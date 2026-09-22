@@ -1389,6 +1389,55 @@ h3{font-size:.66rem; line-height:1.9}
 .ster.uit .sterik{opacity:.45}
 @keyframes sterpop{0%{transform:scale(0) rotate(-40deg); opacity:0} 60%{transform:scale(1.45) rotate(8deg); opacity:1} 100%{transform:scale(1) rotate(0)}}
 .sternieuw{color:var(--gold) !important; animation:lvfade .4s ease-out both; animation-delay:1.6s}
+/* ---------- 🏪 de winkel ---------- */
+.ovbox.wkbox{max-width:min(880px,96vw); text-align:left}
+.wkkop{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px}
+.wkkop h2{margin:0; flex:1 1 auto}
+.wkkop .obtn{padding:7px 14px; font-size:.5rem; min-height:0}
+.wkkop .schervenbalk{font-family:"VT323",ui-monospace,monospace; font-size:1rem; letter-spacing:.06em;
+  padding:4px 10px; border:2px solid var(--ink2); background:rgba(10,14,20,.8); color:#dfe6ee}
+.wkkop .schervenbalk b{color:#8fd7ff}
+/* Knorst en zijn praatbalk. */
+.wkpraat{display:flex; align-items:flex-end; gap:12px; margin-bottom:14px}
+.wkspr{width:96px; flex:0 0 auto; align-self:flex-end}
+.wkspr .sprwrap{--sprgroei:1}
+.wkspr .pix{width:100%; height:auto; display:block; image-rendering:pixelated}
+.wkbel{flex:1 1 auto; padding:10px 14px; border:3px solid var(--ink2); background:#151b23;
+  box-shadow:0 3px 0 0 rgba(0,0,0,.5)}
+.wknaam{font-family:"VT323",ui-monospace,monospace; font-size:.9rem; letter-spacing:.14em;
+  color:#e0c07a; text-transform:uppercase; margin-bottom:3px}
+.wkzin{font-family:"VT323",ui-monospace,monospace; font-size:1.05rem; line-height:1.35; color:#f6f4e4}
+.wklab{font-family:"VT323",ui-monospace,monospace; font-size:.95rem; letter-spacing:.14em;
+  color:var(--muted); text-transform:uppercase; margin:12px 0 6px}
+/* Het schap: vijf plekken naast elkaar. */
+.wkrij{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+.wkrij.een .wkvak:first-child{grid-column:span 2}
+.wkvak{display:flex; flex-direction:column; gap:3px; padding:9px 9px 8px; min-height:112px;
+  border:2px solid var(--ink2); background:#151b23; box-shadow:0 3px 0 0 rgba(0,0,0,.5);
+  font-family:"VT323",ui-monospace,monospace; cursor:pointer; transition:transform .12s, background .12s}
+.wkvak.kan:hover{background:#1c2430; transform:translateY(-2px); border-color:var(--gold)}
+.wkvak.duur{opacity:.55; cursor:not-allowed}
+.wkvak.mijn{opacity:.6; cursor:default; border-color:#2f7a41}
+.wkvak.leeg{opacity:.35; cursor:default; border-style:dashed}
+.wkvi{font-size:1.3rem; line-height:1}
+.wkvn{font-size:1rem; color:#f6e9b0; line-height:1.15}
+.wkvk{flex:1 1 auto; font-size:.82rem; color:var(--muted); line-height:1.25}
+.wkvp{font-size:.95rem; letter-spacing:.06em; color:#8fd7ff}
+.wkvak.mijn .wkvp{color:#5cb56e}
+.wkvak.duur .wkvp{color:var(--danger)}
+/* Het bevestigingsscherm. */
+.wkbevestig{text-align:center; padding:14px 10px 4px; border:3px solid var(--ink2); background:#151b23}
+.wkbevestig h3{margin:6px 0 2px; font-family:"VT323",ui-monospace,monospace; font-size:1.3rem;
+  letter-spacing:.08em; color:#f6e9b0}
+.wkbic{font-size:2.4rem; line-height:1}
+.wkprijs{font-family:"VT323",ui-monospace,monospace; font-size:1.1rem; letter-spacing:.06em;
+  color:#dfe6ee; margin:10px 0 4px}
+.wkprijs b{color:#8fd7ff}
+@media (max-width:900px), (pointer:coarse){
+  .wkrij{grid-template-columns:repeat(2,1fr)}
+  .wkspr{width:72px}
+  .wkvak{min-height:104px}
+}
 /* 💠 Het beloningsscherm. */
 .ovbox.belbox{max-width:min(520px,94vw); text-align:center}
 .bellijst{display:flex; flex-direction:column; gap:8px; margin:14px 0 12px; text-align:left}
@@ -8185,6 +8234,7 @@ function overlayHTML(){
   if(M && M.type === "story") return storyHTML();
   if(M && M.type === "info") return infoHTML();
   if(M && M.type === "beloning") return beloningHTML();
+  if(M && M.type === "winkel") return winkelHTML();
   if(M && (M.type === "menu" || M.type === "help" || M.type === "tutorial" || M.type === "share" || M.type === "join" || M.type === "audio" || M.type === "aelib" || M.type === "deck")){
     if(M.type === "aelib") return aeLibHTML();
     if(M.type === "deck") return deckHTML(M.p);
@@ -10857,6 +10907,11 @@ const SPRITE_MAAT = {
 const SPRITE_PB = { waardin_taunt: 0.6, max_taunt: 0.7 };
 const SPRITE_BEELD = {
   /* --- wereld 4, opnieuw opgebouwd. Zet het bestand in art/ en het staat er meteen. --- */
+  /* --- 🏪 Knorst, de winkelier (wereld 2, achter de herberg) --- */
+  knorst:            "art/knorst.png",               // achter zijn kraam
+  knorst_blij:       "art/knorst-blij.png",          // als je iets koopt
+  knorst_zuur:       "art/knorst-zuur.png",          // als je te weinig scherven hebt
+  knorst_taunt:      "art/knorst-taunt.png",         // zijn praatbalkje
   sluiswachter:      "art/sluiswachter.png",         // 4-1 · pet, klembord, poort
   sluiswachter_poort:"art/sluiswachter-poort.png",   // 4-1 · hij haalt de poort omhoog (na de winst)
   sluiswachter_taunt:"art/sluiswachter-taunt.png",   // 4-1 · de balk linksonder
@@ -11003,6 +11058,7 @@ const SPRITE_BEELD = {
    tenminste iets in beeld in plaats van een gat. Zodra het bestand in art/ staat wint dat
    sowieso van de pixels. */
 const SPR_LEEN = {
+  knorst:"bosbos", knorst_blij:"bosbos", knorst_zuur:"bosbos_boos", knorst_taunt:"bosbos",
   sluiswachter_poort:"sluiswachter", sluiswachter_taunt:"sluiswachter",
   inkt:"bosbos", inkt_wijd:"bosbos_boos", inkt_stuk:"bosbos_stuk", inkt_taunt:"bosbos",
   spiegelbeeld:"eerste", spiegelbeeld_stuk:"eerste", spiegelbeeld_taunt:"eerste",
@@ -14328,6 +14384,13 @@ function buitVoor(id){
     const ex = (SET.story.extra || {})[STORY_ORDER[k]] || [];
     ex.forEach(x => { if(LIGHTS[x] && lt.indexOf(x) < 0) lt.push(x); });
   }
+  /* 🏪 Wat je bij Knorst gekocht hebt telt overal mee, ongeacht waar je bent in het verhaal. */
+  if(typeof koopState === "function"){
+    const kp = koopState();
+    kp.ae.forEach(x => { if(AETHERS[x] && ae.indexOf(x) < 0) ae.push(x); });
+    kp.lt.forEach(x => { if(LIGHTS[x] && lt.indexOf(x) < 0) lt.push(x); });
+    if(kp.hart) hart = (hart || 5) + kp.hart;
+  }
   return {ae, lt, hart, ltMax, aeMax, vars, upg};
 }
 /* ---------- het voorbereidingsscherm: deckmix, upgrades, aether, licht ----------
@@ -14599,6 +14662,153 @@ const OVERWORLD_PAD = {
 const OVERWORLD_HEMEL = {x:51, y:17};
 /* 🏪 De winkel in het Rankenwoud, achter de herberg. Gaat open zodra 2-2 gehaald is. */
 const OVERWORLD_WINKEL = {x:14, y:37, na:"2-2"};
+/* ================= 🏪 DE WINKEL =================
+   Knorst staat achter een kraam die hij zelf een kraam noemt. Hij verkoopt de krachten die
+   geen enkele baas weggeeft. Je betaalt met 💠 scherven, en hij vraagt elke keer opnieuw of
+   je het zeker weet — niet uit beleefdheid, maar omdat hij het leuk vindt om het te vragen.
+
+   Er zijn vijf plekken voor 🟣 aethers en vijf voor ✦ lichtkaarten. Drie van elk liggen er
+   nu; de andere twee staan als lege plank in beeld. Zet er een sleutel neer zodra de kaart
+   bestaat en hij ligt meteen in de winkel. */
+const KOOPWAAR = {
+  ae: ["ae_draw3", "ae_graf", "fu_water", null, null],
+  lt: ["greed", "gamble", "darkhole", null, null]
+};
+/* Wat het kost. Over alle 25 levels op drie sterren verdien je 1750 scherven; alles bij
+   elkaar kost 1880. Je kunt dus net niet alles. */
+const KOOP_PRIJS = {
+  ae_draw3:300, ae_graf:260, fu_water:240,
+  greed:200, gamble:170, darkhole:150
+};
+const HART_PRIJS = [120, 180, 260];      // elk volgend hartje kost meer
+/* Wat je gekocht hebt. Staat naast je sterren en je scherven in de opslag. */
+function koopState(){
+  const S0 = SET.story;
+  if(!S0.koop || typeof S0.koop !== "object") S0.koop = {};
+  const k = S0.koop;
+  if(!Array.isArray(k.ae)) k.ae = [];
+  if(!Array.isArray(k.lt)) k.lt = [];
+  if(typeof k.hart !== "number") k.hart = 0;
+  return k;
+}
+const alGekocht = key => { const k = koopState(); return k.ae.indexOf(key) >= 0 || k.lt.indexOf(key) >= 0; };
+const winkelOpen = () => storyKlaar(OVERWORLD_WINKEL.na);
+/* Wat Knorst zegt. Voor nu plaatshouders — vervang de zinnen, de rest blijft staan. */
+const KNORST_HALLO = [
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+];
+const KNORST_TAUNT = [
+  "Excepteur sint occaecat cupidatat non proident.",
+  "Sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  "Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+  "Quis autem vel eum iure reprehenderit qui in ea voluptate.",
+  "At vero eos et accusamus et iusto odio dignissimos."
+];
+const KNORST_KOOP = "Laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.";
+const KNORST_ARM  = "Nemo enim ipsam voluptatem quia voluptas sit aspernatur.";
+/* De praatbalk ververst zichzelf zolang de winkel openstaat. Koop je iets, dan zegt hij daar
+   iets over en pakt hij daarna de draad weer op. */
+let WINKELT = null;
+function winkelZeg(zin, spr, vast){
+  if(!M || M.type !== "winkel") return;
+  M.zin = zin; M.spr = spr || "knorst";
+  clearTimeout(WINKELT);
+  WINKELT = setTimeout(winkelTik, vast ? 4200 : 9000);
+  render();
+}
+function winkelTik(){
+  if(!M || M.type !== "winkel"){ clearTimeout(WINKELT); WINKELT = null; return; }
+  winkelZeg(KNORST_TAUNT[Math.floor(Math.random() * KNORST_TAUNT.length)], "knorst_taunt");
+}
+function winkelOpenen(){
+  M = {type:"winkel", zin:KNORST_HALLO[Math.floor(Math.random() * KNORST_HALLO.length)], spr:"knorst", bevestig:null};
+  clearTimeout(WINKELT);
+  WINKELT = setTimeout(winkelTik, 9000);
+  AU.zet("kaart");
+  render();
+}
+function winkelSluit(){ clearTimeout(WINKELT); WINKELT = null; M = {type:"story"}; storySkin(0); render(); }
+/* Eén plek in het schap. Geeft terug wat er staat en of je erop mag klikken. */
+function koopVak(soort, key, i){
+  if(!key) return {leeg:true, i, soort};
+  const licht = soort === "lt";
+  const d = licht ? LIGHTS[key] : AETHERS[key];
+  if(!d) return {leeg:true, i, soort};
+  const prijs = KOOP_PRIJS[key] || 999;
+  return {soort, key, i, naam:d.name, kort:d.kort || "", prijs,
+          mijn:alGekocht(key), kan:scherven() >= prijs};
+}
+const hartGekocht = () => koopState().hart;
+function hartVak(){
+  const n = hartGekocht();
+  if(n >= HART_PRIJS.length) return {soort:"hart", op:true, naam:"Geen hartjes meer", kort:`je kocht er ${n} — meer heeft Knorst er niet`};
+  const prijs = HART_PRIJS[n];
+  return {soort:"hart", key:"hart", prijs, n, naam:"+1 maximum leven", kort:`je begint elk gevecht met één leven meer${n ? ` · je kocht er al ${n}` : ""}`, kan:scherven() >= prijs};
+}
+function winkelHTML(){
+  const sp = spriteSVG(M.spr || "knorst");
+  const kop = `<div class="wkkop"><h2>🏪 De winkel</h2>
+      <span class="schervenbalk" title="scherven">💠 <b id="wksaldo">${scherven()}</b></span>
+      <button class="obtn b-dim" data-act="btn" data-btn="winkelweg">Terug</button></div>`;
+  const praat = `<div class="wkpraat"><div class="wkspr">${sp}</div>
+      <div class="wkbel"><div class="wknaam">Knorst</div><div class="wkzin">${M.zin || ""}</div></div></div>`;
+  if(M.bevestig){
+    const b = M.bevestig;
+    const ic = b.soort === "hart" ? "❤" : (b.soort === "lt" ? "✦" : "🟣");
+    const na = scherven() - b.prijs;
+    return `<div class="ovbox wkbox">${kop}${praat}
+      <div class="wkbevestig">
+        <div class="wkbic">${ic}</div>
+        <h3>${b.naam}</h3>
+        <div class="sub">${b.kort}</div>
+        <div class="wkprijs">💠 <b>${b.prijs}</b> scherven · je houdt er <b>${na}</b> over</div>
+        <div class="mrow">
+          <button class="obtn b-story" data-act="btn" data-btn="koopja">Kopen</button>
+          <button class="obtn b-dim" data-act="btn" data-btn="koopnee">Toch niet</button>
+        </div>
+      </div></div>`;
+  }
+  const vak = v => {
+    if(v.leeg) return `<div class="wkvak leeg"><div class="wkvi">·</div><div class="wkvn">lege plank</div><div class="wkvk">binnenkort</div></div>`;
+    if(v.op)   return `<div class="wkvak leeg"><div class="wkvi">❤</div><div class="wkvn">${v.naam}</div><div class="wkvk">${v.kort}</div></div>`;
+    const ic = v.soort === "hart" ? "❤" : (v.soort === "lt" ? "✦" : "🟣");
+    const staat = v.mijn ? "mijn" : (v.kan ? "kan" : "duur");
+    const knop = v.mijn ? "in bezit" : `💠 ${v.prijs}`;
+    return `<div class="wkvak ${staat}"${v.mijn ? "" : ` data-act="btn" data-btn="koopvraag" data-soort="${v.soort}" data-key="${v.key || ""}"`}>
+      <div class="wkvi">${ic}</div><div class="wkvn">${v.naam}</div>
+      <div class="wkvk">${v.kort}</div><div class="wkvp">${knop}</div></div>`;
+  };
+  const rij = soort => `<div class="wkrij">${KOOPWAAR[soort].map((k, i) => vak(koopVak(soort, k, i))).join("")}</div>`;
+  return `<div class="ovbox wkbox">${kop}${praat}
+    <div class="wklab">🟣 Aethers</div>${rij("ae")}
+    <div class="wklab">✦ Lichtkaarten</div>${rij("lt")}
+    <div class="wklab">❤ De rest</div>
+    <div class="wkrij een">${vak(hartVak())}</div>
+  </div>`;
+}
+/* Klikken op een vak vraagt eerst of je het zeker weet. */
+function koopVraag(soort, key){
+  if(!M || M.type !== "winkel") return;
+  const v = soort === "hart" ? hartVak() : koopVak(soort, key, 0);
+  if(!v || v.leeg || v.op || v.mijn) return;
+  if(!v.kan){ AU.play("lose"); winkelZeg(KNORST_ARM, "knorst_zuur", true); return; }
+  M.bevestig = v; render();
+}
+function koopDoen(){
+  if(!M || M.type !== "winkel" || !M.bevestig) return;
+  const b = M.bevestig;
+  if(scherven() < b.prijs){ M.bevestig = null; winkelZeg(KNORST_ARM, "knorst_zuur", true); return; }
+  const k = koopState();
+  if(b.soort === "hart") k.hart += 1;
+  else if(b.soort === "lt"){ if(k.lt.indexOf(b.key) < 0) k.lt.push(b.key); }
+  else { if(k.ae.indexOf(b.key) < 0) k.ae.push(b.key); }
+  schervenErbij(-b.prijs);          // schrijft ook de koop weg
+  M.bevestig = null;
+  AU.play("win");
+  winkelZeg(KNORST_KOOP, "knorst_blij", true);
+}
 /* Hoe ver de mist wijkt rond een plek waar je geweest bent, in procenten van de kaart. */
 const OVERWORLD_ZICHT = 15;
 /* Het portret op een level: de tegenstander zelf. Zijn tekening als die er is, anders zijn
@@ -14732,8 +14942,8 @@ function kaartHTML(){
   if(storyKlaar(OVERWORLD_WINKEL.na)){
     const w = OVERWORLD_WINKEL, nieuwW = !oud.winkel;
     gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwW);
-    winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De winkel">
-        <span class="lvbinnen">🏪</span><span class="lvnaam">winkel · binnenkort</span></button>`;
+    winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De winkel van Knorst">
+        <span class="lvbinnen">🏪</span><span class="lvnaam">Knorst · winkel</span></button>`;
   }
   let hemel = "";
   if(storyVrij("5-1") && STORY["5-1"]){
@@ -16114,8 +16324,11 @@ function onBtn(btn, el, fromAction){
     case "closemodal": M = null; render(); break;
     case "belpak": beloningPak(+(el && el.dataset.i)); break;
     case "belverder": beloningKlaar(); break;
-    case "winkel": M = {type:"info", titel:"De winkel", ic:"🏪", kleur:"#e0c07a", sub:"Rankenwoud",
-      tekst:"<p>De luiken zitten nog dicht. Er hangt een briefje: <em>binnenkort open</em>.</p><p>Hier ga je straks je 💠 scherven uitgeven — aan 🟣 aethers, ✦ lichtkaarten en meer.</p>"}; render(); break;
+    case "winkel": winkelOpenen(); break;
+    case "winkelweg": winkelSluit(); break;
+    case "koopvraag": koopVraag(el && el.dataset.soort, el && el.dataset.key); break;
+    case "koopja": koopDoen(); break;
+    case "koopnee": if(M && M.type === "winkel"){ M.bevestig = null; render(); } break;
     case "infoterug": M = (M && M.terug) ? M.terug : null; render(); break;
     case "mlog": { const a = document.getElementById("app"); if(a) a.classList.toggle("showlog"); break; }
     case "logtoggle": document.body.classList.toggle("logopen"); break;
@@ -16288,7 +16501,9 @@ document.addEventListener("keydown", e => {
   /* Cijfers en E: kaart kiezen, creature/spell, kolom — en een stap terug. */
   if(!M && !S.over && !e.ctrlKey && !e.metaKey && !e.altKey && sneltoets(e)){ e.preventDefault(); return; }
   if(e.key === "Escape"){
-    if(M){ if(M.type === "menu" && M.confirm){ M = {type:"menu"}; render(); } else { M = null; render(); } return; }
+    if(M){
+      if(M.type === "winkel"){ if(M.bevestig){ M.bevestig = null; render(); } else winkelSluit(); return; }
+      if(M.type === "menu" && M.confirm){ M = {type:"menu"}; render(); } else { M = null; render(); } return; }
     const u = S.ui;
     if(u.p != null && isBot(u.p)) return;
     if(u.mode === "slot" && u.cancellable){ doAct({t:"f", v:"cancel"}); return; }
