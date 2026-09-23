@@ -235,6 +235,36 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
 #witflits{position:fixed; inset:0; z-index:450; pointer-events:none; opacity:0; background:#fffdf2}
 #witflits.aan{animation:witflits .7s ease-out 1 both}
 @keyframes witflits{0%{opacity:0}8%{opacity:.85}26%{opacity:.4}100%{opacity:0}}
+/* 🔄 De mulligan is een beslissing, geen regeltje in de statusbalk. Het bord dimt, er
+   komt een paneel overheen en je eigen hand licht op. */
+#mullpaneel{position:fixed; inset:0; z-index:58; display:flex; align-items:center; justify-content:center;
+  pointer-events:none; opacity:0; transition:opacity .22s ease}
+#mullpaneel.aan{opacity:1}
+#mullpaneel .mullbox{pointer-events:auto; max-width:min(440px,92vw); text-align:center;
+  padding:22px 26px 20px; border-radius:14px; background:linear-gradient(180deg,#1d2740,#141c2e);
+  border:2px solid var(--ink2); box-shadow:0 10px 0 0 rgba(0,0,0,.45), 0 0 0 3px rgba(0,0,0,.5), 0 0 40px rgba(0,0,0,.6);
+  transform:translateY(14px) scale(.96); transition:transform .28s cubic-bezier(.2,1.5,.5,1)}
+#mullpaneel.aan .mullbox{transform:none}
+.mullkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.92rem; color:var(--gold); margin-bottom:12px}
+.mullsub{font-family:"VT323",ui-monospace,monospace; font-size:1.05rem; letter-spacing:.04em; color:#dfe6ee; line-height:1.45}
+.mullprijs{font-family:"VT323",ui-monospace,monospace; font-size:1.05rem; letter-spacing:.04em; color:#a9b6c8; margin-top:8px}
+.mullprijs b{color:#ff7b7b}
+.mulltel{font-family:"VT323",ui-monospace,monospace; font-size:.98rem; color:var(--muted); margin-top:6px}
+.mulllaatste{font-family:"VT323",ui-monospace,monospace; font-size:.98rem; color:#ffb14d; margin-top:6px}
+.mullknop{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+.mullknop .abtn{font-size:.62rem}
+body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brightness(.5) saturate(.65); transition:filter .25s ease}
+.hand.mullhand .card{animation:mullgloed 1.9s ease-in-out infinite;
+  box-shadow:0 0 0 2px rgba(255,212,71,.5), 0 0 18px rgba(255,212,71,.28)}
+.hand.mullhand .card:nth-child(2n){animation-delay:.25s}
+.hand.mullhand .card:nth-child(3n){animation-delay:.5s}
+@keyframes mullgloed{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hand.mullnieuw .card{animation:mullkomt .42s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes mullkomt{from{opacity:0; transform:translateY(22px) rotate(-6deg)}to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){
+  #mullpaneel .mullbox{transition:none; transform:none}
+  .hand.mullhand .card{animation:none}
+  .hand.mullnieuw .card{animation:none} }
 #glitchlaag{position:fixed; inset:0; z-index:4; pointer-events:none; display:none; mix-blend-mode:screen;
   background:repeating-linear-gradient(0deg, rgba(255,253,242,.05) 0 2px, rgba(0,0,0,0) 2px 4px)}
 #glitchlaag.aan{display:block; animation:glitchband 5.5s steps(1,end) infinite}
@@ -2782,6 +2812,9 @@ function partijWeg(){
   if(FAST) return;
   try{
     lavaVerf(false); rookVerf(false); glitchAan(false); decorWeg(); horizonWeg();
+    document.body.classList.remove("mulligaan");
+    [0,1].forEach(q => { const h = document.getElementById("hand" + q); if(h) h.classList.remove("mullhand"); });
+    { const mp = document.getElementById("mullpaneel"); if(mp) mp.remove(); }
     if(typeof ogenToon === "function") ogenToon(null);
     const app = document.getElementById("app");
     if(app){ [...app.classList].forEach(c => { if(/^(lv\d|w\d)/.test(c) || ["stuk","beeft","glitcht","hzruim","hzdoor"].includes(c)) app.classList.remove(c); }); }
@@ -3431,6 +3464,41 @@ function witFlits(){
   if(!el){ el = document.createElement("div"); el.id = "witflits"; document.body.appendChild(el); }
   el.classList.remove("aan"); void el.offsetWidth; el.classList.add("aan");
   AU.play("light");
+}
+/* Het mulligan-paneel: staat er alleen als jij aan zet bent om te beslissen. */
+function mulliganPaneel(){
+  const u = (S && S.ui) || {};
+  const aan = u.mode === "mulligan" && !isBot(u.p) && iControl(u.p) && !FAST;
+  let el = document.getElementById("mullpaneel");
+  if(!aan){
+    document.body.classList.remove("mulligaan");
+    [0,1].forEach(q => { const h = document.getElementById("hand" + q); if(h) h.classList.remove("mullhand"); });
+    if(el){ el.classList.remove("aan"); const w = el; setTimeout(() => { if(w && !w.classList.contains("aan")) w.remove(); }, 300); }
+    return;
+  }
+  const app = document.getElementById("app"); if(!app) return;
+  if(!el){ el = document.createElement("div"); el.id = "mullpaneel"; app.appendChild(el); }
+  const p = u.p, lev = P(p).life, n = P(p).hand.length, keer = u.keer || 0;
+  el.innerHTML = `<div class="mullbox">
+    <div class="mullkop">🔄 Je starthand</div>
+    <div class="mullsub">Dit zijn de ${n} kaarten waarmee je begint. Houden, of alles terugschudden en er ${n} nieuwe trekken?</div>
+    <div class="mullprijs">Opnieuw trekken kost <b>1 leven</b> — je hebt er ${lev}.</div>
+    ${keer ? `<div class="mulltel">Je hebt al ${keer}× opnieuw getrokken.</div>` : ""}
+    ${lev <= 2 ? `<div class="mulllaatste">Dit is de laatste keer dat het kan.</div>` : ""}
+    <div class="mullknop">
+      <button class="abtn primary" data-act="btn" data-btn="mullhouden">✔ Houden <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>
+      ${lev > 1 ? `<button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw · −1 ❤ <span style="opacity:.6;font-size:.7rem">[E]</span></button>` : ""}
+    </div></div>`;
+  document.body.classList.add("mulligaan");
+  [0,1].forEach(q => { const h = document.getElementById("hand" + q); if(h) h.classList.toggle("mullhand", q === p); });
+  void el.offsetWidth; el.classList.add("aan");
+}
+/* De nieuwe hand komt binnenwaaieren, zodat je ziet dát er iets gebeurd is. */
+function mulliganWaaier(p){
+  if(FAST) return;
+  const h = document.getElementById("hand" + p); if(!h) return;
+  h.classList.remove("mullnieuw"); void h.offsetWidth; h.classList.add("mullnieuw");
+  setTimeout(() => { const e = document.getElementById("hand" + p); if(e) e.classList.remove("mullnieuw"); }, 700);
 }
 function glitchAan(aan){
   const app = document.getElementById("app");
@@ -4459,7 +4527,7 @@ function cardFaceHTML(el, spell, card){
   if(c && c.lk){
     const lb = KAART_BEELD[c.lk] || LICHT_KAART;   // eigen prent gaat vóór de algemene
     return `<div class="card el-licht light">
-    <div class="ci">${lb && BEELD_KLAAR[lb] !== "fout" ? `<img class="kaartbeeld" src="${kaartSrc(lb)}" alt="" decoding="sync" onerror="this.remove()">` : ""}${pixArt("licht")}</div>
+    <div class="ci">${lb && BEELD_KLAAR[lb] !== "fout" ? `<img class="kaartbeeld" src="${kaartSrc(lb)}" alt="" decoding="sync" onerror="beeldFout(this)">` : ""}${pixArt("licht")}</div>
     <div class="cn">${LIGHTS[c.lk].name}</div>
     <div class="cm">licht</div></div>`;
   }
@@ -4469,7 +4537,7 @@ function cardFaceHTML(el, spell, card){
      bestand tekenen we hem zelf in pixels; is er ook dat niet, dan blijft het icoon over. */
   if(EL[e] && EL[e].kaart){
     const beeld = KAART_BEELD[e];
-    const img = beeld && BEELD_KLAAR[beeld] !== "fout" ? `<img class="kaartbeeld" src="${kaartSrc(beeld)}" alt="" decoding="sync" onerror="this.remove()">` : "";
+    const img = beeld && BEELD_KLAAR[beeld] !== "fout" ? `<img class="kaartbeeld" src="${kaartSrc(beeld)}" alt="" decoding="sync" onerror="beeldFout(this)">` : "";
     const eigen = (!img && PIX_ART[e]) ? pixArt(e) : "";
     /* Op een ei is het geen bonus maar een aftelling: nog zoveel beurten van haar. */
     const tokens = (c && c.tokens)
@@ -4485,7 +4553,7 @@ function cardFaceHTML(el, spell, card){
     /* Een eigen tekening voor het kaartgezicht als die er is; anders het element met een badge. */
     const beeld = KAART_BEELD[vk];
     const ci = beeld && BEELD_KLAAR[beeld] !== "fout"
-      ? `<img class="kaartbeeld" src="${kaartSrc(beeld)}" alt="" decoding="sync" onerror="this.remove()">${pixArt(e)}`
+      ? `<img class="kaartbeeld" src="${kaartSrc(beeld)}" alt="" decoding="sync" onerror="beeldFout(this)">${pixArt(e)}`
       : pixArt(e);
     /* Staat er een echte tekening, dan zegt die zelf wel welke variant het is — het
        badge-icoontje in de hoek mag dan weg. */
@@ -4497,7 +4565,7 @@ function cardFaceHTML(el, spell, card){
   /* De vier gewone elementen: eigen tekening als die er is, anders de pixelversie. */
   const eb = KAART_BEELD[e];
   const eimg = eb && BEELD_KLAAR[eb] !== "fout"
-    ? `<img class="kaartbeeld" src="${kaartSrc(eb)}" alt="" decoding="sync" onerror="this.remove()">` : "";
+    ? `<img class="kaartbeeld" src="${kaartSrc(eb)}" alt="" decoding="sync" onerror="beeldFout(this)">` : "";
   return `<div class="card el-${e} ${spell?'spellcard':''}${c && c.seraf ? " serafkaart" : ""}${c && c.ws ? " ws" : ""}">
     <div class="ci">${eimg}${pixArt(e)}</div>
     <div class="cn">${EL[e].name}</div>
@@ -4532,7 +4600,7 @@ function rugVan(p){
    het is; het plaatje zegt alleen wát voor soort kracht het is.
    Heeft een kaart tóch een eigen tekening in KAART_BEELD (Shelobs web bijvoorbeeld), dan
    wint die — de algemene is de vanger, niet de regel. */
-const LICHT_KAART  = "art/licht-kaart.png";    // staand full art, 480×672
+const LICHT_KAART  = "art/kaart-licht.png";    // staand full art, 480×672
 const AETHER_KAART = "art/aether-kaart.png";   // liggende banner, 512×288
 /* Op het startscherm schuiven er kaarten voorbij, en daar staat een 🟣 aether óók als kaart
    — rechtop, op kaartformaat. De banner hierboven is liggend en past daar niet in, dus die
@@ -6402,7 +6470,10 @@ async function mulliganFase(){
       P(p).life -= 1; keer++;
       AU.play("draw");
       addLog(`🔄 <em>${pName(p)}</em> schudt zijn hand terug en trekt ${n} nieuwe kaarten — dat kost 1 leven (nu ${P(p).life}).`, true);
+      if(!FAST){ pop(rectOf(`.pside[data-side="${p}"] .plife`), "-1", "dmg"); }
       render();
+      mulliganWaaier(p);
+      if(!FAST) await sleep(260);
     }
   }
   S.actor = actorWas;
@@ -7797,7 +7868,7 @@ function kaartbanenHTML(){
   const soorten = ["water","vuur","gras","steen","licht","aether"];
   /* De ✦ lichtkaart en de 🟣 aether staan hier als kaart, met hun eigen prent als die er is. */
   const prent = pad => pad && BEELD_KLAAR[pad] !== "fout"
-    ? `<img class="kaartbeeld" src="${kaartSrc(pad)}" alt="" decoding="sync" onerror="this.remove()">` : "";
+    ? `<img class="kaartbeeld" src="${kaartSrc(pad)}" alt="" decoding="sync" onerror="beeldFout(this)">` : "";
   const tegel = k => {
     if(k === "licht") return `<div class="kbt"><div class="card el-licht light"><div class="ci">${prent(LICHT_KAART)}${pixArt("licht")}</div></div></div>`;
     if(k === "aether") return `<div class="kbt"><div class="card kbae"><div class="ci">${prent(AETHER_KAARTVORM)}<span class="kbaeic">🟣</span></div></div></div>`;
@@ -8164,8 +8235,9 @@ function actionsHTML(){
   }
   if(u.mode==="mulligan"){
     if(!iControl(u.p)) return `<div style="color:var(--dim);font-size:.8rem">⏳ ${pName(u.p)} bekijkt zijn starthand…</div>`;
-    return `<button class="abtn primary" data-act="btn" data-btn="mullhouden">✔ Houden <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>
-      <button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw trekken · −1 ❤</button>`;
+    /* De echte knoppen staan in het mulligan-paneel; hier blijft alleen de terugval voor
+       als dat paneel om wat voor reden dan ook niet staat. */
+    return `<div style="color:var(--dim);font-size:.8rem">🔄 kies hierboven: houden of opnieuw</div>`;
   }
   if(u.mode==="slot" && u.cancellable) return `<button class="abtn ghost" data-act="btn" data-btn="cancel">✕ Annuleer</button>`;
   if(u.mode==="choice" && u.optional && !isBot(u.p)) return `<button class="abtn ghost" data-act="btn" data-btn="skip">Overslaan</button>`;
@@ -8205,9 +8277,10 @@ function bannerHTML(){
     if(isBot(u.p)) return `${what} — 🤖 overweegt een reactie…`;
     return `${what}<br><span style="font-size:.86em">reageren met een ⚡ flash-kaart, of <b>spatie</b> om door te laten</span>`;
   }
-  if(u.mode==="mulligan") return `<b>${pName(u.p)}</b> — je starthand. Houden, of alles terugschudden en opnieuw trekken voor <b>1 leven</b>?${
-    u.keer ? ` <span style="font-size:.86em">(al ${u.keer}× opnieuw · ${P(u.p).life} ❤ over)</span>` : ""}${
-    P(u.p).life <= 2 ? ` <span style="font-size:.86em;color:#ffb14d">Dit is de laatste keer dat het kan.</span>` : ""}`;
+  /* Staat het mulligan-paneel in beeld, dan zegt die het al — dan hoeft de balk niets te
+     herhalen. Alleen wie moet wachten krijgt hier een regel. */
+  if(u.mode==="mulligan") return (iControl(u.p) && !isBot(u.p)) ? null
+    : `<b>${pName(u.p)}</b> bekijkt zijn starthand.`;
   if(u.mode==="slot") return u.prompt || "Kies een plek";
   if(u.mode==="choice") return u.prompt || "Kies een doelwit";
   if(u.mode==="battle") return `<b>${pName(S.tp)}</b> — klik een creature om aan te vallen${flashFuseOk(S.tp)||handHasFlash(S.tp)?"; ⚡ gemarkeerde handkaarten mag je nu ook spelen":""}`;
@@ -10988,20 +11061,20 @@ const SPRITE_BEELD = {
   struik_benen:   "art/struik-benen.png",     // omslag 2: er komen twee benen onder vandaan
   struik_trans2:  "art/struik-trans2.png",    // omslag 3: rechtop, nog steeds zonder gezicht
   struikrover:    "art/struikrover.png",      // en dit is wat eronder zit
-  struikrover_slag:"art/struikrover-slag.png",// de zwaardhaal
+  struikrover_slag:"art/struik-slag.png",     // de zwaardhaal
   struik_taunt:   "art/struik-taunt.png",
   /* --- de Waardin (2-3) --- */
   waardin:        "art/waardin.png",
   waardin_zacht:  "art/waardin-zacht.png",    // haar wiegeliedgezicht
   waardin_thee:   "art/waardin-thee.png",     // ze houdt je een kop thee voor
-  waardin_stuk:   "art/waardin-stuk.png",
+  waardin_stuk:   "art/waardin-verslagen.png",
   waardin_taunt:  "art/waardin-taunt.png",
   /* --- Moeder Natuur, de baas (2-5) --- */
   moeder:         "art/moeder-natuur.png",
   moeder_donker:  "art/moeder-natuur-donker.png",  // voor ze haar ogen opendoet: alleen de ogen
   moeder_boos:    "art/moeder-natuur-boos.png",
   moeder_stuk:    "art/moeder-natuur-stuk.png",    // op 0 — en dan komt de bloei
-  moeder_trans:   "art/moeder-natuur-trans.png",   // halverwege: de knoppen gaan open, zij nog niet
+  moeder_trans:   "art/moeder-natuur-transformatie.png", // halverwege: de knoppen gaan open, zij nog niet
   moeder_bloei:   "art/moeder-natuur-bloei.png",   // de tweede fase: overal rozen
   moeder_bloei_taunt:"art/moeder-natuur-bloei-taunt.png",  // haar houding in de balk tijdens de bloei
   moeder_op:      "art/moeder-natuur-op.png",      // ná de bloei: echt verslagen, rozen dicht
@@ -11037,7 +11110,7 @@ const SPRITE_BEELD = {
   trio_een_taunt: "art/trio-een-taunt.png",    // de balk links, alleen
   trio_as:        "art/trio-as.png",           // drie hoopjes as
   klinknagel:     "art/klinknagel.png",
-  klinknagel_boos:"art/klinknagel-boos.png",   // lampoog rood
+  klinknagel_boos:"art/Klinknagel-boos.png",   // lampoog rood · hoofdletter K, zo heet het bestand
   klinknagel_stuk:"art/klinknagel-stuk.png",
   klinknagel_taunt:"art/klinknagel-taunt.png",
   papieren:       "art/papieren.png",
@@ -11088,7 +11161,7 @@ function spriteSVG(key){
      en de pixels eronder verborgen zodra hij binnen is, kan dat niet meer. */
   if(beeld && BEELD_KLAAR[beeld] !== "fout") return `<span class="sprwrap"${stl ? ` style="${stl}"` : ""}>`
     + `<img class="sprbeeld${beeldKlaar(beeld) ? " klaar" : ""}" src="${beeld}" alt=""`
-    + ` decoding="sync" onload="this.classList.add('klaar')" onerror="this.remove()"></span>`;
+    + ` decoding="sync" onload="this.classList.add('klaar')" onerror="beeldFout(this)"></span>`;
   return spriteSVG.pix(key);
 }
 spriteSVG.pix = function(key){
@@ -11772,6 +11845,20 @@ const STORY = {
       zeg:{ beurt:["…"], popup:[], laag:["…"], jij:["…"] }
     },
     geeft:"ae_grassx2",
+    /* 🟣 Flint trekt hier de tweede lade open: vanaf 2-4 speel je met twee aethers. */
+    geeftAeSlot:2,
+    na:[
+      {s:null, bg:2, naam:"…", t:"Het pad loopt weer door. Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee. Je doet dat ding waarbij je niks zegt en dan gewoon wint. Prima werk."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Verderop in dit woud staat niet nog zoiets. Daar staat het woud zélf. Alles wat groen is, tegelijk, in één klap."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En daarvóór wacht er nog iemand met een halo op je. Die telt niet eens mee, en die ga je ook niet leuk vinden."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Dat is groot geschut, kleine. Daar ga je niet met één trucje langs."},
+      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee. Ik ben het vuur, ik krijg nergens last mee."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het alleen interessanter voor mezelf. Dat is iets anders."}
+    ],
     varianten:{
       struik:{},
       shelob:{
@@ -11812,7 +11899,17 @@ const STORY = {
         ],
         na:[
           {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Het web gaat achter je dicht. Je hoort haar niet meer, en dat is de eerste keer sinds je binnenkwam dat je niet acht ogen in je rug voelt."},
-          {s:null, bg:2, naam:"…", t:"Je komt weer uit op het gewone pad, verderop, alsof je nooit weg bent geweest. Ergens achter je staat een struik die je niet gezien hebt. Hij staat er nog steeds."}
+          {s:null, bg:2, naam:"…", t:"Je komt weer uit op het gewone pad, verderop, alsof je nooit weg bent geweest. Ergens achter je staat een struik die je niet gezien hebt. Hij staat er nog steeds."},
+      {s:null, bg:2, naam:"…", t:"Het pad loopt weer door. Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee. Je doet dat ding waarbij je niks zegt en dan gewoon wint. Prima werk."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Verderop in dit woud staat niet nog zoiets. Daar staat het woud zélf. Alles wat groen is, tegelijk, in één klap."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En daarvóór wacht er nog iemand met een halo op je. Die telt niet eens mee, en die ga je ook niet leuk vinden."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Dat is groot geschut, kleine. Daar ga je niet met één trucje langs."},
+      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee. Ik ben het vuur, ik krijg nergens last mee."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het alleen interessanter voor mezelf. Dat is iets anders."}
         ]
       }
     },
@@ -11920,18 +12017,9 @@ const STORY = {
        zet de zes-vleugelbaas van 5-4 aan, en die hoort hier niet. */
     seraf:{deck:{vuur:4, gras:4, steen:3, water:3, reborn:3, vital:3}},
     geeftLicht:"reborn",
-    geeftAeSlot:2,
     na:[
       {s:null, bg:2, naam:"…", t:"Het woud is weer stil. Je hebt gewonnen en je weet niet precies waarvan, en je blijft naar de schaduwen kijken om te zien of er nog iets in zit."},
-      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee. Beetje hond, beetje engel. Prima werk."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Wat hier verderop in het woud zit, is geen afgezant met een halo. Dat ding is het woud. Alles wat groen is, tegelijk, in één klap."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Dat is groot geschut, kleine. Daar ga je niet met één trucje langs."},
-      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee. Ik ben het vuur, ik krijg nergens last mee."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het alleen interessanter voor mezelf. Dat is iets anders."}
+      {s:null, bg:2, naam:"…", t:"Verderop houdt het pad op met een pad te zijn. Geen bocht, geen afslag — alleen nog groen, en het staat te wachten."}
     ],
     varianten:{
       straf:{ startSchade:3 },
@@ -12068,7 +12156,7 @@ const STORY = {
     ],
     midden:[
       {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", t:"Je vecht goed. Dat is geen compliment, dat is een observatie. Ik doe niet aan complimenten, ik doe aan notulen."},
-      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"O ja — elk vuur dat jij aansteekt, komt bij mij binnen. Dat had ik moeten zeggen. Dat had ik écht moeten zeggen."}
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik hou het bij, hoor. Niet dat iemand het ooit naleest, maar ik hou het bij."}
     ],
     middenNa:2,
     win:[
@@ -12119,7 +12207,7 @@ const STORY = {
     aeVij:["fu_fire","ae_fire6"],
     levensVij:10,
     bord:[{p:1, c:2, el:"balrog", hp:20, wakker:true}],
-    brandstof:true, balrogHeal:2, lavaJij:true,
+    balrogHeal:2, lavaJij:true,
     geeft:"fu_fire",
     ban:10, begint:1
   },
@@ -12371,7 +12459,7 @@ const STORY = {
     varianten:{
       vuurtje:{ levensVij:8, fase2Hand:2, fase2Zacht:true },
       zitten:{ levensVij:8, levensJij:9 },
-      meteen:{ levensVij:6, fase2Extra:3, fase2Hand:5 }
+      meteen:{ levensVij:6, fase2Hand:5 }
     },
     midden:[
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Merk je dat ik niet hard sla? Dat is geen tactiek. Ik heb gewoon geen zin."},
@@ -12379,7 +12467,7 @@ const STORY = {
     ],
     middenNa:2,
     fase2:{
-      vijand:"Flint", sprite:"fireguy_wit", tauntSpr:"fireguy_wit_taunt", levens:12,
+      vijand:"Flint", sprite:"fireguy_wit", tauntSpr:"fireguy_wit_taunt", levens:8,
       wit:true, bordLeeg:true, pakAethers:true, jijTrekt:2, vuurzeeSnel:true,
       praat:[
         {s:"fireguy", naam:"…", kleur:"#ff8a4a", t:"Hij kijkt naar zijn eigen handen. Er is niks meer over. Hij knikt alsof dat klopt."},
@@ -14655,9 +14743,14 @@ const OVERWORLD_PAD = {
   "1-4":[[38,62]],
   "1-5":[[42,52],[41,49]],
   "2-3":[[32,34]],
-  "2-5":[[34,27],[46,36],[55,39],[64,37]],
+  /* Van het woud naar de Asgronden gaat het over de rug van het eiland, boven langs de
+     trap. Zou hij rechtdoor snijden, dan loopt hij pal langs 2-1 en de winkel en lijkt het
+     alsof het pad dáár begint. */
+  "2-5":[[33,19],[43,23],[54,28],[62,33]],
   "3-2":[[76,29]],
-  "3-5":[[86,17],[89,27],[87,38],[80,46],[75,50],[70,54]]
+  /* En van de vulkaan naar het ijs langs de oostkust, ruim om wereld 3 heen — anders
+     lijkt hij bij 3-1 of 3-2 te beginnen in plaats van bij de top. */
+  "3-5":[[88,15],[93,27],[94,41],[89,52],[81,61],[72,62]]
 };
 /* De trap de wolken in: daar zit wereld 5, die (nog) niet op het eiland ligt. */
 const OVERWORLD_HEMEL = {x:51, y:17};
@@ -14677,14 +14770,14 @@ const KOOPWAAR = {
   ae: ["ae_draw3", "ae_offer", "ae_graf", "fu_water", null],
   lt: ["greed", "gamble", "darkhole", null, null]
 };
-/* Wat het kost, in sterren. Over alle 25 levels perfect gespeeld liggen er 75 sterren;
-   alles bij Knorst kopen kost er 78. Je kunt dus net niet alles — en wie niet elk level
-   uitknijpt, moet echt kiezen. */
+/* Wat het kost, in sterren. Over alle 25 levels perfect gespeeld liggen er 75 sterren,
+   en alles bij Knorst kopen kost er precies 75. Alles krijgen kan dus — maar alleen als je
+   nergens een ster laat liggen. Eén misser en je moet kiezen. */
 const KOOP_PRIJS = {
-  ae_draw3:12, ae_offer:10, ae_graf:9, fu_water:8,
-  greed:7, gamble:6, darkhole:5
+  ae_draw3:15, ae_offer:11, ae_graf:9, fu_water:8,
+  greed:6, gamble:5, darkhole:4
 };
-const HART_PRIJS = [4, 7, 10];           // elk volgend hartje kost meer
+const HART_PRIJS = [4, 6, 7];            // elk volgend hartje kost meer
 /* Wat je gekocht hebt. Staat naast je sterren in de opslag. */
 function koopState(){
   const S0 = SET.story;
@@ -14975,7 +15068,7 @@ function kaartHTML(){
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
     <div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}" id="kaartvlak">
-      ${artOk ? `<img class="kaartart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="this.remove()">` : ""}
+      ${artOk ? `<img class="kaartart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">` : ""}
       <svg class="kaartlaag" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
           <filter id="owzacht" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
@@ -15261,6 +15354,7 @@ function render(){
     else if(!wil && dl) dl.remove();
   }
   if(typeof glitchAan === "function" && !(S.story && S.story.glitchAan)) glitchAan(false);
+  if(typeof mulliganPaneel === "function") mulliganPaneel();
   const kb = document.getElementById("klokbtn");
   if(kb){
     const aan = !!(S.klok && S.klok.aan);
@@ -16576,6 +16670,20 @@ function kaartTrim(pad, im){
   }catch(e){ /* getaint of te groot: dan gewoon het bestand zelf */ }
 }
 const kaartSrc = pad => BEELD_TRIM[pad] || pad;
+/* Een <img> die het in beeld niet haalt verdwijnt niet meteen: hij probeert het nog twee
+   keer. Anders kost één hik in de verbinding je de tekening voor de rest van het potje. */
+function beeldFout(img){
+  if(!img) return;
+  const n = +(img.dataset.pog || 0);
+  const bron = img.getAttribute("src");
+  if(n >= 2 || !bron || bron.slice(0, 5) === "data:"){ img.remove(); return; }
+  img.dataset.pog = n + 1;
+  setTimeout(() => {
+    if(!img.isConnected) return;
+    img.removeAttribute("src");
+    img.setAttribute("src", bron);
+  }, 500 * (n + 1));
+}
 /* Een plaatje dat de browser al binnen heeft mag meteen zichtbaar zijn, ook als het
    decoderen nog niet is afgerond. Anders zie je bij het doorklikken één zwart frame. */
 function beeldKlaar(pad){
@@ -16586,6 +16694,61 @@ function beeldKlaar(pad){
 const KAART_PADEN = new Set([].concat(
   typeof KAART_BEELD === "object" ? Object.values(KAART_BEELD) : [],
   [LICHT_KAART, AETHER_KAARTVORM]));
+/* Een download die afknapt is bijna nooit een bestand dat er niet is — het is de
+   verbinding die het begeeft omdat we 228 plaatjes tegelijk opvragen. Daarom twee dingen:
+   we halen ze in een rij op, een handvol tegelijk, en een mislukking krijgt drie kansen
+   voordat we hem opgeven. Pas daarna staat er "fout" en valt het spel terug op de oude
+   pixelvorm — en dat hoort dus bijna nooit te gebeuren. */
+const BEELD_POGING = {}, BEELD_MAXPOG = 3;
+let BEELD_RIJ = [], BEELD_BEZIG = 0;
+const BEELD_TEGELIJK = 8;
+function beeldVolgende(){
+  while(BEELD_BEZIG < BEELD_TEGELIJK && BEELD_RIJ.length){
+    BEELD_BEZIG++;
+    beeldHaal(BEELD_RIJ.shift());
+  }
+}
+function beeldAf(pad, gelukt){
+  BEELD_KLAAR[pad] = gelukt ? true : "fout";
+  BEELD_BEZIG--;
+  laadTik("beeld");
+  beeldVolgende();
+}
+function beeldHaal(pad){
+  const im = new Image();
+  BEELD_CACHE[pad] = im;
+  im.decoding = "async";
+  im.addEventListener("load", () => {
+    /* pas klaar als hij ook gedecodeerd is, anders zie je hem alsnog opbouwen */
+    const af = () => { if(KAART_PADEN.has(pad)) kaartTrim(pad, im); beeldAf(pad, true); };
+    if(im.decode) im.decode().then(af, af); else af();
+  });
+  im.addEventListener("error", () => {
+    const n = (BEELD_POGING[pad] = (BEELD_POGING[pad] || 0) + 1);
+    if(n < BEELD_MAXPOG){
+      /* Achteraan in de rij en de plek meteen vrijgeven, anders staat de hele stoet stil
+         te wachten op één bestand dat toch niet komt. */
+      BEELD_BEZIG--;
+      setTimeout(() => { BEELD_RIJ.push(pad); beeldVolgende(); }, 350 * n);
+      beeldVolgende();
+      return;
+    }
+    beeldAf(pad, false);
+  });
+  im.src = pad;
+}
+/* In de console: welke tekeningen het niet gehaald hebben. Handig als je net iets
+   geüpload hebt en je wil weten of het spel het ziet. */
+function tekeningenStand(){
+  const fout = [], bezig = [];
+  for(const pad in BEELD_KLAAR){
+    if(BEELD_KLAAR[pad] === "fout") fout.push(pad);
+    else if(BEELD_KLAAR[pad] !== true) bezig.push(pad);
+  }
+  console.log(`🖼 ${Object.keys(BEELD_KLAAR).length} tekeningen · ${fout.length} niet gevonden · ${bezig.length} nog onderweg`);
+  if(fout.length) console.log(fout.join("\n"));
+  return {fout, bezig};
+}
 function beeldenWarm(){
   const paden = [];
   if(typeof SPRITE_BEELD === "object") paden.push(...Object.values(SPRITE_BEELD));
@@ -16600,19 +16763,11 @@ function beeldenWarm(){
   if(typeof OVERWORLD_BEELD === "string") paden.push(OVERWORLD_BEELD);
   const nieuw = [...new Set(paden.filter(pad => pad && BEELD_KLAAR[pad] === undefined))];
   LAAD.tot += nieuw.length; LAAD.beeldTot += nieuw.length;
-  nieuw.forEach(pad => {
-    BEELD_KLAAR[pad] = false;
-    const im = new Image();
-    BEELD_CACHE[pad] = im;
-    im.decoding = "async";
-    im.addEventListener("load", () => {
-      /* pas klaar als hij ook gedecodeerd is, anders zie je hem alsnog opbouwen */
-      const af = () => { if(KAART_PADEN.has(pad)) kaartTrim(pad, im); BEELD_KLAAR[pad] = true; laadTik("beeld"); };
-      if(im.decode) im.decode().then(af, af); else af();
-    });
-    im.addEventListener("error", () => { BEELD_KLAAR[pad] = "fout"; laadTik("beeld"); });
-    im.src = pad;
-  });
+  /* De kaarten en de sprites die je meteen ziet gaan voorop; de vergezichten achteraan. */
+  const vroeg = pad => KAART_PADEN.has(pad) || (typeof SPRITE_BEELD === "object" && Object.values(SPRITE_BEELD).indexOf(pad) >= 0);
+  nieuw.sort((a, b) => (vroeg(b) ? 1 : 0) - (vroeg(a) ? 1 : 0));
+  nieuw.forEach(pad => { BEELD_KLAAR[pad] = false; BEELD_RIJ.push(pad); });
+  beeldVolgende();
 }
 /* De muziek ook alvast: elk bestand uit de MUZIEK-tabel krijgt nu al zijn speler, zodat
    AU.zet() hem straks kant-en-klaar aantreft en een gevecht niet stil begint. */
