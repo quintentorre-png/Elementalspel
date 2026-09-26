@@ -2349,8 +2349,8 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
 #app.w1.lv1-4{--raster:rgba(150,150,170,.05); --vlak:#26232c; --diep:#0f0e14}     /* donker, terug het hol in */
 #app.w1.lv1-5{--raster:rgba(255,140,80,.055); --vlak:#3b2a22; --diep:#160d09}     /* de zaal van Magnus */
 #app.w2.lv2-1{--raster:rgba(190,225,180,.06);  --vlak:#24422c; --diep:#0e1c12}    /* varens, ochtendgroen */
-#app.w2.lv2-2{--raster:rgba(255,214,140,.07);  --vlak:#3d3520; --diep:#1a160c}    /* de herberg: warm lamplicht */
-#app.w2.lv2-3{--raster:rgba(150,200,150,.045); --vlak:#1d3524; --diep:#0a150e}    /* dieper, donkerder, stiller */
+#app.w2.lv2-3{--raster:rgba(255,214,140,.07);  --vlak:#3d3520; --diep:#1a160c}    /* de herberg: warm lamplicht */
+#app.w2.lv2-2a,#app.w2.lv2-2b{--raster:rgba(150,200,150,.045); --vlak:#1d3524; --diep:#0a150e}    /* dieper, donkerder, stiller */
 #app.w2.lv2-4{--raster:rgba(160,205,210,.05);  --vlak:#243a38; --diep:#0d1a19}    /* storm op komst, groengrijs */
 #app.w2.lv2-5{--raster:rgba(120,200,120,.06);  --vlak:#16301b; --diep:#07120a}    /* het woud zelf, bijna zwart */
 #app.w3.lv3-1{--raster:rgba(255,120,60,.07);   --vlak:#4a1a10; --diep:#1c0806}    /* in de berg: donkerrood */
@@ -3797,7 +3797,8 @@ const SOUNDS = {
    waar het gebleven was. */
 const MUZIEK = {
   /* --- overal --- */
-  titel:          "audio/agni-kai.mp3",   // titelscherm, en het zwarte begin van 1-1
+  titel:          "audio/agni-kai.mp3",   // titelscherm
+  winkel:         "audio/winkel.mp3",                     // de kraam van Knort
   kaart:          "audio/agni-kai.mp3",   // wereldkaart, levelkeuze, lopen tussen gevechten
   gevecht:        "audio/agni-kai.mp3",   // vrij spel en online potjes
   /* --- wereld 1 · Steenrijk --- */
@@ -3811,16 +3812,18 @@ const MUZIEK = {
   w1_steenbaas:   "",                     // 1-4 en 1-5: Magnus, cutscene en afscheid
   w1_baasgevecht: "",                     // 1-5: het bazengevecht met de rotsval
   /* --- wereld 2 · Rankenwoud --- */
-  w2_woud:        "",                     // lopen door het woud, de gewone dialoog
-  w2_seraf:       "",                     // elke keer dat Seraf verschijnt
-  w2_herberg:     "",                     // de Waardin, de thee, de verhalen
-  w2_wiegelied:   "",                     // 2-2: haar gevecht, slaperig en warm
-  w2_gevecht:     "",                     // 2-1 en 2-4: het gewone gevecht
-  w2_struik:      "",                     // 2-3: de omslag en het gevecht met de Struikrover
-  w2_web:         "",                     // 2-3: Shelob, cutscene en gevecht
-  w2_moeder:      "",                     // 2-5: Moeder Natuur, cutscene en afscheid
-  w2_baasgevecht: "",                     // 2-5: het gevecht in de regen
-  w2_bloei:       "",                     // 2-5: de tweede fase
+  w2_woud:        "audio/w2-01-woud.mp3",                     // lopen door het woud, de gewone dialoog
+  w2_seraf:       "audio/w2-02-seraf.mp3",                     // elke keer dat Seraf verschijnt
+  w2_herberg:     "audio/w2-06-herberg.mp3",                     // de Waardin, de thee, de verhalen
+  w2_wiegelied:   "audio/w2-07-wiegelied.mp3",                     // 2-3: haar gevecht, slaperig en warm
+  w2_tellen:      "audio/w2-03-tellen.mp3",                     // 2-1: Seraf telt tot zes
+  w2_gevecht:     "audio/w2-09-gevecht.mp3",                     // 2-4: het gewone gevecht
+  w2_valletjes:   "audio/w2-08-valletjes.mp3",                     // 2-4: het katje, het cadeau, de hamer
+  w2_struik:      "audio/w2-04-struik.mp3",                     // 2-2a: de omslag en het gevecht met de Struikrover
+  w2_web:         "audio/w2-05-web.mp3",                     // 2-2b: Kaelid, cutscene en gevecht
+  w2_moeder:      "audio/w2-10-moeder.mp3",                     // 2-5: Moeder Natuur, cutscene en afscheid
+  w2_baasgevecht: "audio/w2-11-baasgevecht.mp3",                     // 2-5: het gevecht in de regen
+  w2_bloei:       "audio/w2-12-bloei.mp3",                     // 2-5: de tweede fase
   /* --- wereld 3 · Asgronden --- */
   w3_as:          "",                     // lopen door de as, de gewone dialoog
   w3_flint:       "",                     // Flint in wereld 3: na 3-1, en het krat bij 3-5
@@ -3851,6 +3854,17 @@ if(!SET.story || typeof SET.story !== "object") SET.story = {klaar:[], vrij:fals
 if(!Array.isArray(SET.story.klaar)) SET.story.klaar = [];
 if(!Array.isArray(SET.story.aethers)) SET.story.aethers = [];   // verdiende 🟣 krachten
 if(!Array.isArray(SET.story.lichten)) SET.story.lichten = [];   // verdiende ✦ lichtkaarten
+/* Wereld 2 is omgenummerd: de Waardin is nu 2-3, en de kruising is twee eigen levels. */
+if(!SET.story.w2tak){
+  const webTak = ((SET.story.extra || {})["2-3"] || []).indexOf("web") >= 0;
+  const om = id => id === "2-2" ? "2-3" : (id === "2-3" ? (webTak ? "2-2b" : "2-2a") : id);
+  ["klaar","ontmoet","kaartGezien"].forEach(k => { if(Array.isArray(SET.story[k])) SET.story[k] = SET.story[k].map(om); });
+  ["sterren","extra","kaartStand"].forEach(k => {
+    const o = SET.story[k]; if(!o || typeof o !== "object") return;
+    const n = {}; Object.keys(o).forEach(x => { n[om(x)] = o[x]; }); SET.story[k] = n; });
+  SET.story.w2tak = true;
+  try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){}
+}
 function saveSet(){ try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){} }
 /* Autopass: dit scherm laat de chain automatisch door voor speler p.
    Dat gaat via een echte pass-actie, dus hij komt gewoon in de zettenlijst en over het net. */
@@ -6778,6 +6792,13 @@ async function endTurn(){
   if(!S.over && S.story && typeof storyEindeBeurt === "function") await storyEindeBeurt();
   if(!S.over && S.story && typeof storyVeldPraat === "function") await storyVeldPraat();
   if(!S.over && S.story && typeof storyPopup === "function") await storyPopup();
+  /* ✦ Overleven: heb je het zoveel rondes uitgehouden, dan is het klaar. Een ronde is
+     één beurt van hem en één van jou. */
+  if(!S.over && S.story && S.story.overleef){
+    const ronde = Math.ceil(S.gTurn / 2);
+    if(S.gTurn % 2 === 0) addLog(`✦ Ronde <b>${ronde}</b> van ${S.story.overleef} doorstaan.`, true);
+    if(S.gTurn >= S.story.overleef * 2) return gameOver(0, `Je hebt het ${S.story.overleef} rondes uitgehouden.`);
+  }
   if(S.over) return;
   await sleep(250);
   S.gTurn++; S.tp = opp(S.tp); S.turnNo[S.tp]++;
@@ -9251,7 +9272,11 @@ const WERELDEN = {
   4:{naam:"Diepstroom",  ic:"💧", el:"water", kleur:"#a9e2ff"},
   5:{naam:"Hemelrand",   ic:"✦",  el:"licht", kleur:"#fffdf2"}
 };
-const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => [1,2,3,4,5].map(n => w + "-" + n)));
+/* Na 2-1 splitst het pad: 2-2a (het pad) of 2-2b (het web). Allebei komen ze uit bij 2-3. */
+const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => w === 2
+  ? ["2-1","2-2a","2-2b","2-3","2-4","2-5"]
+  : [1,2,3,4,5].map(n => w + "-" + n)));
+const STORY_VEREIST = {"2-2a":["2-1"], "2-2b":["2-1"], "2-3":["2-2a","2-2b"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -10911,17 +10936,17 @@ const HORIZON = {
          {b:"h21_gat",     y:24,        w:118, d:.30, op:.9},
          {b:"h21_scherven",bot:0,       w:130, d:.66, op:.85},
          {b:"h21_raad",    y:0,         w:136, d:.95, op:1}],
-  "2-2":[{b:"h22_avond",   y:0,  h:100, w:110, d:.03, op:1},
+  "2-3":[{b:"h22_avond",   y:0,  h:100, w:110, d:.03, op:1},
          {b:"h22_herberg", y:24,        w:118, d:.32, op:.9},
          {b:"h22_mos",     bot:0,       w:130, d:.66, op:.9},
          {b:"h22_lampion", y:0,         w:136, d:.95, op:1}],
   /* 2-3 · links het web. Geen spin in beeld: alleen wat ze gebouwd heeft. */
-  "2-3:shelob":[{b:"h23s_diep",   y:0,  h:100, w:110, d:.04, op:1},
+  "2-2b":[{b:"h23s_diep",   y:0,  h:100, w:110, d:.04, op:1},
          {b:"h23s_gewelf", y:14,        w:120, d:.28, op:.85},
          {b:"h23s_trecht", bot:0,       w:132, d:.66, op:.9},
          {b:"h23s_koepel", y:-6,        w:138, d:.95, op:1}],
   /* 2-3 · rechts het pad. Geen struikrover in beeld: alleen dat het te netjes is. */
-  "2-3:struik":[{b:"h23r_gang",   y:0,  h:100, w:110, d:.04, op:1},
+  "2-2a":[{b:"h23r_gang",   y:0,  h:100, w:110, d:.04, op:1},
          {b:"h23r_haag",   y:18,        w:118, d:.30, op:.9},
          {b:"h23r_struik", bot:0,       w:130, d:.66, op:.9},
          {b:"h23r_boog",   y:-8,        w:136, d:.95, op:1}],
@@ -11235,6 +11260,11 @@ const SPRITE_BEELD = {
   rock1b_zwart:   "art/rocky-cape-zwart.png",   // donkere versie, voor zijn entree in het zwart
   /* --- Rocky in de zaal van Magnus (1-5): pak uit, mascara nog op --- */
   rock1c:         "art/rocky-mascara.png",
+  rock1_zit:      "art/rots-goon-zit.png",      // 1-1 · op zijn krukje, Kees op schoot
+  rock1_papier:   "art/rots-goon-papier.png",   // 1-1 · leest zijn speech van een papiertje
+  kees:           "art/kees.png",               // 1-1 · Kees, een steen met een gezichtje erop
+  rocky_til:      "art/rocky-til.png",          // 1-2 · Brokko tilt en telt
+  rocky_boekje:   "art/rocky-boekje.png",       // 1-2 · Brokko leest in zijn opschrijfboekje
   /* --- wereld 1 · Nimbus --- */
   nimbus:         "art/nimbus.png",   // het wolkje met het kroontje
   nimbus_boos:    "art/nimbus-boos.png",
@@ -11260,6 +11290,7 @@ const SPRITE_BEELD = {
   engel_wijd:     "art/seraf-wijd.png",       // vleugels uit
   engel_stuk:     "art/seraf-stuk.png",
   engel_taunt:    "art/seraf-taunt.png",
+  engel_rug:      "art/seraf-rug.png",        // 2-1 · met de rug naar je toe, vleugels dicht
   /* --- Max, de schaduwhond van Seraf (2-4) --- */
   max:            "art/max.png",
   max_stuk:       "art/max-stuk.png",
@@ -11269,6 +11300,7 @@ const SPRITE_BEELD = {
   shelob_boos:    "art/shelob-boos.png",
   shelob_stuk:    "art/shelob-stuk.png",
   shelob_taunt:   "art/shelob-taunt.png",
+  kaelid_ogen:    "art/kaelid-ogen.png",      // 2-2b · acht ogen die in het donker opengaan
   /* --- de ranken die overal rondhangen --- */
   rank1:          "art/rank.png",
   rank1_bang:     "art/rank-bang.png",
@@ -11356,7 +11388,15 @@ const SPR_LEEN = {
   ijsvlakte:"diepbaas", ijsvlakte_stuk:"diepbaas_stuk", ijsvlakte_taunt:"diepbaas",
   oceaan:"diepbaas", oceaan_wijd:"diepbaas_wijd", oceaan_stuk:"diepbaas_stuk", oceaan_taunt:"diepbaas"
 };
+/* Een nieuwe stand die nog niet getekend is, leent de tekening van een bestaande stand van
+   hetzelfde personage — dan staat er iets herkenbaars in plaats van niets. */
+const SPRITE_TERUG = {
+  rock1_zit:"rock1", rock1_papier:"rock1", kees:"rock1",
+  rocky_til:"rocky", rocky_boekje:"rocky",
+  engel_rug:"engel", kaelid_ogen:"shelob"
+};
 function spriteSVG(key){
+  if(SPRITE_TERUG[key] && (!SPRITE_BEELD[key] || BEELD_KLAAR[SPRITE_BEELD[key]] === "fout")) return spriteSVG(SPRITE_TERUG[key]);
   /* De PNG hoort bij de échte naam; de pixelvorm mag geleend zijn zolang die er nog niet is.
      Die twee moeten dus los van elkaar opgezocht worden — anders staat er niets in beeld
      zodra er wél een plek voor een tekening is maar het bestand nog ontbreekt. */
@@ -11397,47 +11437,103 @@ spriteSVG.pix = function(key){
   }
   return `<svg class="pix" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${r}</svg>`;
 };
+/* 2-4 · wat er gebeurt als Seraf eenmaal begint, welke route je ook nam. */
+const INZET_24 = [
+  {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"Ik heb iets meegenomen."},
+  {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Dat mag, sinds kort. Ik heb het nagevraagd."},
+  {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit de schaduw komt iets los dat er de hele tijd al in zat."},
+  {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", t:"Het heeft de vorm van een hond. Het is geen hond. Er zit niemand in."},
+  {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max."},
+  {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", t:"Verder wordt er niks over gezegd. Max zegt sowieso niks. Max is geen iemand."},
+  {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; die kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft een eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet de wolven daar bovenop."}
+];
 const STORY = {
   "1-1":{
     wereld:1, naam:"De kiezelwacht", vijand:"Rocky", sprite:"rock1", muziek:"w1_gevecht",
     hzruim:true,
     intro:[
-      {s:null, bg:0, naam:"…", kleur:"#6f83a6", mu:"titel", t:"Zwart. Een lange gang van niets. Ergens ver weg klinkt water, en vuur, en iets dat groeit — alle vier tegelijk, en geen van alle dichtbij."},
-      {s:null, bg:0, naam:"…", kleur:"#6f83a6", t:"Je bent een elementaal. Je draagt ze alle vier tegelijk. Dat schijnt niet te mogen."},
-      {s:null, bg:0, naam:"…", kleur:"#6f83a6", t:"Je hebt bedacht dat je het gewoon even gaat vrágen. Aan de bazen zelf. Over harmonie. Over sámen."},
-      {s:null, bg:1, naam:"…", mu:"kaart", t:"Er gaat iets open. Bruin. Overal bruin, rotsblokken tot aan de horizon, stof in je keel en een zon die er niet doorheen komt."},
-      {s:null, bg:1, naam:"…", t:"Je zet twee stappen."},
-      {s:"rock1", bg:1, mu:"w1_rustig", t:"Ho ho ho. Blijf staan, jij."},
-      {s:"rock1", t:"Wacht eens even. Vuur, water, gras én steen. Bij één iemand."},
-      {s:"rock1", t:"…Mag dat?"},
-      {s:"rock1", t:"Hahaha! En je wilt de bazen spréken? Over harmonie? Over sámen?"},
-      {s:"rock1_boos", mu:"w1_gespannen", t:"Sukkel! Vroeger waren we gewoon rotsen. Geen gepraat, geen gedoe."},
-      {s:"rock1_boos", t:"Dat zegt mijn grote broer. En mijn grote broer weet alles."},
-      {s:"rock1_boos", t:"Niemand komt langs mij heen zonder een flink pak slaag. Kom maar op, zachtei!"}
+      {s:null, bg:1, naam:"…", mu:"w1_rustig", t:"Bruin, stof, hitte."},
+      {s:null, bg:1, naam:"…", t:"Een paaltje in de grond met een bordje eraan. De letters zijn er al jaren geleden afgewaaid."},
+      {s:"rock1_zit", bg:1, naam:"…", t:"Ernaast een krukje. Op het krukje zit iemand van steen met een kleinere steen op schoot."},
+      {s:"rock1_zit", t:"…en toen zei ik: niemand komt hier langs. Zó zei ik het. Met mijn arm erbij."},
+      {s:"rock1_zit", t:"Nee, jij hoeft niks te zeggen. Ik weet het al."},
+      {s:"rock1_zit", t:"Jij bent een goeie, Kees."},
+      {s:"rock1_zit", naam:"…", t:"Hij veegt het stof van Kees af. Kijkt over de vlakte. Er is geen vlakte, er is alleen stof."},
+      {s:"rock1_zit", t:"Zullen we tellen?"},
+      {s:"rock1_zit", t:"Eén."},
+      {s:"rock1_zit", naam:"…", t:"Ergens ver weg komt iets aan."},
+      {s:"rock1_zit", t:"Twee."},
+      {s:"rock1_zit", naam:"…", t:"Het wordt groter."},
+      {s:"rock1_zit", t:"…Kees."},
+      {s:"rock1_zit", t:"Kees, er komt iets aan."},
+      {s:"rock1", naam:"…", t:"Hij staat op. Zet Kees heel voorzichtig neer, alsof Kees anders schrikt. Veegt zijn handen af aan iets wat geen broek is. Haalt een verkreukeld papiertje tevoorschijn."},
+      {s:"rock1_papier", mu:"w1_gespannen", t:"Oké. Oké oké oké. Elf jaar. Elf jaar en nu is het zover."},
+      {s:"rock1_papier", t:"GIJ DIE HIER BETREEDT—"},
+      {s:"rock1_papier", t:"Zachter. Niet meteen alles eruit gooien."},
+      {s:"rock1_papier", t:"Gij die hier betreedt…"},
+      {s:"rock1_papier", naam:"…", t:"Je staat voor hem."},
+      {s:"rock1", t:"…"},
+      {s:"rock1", t:"Hoi."},
+      {s:"rock1_boos", t:"Nee. Nee! Niet hoi. Vergeet hoi."},
+      {s:"rock1_boos", t:"Ga terug. Ga tien passen terug en kom dan nog een keer, dan doe ik het goed."},
+      {s:"rock1", naam:"…", t:"Je beweegt niet."},
+      {s:"rock1", t:"…Prima. Ook goed. Prima."},
+      {s:"rock1", naam:"…", t:"Hij kijkt je nu pas echt aan."},
+      {s:"rock1", t:"Wacht even. Doe je hand eens omhoog."},
+      {s:"rock1", t:"Vuur. Water. Gras. En steen."},
+      {s:"rock1", t:"Bij één iemand."},
+      {s:"rock1", t:"Dat zijn er dus vier."},
+      {s:"rock1", t:"…Is dat veel? Ik weet niet of dat veel is. Ik heb er één."},
+      {s:"rock1", naam:"…", t:"Hij wijst naar het paaltje met het bordje."},
+      {s:"rock1", t:"Maar dit mag sowieso niet. Van die kant naar deze kant. Dat staat daar."},
+      {s:"rock1", t:"Wat er precies staat weet ik niet. Dat was al weg toen ik kwam."},
+      {s:"rock1", t:"Waaróm het niet mag?"},
+      {s:"rock1", t:"…Hm. Dat heb ik nooit gevraagd."},
+      {s:"rock1", t:"Mijn grote broer weet dat wel. Mijn grote broer weet alles."},
+      {s:"rock1_papier", naam:"…", t:"Hij stopt het papiertje weg."},
+      {s:"rock1_boos", t:"Weet je wat, ik sla je eerst in elkaar en dan zeg ik hem daarna."},
+      {s:"rock1_boos", t:"Kom maar op, zachtei."}
     ],
     win:[
-      {s:"rock1_stuk", mu:"w1_rustig", t:"Au. …Blijkbaar was ík de kiezel."},
-      {s:"rock1_stuk", t:"Ga maar. En zeg niet dat ik je doorliet. Zeg dat het lang duurde."}
+      {s:"rock1_stuk", mu:"w1_rustig", t:"Au."},
+      {s:"rock1_stuk", t:"…"},
+      {s:"rock1_stuk", t:"Ga maar."},
+      {s:"rock1_stuk", t:"En zeg niet dat ik je doorliet. Zeg dat het lang duurde. Zeg dat ik bloedde."},
+      {s:"rock1", t:"En hé."},
+      {s:"rock1", t:"Kom je nog even terug om te vertellen hoe het afliep? Ik hoor hier nooit wat."},
+      {s:"rock1_zit", naam:"…", t:"Je loopt verder. Achter je hoor je hem nog net."},
+      {s:"rock1_zit", t:"Kees. Kees, je hebt alles gemist."}
     ],
-    verlies:[{s:"rock1_boos", mu:"w1_rustig", t:"Zie je wel. Terug naar je grasveldje. En doe de poort achter je dicht, er waait stof naar binnen."}],
+    verlies:[
+      {s:"rock1_boos", mu:"w1_rustig", t:"HA! …Ha."},
+      {s:"rock1", t:"Ja. Nou."},
+      {s:"rock1", t:"…"},
+      {s:"rock1", t:"Je kan het ook nog een keer proberen, hoor. Als je wil."},
+      {s:"rock1_zit", t:"Ik sta hier toch."}
+    ],
     zegSpr:"rock1_boos", tauntSpr:"rock1_taunt",
     zeg:{ beurt:[
         "Kom op dan, zachtei.",
         "Hier ben ik goed in. Dit is letterlijk mijn baan.",
-        "Weet je hoe ontzettend lang ik deze plek al verdedig? Nee?! …Ik ook eigenlijk niet.",
-        "Ja, ik heb een pet-rock. Dat is niet raar. <b>Jij</b> bent raar.",
         "Blijf staan! …Je stáát al. Goed zo.",
-        "Straks moet ik dit nog uitleggen aan de baas."
+        "Ja, ik heb een pet-rock. Dat is niet raar. <b>Jij</b> bent raar.",
+        "Kees, niet kijken.",
+        "Ik heb dit duizend keer geoefend. Alleen nooit met iemand erbij.",
+        "Straks moet ik dit uitleggen aan de baas. Dat wordt niks."
       ],
       popup:[
-        "Jij bent de eerste die hier komt. Ik had een speech. Die ben ik kwijt.",
-        "De baas zegt: laat niemand door. Meer instructies heb ik niet gekregen. Ik heb ook niet doorgevraagd.",
-        "Als je mijn broer tegenkomt: niks gezegd, hè."
+        "Jij bent de eerste die hier komt. De eerste. Ik weet even niet wat ik moet voelen.",
+        "De baas zegt: laat niemand door. Meer heb ik niet gekregen. Ik heb ook niet doorgevraagd.",
+        "Als je mijn broer tegenkomt: niks gezegd, hè.",
+        "Weet je wat het gekke is? Ik ben helemaal niet boos. Ik ben eigenlijk best blij."
       ],
       laag:["Wacht. Wacht even. Dit ging heel anders in mijn hoofd."],
-      jij:["Zie je wel! ZIE JE WEL. Ik zei het toch."] },
+      jij:["ZIE JE WEL. Dat zei ik toch. Dat zei ik!"] },
+    /* Wat Rocky zegt terwijl jij de tutorial doet: per gehaalde stap, op volgorde. */
+    tutZeg:["Hé. Hé! Wat doe je nou.", "Mag dat wel? Ik dénk dat dat niet mag.", null, "Ik schrijf het op. Voor straks."],
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:9, vuur:5, gras:5, water:5},
+    levensVij:4,
     /* Een vaste openingshand, zodat de tutorial altijd hetzelfde loopt. */
     handJijVast:["gras","water","vuur","steen"],
     bovenop:["steen"],
@@ -11463,56 +11559,78 @@ const STORY = {
     wereld:1, naam:"Steenhard", vijand:"Brokko", sprite:"rocky", muziek:"w1_gevecht",
     hzruim:true,
     intro:[
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", bg:3, mu:"w1_vuurguy", t:"Hey. Dat was very nice work, kid."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", bg:3, t:"Iemand moest die arrogante stenen ook een keer aanpakken. Wij kunnen iemand als jij goed gebruiken — een doener."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Ik zou je wat vuur geven, maar je hébt vuur. Je hebt álles. Dat is nogal het punt van jou."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Wel iets anders: vanaf nu mag je vóór elk gevecht tien kaarten bekijken en eruit gooien wat je niet wilt. Scheelt dood gewicht."},
-      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", bg:3, t:"I'll keep an eye out for you. See ya."},
-      {s:null, naam:"…", bg:1, mu:"kaart", t:"Hij loopt weg. Het rood zakt uit de lucht en het bruin komt er weer voor terug."},
-      {s:"rocky", groot:true, bg:1, mu:"w1_rustig", t:"Wablief?! Een elementaal? Hier?!"},
-      {s:"rocky_boos", groot:true, bg:1, naam:"…", t:"Focus. Fócus, Brokko. — Hij slaat zichzelf in zijn gezicht. Het klinkt als twee stenen."},
-      {s:"rocky", groot:true, bg:1, t:"Ik daag u, mijn waarde elementaal, uit voor een steenharde strijd."},
-      {s:"rocky_boos", groot:true, bg:1, mu:"w1_gespannen", t:"Maar verwacht niet dat ik zo makkelijk om te praten ben als mijn kleine broertje."},
-      {s:"rocky_boos", groot:true, bg:1, t:"Ik ga je verslaan met mijn volle kracht."},
-      {s:"rocky_boos", groot:true, bg:1, t:"Mijn 🟣 <b>ONWRIKBAARHEID</b>."},
-      {s:"rocky_boos", groot:true, bg:1, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant slaat voortaan met zijn volle gewicht."},
+      {s:"fireguy", naam:"…", kleur:"#ff8a4a", bg:3, mu:"w1_vuurguy", t:"Iemand staat er ineens. Je hebt hem niet horen komen. Zonnebril, in dit licht."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", bg:3, t:"Hey. Nice work back there, kid."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Iemand moest die arrogante stenen ook een keer aanpakken."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Ik zou je wat vuur geven, maar je hébt vuur. Je hebt alles. Dat is nogal het punt van jou, hè."},
+      {s:"fireguy", naam:"…", kleur:"#ff8a4a", t:"Hij zegt het vriendelijk. Hij kijkt er alleen iets te lang bij."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Wel iets anders. Vanaf nu mag je vooraf tien kaarten bekijken en eruit gooien wat je niet wilt. Scheelt dood gewicht."},
+      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", bg:3, t:"En ik hou je in de gaten. Serieus. See ya."},
+      {s:null, naam:"…", bg:1, mu:"kaart", t:"Hij loopt weg. Het rood zakt uit de lucht en het bruin komt ervoor terug."},
+      {s:"rocky_til", groot:true, bg:1, naam:"…", mu:"w1_rustig", t:"Verderop staat iemand stenen te tillen. Hij zet ze neer. Hij pakt ze op. Hij zet ze neer."},
+      {s:"rocky_til", groot:true, t:"Achtentachtig. Negenentachtig."},
+      {s:"rocky_til", groot:true, t:"Negen…"},
+      {s:"rocky_til", groot:true, t:"…"},
+      {s:"rocky", groot:true, naam:"…", t:"Hij zet de steen neer."},
+      {s:"rocky", groot:true, t:"Nee. Nee, ik tel opnieuw. Ik weet nu niet meer waar ik was en dan telt het niet."},
+      {s:"rocky", groot:true, naam:"…", t:"Hij ziet je."},
+      {s:"rocky", groot:true, t:"…Ah."},
+      {s:"rocky_boekje", groot:true, naam:"…", t:"Hij haalt een opschrijfboekje tevoorschijn. Het is hetzelfde handschrift als op Rocky's papiertje. Dit is het origineel."},
+      {s:"rocky_boekje", groot:true, t:"Even kijken. Tussen “Zandstorm — schuilen” en “Vreemde vogel — negeren”."},
+      {s:"rocky_boekje", groot:true, t:"Hier. “Elementaal — niet doorlaten.”"},
+      {s:"rocky_boekje", groot:true, t:"Dat ben jij dan."},
+      {s:"rocky", groot:true, naam:"…", t:"Hij klapt het dicht."},
+      {s:"rocky", groot:true, t:"Wat een elementaal precies ís, staat er niet bij. Dat heb ik ook nooit gevraagd. Er staat wat ik moet doen, dat is genoeg."},
+      {s:"rocky", groot:true, t:"Mijn broertje heeft dit van mij. Hij heeft er alleen één blaadje van."},
+      {s:"rocky", groot:true, t:"Ik daag u uit, waarde elementaal, tot een steenharde strijd."},
+      {s:"rocky_boos", groot:true, mu:"w1_gespannen", t:"Maar verwacht niet dat ik zo makkelijk om te praten ben als hij."},
+      {s:"rocky_boos", groot:true, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant slaat voortaan met zijn volle gewicht."},
+      {s:"rocky_boos", groot:true, t:"🟣 <b>ONWRIKBAARHEID.</b>"},
+      {s:"rocky_boos", groot:true, t:"Vierhonderd stenen per ochtend, elf jaar lang. Reken maar uit."},
+      {s:"rocky", groot:true, t:"Nee, doe maar niet. Ik heb het al uitgerekend."}
     ],
     midden:[
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Jeez. Dat is oneerlijk."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Jeez. Dat is niet eerlijk."},
       {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Hier. Twee 🔥 van mij, als spell. Ze doen nu nog niks — maar alles wat jij daar straks neerzet gaat branden."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Van mij mag hij zijn paarse trucje houden. Jij hebt vrienden."},
-      {s:"rocky_boos", groot:true, naam:"Brokko", mu:"w1_gevecht", t:"Ha! Vrienden heb ik niet nodig. Ik ben de rots, jullie zijn kiezels."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Hou hem bezig, kid. Ik wil zien hoe ver je komt."},
+      {s:"rocky_boos", groot:true, naam:"Brokko", mu:"w1_gevecht", t:"Hulp. Natuurlijk."},
+      {s:"rocky_boos", groot:true, naam:"Brokko", t:"Ik heb geen hulp. Ik heb een schema."}
     ],
     win:[
       {s:"rocky_stuk", groot:true, mu:"w1_rustig", t:"Verliezen blijkt een familiekwaal."},
       {s:"rocky_stuk", groot:true, naam:"…", t:"Hij kijkt beteuterd naar zijn eigen vuisten."},
       {s:"rocky_stuk", groot:true, t:"Ga maar. Ik moet even zitten."},
-      {s:"rocky_stuk", groot:true, t:"…Wacht. Wacht even."},
-      {s:"rocky_stuk", groot:true, t:"Ik kwam hier met een aether en jij met niks. Dat zit me al de hele partij niet lekker."},
-      {s:"rocky", groot:true, paars:true, t:"Hier. Neem hem. 🟣 <b>Onwrikbaar</b> — jouw steen slaat zo hard als hij groot is."},
-      {s:"rocky", groot:true, t:"Discipline is niks waard als je er ondertussen omheen sluipt."},
+      {s:"rocky_stuk", groot:true, t:"…En die aether. Neem maar mee."},
+      {s:"rocky_stuk", groot:true, t:"Hij staat niet in mijn boekje. Die kreeg ik erbij."},
+      {s:"rocky_stuk", groot:true, t:"Waar hij vandaan komt weet ik niet. Die vraag stond er ook niet in."}
+    ],
+    verlies:[
+      {s:"rocky", groot:true, mu:"w1_rustig", t:"Ziezo."},
+      {s:"rocky", groot:true, t:"Dat was set één."},
+      {s:"rocky_til", groot:true, t:"Kom terug als je wilt. Ik sta hier nog wel even. Ik sta hier altijd nog wel even."}
     ],
     zegSpr:"rocky_boos", tauntSpr:"rocky_taunt",
     zeg:{ beurt:[
-        "VOEL JE DAT? DAT IS DISCIPLINE!",
-        "Met zo'n vorm kun jij mij nooit verslaan. Wat is je fitness routine?",
-        "Je hebt talent. Talent is wat je hebt als je niet traint.",
+        "Tweehonderdveertien. Tweehonderdvijftien.",
+        "Dat was buiten het schema. Ik doe het nu alsnog, maar het telt niet.",
         "Jij tilt met je rug. Dat gaat een keer mis.",
-        "Vierhonderd stenen. Elke ochtend. Op een lege maag, maat.",
-        "Geen rustdag. Nóóit een rustdag.",
-        "Nog drie. Nog drie en dan ben ik warm.",
-        "Mijn broertje verloor van jou. Mijn broertje slaat ook leg day over.",
+        "Geen rustdag. Nooit een rustdag. Ik heb het één keer geprobeerd en ik werd er naar van.",
+        "Talent is wat je hebt als je niet traint.",
+        "Nog drie. Nog drie en dan ben ik pas warm.",
+        "Ik doe dit elke dag om acht uur. Het is nu kwart over. Dat zit me dwars.",
         "Adem in. Adem uit. En dan een steen."
       ],
       popup:[
         "Ik tel alles. Sets, stenen, stappen. Op een gegeven moment tel je jezelf ook mee en dan wordt het raar.",
         "Mijn broertje heeft talent. Ik heb een schema. Raad eens wie er verder komt.",
-        "Als ik dit verlies moet ik het thuis uitleggen. Dat is erger dan verliezen."
+        "Als ik dit verlies moet ik het thuis uitleggen. Dat is erger dan verliezen.",
+        "Van wie ik dat boekje heb? Van de baas. Van wie hij het heeft, geen idee. Dat vraag je niet."
       ],
       laag:["Nee. Nee nee nee. Ik heb hier VOOR GETRAIND."],
       jij:["Ik zit in de zone. Ik zit ECHT in de zone."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:9, vuur:5, gras:5, water:5},   /* Brokko speelt gewoon steen */
+    levensVij:5,
     aeVij:["ae_stonefull"],
     geeft:"ae_stonefull",
     middenNa:1,
@@ -11524,48 +11642,52 @@ const STORY = {
     hzruim:true,
     tauntSpr:"nimbus_taunt",
     intro:[
-      {s:null, naam:"…", mu:"kaart", t:"Je loopt verder het Steenrijk in. Boven je pad hangt iets kleins en grijs stil in de lucht, precies op ooghoogte, alsof het daar al een tijdje op je wacht."},
-      {s:"nimbus", kleur:"#dfe8f2", mu:"w1_nimbus", t:"Halt! Jij daar. Elementaal."},
+      {s:null, naam:"…", mu:"kaart", t:"Het pad loopt omhoog. Er hangt iets kleins en grijs stil in de lucht, precies op ooghoogte."},
+      {s:"nimbus", kleur:"#dfe8f2", mu:"w1_nimbus", t:"Halt."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Ik ben Nimbus. Ik hoor bij geen enkel rijk, ik dien geen enkele baas, en ik ben — dat wil ik alvast gezegd hebben — de ware heerser der elementen."},
       {s:"nimbus", naam:"…", kleur:"#dfe8f2", t:"Hij heeft een kroontje op. Het is duidelijk zelfgemaakt."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Ik heb je bezig gezien. Vuur op je eigen bord, water dat kaarten terugspeelt, gras dat zich volzuigt. Heel knap. Heel indrukwekkend."},
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"En heel goedkoop. Met trucjes wint iedereen. Ik wil weten of je kúnt spelen."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Dus: mijn uitdaging. Geen trucjes. Allebei veertig kaarten 🪨 Steen, verder niets. Geen vuur, geen water, geen gras, geen aethers, geen bannen."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Alleen jij, ik, en de vraag wie er echt kan spelen. Wat wordt het?",
+      {s:"nimbus", kleur:"#dfe8f2", t:"Ik hang al drie dagen boven je. Je hebt me niet gezien. Niemand ziet me."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Dat is het voordeel van een wolk. Er is een afspraak dat alles in zijn eigen rijk blijft, en iedereen doet eraan mee."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Behalve ik. Want niemand heeft ooit aan wolken gedacht."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Dus ik ben overal geweest. Bij het groen. Bij het water. Bij die rooksliert die nooit een keer ophoudt."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Vier rijken, vier bazen, en niet één die de ander ooit spreekt. Dat weet ik. Als enige."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Nou ja. En jij nu ook. Graag gedaan."},
+      {s:"nimbus", naam:"…", kleur:"#dfe8f2", t:"Hij komt dichterbij."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"En ik heb je bezig gezien. Vuur op je eigen bord, water dat je kaarten terughaalt, gras dat zich volzuigt. Heel knap."},
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"En heel goedkoop. Met trucjes wint iedereen."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Dus. Mijn uitdaging. Geen trucjes. Allebei veertig 🪨 Steen en verder niks. Geen vuur, geen water, geen gras, geen aethers, geen bannen."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Alleen jij, ik, en de vraag wie er echt kan spelen."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Wat wordt het?",
         keuze:[{label:"🤝 Afgesproken", ga:"ja"}, {label:"🚪 Nee, bedankt", ga:"nee1"}]}
     ],
     ja:[
-      {s:"nimbus", kleur:"#dfe8f2", t:"Ha! Goed. Zeg dat je een elementaal bent, maar heb het lef van eentje."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Ik leg er alvast eentje neer als spell, in het midden. Niet als voorsprong. Als handtekening."},
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Laat maar zien wat je zonder speelgoed waard bent."}
+      {s:"nimbus", kleur:"#dfe8f2", t:"Ha! Goed."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Zeg dat je een elementaal bent, maar heb dan ook het lef van eentje."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Ik leg er alvast eentje neer in het midden. Niet als voorsprong. Als handtekening."}
     ],
     nee1:[
       {s:"nimbus_boos", kleur:"#dfe8f2", t:"…Nee?"},
-      {s:"nimbus_kip", kleur:"#dfe8f2", t:"Nee. Nee zegt hij. — Hij klappert met zijn armpjes. — TOK. TOK TOK TOK."},
-      {s:"nimbus_kip", kleur:"#dfe8f2", t:"KIP! Een kip! Vier elementen op zak en niet dúrven spelen zonder!"},
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Ik vraag het nog één keer, en dan hou ik erover op. Veertig steen tegen veertig steen. Durf je?",
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Nee. Nee zegt hij."},
+      {s:"nimbus_kip", kleur:"#dfe8f2", t:"TOK. TOK TOK TOK."},
+      {s:"nimbus_kip", kleur:"#dfe8f2", t:"KIP! Een kip! Vier elementen op zak en niet durven zonder!"},
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Ik vraag het nog één keer en dan hou ik erover op. Veertig steen tegen veertig steen. Durf je?",
         keuze:[{label:"…vooruit dan", ga:"ja"}, {label:"Nee. Echt niet.", ga:"nee2"}]}
     ],
     nee2:[
-      {s:"nimbus_kip", kleur:"#dfe8f2", t:"Ook goed! Ook goed. Prima. Helemaal prima."},
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Dan doen we het zó: jij je hele regenboog, tien van elk element. Ik alleen steen. Veertig stuks."},
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"En dan win ik alsnog. En dan hoor je het hele potje van mij wat ik daarvan vind."},
-      {s:"nimbus_kip", kleur:"#dfe8f2", t:"TOK. TOK TOK."}
+      {s:"nimbus_kip", kleur:"#dfe8f2", t:"Ook goed! Prima. Helemaal prima."},
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"Dan doen we het zo: jij je hele regenboog, tien van elk. Ik alleen steen, veertig stuks."},
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"En dan win ik alsnog. En dan hoor je de hele tijd van mij wat ik daarvan vind."},
+      {s:"nimbus_kip", kleur:"#dfe8f2", t:"TOK."}
     ],
     win:[
-      {s:"nimbus_stuk", kleur:"#dfe8f2", mu:"w1_rustig", t:"…Hm."},
-      {s:"nimbus_stuk", naam:"…", kleur:"#dfe8f2", t:"Zijn kroontje glijdt af en valt in het stof. Hij kijkt ernaar en laat het liggen."},
-      {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Goed. Goed dan. Je kunt spelen. Dat geef ik toe, en ik geef nooit iets toe."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Weet je wat het is — ik hoor nergens bij. Geen rijk, geen element, geen baas. Ik zeg tegen iedereen dat dat mijn kracht is."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Jij bent de eerste die van álle vier is."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"…Laat maar. Ga door."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Ga door. Ik zweef nog wel een keer langs. Ik zit overal, dat is het voordeel van nergens bij horen."},
+      {s:"nimbus_stuk", kleur:"#dfe8f2", mu:"w1_rustig", t:"…Hm."}
     ],
     verlies:[
-      {s:"nimbus_kip", kleur:"#dfe8f2", mu:"w1_rustig", t:"TOK. Ik zei het toch. Nog een keer? Ik heb alle tijd, ik ben lucht."}
+      {s:"nimbus", kleur:"#dfe8f2", mu:"w1_rustig", t:"Zo. Dat was eerlijk en dat was van mij."}
     ],
     deckJij:{steen:40},
     deckVij:{steen:40},
+    levensVij:4,
     /* Nimbus begint niet met een steen op het veld — je ziet hem hem neerleggen. */
     opening:{p:1, el:"steen", col:2},
     gevechtNa:{ja:"a", nee2:"b"},
@@ -11574,45 +11696,66 @@ const STORY = {
           zegKleur:"#dfe8f2",
           zeg:{ beurt:[
               "Veertig stenen. Geen uitvluchten. Eindelijk.",
-              "Zie je? Dit is spelen. De rest is decoratie.",
+              "Zie je dit? Dit is spelen. De rest is decoratie.",
               "Goeie. Die had ik niet zien aankomen.",
-              "Ik heb hier lang op gewacht, weet je dat.",
-              "Iedereen bouwt decks. Bijna niemand speelt.",
-              "Hou dit vol. Ik meen het.",
-              "Dat was scherp. Vervelend scherp."
+              "Iedereen bouwt. Bijna niemand speelt.",
+              "Dat was scherp. Vervelend scherp.",
+              "Hou dit vol. Ik meen het."
             ],
             popup:[
-        "Weet je hoeveel wolken ik ben tegengekomen die dachten dat ze bijzonder waren? Allemaal. Elke wolk.",
-        "Ik hoor nergens bij. Dat betekent ook dat er nergens iemand op mij wacht. Dat vertel ik er meestal niet bij.",
-        "Dit gaat gelijk op. Dat heb ik nog nooit gehad en ik weet niet goed wat ik ermee moet."
-      ],
-      laag:["Hm. Jij bent beter dan de vorige tien. Dat is niet niks."],
-            jij:["Niet opgeven nu. Dan was dit voor niks."] } },
+              "Weet je hoeveel wolken ik ben tegengekomen die dachten dat ze bijzonder waren? Allemaal. Elke wolk.",
+              "Ik hoor nergens bij. Dat betekent ook dat er nergens iemand op me wacht. Dat vertel ik er meestal niet bij.",
+              "Dit gaat gelijk op. Dat heb ik nog nooit gehad en ik weet niet zo goed wat ik ermee moet."
+            ],
+            laag:["Hm. Jij bent beter dan de vorige tien. Dat is niet niks."],
+            jij:["Niet opgeven nu. Dan was dit voor niks."] },
+          win:[
+            {s:"nimbus_stuk", kleur:"#dfe8f2", mu:"w1_rustig", t:"…Hm."},
+            {s:"nimbus_stuk", naam:"…", kleur:"#dfe8f2", t:"Zijn kroontje glijdt af en valt in het stof. Hij kijkt ernaar en laat het liggen."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Goed. Je kunt spelen. Dat geef ik toe, en ik geef nooit iets toe."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Weet je wat het is. Ik hoor nergens bij, en daar heb ik een kroontje van gemaakt."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Jij bent van alle vier. Dat is niet hetzelfde. Dat is het tegenovergestelde."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"…Laat maar."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Nog iets. Ik ben één keer hoog gegaan. Echt hoog, boven alles."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Daar is iets."},
+            {s:"nimbus_stuk", kleur:"#dfe8f2", t:"Ik ga er niet meer heen. Ga door, ik zweef nog wel een keer langs."}
+          ],
+          verlies:[
+            {s:"nimbus", kleur:"#dfe8f2", mu:"w1_rustig", t:"Zo. Dat was eerlijk en dat was van mij."},
+            {s:"nimbus", kleur:"#dfe8f2", t:"Nog een keer? Ik heb alle tijd. Ik ben lucht."}
+          ] },
       b:{ deckJij:{steen:10, vuur:10, gras:10, water:10}, deckVij:{steen:40}, ban:10,
           zegSpr:"nimbus_kip", zegKleur:"#dfe8f2",
           zeg:{ altijd:true,
             beurt:[
               "TOK. TOK TOK TOK.",
               "Kijk hem gaan met zijn vier kleurtjes.",
-              "Watje.",
               "Ik speel met één element en jij hebt er vier nodig. Denk daar 's over na.",
-              "Pussy.",
-              "…Dat was trouwens wel een nette zet. Ik zeg het maar even.",
               "Nee joh, speel die maar. Speel maar alles. Ik wacht wel.",
-              "Bang jongetje met een regenboogdeck.",
-              "Weet je wat jij bent? Bang. Dát ben je.",
               "Mijn oma speelt beter en die is een bui.",
-              "TOK!",
-              "Even serieus: dit had je gewoon eerlijk kunnen doen. Was leuker geweest.",
-              "Zou je zonder je trucjes ook maar iets waard zijn? Nee dus.",
-              "Bibberbeen.",
-              "Straks ga je verliezen mét voordeel. Bedenk hoe dat voelt.",
+              "Straks ga je verliezen mét voordeel. Bedenk even hoe dat voelt.",
               "Ik ben een wolk. Ik heb geen element. En ik lig voor.",
-              "Pussy. Sorry hoor, maar het is zo.",
-              "Ik zeg niets meer. …Grapje. Watje."
+              "…Dat was trouwens een nette zet. Ik zeg het maar even. TOK."
             ],
-            laag:["Oké. Oké! Rustig. Ik zat wat te dollen. Dat weet je toch."],
-            jij:["TOK TOK TOK! Daar gaan we! Dag kip!"] } }
+            popup:[
+              "Dit had gewoon leuk kunnen zijn.",
+              "Ik hang hier al drie dagen en dit is wat ik ervoor terugkrijg.",
+              "Weet je wat er in de andere rijken gebeurt? Ik wel. Maar nee hoor, vraag het vooral niet."
+            ],
+            laag:["Oké. Oké! Rustig. Ik zat wat te dollen, dat weet je toch."],
+            jij:["TOK TOK TOK! Daar gaan we! Dag kip!"] },
+          win:[
+            {s:"nimbus", kleur:"#dfe8f2", mu:"w1_rustig", t:"Ja. Nou. Met tien van alles erbij."},
+            {s:"nimbus_boos", kleur:"#dfe8f2", t:"Dat is geen winnen, dat is boodschappen doen."},
+            {s:"nimbus", kleur:"#dfe8f2", t:"Ga maar door. Doe vooral je ding."},
+            {s:"nimbus", kleur:"#dfe8f2", t:"…"},
+            {s:"nimbus_kip", kleur:"#dfe8f2", t:"TOK."},
+            {s:"nimbus", naam:"…", kleur:"#dfe8f2", t:"Hij zegt het zachter dan de vorige keren."}
+          ],
+          verlies:[
+            {s:"nimbus_kip", kleur:"#dfe8f2", mu:"w1_rustig", t:"TOK! Ik zei het toch."},
+            {s:"nimbus_kip", kleur:"#dfe8f2", t:"Nog een keer? Ik heb alle tijd, ik ben lucht."}
+          ] }
     },
     begint:1
   },
@@ -11621,37 +11764,61 @@ const STORY = {
     hzruim:true,
     sprite:"rock1b", muziek:"w1_gevecht",
     intro:[
-      {s:null, naam:"…", bg:0, kleur:"#6f83a6", mu:"w1_terugkeer", t:"Zwart. Ergens in het donker klinken voetstappen. Stap. Stap."},
+      {s:null, naam:"…", bg:0, kleur:"#6f83a6", mu:"w1_terugkeer", t:"Zwart. Voetstappen. Stap. Stap."},
       {s:"rock1b", sil:0, loop:true, naam:"???", kleur:"#6f83a6", bg:0, t:"MUHAHAHAHA…"},
       {s:"rock1b", sil:0, loop:true, naam:"…", bg:0, t:"Een pikzwart silhouet schuift langzaam door het beeld. Het lacht nog een keer, iets langer dan nodig."},
-      {s:"rock1b", sil:0, loop:true, naam:"???", kleur:"#b09a72", bg:0, t:"Dus je dacht zo snel van mij af te zijn?"},
-      {s:"rock1b_boos", naam:"Rocky", bg:1, mu:"w1_gespannen", t:"MUHAHA! Je dácht mij verslagen te hebben! Maar je hebt me alleen maar wákker gemaakt!"},
+      {s:"rock1b", sil:0, loop:true, naam:"???", kleur:"#b09a72", bg:0, t:"Dus je dacht zo makkelijk van mij af te zijn?"},
+      {s:"rock1b_boos", naam:"Rocky", bg:1, mu:"w1_gespannen", t:"MUHAHA! Je dácht mij verslagen te hebben. Maar je hebt me alleen maar wákker gemaakt!"},
       {s:"rock1b", naam:"…", t:"Je zegt niets."},
       {s:"rock1b", naam:"Rocky", t:"…"},
       {s:"rock1b", naam:"Rocky", t:"Komt het door de cape?"},
-      {s:"rock1b", naam:"Rocky", t:"Ik was al bang dat hij over de top was. Mijn broer zei het ook al."},
+      {s:"rock1b", naam:"Rocky", t:"Ik was al bang dat hij te veel was."},
       {s:"rock1b", naam:"…", t:"Je zegt nog steeds niets."},
       {s:"rock1b", naam:"Rocky", t:"…Vind je hem wél mooi?"},
-      {s:"rock1b", naam:"Rocky", t:"Oh. Oh, bedankt. Dat betekent echt heel veel voor—"},
-      {s:"rock1b_boos", naam:"Rocky", t:"…Hé. Wacht eens even."},
-      {s:"rock1b_boos", naam:"Rocky", t:"Ik wil jouw medelijden niet!"},
-      {s:"rock1b_boos", naam:"Rocky", t:"Ik ga je vernietigen. Dit is voor mijn grote broer."},
+      {s:"rock1b", naam:"Rocky", t:"Oh. Oh, dat is echt heel—"},
+      {s:"rock1b_boos", naam:"Rocky", t:"…Hé."},
+      {s:"rock1b_boos", naam:"Rocky", t:"Hé, wacht even. Ik wil jouw medelijden niet."},
+      {s:"rock1b", naam:"Rocky", t:"Dit is voor mijn grote broer."},
+      {s:"rock1b", naam:"Rocky", t:"Hij weet er niks van, maar dat maakt het juist mooi."},
+      {s:"rock1b", naam:"Rocky", t:"Straks kom ik bij hem en dan zeg ik: broer. Het is geregeld."},
+      {s:"rock1b", naam:"Rocky", t:"En dan zegt hij: wat is geregeld."},
+      {s:"rock1b", naam:"Rocky", t:"En dan zeg ik niks. Ik zeg dan gewoon niks."},
       {s:"rock1b_boos", naam:"Rocky", bg:1, t:"EN GARDE!"}
     ],
-
     win:[
-      {s:"rock1b_stuk", naam:"Rocky", mu:"w1_rustig", t:"Twee keer. …Ligt het aan de cape?"},
-      {s:"rock1b_stuk", naam:"Rocky", t:"Hier. Pak aan. 🟣 <b>Bergrug</b> — geef er één, krijg er twee."},
-      {s:"rock1b_stuk", naam:"Rocky", t:"Ik heb er toch niks aan. Ik verlies er alleen langzamer mee."},
+      {s:"rock1b_stuk", naam:"Rocky", mu:"w1_rustig", t:"Twee keer."},
+      {s:"rock1b_stuk", naam:"Rocky", t:"…Ligt het aan de cape?"},
+      {s:"rock1b_stuk", naam:"Rocky", t:"Pak die Bergrug maar mee. Ik heb er toch niks aan. Ik verlies er alleen langzamer mee."},
+      {s:"rock1b", naam:"Rocky", t:"…Ga je nou echt naar binnen?"},
+      {s:"rock1b", naam:"Rocky", t:"Want daar is hij. De baas."},
+      {s:"rock1b", naam:"Rocky", t:"Ik heb hem twee keer gezien. De eerste keer viel ik om."},
+      {s:"rock1b", naam:"Rocky", t:"Ik hou de cape trouwens aan. Los van dit alles staat hij me gewoon goed."}
+    ],
+    verlies:[
+      {s:"rock1b_boos", naam:"Rocky", mu:"w1_rustig", t:"HA! MUHAHA—"},
+      {s:"rock1b", naam:"Rocky", t:"…"},
+      {s:"rock1b", naam:"Rocky", t:"Ik dacht dat dit beter zou voelen."},
+      {s:"rock1b", naam:"Rocky", t:"Kom nog maar een keer. Ik trek hem wel weer aan."}
     ],
     na:[
-      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", mu:"w1_steenbaas", t:"Baas… ik moet u iets vertellen. Die elementaal. Hij is langs mij heen gekomen. En langs Brokko."},
-      {s:"rotsbaas", naam:"…", t:"Uit het donker rijst iets op dat tot aan het plafond doorloopt. Twee gloeiende ogen draaien traag omlaag."},
-      {s:"rotsbaas", naam:"Magnus", t:"WAT?! …Dat gaat consequenties hebben. Voor jou, bedoel ik."},
-      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"…Laat de elementaal maar komen."}
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", mu:"w1_steenbaas", t:"Baas. Baas, ik moet u iets vertellen."},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"Die elementaal. Hij is langs mij heen gekomen. Twee keer. En langs Brokko."},
+      {s:"rotsbaas", naam:"…", bg:0, t:"Uit het donker rijst iets op dat tot aan het plafond doorloopt. Twee gloeiende ogen draaien traag omlaag."},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Zeg dat nog eens."},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"Hij is langs—"},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Niet dát. Het woord."},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"…Elementaal?"},
+      {s:"rotsbaas", reus:true, naam:"…", bg:0, t:"Het is even heel stil."},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Dat heeft niemand hier ooit hardop gezegd."},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Ga weg, Rocky. Ga naar je broer."},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"Krijg ik geen—"},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Ga naar je broer."},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"…"},
+      {s:"rotsbaas", reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Laat hem maar komen."}
     ],
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:7, steen:3, vuur:5, gras:5, water:4},   /* hier komt de Rots voor het eerst */
+    levensVij:4,
     /* De eerste keer dat hij er eentje neerlegt, staat het potje even stil: hij zegt er iets
        over en daarna krijg je in één schermpje te lezen wat een sterke variant is. Eén keer
        per gevecht, en alleen bij hem — dit is de introductie van het hele idee. */
@@ -11665,15 +11832,17 @@ const STORY = {
         "De cape doet niks. Dat weet ik ook wel. Maar hij hángt lekker.",
         "Ik heb getraind. In mijn hoofd. Dat telt ook.",
         "Alles wat jij kapotmaakt komt terug. Ik ben het bewijs.",
-        "MUHAHAHA! …Sorry. Dat hoort erbij."
+        "MUHAHAHA! …Sorry. Dat hoort erbij.",
+        "Kees vindt hem trouwens prachtig. Kees heeft smaak."
       ],
       popup:[
         "Drie weken heb ik hierover nagedacht. Dat is lang, voor iemand van steen.",
-        "Als ik nu weer verlies, ga ik gewoon ergens anders staan. Er zijn genoeg paden.",
-        "Weet je wat het ergste is? Ik vind je best aardig."
+        "Als ik nu weer verlies ga ik gewoon ergens anders staan. Er zijn genoeg paden.",
+        "Weet je wat het ergste is? Ik vind je best aardig.",
+        "Je bent trouwens nooit teruggekomen om te vertellen hoe het afliep."
       ],
       laag:["Niet weer. Niet wéér. Ik kan dit niet nog een keer uitleggen."],
-      jij:["Ja! JA! Zo voelde het dus de vorige keer!"] },
+      jij:["JA! Zo voelde het dus de vorige keer!"] },
     aeVij:["fu_stone"],
     bord:[{p:1, c:2, spell:"steen"}],
     geeft:"fu_stone",
@@ -11684,183 +11853,365 @@ const STORY = {
     hzruim:true,
     intro:[
       {s:null, naam:"…", bg:1, mu:"kaart", t:"Het pad loopt dood op een muur van rots. Dan schuift de muur opzij. Hij wás de deur."},
-      {s:"rock1c", naam:"Rocky", mu:"w1_rustig", t:"Psst. Hé. Elementaal. Ik heb niks gezegd, hè."},
-      {s:"rock1c", naam:"Rocky", t:"Maar… veel succes daarbinnen. En eh. Sorry van dat 'zachtei'."},
+      {s:"rock1c", naam:"Rocky", mu:"w1_rustig", t:"Psst. Hé."},
+      {s:"rock1c", naam:"Rocky", t:"Ik heb niks gezegd, hè."},
+      {s:"rock1c", naam:"Rocky", t:"En eh. Sorry van dat zachtei."},
       {s:"rocky", groot:true, naam:"Brokko", t:"Wat mijn broertje bedoelt: hij is groot."},
-      {s:"rocky_boos", groot:true, naam:"Brokko", t:"Écht groot."},
+      {s:"rocky_boos", groot:true, naam:"Brokko", t:"Echt groot."},
       {s:"rocky_boos", groot:true, naam:"Brokko", t:"ÉCHT GROOT."},
+      {s:"rocky", groot:true, naam:"Brokko", t:"En hij is raar sinds vanochtend. Hij staat stil. Hij staat nooit stil."},
       {s:null, naam:"…", bg:0, mu:"w1_steenbaas", t:"Je stapt de zaal in. Het licht valt weg alsof iemand er een deksel op zet."},
       {s:"rotsbaas", sil:0, naam:"???", bg:0, kleur:"#6f83a6", t:"…"},
       {s:"rotsbaas", sil:0.3, naam:"???", bg:0, kleur:"#8b96a0", t:"Magnus hoorde je aankomen. Drie keer."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Je hebt zijn wachters verslagen. Alle drie. Dat vindt Magnus knap, en dat meent hij."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"En nu ga je hem vertellen dat de elementen samen horen."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Magnus heeft dat verhaal eerder gehoord. Van iemand die veel ouder is dan jij."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Zijn wachters zijn allemaal verslagen. Dat vindt Magnus knap, en dat meent hij."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Ga staan waar Magnus je zien kan."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"…"},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Ah."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Magnus heeft jou al eens ontmoet. Niet jou. Iemand die er zo uitzag."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Tweehonderd jaar geleden. Magnus was jong en hij deed wat hem gezegd werd, en dat was genoeg om het te overleven."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Er staat hier niemand meer die erbij was. Magnus is de laatste. En Magnus heeft nooit gedacht dat hij dit gezicht nog een keer zou zien."},
+      {s:"rotsbaas_licht", reus:true, naam:"…", bg:1, kleur:"#ff5a3c", t:"Hij komt niet dichterbij."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"En nu ga je Magnus vertellen dat de elementen samen horen."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Magnus heeft dat verhaal eerder gehoord. Van iemand die veel ouder was dan jij. Het klonk toen ook goed."},
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Er zijn vier rijken. Niet omdat wij elkaar haten."},
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Omdat het ons zo verteld is."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", ogen:"seraf_ogen", t:"Door wie? — Er valt gruis uit het plafond. Hij kijkt omhoog. Hij zwijgt lang genoeg dat jij ook omhoog kijkt."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Door wie?"},
+      {s:"rotsbaas_licht", reus:true, naam:"…", bg:1, kleur:"#ff5a3c", ogen:"seraf_ogen", t:"Er valt gruis uit het plafond. Hij kijkt omhoog. Hij zwijgt lang genoeg dat jij ook omhoog kijkt."},
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Vraag dat hier niet."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Draai om. Ga naar huis. Wees een verhaal dat ze elkaar 's avonds vertellen."},
-      {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"…Nee? — Hij komt overeind. De zaal wordt kleiner."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Draai om. Ga terug. Wees een verhaal dat ze elkaar 's avonds vertellen."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Magnus vraagt het je. Dat doet Magnus nooit."},
+      {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"…Nee?"},
       {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Dan doet Magnus het zoals steen het doet."},
-      {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Hij houdt zich niet in. Dat is het enige respect dat hij je geven kan."},
+      {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Hij houdt zich niet in. Dat is het enige respect dat hij je nog geven kan."},
       {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Deze zaal is van Magnus. Het plafond niet."},
-      {s:null, naam:"…", bg:1, kleur:"#e6c88a", t:"🪨 <b>Rotsval.</b> Aan het begin van elke beurt komt er aan <b>allebei</b> de kanten een ✕ boven een willekeurige plek. Staat er aan het eind van die beurt nog iets, dan komt het plafond eroverheen. 🪨 Steen overleeft het."},
+      {s:null, naam:"…", bg:1, kleur:"#e6c88a", t:"🪨 <b>Rotsval.</b> Aan het begin van elke beurt komt er aan <b>allebei</b> de kanten een ✕ boven een willekeurige plek. Staat er aan het eind van die beurt nog iets, dan komt het plafond eroverheen. 🪨 Steen overleeft het."}
     ],
     midden:[
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Wow. It's getting hot in here."},
-      {s:"fireguy", naam:"…", kleur:"#ff8a4a", t:"Hij staat gewoon in de zaal van de baas. Alsof dat kan. Niemand weet hoe hij binnen is gekomen; de deur is een muur."},
+      {s:"fireguy", naam:"…", kleur:"#ff8a4a", t:"Hij staat gewoon in de zaal van de baas. Niemand weet hoe hij binnen is gekomen; de deur is een muur."},
       {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Zonder wat firepower ga je dit niet redden, kid. Hier — 🟣 Verzengende Woede. Je vuur doet nu 5 schade in plaats van 2."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"En baas, met alle respect: dit is er eentje van ons nu."},
+      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"En baas, with all due respect: deze is er eentje van ons nu."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Van jullie."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Magnus weet waar jij je woorden vandaan hebt. En je kaarten."},
+      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Ouwe, je krijgt de groeten. See ya."},
       {s:"rotsbaas_woede", reus:true, naam:"Magnus", kleur:"#ff5a3c", mu:"w1_baasgevecht", t:"Voel je dat? Dit is nog niet eens de helft."},
       {s:"rotsbaas_woede", reus:true, naam:"…", kleur:"#ff5a3c", t:"Hij zet één voet naar voren. Het hele veld kantelt mee. Er valt gruis op je kaarten."},
       {s:null, naam:"…", t:"Achter je gaat de deur open. Twee stenen silhouetten blijven in de opening staan, precies ver genoeg om te kunnen zeggen dat ze er niet waren."},
-      {s:"rock1c", naam:"Rocky", t:"HOU VOL! Hij doet dat altijd! Dat voetending! Dat is bluf!"},
-      {s:"rocky_boos", groot:true, naam:"Brokko", t:"Het is geen bluf. — Maar hij is wél te verslaan. Want jij hebt míj verslagen, en ik ben sterker dan hij."},
+      {s:"rock1c", naam:"Rocky", t:"HOU VOL! Hij doet dat altijd! Dat voetding! Dat is bluf!"},
+      {s:"rocky_boos", groot:true, naam:"Brokko", t:"Het is geen bluf."},
+      {s:"rocky", groot:true, naam:"Brokko", t:"Maar hij is wél te verslaan. Want jij hebt míj verslagen, en ik ben sterker dan hij."},
       {s:"rock1c", naam:"Rocky", t:"Dat is niet waar en dat weet je."},
-      {s:"rotsbaas_licht", reus:true, naam:"…", kleur:"#ff5a3c", t:"Hij kijkt langs je heen naar de deur. Er verschuift iets in zijn gezicht, en het is geen woede."},
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Blijf staan, elementaal. Ik wil zien of je meent wat je zegt."}
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Blijf staan, alle twee. Magnus wil dat jullie dit zien."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Het is de enige keer dat jullie het te zien krijgen."}
     ],
     middenAe:"ae_fire6", middenNa:2,
     win:[
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", mu:"w1_steenbaas", t:"…Ah."},
       {s:"rotsbaas_barst", reus:true, naam:"…", t:"Een scheur loopt dwars over hem heen, van zijn hoorn tot de vloer. Hij kijkt ernaar alsof hij hem van iemand geleend heeft."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Je bent niet harder dan Magnus. Je bent zachter."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"…Ik. Ik ben tweehonderd jaar bang geweest."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Je bent niet harder dan Magnus."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Je bent zachter."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"…"},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Ik."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Ik ben tweehonderd jaar bang geweest."},
       {s:"rotsbaas_barst", reus:true, naam:"…", t:"Het is de eerste keer dat hij <b>ik</b> zegt."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Sta op. Kom hier. — Hij legt een hand zo groot als een tafelblad op je schouder. Er valt gruis in je haar."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", paars:true, t:"Neem 🟣 <b>Oerkracht</b> mee. Kies één element en alles daarvan komt dikker op tafel. Zo bouwen wij."},
-      {s:"rotsbaas_barst", reus:true, naam:"…", t:"Hij geeft hem gewoon. Geen voorwaarden, geen tegenprestatie. Voor zover iemand weet is dat de eerste keer dat steen iets weggeeft."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"En je stenen. Laat zien. — Hij pakt er drie uit je hand alsof het kiezels zijn, sluit zijn vuist, en geeft ze terug. Ze zijn zwaarder."},
-      {s:"rotsbaas_barst", reus:true, naam:"…", wit:true, t:"⛰️ <b>Drie van je 🪨 Stenen zijn vanaf nu Rots.</b> Elke Rots zet bij het spelen eerst een kiezel neer, en doet daarna gewoon het Steen-effect."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Sta op. Kom hier."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"En je stenen. Laat zien."},
+      {s:"rotsbaas_barst", reus:true, naam:"…", t:"Hij pakt er drie uit je hand alsof het kiezels zijn, sluit zijn vuist, en geeft ze terug. Ze zijn zwaarder."},
+      {s:"rotsbaas_barst", reus:true, naam:"…", wit:true, t:"⛰️ <b>Drie van je 🪨 Stenen zijn vanaf nu Rots.</b> Elke Rots zet bij het spelen eerst een kiezel neer, en doet daarna gewoon het Steen-effect."}
     ],
     verlies:[
-      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Sta op. Nog een keer. Magnus heeft geen haast — hij is van steen."}
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Sta op. Nog een keer."},
+      {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Magnus heeft geen haast. Magnus is van steen."}
     ],
     na:[
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Vier rijken. Ik hield het mijne dicht omdat ik dacht dat dat veilig was. En kijk waar het me bracht: bang voor een kind met kaarten."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Vier rijken. Ik hield het mijne dicht omdat ik dacht dat dat veilig was."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"En kijk waar het me bracht. Bang voor een kind dat niet eens weet wat het is."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Je weet het niet, hè."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"…Nee. Dat dacht ik al."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Dan zeg ik het ook niet. Ik ben te oud om dat op iemand te leggen."},
       {s:"rotsbaas_barst", reus:true, naam:"Magnus", bg:1, kleur:"#cfa06a", t:"Ga naar het Rankenwoud. Dat is de volgende. Groen, warm, alles ruikt er naar regen. Je zult je er meteen welkom voelen."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", bg:1, kleur:"#cfa06a", t:"En dáár moet je op letten. Steen weigert te bewegen — dat zie je van ver aankomen. Ranken bewegen wél. Ze bewegen naar je toe, ze doen aardig, en dan sta je stil zonder dat je gemerkt hebt wanneer."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Nog iets. Sinds kort kruipen die ranken over mijn buitenmuren. Zo ver zijn ze nooit gekomen. Iets daar groeit harder dan het hoort."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", bg:1, kleur:"#cfa06a", t:"En dáár moet je op letten. Steen weigert te bewegen, dat zie je van ver aankomen. Ranken bewegen wél. Ze bewegen naar je toe, ze doen aardig, en dan sta je stil zonder dat je gemerkt hebt wanneer."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Nog iets. Sinds kort kruipen die ranken over mijn buitenmuren. Zo ver zijn ze nooit gekomen."},
+      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Iets daar groeit harder dan het hoort."},
       {s:"rock1c", naam:"Rocky", t:"Baas! Baas, hij heeft mij ook verslagen, dus eigenlijk is dit heel normaal—"},
       {s:"rocky_stuk", groot:true, naam:"Brokko", bg:1, t:"Rustig. Laat de baas even zitten."},
       {s:null, naam:"…", t:"Ergens tussen twee tegels duwt zich iets omhoog dat daar niet hoort."},
-      {s:"spruit", naam:"…", bg:2, kleur:"#7fd18c", t:"Een groen sprietje breekt door de steen. Het buigt naar de deur toe. Alsof het wijst."},
-      {s:"spruit", naam:"…", bg:2, kleur:"#7fd18c", t:"Ver weg, aan de rand van al dat bruin, begint iets te ruisen. Het houdt niet meer op."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", bg:1, kleur:"#cfa06a", t:"Wacht. Nog één ding."},
-      {s:"rotsbaas_barst", reus:true, naam:"…", t:"Hij breekt een stuk uit zijn eigen borst. Het klopt. Het is warm. Hij houdt het naar je uit alsof het niks is."},
-      {s:null, naam:"…", bg:1, kleur:"#d5503c", t:"❤️ Je hart is groter dan het was."},
-      {s:"rotsbaas_barst", reus:true, naam:"Magnus", t:"Steen heeft er genoeg. Ga nou maar, voor ik erover ga nadenken."},
+      {s:"spruit", naam:"…", bg:2, kleur:"#7fd18c", t:"Een groen sprietje breekt door de steen. Het buigt naar de deur toe. Alsof het wijst."}
     ],
     zegSpr:"rotsbaas_licht", tauntSpr:"rotsbaas_taunt", zegKleur:"#ff5a3c",
     zeg:{ beurt:[
-        "Magnus heeft tijd. Dat is alles wat hij heeft.",
-        "Je speelt alsof iemand naar je kijkt.",
+        "Magnus heeft tijd. Dat is alles wat Magnus heeft.",
+        "Je speelt alsof er iemand naar je kijkt.",
         "Magnus heeft dit duizend keer gedaan. Hij weet nog elke keer.",
-        "Dat was goed. Ik zeg dat niet vaak.",
+        "Dat was goed. Magnus zegt dat niet vaak.",
         "Steen wacht. Steen wint meestal door te wachten.",
         "Steen onthoudt alles. Daarom is steen zo zwaar.",
         "Je mag nog weg. Straks niet meer.",
-        "Er is niets persoonlijks aan. Dat is het ergste eraan."
+        "Magnus heeft hier niks persoonlijks tegen jou. Dat maakt het niet beter."
       ],
       popup:[
-        "Er is mij ooit verteld hoe het hier hoort. Ik heb niet gevraagd door wie. Dat vroeg je niet, toen.",
-        "Ik heb dit rijk tweehonderd jaar dichtgehouden. Er is nog nooit iemand blij van geworden, ikzelf ook niet.",
+        "Er is Magnus ooit verteld hoe het hier hoort. Hij heeft niet gevraagd door wie. Dat vroeg je niet, toen.",
+        "Magnus houdt dit rijk tweehonderd jaar dicht. Er is nog nooit iemand blij van geworden. Magnus ook niet.",
+        "De laatste die eruitzag zoals jij heeft Magnus zien vallen. Magnus stond erbij.",
         "Je gaat dit niet winnen met kracht. Dat weet je zelf ook, anders was je hier niet."
       ],
-      laag:["…Hm. Dat had ik niet verwacht. Goed. Dan doen we het echt."],
+      laag:["…Hm. Dat had Magnus niet verwacht. Goed. Dan doen we het echt."],
       jij:["Ga zitten, elementaal. Je hoeft dit niet uit te vechten."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:6, steen:3, vuur:5, gras:5, water:5},
     aeVij:["ae_stonefull","fu_stone","ae_hp3"], keuzeVij:"steen",
     rotsval:true,
-    levensVij:10,
+    levensVij:8,
     bord:[{p:1, c:2, spell:"steen"}],
     geeft:["ae_hp3","ae_fire6"], geeftUpg:"steen",
     ban:10, begint:1
   },
   /* ---------- Wereld 2 · Rankenwoud ---------- */
   "2-1":{
-    wereld:2, naam:"De afgezant", vijand:"Seraf", muziek:"w2_gevecht", sprite:"engel",
+    wereld:2, naam:"De afgezant", vijand:"Seraf", muziek:"w2_tellen", sprite:"engel",
     hzruim:true,
     intro:[
-      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Het woud is warm en groen en het ruikt naar regen, precies zoals hij zei. Je hoort stemmen. Dus blijf je achter een varen staan."},
-      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"—maar ik heb ze níks verteld! Echt niet! Ik hou me aan de afspraak. Net als altijd."},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Dat weet ik. Als jij iets verteld had, stond ik hier niet met je te práten."},
+      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Het woud is warm en het ruikt naar regen. Na het Steenrijk voelt dat als binnenkomen."},
+      {s:null, bg:2, naam:"…", t:"Je hoort stemmen. Dus blijf je achter een varen staan."},
+      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"—maar ik heb níks gezegd. Echt niet. Tegen niemand."},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Dat weet ik. Anders stond ik hier niet met je te praten."},
       {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"…"},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Het gaat om de steen. Hij heeft gepraat. Niet veel. Genoeg."},
-      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Magnus? Die zégt nooit wat. Wat heeft hij dan—"},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Hij heeft gezegd dat het jullie is vertéld. Meer niet. Maar dat is precies het ene zinnetje waarvan wij liever hebben dat niemand het hardop zegt."},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Vier rijken. Vier bazen. Vier afspraken. Zolang niemand die vier naast elkaar legt, is er niets aan de hand."},
-      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"En… en die elementaal dan? Die loopt ze wél alle vier af."},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Ja."},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"En hij groeit. Hij begon met vier elementen. Nu draagt hij ook de fusie van de steen. Die is niet gestolen, Loof. Die is hem gegéven, door de baas zelf."},
-      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Is dat erg dan?"},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"Geven is precies wat wij tegenhouden. Als steen aan gras kan geven, en gras aan vuur, dan is er geen bóven meer. Dan is er alleen nog naast elkaar."},
-      {s:"engel", naam:"???", kleur:"#f6f7fb", t:"De Hemelraad kijkt mee. Ze willen dat het opgelost is vóór hij hier klaar is."},
-      {s:"engel", bg:2, naam:"…", kleur:"#f6f7fb", wit:true, glitch:true, mu:"w2_seraf", t:"Hij zwijgt. Achter je knapt een takje. Jij hebt niet bewogen."},
-      {s:"engel_wijd", groot:true, bg:2, naam:"…", kleur:"#ffe08a", t:"Hij draait zich niet om. Hij vouwt alleen zijn vleugels open — heel langzaam, alsof hij er de tijd voor heeft en jij niet."},
-      {s:"engel_wijd", groot:true, bg:2, naam:"Seraf", kleur:"#ffe08a", t:"Elementaal. Kom maar tevoorschijn. Het is onbeleefd om je te verstoppen op een plek waar je al gezien bent."},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Het gaat om de steen."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Magnus? Die zegt nooit wat."},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Hij heeft één zin gezegd. Meer niet."},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Dat is ook genoeg."},
+      {s:null, bg:2, naam:"…", t:"Stilte. Je hoort iemand ademen en je weet niet wie van de twee."},
+      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"En… is dat erg dan?"},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Voor jou niet."},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Ga maar bladeren harken, Loof."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ja. Ja. Doe ik."},
+      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"…Zeg. Als ze vragen of ik—"},
+      {s:"engel_rug", sil:0.4, naam:"???", kleur:"#f6f7fb", t:"Ze vragen niks."},
+      {s:null, bg:2, naam:"…", mu:"w2_seraf", t:"Achter je knapt een takje. Jij hebt niet bewogen."},
+      {s:"engel_rug", bg:2, naam:"???", kleur:"#f6f7fb", t:"Kom maar tevoorschijn."},
+      {s:"engel_rug", bg:2, naam:"???", kleur:"#f6f7fb", t:"Het is onbeleefd om je te verstoppen waar je al gezien bent."},
+      {s:"engel", bg:2, naam:"…", kleur:"#f6f7fb", t:"Seraf draait zich om. Het duurt langer dan omdraaien hoort te duren."},
       {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"O nee. O nee o nee. Ik ga. Ik heb niks gezien. Ik ben een struik."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik ben Seraf. Afgezant van de Hemelraad. Geen baas, geen goon. Ik ben degene die langskomt als er iets rechtgezet moet worden."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Je hebt iets gehoord dat niet voor jou bestemd was. Dat geeft niet. Iets terugnemen is makkelijker dan iets niet zeggen."},
-      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Ik speel niet met elementen. Ik speel met ✦ licht. Laten we eens kijken hoe ver die steen van jou je brengt."}
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik ben Seraf. Ik kom kijken."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Niet bang zijn."},
+      {s:"engel", naam:"…", kleur:"#f6f7fb", t:"Even niks. Alsof Seraf controleert of je het doet."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Goed."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", wit:true, t:"Zes tellen. Dan ben ik klaar."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Wat jij in die tijd doet, is aan jou."},
+      {s:null, bg:2, naam:"…", kleur:"#f6f7fb", t:"✦ <b>Zes rondes.</b> Seraf komt niet om te winnen. Je hoeft het alleen uit te houden."}
     ],
     midden:[
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Je vecht goed. Dat is jammer. Het was makkelijker geweest als je slecht was."},
-      {s:"engel_wijd", naam:"…", kleur:"#ffe08a", t:"Hij glimlacht niet en hij fronst niet. Hij doet zijn werk."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Drie."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Je vecht alsof je het al eens gedaan hebt."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik doe hier niets bijzonders, hoor. Ik kijk gewoon."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dat voelt erger dan het is."}
     ],
     middenNa:3,
     win:[
-      {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Zijn halo valt uit elkaar. De stukken blijven nog even hangen voordat ze het gras in vallen."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"…Netjes."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Je denkt nu dat je iets gewonnen hebt. Wat je gewonnen hebt is een naam op een lijst. Die stond er trouwens al op."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Ga gerust verder. Het woud is vriendelijk. Dat is het probleem met het woud."},
-      {s:null, naam:"…", kleur:"#f6f7fb", t:"Uit de scherven van zijn halo valt één kaart in het gras. Wit. Zwaarder dan hij eruitziet."},
-      {s:null, naam:"…", kleur:"#f6f7fb", t:"✦ <b>Wolkenzwerm.</b> Je hebt hem opgeraapt voor je erover nagedacht hebt."},
-      {s:null, naam:"…", kleur:"#f6f7fb", t:"Vanaf nu kies je vóór elk gevecht ook een <b>✦ lichtkaart</b>. Er gaan er telkens drie mee je deck in."},
-      {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Hij zegt er niets van. Dat is het eerste wat hij vandaag níet doet."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Zes."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dank je."},
+      {s:"engel", naam:"…", kleur:"#f6f7fb", t:"Er wordt iets van een mouw geklopt dat er niet zit."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Verderop splitst het pad. Links hangt een web. Rechts loopt het gewoon door."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik zou rechts nemen."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Maar ik ben ook niet zoals jij."},
+      {s:null, bg:2, naam:"…", t:"Seraf loopt het pad af waar jij vandaan komt. Niet één keer omkijken."}
     ],
     verlies:[
-      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Zo. Dat is dan rechtgezet. — Er gebeurt niets ergs. Hij kijkt je alleen aan tot je wegkijkt."}
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ah."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Sta maar op. Ik ben nog niet klaar."}
     ],
     na:[
-      {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"…Is hij weg? Hij is weg. Hij is echt weg."},
-      {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Hoor eens. Ik heb hier niks mee te maken. Ik hark bladeren. Dat is alles wat ik doe."},
-      {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Maar als je toch verder gaat: wees voorzichtig met hoe aardig iedereen hier is. Wij zijn heel aardig. Wij zijn zo aardig dat je vergeet weg te gaan."},
-      {s:"rank1", naam:"…", kleur:"#7fd18c", t:"Hij kijkt naar de scherfjes halo in het gras. Er groeit al een rank omheen."},
+      {s:"rank1_bang", naam:"…", bg:2, kleur:"#7fd18c", t:"Achter de varen komt iets omhoog dat tot je knie komt."},
+      {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Is het weg? Het is weg."},
+      {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Ik hark bladeren. Dat is alles. Dat is echt alles wat ik doe."},
+      {s:"rank1", naam:"…", kleur:"#7fd18c", t:"Hij kijkt naar het pad waar Seraf net liep."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"En dat daar. Dat komt hier nooit. Al jaren niet."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"En dan sta ik vanochtend bladeren te harken en dan staat het er gewoon."},
+      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Het vroeg niks. Het ging gewoon staan. Het wist al hoe laat je zou komen."},
+      {s:"rank1", naam:"…", kleur:"#7fd18c", t:"Hij zegt het alsof dat het vreemde is."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Nou. Succes verderop. En als je het weer tegenkomt: ik heb niks gezegd."},
+      {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ik zeg nooit wat."},
+      {s:null, bg:2, naam:"…", t:"De weg splitst zich. Links het web, rechts het pad."}
     ],
     zegSpr:"engel", tauntSpr:"engel_taunt", zegKleur:"#f6f7fb",
+    /* Seraf telt. In elke eigen beurt zegt Seraf het nummer van de ronde; pas als dat op is
+       komt er een gewone zin. */
+    tellen:["Eén.", "Twee.", "Drie.", "Vier.", "Vijf."],
     zeg:{ beurt:[
-        "Ga gerust door. Ik noteer alles.",
-        "Vier elementen en een fusie. Dat is precies te veel.",
-        "Ik hoef geen hekel aan je te hebben om dit te doen.",
-        "Dat was knap. Ik zeg dat omdat het waar is, niet om aardig te zijn.",
-        "Weet je wat het licht doet? Het laat dingen zien zoals ze zijn.",
-        "Loof staat achter die varen nog steeds te kijken. Hij denkt dat wij dat niet doorhebben.",
-        "Er is één ding waar de Hemelraad niet tegen kan, en dat is iets wat ze niet zelf verzonnen hebben."
+        "Ga door. Ik onderbreek je niet.",
+        "Dat was netjes.",
+        "Dat had ik niet verwacht. Ik noteer het.",
+        "Blijf vooral gaan. Ik tel de tijd, niet jij.",
+        "Zo doen ze dat hier niet. Maar goed, jij bent niet van hier.",
+        "Ik hoef dit niet te winnen. Dat scheelt enorm.",
+        "Je hebt haast. Ik zie het aan alles."
       ],
-      sterf:"STERF.", sterfKans:0.18,
-      laag:["Interessant. Daar had de Hemelraad geen rekening mee gehouden."],
       popup:[
-        "Ik heb geen hekel aan je. Ik heb een opdracht. Dat is rustiger werken.",
-        "Elke kaart die ik speel geeft mij een leven en een kaart terug. Dat is geen truc, dat is boekhouding.",
-        "Vier elementen, een fusie, en nu ook een hart dat je gekrégen hebt. Je verzamelt.",
-        "Loof staat nog te kijken. Hij denkt dat wij het niet merken.",
-        "Dit duurt precies zo lang als het moet duren."
+        "Dit doet minder pijn dan je denkt. Dat is niet bedoeld als troost.",
+        "Ik heb geen hekel aan je. Ik heb een opdracht. Dat werkt rustiger.",
+        "Loof staat nog steeds achter die varen. Hij denkt van niet.",
+        "Weet je hoeveel mensen dit woud in lopen? Twee per jaar. Allebei per ongeluk.",
+        "Ik ben hier eerder geweest. Dit is de derde keer in tweehonderd jaar.",
+        "Je hoeft niet zo je best te doen. Je hoeft alleen te blijven staan.",
+        "Ik zeg niet veel. Dat is niet omdat ik niks weet."
       ],
-      jij:["Zo. Bijna klaar. Het doet niet echt pijn, straks."] },
+      bijna:["Bijna.", "Nog eentje. Hou vol, je bent er bijna."],
+      laag:["Bijna.", "Nog eentje. Hou vol, je bent er bijna."],
+      jij:["Rustig. Dit was niet de bedoeling.", "Ho. Ga even zitten. Ik wacht wel."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:6, vuur:6, gras:6, water:6, kuriboh:3, reborn:3},
     ltVij:["kuriboh","reborn"],
     aeVij:["ae_hemel"],
     glitch:true,
-    levensVij:6,
-    geeftLicht:["reborn","kuriboh","doortast"], geeftLichtSlot:4,
+    levensVij:8,
+    overleef:6,
+    geeftLicht:["reborn","kuriboh","doortast"], geeftLichtSlot:3,
     handVij:["kuriboh"],
     opening:{p:1, lk:"kuriboh"},
     ban:10, begint:1
   },
-  "2-2":{
+  "2-2a":{
+    wereld:2, tak:true, naam:"Het pad", vijand:"De Struik", sprite:"struik", zegKleur:"#7fd18c", muziek:"w2_struik",
+    hzruim:true,
+    intro:[
+      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Je neemt het pad. Natuurlijk neem je het pad."},
+      {s:null, bg:2, naam:"…", t:"Het wordt smaller. De bomen staan dichter op elkaar en ze staan allemaal een beetje naar je toe gebogen, alsof ze meeluisteren."},
+      {s:null, bg:2, naam:"…", t:"Je verwacht elk moment iemand. Een wachter, een goon, wéér iemand met een mening."},
+      {s:null, bg:2, naam:"…", t:"Er komt niemand."},
+      {s:null, bg:2, naam:"…", t:"Na een uur hoor je dingen die er niet zijn. Na twee uur weet je niet meer zeker of ze er niet zijn."},
+      {s:null, bg:2, naam:"…", t:"Dan houdt het pad op. Er staat iets middenop."},
+      {s:"struik", bg:2, t:"…"},
+      {s:"struik", bg:2, naam:"…", t:"<i>(Struiks voor: het is een struik.)</i>"},
+      {s:"struik", bg:2, naam:"…", t:"Je loopt eromheen. Daar loopt het pad dood."},
+      {s:"struik", bg:2, naam:"…", t:"Je loopt terug. De struik staat er nog."},
+      {s:"struik", bg:2, t:"…"},
+      {s:"struik", bg:2, naam:"…", t:"Dus je vecht tegen een struik."}
+    ],
+    /* Wie er praat als een regel zelf geen naam meedraagt. */
+    midden:[
+      {s:"struik", naam:"De Struik", kleur:"#7fd18c", t:"…!"},
+      {s:"struik", naam:"…", kleur:"#7fd18c", t:"<i>(Struiks voor: ik ben sip. Of beeld je je dat in?)</i>"}
+    ],
+    middenNa:1,
+    win:[
+      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zakt door zijn twee benen. Het zwaard sist uit en laat een geur van onweer achter."},
+      {s:"struik", naam:"…", kleur:"#7fd18c", t:"Hij is weer een struik."},
+      {s:"struik", naam:"De Struik", kleur:"#7fd18c", t:"…"},
+      {s:"struik", naam:"…", kleur:"#7fd18c", t:"Het pad achter hem ligt open."}
+    ],
+    verlies:[
+      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Het zwaard gaat omhoog, en dan omlaag, en dan is het klaar."},
+      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zegt er niks bij. Hij heeft geen mond."}
+    ],
+    zegSpr:"struik", tauntSpr:"struik",
+    /* Een struik zegt niets. Ook geen grapje over dat hij niets zegt. Niets. */
+    zeg:{ beurt:["…", "…!", "…?", "……"], popup:[], laag:["…!"], jij:["…"] },
+    /* Fase 1: een volkomen normale struik. Eén leven, geen deck, geen krachten. */
+    deckJij:{steen:6, vuur:6, gras:6, water:6},
+    deckVij:{gras:20},
+    levensVij:1, stil:true,
+    bord:[],
+    fase2:{
+      vijand:"De Struikrover", sprite:"struikrover", tauntSpr:"struik_taunt", levens:6,
+      praat:[
+        {s:"struik", naam:"…", kleur:"#7fd18c", mu:"w2_struik", t:"De struik valt om. Dat is dat, denk je."},
+        {s:"struik_trans1", naam:"…", kleur:"#7fd18c", t:"De struik valt niet om."},
+        {s:"struik_benen", naam:"…", kleur:"#7fd18c", t:"Onder de bladeren komen twee benen tevoorschijn. Menselijke benen. In laarzen. Ze gaan staan, en de struik staat mee op."},
+        {s:"struik_trans2", groot:true, naam:"…", kleur:"#7fd18c", t:"Er is geen hoofd. Er is geen gezicht. Er is alleen struik, en daaronder iemand die duidelijk weet hoe je staat."},
+        {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij grijpt in zichzelf en trekt er iets uit. Het is blauw. Het is licht. Het is drie keer zo lang als hij."},
+        {s:"struikrover", groot:true, naam:"De Struikrover", kleur:"#57d7ff", t:"…"},
+        {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"<i>(Struiks voor: dit is volkomen normaal.)</i>"},
+        {s:"struikrover_slag", groot:true, naam:"…", kleur:"#57d7ff", zwaard:true, schade:2,
+         slag:["struikrover","struikrover_slag"],
+         t:"Het zwaard gaat in één haal door de lucht. Je hoort het pas nadat het al gebeurd is. — <b>2 levens.</b>"},
+        {s:null, naam:"…", kleur:"#57d7ff", t:"🗡 <b>Hij legt drie dingen voor zich neer.</b> Het zijn spells, en ze gaan af zoals spells afgaan: zodra hij er iets bovenop zet. Niet eerder. Ze liggen dus te wachten tot hij ze nodig heeft."},
+        {s:null, naam:"…", kleur:"#57d7ff", t:"<b>Swipe</b> raakt alles wat jij hebt staan, en wordt elke keer dat hij afgaat één harder. <b>Stab</b> doet 10 aan wat er recht tegenover ligt, en 1 aan jou. <b>Schild</b> geeft alles van hem +1 en zet een schildje op elke lege plek."}
+      ],
+      deck:{vuur:5, gras:5, steen:5, water:8, roos:4, siphon:4},
+      lt:["siphon"],
+      ae:["ae_grassx2","fu_grass"], aeUitleg:true,
+      hand:5, struikSpells:true,
+      bord:[{p:1, c:1, spell:"swipe"},{p:1, c:2, spell:"stab"},{p:1, c:3, spell:"schild"}],
+      /* Ook met een zwaard in zijn handen blijft hij een struik: hij zegt niets. */
+      zeg:{ beurt:["…", "……", "…!", "…?"], popup:[], laag:["…"], jij:["…!"] }
+    },
+    geeft:"ae_grassx2",
+    ban:10, begint:1
+  },
+  "2-2b":{
+    wereld:2, tak:true, naam:"Het web", vijand:"Kaelid", sprite:"shelob", zegSpr:"shelob", tauntSpr:"shelob_taunt", zegKleur:"#c9b6ff", muziek:"w2_web",
+    hzruim:true,
+    intro:[
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", mu:"w2_web", t:"Je gaat links."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Het web kleeft niet. Het gaat open zoals een deur opengaat: omdat iemand dat wil."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Daarachter is het donker en droog en warm. Overal om je heen hangen bleke bolletjes aan draden."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Sommige bewegen."},
+      {s:"kaelid_ogen", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Boven je gaat iets open. Dan nog iets. Dan acht dingen tegelijk, en ze kijken allemaal precies naar jou."},
+      {s:"kaelid_ogen", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Er gebeurt heel lang niks."},
+      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"…Je bent er nog."},
+      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Ze zegt het alsof ze een gesprek voortzet."},
+      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Dat dacht ik niet."},
+      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Dat dacht niemand."},
+      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Ze komt niet dichterbij. Ze gaat verder met wat ze deed, en wat ze deed is niet te zien."},
+      {s:"shelob_boos", reus:true, bg:2, kleur:"#c9b6ff", t:"Blijf staan waar je stond."},
+      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Je bent niet verplaatst."},
+      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Ik weet nog hoe dat ging."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"🥚 <b>Eieren.</b> Er hangt er al één, midden voor je neus. Aan het begin van élke beurt van haar legt Kaelid er een bij: 4 levens, valt niet aan. Na <b>twee beurten</b> van haar komt er een uit — en dan staat er een spin van <b>7 om 7</b>."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"✦ <b>Web.</b> Haar lichtkaart: ze betaalt 2 levens, trekt een kaart, en al jouw creatures zitten een beurt lang vast. Ze heeft er één in haar hand — en de éérste keer dat je uithaalt, gooit ze hem."},
+      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", paars:true, t:"Om haar heen groeit alles dubbel en grijpt alles vast. 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"En zij begint."}
+    ],
+    midden:[
+      {s:"shelob", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Je doet het anders dan de vorige."},
+      {s:"shelob", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Niet beter."}
+    ],
+    middenNa:3,
+    win:[
+      {s:"shelob_stuk", reus:true, naam:"…", kleur:"#c9b6ff", t:"Ze zakt door haar poten. Een voor een, alsof ze ze stuk voor stuk beslist."},
+      {s:"shelob_stuk", reus:true, naam:"…", kleur:"#c9b6ff", t:"De ogen gaan dicht. Niet allemaal. Twee blijven open."},
+      {s:"shelob_stuk", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"…Hm."},
+      {s:"shelob_stuk", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Je bent niet zoals ik dacht."},
+      {s:"shelob_stuk", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Dat is erger."},
+      {s:"shelob_stuk", reus:true, naam:"…", kleur:"#c9b6ff", t:"Ze zegt verder niks meer, en ze gaat ook niet dood."}
+    ],
+    verlies:[
+      {s:"shelob", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Zo."},
+      {s:"shelob", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Ingepakt. Netjes."},
+      {s:"shelob", reus:true, naam:"Kaelid", kleur:"#c9b6ff", t:"Ik laat je hangen tot je stil bent. En dan nog even."}
+    ],
+    na:[
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Het web gaat achter je dicht."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Je hoort haar niet meer, en dat is de eerste keer sinds je binnenkwam dat je niet acht ogen in je rug voelt."},
+      {s:null, bg:2, naam:"…", t:"Je komt weer uit op het gewone pad, verderop, alsof je nooit weg bent geweest. Ergens achter je staat een struik die je niet gezien hebt."}
+    ],
+    zeg:{ beurt:[
+        "Ik ruik er vier. Dat hoort al heel lang niet meer.",
+        "Sta stil.",
+        "Zo deed hij het ook.",
+        "Nee. Niet met die hand.",
+        "Je bent kleiner dan toen.",
+        "Ik heb hier geen zin in. Ik doe het toch.",
+        "Dat werkte de vorige keer ook niet."
+      ],
+      popup:[
+        "De bomen hier zijn jonger dan ik. Alles hier is jonger dan ik.",
+        "Ze hebben mij nooit iets gevraagd. Ik zat te hoog.",
+        "Ik ben niet bang voor je. Ik ben je aan het opruimen.",
+        "Ik heb hier lang geleden een avond over nagedacht. Nu niet meer."
+      ],
+      laag:["…Nee. Nee. Dit is precies zo begonnen."],
+      jij:["Sst. Niet spartelen. Dat maakt de draad alleen strakker."] },
+    deckJij:{steen:6, vuur:6, gras:6, water:6},
+    levensVij:10, eieren:true,
+    /* Er hangt er al een als je binnenkomt. Precies in het midden, op ooghoogte. */
+    bord:[{p:1, c:2, el:"ei", hp:4}],
+    deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:5},
+    ltVij:["web"], handVij:["web"],
+    aeVij:["ae_grassx2","fu_grass"],
+    geeft:"ae_grassx2", geeftLicht:"web",
+    ban:10, begint:1
+  },
+  "2-3":{
     wereld:2, naam:"Het wiegelied", vijand:"De Waardin", sprite:"waardin", zegKleur:"#a8c46b", muziek:"w2_wiegelied",
     hzruim:true,
     intro:[
@@ -11870,96 +12221,103 @@ const STORY = {
       {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Ik ben de Waardin. Je loopt al zo lang. Dat zie ik aan je schoenen."},
       {s:null, bg:2, naam:"…", t:"Aan de rand van de open plek liggen heuveltjes mos. Je telt er negen. Ze hebben allemaal ongeveer de vorm van iemand."},
       {s:null, bg:2, naam:"…", t:"Eentje ademt."},
-      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Thee? Hij is net gezet. En ik weet dingen die jij niet weet — dat hoor ik aan hoe je vraagt zonder iets te vragen."},
-      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Ga zitten, dan vertel ik. Of niet. Ik dwing niemand.",
-        keuze:[{label:"☕ Ja, graag", ga:"zit"}, {label:"🚶 Nee. Ik moet door", ga:"geenthee"}]}
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", als:"2-2b", t:"En je ruikt naar dat web. Nou. Dat is dan ook weer gebeurd."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", als:"2-2a", alsNiet:"2-2b", t:"En er zit een blad in je haar. Van die struik zeker. Laat maar zitten."},
+      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Thee?"},
+      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Ga zitten, dan vertel ik wat. Of niet. Ik dwing niemand.",
+        keuze:[{label:"☕ Ja, graag", ga:"zit"}, {label:"🚶 Nee, ik moet door", ga:"geenthee"}]}
     ],
     geenthee:[
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"…O. Nou. Dat is jammer. Voor jou, bedoel ik."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Dan doen we het staand. Ik heb alle tijd van de wereld en jij hebt er steeds minder."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"…O. Nou. Dat is jammer."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Voor jou, bedoel ik."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Dan doen we het staand."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"💤 <b>Het wiegelied.</b> Elke beurt waarin je <b>niets raakt</b> zak je dieper weg, en wordt zij er een leven beter van. Neem je écht leven af — van haar of van een creature — dan schud je jezelf wakker."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een 🌿 telt niet mee. Ze moet het <b>voelen</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Zak je drie keer weg, dan blijf je hier. Net als de anderen."},
-      {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niets weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
+      {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niks weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
     ],
     zit:[
-      {s:null, bg:2, naam:"…", t:"Je gaat zitten. De stoel is precies goed. Dat is het eerste wat je opvalt, en het had het laatste moeten zijn."},
+      {s:null, bg:2, naam:"…", t:"Je gaat zitten. De stoel is precies goed."},
       {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Kijk. Je bent door het Steenrijk gekomen, dus je hebt de Lijn gezien. Die streep waar het bruin ophoudt en het groen begint."},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Er zijn er vier. Ze zijn er tweehonderd jaar. Wij noemen dat de Rust. Zo heet het echt — iemand heeft dat ooit opgeschreven en het is blijven hangen."},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Iedereen blijft thuis. Steen bij steen, gras bij gras. Ik vind dat mooi. Ik hou van thuis. Ik heb er een herberg van gemaakt."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Vóór de Rust liep er iets rond dat overal thuis was. Dat is het verschil. Dat is het hele verschil."},
-      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Hier. Hij is nog warm. — Ze schuift de kop naar je toe. Het ruikt naar iets dat je vroeger gedronken hebt.",
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Er zijn er vier. Ze zijn er tweehonderd jaar. Wij noemen dat de Rust."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Iemand heeft dat ooit opgeschreven en het is blijven hangen."},
+      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Hier. Hij is nog warm."},
+      {s:"waardin_thee", groot:true, bg:2, naam:"…", kleur:"#a8c46b", t:"Ze schuift de kop naar je toe. Het ruikt naar iets dat je vroeger gedronken hebt.",
         keuze:[{label:"☕ Drinken", ga:"thee2", tel:"thee"}, {label:"✋ Laten staan", ga:"thee2"}]}
     ],
     thee2:[
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Je wilt weten hoe het vroeger was. Dat wil iedereen, en niemand vraagt het, want wie het weet praat er niet over."},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Op eentje na. Dieper het woud in, voorbij het pad — waar het web hangt. Daar zit Shelob."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Ze is ouder dan de Rust. Ze is ouder dan het woud. Ze heeft het allemaal gezien en ze is er niet vrolijker van geworden."},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Als je het echt wilt weten, moet je naar haar toe. Ze houdt niet van bezoek. Ze houdt niet van jou, en ze heeft je nog nooit gezien."},
-      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Nog een kop? Je hoeft niet. Je ziet er alleen zo uit alsof je moet.",
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Vroeger kwamen hier mensen langs die je nu nergens meer ziet."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Er zat er een aan die tafel daar, elke herfst, met natte voeten. Van het water. Dat mocht toen nog."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Hij zei altijd dat hij van een schema was. Dat hij niet zelf besliste wanneer hij kwam."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Ik heb nooit gevraagd van wie dat schema was. Ik was jong en ik vond het interessanter dat hij natte voeten had."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Op een gegeven moment kwam hij niet meer. Dat was de eerste herfst van de Rust."},
+      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"Nog een? Je hoeft niet. Je ziet er alleen zo uit alsof je moet.",
         keuze:[{label:"☕ Drinken", ga:"thee3", tel:"thee"}, {label:"✋ Laten staan", ga:"thee3"}]}
     ],
     thee3:[
       {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Die negen daar. Die had ik je nog niet verteld."},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Die kwamen allemaal ergens heen. Eentje wilde de bazen spreken. Over harmonie, geloof ik. Over sámen."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Hij is nu heel rustig. Kijk maar. Fijn voor hem, toch?"},
-      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Ik heb ze niet vastgehouden, hoor. Ik heb alleen nooit gezegd dat ze weg mochten. Dat is iets anders. Dat is echt iets anders."},
-      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"De laatste. Daarna vertel ik niets meer, want dan weet je alles wat ik weet.",
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Die kwamen allemaal ergens heen."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Eentje wilde de bazen spreken. Over harmonie, geloof ik. Over sámen."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Hij is nu heel rustig. Kijk maar."},
+      {s:"waardin_thee", groot:true, bg:2, naam:"…", kleur:"#a8c46b", t:"Ze schenkt nog een keer in zonder dat iemand daarom gevraagd heeft."},
+      {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Ik heb ze niet vastgehouden, hoor."},
+      {s:"waardin_thee", groot:true, bg:2, kleur:"#a8c46b", t:"De laatste. Daarna vertel ik niks meer, want dan weet je alles wat ik weet.",
         keuze:[{label:"☕ Drinken", ga:"regels", tel:"thee"}, {label:"✋ Laten staan", ga:"regels"}]}
     ],
     regels:[
       {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Zo. En nu ga je toch, hè. Dat zie ik. Ze gaan altijd toch."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Blijf dan tenminste nog even. Heel even maar. Ik heb alle tijd van de wereld en jij hebt er steeds minder."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Blijf dan tenminste nog even. Heel even maar."},
+      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Ik heb alle tijd van de wereld en jij hebt er steeds minder."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"💤 <b>Het wiegelied.</b> Elke beurt waarin je <b>niets raakt</b> zak je dieper weg, en wordt zij er een leven beter van. Neem je écht leven af — van haar of van een creature — dan schud je jezelf wakker."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een 🌿 telt niet mee. Ze moet het <b>voelen</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Zak je drie keer weg, dan blijf je hier. Net als de anderen. <b>Elke kop thee die je dronk telt al mee.</b>"},
-      {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niets weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
+      {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niks weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
     ],
     inslaap:[
       {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"…Kijk. Je ogen doen het al bijna niet meer."},
       {s:null, bg:2, naam:"…", t:"De kop is leeg. De stoel is precies goed. Je hoort de muziek nog, en dan hoor je hem niet meer, en dat is prima."},
-      {s:null, bg:2, naam:"…", t:"Aan de rand van de open plek liggen heuveltjes mos. Je telt er tien."},
-      {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Sst. Zo. Er is niets meer om naartoe te gaan. Slaap maar lekker."}
+      {s:null, bg:2, naam:"…", t:"Aan de rand van de open plek liggen heuveltjes mos. Je telt er tien."}
     ],
     gevechtNa:{geenthee:"basis", regels:"basis"},
     doodBij:{teller:"thee", n:3, fase:"inslaap"},
     terugNa:{inslaap:true},
     theeTeller:"thee",
     midden:[
-      {s:"waardin_zacht", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"Ze neuriet. Je kent het wijsje niet en toch weet je hoe het verdergaat."}
+      {s:"waardin_zacht", groot:true, naam:"…", kleur:"#a8c46b", t:"Ze neuriet. Je kent het wijsje niet en toch weet je hoe het verdergaat."}
     ],
     middenNa:2,
     win:[
-      {s:"waardin_stuk", groot:true, naam:"…", kleur:"#a8c46b", t:"Ze zakt in elkaar als een kussen waar iemand van opstaat."},
-      {s:"waardin_stuk", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"…Je bent wakker gebleven. Dat is niemand ooit gelukt."},
-      {s:null, naam:"…", kleur:"#a8c46b", t:"Achter je komen de mosheuveltjes omhoog. Negen mensen rekken zich uit alsof ze vergeten waren hoe dat moest."},
-      {s:"waardin", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"Neem dit mee. Het is het enige wat ik heb dat niet over blijven gaat."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Levensroof.</b> Kies een creature: die raakt al zijn levens kwijt, en jij krijgt daar <b>de helft</b> van — ook boven je startlevens uit."},
-      {s:"waardin", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"Ik heb tweehonderd jaar lang genomen wat mensen toch niet meer gebruikten. Zachtjes. Met een glimlach erbij. Nu kun jij het ook, één kaart lang."},
-      {s:"waardin_stuk", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"En elementaal — als je naar haar toe gaat: zeg niet dat je bij mij thee hebt gedronken. Of wel. Dat maakt haar niet uit. Er is niets dat haar uitmaakt."}
+      {s:"waardin_stuk", groot:true, kleur:"#a8c46b", t:"…Je bent wakker gebleven."},
+      {s:"waardin_stuk", groot:true, kleur:"#a8c46b", t:"Dat is niemand ooit gelukt."},
+      {s:null, naam:"…", kleur:"#a8c46b", t:"Achter je komen de mosheuveltjes overeind. Negen mensen rekken zich uit alsof ze vergeten waren hoe dat moest."},
+      {s:"waardin", groot:true, kleur:"#a8c46b", t:"Nou. Daar gaan ze."},
+      {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Ik hoop dat het buiten meevalt."}
     ],
     verlies:[
-      {s:"waardin_zacht", groot:true, naam:"De Waardin", kleur:"#a8c46b", t:"Sst. Zo. Er is niets meer om naartoe te gaan. Slaap maar lekker."}
+      {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Sst. Zo."},
+      {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Er is niks meer om naartoe te gaan. Slaap maar lekker."}
     ],
     na:[
       {s:null, bg:2, naam:"…", t:"Je loopt de open plek uit. Achter je hoor je negen mensen tegelijk vragen hoe laat het is."},
-      {s:null, bg:2, naam:"…", t:"Verderop houdt de muziek op. Je hoort alleen nog je eigen voetstappen, en na twee dagen voelt dat als stilte."},
+      {s:null, bg:2, naam:"…", t:"Verderop houdt de muziek op. Je hoort alleen nog je eigen voetstappen, en na twee dagen voelt dat als stilte."}
     ],
     zegSpr:"waardin_zacht", tauntSpr:"waardin_taunt",
     zeg:{ beurt:[
-        "Ga toch zitten. Je hoeft echt niets te doen.",
+        "Ga toch zitten. Je hoeft echt niks te doen.",
         "Hoor je dat? Nee? Precies. Zo stil is het hier.",
         "Je bent moe. Dat is niet erg. Iedereen is moe.",
         "Er wacht daarbuiten niemand op je, lieverd.",
         "Wat je ook zoekt, hier is het ook. Alleen makkelijker.",
         "Sla gerust. Ik neem het je niet kwalijk.",
-        "Nog even. Nog heel even maar."
+        "Nog even. Nog heel even maar.",
+        "Je knippert langzamer dan een uur geleden. Dat valt mij op, dat is mijn vak."
       ],
       popup:[
-        "Weet je wat er gebeurt als je hier gewoon blijft zitten? Niets. Nooit meer iets. Dat is het aanbod.",
-        "De negen daar hebben ook allemaal precies één ding nog te doen gehad.",
-        "Ik ben niet je vijand, elementaal. Ik ben de reden dat je niet verder wilt.",
-        "Je hebt nu al drie keer gedacht: nog één beurt en dan stop ik."
+        "Weet je wat er gebeurt als je hier gewoon blijft zitten? Niks. Nooit meer iets.",
+        "De negen daar hadden ook allemaal nog precies één ding te doen.",
+        "Ik ben niet je vijand. Ik ben de reden dat je niet verder wilt.",
+        "Je hebt nu al drie keer gedacht: nog één beurt en dan stop ik.",
+        "Dat kereltje met die harkjes staat buiten te wachten tot je klaar bent. Loof. Die durft niet naar binnen."
       ],
       laag:["…O. Je meent het écht. Wat vervelend."],
       jij:["Sst. Bijna. Kijk, je ogen doen het al bijna niet meer."] },
@@ -11975,185 +12333,26 @@ const STORY = {
     geeftLicht:"siphon",
     ban:10, begint:1
   },
-  "2-3":{
-    wereld:2, naam:"De kruising", vijand:"Struik", sprite:"struik", zegKleur:"#7fd18c", muziek:"w2_struik",
-    hzruim:true,
-    intro:[
-      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Je loopt dieper het woud in. Achter je houdt de muziek van de herberg op, en je merkt pas hoe hard hij stond toen hij weg is."},
-      {s:null, bg:2, naam:"…", t:"Het pad wordt smaller. De bomen staan dichter op elkaar en ze staan allemaal een beetje naar je toe gebogen, alsof ze meeluisteren."},
-      {s:null, bg:2, naam:"…", t:"Je verwacht elk moment iemand — een wachter, een goon, wéér iemand met een mening. Er komt niemand. Dat is erger."},
-      {s:null, bg:2, naam:"…", t:"Na een uur begin je dingen te horen die er niet zijn. Na twee uur weet je niet meer zeker of ze er niet zijn."},
-      {s:null, bg:2, naam:"…", t:"Dan splitst het pad."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Links hangt een web. Niet een web — hét web. Het loopt van boom tot boom en verder omhoog dan je kunt zien, en het beweegt zonder wind."},
-      {s:null, bg:2, naam:"…", t:"Rechts loopt het pad gewoon door: groen, zacht, een pad zoals een pad hoort te zijn. Er is niets aan te zien."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"De Waardin zei: daar zit iemand die het nog weet. Ze zei ook: ze houdt niet van bezoek.",
-        keuze:[{label:"🕸 Naar het web", ga:"web"}, {label:"🌿 Het veilige pad", ga:"veilig"}]}
-    ],
-    veilig:[
-      {s:null, bg:2, naam:"…", t:"Je neemt het pad. Natuurlijk neem je het pad. Het is het enige verstandige, en je voelt je er meteen dommer door."},
-      {s:null, bg:2, naam:"…", t:"Het woud is hier oud. Ouder dan de Rust, ouder dan de Lijnen. De bomen hebben alles gezien en er niets van geleerd, want bomen leren niet — ze onthouden alleen."},
-      {s:null, bg:2, naam:"…", t:"Er hangt een stilte die niet leeg is. Het is de stilte van iets dat gestopt is met praten omdat jij binnenkwam."},
-      {s:null, bg:2, naam:"…", t:"Dan houdt het pad op. Er staat iets middenop."},
-      {s:"struik", bg:2, naam:"Struik", t:"Het is een struik."},
-      {s:"struik", bg:2, naam:"Struik", t:"…"},
-      {s:"struik", bg:2, naam:"Struik", t:"Een volkomen normale struik."},
-      {s:"struik", bg:2, naam:"Struik", t:"…"},
-      {s:"struik", bg:2, naam:"Struik", t:"Je loopt eromheen. Daar loopt het pad dood. Je loopt terug. De struik staat er nog."},
-      {s:"struik", bg:2, naam:"Struik", t:"…"},
-      {s:"struik", bg:2, naam:"Struik", t:"Hij verspert de weg. Dus. Je vecht dan maar tegen een struik."}
-    ],
-    web:[
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", mu:"w2_web", t:"Je gaat links. Het web kleeft niet. Het gaat open zoals een deur opengaat: omdat iemand dat wil."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Daarachter is het donker en droog en warm, en overal om je heen hangen bleke bolletjes aan draden. Sommige bewegen."},
-      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", t:"Boven je gaat iets open. Dan nog iets. Dan acht dingen tegelijk, en ze kijken allemaal precies naar jou."},
-      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"…Nee."},
-      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Nee, nee, nee. Dat is het niet. Dat kán het niet zijn. Die zijn óp."},
-      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Ik heb ze zien branden. Ik heb er zelf een gegeten en hij smaakte naar alles tegelijk en ik ben er drie jaar ziek van geweest."},
-      {s:"shelob_boos", reus:true, bg:2, kleur:"#c9b6ff", t:"En nu loop jij mijn web in met dat geurtje van vier kanten, en je kijkt me aan alsof je hier kómt vragen om iets."},
-      {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Wat je ook wilt weten: nee. Wat ze je ook verteld hebben: ze weten het niet. Ik weet het. En ik zeg het niet tegen jóu."},
-      {s:"shelob_boos", reus:true, bg:2, kleur:"#c9b6ff", t:"Ik ga je inpakken, elementaal. Netjes. Zoals vroeger. En dan hang je hier tot je kalm bent."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"🥚 <b>Eieren.</b> Er hangt er al één, midden voor je neus. Aan het begin van élke beurt van haar legt Shelob er een bij: 4 levens, valt niet aan. Na <b>twee beurten</b> van haar komt er een uit — en dan staat er een spin van <b>7 om 7</b>."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"✦ <b>Web.</b> Haar lichtkaart: ze betaalt 2 levens, trekt een kaart, en al jouw creatures zitten een beurt lang vast. Ze heeft er één in haar hand — en de éérste keer dat je uithaalt, gooit ze hem."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"En zij begint."},
-      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", paars:true, t:"Om haar heen groeit alles dubbel en grijpt alles vast. 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>. Ze heeft ze niet gekregen. Ze was er eerder dan de mensen die ze uitdelen."}
-    ],
-    gevechtNa:{veilig:"struik", web:"shelob"},
-    /* Wie er praat als een regel zelf geen naam meedraagt — per tak van het praatje. */
-    faseNaam:{web:"Shelob", veilig:"…"},
-    win:[
-      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zakt door zijn twee benen. Het zwaard sist uit en laat een geur van onweer achter."},
-      {s:"struik", naam:"…", kleur:"#7fd18c", t:"Hij is weer een struik. Er ligt alleen één rank naast hem die niet meer bij hem hoort."},
-      {s:null, naam:"…", kleur:"#7fd18c", paars:true, t:"🟣 <b>Woekergroei.</b> Je 🌿 Gras verstrikt vanaf nu met twee tokens in plaats van één."},
-      {s:"struik", naam:"Struik", kleur:"#7fd18c", t:"…"},
-      {s:"struik", naam:"Struik", kleur:"#7fd18c", t:"Het pad achter hem ligt open."}
-    ],
-    verlies:[
-      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Het zwaard gaat omhoog, en dan omlaag, en dan is het klaar. Hij zegt er niets bij. Hij heeft geen mond."}
-    ],
-    zegSpr:"struik", tauntSpr:"struik",
-    /* Een struik zegt niets. Ook geen grapje over dat hij niets zegt. Niets. */
-    zeg:{ beurt:["…"], popup:[], laag:["…"], jij:["…"] },
-    /* Fase 1: een volkomen normale struik. Eén leven, geen deck, geen krachten. */
-    deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{gras:20},
-    levensVij:1, stil:true,
-    bord:[],
-    fase2:{
-      vijand:"Struikrover", sprite:"struikrover", tauntSpr:"struik_taunt", levens:6,
-      praat:[
-        {s:"struik", naam:"Struik", kleur:"#7fd18c", mu:"w2_struik", t:"De struik valt om. Dat is dat, denk je."},
-        {s:"struik_trans1", naam:"Struik", kleur:"#7fd18c", t:"De struik valt niet om."},
-        {s:"struik_benen", naam:"???", kleur:"#7fd18c", t:"Onder de bladeren komen twee benen tevoorschijn. Menselijke benen. In laarzen. Ze staan op, en de struik staat mee op."},
-        {s:"struik_trans2", groot:true, naam:"???", kleur:"#7fd18c", t:"Er is geen hoofd. Er is geen gezicht. Er is alleen struik, en daaronder iemand die duidelijk weet hoe je staat."},
-        {s:"struikrover", groot:true, naam:"???", kleur:"#57d7ff", t:"Hij grijpt in zichzelf en trekt er iets uit. Het is blauw. Het is licht. Het is drie keer zo lang als hij."},
-        {s:"struikrover", groot:true, naam:"Struikrover", kleur:"#57d7ff", t:"…"},
-        {s:"struikrover_slag", groot:true, naam:"…", kleur:"#57d7ff", zwaard:true, schade:2,
-         slag:["struikrover","struikrover_slag"],
-         t:"Het zwaard gaat in één haal door de lucht. Je hoort het pas nadat het al gebeurd is. — <b>2 levens.</b>"},
-        {s:null, naam:"…", kleur:"#57d7ff", t:"🗡 Hij legt drie dingen voor zich neer. Het zijn spells, en ze gaan af zoals spells afgaan: <b>zodra hij er iets bovenop zet</b>. Niet eerder. Ze liggen dus te wachten tot hij ze nodig heeft."},
-        {s:null, naam:"…", kleur:"#57d7ff", t:"<b>Swipe</b> raakt alles wat jij hebt staan, en wordt elke keer dat hij afgaat één harder. <b>Stab</b> doet 10 aan wat er recht tegenover ligt, en 1 aan jou. <b>Schild</b> geeft alles van hem +1 en zet een schildje op elke lege plek."}
-      ],
-      deck:{vuur:5, gras:5, steen:5, water:8, roos:4, siphon:4},
-      lt:["siphon"],
-      ae:["ae_grassx2","fu_grass"], aeUitleg:true,
-      hand:5, struikSpells:true,
-      bord:[{p:1, c:1, spell:"swipe"},{p:1, c:2, spell:"stab"},{p:1, c:3, spell:"schild"}],
-      /* Ook met een zwaard in zijn handen blijft hij een struik: hij zegt niets. */
-      zeg:{ beurt:["…"], popup:[], laag:["…"], jij:["…"] }
-    },
-    geeft:"ae_grassx2",
-    /* 🟣 Flint trekt hier de tweede lade open: vanaf 2-4 speel je met twee aethers. */
-    geeftAeSlot:2,
-    na:[
-      {s:null, bg:2, naam:"…", t:"Het pad loopt weer door. Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee. Je doet dat ding waarbij je niks zegt en dan gewoon wint. Prima werk."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Verderop in dit woud staat niet nog zoiets. Daar staat het woud zélf. Alles wat groen is, tegelijk, in één klap."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En daarvóór wacht er nog iemand met een halo op je. Die telt niet eens mee, en die ga je ook niet leuk vinden."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Dat is groot geschut, kleine. Daar ga je niet met één trucje langs."},
-      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee. Ik ben het vuur, ik krijg nergens last mee."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het alleen interessanter voor mezelf. Dat is iets anders."}
-    ],
-    varianten:{
-      struik:{},
-      shelob:{
-        vijand:"Shelob", sprite:"shelob", zegSpr:"shelob", tauntSpr:"shelob_taunt", zegKleur:"#c9b6ff", muziek:"w2_web",
-        levensVij:10, stil:false, fase2:null, eieren:true, begint:1,
-        /* Er hangt er al een als je binnenkomt. Precies in het midden, op ooghoogte. */
-        bord:[{p:1, c:2, el:"ei", hp:4}],
-        deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:5},
-        ltVij:["web"], handVij:["web"],
-        aeVij:["ae_grassx2","fu_grass"],
-        geeftExtra:{licht:"web"},
-        zeg:{ beurt:[
-            "Vier geurtjes. Ik ruik er vier. Dat hoort niet.",
-            "Blijf vooral stilstaan. Dat maakt het inpakken makkelijker.",
-            "Mijn kinderen hebben honger. Ze hebben altijd honger. Dat heb ik ze geleerd.",
-            "Je vecht alsof je dit al eens gedaan hebt. Dat is precies wat ik dacht.",
-            "Ik heb er een gegeten, weet je dat. Ik zou het niet nog eens doen. Maar ik zou het wél kunnen.",
-            "…Wat ben je stil. Zíj waren ook stil. Tot ze niet meer stil waren."
-          ],
-          popup:[
-            "Ik ben ouder dan hun Rust en ouder dan hun Lijnen. Ik heb ze allebei zien tekenen, en ik heb de reden gezien. Jij bent de reden.",
-            "Weet je wat het ergste was? Niet dat ze wonnen. Dat ze aardig waren terwijl ze het deden.",
-            "Ze hebben mij nooit iets gevraagd. Ik zat te hoog. Dat is het enige voordeel van hoog zitten."
-          ],
-          laag:["…Het lukt je. Het lukt je echt. Ik had niet gedacht dat ik dat nog eens zou zien."],
-          jij:["Sst. Niet spartelen. Dat maakt de draad alleen maar strakker."] },
-        win:[
-          {s:"shelob_stuk", reus:true, naam:"…", kleur:"#c9b6ff", t:"Ze zakt door haar poten, een voor een, alsof ze ze stuk voor stuk beslist. De ogen gaan dicht — niet allemaal. Twee blijven open."},
-          {s:"shelob_stuk", reus:true, naam:"Shelob", kleur:"#c9b6ff", t:"…Hm."},
-          {s:"shelob_stuk", reus:true, naam:"Shelob", kleur:"#c9b6ff", t:"Je hebt me niet opgegeten. Dat hadden zij wel gedaan. Dat deden ze altijd, aan het eind. Ze noemden het iets anders, maar dat deden ze."},
-          {s:"shelob_stuk", reus:true, naam:"Shelob", kleur:"#c9b6ff", t:"Ik ga je niets vertellen. Dat had ik gezegd en dat hou ik. Maar ik ga je ook niet meer tegenhouden, en dat is meer dan wie dan ook ooit van mij gekregen heeft."},
-          {s:"shelob_stuk", reus:true, naam:"…", kleur:"#c9b6ff", t:"Ze schuift iets naar je toe met een poot die daar nauwelijks nog toe in staat is. Het is wit en het plakt niet."},
-          {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Web.</b> Betaal 2 levens, trek een kaart, en alles van je tegenstander zit een beurt lang vast."},
-          {s:"shelob_stuk", reus:true, naam:"Shelob", kleur:"#c9b6ff", t:"Als je bij de zaal van het woud komt: kijk niet naar de bloemen. Dat deden zij ook. Kijk naar wat eronder zit."}
-        ],
-        verlies:[
-          {s:"shelob", reus:true, naam:"Shelob", kleur:"#c9b6ff", t:"Zo. Ingepakt. Netjes. Ik laat je hangen tot je stil bent — en dan nog even, voor de zekerheid."}
-        ],
-        na:[
-          {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Het web gaat achter je dicht. Je hoort haar niet meer, en dat is de eerste keer sinds je binnenkwam dat je niet acht ogen in je rug voelt."},
-          {s:null, bg:2, naam:"…", t:"Je komt weer uit op het gewone pad, verderop, alsof je nooit weg bent geweest. Ergens achter je staat een struik die je niet gezien hebt. Hij staat er nog steeds."},
-      {s:null, bg:2, naam:"…", t:"Het pad loopt weer door. Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee. Je doet dat ding waarbij je niks zegt en dan gewoon wint. Prima werk."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Verderop in dit woud staat niet nog zoiets. Daar staat het woud zélf. Alles wat groen is, tegelijk, in één klap."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En daarvóór wacht er nog iemand met een halo op je. Die telt niet eens mee, en die ga je ook niet leuk vinden."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Dat is groot geschut, kleine. Daar ga je niet met één trucje langs."},
-      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee. Ik ben het vuur, ik krijg nergens last mee."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het alleen interessanter voor mezelf. Dat is iets anders."}
-        ]
-      }
-    },
-    ban:10, begint:1
-  },
   "2-4":{
-    wereld:2, naam:"Het lokaas", vijand:"Seraf", vechtNaam:"Max & Seraf", muziek:"w2_gevecht", sprite:"engel", zegKleur:"#f6f7fb",
+    wereld:2, naam:"Het lokaas", vijand:"Seraf", vechtNaam:"Seraf & Max", muziek:"w2_gevecht", sprite:"engel", zegKleur:"#f6f7fb",
     hzruim:true,
     intro:[
-      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Je loopt verder. Het woud wordt zachter, warmer, aardiger. Precies waar Magnus voor waarschuwde."},
+      {s:null, bg:2, naam:"…", mu:"w2_valletjes", t:"Je loopt verder. Het woud wordt zachter, warmer, aardiger. Precies waar Magnus voor waarschuwde."},
       {s:"kitten", bg:2, naam:"…", kleur:"#ffb03a", t:"Er zit een katje op het pad. Het is uitgemergeld. Je kunt de ribben tellen."},
       {s:"kitten", bg:2, naam:"…", kleur:"#ffb03a", t:"Het kijkt naar je op. Het legt zijn kopje scheef. Het maakt een geluidje dat je in je borst voelt."},
-      {s:"kitten", bg:2, naam:"…", kleur:"#ffb03a", t:"Ga je naar haar toe om haar te aaien?",
+      {s:"kitten", bg:2, naam:"…", kleur:"#ffb03a", t:"Ga je erheen om het te aaien?",
         keuze:[{label:"🐈 Natuurlijk", ga:"val"}, {label:"🚶 Doorlopen", ga:"cadeau"}]}
     ],
     val:[
       {s:null, bg:2, naam:"…", kleur:"#d5503c", val:true, t:"De grond onder je klapt weg."},
-      {s:null, bg:2, naam:"…", kleur:"#d5503c", val:true, t:"Je valt drie meter en landt op iets wat daar met zorg voor je is neergelegd. Je verliest <b>3 levens</b>."},
-      {s:"engel_wijd", groot:true, bg:2, naam:"…", kleur:"#ffe08a", t:"Hij staat boven de kuil. Hij zegt niets. Hij begint gewoon."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
-      {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
-      {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      {s:null, bg:2, naam:"…", kleur:"#d5503c", val:true, t:"Je valt drie meter en landt op iets wat daar met zorg voor je is neergelegd. — <b>3 levens.</b>"},
+      {s:"engel_wijd", groot:true, bg:2, naam:"…", kleur:"#ffe08a", t:"Seraf staat boven de kuil. Er wordt niks gezegd. Er wordt gewoon begonnen."},
+      ...INZET_24
     ],
     cadeau:[
       {s:null, bg:2, naam:"…", t:"Je loopt door. Het katje kijkt je na. Dat voelt niet goed. Je loopt door."},
-      {s:"cadeau", bg:2, naam:"…", kleur:"#ffd45e", t:"Honderd meter verder staat midden op het pad een gigantisch cadeau. Er hangt een label aan. Er staat jóuw naam op."},
+      {s:"cadeau", bg:2, naam:"…", kleur:"#ffd45e", t:"Honderd meter verder staat midden op het pad een gigantisch cadeau. Er hangt een label aan."},
+      {s:"cadeau", bg:2, naam:"…", kleur:"#ffd45e", t:"Er staat jouw naam op."},
       {s:"cadeau", bg:2, naam:"…", kleur:"#ffd45e", t:"Ga je erheen?",
         keuze:[{label:"🎁 Het is voor mij", ga:"val"}, {label:"🚶 Doorlopen", ga:"kruis"}]}
     ],
@@ -12165,61 +12364,73 @@ const STORY = {
     ],
     hamer:[
       {s:null, bg:2, naam:"…", kleur:"#d5503c", hamer:true, t:"BONK."},
-      {s:null, bg:2, naam:"…", kleur:"#d5503c", t:"Je verliest <b>5 levens</b>. Je ziet even alleen sterren en bladeren."},
+      {s:null, bg:2, naam:"…", kleur:"#d5503c", t:"— <b>5 levens.</b> Je ziet even alleen sterren en bladeren."},
       {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"…Wat. Echt?"},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Ik had eerlijk gezegd niet verwacht dat die zou werken. Die had ik erbij gezet omdat het budget op was."},
+      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Die had ik erbij gezet omdat het budget op was."},
       {s:"engel_wijd", groot:true, bg:2, naam:"Seraf", kleur:"#ffe08a", t:"Goed. Dan hoeven we hier ook niet lang over te doen."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
-      {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
-      {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      ...INZET_24
     ],
     slim:[
-      {s:"engel", bg:2, naam:"…", kleur:"#f6f7fb", t:"Hij komt tussen de bomen vandaan alsof hij daar de hele tijd al stond. Dat stond hij ook."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Slimme vos. Drie keer achter elkaar niet happen — dat doen er niet veel."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Dat is jammer voor mij en gunstig voor jou, en verder verandert het niets."},
-      {s:"engel_wijd", groot:true, bg:2, naam:"Seraf", kleur:"#ffe08a", t:"Dan doen we het gewoon met de hand."},
-      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
-      {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
-      {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      {s:"engel", bg:2, naam:"…", kleur:"#f6f7fb", t:"Seraf komt tussen de bomen vandaan alsof daar de hele tijd al iemand stond. Dat stond er ook."},
+      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Drie keer niet happen."},
+      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Dat doen er niet veel."},
+      {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Jammer voor mij. Verandert verder niks."},
+      ...INZET_24
     ],
     gevechtNa:{val:"straf", hamer:"hamerstraf", slim:"eerlijk"},
     midden:[
-      {s:"max", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Hij heeft nog nooit iemand losgelaten die hij eenmaal had. Dat is het enige wat ik van hem weet, en het is genoeg."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Het is niet persoonlijk. Het is nooit persoonlijk. Dat is het punt."}
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Het heeft nog nooit iets losgelaten dat het eenmaal had."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dat is het enige wat ik ervan weet. Dat is ook genoeg."},
+      {s:"max", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Nee, ik stuur het niet aan. Dat kan niemand."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb het alleen meegenomen."}
     ],
     middenNa:2,
     win:[
-      {s:"max_stuk", groot:true, naam:"…", kleur:"#b9a7e6", t:"Max gaat liggen. Niet omdat hij moet — hij kijkt eerst naar Seraf, en dan pas gaat hij liggen."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Twee keer. Dat is nog nooit gebeurd. En nu met z'n tweeën."},
-      {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Hij gaat in het gras zitten. Voor een afgezant die gaat zitten bestaat geen protocol."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"De kuil, het cadeau, de hamer — allemaal van mij. Ik schaam me er niet voor. Ik zeg het alleen even hardop."},
-      {s:null, naam:"…", kleur:"#f6f7fb", t:"Hij legt één kaart voor je neer in het natte gras: ✦ <b>Zielenoproep</b>."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Neem hem. Ik heb hem gekregen van iemand die hem ook niet zelf gemaakt heeft."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"En elementaal — als je bij de Hemelraad komt, zeg dan niet dat je mij gesproken hebt."}
+      {s:"max_stuk", groot:true, naam:"…", kleur:"#b9a7e6", t:"Max zakt terug in de schaduw. Er is niks wat erop reageert. Het is gewoon weg."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Twee keer."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Dat is nog nooit gebeurd."},
+      {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Seraf gaat in het gras zitten. Voor een afgezant die gaat zitten bestaat geen protocol."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"De kuil, het cadeau, de hamer. Allemaal van mij."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Ik schaam me er niet voor. Ik zeg het alleen even hardop."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Ga maar door. Verderop kan ik toch niks meer voor je doen."},
+      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Dat was geen grapje."}
     ],
     verlies:[
-      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Zo. Rechtgezet. Sta maar weer op, dan doen we het nog een keer."}
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Zo. Rechtgezet."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Sta maar weer op, dan doen we het nog een keer."}
+    ],
+    na:[
+      {s:null, bg:2, naam:"…", t:"Het woud is weer stil. Je hebt gewonnen en je weet niet precies waarvan, en je blijft naar de schaduwen kijken om te zien of er nog iets in zit."},
+      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Op een omgevallen boom zit iemand die daar tien seconden geleden nog niet zat."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Yo. Ik keek even mee."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Beetje hond, beetje engel. Prima werk."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Wat hier verderop zit is geen afgezant met een halo. Dat ding ís het woud. Alles wat groen is, tegelijk, in één klap."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"That's big, kid. Daar ga je niet met één trucje langs."},
+      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee."},
+      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het interessanter voor mezelf. Dat is iets anders."},
+      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"See ya."}
     ],
     rug:[null, "schaduw"],
     zegSpr:"max", tauntSpr:"max_taunt", zegNaamVast:"Seraf",
     zeg:{ beurt:[
-        "Max. Zit. — Hij zit al. Hij zat al voor ik het zei.",
-        "Ik heb dit al een keer gedaan. In mijn hoofd. Gisteren.",
         "Nette zet. Dat blijf ik zeggen en ik blijf het menen.",
-        "Loof heeft me verteld dat je hier langs zou komen. Loof vertelt mij alles.",
+        "Elke wolf maakt de vorige dikker. Dat heb ik het niet geleerd. Zo is het gewoon.",
+        "Ik heb dit al een keer gedaan. In mijn hoofd. Gisteren.",
+        "Loof had me verteld dat je hier langs zou komen.",
         "Je bent moeilijker geworden. Dat is genoteerd.",
-        "Elke wolf die hij neerzet maakt de vorige dikker. Ik heb hem dat niet geleerd. Hij is er gewoon mee gekomen.",
-        "We hebben allebei tijd. Ik alleen wat meer."
+        "We hebben allebei tijd. Ik alleen wat meer.",
+        "Kijk er niet te lang naar. Dat helpt niet, maar het is prettiger."
       ],
       popup:[
-        "Je slaat, ik word sterker. Je slaat nog eens, ik word nog sterker. Dat is het hele idee.",
+        "Je slaat, het wordt sterker. Je slaat nog eens, het wordt nog sterker. Dat is het hele idee.",
         "De kuil was voor het geval je aardig was. De hamer was voor het geval je dom was. Je was geen van beide.",
-        "Weet je wat er gebeurt als iemand als jij bij de Hemelraad aankomt? Ik ook niet. Daarom sta ik hier.",
-        "Ik ben niet je vijand. Ik ben je opdracht. Dat is niet hetzelfde en het scheelt jou niets."
+        "Ik ben niet je vijand. Ik ben je opdracht. Dat is niet hetzelfde en het scheelt jou niks.",
+        "Vorige keer telde ik tot zes. Dat doe ik nu niet.",
+        "Ik heb dit ding niet zelf gevonden. Ik heb er alleen om gevraagd."
       ],
-      sterf:"STERF.", sterfKans:0.2,
       laag:["Hm. Dit is de tweede keer dat ik hier sta en dat had er nul moeten zijn."],
       jij:["Blijf zitten als je wilt. Ik heb geen haast en jij geen levens."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
@@ -12229,15 +12440,12 @@ const STORY = {
     glitch:true,
     levensVij:8,
     wolfScript:true,
-    /* Serafs eigen hand: elke beurt één kaart, meteen als spell op het bord. Geen kaart die trekt. */
-    /* Zijn eigen stapel naast Max. LET OP: dit is een object, geen `true` — `seraf:true`
+    /* Serafs eigen stapel naast Max. LET OP: dit is een object, geen `true` — `seraf:true`
        zet de zes-vleugelbaas van 5-4 aan, en die hoort hier niet. */
     seraf:{deck:{vuur:4, gras:4, steen:3, water:3, reborn:3, vital:3}},
     geeftLicht:"reborn",
-    na:[
-      {s:null, bg:2, naam:"…", t:"Het woud is weer stil. Je hebt gewonnen en je weet niet precies waarvan, en je blijft naar de schaduwen kijken om te zien of er nog iets in zit."},
-      {s:null, bg:2, naam:"…", t:"Verderop houdt het pad op met een pad te zijn. Geen bocht, geen afslag — alleen nog groen, en het staat te wachten."}
-    ],
+    /* 🟣 Flint trekt hier de tweede lade open: vanaf 2-5 speel je met twee aethers. */
+    geeftAeSlot:2,
     varianten:{
       straf:{ startSchade:3 },
       hamerstraf:{ startSchade:5 },
@@ -12249,88 +12457,96 @@ const STORY = {
     wereld:2, bosslag:true, naam:"Moeder Natuur", vijand:"Moeder Natuur", sprite:"moeder", zegKleur:"#e08fb0", muziek:"w2_baasgevecht",
     hzruim:true,
     intro:[
-      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Het pad houdt op zonder dat er iets in de weg staat. Je loopt door en je komt terug op dezelfde plek. Drie keer."},
-      {s:null, bg:2, naam:"…", t:"De vierde keer sta je stil en zeg je hardop: ik weet dat je er bent."},
-      {s:"moeder_donker", reus:true, bg:2, naam:"…", kleur:"#e08fb0", mu:"w2_moeder", t:"Het woud doet haar ogen open. Niet één boom. Het hele woud."},
+      {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Het pad houdt op zonder dat er iets in de weg staat. Je loopt door en je komt terug op dezelfde plek."},
+      {s:null, bg:2, naam:"…", t:"Drie keer."},
+      {s:null, bg:2, naam:"…", t:"De vierde keer sta je stil."},
+      {s:"moeder_donker", reus:true, bg:2, naam:"…", kleur:"#e08fb0", mu:"w2_moeder", t:"Het woud doet zijn ogen open. Niet één boom. Het hele woud."},
       {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Kind."},
       {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", t:"Ze zegt het zoals je iets zegt tegen wat je zelf gemaakt hebt. Je weet niet of dat een begroeting is."},
-      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Je hebt mijn wachter wakker gemaakt. Je hebt mijn struik geslagen. Je hebt de Waardin haar gasten afgenomen."},
-      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Ik ben niet boos. Ik ben een woud. Wij zijn nooit boos, wij zijn alleen langzaam, en wij onthouden."},
-      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Weet je waarom ik ze hier hou? Omdat mij verteld is dat er buiten niets voor ze is. Door iemand met een halo en heel veel geduld."},
-      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"En dat was geen leugen. Ik heb gezien wat er buiten liep, vóór de Lijnen. Het rook precies zoals jij."},
-      {s:"moeder_boos", reus:true, bg:2, kleur:"#e08fb0", t:"En nu loop jij hier met vier elementen tegelijk en zeg je dat het anders kan. Dat zeiden zij ook. Dat zeiden ze heel lief."},
-      {s:"moeder_boos", reus:true, bg:2, kleur:"#e08fb0", t:"Dan wil ik het zien. Niet horen. Zien."},
-      {s:null, bg:2, naam:"…", kleur:"#a9e2ff", t:"🌧 Er trekt een wolk over de open plek. <b>Om de andere ronde regent het</b> — en in de regen doet 🔥 Vuur niets meer, behalve tegen je eigen creatures."},
-      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", paars:true, t:"Alles om haar heen groeit dubbel, en alles grijpt vast. 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>. En 🟣 <b>Oerkracht</b> op 🌿 Gras: alles wat zij plant komt met <b>+4 levens</b> uit de grond. Overal, tussen de wortels: rozen."}
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Je hebt onze wachter wakker gemaakt. Je hebt onze struik geslagen. Je hebt de Waardin haar gasten afgenomen."},
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Wij zijn niet boos. Wij zijn een woud."},
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Wij zijn nooit boos. Wij zijn alleen langzaam, en wij onthouden."},
+      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", t:"Er beweegt niks, en toch staat alles anders dan een moment geleden."},
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Wij hebben jou eerder geroken."},
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Lang voor de Lijnen. Toen wij nog kleiner waren."},
+      {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Wij hebben er sindsdien over nagedacht. Wij denken lang."},
+      {s:"moeder_boos", reus:true, bg:2, kleur:"#e08fb0", t:"En nu sta je hier en zeg je dat het anders kan."},
+      {s:"moeder_boos", reus:true, bg:2, kleur:"#e08fb0", t:"Dan willen wij het zien. Niet horen. Zien."},
+      {s:null, bg:2, naam:"…", kleur:"#a9e2ff", t:"🌧 <b>Regen.</b> Er trekt een wolk over de open plek. Om de andere ronde regent het — en in de regen doet 🔥 Vuur niks meer, behalve tegen je eigen creatures."},
+      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", paars:true, t:"Alles om haar heen groeit dubbel en grijpt vast: 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>. En 🟣 <b>Oerkracht</b> op 🌿 Gras: alles wat zij plant komt met <b>+4 levens</b> uit de grond."},
+      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", t:"Overal, tussen de wortels: rozen."}
     ],
     midden:[
-      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Voel je de regen? Dat ben ik. Ik heb hier tweehonderd jaar over het weer nagedacht."},
-      {s:"moeder_boos", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Vuur is het enige dat een woud bang maakt. Dus heb ik het weggeregend. Zo simpel is het."}
+      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Voel je de regen? Dat zijn wij."},
+      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij hebben hier tweehonderd jaar over het weer nagedacht."},
+      {s:"moeder_boos", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Vuur is het enige waar een woud bang voor is. Dus hebben wij het weggeregend."}
     ],
     middenNa:2,
     bloei:{
       praat:[
         {s:"moeder_stuk", reus:true, naam:"…", kleur:"#e08fb0", t:"Ze zakt. Takken breken, de regen valt even stil, en heel even is het woud gewoon een woud."},
         {s:"moeder_stuk", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"…Nee."},
-        {s:"moeder_stuk", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Nee, kind. Zo makkelijk niet. Ik heb tweehonderd jaar niet losgelaten. Ik laat nu ook niet los."},
-        {s:"moeder_trans", reus:true, naam:"…", kleur:"#e08fb0", t:"Overal om je heen komen knoppen omhoog uit het natte gras. Ze staan stil. Ze wachten ergens op, en dan houden ze op met wachten."},
-        {s:"moeder_bloei", reus:true, naam:"…", kleur:"#e08fb0", wit:true, mu:"w2_bloei", t:"En dan gaat alles open. Elke knop in het gras, elke doorn in de wortels, tegelijk — het hele veld staat in bloei en het is niet mooi. Het is hongerig."},
-        {s:null, naam:"…", kleur:"#e08fb0", t:"🌹 <b>Bloei.</b> Op al haar spell-plekken komt een <b>Roos</b> te liggen — wat er lag, is weg. Ze staat weer op <b>5 levens</b>. Zij trekt twee kaarten. Jij ook."}
+        {s:"moeder_stuk", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Zo makkelijk niet, kind."},
+        {s:"moeder_trans", reus:true, naam:"…", kleur:"#e08fb0", t:"Overal om je heen komen knoppen omhoog uit het natte gras. Ze staan stil. Ze wachten ergens op."},
+        {s:"moeder_trans", reus:true, naam:"…", kleur:"#e08fb0", t:"En dan houden ze op met wachten."},
+        {s:"moeder_bloei", reus:true, naam:"…", kleur:"#e08fb0", wit:true, mu:"w2_bloei", t:"Elke knop in het gras, elke doorn in de wortels, tegelijk. Het hele veld staat in bloei en het is niet mooi. Het is hongerig."},
+        {s:null, naam:"…", kleur:"#e08fb0", t:"🌹 <b>Bloei.</b> Op al haar spell-plekken komt een Roos te liggen — wat er lag, is weg. Ze staat weer op <b>5 levens</b>. Zij trekt twee kaarten. Jij ook."}
       ],
-      /* Terwijl het veld openbloeit komt er iets kleins achter een boom vandaan dat daar
-         al de hele tijd stond en dat nu iets zegt wat het niet had moeten zeggen. */
+      /* Terwijl het veld openbloeit komt er iets kleins achter een boom vandaan. */
       loof:[
         {s:"rank1_bang", naam:"…", kleur:"#7fd18c", t:"Tussen de rozen door schuift iets kleins naar voren. Een rank. Hij komt tot je knie en hij trilt van boven tot onder."},
-        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ik — sorry. Sorry. Ik zeg dit één keer en dan ga ik weer achter mijn boom staan."},
-        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ik heb het gezien. Je stond drie keer met alles in je handen en drie keer heb je het níet leeggehaald. Dat is niet wat er in de verhalen staat."},
-        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Dus ik geloof het. Ik geloof jou. Er is geen reden voor de Lijnen. Er is nooit een reden geweest — wij zijn gewoon apart gaan staan en toen zijn we vergeten waarom."},
-        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Loof."},
-        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Dwaas. Kleine, dwaze rank. Ik heb tweehonderd jaar over die reden nagedacht en jij hebt hem in één middag weggegooid."},
-        {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"…Ja. Dat klopt. — Hij draait zich naar jou toe en houdt iets omhoog dat hij duidelijk niet mag weggeven."},
-        {s:"rank1", naam:"Loof", kleur:"#7fd18c", wit:true, t:"Hier. Uit de wortels. Ze merkt het toch niet, ze is bezig. Kies er maar een — nu meteen, midden in het gevecht."}
+        {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Ik — sorry."},
+        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ik zeg dit één keer en dan ga ik weer achter mijn boom staan."},
+        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Ze hebben mij verteld hoe je zou zijn."},
+        {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Ik heb dat doorverteld. Meteen. Zoals altijd."},
+        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"En toen zag ik het zelf."},
+        {s:"rank1_bang", naam:"…", kleur:"#7fd18c", t:"Hij kijkt niet omhoog."},
+        {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Hier. Uit de wortels. Ze merkt het toch niet, ze is bezig."},
+        {s:"rank1", naam:"Loof", kleur:"#7fd18c", wit:true, t:"Kies er maar een. Nu meteen."}
       ],
-      /* Wat hij je aanbiedt: drie krachten die je nog niet hebt. Je kiest er één, live. */
       loofNa:[
         {s:"rank1", naam:"Loof", kleur:"#7fd18c", t:"Zo. Nu ga ik heel hard achter een boom staan en doen alsof ik hier niet was."},
-        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Ik heb dat gezien, Loof. Ik ben het woud. Ik zie alles wat groen is."},
-        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"…Ga maar. Ga maar achter je boom. Wij praten later."}
+        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij hebben dat gezien, Loof."},
+        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij zijn het woud. Wij zien alles wat groen is."},
+        {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"…Ga maar. Ga maar achter je boom."}
       ]
     },
     win:[
       {s:"moeder_op", reus:true, naam:"…", kleur:"#e08fb0", mu:"w2_moeder", t:"De rozen vallen dicht, een voor een. De regen blijft even hangen en valt dan gewoon naar beneden. Als gewone regen."},
-      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"…Je hebt me niet leeggehaald."},
-      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Dat deden zij wel. Aan het eind. Altijd. Ze noemden het samen, en dan was er alleen nog zíj."},
-      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Jij stond daar, met alles wat je nodig had om het te doen, en je deed het niet. Ik weet niet wat dat betekent. Ik ga er lang over nadenken. Ik ben een woud."},
-      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"En Loof mag blijven staan waar hij staat. Ik heb hem gehoord. Ik zei dwaas, en ik meende het, en ik heb er sindsdien over nagedacht."},
-      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", paars:true, t:"Neem mijn ranken mee. 🟣 <b>Wurgranken</b> — offer een creature en élke vijand komt vast te zitten, met alle drain naar jouw kant."},
-      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"En je gras. Laat zien. — Ze raakt drie van je kaarten aan. Er komen doornen aan."},
-      {s:null, naam:"…", kleur:"#e08fb0", wit:true, t:"🌹 <b>Drie van je 🌿 Gras-kaarten zijn vanaf nu Roos.</b> Een Roos slaat met zijn volle levens en groeit elke beurt."},
-      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Ik ga de paden weer opendoen. Dat duurt even. Ik ben een woud."}
+      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"…Hm."},
+      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij hadden dit anders verwacht."},
+      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij gaan er lang over nadenken. Wij zijn een woud."},
+      {s:"moeder_op", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"En Loof mag blijven staan waar hij staat. Wij hebben hem gehoord."},
+      {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij gaan de paden weer opendoen. Dat duurt even."}
     ],
     verlies:[
-      {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Blijf maar even liggen. Het regent toch. En kijk — je hebt al wortel geschoten."}
+      {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Blijf maar even liggen. Het regent toch."},
+      {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"En kijk. Je hebt al wortel geschoten."}
     ],
     na:[
       {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Ik heb alles gezien. Alles. Ik stond achter een boom, maar ik heb alles gezien."},
-      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Je hebt het wóud verslagen. Weet je hoe raar dat is? Dat is alsof je het wéér verslaat."},
-      {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"De Hemelraad gaat dit horen. Die hoort alles. En dan sturen ze niet meer een afgezant."},
-      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Ver voorbij het woud kleurt de horizon oranje. Geen zonsondergang. Rook."},
+      {s:"rank1_bang", naam:"Loof", kleur:"#7fd18c", t:"Je hebt het wóud verslagen. Weet je hoe raar dat is?"},
+      {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Ze horen dit. Ze horen altijd alles."},
+      {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"En dan sturen ze niet meer een afgezant."},
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Ver voorbij het woud kleurt de horizon oranje. Geen zonsondergang."},
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Rook."}
     ],
     zegSpr:"moeder", tauntSpr:"moeder_taunt",
     zeg:{ beurt:[
         "Kind.",
         "Wij hebben andere tijd dan jullie. Een gevecht duurt hier een seizoen.",
-        "Voel je de regen weer aankomen? Ik wel.",
-        "Ik heb hier bomen staan die ouder zijn dan jouw hele soort. Nou ja. Bijna.",
-        "Je vecht goed. Dat maakt het erger, niet beter.",
-        "Alles wat jij neerzet, groeit hier. Ook wat je liever niet had geplant.",
-        "Nog steeds nat?"
+        "Voel je de regen weer aankomen? Wij wel.",
+        "Wij hebben hier bomen staan die ouder zijn dan jouw hele soort. Nou ja. Bijna.",
+        "Je vecht goed. Dat maakt het erger.",
+        "Alles wat jij neerzet groeit hier. Ook wat je liever niet had geplant.",
+        "Nog steeds nat?",
+        "Wij hoeven niet te winnen. Wij hoeven alleen te blijven staan. Dat doen wij al heel lang."
       ],
       popup:[
-        "Vuur in de regen. Dat is wat je nu bent. Nog steeds warm, maar er gebeurt niets meer.",
-        "Ik heb de Waardin niet gevraagd om die mensen te houden. Ik heb alleen nooit gezegd dat het niet mocht. Dat is hetzelfde.",
-        "Als jij wint, gaat het woud open. Denk je dat iedereen daar blij mee is? Ik ook niet.",
-        "Zij zeiden ook dat ze niets kwamen halen. Ze hadden gelijk. Wij gáven het."
+        "Vuur in de regen. Dat is wat je nu bent. Nog steeds warm, en er gebeurt niks meer.",
+        "Wij hebben de Waardin nooit iets gevraagd. Wij hebben ook nooit iets gezegd.",
+        "Als jij wint gaat het woud open. Denk je dat iedereen daar blij mee is? Wij ook niet.",
+        "Er is hier iemand langsgekomen met een halo. Die had veel geduld. Wij hebben goed geluisterd."
       ],
       laag:["De hele open plek ritselt tegelijk. Voor het eerst klinkt het woud als iets dat schrikt."],
       jij:["Ga maar liggen. Het gras is zacht hier. Dat is met opzet."] },
@@ -12343,7 +12559,6 @@ const STORY = {
     regen:true,
     bord:[{p:1, c:2, spell:"gras"}],
     geeft:"fu_grass", geeftUpg:"gras",
-    geeftLichtSlot:5,
     ban:10, begint:1
   },
   "3-1":{
@@ -12768,7 +12983,7 @@ const STORY = {
     levensVij:8, levensJij:8,
     vuurzee:true, lava:true,
     geeft:"ae_vonk", geeftUpg:"vuur",
-    geeftAeSlot:3, geeftLichtSlot:6,
+    geeftAeSlot:3,
     ban:10, begint:1
   },
   "4-1":{
@@ -13587,6 +13802,8 @@ function tutKlaarStap(soort, data){
   if(soort === "beurt" && st.beurtAf) raak = true;
   if(!raak) return;
   S.story.tut.i++;
+  const tz = (levelVan(S.story) || {}).tutZeg;
+  if(tz && tz[S.story.tut.i - 1]) zegLos(tz[S.story.tut.i - 1]);
   if(S.story.tut.i >= S.story.tut.stappen.length) tutStop(true);
   else { S.story.tut.open = true; if(!FAST) AU.play("light"); }
   render();
@@ -13635,6 +13852,7 @@ function heeftKeuze(id){
 const storyKlaar = id => SET.story.klaar.indexOf(id) >= 0;
 function storyVrij(id){
   if(SET.story.vrij) return true;
+  if(STORY_VEREIST[id]) return STORY_VEREIST[id].some(storyKlaar);
   let i = STORY_ORDER.indexOf(id);
   if(i <= 0) return true;
   /* Levels die nog niet bestaan slaan we over — anders zet één gat de rest van de wereld op slot. */
@@ -13654,7 +13872,7 @@ function beloningMaak(id, extra){
   const nieuwSter = st ? Math.max(0, st.n - best) : 0;
   if(st){
     items.push({k:"ster", ic:"★", naam:`${st.n} van 3 sterren`,
-      sub:nieuwSter ? `+${nieuwSter} ster${nieuwSter === 1 ? "" : "ren"} erbij · daar koop je bij Knorst mee` : `je record hier was al ${best}`,
+      sub:nieuwSter ? `+${nieuwSter} ster${nieuwSter === 1 ? "" : "ren"} erbij · daar koop je bij Knort mee` : `je record hier was al ${best}`,
       n:st.n, nieuw:nieuwSter, info:!nieuwSter});
     if(!SET.story.sterren || typeof SET.story.sterren !== "object") SET.story.sterren = {};
     if(st.n > best) SET.story.sterren[id] = st.n;
@@ -13754,7 +13972,7 @@ const MUZIEK_UITLEG = {
   w1_gevecht:"1 · gevecht", w1_nimbus:"1 · Nimbus", w1_spiegel:"1 · spiegelduel",
   w1_terugkeer:"1 · terugkeer", w1_steenbaas:"1 · Magnus", w1_baasgevecht:"1 · bazengevecht",
   w2_woud:"2 · woud", w2_seraf:"2 · Seraf", w2_herberg:"2 · herberg", w2_wiegelied:"2 · wiegelied",
-  w2_gevecht:"2 · gevecht", w2_struik:"2 · Struikrover", w2_web:"2 · Shelob", w2_moeder:"2 · Moeder Natuur",
+  w2_gevecht:"2 · gevecht", w2_struik:"2 · Struikrover", w2_web:"2 · Kaelid", w2_tellen:"2 · Seraf telt", w2_valletjes:"2 · de valletjes", winkel:"Knort", w2_moeder:"2 · Moeder Natuur",
   w2_baasgevecht:"2 · bazengevecht", w2_bloei:"2 · bloei",
   w3_as:"3 · as", w3_flint:"3 · Flint", w3_gevecht:"3 · golem", w3_rook:"3 · rook", w3_circus:"3 · circus",
   w3_fabriek:"3 · fabriek", w3_flintgevecht:"3 · Flint-gevecht", w3_wit:"3 · wit",
@@ -13784,53 +14002,59 @@ let PRAAT = null;
 const VELD = {
   "1-1": { kop:"Oefenpotje",
     regels:["Oefenpotje. Je krijgt een vaste openingshand en Rocky legt precies neer wat de les nodig heeft.",
-            "Verder gewoon veld. Geen bijzondere regels."] },
+            "Verder gewoon veld. Geen bijzondere regels.",
+            "Hij begint met <b>4</b> levens, jij ook."] },
 
   "1-2": { kop:"Steenharde vlakte",
     regels:["Gewoon veld. Brokko's deck leunt zwaar op 🪨 Steen.",
-            "Na zijn eerste beurt schuift iemand je iets toe: een 🔥 Vuur-spell in jouw kolom 3 en 4."] },
+            "Na zijn eerste beurt schuift iemand je iets toe: een 🔥 Vuur-spell in jouw kolom 3 en 4.",
+            "Hij begint met <b>5</b> levens."] },
 
   "1-3": { kop:"Veertig keer steen",
     regels:["Allebei veertig keer 🪨 Steen. Geen aethers, geen ✦ lichtkaarten, niets bannen.",
-            "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom."],
+            "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom.",
+            "Hij begint met <b>4</b> levens."],
     varianten:{
       "b":["Jij speelt met tien van elk element, hij met veertig keer 🪨 Steen.",
-           "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom."] } },
+           "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom.",
+           "Hij begint met <b>4</b> levens."] } },
 
   "1-4": { kop:"De eerste rotsen",
     regels:["Zijn deck heeft ⛰️ Rots: die zet eerst een kiezel van 1 leven neer en doet daarna het gewone steen-effect.",
-            "Er ligt al een 🪨 Steen-spell in zijn middelste kolom."] },
+            "Er ligt al een 🪨 Steen-spell in zijn middelste kolom.",
+            "Hij begint met <b>4</b> levens."] },
 
   "1-5": { kop:"Vallend plafond",
     regels:["🪨 <b>Rotsval.</b> Elke beurt komt er aan allebei de kanten een ✕ boven een willekeurige plek.",
             "Staat daar aan het eind van die beurt iets, dan wordt het verpletterd. 🪨 Steen (ook ⛰️ Rots en kiezels) overleeft het.",
             "Er ligt al een 🪨 Steen-spell in zijn middelste kolom, en zijn deck heeft ⛰️ Rots.",
-            "Hij begint met <b>10</b> levens."] },
+            "Hij begint met <b>8</b> levens."] },
 
-  "2-1": { kop:"Haperend licht",
-    regels:["Gewoon veld. Geen bijzondere regels.",
-            "Het beeld hapert af en toe. Puur sfeer, het doet verder niets.",
-            "Hij begint met <b>6</b> levens."] },
+  "2-1": { kop:"Zes tellen",
+    regels:["✦ <b>Overleef 6 rondes.</b> Een ronde is één beurt van Seraf en één van jou. Hou je het zo lang uit, dan win je.",
+            "Je mag Seraf ook gewoon verslaan: Seraf begint met <b>8</b> levens.",
+            "Het beeld hapert af en toe. Puur sfeer, het doet verder niets."] },
 
-  "2-2": { kop:"Slaperige herberg",
-    regels:["💤 <b>Het wiegelied.</b> Raak je in je beurt met een aanval niets, dan zak je een stap weg en heelt zij 1 leven.",
-            "Raak je wél (haar of een creature), dan word je een stap wakker. Op <b>3/3</b> val je in slaap en verlies je.",
-            "Elke kop thee die je bij haar dronk telt al mee (hoogstens 2).",
-            "Er liggen al 🌿 Gras-spells in haar kolom 2 en 4.",
-            "Zij begint met <b>7</b> levens."] },
-
-  "2-3": { kop:"De kruising",
+  "2-2a": { kop:"Het pad",
     regels:["Een struik. Hij heeft geen hand en doet niets.",
             "Hij begint met <b>1</b> leven."],
-    varianten:{
-      "shelob":["🥚 <b>Eieren.</b> Er hangt er al één in haar middelste kolom. Elke beurt van haar legt ze er een bij: 4 levens, {Muur}.",
-                "Na <b>twee</b> beurten van haar komt een ei uit: een 🕷 spin van 7 levens die altijd voor <b>7</b> slaat.",
-                "Zij begint met <b>10</b> levens."] },
     fase2:["Hij staat op als Struikrover, met een nieuw deck en 5 kaarten. Jouw kant blijft staan.",
            "Zijn eerste zwaardhaal kost je meteen <b>2</b> levens.",
            "In zijn kolom 2, 3 en 4 liggen 🗡 Swipe, 🔪 Stab en 🛡 Schild. Ze gaan af zodra hij er iets op zet.",
            "Swipe: schade aan al jouw creatures, elke keer 1 meer. Stab: 10 recht tegenover en 1 aan jou. Schild: alles van hem +1.",
            "Hij begint met <b>6</b> levens."] },
+
+  "2-2b": { kop:"Het web",
+    regels:["🥚 <b>Eieren.</b> Er hangt er al één in haar middelste kolom. Elke beurt van haar legt ze er een bij: 4 levens, {Muur}.",
+            "Na <b>twee</b> beurten van haar komt een ei uit: een 🕷 spin van 7 levens die altijd voor <b>7</b> slaat.",
+            "Zij begint met <b>10</b> levens."] },
+
+  "2-3": { kop:"Slaperige herberg",
+    regels:["💤 <b>Het wiegelied.</b> Raak je in je beurt met een aanval niets, dan zak je een stap weg en heelt zij 1 leven.",
+            "Raak je wél (haar of een creature), dan word je een stap wakker. Op <b>3/3</b> val je in slaap en verlies je.",
+            "Elke kop thee die je bij haar dronk telt al mee (hoogstens 2).",
+            "Er liggen al 🌿 Gras-spells in haar kolom 2 en 4.",
+            "Zij begint met <b>7</b> levens."] },
 
   "2-4": { kop:"De kuil",
     regels:["🐺 Max en Seraf delen één levensbalk. Samen beginnen ze met <b>8</b> levens.",
@@ -13965,10 +14189,14 @@ function levelVan(st){
   return V ? Object.assign({}, basis, V) : basis;
 }
 /* De regels van een fase: eerst kijken of de gespeelde variant er eigen tekst voor heeft. */
+/* als:"2-2b" — die regel komt alleen als je 2-2b gehaald hebt; alsNiet: juist als je dat niet hebt. */
+const regelTelt = r => !r || ((!r.als || storyKlaar(r.als)) && (!r.alsNiet || !storyKlaar(r.alsNiet)));
 function faseRegels(id, fase){
   const st = S && S.story;
-  if(st && st.id === id){ const L = levelVan(st); if(L && Array.isArray(L[fase])) return L[fase]; }
-  return (STORY[id] && Array.isArray(STORY[id][fase])) ? STORY[id][fase] : [];
+  let uit = null;
+  if(st && st.id === id){ const L = levelVan(st); if(L && Array.isArray(L[fase])) uit = L[fase]; }
+  if(!uit) uit = (STORY[id] && Array.isArray(STORY[id][fase])) ? STORY[id][fase] : [];
+  return uit.some(r => r && (r.als || r.alsNiet)) ? uit.filter(regelTelt) : uit;
 }
 /* Wie je één keer in de ogen hebt gekeken, staat vanaf dan met zijn gezicht op de kaart —
    ook als je nog van hem verloren hebt. Tot die tijd is hij een vraagteken. */
@@ -14394,7 +14622,7 @@ async function startStoryGevecht(id, variant){
   resetBoard();
   /* Wat je aan levens hebt opgebouwd — van een baas of bij Knorst gekocht. */
   const buit0 = buitVoor(id);
-  if(buit0.hart) P(0).life = buit0.hart;
+  P(0).life = buit0.hart || VERHAAL_LEVENS;
   if(L.levensJij) P(0).life = L.levensJij;
   if(L.startSchade) P(0).life = Math.max(1, P(0).life - L.startSchade);
   if(L.levensVij) P(1).life = L.levensVij;
@@ -14444,6 +14672,7 @@ async function startStoryGevecht(id, variant){
     } }
   if(L.fuseVoorkeur) S.story.fuseVoorkeur = L.fuseVoorkeur;
   if(L.regen){ S.story.regenAan = true; S.story.regen = false; }
+  if(L.overleef) S.story.overleef = L.overleef;   /* 2-1: hou het zoveel rondes uit */
   if(L.bosslag) S.story.bosslag = true;   /* in 2-5 is de regen hém, niet het weer */
   /* Vooraf mag hij "???" heten — dat is de grap van de entree. Zodra het gevecht begint
      staat er gewoon wie het is, in de balken, in het log en in de praatbel. */
@@ -14640,9 +14869,26 @@ function verseZin(lijst, sleutel, soort){
   st[sleutel][soort] = (i + 1) % lijst.length;
   return lijst[i];
 }
+/* Eén vaste zin in de praatbalk, buiten de gewone lijstjes om. */
+function zegLos(zin){
+  const st = S && S.story; if(!st || !zin) return;
+  st.zin = zin; st.zinHard = false;
+  if(FAST) return;
+  zegPaint();
+  const el = document.getElementById("praatbel");
+  if(el){ el.classList.remove("puls"); void el.offsetWidth; el.classList.add("puls"); }
+  clearTimeout(ZEGT);
+  ZEGT = setTimeout(() => { if(S && S.story){ S.story.zin = null; zegPaint(); } }, 7000);
+}
 function zegNu(soort){
   const st = S && S.story, cfg = st && st.zeg;
   if(!cfg) return;
+  /* ✦ 2-1: Seraf telt de rondes af. Eén, twee, drie… en in de laatste: bijna. */
+  if(soort === "beurt" && st.overleef){
+    const ronde = Math.ceil(S.gTurn / 2), tel = (levelVan(st) || {}).tellen || [];
+    if(ronde <= tel.length) return zegLos(tel[ronde - 1]);
+    if(ronde >= st.overleef && cfg.bijna && cfg.bijna.length) return zegLos(cfg.bijna[(ronde - st.overleef) % cfg.bijna.length]);
+  }
   /* Sommige tegenstanders zeggen af en toe maar één woord. */
   if(cfg.sterf && !FAST && rnd() < (cfg.sterfKans || 0.22)){
     st.zin = cfg.sterf; st.zinHard = true;
@@ -14851,6 +15097,8 @@ async function storyPopup(){
 /* Wat je op dít punt in het verhaal bij je hebt. Niet "alles wat je ooit gevonden hebt",
    maar precies de buit van de levels die vóór dit level komen — speel je 1-3 opnieuw, dan
    speel je met wat je toen had, niet met wat je later in wereld 2 vond. */
+/* In het verhaal begin je met 4 levens. Hartjes bij Knort komen daarbovenop. */
+const VERHAAL_LEVENS = 4, LT_SLOTS_MAX = 6;
 function buitVoor(id){
   const i = STORY_ORDER.indexOf(id);
   const tot = i < 0 ? STORY_ORDER.length : i;
@@ -14858,6 +15106,8 @@ function buitVoor(id){
   let hart = 0, ltMax = 0, aeMax = 1;
   for(let k = 0; k < tot; k++){
     const L = STORY[STORY_ORDER[k]]; if(!L) continue;
+    /* Een zijtak telt alleen mee als je hem echt gelopen hebt. */
+    if(L.tak && !storyKlaar(STORY_ORDER[k])) continue;
     /* Een baas kan een deel van je deck blijvend versterken: 3 steen worden 3 rots, enzovoort.
        Net als de rest telt dat pas vanaf het level erna — niet als je terugspeelt. */
     if(L.geeftVar) for(const v in L.geeftVar) vars[v] = (vars[v] || 0) + L.geeftVar[v];
@@ -14881,7 +15131,9 @@ function buitVoor(id){
     const kp = koopState();
     kp.ae.forEach(x => { if(AETHERS[x] && ae.indexOf(x) < 0) ae.push(x); });
     kp.lt.forEach(x => { if(LIGHTS[x] && lt.indexOf(x) < 0) lt.push(x); });
-    if(kp.hart) hart = (hart || 5) + kp.hart;
+    if(kp.hart) hart = (hart || VERHAAL_LEVENS) + kp.hart;
+    /* ✦ Lichtkaart-slots koop je bij Knort, zodra je lichtkaarten hebt. */
+    if(ltMax > 0 && kp.slot) ltMax = Math.min(LT_SLOTS_MAX, ltMax + kp.slot);
   }
   return {ae, lt, hart, ltMax, aeMax, vars, upg};
 }
@@ -15135,25 +15387,34 @@ const OVERWORLD_BEELD = "art/overworld.png";
    zelf: de open plekken langs het pad, de steiger, de herberg, de tent, de sluis, de kolk. */
 const OVERWORLD = {
   "1-1":{x:48,y:81}, "1-2":{x:32,y:78}, "1-3":{x:46,y:70}, "1-4":{x:33,y:67}, "1-5":{x:42,y:57},
-  "2-1":{x:40,y:47}, "2-2":{x:18,y:46}, "2-3":{x:28,y:38}, "2-4":{x:40,y:31}, "2-5":{x:28,y:23},
+  "2-1":{x:40,y:47}, "2-2a":{x:24,y:52}, "2-2b":{x:24,y:32}, "2-3":{x:18,y:46}, "2-4":{x:40,y:31}, "2-5":{x:28,y:23},
   "3-1":{x:68,y:38}, "3-2":{x:83,y:33}, "3-3":{x:62,y:30}, "3-4":{x:72,y:22}, "3-5":{x:81,y:11},
   "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
-/* Tussenpunten van het pad van een level naar het volgende — alleen waar het niet rechtdoor
-   kan: door de poort en de trap omhoog, over de brug, en van de vulkaan langs de oostkust
-   naar beneden het ijs op. */
+/* Welke paden er zijn. [van, naar] verschijnt zodra "van" gehaald is. Met een derde naam
+   verschijnt hij pas als díé gehaald is: de weg naar de volgende wereld begint bij het
+   eerste level van de vorige, niet uit de zaal van de baas — die is een doodlopend eind. */
+const OVERWORLD_RANDEN = [
+  ["1-1","1-2"], ["1-2","1-3"], ["1-3","1-4"], ["1-4","1-5"], ["1-5","2-1"],
+  ["2-1","2-2a"], ["2-1","2-2b"], ["2-2a","2-3"], ["2-2b","2-3"], ["2-3","2-4"], ["2-4","2-5"],
+  ["2-1","3-1","2-5"],
+  ["3-1","3-2"], ["3-2","3-3"], ["3-3","3-4"], ["3-4","3-5"],
+  ["3-1","4-1","3-5"],
+  ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
+  ["3-1","hemel","4-5"]
+];
+/* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
-  "1-4":[[38,62]],
-  "1-5":[[42,52],[41,49]],
-  "2-3":[[32,34]],
-  /* Van het woud naar de Asgronden gaat het over de rug van het eiland, boven langs de
-     trap. Zou hij rechtdoor snijden, dan loopt hij pal langs 2-1 en de winkel en lijkt het
-     alsof het pad dáár begint. */
-  "2-5":[[33,19],[43,23],[54,28],[62,33]],
-  "3-2":[[76,29]],
-  /* En van de vulkaan naar het ijs langs de oostkust, ruim om wereld 3 heen — anders
-     lijkt hij bij 3-1 of 3-2 te beginnen in plaats van bij de top. */
-  "3-5":[[88,15],[93,27],[94,41],[89,52],[81,61],[72,62]]
+  "1-4>1-5":[[38,62]],
+  "1-5>2-1":[[42,52],[41,49]],
+  "2-1>2-2a":[[32,50]],
+  "2-1>2-2b":[[34,42],[28,37]],
+  "2-2b>2-3":[[20,39]],
+  "2-3>2-4":[[27,40],[35,34]],
+  "2-1>3-1":[[48,44],[58,42]],
+  "3-2>3-3":[[76,29]],
+  "3-1>4-1":[[70,45],[66,51]],
+  "3-1>hemel":[[60,32],[55,24]]
 };
 /* De trap de wolken in: daar zit wereld 5, die (nog) niet op het eiland ligt. */
 const OVERWORLD_HEMEL = {x:51, y:17};
@@ -15173,14 +15434,17 @@ const KOOPWAAR = {
   ae: ["ae_draw3", "ae_offer", "ae_graf", "fu_water", null],
   lt: ["greed", "gamble", "darkhole", null, null]
 };
-/* Wat het kost, in sterren. Over alle 25 levels perfect gespeeld liggen er 75 sterren,
-   en alles bij Knorst kopen kost er precies 75. Alles krijgen kan dus — maar alleen als je
+/* Wat het kost, in sterren. Over alle 26 levels perfect gespeeld liggen er 78 sterren,
+   en alles bij Knort kopen kost er precies 78. Alles krijgen kan dus — maar alleen als je
    nergens een ster laat liggen. Eén misser en je moet kiezen. */
 const KOOP_PRIJS = {
   ae_draw3:15, ae_offer:11, ae_graf:9, fu_water:8,
-  greed:6, gamble:5, darkhole:4
+  greed:5, gamble:4, darkhole:3
 };
 const HART_PRIJS = [4, 6, 7];            // elk volgend hartje kost meer
+/* ✦ Lichtkaart-slots: in 2-1 krijg je er 3, de 4e, 5e en 6e koop je hier. Het eerste is
+   goedkoop. Met 26 levels liggen er 78 sterren; alles hier kost er samen precies 78. */
+const SLOT_PRIJS = [1, 2, 3];
 /* Wat je gekocht hebt. Staat naast je sterren in de opslag. */
 function koopState(){
   const S0 = SET.story;
@@ -15189,25 +15453,57 @@ function koopState(){
   if(!Array.isArray(k.ae)) k.ae = [];
   if(!Array.isArray(k.lt)) k.lt = [];
   if(typeof k.hart !== "number") k.hart = 0;
+  if(typeof k.slot !== "number") k.slot = 0;
   return k;
 }
 const alGekocht = key => { const k = koopState(); return k.ae.indexOf(key) >= 0 || k.lt.indexOf(key) >= 0; };
 const winkelOpen = () => storyKlaar(OVERWORLD_WINKEL.na);
-/* Wat Knorst zegt. Voor nu plaatshouders — vervang de zinnen, de rest blijft staan. */
-const KNORST_HALLO = [
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+/* Wat Knort zegt. Hij hoort nergens bij en hij verkoopt aan iedereen. */
+const KNORT_EERSTE = [
+  "Hé. Jij.",
+  "Nee, blijf. Iedereen loopt door en dan komen ze terug en dan is het op.",
+  "Knort. Ik verkoop.",
+  "Aan iedereen. Dat zeg ik er meteen bij, dan hoeven we het er later niet over te hebben."
 ];
-const KNORST_TAUNT = [
-  "Excepteur sint occaecat cupidatat non proident.",
-  "Sunt in culpa qui officia deserunt mollit anim id est laborum.",
-  "Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
-  "Quis autem vel eum iure reprehenderit qui in ea voluptate.",
-  "At vero eos et accusamus et iusto odio dignissimos."
+const KNORT_HALLO = [
+  "Daar ben je weer. Ik had het al geregeld.",
+  "Kijk gerust. Kijken is gratis. Verder is niks gratis.",
+  "Goeiemiddag. Of ochtend. Ik hou het hier niet bij.",
+  "Je ziet er beroerd uit. Dat is goed voor mij.",
+  "Nog steeds in één stuk. Netjes."
 ];
-const KNORST_KOOP = "Laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.";
-const KNORST_ARM  = "Nemo enim ipsam voluptatem quia voluptas sit aspernatur.";
+const KNORT_KOOP = [
+  "Mooi. Geen spijt achteraf, hè.",
+  "Doe er iets leuks mee.",
+  "Die had ik nog achtergehouden. Voor iemand met geld.",
+  "Gaat-ie. Volgende."
+];
+const KNORT_ARM = [
+  "Nee.",
+  "Dat is het niet.",
+  "Ik doe niet aan later. Later is waar ik niet meer sta.",
+  "Kom terug met meer. Ik ga nergens heen."
+];
+const KNORT_KIJK = [
+  "Je staat er nou al een tijdje naar te kijken.",
+  "Het wordt niet goedkoper van kijken.",
+  "Pak 'm gewoon. Of niet. Maar doe iets.",
+  "Waar dit vandaan komt? Van een gozer. Die had het weer van iemand anders. Zo gaat dat.",
+  "Ik vraag niks. Vragen is slecht voor de zaken.",
+  "Die grote met dat groen is hier vorige week ook geweest. Kocht precies dit.",
+  "Ik sta hier al jaren. Niemand heeft me ooit gevraagd wat ik hier doe. Dat is het mooie van niemand zijn.",
+  "Kijk, dit spul is niet van hier. Niks van dit spul is van hier. Daarom werkt het.",
+  "Ik heb ooit twee van deze op één dag verkocht. Aan twee mensen die elkaar diezelfde avond tegenkwamen. Eentje kwam terug.",
+  "Jij bent makkelijk, weet je dat. Normaal moet ik vier verschillende dozen openmaken. Bij jou pak ik gewoon alles.",
+  "Laatste keer dat ik zo'n bestelling deed was… ja. Lang geleden. Andere klant.",
+  "Nee, ik ga je niet vertellen wat je bent. Ik ga je vertellen wat dit kost."
+];
+const KNORT_DAG = [
+  "Tot straks.",
+  "Niet doodgaan. Slecht voor de omzet.",
+  "Hé — als je iemand tegenkomt die iets nodig heeft: ik sta hier."
+];
+const knortZin = lijst => lijst[Math.floor(Math.random() * lijst.length)];
 /* De praatbalk ververst zichzelf zolang de winkel openstaat. Koop je iets, dan zegt hij daar
    iets over en pakt hij daarna de draad weer op. */
 let WINKELT = null;
@@ -15220,16 +15516,35 @@ function winkelZeg(zin, spr, vast){
 }
 function winkelTik(){
   if(!M || M.type !== "winkel"){ clearTimeout(WINKELT); WINKELT = null; return; }
-  winkelZeg(KNORST_TAUNT[Math.floor(Math.random() * KNORST_TAUNT.length)], "knorst_taunt");
+  winkelZeg(knortZin(KNORT_KIJK), "knorst_taunt");
 }
 function winkelOpenen(){
-  M = {type:"winkel", zin:KNORST_HALLO[Math.floor(Math.random() * KNORST_HALLO.length)], spr:"knorst", bevestig:null};
+  /* De eerste keer stelt hij zich voor, zin voor zin. Daarna een begroeting. */
+  const eerste = !SET.story.knortGezien;
+  M = {type:"winkel", zin:eerste ? KNORT_EERSTE[0] : knortZin(KNORT_HALLO), spr:"knorst", bevestig:null, intro:eerste ? 1 : 0};
+  if(eerste){ SET.story.knortGezien = true; saveSet(); }
   clearTimeout(WINKELT);
-  WINKELT = setTimeout(winkelTik, 9000);
-  AU.zet("kaart");
+  WINKELT = setTimeout(eerste ? winkelIntro : winkelTik, eerste ? 2600 : 9000);
+  AU.zet(MUZIEK.winkel ? "winkel" : "kaart");
   render();
 }
-function winkelSluit(){ clearTimeout(WINKELT); WINKELT = null; M = {type:"story"}; storySkin(0); render(); }
+function winkelIntro(){
+  if(!M || M.type !== "winkel" || !M.intro) return;
+  if(M.intro >= KNORT_EERSTE.length){ M.intro = 0; winkelTik(); return; }
+  M.zin = KNORT_EERSTE[M.intro++]; M.spr = "knorst";
+  clearTimeout(WINKELT); WINKELT = setTimeout(winkelIntro, 2800);
+  render();
+}
+/* Weggaan: hij zegt nog iets, en dan pas ben je weg. */
+function winkelSluit(){
+  clearTimeout(WINKELT); WINKELT = null;
+  if(M && M.type === "winkel" && !M.dag && !FAST){
+    M.dag = true; M.bevestig = null; M.zin = knortZin(KNORT_DAG); M.spr = "knorst"; render();
+    WINKELT = setTimeout(() => { if(M && M.type === "winkel"){ M = {type:"story"}; storySkin(0); render(); } }, 1300);
+    return;
+  }
+  M = {type:"story"}; storySkin(0); render();
+}
 /* Eén plek in het schap. Geeft terug wat er staat en of je erop mag klikken. */
 function koopVak(soort, key, i){
   if(!key) return {leeg:true, i, soort};
@@ -15243,9 +15558,17 @@ function koopVak(soort, key, i){
 const hartGekocht = () => koopState().hart;
 function hartVak(){
   const n = hartGekocht();
-  if(n >= HART_PRIJS.length) return {soort:"hart", op:true, naam:"Geen hartjes meer", kort:`je kocht er ${n} — meer heeft Knorst er niet`};
+  if(n >= HART_PRIJS.length) return {soort:"hart", op:true, naam:"Geen hartjes meer", kort:`je kocht er ${n} — meer heeft Knort er niet`};
   const prijs = HART_PRIJS[n];
   return {soort:"hart", key:"hart", prijs, n, naam:"+1 maximum leven", kort:`je begint elk gevecht met één leven meer${n ? ` · je kocht er al ${n}` : ""}`, kan:sterVrij() >= prijs};
+}
+/* ✦ Een extra lichtkaart-slot. Pas te koop als je er in 2-1 drie gekregen hebt. */
+function slotVak(){
+  const n = koopState().slot, basis = storyKlaar("2-1") ? 3 : 0;
+  if(!basis) return {soort:"slot", op:true, ic:"✦", naam:"Lichtkaart-slot", kort:"nog dicht — eerst moet je lichtkaarten hebben"};
+  if(n >= SLOT_PRIJS.length) return {soort:"slot", op:true, ic:"✦", naam:"Alle slots gekocht", kort:`je hebt er ${basis + n} — meer passen er niet`};
+  const prijs = SLOT_PRIJS[n];
+  return {soort:"slot", key:"slot", prijs, n, naam:`${basis + n + 1}e lichtkaart-slot`, kort:"één lichtkaart meer mee je deck in", kan:sterVrij() >= prijs};
 }
 function winkelHTML(){
   const sp = spriteSVG(M.spr || "knorst");
@@ -15253,10 +15576,10 @@ function winkelHTML(){
       <span class="sterbalk" title="sterren — die geef je hier uit">★ <b id="wksaldo">${sterVrij()}</b></span>
       <button class="obtn b-dim" data-act="btn" data-btn="winkelweg">Terug</button></div>`;
   const praat = `<div class="wkpraat"><div class="wkspr">${sp}</div>
-      <div class="wkbel"><div class="wknaam">Knorst</div><div class="wkzin">${M.zin || ""}</div></div></div>`;
+      <div class="wkbel"><div class="wknaam">Knort</div><div class="wkzin">${M.zin || ""}</div></div></div>`;
   if(M.bevestig){
     const b = M.bevestig;
-    const ic = b.soort === "hart" ? "❤" : (b.soort === "lt" ? "✦" : "🟣");
+    const ic = b.soort === "hart" ? "❤" : (b.soort === "lt" || b.soort === "slot" ? "✦" : "🟣");
     const na = sterVrij() - b.prijs;
     return `<div class="ovbox wkbox">${kop}${praat}
       <div class="wkbevestig">
@@ -15272,8 +15595,8 @@ function winkelHTML(){
   }
   const vak = v => {
     if(v.leeg) return `<div class="wkvak leeg"><div class="wkvi">·</div><div class="wkvn">lege plank</div><div class="wkvk">binnenkort</div></div>`;
-    if(v.op)   return `<div class="wkvak leeg"><div class="wkvi">❤</div><div class="wkvn">${v.naam}</div><div class="wkvk">${v.kort}</div></div>`;
-    const ic = v.soort === "hart" ? "❤" : (v.soort === "lt" ? "✦" : "🟣");
+    if(v.op)   return `<div class="wkvak leeg"><div class="wkvi">${v.ic || "❤"}</div><div class="wkvn">${v.naam}</div><div class="wkvk">${v.kort}</div></div>`;
+    const ic = v.soort === "hart" ? "❤" : (v.soort === "lt" || v.soort === "slot" ? "✦" : "🟣");
     const staat = v.mijn ? "mijn" : (v.kan ? "kan" : "duur");
     const knop = v.mijn ? "in bezit" : `★ ${v.prijs}`;
     return `<div class="wkvak ${staat}"${v.mijn ? "" : ` data-act="btn" data-btn="koopvraag" data-soort="${v.soort}" data-key="${v.key || ""}"`}>
@@ -15285,29 +15608,30 @@ function winkelHTML(){
     <div class="wklab">🟣 Aethers</div>${rij("ae")}
     <div class="wklab">✦ Lichtkaarten</div>${rij("lt")}
     <div class="wklab">❤ De rest</div>
-    <div class="wkrij een">${vak(hartVak())}</div>
+    <div class="wkrij een">${vak(hartVak())}${vak(slotVak())}</div>
   </div>`;
 }
 /* Klikken op een vak vraagt eerst of je het zeker weet. */
 function koopVraag(soort, key){
   if(!M || M.type !== "winkel") return;
-  const v = soort === "hart" ? hartVak() : koopVak(soort, key, 0);
+  const v = soort === "hart" ? hartVak() : (soort === "slot" ? slotVak() : koopVak(soort, key, 0));
   if(!v || v.leeg || v.op || v.mijn) return;
-  if(!v.kan){ AU.play("lose"); winkelZeg(KNORST_ARM, "knorst_zuur", true); return; }
+  if(!v.kan){ AU.play("lose"); winkelZeg(knortZin(KNORT_ARM), "knorst_zuur", true); return; }
   M.bevestig = v; render();
 }
 function koopDoen(){
   if(!M || M.type !== "winkel" || !M.bevestig) return;
   const b = M.bevestig;
-  if(sterVrij() < b.prijs){ M.bevestig = null; winkelZeg(KNORST_ARM, "knorst_zuur", true); return; }
+  if(sterVrij() < b.prijs){ M.bevestig = null; winkelZeg(knortZin(KNORT_ARM), "knorst_zuur", true); return; }
   const k = koopState();
   if(b.soort === "hart") k.hart += 1;
+  else if(b.soort === "slot") k.slot += 1;
   else if(b.soort === "lt"){ if(k.lt.indexOf(b.key) < 0) k.lt.push(b.key); }
   else { if(k.ae.indexOf(b.key) < 0) k.ae.push(b.key); }
   sterUitgeven(b.prijs);            // schrijft ook de koop weg
   M.bevestig = null;
   AU.play("win");
-  winkelZeg(KNORST_KOOP, "knorst_blij", true);
+  winkelZeg(knortZin(KNORT_KOOP), "knorst_blij", true);
 }
 /* Hoe ver de mist wijkt rond een plek waar je geweest bent, in procenten van de kaart. */
 const OVERWORLD_ZICHT = 15;
@@ -15355,8 +15679,10 @@ function kaartStippen(pts, stap){
 /* Het pad van a naar b loopt niet kaarsrecht: een zachte bocht door de tussenpunten, en
    daaroverheen een lichte slinger — als een voetpad dat om stenen heen gaat. De uiteinden
    blijven precies op de levels liggen. */
+const owPos = id => id === "hemel" ? OVERWORLD_HEMEL : OVERWORLD[id];
 function kaartRoute(id, volgende){
-  const ruw = [[OVERWORLD[id].x, OVERWORLD[id].y]].concat(OVERWORLD_PAD[id] || [], [[OVERWORLD[volgende].x, OVERWORLD[volgende].y]]);
+  const a = owPos(id), b = owPos(volgende);
+  const ruw = [[a.x, a.y]].concat(OVERWORLD_PAD[id + ">" + volgende] || [], [[b.x, b.y]]);
   /* Catmull-Rom door de tussenpunten, fijn bemonsterd. */
   const P0 = ruw[0], Pn = ruw[ruw.length - 1];
   const pts = [[2 * P0[0] - ruw[1][0], 2 * P0[1] - ruw[1][1]]].concat(ruw, [[2 * Pn[0] - ruw[ruw.length - 2][0], 2 * Pn[1] - ruw[ruw.length - 2][1]]]);
@@ -15396,12 +15722,13 @@ function kaartHTML(){
   const nieuw = id => stand[id] && stand[id] !== (oud[id] || "");
   /* Eerst het pad, want hoe lang dat erover doet bepaalt wanneer de rest mag beginnen. */
   let stipTel = 0, stippen = "", padMask = "";
-  ids.forEach((id, i) => {
-    const volgende = ids[i + 1];
-    if(!volgende || stand[id] !== "klaar") return;
+  OVERWORLD_RANDEN.forEach(([id, volgende, na]) => {
+    const trigger = na || id;
+    if(!owPos(id) || !owPos(volgende) || !storyKlaar(trigger)) return;
+    if(volgende === "hemel" ? !STORY["5-1"] : !STORY[volgende]) return;
     const pts = kaartRoute(id, volgende);
     padMask += `<polyline points="${pts.map(q => q.join(",")).join(" ")}"/>`;
-    const nieuwPad = nieuw(id) || (nieuw(volgende) && !oud[volgende]);
+    const nieuwPad = nieuw(trigger) || (stand[volgende] && nieuw(volgende) && !oud[volgende]);
     kaartStippen(pts, 2.1).slice(1).forEach(([x, y], k, arr) => {
       if(k >= arr.length - 1) return;                       // niet tot óp de volgende knop
       const wacht = nieuwPad ? stipTel++ * 55 : 0;
@@ -15454,8 +15781,8 @@ function kaartHTML(){
   if(storyKlaar(OVERWORLD_WINKEL.na)){
     const w = OVERWORLD_WINKEL, nieuwW = !oud.winkel;
     gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwW);
-    winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De winkel van Knorst">
-        <span class="lvbinnen">🏪</span><span class="lvnaam">Knorst · winkel</span></button>`;
+    winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De kraam van Knort">
+        <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.knorst) ? `<img class="lvport" src="${SPRITE_BEELD.knorst}" alt="" draggable="false">` : "🏪"}</span><span class="lvnaam">Knort · winkel</span></button>`;
   }
   let hemel = "";
   if(storyVrij("5-1") && STORY["5-1"]){
@@ -15467,7 +15794,7 @@ function kaartHTML(){
   return `<div class="ovbox kaartbox">
     <div class="kaartkop"><h2>📖 Verhaal</h2>
       <span class="sub" style="color:var(--gold)">${n} van de ${STORY_ORDER.length}${alles ? " · 🔓" : ""}</span>
-      <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knorst, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
+      <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
     <div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}" id="kaartvlak">
