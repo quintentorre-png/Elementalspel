@@ -992,6 +992,10 @@ h3{font-size:.66rem; line-height:1.9}
 /* ---------- kaarten ---------- */
 .card{border:3px solid var(--ink2); background:var(--c2); overflow:hidden;
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.18), 3px 3px 0 0 rgba(0,0,0,.5)}
+/* ✦ Een lichtkaart herken je aan zijn witte rand — op de hand, op het veld, in de winkel,
+   overal. In CSS en niet in de tekening: zo is hij overal even dik en valt hij nooit weg
+   onder de naam- of tekstbalk. */
+.card.light{border-color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35), 0 0 6px rgba(255,255,255,.35), 3px 3px 0 0 rgba(0,0,0,.5)}
 .card .ci{position:absolute; inset:0; padding:0; display:block; filter:none; text-shadow:none}
 .card .ci .pix{display:block; width:100%; height:100%; image-rendering:pixelated}
 .card .cn{position:absolute; left:0; right:0; top:0; z-index:2;
@@ -1245,6 +1249,7 @@ h3{font-size:.66rem; line-height:1.9}
     gap:3px 7px; width:100%; max-width:100%; min-width:0; overflow:hidden; padding:0 4px}
   .pside.bottom{flex-direction:column-reverse}
   .pside .pinfo .aemini{font-size:.95rem; padding:5px 10px; margin-top:0}
+  .pside .pinfo .ruiten{--r:44px; margin-top:0}
   .pside .hand{flex:0 0 auto; width:100%; height:var(--hh)}
   .pdeckinfo{font-size:.58rem; white-space:nowrap}
 
@@ -1309,6 +1314,7 @@ h3{font-size:.66rem; line-height:1.9}
   .pside .pinfo{position:absolute; left:8px; top:50%; transform:translateY(-50%);
     flex-direction:column; align-items:flex-start; justify-content:center; flex-wrap:nowrap;
     width:auto; max-width:24vw; min-width:0}
+  .pside .pinfo .ruiten{--r:32px; --g:2px; margin-top:2px}
   .hand{flex:0 1 auto; width:auto; height:var(--hh)}
   .pname{font-size:.42rem}
   .pdeckinfo{font-size:.58rem}
@@ -1861,6 +1867,50 @@ h3{font-size:.66rem; line-height:1.9}
   .voorae .aecard.klein{min-width:112px}
   .aecard.klein .aex{font-size:.86rem; max-height:7.2em}
 }
+.aecard .aei.beeld .aebeeld.eigen{object-position:center 50%}
+/* 🟣 De ruitenrij. Een ruit is een vierkant op zijn punt, uit het midden van de prent gesneden;
+   de rand is de achtergrond die langs de binnenste ruit piept. De glans zit op de buitenste
+   laag, want een clip-path knipt een schaduw gewoon mee weg. */
+.ruiten{--r:56px; --g:3px; position:relative; flex:0 0 auto; margin-top:6px;
+  width:calc((var(--n) - 1) * (var(--r) / 2 + var(--g)) + var(--r));
+  height:calc(var(--r) * 1.5 + var(--g))}
+.ruiten.een{height:var(--r)}
+.ruitw{position:absolute; width:var(--r); height:var(--r); cursor:pointer;
+  left:calc(var(--i) * (var(--r) / 2 + var(--g))); top:calc(var(--rij) * (var(--r) / 2 + var(--g)));
+  transition:transform .12s ease, filter .12s ease; --rk:#b48be0;
+  filter:drop-shadow(0 0 3px rgba(157,111,216,.55)) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+.ruitw.veld{--rk:#d9b35a; filter:drop-shadow(0 0 3px rgba(217,179,90,.45)) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+.ruitw.licht{--rk:#fffdf2; filter:drop-shadow(0 0 4px rgba(255,255,255,.55)) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+.ruitw:hover,.ruitw:active{transform:scale(1.14); z-index:3}
+.ruit{position:absolute; inset:0; background:var(--rk); clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.ruitin{position:absolute; inset:4px; background:#231838; clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+  display:flex; align-items:center; justify-content:center; overflow:hidden}
+.ruitw.veld .ruitin{background:#1c1a14}
+.ruitw.licht .ruitin{background:#101626}
+.ruitic{font-size:calc(var(--r) * .36); line-height:1}
+.ruitbeeld{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;
+  image-rendering:pixelated}
+/* Het onderwerp van een aetherprent zit in het midden; zoom daarop in zodat het de ruit vult. */
+.ruitw.ae .ruitbeeld{transform:scale(1.55)}
+.ruitmerk{position:absolute; left:50%; transform:translateX(-50%); font-size:calc(var(--r) * .3); line-height:1;
+  filter:drop-shadow(0 0 3px rgba(201,162,255,.9)); pointer-events:none}
+.ruitw.r0 .ruitmerk{top:calc(var(--r) * -.22)}
+.ruitw.r1 .ruitmerk{bottom:calc(var(--r) * -.22)}
+.ruitw.merk{z-index:2}
+/* Trefwoorden: onderstreept met stippen; hover of tik = uitleg in een bubbel. */
+.kw{font-weight:700; border-bottom:1px dotted currentColor; cursor:help; white-space:nowrap}
+#kwtip{position:fixed; z-index:200; max-width:min(300px,86vw); padding:9px 12px; pointer-events:none;
+  background:#10141f; border:2px solid #e8c870; color:#e9e4d4; font-size:.8rem; line-height:1.4;
+  box-shadow:3px 3px 0 rgba(0,0,0,.6); opacity:0; transition:opacity .1s}
+#kwtip.aan{opacity:1}
+#kwtip b{display:block; color:#e8c870; margin-bottom:3px}
+.fxlijst{display:flex; flex-direction:column; gap:6px}
+.fxr{display:flex; gap:7px; align-items:baseline; line-height:1.4}
+.fxr .fxi{flex:0 0 1.1em; text-align:center; color:#e8c870; font-size:.9em}
+.fxr.fxspell{opacity:.8; font-size:.92em}
+.fxnoot{opacity:.75; font-size:.9em; margin-top:10px}
+.helptxt h4{margin:14px 0 4px; color:var(--gold)}
+.helptxt dl{margin:6px 0 0} .helptxt dt{font-weight:700; margin-top:8px} .helptxt dd{margin:2px 0 0 0; opacity:.9}
 .aemini .aeel{margin-left:6px; font-size:1.05em; filter:drop-shadow(0 0 4px rgba(201,162,255,.8))}
 .slaapmeter,.regenmeter{margin-top:7px; font-family:"Press Start 2P",ui-monospace,monospace;
   font-size:.42rem; line-height:1.7; padding:5px 6px; border-radius:3px; border:2px solid var(--line)}
@@ -2448,169 +2498,81 @@ body:not(.geladen) #app{visibility:hidden}
 const SELF_SCRIPT = document.currentScript;
 /* ================= DATA ================= */
 const EL = {
-  water:{name:"Water", icon:"💧", strong:"vuur", flash:true, hp:2,
-    kort:"Speel één van je <b>eigen</b> creatures opnieuw, ergens anders of op dezelfde plek. Daarna is hij een 🪞 <b>Waterspiegel</b>: elke volgende trigger spiegelt het speel-effect van een andere eigen kaart.",
-    cre:"Bij spelen kies je meteen een <b>eigen</b> creature en speelt die opnieuw — op dezelfde plek of een andere vrije plek. Hij <b>houdt zijn levens</b>, maar entangle-tokens vallen weg. Zijn speel-effect en de spell in die kolom triggeren opnieuw. Je mag Water ook <b>bovenop</b> een eigen creature spelen: die verhuist dan meteen. Creatures van je tegenstander kun je niet herspelen.<br><br>Na die plons is de kaart een 🪞 <b>Waterspiegel</b> (kijk naar het hoekje). Wordt hij daarna nog eens getriggerd — herspeeld door een ander Water, of aangewezen door een spiegel — dan verplaatst hij niets meer: je kiest een <b>andere eigen kaart</b> op het veld en háár speel-effect gaat nog een keer af. Wijs je een andere spiegel aan, dan spiegelt die door.",
-    sp:"Bij spelen: het herspeel-effect. Daarna is hij een 🪞 <b>Waterspiegel</b>: telkens als je hier een creature speelt, kies je een andere eigen kaart op het veld en gaat háár speel-effect nog een keer af — de creature die je net speelde mag ook."},
-  steen:{name:"Steen", icon:"🪨", strong:"water", flash:true, hp:3,
-    kort:"Deel twee keer <b>+1 leven</b> uit. Zelf mag ook, twee keer dezelfde mag ook.",
-    cre:"Start met 3 levens — het enige element dat sterker begint. Bij spelen kies je meteen tweemaal een doelwit voor +1 leven (mag allebei dezelfde, mag ook zichzelf). De twee +1'en fizzelen los van elkaar.",
-    sp:"Telkens als je hier een creature speelt: opnieuw tweemaal +1 leven naar keuze."},
-  vuur:{name:"Vuur", icon:"🔥", strong:"gras", flash:true, hp:2,
-    kort:"<b>2 schade</b> aan een creature van je <b>tegenstander</b>. 💧 Water is er immuun voor.",
-    cre:"Bij spelen kies je meteen je doelwit: 2 schade aan een creature van je <b>tegenstander</b>. 💧 Water is hier volledig immuun voor. Je eigen creatures kun je niet aanwijzen — daar bestaat 🟣 <b>Brandoffer</b> voor. Is het doelwit bij het resolven weg of verhuisd, dan fizzelt het.",
-    sp:"Bij spelen én telkens als je hier een creature speelt: hetzelfde schade-effect. De triggerende creature kan er niet door sterven."},
-  gras:{name:"Gras", icon:"🌿", strong:"steen", flash:true, hp:2,
-    kort:"Zet een <b>🌿 token</b> op één creature. Die verliest elke beurt 1 leven en die van jou krijgt er 1 bij.",
-    cre:"Bij spelen kies je meteen wie je entanglet. Dat token <b>draint</b>: het doelwit verliest 1 leven en deze creature krijgt er 1 bij — op 🪨 Steen is dat <b>dubbel: −2 daar, +2 hier</b>. Tokens stapelen en blokkeren aanvallen; in de upkeep van de eigenaar gaat er één af. Genoeg drain maakt een creature af. 🔥 Vuur is immuun voor entangle.",
-    sp:"Bij spelen én telkens als je hier een creature speelt: hetzelfde entangle-effect; de gedrainde levens gaan naar de creature die de trigger veroorzaakte."}
+  water:{name:"Water", icon:"💧", strong:"vuur", flash:true, hp:2},
+  steen:{name:"Steen", icon:"🪨", strong:"water", flash:true, hp:3},
+  vuur:{name:"Vuur", icon:"🔥", strong:"gras", flash:true, hp:2},
+  gras:{name:"Gras", icon:"🌿", strong:"steen", flash:true, hp:2}
 };
 /* Aether-kaarten (Commander) — passieve krachten en fusies, 🟣 paars, niet te verwijderen */
 const AETHERS = {
-  ae_draw3:  {el:null, name:"Bron van Overvloed", kind:"passief",
-    txt:"Je trekt in je draw phase 2 kaarten in plaats van 1. Trok je die tweede kaart écht, dan kost dat je aan het einde van diezelfde beurt <b>1 leven</b>. Sta je nog maar op <b>1 leven</b>, dan laat je die tweede kaart liggen en betaal je niets — je gaat er dus nooit zelf aan dood.",
-    kort:"2 kaarten per beurt · 1 leven als je trok"},
-  ae_vonk:   {el:"vuur", name:"Vonkoverslag", kind:"passief",
-    txt:"Al jouw 🔥-schade slaat over: de creatures in de <b>buurkolommen</b> van je doelwit — aan diezelfde kant — krijgen er <b>1 schade</b> bij. Die overslag telt zelf niet als vuur voor de elementcirkel, dus 💧 Water voelt hem ook, en hij slaat niet nog een keer over.",
-    kort:"🔥-schade raakt ook de buurkolommen voor 1"},
-  ae_watercycle:{el:"water", name:"Getijdenstroom", kind:"passief",
-    txt:"De creature die je met je 💧 Water-effect opnieuw speelt, doet zijn speel-effect <b>twee keer</b> in plaats van één keer.",
-    kort:"herspeelde creature triggert dubbel"},
-  ae_offer:  {el:"vuur", name:"Brandoffer", kind:"passief",
-    txt:"Je 🔥 Vuur-effect doet <b>1 schade extra</b>. En je mag er je <b>eigen</b> creatures mee aanwijzen: dat is geen schade maar een offer — <b>instakill</b>, ook op 💧 Water, en jij <b>trekt een kaart</b>. Een eigen 🔥 Vuur en alles in een eigen kolom met een 🔥-spell blijven buiten schot. Zonder deze aether raakt je vuur alleen de overkant.",
-    kort:"🔥 doet 1 meer · eigen creature offeren: instakill + trek 1"},
-  ae_fire6:  {el:"vuur", name:"Verzengende Woede", kind:"passief",
-    txt:"Je 🔥 Vuur-effect doet 5 schade in plaats van 2. 💧 Water blijft er immuun voor — daar is ☄️ Plasma voor.",
-    kort:"Vuur doet 5"},
-  ae_stonefull:{el:"steen", name:"Onwrikbaar", kind:"passief",
-    txt:"Je 🪨 Steen-creatures vallen aan met hun volle levens in plaats van de helft.",
-    kort:"Steen valt aan met volle levens"},
-  ae_grassx2:{el:"gras", name:"Woekergroei", kind:"passief",
-    txt:"Je 🌿 Gras-effect plaatst 2 entangle-tokens in plaats van 1, met dubbele drain.",
-    kort:"Gras plaatst 2 tokens"},
-  ae_hp3:    {el:null, name:"Oerkracht", kind:"passief",
-    txt:"Aan het begin van het potje — nadat je je starthand hebt gezien — kies je een element. Al jouw creatures van dat element komen met <b>+4 levens</b> op het bord.",
-    kort:"gekozen element: +4 levens"},
-  ae_graf:   {el:null, name:"Eeuwige Terugkeer", kind:"passief",
-    txt:"Aan het begin van het potje kies je een element. In de <b>eindfase van je beurt</b> roep je een kaart van dat element uit je graf op — met al zijn speel-effecten erbij. Zit je bord vol, dan gebeurt er niets.",
-    kort:"elke beurt een kaart uit je graf terug"},
-  fu_water:  {el:"water", name:"Dieptestroom", kind:"fusie", fuse:{speed:"flash"},
-    txt:"Offer een willekeurige eigen creature en zet op die plek een 💧 Water neer. Je trekt <b>1 kaart</b> en daarna gaat het <b>gewone Water-effect</b> gewoon af: je speelt een creature opnieuw.",
-    kort:"offer 1 creature → 💧 · trek 1 en herspeel"},
-  fu_fire:   {el:"vuur", name:"Assekern", kind:"fusie", fuse:{speed:"flash"},
-    txt:"Offer een willekeurige eigen creature en zet op die plek een 🔥 Vuur neer. Het fusie-effect <b>vervangt</b> het gewone Vuur-effect: 2 vuurschade aan élke vijandelijke creature. Met 🟣 Verzengende Woede krijgt één vijand naar keuze 5 in plaats van 2.",
-    kort:"offer 1 creature → 🔥 · 2 schade aan het hele vijandelijke bord"},
-  fu_stone:  {el:"steen", name:"Bergrug", kind:"fusie", fuse:{speed:"flash"},
-    txt:"Offer een willekeurige eigen creature en zet op die plek een 🪨 Steen met 4 levens neer, plus nóg een 🪨 Steen met 4 levens op een vrije plek. Het fusie-effect <b>vervangt</b> het gewone Steen-effect: allebei deze Stenen doen eenmalig het Steen-effect (dus vier keer +1 leven naar keuze).",
-    kort:"offer 1 creature → twee 🪨 van 4 · beide doen het Steen-effect"},
-  ae_hemel:  {el:null, name:"Hemelschoon", kind:"passief", verhaal:true,
-    txt:"Telkens als je een ✦ lichtkaart speelt: je <b>heelt 1 leven</b> — dit mag boven je startlevens uitkomen — en je <b>trekt 1 kaart</b>.",
-    kort:"lichtkaart: +1 leven en trek 1"},
-  ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true,
-    txt:"Telkens als je <b>schade van je tegenstander</b> oploopt, trek je 1 kaart. Alleen zijn aanvallen tellen — levens die je zélf betaalt, bijvoorbeeld als prijs van een ✦ lichtkaart, doen niets.",
-    kort:"schade van de tegenstander: trek 1"},
-  ae_alziend:{el:null, name:"Alziend", kind:"passief", verhaal:true, ic:"👁",
-    txt:"Je ziet de <b>hand van je tegenstander</b> — de hele partij, open en bloot. Hij weet dat en hij kan er niets aan doen.",
-    kort:"je ziet zijn hand"},
-  ae_genade: {el:null, name:"Genade", kind:"passief", verhaal:true, ic:"🕊",
-    txt:"Eén keer per beurt: de eerste van jouw creatures die vernietigd zou worden, <b>blijft staan op 1 leven</b>. Wat er daarna nog omvalt, valt gewoon om.",
-    kort:"één creature per beurt overleeft op 1"},
-  fu_grass:  {el:"gras", name:"Wurgranken", kind:"fusie", fuse:{speed:"flash"},
-    txt:"Offer een willekeurige eigen creature en zet op die plek een 🌿 Gras neer. Het fusie-effect <b>vervangt</b> het gewone Gras-effect: élke vijandelijke creature krijgt een entangle-token en alle drain komt bij deze Gras terecht.",
-    kort:"offer 1 creature → 🌿 · entangle het hele vijandelijke bord"}
+  ae_draw3:  {el:null, name:"Bron van Overvloed", kind:"passief"},
+  ae_vonk:   {el:"vuur", name:"Vonkoverslag", kind:"passief"},
+  ae_watercycle:{el:"water", name:"Getijdenstroom", kind:"passief"},
+  ae_offer:  {el:"vuur", name:"Brandoffer", kind:"passief"},
+  ae_fire6:  {el:"vuur", name:"Verzengende Woede", kind:"passief"},
+  ae_stonefull:{el:"steen", name:"Onwrikbaar", kind:"passief"},
+  ae_grassx2:{el:"gras", name:"Woekergroei", kind:"passief"},
+  ae_hp3:    {el:null, name:"Oerkracht", kind:"passief"},
+  ae_graf:   {el:null, name:"Eeuwige Terugkeer", kind:"passief"},
+  fu_water:  {el:"water", name:"Dieptestroom", kind:"fusie", fuse:{speed:"flash"}},
+  fu_fire:   {el:"vuur", name:"Assekern", kind:"fusie", fuse:{speed:"flash"}},
+  fu_stone:  {el:"steen", name:"Bergrug", kind:"fusie", fuse:{speed:"flash"}},
+  ae_hemel:  {el:null, name:"Hemelschoon", kind:"passief", verhaal:true},
+  ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true},
+  ae_alziend:{el:null, name:"Alziend", kind:"passief", verhaal:true, ic:"👁"},
+  ae_genade: {el:null, name:"Genade", kind:"passief", verhaal:true, ic:"🕊"},
+  fu_grass:  {el:"gras", name:"Wurgranken", kind:"fusie", fuse:{speed:"flash"}}
 };
-EL.licht = {name:"Licht", icon:"✦", strong:null, flash:true, hp:2, light:true,
-  cre:"Een ✦ lichtkaart speel je op een spell-plek; hij doet zijn ding en gaat daarna meteen naar het graf. Lichtkaarten mogen altijd ⚡ als reactie gespeeld worden.",
-  sp:"Lichtkaarten gaan altijd op een spell-plek en verdwijnen daarna naar het graf."};
+EL.licht = {name:"Licht", icon:"✦", strong:null, flash:true, hp:2, light:true};
 /* Een verhaal-creature: geen element, maar wel een hekel aan gras. */
 EL.balrog = {name:"Lavagolem", icon:"🌋", strong:null, flash:false, hp:20, token:true, speciaal:true,
-  entVrij:true, onsterfelijk:true, kaart:true, geenOffer:true,
-  cre:"De golem zelf. Hij heeft <b>geen element</b>, dus de elementcirkel raakt hem niet: geen instakill, geen immuniteit. Hij slaat als iedereen met de <b>helft van zijn levens</b>. 🌿 Entangle-tokens zuigen hem wél leeg, maar houden hem niet thuis — hij valt gewoon aan. En hij gaat niet dood: hij zakt hooguit naar <b>0 levens</b> en blijft staan.",
-  sp:""};
+  entVrij:true, onsterfelijk:true, kaart:true, geenOffer:true};
 /* 💀 De kapitein van een bemanning die al verdronken is. Zolang hij staat komt de rest terug. */
 EL.kapitein = {name:"Kapitein", icon:"💀", strong:null, flash:false, hp:5, token:true, speciaal:true,
-  minAtk:3, kaartrug:"verzopen", sprite:"kapiteincre",
-  cre:"De kapitein. <b>Geen element</b>, dus de elementcirkel doet hem niets. Hij slaat <b>minimaal 3</b> — meer als hij dikker wordt. Aan het eind van zijn beurt komt alles wat je van hem hebt omgelegd <b>terug als 💀 skelet</b>. Leg je hém om, dan haalt hij die beurt alleen <b>zichzelf</b> terug.",
-  sp:""};
+  minAtk:3, kaartrug:"verzopen", sprite:"kapiteincre"};
 /* 🐋 Wat er op de bodem woont. Te groot om te verpletteren en te groot om te negeren. */
 EL.reus = {name:"Diepzeereus", icon:"🐋", strong:null, flash:false, hp:12, token:true, speciaal:true,
-  vastAtk:3, entVrij:true, kaartrug:"verzopen", sprite:"reuscre",
-  cre:"Een reus van de bodem: <b>geen element</b>, een berg levens en een vaste aanval van <b>3</b>. 🌿 Entangle zuigt hem leeg maar houdt hem niet thuis, en de druk op deze diepte doet hem niets — daarvoor is hij te groot.",
-  sp:""};
+  vastAtk:3, entVrij:true, kaartrug:"verzopen", sprite:"reuscre"};
 /* 💀 Wat er van een bemanningslid overblijft. Wit, licht, en makkelijk te vervangen. */
 /* 👑 Een troon draagt het weer van één wereld. Zolang hij staat, staat dat weer aan. */
 EL.troon = {name:"Troon", icon:"👑", strong:null, flash:false, hp:6, token:true, speciaal:true,
-  stil:true, kaartrug:"troon", sprite:"troonsp",
-  cre:"Een van de vier tronen. <b>Geen element</b> en hij <b>valt nooit aan</b> — hij staat er alleen. Maar zolang hij staat draait <b>het weer dat hij draagt</b> door, én trekt hij zijn eigenaar elke beurt <b>een kaart</b>. Leg hem om en dat weer houdt op.",
-  sp:""};
-EL.skelet = {name:"Skelet", icon:"💀", strong:null, flash:false, hp:1, token:true, overheen:true,
-  cre:"Bot. <b>1 leven</b>, <b>geen element</b> — de elementcirkel doet hem niets. Je mag er gewoon een echte creature <b>overheen</b> spelen; dan valt hij uit elkaar.",
-  sp:""};
-EL.wolk  = {name:"Wolk", icon:"☁️", strong:null, flash:false, hp:2, token:true, overheen:true,
-  cre:"Een wolk-creature heeft 2 levens en geen element: geen instakill, geen immuniteit. Hij mag gewoon aanvallen. Zet je hier een echte creature neer, dan lost de wolk op.",
-  sp:""};
+  stil:true, kaartrug:"troon", sprite:"troonsp"};
+EL.skelet = {name:"Skelet", icon:"💀", strong:null, flash:false, hp:1, token:true, overheen:true};
+EL.wolk  = {name:"Wolk", icon:"☁️", strong:null, flash:false, hp:2, token:true, overheen:true};
 /* 🐺 De schaduwwolven van Max. Typeloos, 3 levens, en elke nieuwe wolf maakt de roedel dikker. */
-EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true, speciaal:true,
-  cre:"Een schaduwwolf. <b>Geen element</b>, <b>3 levens</b>. Zodra hij op het bord komt krijgen <b>alle wolven</b> van zijn baas +1 leven — hijzelf ook.",
-  sp:"Telkens als er hier een wolf op gespeeld wordt: alle wolven van zijn baas +1 leven."};
+EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true, speciaal:true};
 /* 🥚 Het ei van Shelob. Vier levens, valt nooit aan, en na twee van haar beurten komt het uit. */
 EL.ei = {name:"Ei", icon:"🥚", strong:null, flash:false, hp:4, token:true, speciaal:true, stil:true, vastAtk:0, geenOffer:true,
-  kaart:true, geenEnt:true,
-  cre:"Een ei. <b>Geen element</b>, <b>4 levens</b>, en het valt nooit aan — wat je er ook op legt. Na <b>twee beurten</b> van Shelob komt het uit, en dan staat er iets van 7 om 7. Maak het kapot vóór die tijd.",
-  sp:""};
+  kaart:true, geenEnt:true};
 /* 🕷 Wat er uit het ei komt. */
-EL.spin = {name:"Spin", icon:"🕷", strong:null, flash:false, hp:7, token:true, speciaal:true, vastAtk:7, kaart:true,
-  cre:"Een jonge spin. <b>Geen element</b>, <b>7 levens</b>, en hij slaat altijd voor <b>7</b>. Hij is nog nergens bang voor.",
-  sp:""};
+EL.spin = {name:"Spin", icon:"🕷", strong:null, flash:false, hp:7, token:true, speciaal:true, vastAtk:7, kaart:true};
 /* De drie spells van de Struikrover. Ze triggeren niet als je er iets op speelt — ze gaan
    aan het begin van élke beurt van hem af, van links naar rechts. */
-EL.swipe = {name:"Swipe", icon:"🗡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true,
-  cre:"", sp:"Aan het begin van elke beurt van de Struikrover: <b>1 schade aan al jouw creatures</b>, en daarna komt er een <b>+1-token</b> op deze spell. Elke haal doet dus één meer dan de vorige."};
-EL.stab = {name:"Stab", icon:"🔪", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true,
-  cre:"", sp:"Aan het begin van elke beurt van de Struikrover: <b>10 schade</b> aan de creature die recht tegenover deze spell staat, en <b>1 schade aan jou</b>."};
-EL.schild = {name:"Schild", icon:"🛡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true,
-  cre:"", sp:"Aan het begin van elke beurt van de Struikrover: al zijn creatures krijgen <b>+1 leven</b>. Op elke lege plek van hem komt een <b>schildje</b> van 1 leven — waar hij later gewoon overheen speelt."};
-EL.schildje = {name:"Schildje", icon:"🛡", strong:null, flash:false, hp:1, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true, overheen:true, geenEnt:true,
-  cre:"Een schildje. 1 leven, valt niet aan, en er kan een echte creature overheen gespeeld worden.",
-  sp:""};
+EL.swipe = {name:"Swipe", icon:"🗡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
+EL.stab = {name:"Stab", icon:"🔪", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
+EL.schild = {name:"Schild", icon:"🛡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
+EL.schildje = {name:"Schildje", icon:"🛡", strong:null, flash:false, hp:1, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true, overheen:true, geenEnt:true};
 /* 🕯 De Lichtbrenger. Geen element, vijf levens, en hij slaat met alles wat hij heeft —
    dus zo hard als hij nog leeft. Verder doet hij niets: geen speel-effect, geen trucje. */
 EL.brenger = {name:"Lichtbrenger", icon:"🕯", strong:null, flash:false, hp:5, token:true,
-  speciaal:true, kaart:true, volAtk:true,
-  cre:"Vijf levens, <b>geen element</b> — de cirkel doet hem niets. Hij valt aan met <b>al zijn levens</b> in plaats van de helft, dus hoe meer schade hij oploopt, hoe zachter hij slaat.",
-  sp:""};
+  speciaal:true, kaart:true, volAtk:true};
 /* ✦ Lichtkaarten (Commander) — wit, worden door je deck geschud */
 const LIGHTS = {
-  greed:   {cost:2, tribute:true, name:"Bron van Gulzigheid", n:3, kort:"2 levens + offer een creature · trek 2",
-    txt:"Betaal <b>2 levens</b> <b>en offer een eigen creature</b> (er komt niets voor terug) en trek 2 kaarten."},
-  darkhole:{cost:1, name:"Zwart Gat", n:3, kort:"betaal 1 leven · ruim je eigen bord op · trek er tot 3",
-    txt:"Betaal 1 leven. Vernietig al je eigen creatures. Trek 1 kaart voor elke creature die hierdoor vernietigd wordt, tot <b>hoogstens 3</b>."},
-  kuriboh: {name:"Wolkenzwerm", n:3, kort:"wolkjes op al je vrije plekken",
-    txt:"Zet op élke vrije plek aan jouw kant een wolk-creature met 2 levens neer — geen element, mag gewoon aanvallen. Speel je later een creature op zo'n plek, dan lost de wolk op."},
-  reborn:  {name:"Zielenoproep", n:3, kort:"terug uit het graf",
-    txt:"Alles uit je eigen graf. Kies één: pak er een kaart uit terug in je hand, óf roep er een creature uit op met +3 levens."},
-  master:  {name:"Elementaal Meester", n:3, kort:"wordt een element naar keuze",
-    txt:"Kies bij het spelen een element (🔥 💧 🌿 🪨). Deze kaart wordt dat element voor de rest van het potje, je laat hem aan je tegenstander zien en neemt hem daarna in je hand. Dat triggert niets."},
-  negate:  {name:"Volledige Negatie", n:3, kort:"negeer een kaart volledig",
-    txt:"Negeer de kaart die je tegenstander zojuist speelde volledig: de kaart gaat naar het graf en al zijn effecten verdwijnen van de chain. Dit gebeurt <b>meteen</b> — er komt geen chain-link bij en er valt niet op te reageren."},
-  dfusion: {cost:1, name:"Directe Fusie", n:3, kort:"betaal 1 leven · fusie zonder offer",
-    txt:"Betaal 1 leven. Heb je een 🟣 fusie-aether, dan speel je deze kaart als díe fusie-creature — zonder een creature te offeren. Heb je er meerdere, dan kies je."},
-  gamble:  {cost:1, name:"Gokkersbrouwsel", n:3, kort:"betaal 1 leven · gok op een type",
-    txt:"Betaal 1 leven. Noem een type (🔥 💧 🌿 🪨 of ✦ licht), trek 3 kaarten en discard daarvan alles wat niet dat type is."},
-  brenger: {name:"Lichtbrenger", n:3, kort:"zet een 🕯 van 5 neer die met zijn volle levens slaat",
-    txt:"Zet op een vrije eigen plek een <b>🕯 Lichtbrenger</b> neer: <b>5 levens</b>, geen element, en hij valt aan met <b>al zijn levens</b> in plaats van de helft. Meer doet hij niet."},
-  echo:    {name:"Echo", n:3, kort:"één eigen creature doet zijn speel-effect nog twee keer",
-    txt:"Kies een eigen creature op het veld. Zijn <b>speel-effect gaat nog twee keer af</b> — een 🪨 Steen deelt dus nog vier keer +1 uit, een ⛰️ Rots legt er nog twee kiezels bij. Je kiest meteen bij het spelen; die keuze kan niet meer vervallen."},
-  kloon:   {name:"Kloon", n:3, kort:"maak een kopie van een creature op het veld",
-    txt:"Kies een creature op het veld — van wie dan ook — en zet een <b>kopie</b> ervan op een vrije eigen plek. Die kopie komt vers op het bord: zijn speel-effect gaat gewoon af en de spell waar hij landt triggert ook. Je kiest meteen bij het spelen; die keuze kan niet meer vervallen."},
-  doortast:{cost:1, name:"Doortastend", n:3, kort:"1 leven · zoek een kaart uit je deck",
-    txt:"Betaal 1 leven. Kies een soort kaart die nog in je deck zit en neem er één van in je hand. Daarna wordt je deck geschud."},
-  vital:   {name:"Vitaliteit", n:3, kort:"2 levens erbij · trek een kaart",
-    txt:"Je krijgt <b>2 levens</b> terug en trekt <b>1 kaart</b>. Je levens mogen daarmee niet boven je startaantal uitkomen."},
-  web:     {cost:2, name:"Web", n:3, kort:"betaal 2 levens · trek 1 · al zijn creatures zitten vast", verhaal:true,
-    txt:"Betaal 2 levens en trek 1 kaart. Élke creature van je tegenstander krijgt een <b>🕸 web-token</b>: hij kan niet aanvallen. In zijn eigen upkeep valt het token er weer af."},
-  siphon:  {name:"Levensroof", n:3, kort:"zuig een creature leeg",
-    txt:"Kies bij het spelen een creature: die verliest al zijn levens. Jij krijgt daar <b>de helft</b> van (naar beneden afgerond) — je levens mogen daarmee boven je startaantal uitkomen."}
+  greed:   {cost:2, tribute:true, name:"Bron van Gulzigheid", n:3},
+  darkhole:{cost:1, name:"Zwart Gat", n:3},
+  kuriboh: {name:"Wolkenzwerm", n:3},
+  reborn:  {name:"Zielenoproep", n:3},
+  master:  {name:"Elementaal Meester", n:3},
+  negate:  {name:"Volledige Negatie", n:3},
+  dfusion: {cost:1, name:"Directe Fusie", n:3},
+  gamble:  {cost:1, name:"Gokkersbrouwsel", n:3},
+  brenger: {name:"Lichtbrenger", n:3},
+  echo:    {name:"Echo", n:3},
+  kloon:   {name:"Kloon", n:3},
+  doortast:{cost:1, name:"Doortastend", n:3},
+  vital:   {name:"Vitaliteit", n:3},
+  web:     {cost:2, name:"Web", n:3, verhaal:true},
+  siphon:  {name:"Levensroof", n:3}
 };
 const lName = cd => (cd && cd.lk) ? LIGHTS[cd.lk].name : null;
 const ORDER = ["water","steen","vuur","gras"];   // cirkel: 💧→🔥→🌿→🪨→💧
@@ -2620,22 +2582,182 @@ const ORDER = ["water","steen","vuur","gras"];   // cirkel: 💧→🔥→🌿�
    element werken. Alleen card.var zegt dat het de sterke versie is, en dat verandert wat hij
    extra doet. Kiezel is een token-variant van steen: hij hoort bij steen voor alle buffs. */
 const VAR = {
-  rots:  {basis:"steen", name:"Rots",   icon:"⛰️", badge:"⛰",
-    kort:"Zet eerst een <b>kiezel</b> neer (1 leven, hoort bij steen). Daarna het gewone steen-effect.",
-    uitleg:"Een zwaardere steen. Bij spelen zet je eerst op een vrije eigen plek een <b>kiezel</b> neer: een token van 1 leven dat bij 🪨 Steen hoort — hij krijgt dus dezelfde 🟣 buffs, en je mag er later gewoon een echte creature overheen spelen. Daarna doet Rots het gewone Steen-effect."},
-  plasma:{basis:"vuur",  name:"Plasma", icon:"☄️", badge:"☄",
-    kort:"Vuur dat ook <b>💧 Water</b> raakt — als effect én als aanval. Water maakt hem nog steeds meteen af.",
-    uitleg:"Heter dan vuur. Zijn schade-effect en zijn aanvallen raken ook 💧 Water, dat anders immuun is. De cirkel blijft verder gewoon staan: 💧 Water maakt Plasma nog altijd in één klap af."},
-  roos:  {basis:"gras",  name:"Roos",   icon:"🌹", badge:"🌹",
-    kort:"Slaat met zijn <b>volle levens</b> en groeit elke beurt <b>+1</b>. Als spell geeft hij dat aan wie erop staat.",
-    uitleg:"Gras met doornen. Een Roos valt aan met zijn volle levens in plaats van de helft, en aan het begin van elke beurt van zijn eigenaar krijgt hij +1 leven. Als spell doet hij hetzelfde voor de creature die erop staat: die slaat met zijn volle levens en groeit elke beurt +1. Daarnaast doet Roos gewoon het Gras-effect."},
-  ijs:   {basis:"water", name:"IJs",    icon:"🧊", badge:"🧊",
-    kort:"Speel hem op een lege plek of <b>op een eigen creature</b>. Eén eigen kaart gaat terug in je hand; dan smelt hij tot 💧 Water.",
-    uitleg:"Water dat je een kaart teruggeeft. Speel IJs op een eigen creature, dan gaat díe terug in je hand. Speel hem op een lege plek, dan kies je zelf welke eigen creature terug in je hand gaat — ook een 💧 Water of iets op een 💧-spell, wat het gewone water-effect niet kan. Daarna smelt het IJs meteen tot een gewone 💧 Water-creature. Dat smelten triggert niets, ook de spell eronder niet."},
-  kiezel:{basis:"steen", name:"Kiezel", icon:"🪨", badge:"·", token:true,
-    kort:"Een steentje van 1 leven. Hoort bij 🪨 Steen. Je mag er een echte creature overheen spelen.",
-    uitleg:"Wat de Rots achterlaat. Eén leven, hoort bij 🪨 Steen (dus 🟣 Oerkracht, 🟣 Onwrikbaar en de rotsval-bescherming gelden ook voor hem) en hij lost op zodra je er een echte creature overheen speelt."}
+  rots:  {basis:"steen", name:"Rots",   icon:"⛰️", badge:"⛰"},
+  plasma:{basis:"vuur",  name:"Plasma", icon:"☄️", badge:"☄"},
+  roos:  {basis:"gras",  name:"Roos",   icon:"🌹", badge:"🌹"},
+  ijs:   {basis:"water", name:"IJs",    icon:"🧊", badge:"🧊"},
+  kiezel:{basis:"steen", name:"Kiezel", icon:"🪨", badge:"·", token:true}
 };
+/* ================= TEKSTEN =================
+   Eén taal voor alle kaarten. Een kaart heeft een ▶ speel-effect (gaat één keer af als hij
+   als creature het veld op komt) en/of een ◆ veld-effect (werkt zolang hij er ligt). Wat
+   steeds terugkomt is een trefwoord: op de kaart staat alleen het woord, de uitleg staat één
+   keer hieronder in BEGRIPPEN en verschijnt als je erover hovert of erop tikt.
+   Schrijfregels: één effect is één zin, gebiedende wijs, getallen vet, "eigen"/"vijandelijk",
+   nooit een trefwoord opnieuw uitleggen, geen sfeer in een regeltekst.
+   In de teksten hieronder is {Woord} een trefwoord, {vorm|sleutel} als de vorm afwijkt. */
+const BEGRIPPEN = {
+  speel:     {naam:"▶ Speel-effect", uitleg:"Gaat één keer af, op het moment dat de kaart als creature het veld op komt."},
+  veld:      {naam:"◆ Veld-effect", uitleg:"Werkt zolang de kaart op het veld ligt."},
+  spell:     {naam:"Spell", uitleg:"Een kaart op de spell-plek van een kolom. Hij doet zijn speel-effect bij het neerleggen, en opnieuw elke keer dat jij in die kolom een creature speelt. Een nieuwe spell op een bezette plek vervangt de oude."},
+  snel:      {naam:"⚡ Snel", uitleg:"Mag als reactie in de chain, buiten je beurt en in je gevechtsfase."},
+  kleurloos: {naam:"Kleurloos", uitleg:"Heeft geen element: de cirkel doet hem niets. Geen instakill, nergens immuun voor."},
+  volleslag: {naam:"Volle slag", uitleg:"Valt aan met al zijn levens in plaats van de helft."},
+  groei:     {naam:"Groei", uitleg:"Begin van de beurt van zijn baas: +1 leven."},
+  muur:      {naam:"Muur", uitleg:"Valt nooit aan."},
+  wijkt:     {naam:"Wijkt", uitleg:"Speel je er een creature op, dan verdwijnt hij."},
+  verstrik:  {naam:"Verstrik", uitleg:"Leg een 🌿 op een creature. Die verliest meteen 1 leven en de bron krijgt er 1 bij (op 🪨 Steen 2). Met 🌿 kan hij niet aanvallen. In zijn upkeep valt er één 🌿 af. 🔥 Vuur kan niet verstrikt worden."},
+  vast:      {naam:"Vast", uitleg:"🕸 Kan niet aanvallen tot zijn volgende upkeep."},
+  herspeel:  {naam:"Herspeel", uitleg:"Pak een eigen creature op en zet hem opnieuw neer, op dezelfde of een andere vrije plek. Hij houdt zijn levens, zijn 🌿 vallen weg, en zijn speel-effect gaat opnieuw af (net als de spell in die kolom)."},
+  spiegel:   {naam:"🪞 Spiegel", uitleg:"Triggert deze kaart opnieuw, dan herspeelt hij niets meer: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. Kies je een andere spiegel, dan spiegelt die door."},
+  roepop:    {naam:"Roep op", uitleg:"Zet een kaart uit je graf op het veld. Zijn speel-effect gaat af."},
+  offer:     {naam:"Offer", uitleg:"Vernietig een eigen creature als prijs."},
+  betaal:    {naam:"Betaal", uitleg:"Verlies levens als prijs. Dat telt niet als schade."},
+  heel:      {naam:"Heel", uitleg:"Krijg levens terug, maar nooit boven je startlevens."},
+  pluslevens:{naam:"+levens", uitleg:"Levens erbij; dit mag wél boven je startlevens uitkomen."},
+  negeer:    {naam:"Negeer", uitleg:"De kaart gaat naar het graf en al zijn effecten verdwijnen van de chain. Hierop kan niemand reageren."},
+  fusie:     {naam:"Fusie", uitleg:"Offer een willekeurige eigen creature. Deze kaart komt op die plek, met het fusie-effect in plaats van zijn speel-effect. Altijd ⚡ Snel. Herspeel je hem later, dan doet hij zijn gewone speel-effect."},
+  instakill: {naam:"Instakill", uitleg:"Schade tussen creatures volgt de cirkel 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak: meteen vernietigd."},
+  immuun:    {naam:"Immuun", uitleg:"Zwak tegen sterk: de schade doet niets."},
+  fizzelt:   {naam:"Fizzelt", uitleg:"Is het doelwit weg of verhuisd als het effect resolvet, dan gebeurt er niets."},
+  licht:     {naam:"✦ Licht", uitleg:"Speel je op een spell-plek. Altijd ⚡ Snel. Doet zijn effect en gaat meteen naar het graf."},
+  aether:    {naam:"🟣 Aether", uitleg:"Een blijvende kracht. Niet te verwijderen."}
+};
+/* Vormen die op een ander trefwoord wijzen. */
+const KW_ALIAS = {herspeelt:"herspeel", herspelen:"herspeel", verstrikt:"verstrik", verstrikken:"verstrik",
+  offert:"offer", betaalt:"betaal", negeert:"negeer", fizzelen:"fizzelt", fizzel:"fizzelt",
+  immuniteit:"immuun", flash:"snel", groei1:"groei", spiegel:"spiegel", aethers:"aether"};
+function kwSleutel(w){
+  const k = String(w).toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+  return BEGRIPPEN[k] ? k : (KW_ALIAS[k] || null);
+}
+/* {Woord} → een trefwoord waar je overheen kunt hoveren. */
+function kwHTML(t){
+  if(typeof t !== "string" || t.indexOf("{") < 0) return t;
+  return t.replace(/\{([^{}|]+)(?:\|([a-z]+))?\}/g, (m, w, k) => {
+    const key = k || kwSleutel(w);
+    return key && BEGRIPPEN[key] ? `<span class="kw" data-kw="${key}">${w}</span>` : `<b>${w}</b>`;
+  });
+}
+const kwChip = k => BEGRIPPEN[k] ? `<span class="kw" data-kw="${k}">${BEGRIPPEN[k].naam}</span>` : "";
+
+/* ---- de vier elementen en alles wat verder op het bord kan staan ----
+   kw: trefwoorden in de kop · speel: ▶ · veld: ◆ · eig: vaste eigenschap zonder moment ·
+   spell: wat er als spell nog bij komt (de vaste spell-regel staat er altijd al). */
+const KAART_TEKST = {
+  water:   {kw:["snel"], speel:"{Herspeel} een eigen creature. Daarna is deze kaart een {🪞 Spiegel|spiegel}.",
+            eig:"Speel je hem óp een eigen creature, dan herspeel je die."},
+  vuur:    {kw:["snel"], speel:"<b>2</b> schade aan een vijandelijke creature."},
+  gras:    {kw:["snel"], speel:"{Verstrik} een creature."},
+  steen:   {kw:["snel"], speel:"Twee keer <b>+1 leven</b> aan een creature naar keuze. Mag dezelfde, mag zichzelf."},
+  licht:   {kw:["licht"]},
+  balrog:  {kw:["kleurloos"], veld:"Gaat niet dood: blijft op 0 staan. 🌿 houdt hem niet tegen."},
+  kapitein:{kw:["kleurloos"], eig:"Slaat minstens <b>3</b>.",
+            veld:"Einde van zijn beurt: wat jij van hem vernietigde, komt terug als 💀 Skelet. Vernietig je hém, dan komt alleen hij terug."},
+  reus:    {kw:["kleurloos"], eig:"Slaat altijd <b>3</b>. 🌿 houdt hem niet tegen. De druk van de diepte doet hem niets."},
+  troon:   {kw:["kleurloos","muur"], veld:"Zijn weer draait door, en zijn baas trekt elke beurt <b>1</b>. Vernietig hem en dat weer stopt."},
+  skelet:  {kw:["kleurloos","wijkt"]},
+  wolk:    {kw:["kleurloos","wijkt"]},
+  wolf:    {kw:["kleurloos"], speel:"Alle wolven van zijn baas <b>+1</b> leven."},
+  ei:      {kw:["kleurloos","muur"], veld:"Na <b>2</b> beurten van zijn baas komt er een 🕷 Spin uit."},
+  spin:    {kw:["kleurloos"], eig:"Slaat altijd <b>7</b>."},
+  swipe:   {veld:"Begin van zijn beurt: <b>1</b> schade aan al jouw creatures, en daarna elke keer <b>1</b> meer."},
+  stab:    {veld:"Begin van zijn beurt: <b>10</b> schade aan de creature hier tegenover, en <b>1</b> aan jou."},
+  schild:  {veld:"Begin van zijn beurt: al zijn creatures <b>+1</b> leven, en op elke lege plek van hem een 🛡 Schildje."},
+  schildje:{kw:["muur","wijkt"]},
+  brenger: {kw:["kleurloos","volleslag"]}
+};
+const VAR_TEKST = {
+  rots:   {speel:"Zet een 🪨 Kiezel op een vrije eigen plek. Daarna het Steen-effect."},
+  plasma: {eig:"Zijn schade en zijn aanval raken ook 💧 Water."},
+  roos:   {kw:["volleslag","groei"], speel:"{Verstrik} een creature.",
+           spell:"De creature op deze plek krijgt {Volle slag} en {Groei 1|groei}."},
+  ijs:    {speel:"Een eigen creature gaat terug naar je hand (ook 💧 Water). Speel je IJs óp een eigen creature, dan gaat die. Daarna smelt IJs tot 💧 Water, zonder trigger."},
+  kiezel: {kw:["wijkt"], eig:"Telt als 🪨 Steen."}
+};
+const LICHT_TEKST = {
+  greed:   "{Betaal} <b>2</b> en {offer} een eigen creature: trek <b>2</b>.",
+  darkhole:"{Betaal} <b>1</b>: vernietig al je eigen creatures. Trek <b>1</b> per stuk, hoogstens <b>3</b>.",
+  kuriboh: "Zet op elke vrije eigen plek een ☁️ Wolk: <b>2</b> levens, {Kleurloos}, {Wijkt}.",
+  reborn:  "Kies: pak een kaart uit je graf terug in je hand, óf {roep|roepop} er een creature uit {op|roepop} met <b>+3</b> levens.",
+  master:  "Kies 🔥 💧 🌿 of 🪨. Deze kaart wordt dat element tot het eind van het potje en gaat terug naar je hand.",
+  negate:  "{Negeer} de kaart die je tegenstander net speelde.",
+  dfusion: "{Betaal} <b>1</b>: speel deze kaart als je 🟣 {fusie}, zonder offer.",
+  gamble:  "{Betaal} <b>1</b>: noem een type en trek <b>3</b>. Gooi weg wat niet dat type is.",
+  brenger: "Zet een 🕯 Lichtbrenger op een vrije eigen plek: <b>5</b> levens, {Kleurloos}, {Volle slag}.",
+  echo:    "Het speel-effect van een eigen creature gaat nog <b>twee keer</b> af.",
+  kloon:   "Zet een kopie van een creature (van wie ook) op een vrije eigen plek. Zijn speel-effect gaat af.",
+  doortast:"{Betaal} <b>1</b>: kies een kaart uit je deck en neem hem in je hand.",
+  vital:   "{Heel} <b>2</b>. Trek <b>1</b>.",
+  web:     "{Betaal} <b>2</b>: trek <b>1</b>. Alle vijandelijke creatures zitten {Vast}.",
+  siphon:  "Een creature verliest al zijn levens. Jij krijgt de helft daarvan als {+levens|pluslevens}."
+};
+const AETHER_TEKST = {
+  ae_draw3:     "Trek <b>2</b> per beurt in plaats van 1. {Betaal} dan <b>1</b> aan het eind van die beurt. Op 1 leven trek je er gewoon 1.",
+  ae_vonk:      "Je 🔥-schade doet ook <b>1</b> schade aan de creatures ernaast (ook aan 💧 Water).",
+  ae_watercycle:"Wat je {herspeelt}, doet zijn speel-effect <b>twee keer</b>.",
+  ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen creature mee kiezen: {offer} hem en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-spell.",
+  ae_fire6:     "Je 🔥 doet <b>5</b> in plaats van 2.",
+  ae_stonefull: "Je 🪨 hebben {Volle slag}.",
+  ae_grassx2:   "Je 🌿 {verstrikt} met <b>2</b> tokens in plaats van 1.",
+  ae_hp3:       "Kies bij de start een element. Je creatures van dat element komen binnen met <b>+4</b> levens.",
+  ae_graf:      "Kies bij de start een element. Einde van je beurt: {roep|roepop} er één {op|roepop} uit je graf.",
+  fu_water:     "{Fusie} 💧: trek <b>1</b>, daarna {herspeel}.",
+  fu_fire:      "{Fusie} 🔥: <b>2</b> schade aan elke vijandelijke creature. Met Verzengende Woede krijgt één ervan naar keuze <b>5</b>.",
+  fu_stone:     "{Fusie} 🪨 met <b>4</b> levens, plus een tweede 🪨 van <b>4</b> op een vrije plek. Allebei doen hun speel-effect.",
+  fu_grass:     "{Fusie} 🌿: {verstrik} elke vijandelijke creature. Alle drain gaat naar deze Gras.",
+  ae_hemel:     "Speel je een ✦: <b>+1</b> {leven|pluslevens} en trek <b>1</b>.",
+  ae_pijn:      "Doet je tegenstander je schade: trek <b>1</b>.",
+  ae_alziend:   "Je ziet zijn hand.",
+  ae_genade:    "Eén keer per beurt: je eerste creature die vernietigd zou worden, blijft staan op <b>1</b>."
+};
+const SPELL_REGEL = "Doet zijn speel-effect bij het neerleggen en bij elke creature die jij hier speelt.";
+/* Alles in één keer omzetten. De oude velden (kort, cre, sp, txt, uitleg) blijven bestaan
+   zodat elke plek die ze leest de nieuwe tekst krijgt. */
+(function(){
+  const plat = t => (t || "").replace(/<[^>]+>/g, "");
+  Object.entries(KAART_TEKST).forEach(([k, t]) => {
+    const E = EL[k]; if(!E) return;
+    const o = {kw:t.kw || [], speel:kwHTML(t.speel || ""), veld:kwHTML(t.veld || ""), eig:kwHTML(t.eig || ""), spell:kwHTML(t.spell || "")};
+    E.tekst = o;
+    E.kort = o.speel || o.veld || o.eig || o.kw.map(kwChip).join(" · ");
+    E.cre = [o.speel && "▶ " + o.speel, o.eig, o.veld && "◆ " + o.veld].filter(Boolean).join(" ") || E.kort;
+    E.sp = E.alleenSpell ? o.veld : SPELL_REGEL + (o.spell ? " " + o.spell : "");
+  });
+  Object.entries(VAR_TEKST).forEach(([k, t]) => {
+    const V = VAR[k]; if(!V) return;
+    const o = {kw:t.kw || [], speel:kwHTML(t.speel || ""), veld:kwHTML(t.veld || ""), eig:kwHTML(t.eig || ""), spell:kwHTML(t.spell || "")};
+    V.tekst = o;
+    V.kort = V.uitleg = [o.speel && "▶ " + o.speel, o.eig, o.spell && "Als spell: " + o.spell].filter(Boolean).join(" ")
+      || o.kw.map(kwChip).join(" · ");
+  });
+  Object.entries(LICHT_TEKST).forEach(([k, t]) => { if(LIGHTS[k]) LIGHTS[k].txt = LIGHTS[k].kort = kwHTML(t); });
+  Object.entries(AETHER_TEKST).forEach(([k, t]) => { if(AETHERS[k]) AETHERS[k].txt = AETHERS[k].kort = kwHTML(t); });
+})();
+/* Een kaartuitleg in vaste vakjes: ▶ speel-effect, ◆ veld-effect, eigenschappen, en wat hij
+   als spell doet. Gebruikt door de hover-uitleg, het infoscherm en het spelen-als-scherm. */
+function kaartTekst(el, varKey){
+  const E = EL[el] || {}, V = varKey && VAR[varKey];
+  const b = E.tekst || {kw:[], speel:"", veld:"", eig:"", spell:""};
+  const v = (V && V.tekst) || {};
+  const kw = [...new Set([].concat(b.kw || [], v.kw || []))];
+  return {kw, speel:v.speel || b.speel, veld:v.veld || b.veld,
+    eig:[b.eig, v.eig].filter(Boolean), spell:v.spell || b.spell, alleenSpell:!!E.alleenSpell};
+}
+function kwRij(kw){
+  return kw.map(k => k === "groei" ? `<span class="kw" data-kw="groei">Groei 1</span>` : kwChip(k)).filter(Boolean).join(" · ");
+}
+function effectHTML(el, varKey, opt){
+  const t = kaartTekst(el, varKey), o = opt || {};
+  const r = [];
+  if(t.speel) r.push(`<div class="fxr"><span class="fxi" title="Speel-effect">▶</span><span>${t.speel}</span></div>`);
+  t.eig.forEach(e => r.push(`<div class="fxr"><span class="fxi"></span><span>${e}</span></div>`));
+  if(t.veld) r.push(`<div class="fxr"><span class="fxi" title="Veld-effect">◆</span><span>${t.veld}</span></div>`);
+  const element = !!(EL[el] && EL[el].strong);
+  if(!o.geenSpell && (element || t.spell))
+    r.push(`<div class="fxr fxspell"><span class="fxi"></span><span><span class="kw" data-kw="spell">Als spell</span>: ${SPELL_REGEL.charAt(0).toLowerCase() + SPELL_REGEL.slice(1)}${t.spell ? " " + t.spell : ""}</span></div>`);
+  return r.join("");
+}
 /* 🎪 Knetter maakt hun vuur tot plasma. Dat gold al voor wat het dóet; vanaf nu ook voor
    hoe het eruitziet — anders staat er "Vuur" op een kaart die water doodslaat. Gaat hij uit,
    dan zijn het weer gewone vuurkaarten, ook op het scherm. */
@@ -4525,7 +4647,7 @@ function cardFaceHTML(el, spell, card){
   const c = (el && typeof el === "object") ? el : card;
   const e = c ? c.el : el;
   if(c && c.lk){
-    const lb = KAART_BEELD[c.lk] || LICHT_KAART;   // eigen prent gaat vóór de algemene
+    const lb = LICHT_BEELD[c.lk] || KAART_BEELD[c.lk] || LICHT_KAART;   // eigen prent gaat vóór de algemene
     return `<div class="card el-licht light">
     <div class="ci">${lb && BEELD_KLAAR[lb] !== "fout" ? `<img class="kaartbeeld" src="${kaartSrc(lb)}" alt="" decoding="sync" onerror="beeldFout(this)">` : ""}${pixArt("licht")}</div>
     <div class="cn">${LIGHTS[c.lk].name}</div>
@@ -4586,6 +4708,16 @@ const KAART_BEELD = {
      in het kaartvenster gepast, en er staat een kleine versie van hem bovenop. */
   balrog:"art/lavagolem.png"
 };
+/* ✦ Elke lichtspell zijn eigen prent: allemaal dezelfde nachtlucht en lichtkegel als de
+   algemene lichtkaart, met per kaart één onderwerp erin. Een los lijstje, zodat 'web' hier
+   de lichtkaart is en in KAART_BEELD het web-element blijft. */
+const LICHT_BEELD = {
+  greed:"art/licht-gulzigheid.png", darkhole:"art/licht-zwartgat.png", kuriboh:"art/licht-wolkenzwerm.png",
+  reborn:"art/licht-zielenoproep.png", master:"art/licht-meester.png", negate:"art/licht-negatie.png",
+  dfusion:"art/licht-fusie.png", gamble:"art/licht-brouwsel.png", brenger:"art/licht-lichtbrenger.png",
+  echo:"art/licht-echo.png", kloon:"art/licht-kloon.png", doortast:"art/licht-doortastend.png",
+  vital:"art/licht-vitaliteit.png", web:"art/licht-web.png", siphon:"art/licht-levensroof.png"
+};
 /* De achterkant van een dichte kaart. Een verhaallevel mag er per kant een eigen geven —
    in 2-4 zie je zo meteen dat de wolven van Max zijn en niet van de Seraf. */
 function rugVan(p){
@@ -4606,12 +4738,30 @@ const AETHER_KAART = "art/aether-kaart.png";   // liggende banner, 512×288
    — rechtop, op kaartformaat. De banner hierboven is liggend en past daar niet in, dus die
    ene plek heeft zijn eigen staande prent. */
 const AETHER_KAARTVORM = "art/kaart-aether.png";   // staand full art, 480×672
+/* 🟣 Elke aether zijn eigen prent: dezelfde paarse schemerlucht als de algemene aetherkaart,
+   met per kracht één onderwerp in het midden. Het midden is wat je in het spel ziet: daar wordt
+   de ruit naast je levens uit gesneden. In de winkel en bij het kiezen zie je meer. */
+const AETHER_BEELD = {
+  ae_draw3:"art/aether-overvloed.png", ae_vonk:"art/aether-vonkoverslag.png",
+  ae_watercycle:"art/aether-getijdenstroom.png", ae_offer:"art/aether-brandoffer.png",
+  ae_fire6:"art/aether-woede.png", ae_stonefull:"art/aether-onwrikbaar.png",
+  ae_grassx2:"art/aether-woekergroei.png", ae_hp3:"art/aether-oerkracht.png",
+  ae_graf:"art/aether-terugkeer.png", fu_water:"art/aether-dieptestroom.png",
+  fu_fire:"art/aether-assekern.png", fu_stone:"art/aether-bergrug.png",
+  fu_grass:"art/aether-wurgranken.png", ae_hemel:"art/aether-hemelschoon.png",
+  ae_pijn:"art/aether-loutering.png", ae_alziend:"art/aether-alziend.png",
+  ae_genade:"art/aether-genade.png"
+};
+/* De twee vaste ruiten aan het eind van de rij van je tegenstander. */
+const RUIT_VELD  = "art/ruit-veld.png";    // veldcondities van dit gevecht
+const RUIT_LICHT = "art/ruit-licht.png";   // welke ✦ lichtkaarten hij in zijn deck heeft
 /* Het vak met het symbool op een aether- of lichtkaart: een tekening als die er is,
    anders het icoon dat er altijd al stond. */
 function aeBeeldHTML(k, licht){
-  const pad = licht ? (KAART_BEELD[k] || LICHT_KAART) : AETHER_KAART;
+  const eigen = licht ? (LICHT_BEELD[k] || KAART_BEELD[k]) : AETHER_BEELD[k];
+  const pad = (eigen && BEELD_KLAAR[eigen] !== "fout") ? eigen : (licht ? LICHT_KAART : AETHER_KAART);
   if(!pad || BEELD_KLAAR[pad] === "fout") return null;
-  return `<img class="aebeeld" src="${pad}" alt="" decoding="sync" onerror="this.closest('.aei').classList.remove('beeld'); this.remove()">`;
+  return `<img class="aebeeld${pad === eigen ? " eigen" : ""}" src="${pad}" alt="" decoding="sync" onerror="this.closest('.aei').classList.remove('beeld'); this.remove()">`;
 }
 function aeVak(k, licht){
   const img = aeBeeldHTML(k, licht);
@@ -4912,16 +5062,30 @@ function targetsForEff(p, e, selfId, cardEl, exclIds){
 }
 const effPrompt = {
   vuur:  "🔥 Vuur: kies nu je doelwit (%D% schade%O%)",
-  gras:  "🌿 Gras: kies nu wie je entanglet (−1/+1 · op 🪨 Steen −2/+2)",
+  gras:  "🌿 Gras: kies wie je verstrikt (−1/+1 · op 🪨 Steen −2/+2)",
   steen: "🪨 Steen: kies nu wie er +1 leven krijgt",
   water: "💧 Water: kies nu een eigen creature om opnieuw te spelen",
   ws:    "🪞 Waterspiegel: kies een andere eigen kaart op het veld — haar speel-effect gaat nog een keer af"
 };
+async function rotsKiezelsVoor(p, card, asSpell, col, o){
+  let n = 0;
+  if(asSpell){ if(card.var === "rots") n++; }
+  else {
+    if(card.var === "rots" && !o.skipOwn && !o.forceEffs) n += o.dubbel ? 2 : 1;
+    const sp = P(p).cols[col] && P(p).cols[col].spell;
+    if(sp && sp.card.var === "rots" && !(sp.card.el === "wolf" && card.el !== "wolf")) n++;
+  }
+  for(let i = 0; i < n && !S.over; i++) await rotsKiezel(p, card, col);
+}
 /* Vraagt per effect één doelwit en geeft het plan terug, of "cancel". */
 async function declarePlan(p, card, asSpell, col, opts){
   const o = opts || {};
   const selfId = asSpell ? null : card.id;
   const plan = plannedEffects(p, card, asSpell, col, o);
+  /* ⛰️ De kiezel is een deel van het speel-effect van Rots, dus hij komt er elke keer bij dat
+     dat effect afgaat: gewoon spelen, herspelen met 💧, twee keer met 🟣 Getijdenstroom, Echo,
+     Kloon, oproepen uit het graf — en als Rots-spell bij elke creature in zijn kolom. */
+  await rotsKiezelsVoor(p, card, asSpell, col, o);
   for(let i=0;i<plan.length;i++){
     const e = plan[i];
     const ids = targetsForEff(p, e, selfId, card.el, o.excl);
@@ -5116,7 +5280,7 @@ async function placeNow(p, card, asSpell, col, opts){
   if(o.keepHp != null && slot.cre){                       // 💧 herspelen: levens blijven, tokens niet
     slot.cre.hp = o.keepHp;
     if(o.keepHp !== (EL[card.el].hp || 2))
-      addLog(`💧 ${icon(card.el)} ${EL[card.el].name} houdt zijn ${o.keepHp} levens; entangle-tokens vallen weg.`);
+      addLog(`💧 ${icon(card.el)} ${EL[card.el].name} houdt zijn ${o.keepHp} levens; zijn 🌿 vallen weg.`);
   }
   render();
   if(o.splash) fxSplash(creSel(p, col)); else AU.play("place");
@@ -5165,8 +5329,6 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
   }
   const ok = await placeNow(p, card, asSpell, col, opts);
   if(!ok){ if(verdrongen){ P(p).cols[col].cre = verdrongen; render(); } return false; }
-  if(!asSpell && card.var === "rots") await rotsKiezel(p, card, col);
-  if(asSpell  && card.var === "rots") await rotsKiezel(p, card, col);
   if(!asSpell && card.var === "ijs"){ await ijsSmelt(p, card, col, ijsTerug); return true; }
   if(verdrongen){ await waterVerdringt(p, card, col, verdrongen, flash); return true; }
   /* 💨 In de rook legt hij zijn creatures dicht neer: geen effect, geen kaartbeeld. */
@@ -5926,9 +6088,6 @@ async function resolveLight(it){
       if(S.over) break;
       const nog = P(p).cols[c] && P(p).cols[c].cre;
       if(!nog || nog.card.id !== cr.card.id) break;      // hij is intussen weg
-      /* Een sterke variant doet meer dan zijn element-effect: de Rots legt eerst een kiezel
-         neer, en dat gebeurt buiten de chain om. Die stap hoort er dus ook nog twee keer bij. */
-      if(nog.card.var === "rots") await rotsKiezel(p, cr.card, c);
       const plan = await declarePlan(p, cr.card, false, c, {onField:true});
       pushPlay(p, cr.card, false, c, false, plan === "cancel" ? [] : plan);
       await chainLoop();
@@ -6250,8 +6409,8 @@ async function resolveEffect(it){
 
   if(it.el === "gras"){
     const ids = allCreIds(entBaar);                        // 🔥 (en de Balrog) is immuun voor entangle
-    if(!ids.length){ addLog("🌿 Geen geldig doelwit (🔥 Vuur is immuun voor entangle)."); return; }
-    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🌿 Gras: kies een creature om te entanglen (−1 leven daar, +1 hier · op 🪨 Steen −2/+2)`, false, {k:"gras"});
+    if(!ids.length){ addLog("🌿 Geen geldig doelwit (🔥 Vuur kan niet verstrikt worden)."); return; }
+    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🌿 Gras: kies een creature om te verstrikken (−1 leven daar, +1 hier · op 🪨 Steen −2/+2)`, false, {k:"gras"});
     if(id === "fizzle") return;
     if(id === null){ addLog("🌿 Entangle overgeslagen."); return; }
     const f = findCre(id);
@@ -6261,7 +6420,7 @@ async function resolveEffect(it){
     fxThorns(creSel(f.p, f.c), gSrcSel);
     f.cr.ent += n;
     pop(creSel(f.p, f.c), `🌿 +${n}`, "imm");
-    addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} (kolom ${f.c+1}, ${pName(f.p)}) krijgt ${n} entangle-token${n>1?"s":""}${n>1?" (🟣 Woekergroei)":""} — nu ${f.cr.ent}.`, true);
+    addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} (kolom ${f.c+1}, ${pName(f.p)}) wordt verstrikt: +${n} 🌿${n>1?" (🟣 Woekergroei)":""}, nu ${f.cr.ent}.`, true);
     entangleDrain(id, src ? it.srcId : null, p, n);
     render(); return;
   }
@@ -6290,6 +6449,7 @@ async function resolveEffect(it){
     if(!effs.length){ addLog(`🪞 ${kIcon(f.card)} ${kNaam(f.card)} heeft geen speel-effect om te spiegelen.`); return; }
     addLog(`🪞 <em>Waterspiegel</em> spiegelt ${kIcon(f.card)} <em>${kNaam(f.card)}</em> (${f.kind === "spell" ? "spell" : "creature"}, kolom ${f.c+1}): haar speel-effect gaat nog een keer af.`, true);
     if(!FAST){ fxSplash(f.kind === "spell" ? `.pside[data-side="${f.p}"] .col:nth-child(${f.c+1}) .slot.sp` : creSel(f.p, f.c)); AU.play("water"); await sleep(220); }
+    if(f.card.var === "rots") await rotsKiezel(p, f.card, f.c);
     const selfId = f.kind === "cre" ? f.card.id : null;
     for(let i = effs.length - 1; i >= 0; i--){
       const e = Object.assign({}, effs[i], {keten});
@@ -6352,9 +6512,9 @@ async function resolveEffect(it){
   if(it.el === "fu_stone") return;      // 🟣 Bergrug zit volledig in het gedeclareerde plan
   if(it.el === "fu_grass"){
     const foes = allCreIds((cr, pp) => pp === opp(p) && entBaar(cr));
-    if(!foes.length){ addLog("🟣 Wurgranken: geen vijandelijke creature om te entanglen."); return; }
+    if(!foes.length){ addLog("🟣 Wurgranken: geen vijandelijke creature om te verstrikken."); return; }
     const n = hasAe(p, "ae_grassx2") ? 2 : 1;
-    addLog(`🟣 Wurgranken: elke vijandelijke creature krijgt ${n} entangle-token${n>1?"s":""}.`, true);
+    addLog(`🟣 Wurgranken: elke vijandelijke creature wordt verstrikt (+${n} 🌿).`, true);
     for(const fid of foes){
       if(S.over) break;
       const f = findCre(fid); if(!f) continue;
@@ -6370,7 +6530,7 @@ async function resolveAttack(it){
   const p = it.ctrl, col = it.col;
   const att = P(p).cols[col].cre;
   if(!att || att.card.id !== it.creId){ addLog("De aanvaller is er niet meer: aanval vervalt."); return; }
-  if(att.ent > 0){ addLog(`${icon(att.card.el)} is entangled: de aanval gaat niet door!`, true); return; }
+  if(att.ent > 0){ addLog(`${icon(att.card.el)} is verstrikt: de aanval gaat niet door!`, true); return; }
   /* 🕸 Het web komt als reactie op een aanval die al aangekondigd is — dan moet hij ook
      écht ophouden. Wie tussen het aankondigen en het uitvoeren ingesponnen raakt, slaat niet. */
   if(att.web){ addLog(`🕸 <em>${kIcon(att.card)} ${kNaam(att.card)} zit vast in het web</em> — de aanval gaat niet door!`, true);
@@ -6440,7 +6600,7 @@ async function upkeepEntangle(p){
     if(cr && cr.ent > 0){
       cr.ent -= 1;
       pop(creSel(p,c), "🌿 −1 token", "imm");
-      addLog(`${icon(cr.card.el)} ${EL[cr.card.el].name} (kolom ${c+1}, ${pName(p)}) verliest een entangle-token (nog ${cr.ent}).`);
+      addLog(`${icon(cr.card.el)} ${EL[cr.card.el].name} (kolom ${c+1}, ${pName(p)}) verliest een 🌿 (nog ${cr.ent}).`);
       render(); await sleep(200);
     }
   }
@@ -7919,34 +8079,25 @@ function pvHTML(el, opts){
   const E = EL[el];
   const cur = opts && opts.cur;
   const lk = opts && opts.lk;
-  const vk = opts && opts.var && VAR[opts.var];
-  if(vk) return `<div class="pv">
-    <div class="pvh"><span class="pvi">${vk.icon}</span><b>${vk.name}</b> <span class="pvsub">— sterke ${E.name.toLowerCase()}</span></div>
-    <div class="pvkort">${vk.uitleg}</div>
-    <div class="pvkort" style="opacity:.8">${E.kort ? "En verder alles van " + E.icon + " " + E.name + ": " + E.kort : ""}</div></div>`;
+  const varKey = opts && opts.var && VAR[opts.var] ? opts.var : null;
+  const vk = varKey ? VAR[varKey] : null;
   if(lk && LIGHTS[lk]){
     const L = LIGHTS[lk];
     return `<div class="pv" style="border-color:#e8e2cf">
       <div class="pvhead el-licht" style="background:linear-gradient(160deg,#f6f3e8,#b6b0a0);color:#2a2721"><span class="ic">✦</span><span class="nm">${L.name}</span></div>
-      <div class="sec"><div class="sect" style="color:#d8d2bd">Lichtkaart · ${L.n} in je deck${L.cost?` · kost ${L.cost} leven`:""}</div><p>${L.txt}</p></div>
-      <div class="sec"><div class="sect">Spelen</div><p>Op een spell-plek; daarna meteen naar het graf. Mag altijd ⚡ als reactie gespeeld worden.</p></div>
+      <div class="sec"><div class="sect" style="color:#d8d2bd">${kwChip("licht")} · ${L.n}× in je deck</div><p>${L.txt}</p></div>
     </div>`;
   }
-  if(el === "wolk" || !E.strong || E.speciaal) return `<div class="pv">
-    <div class="pvhead el-${el}"><span class="ic">${E.icon}</span><span class="nm">${E.name}</span></div>
-    <div class="sec"><div class="sect">Als creature · ${E.hp || 2} levens</div><p>${E.cre}</p></div>
-    ${cur ? `<div class="cur">Op het veld: ${cur.hp} ${cur.hp===1?"leven":"levens"}${cur.ent?` · 🌿 ${cur.ent}`:""}${cur.atk?` · ⚔ ${cur.atk} schade`:""}</div>` : ""}
-  </div>`;
+  const t = kaartTekst(el, varKey);
+  const naam = vk ? vk.name : E.name, ic = vk ? vk.icon : E.icon;
+  const kop = [`${E.hp || 2} levens`, kwRij(t.kw)].filter(Boolean).join(" · ");
+  const curHTML = cur ? `<div class="cur">Op het veld: ${cur.hp} ${cur.hp===1?"leven":"levens"}${cur.sick?" · ⏳ summoning sick":""}${cur.ent?` · 🌿 ${cur.ent}`:""}${cur.spent?" · heeft aangevallen":""}${cur.atk?` · ⚔ ${cur.atk} schade`:""}</div>` : "";
+  const vs = E.strong ? `<div class="vs"><span>Sterk tegen <b>${icon(E.strong)} ${EL[E.strong].name}</b></span><span>Zwak tegen <b>${icon(weakTo(el))} ${EL[weakTo(el)].name}</b></span></div>` : "";
   return `<div class="pv">
-    <div class="pvhead el-${el}"><span class="ic">${E.icon}</span><span class="nm">${E.name}</span></div>
-    <div class="sec"><div class="sect">Wat het doet · ${E.hp || 2} levens ${E.flash?"· ⚡ flash":""}</div>
-      <p class="pvkort">${E.kort || E.cre}</p></div>
-    <div class="sec"><div class="sect">Als spell</div>
-      <p>Hetzelfde effect — en het gaat <b>opnieuw</b> af elke keer dat jij hier een creature neerzet.</p></div>
-    <details class="pvmeer"><summary>de kleine lettertjes</summary>
-      <p>${E.cre}</p><p><b>Als spell:</b> ${E.sp}</p></details>
-    <div class="vs"><span>Sterk tegen <b>${icon(E.strong)} ${EL[E.strong].name}</b></span><span>Zwak tegen <b>${icon(weakTo(el))} ${EL[weakTo(el)].name}</b></span></div>
-    ${cur ? `<div class="cur">Op het veld: ${cur.hp} ${cur.hp===1?"leven":"levens"}${cur.sick?" · ⏳ summoning sick":""}${cur.ent?` · 🌿 ${cur.ent} entangle-token${cur.ent>1?"s":""}`:""}${cur.spent?" · heeft aangevallen":""}${cur.atk?` · ⚔ ${cur.atk} schade`:""}</div>` : ""}
+    <div class="pvhead el-${el}"><span class="ic">${ic}</span><span class="nm">${naam}</span></div>
+    <div class="sec"><div class="sect">${t.alleenSpell ? kwChip("spell") : kop}${vk ? ` · sterke ${E.name.toLowerCase()}` : ""}</div>
+      <div class="fxlijst">${effectHTML(el, varKey)}</div></div>
+    ${vs}${curHTML}
   </div>`;
 }
 function setPreview(html){ const pv=$("#preview"); if(pv) pv.innerHTML = html || CIRC_HTML; }
@@ -8128,17 +8279,78 @@ function handHTML(p, hl){
     return `<div class="hcard${cls}" data-act="hand" data-p="${p}" data-id="${cd.id}"${pv}>${up?cardFaceHTML(cd):backHTML(p)}${nr}${genoemd ? '<div class="genoemdmerk">👁</div>' : ""}</div>`;
   }).join("");
 }
+/* 🟣 De ruitenrij naast je levens. Elke aether is één ruit met zijn prent; hover of tik en je
+   ziet wat hij doet. De rij zigzagt naar rechts: bij de speler bovenaan gaat de tweede ruit
+   rechtsonder, de derde weer rechtsboven, enzovoort — onderaan precies gespiegeld, zodat de
+   rij altijd van het midden van het veld af wijst. De rij van je tegenstander sluit in het
+   verhaal af met een ruit voor de veldcondities, en heeft hij ✦ lichtkaarten, dan nog één
+   met welke dat zijn. */
+function isBovenKant(p){
+  const onder = (NET.on && NET.seat === 1) ? 1 : 0;
+  return p !== onder;
+}
+function veldInfo(){
+  const st = S && S.story; if(!st || !st.id) return null;
+  const V = (typeof VELD === "object") && VELD[st.id]; if(!V) return null;
+  const L = STORY[st.id] || {};
+  let regels = (st.variant && V.varianten && V.varianten[st.variant]) || V.regels || [];
+  let fase = "";
+  if(V.fase2 && (st.fase2Gedaan || st.bloeiGedaan)){ regels = V.fase2; fase = " · fase 2"; }
+  return {kop:V.kop || L.naam || "Het veld", regels, sub:`Veldcondities · ${st.id} ${L.naam || ""}${fase}`};
+}
+function tegenLichten(p){
+  /* Wat hij aan ✦ in zijn deck heeft, met hoe vaak. In het verhaal telt zijn opgegeven deck
+     (en in 2-4 Serafs eigen stapel); daarbuiten zijn gekozen lichtkaarten. */
+  const tel = {};
+  ((S.lt && S.lt[p]) || []).forEach(k => { if(LIGHTS[k]) tel[k] = LIGHTS[k].n; });
+  if(S.story && S.story.id && p === 1){
+    const L = levelVan(S.story) || {};
+    [L.deckVij, L.seraf && L.seraf.deck].forEach(d => d && Object.keys(d).forEach(k => {
+      if(LIGHTS[k] && d[k] > 0) tel[k] = d[k]; }));
+    if(L.spiegelJij) ((S.lt && S.lt[1]) || []).forEach(k => { if(LIGHTS[k] && !tel[k]) tel[k] = LIGHTS[k].n; });
+  }
+  return Object.keys(tel).map(k => ({k, n:tel[k]}));
+}
+function ruitenHTML(p){
+  const boven = isBovenKant(p);
+  const aeEl = (S.aeKeuze && S.aeKeuze[p]) || null;
+  const beeld = (pad, alt) => pad && BEELD_KLAAR[pad] !== "fout"
+    ? `<img class="ruitbeeld" src="${pad}" alt="" decoding="async" onerror="this.remove()">` : "";
+  const ruiten = aeList(p).filter(k => AETHERS[k]).map(k => {
+    /* 🟣 Oerkracht en 🟣 Eeuwige Terugkeer hangen aan één element — laat zien welk. */
+    const merk = (k === "ae_hp3" || k === "ae_graf") && aeEl
+      ? `<span class="ruitmerk">${[].concat(aeEl).filter(e => EL[e]).map(e => EL[e].icon).join("")}</span>` : "";
+    return {cls:"ae", attr:`data-act="aeinfo" data-k="${k}" data-pvae="${k}" title="${AETHERS[k].name}"`,
+      ic:aeIcon(k), img:beeld(AETHER_BEELD[k]), merk};
+  });
+  if(boven && S.story && S.story.id && veldInfo())
+    ruiten.push({cls:"veld", attr:`data-act="veldinfo" data-pvveld="1" title="Veldcondities"`,
+      ic:"🗺", img:beeld(RUIT_VELD), merk:""});
+  if(boven && tegenLichten(p).length)
+    ruiten.push({cls:"licht", attr:`data-act="ltinfo" data-p="${p}" data-pvlt="${p}" title="Zijn ✦ lichtkaarten"`,
+      ic:"✦", img:beeld(RUIT_LICHT), merk:""});
+  return ruitenRij(ruiten, boven);
+}
+function aetherRuit(k){
+  const pad = AETHER_BEELD[k];
+  return {cls:"ae", attr:`data-pvae="${k}" title="${AETHERS[k].name}"`, ic:aeIcon(k), merk:"",
+    img:pad && BEELD_KLAAR[pad] !== "fout" ? `<img class="ruitbeeld" src="${pad}" alt="" decoding="async" onerror="this.remove()">` : ""};
+}
+function ruitenRij(ruiten, boven){
+  if(!ruiten.length) return "";
+  return `<div class="ruiten${boven ? " boven" : " onder"}${ruiten.length === 1 ? " een" : ""}" style="--n:${ruiten.length}">`
+    + ruiten.map((r, i) => {
+      const rij = boven ? i % 2 : 1 - i % 2;
+      const rr = ruiten.length === 1 ? 0 : rij;
+      return `<div class="ruitw ${r.cls} r${rr}${r.merk ? " merk" : ""}" style="--i:${i};--rij:${rr}" ${r.attr}>
+        <div class="ruit"><div class="ruitin"><span class="ruitic">${r.ic}</span>${r.img}</div></div>${r.merk}</div>`;
+    }).join("") + `</div>`;
+}
 function psideHTML(p){
   const pl = P(p);
   const pips = Array.from({length:Math.max(5, pl.life)},(_,i)=>`<span class="hp${i < pl.life ? "" : " off"}"></span>`).join("");
   const active = S.tp===p ? " active":"";
-  const aeEl = (S.aeKeuze && S.aeKeuze[p]) || null;
-  const ae = aeList(p).map(k => {
-    /* 🟣 Oerkracht en 🟣 Eeuwige Terugkeer hangen aan één element — laat zien welk. */
-    const merk = (k === "ae_hp3" || k === "ae_graf") && aeEl
-      ? [].concat(aeEl).filter(e => EL[e]).map(e => `<span class="aeel" title="${EL[e].name}">${EL[e].icon}</span>`).join("") : "";
-    return `<div class="aemini" data-act="aeinfo" data-k="${k}" data-pvae="${k}">🟣 ${AETHERS[k].name}${merk}</div>`;
-  }).join("")
+  const ae = ruitenHTML(p)
     + (NET.on && p === NET.seat ? `<div class="aemini" style="border-color:#4d8fbf;color:#7fd0ff;background:rgba(80,160,220,.1)">🌐 jouw kant</div>` : "");
   /* 🎪 Het trio is niet één tegenstander met zes levens maar drie vlammen met elk twee.
      Eén balk liegt daarover: je slaat op een kolom en ziet een getal zakken zonder te weten
@@ -8197,7 +8409,7 @@ function chainLabel(it){
     return `${who} speelt ✦ <b>${LIGHTS[it.lk].name}</b>${it.flash?" ⚡":""}${doel}`;
   }
   if(it.type==="attack") return `${who} valt aan in kolom ${it.col+1}`;
-  const names = {vuur:"vuurschade", gras:"entangle", steen:"+1 leven", water:"herspelen",
+  const names = {vuur:"vuurschade", gras:"verstrikken", steen:"+1 leven", water:"herspelen",
     fu_fire:"🟣 Assekern", fu_water:"🟣 Dieptestroom", fu_stone:"🟣 Bergrug", fu_grass:"🟣 Wurgranken"};
   return `${who} effect: <b>${names[it.el]}</b> <span style="color:var(--dim)">(${it.origin})</span>`;
 }
@@ -8269,13 +8481,13 @@ function bannerHTML(){
         const d = P(opp(top.ctrl)).cols[top.col].cre;
         what = `<b>${foe}</b> valt aan met ${a ? icon(a.card.el) + " " + EL[a.card.el].name + " (" + atkOf(a, top.ctrl) + " schade)" : "een creature"} in kolom ${top.col+1}${d ? "" : " — recht op je levens"}`;
       } else {
-        const nm = {vuur:"2 schade", gras:"entangle", steen:"+1 leven", water:"herspelen",
+        const nm = {vuur:"2 schade", gras:"verstrikken", steen:"+1 leven", water:"herspelen",
                     fu_fire:"Assekern", fu_water:"Dieptestroom", fu_stone:"Bergrug", fu_grass:"Wurgranken"};
         what = `<b>${foe}</b> laat <b>${nm[top.el] || top.el}</b> resolven`;
       }
     }
     if(isBot(u.p)) return `${what} — 🤖 overweegt een reactie…`;
-    return `${what}<br><span style="font-size:.86em">reageren met een ⚡ flash-kaart, of <b>spatie</b> om door te laten</span>`;
+    return `${what}<br><span style="font-size:.86em">reageren met een ⚡ Snel-kaart, of <b>spatie</b> om door te laten</span>`;
   }
   /* Staat het mulligan-paneel in beeld, dan zegt die het al — dan hoeft de balk niets te
      herhalen. Alleen wie moet wachten krijgt hier een regel. */
@@ -8459,6 +8671,8 @@ function overlayHTML(){
   }
   if(u0.mode === "aeuitleg"){
     const kk = u0.keys || [], ll = u0.lichten || [];
+    /* Hoe vaak elke lichtkaart erin zit, zoals zijn deck het echt zegt (niet altijd 3). */
+    const ltTel = {}; if(S) tegenLichten(1).forEach(x => ltTel[x.k] = x.n);
     const kop = kk.length && ll.length ? `🟣✦ ${u0.naam} speelt met kracht én licht`
               : (kk.length ? `🟣 ${u0.naam} speelt met kracht` : `✦ ${u0.naam} speelt met licht`);
     return `<div class="ovbox" style="max-width:min(860px,94vw)"><h2>${kop}</h2>
@@ -8466,9 +8680,9 @@ function overlayHTML(){
       ${kk.length ? `<div class="aerow">${kk.map(k=>`<div class="aecard vast">
         <div class="aet">${AETHERS[k].name}</div>${aeVak(k)}
         <div class="aex">${AETHERS[k].txt}</div></div>`).join("")}</div>` : ""}
-      ${ll.length ? `<div class="sub" style="margin-top:10px">✦ En deze lichtkaarten zitten <b>3×</b> in zijn deck:</div>
+      ${ll.length ? `<div class="sub" style="margin-top:10px">✦ En deze lichtkaarten zitten in zijn deck:</div>
         <div class="aerow">${ll.map(k=>`<div class="aecard vast licht">
-        <div class="aet">${LIGHTS[k].name}</div>${aeVak(k, true)}
+        <div class="aet">${LIGHTS[k].name}${ltTel[k] ? ` · ${ltTel[k]}×` : ""}</div>${aeVak(k, true)}
         <div class="aex">${LIGHTS[k].txt}</div></div>`).join("")}</div>` : ""}
       <button class="obtn" data-act="btn" data-btn="aeuitlegok">Begrepen <span style="opacity:.6;font-size:.7rem">[spatie]</span></button></div>`;
   }
@@ -8641,7 +8855,7 @@ function overlayHTML(){
       while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
       return ring.concat([ring[0]]).map((e,i) => `<span class="cy el-${e}">${icon(e)}</span>`).join(`<span class="ar">&#9654;</span>`);
     })()}<span class="cylab">sterk tegen</span></div>
-    <div class="sub startfacts">Elk <b>5 levens</b> · deck van <b>40</b> · wie begint krijgt <b>${startHand(true)}</b> kaarten en slaat de eerste draw over, de ander start met ${startHand(false)} en trekt er meteen 1 bij · <b>max ${HANDMAX}</b> kaarten in je hand.</div>
+    <div class="sub startfacts">Elk <b>5 levens</b> · deck van <b>${ORDER.length * 7}</b> · wie begint krijgt <b>${startHand(true)}</b> kaarten en slaat de eerste draw over, de ander start met ${startHand(false)} en trekt er meteen 1 bij · <b>max ${HANDMAX}</b> kaarten in je hand.</div>
     ${LIVE.resume ? `<div style="margin:10px 0 2px"><button class="obtn" style="border-color:#5cb56e;color:#a8ecb5" data-act="btn" data-btn="resumelive">↩ Terug naar room ${LIVE.resume.code}</button></div>` : ""}
     <div class="mlabel" style="--mc:#e0a24a">📖 VERHAAL</div>
     <div class="mnote">vijf werelden · praat je een weg naar de bazen van de elementen</div>
@@ -8690,39 +8904,39 @@ function overlayHTML(){
     const fk = aeFuseKey(u.p, card.el), fuTxt = u.fuseOk && fk ? AETHERS[fk].txt : "";
     return `<div class="ovbox pickbox"><h2>${icon(card.el)} ${EL[card.el].name} spelen als…</h2>
       <div class="pickrow">
-        <button class="obtn b-basis" ${u.creOk?"":"disabled style='opacity:.4'"} data-act="btn" data-btn="asCre">🗡 Creature<span class="bsub">${EL[card.el].hp||2} levens${EL[card.el].flash?" · ⚡ flash":""}<br>dubbeltik = creature</span></button>
+        <button class="obtn b-basis" ${u.creOk?"":"disabled style='opacity:.4'"} data-act="btn" data-btn="asCre">🗡 Creature<span class="bsub">${EL[card.el].hp||2} levens${EL[card.el].flash?" · ⚡ Snel":""}<br>dubbeltik = creature</span></button>
         ${u.flashCtx?"":`<button class="obtn" ${u.spOk?"":"disabled style='opacity:.4'"} data-act="btn" data-btn="asSpell">✦ Spell<span class="bsub">triggert bij creatures hier</span></button>`}
         ${u.fuseOk?`<button class="obtn b-cmd" data-act="btn" data-btn="asFuse">🟣 Fusie<span class="bsub">${AETHERS[fk].name}</span></button>`:""}
       </div>
-      <div class="sub" style="margin-top:10px;font-size:.8rem">${EL[card.el].cre}${u.flashCtx?"":`<br><br><b>Spell:</b> ${EL[card.el].sp}`}${fuTxt?`<br><br><b style="color:#b48be0">🟣:</b> ${fuTxt}`:""}</div>
+      <div class="sub fxlijst" style="margin-top:10px;font-size:.8rem;text-align:left">${effectHTML(card.el, toonVarKey(card), {geenSpell:u.flashCtx})}${fuTxt?`<div class="fxr"><span class="fxi" style="color:#b48be0">🟣</span><span>${fuTxt}</span></div>`:""}</div>
       <button class="obtn" style="border-color:var(--line);color:var(--muted);background:#1a2129;box-shadow:none" data-act="btn" data-btn="cancelmode">Annuleer</button></div>`;
   }
   return "";
 }
 const TUT_ALL = [
   {t:"Waar het om draait", ic:"⚜️",
-   b:`Twee spelers, elk <b>5 levens</b> en een deck van 40 kaarten. Je wint door je tegenstander op 0 te zetten — of door hem te laten trekken uit een leeg deck.<br><br>Het veld heeft <b>5 kolommen</b>, recht tegenover die van je tegenstander. Elke kolom heeft een plek voor een <b>creature</b> en een plek voor een <b>spell</b>. Aanvallen gaan altijd recht vooruit.`,
+   b:`Twee spelers, elk <b>5 levens</b>. Je wint door je tegenstander op 0 te zetten, of als hij moet trekken uit een leeg deck.<br><br>Het veld heeft <b>5 kolommen</b>, recht tegenover die van je tegenstander. Elke kolom heeft een plek voor een <b>creature</b> en een plek voor een <b>spell</b>. Aanvallen gaan altijd recht vooruit.`,
    v:"board"},
   {t:"De elementcirkel", ic:"🔥",
-   b:`Eén soort kaart in vier elementen: 💧 Water, 🔥 Vuur, 🌿 Gras en 🪨 Steen — 10 van elk in je deck.<br><br>Ze vormen een kringloop: 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak is geen schade maar een <b>instakill</b>; andersom is de zwakkere juist <b>immuun</b>. Elk element is dus ergens oppermachtig en ergens machteloos.`,
+   b:`Vier elementen: 💧 Water, 🔥 Vuur, 🌿 Gras en 🪨 Steen.<br><br>Ze vormen een cirkel: 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak is een <span class="kw" data-kw="instakill">instakill</span>. Zwak tegen sterk is <span class="kw" data-kw="immuun">immuun</span>.`,
    v:"circle"},
-  {t:"Twee manieren om te spelen", ic:"🃏",
-   b:`Elke kaart mag je als <b>creature</b> neerzetten of als <b>spell</b> in de spell-plek van een kolom.<br><br>Een creature doet zijn effect één keer, bij het spelen. Een spell doet dat effect meteen én <b>opnieuw elke keer</b> dat je in díé kolom een creature speelt. Een spell op een bezette plek vervangt de oude.<br><br>Alle vier de elementen mogen ook <b>⚡ flash</b> als creature: als reactie in de chain, buiten je beurt en in je gevechtsfase.`,
+  {t:"Speel-effect en veld-effect", ic:"🃏",
+   b:`Een kaart speel je als <b>creature</b> of als <b>spell</b>.<br><br>▶ Als creature doet hij zijn <span class="kw" data-kw="speel">speel-effect</span>: één keer, als hij het veld op komt.<br>◆ Wat een kaart doet zolang hij er ligt, is zijn <span class="kw" data-kw="veld">veld-effect</span>.<br><br>Een <span class="kw" data-kw="spell">spell</span> doet zijn speel-effect bij het neerleggen, en opnieuw bij elke creature die jij in die kolom speelt.<br><br>Alle vier de elementen zijn <span class="kw" data-kw="snel">⚡ Snel</span>.`,
    v:"twoways"},
   {t:"Wat de elementen doen", ic:"✦",
-   b:`<b>🔥 Vuur</b> — 2 schade aan een creature van je tegenstander; 💧 Water is immuun. Je eigen kant raak je er niet mee (daar bestaat 🟣 Brandoffer voor).<br><br><b>💧 Water</b> — speel een <b>eigen</b> creature opnieuw: hij houdt zijn levens, verliest zijn tokens en triggert alles opnieuw.<br><br><b>🪨 Steen</b> — start met 3 levens en geeft tweemaal +1 leven naar keuze.<br><br><b>🌿 Gras</b> — zet een entangle-token: het doel kan niet aanvallen en verliest per token 1 leven dat naar de Gras gaat (op 🪨 Steen dubbel).`,
+   b:`<b>🔥 Vuur</b> — ▶ ${EL.vuur.tekst.speel}<br><br><b>💧 Water</b> — ▶ ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> (3 levens) — ▶ ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> — ▶ ${EL.gras.tekst.speel}<br><br>Onderstreepte woorden leggen zichzelf uit: hover erover of tik erop.`,
    v:"cards"},
   {t:"Het gevecht", ic:"⚔️",
-   b:`In je gevechtsfase klik je je eigen creatures aan. Een creature raakt altijd wie <b>recht tegenover hem</b> staat; is die plek leeg, dan gaat de schade rechtstreeks naar de speler. Er is geen apart blokken.<br><br>De schade is zijn aanvalskracht (⚔ op de kaart) — tenzij de elementcirkel toeslaat met een instakill of immuniteit. Tegen een speler telt altijd gewoon de aanvalskracht.`,
+   b:`In je gevechtsfase klik je je eigen creatures aan. Een creature raakt wie <b>recht tegenover hem</b> staat. Is die plek leeg, dan raakt hij de speler.<br><br>De schade is de <b>helft van zijn levens</b> (⚔ op de kaart), behalve als de cirkel een instakill geeft of immuun maakt.`,
    v:"combat"},
-  {t:"De chain: targeten en dodgen", ic:"⛓️",
-   b:`Een kaart die je speelt <b>staat er meteen</b>; dat is niet te onderbreken. Zijn <b>effect</b> gaat als link op de chain, met het doelwit dat je meteen aanwijst.<br><br>Op zo'n link mogen <b>allebei</b> de spelers reageren met een ⚡ flash — eerst degene die hem er net op zette, dus ook op je eigen kaart. Losse vervolgeffecten resolven meteen; daar word je niet voor gevraagd.<br><br>Is het doelwit bij het resolven weg of naar een andere kolom verhuisd, dan <b>fizzelt</b> het effect. Daar zit het spel in: richt iemand 🔥 op een creature, dan schuif je die met een 💧 Water-flash weg en verdampt het vuur.`,
+  {t:"De chain: targeten en ontwijken", ic:"⛓️",
+   b:`Een kaart die je speelt, <b>staat er meteen</b>. Zijn effect gaat als link op de chain, met het doelwit dat je meteen kiest.<br><br>Allebei de spelers mogen daarop reageren met iets dat <span class="kw" data-kw="snel">⚡ Snel</span> is.<br><br>Is het doelwit bij het resolven weg of verhuisd, dan <span class="kw" data-kw="fizzelt">fizzelt</span> het effect. Mikt iemand 🔥 op je creature, dan <span class="kw" data-kw="herspeel">herspeel</span> je hem met 💧 Water en het vuur mist.`,
    v:"chain"},
   {t:"Commander", ic:"🟣",
-   b:`De grote modus: <b>best of 3</b>. Voor elk potje krijg je één draftscherm waarop je tegelijk kiest:<br><br>• een <b>🟣 aether</b> — een blijvende kracht die de hele match werkt en <b>cumulatief</b> is (in potje 3 speel je met drie);<br>• een <b>✦ lichtkaart</b> — daarvan gaan er 3 door je deck; je speelt hem op een spell-plek en hij gaat meteen naar het graf;<br>• je <b>bans</b> — 10 kaarten in potje 1, daarna 5, voorgoed weg uit de match.<br><br>De startende speler kiest eerst, de ander uit wat overblijft; de rest gaat uit de pool. Na elk potje kiest de <b>verliezer</b> eerst en begint hij. Alles rustig doorlezen kan in de <b>📚 Bibliotheek</b> op het startscherm.`,
+   b:`<b>Best of 3.</b> Voor elk potje kies je:<br><br>• een <span class="kw" data-kw="aether">🟣 aether</span>, een blijvende kracht. Ze stapelen: in potje 3 heb je er drie;<br>• een <span class="kw" data-kw="licht">✦ lichtkaart</span>, waarvan er 3 door je deck gaan;<br>• je <b>bans</b>: kaarten die de hele match weg zijn.<br><br>De beginner kiest eerst. Na elk potje kiest de <b>verliezer</b> eerst en begint hij. Alles rustig doorlezen kan in de <b>📚 Bibliotheek</b>.`,
    v:"stack"},
   {t:"Zo bedien je het", ic:"🖱️",
-   b:`Klik een kaart in je hand, kies creature of spell en dan de kolom; geldige plekken lichten goud op. Hover over een kaart voor de volledige tekst links (op de telefoon zit die achter de 📜-knop).<br><br>Boven de <b>7 kaarten</b> uitkomen mag niet: trek je erboven, dan wijs je meteen aan welke kaart weggaat.<br><br><b>Spatie</b> = doorlaten, overslaan of bevestigen — op de telefoon kun je daarvoor ook gewoon <b>dubbeltikken op een leeg stuk speelveld</b>. <b>Esc</b> of ☰ = menu. Klik je eigen deck om te zien wat er nog in zit, en een graf om erdoorheen te bladeren. Geen zin in reactievensters? Zet <b>⚡ autopass</b> aan rechtsonder.<br><br>Kies op het startscherm 🌐 live online met een roomcode, 🟣 Commander of ⚜️ Basis — en veel plezier.`,
+   b:`Klik een kaart in je hand, kies creature of spell en dan de kolom. Geldige plekken lichten goud op. Hover over een kaart (of houd hem ingedrukt) voor de uitleg.<br><br>Je hand mag hooguit <b>${HANDMAX}</b> kaarten hebben.<br><br><b>Spatie</b> of <b>dubbeltik</b> op een leeg stuk veld = doorlaten, overslaan of bevestigen. <b>Esc</b> of ☰ = menu. Geen zin in reactievensters? Zet <b>⚡ autopass</b> aan, rechtsonder.`,
    v:"ui"}
 ];
 const TUTS = {classic: TUT_ALL, commander: TUT_ALL};
@@ -8809,15 +9023,18 @@ function tutVisual(v){
       <span style="border:1px solid var(--line);border-radius:8px;padding:5px 10px">? · alle regels</span>
       <span style="border:1px solid var(--line);border-radius:8px;padding:5px 10px">☰ / esc · menu</span>
     </div>`;
-  if(v === "aethers") return `<div class="aerow" style="margin:10px 0 2px">${ae("Woekergroei","Verdubbelt je entangle-tokens \u2014 en de drain")}${ae("Onwrikbaar","\ud83e\udea8 valt aan met volle levens")}${ae("Assekern","\ud83d\udfe3 fusie: offer \ud83d\udca7 \u2192 \ud83d\udd25 met vuurwerk")}</div>
+  if(v === "aethers") return `<div class="aerow" style="margin:10px 0 2px">${ae("Woekergroei","Je 🌿 verstrikt met 2 tokens")}${ae("Onwrikbaar","\ud83e\udea8 valt aan met volle levens")}${ae("Assekern","\ud83d\udfe3 fusie: offer \ud83d\udca7 \u2192 \ud83d\udd25 met vuurwerk")}</div>
     <div style="text-align:center;color:var(--dim);font-size:.72rem">← starter kiest · dan de ander · laatste gaat weg →</div>`;
-  if(v === "stack") return `<div style="display:flex;justify-content:center;gap:24px;margin:12px 0 4px;text-align:center;font-size:.74rem;color:#c3b3dd">
-      <div><div style="font-family:"VT323",ui-monospace,monospace;color:var(--gold);margin-bottom:4px">POTJE 1</div><div class="aemini">\ud83d\udfe3 Onwrikbaar</div></div>
+  if(v === "stack"){
+    const potje = (n, keys) => `<div><div style="font-family:"VT323",ui-monospace,monospace;color:var(--gold);margin-bottom:4px">POTJE ${n}</div>${ruitenRij(keys.map(aetherRuit), true)}</div>`;
+    return `<div style="display:flex;justify-content:center;align-items:flex-start;gap:24px;margin:12px 0 4px;text-align:center;font-size:.74rem;color:#c3b3dd">
+      ${potje(1, ["ae_stonefull"])}
       <div style="align-self:center;color:var(--gold);font-size:1.2rem">\u2192</div>
-      <div><div style="font-family:"VT323",ui-monospace,monospace;color:var(--gold);margin-bottom:4px">POTJE 2</div><div class="aemini">\ud83d\udfe3 Onwrikbaar</div><div class="aemini">\ud83d\udfe3 Bergrug</div></div>
+      ${potje(2, ["ae_stonefull","fu_stone"])}
       <div style="align-self:center;color:var(--gold);font-size:1.2rem">\u2192</div>
-      <div><div style="font-family:"VT323",ui-monospace,monospace;color:var(--gold);margin-bottom:4px">POTJE 3</div><div class="aemini">\ud83d\udfe3 Onwrikbaar</div><div class="aemini">\ud83d\udfe3 Bergrug</div><div class="aemini">\ud83d\udfe3 Woekergroei</div></div>
+      ${potje(3, ["ae_stonefull","fu_stone","ae_grassx2"])}
     </div>`;
+  }
   if(v === "ban") return `<div style="display:flex;gap:8px;justify-content:center;margin:12px 0 4px">
       ${card("water")}${card("steen")}
       <div style="position:relative">${card("gras")}<div class="banx" style="font-size:1.3rem">✕</div></div>
@@ -8835,7 +9052,7 @@ function tutVisual(v){
     <div style="text-align:center;color:var(--dim);font-size:.72rem">\ud83d\udfe3 het offer verdwijnt \u2014 de fusie neemt precies zijn plek in</div>`;
   if(v === "fuselist") return "";
   if(v === "speed") return `<div style="display:flex;justify-content:center;gap:18px;margin:12px 0 4px;font-size:.76rem">
-      <div style="border:1px solid #7fd0ff;border-radius:10px;padding:8px 14px;color:#bce7ff">⚡ quickspell — alle vier<br><span style="color:var(--dim);font-size:.7rem">je eigen main · reactie in de chain · buiten je beurt · gevechtsfase</span></div>
+      <div style="border:1px solid #7fd0ff;border-radius:10px;padding:8px 14px;color:#bce7ff">⚡ Snel — alle vier<br><span style="color:var(--dim);font-size:.7rem">je eigen main · reactie in de chain · buiten je beurt · gevechtsfase</span></div>
     </div>`;
   if(v === "flow") return `<div style="display:flex;justify-content:center;align-items:center;gap:10px;margin:12px 0 4px;font-size:.74rem;color:#c3b3dd;flex-wrap:wrap">
       <span style="border:1px solid #5a3f85;border-radius:8px;padding:5px 10px">draft</span><span style="color:var(--gold)">→</span>
@@ -8990,7 +9207,7 @@ function aeLibHTML(){
     const a = AETHERS[k], fu = a.fuse;
     return `<div class="aecard aelib" style="cursor:default;transform:none">
       <div class="aet">${a.name}</div>
-      ${aeVak(k)}${fu ? `<div class="aesub">⚡ quickspell</div>` : ""}
+      ${aeVak(k)}${fu ? `<div class="aesub">⚡ Snel</div>` : ""}
       <div class="aex" style="padding:9px 11px">${a.txt}</div>
     </div>`;
   };
@@ -8998,7 +9215,7 @@ function aeLibHTML(){
   const fusies  = Object.keys(AETHERS).filter(k =>  AETHERS[k].fuse && !AETHERS[k].verhaal);
   return `<div class="ovbox" style="max-width:min(880px,95vw);text-align:left">
     <h2 style="text-align:center">📚 Bibliotheek</h2>
-    <div class="sub" style="text-align:center">De negen krachten van de Commander-modus. Elk potje worden er drie getoond: de startende speler kiest er één, de ander daarna één, en de derde gaat voorgoed uit de pool. Wat je kiest houd je de hele match.</div>
+    <div class="sub" style="text-align:center">De krachten van de Commander-modus. Elk potje worden er drie getoond: de startende speler kiest er één, de ander daarna één, en de derde gaat voorgoed uit de pool. Wat je kiest houd je de hele match.</div>
     <div class="sub" style="margin:16px 0 4px"><b>Passief</b> — werken vanzelf, je hoeft niets te doen</div>
     <div class="aerow" style="flex-wrap:wrap">${passief.map(kaart).join("")}</div>
     <div class="sub" style="margin:18px 0 4px"><b>Fusie</b> — geven een kaart uit je hand een derde speelwijze: offer een <b>willekeurige</b> eigen creature en zet de fusie op die plek neer. Het fusie-effect <b>vervangt</b> het gewone speel-effect van die creature.</div>
@@ -11661,7 +11878,7 @@ const STORY = {
       {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"…O. Nou. Dat is jammer. Voor jou, bedoel ik."},
       {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Dan doen we het staand. Ik heb alle tijd van de wereld en jij hebt er steeds minder."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"💤 <b>Het wiegelied.</b> Elke beurt waarin je <b>niets raakt</b> zak je dieper weg, en wordt zij er een leven beter van. Neem je écht leven af — van haar of van een creature — dan schud je jezelf wakker."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een entangle-token telt niet mee. Ze moet het <b>voelen</b>."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een 🌿 telt niet mee. Ze moet het <b>voelen</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Zak je drie keer weg, dan blijf je hier. Net als de anderen."},
       {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niets weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
     ],
@@ -11694,7 +11911,7 @@ const STORY = {
       {s:"waardin", groot:true, bg:2, kleur:"#a8c46b", t:"Zo. En nu ga je toch, hè. Dat zie ik. Ze gaan altijd toch."},
       {s:"waardin_zacht", groot:true, bg:2, kleur:"#a8c46b", t:"Blijf dan tenminste nog even. Heel even maar. Ik heb alle tijd van de wereld en jij hebt er steeds minder."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"💤 <b>Het wiegelied.</b> Elke beurt waarin je <b>niets raakt</b> zak je dieper weg, en wordt zij er een leven beter van. Neem je écht leven af — van haar of van een creature — dan schud je jezelf wakker."},
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een entangle-token telt niet mee. Ze moet het <b>voelen</b>."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Een aanval die fizzelt, op immuniteit stukloopt of thuisblijft door een 🌿 telt niet mee. Ze moet het <b>voelen</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Zak je drie keer weg, dan blijf je hier. Net als de anderen. <b>Elke kop thee die je dronk telt al mee.</b>"},
       {s:"waardin", groot:true, bg:2, naam:"…", kleur:"#a8c46b", paars:true, t:"Om haar tafels groeit alles dwars door de planken. Ze plukt er niets weg. 🟣 <b>Woekergroei</b> — bij haar komt alles dubbel op."}
     ],
@@ -11806,7 +12023,7 @@ const STORY = {
     win:[
       {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zakt door zijn twee benen. Het zwaard sist uit en laat een geur van onweer achter."},
       {s:"struik", naam:"…", kleur:"#7fd18c", t:"Hij is weer een struik. Er ligt alleen één rank naast hem die niet meer bij hem hoort."},
-      {s:null, naam:"…", kleur:"#7fd18c", paars:true, t:"🟣 <b>Woekergroei.</b> Je 🌿 Gras zet vanaf nu twee entangle-tokens neer in plaats van één, met dubbele drain."},
+      {s:null, naam:"…", kleur:"#7fd18c", paars:true, t:"🟣 <b>Woekergroei.</b> Je 🌿 Gras verstrikt vanaf nu met twee tokens in plaats van één."},
       {s:"struik", naam:"Struik", kleur:"#7fd18c", t:"…"},
       {s:"struik", naam:"Struik", kleur:"#7fd18c", t:"Het pad achter hem ligt open."}
     ],
@@ -11932,7 +12149,7 @@ const STORY = {
       {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
       {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
       {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, geen element, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
     ],
     cadeau:[
       {s:null, bg:2, naam:"…", t:"Je loopt door. Het katje kijkt je na. Dat voelt niet goed. Je loopt door."},
@@ -11955,7 +12172,7 @@ const STORY = {
       {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
       {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
       {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, geen element, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
     ],
     slim:[
       {s:"engel", bg:2, naam:"…", kleur:"#f6f7fb", t:"Hij komt tussen de bomen vandaan alsof hij daar de hele tijd al stond. Dat stond hij ook."},
@@ -11965,7 +12182,7 @@ const STORY = {
       {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", mu:"w2_seraf", t:"O — en ik heb iemand meegenomen. Dat mag, sinds kort. Ik heb het zelf nagevraagd."},
       {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", wit:true, t:"Uit zijn schaduw komt iets los dat er de hele tijd al in zat. Het is een hond. Het is niet helemaal een hond."},
       {s:"max", groot:true, bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max. Hij bijt niet. Hij doet iets anders, en dat is erger, en ik heb er geen woord voor."},
-      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, geen element, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
+      {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; zijn kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft zijn eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet zijn wolven daar bovenop."},
     ],
     gevechtNa:{val:"straf", hamer:"hamerstraf", slim:"eerlijk"},
     midden:[
@@ -12149,7 +12366,7 @@ const STORY = {
       {s:"golem", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het is gemaakt van wat er in de berg zit. Het heeft geen gezicht. Het heeft een plek waar een gezicht zou zitten en daar gloeit het."},
       {s:"golem_boos", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het heft een vuist. Niet naar jou — naar niets in het bijzonder. Alsof het oefent."},
       {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dit is de golem. Hij is van mij. Nou ja — ik stuur hem. Bij dat soort dingen is dat hetzelfde."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>De lavagolem</b> heeft <b>20 levens</b> en <b>geen element</b>: de elementcirkel doet hem niets, in geen van beide richtingen. Hij slaat als iedereen — met de <b>helft van zijn levens</b>."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>De lavagolem</b> heeft <b>20 levens</b> en is <b>kleurloos</b>: de cirkel doet hem niets. Hij slaat met de <b>helft van zijn levens</b>."},
       {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌿 Entangle-tokens zuigen hem wél leeg, maar ze houden hem <b>niet</b> thuis. En elke beurt van zijn baas komen er <b>2 levens</b> bij. Hij gaat niet dood. Je kunt hem op nul zetten. Verder komt hij niet en verder gaat hij niet."},
       {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌋 <b>En de grond aan jouw kant is lava.</b> Aan het begin van elke beurt van jou verliest alles van jou dat geen 🔥 Vuur is <b>1 leven</b>. Zijn kant staat op steen."},
       {s:"cultist_boos", bg:3, naam:"Zuster As", kleur:"#ff8a4a", paars:true, t:"O — en hij slaat meteen. Hij is niet net wakker geworden. Hij heeft nooit geslapen. 🟣 <b>Assekern</b> en 🟣 <b>Verzengende Woede</b>, dat hoort bij de functie. Zo. Volgens mij hebben we alles gehad. Ik ben niks vergeten."}
@@ -12583,7 +12800,7 @@ const STORY = {
       {s:"sluiswachter_poort", naam:"…", kleur:"#a9e2ff", t:"Hij zet een kruisje. Hij zet nog een kruisje. Hij haalt de poort omhoog."},
       {s:"sluiswachter_poort", naam:"Sluiswachter", kleur:"#a9e2ff", t:"Zo. Dan is dat afgehandeld."},
       {s:"sluiswachter_poort", naam:"Sluiswachter", kleur:"#a9e2ff", t:"Ik geef u dit mee. Het zat in de kast bij de reserve-onderdelen en er hoort geen formulier bij, dus het is van niemand."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Getijdenstroom.</b> Speel je met 💧 Water een creature opnieuw, dan gaat zijn effect <b>twee keer</b> af."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Getijdenstroom.</b> Wat je herspeelt, doet zijn speel-effect <b>twee keer</b>."},
       {s:"sluiswachter_poort", naam:"Sluiswachter", kleur:"#a9e2ff", t:"Verderop liggen de wrakken. Blijf daar niet te lang. Niet omdat het gevaarlijk is — omdat het aanstekelijk is."},
       {s:"sluiswachter_poort", naam:"Sluiswachter", kleur:"#a9e2ff", t:"En als u de Diepstroom zelf tegenkomt: vraag haar niks. Ze antwoordt namelijk."}
     ],
@@ -12774,7 +12991,7 @@ const STORY = {
       {s:null, naam:"…", t:"Je zegt dat je gewoon bent blijven staan."},
       {s:"ijsvlakte", reus:true, naam:"IJsvlakte", kleur:"#cfeaff", t:"…dat………is………hetzelfde."},
       {s:null, naam:"…", kleur:"#f6e9b0", t:"Uit de scheur komt iets omhoog dat er niet in hoort te zitten. Het is warm."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Lichtbrenger.</b> Vijf levens, geen element, en hij slaat met alles wat hij nog heeft."},
+      {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Lichtbrenger.</b> 5 levens, kleurloos, volle slag."},
       {s:"ijsvlakte", reus:true, naam:"IJsvlakte", kleur:"#cfeaff", t:"…hij………lag………hier………al………lang."},
       {s:"ijsvlakte", reus:true, naam:"IJsvlakte", kleur:"#cfeaff", t:"…onder………mij………ligt………zij. ………ga………naar………beneden."}
     ],
@@ -12910,7 +13127,7 @@ const STORY = {
       {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"…IK MOET JE MELDEN."},
       {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"IK MELD JE NIET."},
       {s:null, naam:"…", kleur:"#f6e9b0", t:"Er valt iets uit het wiel. Het is warm en het kijkt terug."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Alziend.</b> Vanaf nu ligt de hand van je tegenstander open op tafel. De hele partij."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Alziend.</b> Je ziet zijn hand."},
       {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"NEEM ER EEN. IK HEB ER GENOEG. IK HEB ER TWEEHONDERD JAAR NIETS MEE GEDAAN BEHALVE KIJKEN."},
       {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"ACHTER DE DEUR ZINGEN ZE. LET OP WAT ZE ZINGEN. NIEMAND LET OOIT OP WAT ZE ZINGEN."}
     ],
@@ -12974,7 +13191,7 @@ const STORY = {
       {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"…Het is stil."},
       {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Wij hebben tweehonderd jaar gezongen omdat ons verteld is dat het anders misgaat. Er is nooit gezegd wát er misgaat."},
       {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Er gaat niets mis. Er is gewoon stilte. Weet je hoe lang wij bang zijn geweest voor stilte?"},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Hemelschoon.</b> Elke keer dat je een ✦ lichtkaart speelt: je heelt 1 leven en trekt een kaart."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Hemelschoon.</b> Speel je een ✦: <b>+1</b> leven en trek <b>1</b>."},
       {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Neem het. Het is van de afgezant geweest en die heeft het van boven en boven heeft het van de oven. Zo gaat alles hier."},
       {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Hij zit vier zalen verder. Hij weet al dat je komt — hij weet alles al, dat is zijn hele functie, en het maakt hem doodmoe."}
     ],
@@ -13035,7 +13252,7 @@ const STORY = {
       {s:"troonsp", groot:true, naam:"…", kleur:"#d9c6f5", t:"De laatste stoel valt om, en met hem valt het weer. Het gruis blijft halverwege hangen en zakt dan gewoon naar beneden als gruis."},
       {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"…Vier is niets bijzonders. Dat weet je nu."},
       {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Wij hebben vier rijken uit elkaar gehouden met vier soorten weer en vier afspraken, en jij hebt er in één zaal doorheen gelopen."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Genade.</b> Eén keer per beurt blijft de eerste creature van jou die zou sneuvelen staan — op 1 leven."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Genade.</b> Eén keer per beurt: je eerste creature die vernietigd zou worden, blijft staan op <b>1</b>."},
       {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Neem dit. Het is nooit uitgedeeld. Er is tweehonderd jaar geleden besloten dat het te duur was."},
       {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Hierna komt de afgezant. Kijk niet te lang naar hem. Wij menen dat."}
     ],
@@ -13109,7 +13326,7 @@ const STORY = {
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Ik ga je nu iets vertellen en dan ga ik zitten, want ik ben tweehonderd jaar niet gaan zitten."},
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Er is geen raad. Er is nooit een raad geweest. Er is één stoel en daar zit één iemand op, en die is ooit precies zo binnengekomen als jij."},
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Wij zijn niet de bewakers van de hemel. Wij zijn de bewakers van één beslissing die iemand tweehonderd jaar geleden genomen heeft en nooit heeft teruggenomen."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Loutering.</b> Elke keer dat je schade van je tegenstander oploopt, trek je een kaart."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Loutering.</b> Doet je tegenstander je schade: trek <b>1</b>."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Neem hem. Hij is van mij en hij is het enige aan mij dat nooit uit die oven is gekomen. Ik heb hem verdiend door pijn te hebben."},
       {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Ontzag.</b> Het hele bord van je tegenstander houdt zich stil: zijn volgende beurt valt er niets aan."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"En dit erbij. Het is het enige wat ik ooit echt gekund heb: iets één tel laten ophouden. Iedereen denkt dat dat kracht is. Het is opluchting."},
@@ -13556,6 +13773,192 @@ function muziekStand(){
 /* ---- het praatje ---- */
 let PRAAT = null;
 /* Het level zoals het nu gespeeld wordt: de basis met de gekozen variant eroverheen. */
+/* 💎 Veldcondities per verhaallevel — wat dit gevecht bijzonder maakt.
+   Aethers (🟣) en de ✦ lichtkaarten van de tegenstander staan hier bewust NIET in; die hebben
+   hun eigen icoon.
+   - regels:    wat er geldt vanaf het begin (of vóór er een variant gekozen is).
+   - varianten: per variant de VOLLEDIGE lijst die `regels` vervangt. Staat een variant er niet
+                bij, dan gelden gewoon de basisregels.
+   - fase2:     wat er geldt na de omslag. (2-5 heeft geen echte fase2 maar een "bloei" op nul;
+                die staat hier ook onder fase2 — zie S.story.bloeiGedaan.) */
+const VELD = {
+  "1-1": { kop:"Oefenpotje",
+    regels:["Oefenpotje. Je krijgt een vaste openingshand en Rocky legt precies neer wat de les nodig heeft.",
+            "Verder gewoon veld. Geen bijzondere regels."] },
+
+  "1-2": { kop:"Steenharde vlakte",
+    regels:["Gewoon veld. Brokko's deck leunt zwaar op 🪨 Steen.",
+            "Na zijn eerste beurt schuift iemand je iets toe: een 🔥 Vuur-spell in jouw kolom 3 en 4."] },
+
+  "1-3": { kop:"Veertig keer steen",
+    regels:["Allebei veertig keer 🪨 Steen. Geen aethers, geen ✦ lichtkaarten, niets bannen.",
+            "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom."],
+    varianten:{
+      "b":["Jij speelt met tien van elk element, hij met veertig keer 🪨 Steen.",
+           "Nimbus opent met een 🪨 Steen-spell in zijn middelste kolom."] } },
+
+  "1-4": { kop:"De eerste rotsen",
+    regels:["Zijn deck heeft ⛰️ Rots: die zet eerst een kiezel van 1 leven neer en doet daarna het gewone steen-effect.",
+            "Er ligt al een 🪨 Steen-spell in zijn middelste kolom."] },
+
+  "1-5": { kop:"Vallend plafond",
+    regels:["🪨 <b>Rotsval.</b> Elke beurt komt er aan allebei de kanten een ✕ boven een willekeurige plek.",
+            "Staat daar aan het eind van die beurt iets, dan wordt het verpletterd. 🪨 Steen (ook ⛰️ Rots en kiezels) overleeft het.",
+            "Er ligt al een 🪨 Steen-spell in zijn middelste kolom, en zijn deck heeft ⛰️ Rots.",
+            "Hij begint met <b>10</b> levens."] },
+
+  "2-1": { kop:"Haperend licht",
+    regels:["Gewoon veld. Geen bijzondere regels.",
+            "Het beeld hapert af en toe. Puur sfeer, het doet verder niets.",
+            "Hij begint met <b>6</b> levens."] },
+
+  "2-2": { kop:"Slaperige herberg",
+    regels:["💤 <b>Het wiegelied.</b> Raak je in je beurt met een aanval niets, dan zak je een stap weg en heelt zij 1 leven.",
+            "Raak je wél (haar of een creature), dan word je een stap wakker. Op <b>3/3</b> val je in slaap en verlies je.",
+            "Elke kop thee die je bij haar dronk telt al mee (hoogstens 2).",
+            "Er liggen al 🌿 Gras-spells in haar kolom 2 en 4.",
+            "Zij begint met <b>7</b> levens."] },
+
+  "2-3": { kop:"De kruising",
+    regels:["Een struik. Hij heeft geen hand en doet niets.",
+            "Hij begint met <b>1</b> leven."],
+    varianten:{
+      "shelob":["🥚 <b>Eieren.</b> Er hangt er al één in haar middelste kolom. Elke beurt van haar legt ze er een bij: 4 levens, {Muur}.",
+                "Na <b>twee</b> beurten van haar komt een ei uit: een 🕷 spin van 7 levens die altijd voor <b>7</b> slaat.",
+                "Zij begint met <b>10</b> levens."] },
+    fase2:["Hij staat op als Struikrover, met een nieuw deck en 5 kaarten. Jouw kant blijft staan.",
+           "Zijn eerste zwaardhaal kost je meteen <b>2</b> levens.",
+           "In zijn kolom 2, 3 en 4 liggen 🗡 Swipe, 🔪 Stab en 🛡 Schild. Ze gaan af zodra hij er iets op zet.",
+           "Swipe: schade aan al jouw creatures, elke keer 1 meer. Stab: 10 recht tegenover en 1 aan jou. Schild: alles van hem +1.",
+           "Hij begint met <b>6</b> levens."] },
+
+  "2-4": { kop:"De kuil",
+    regels:["🐺 Max en Seraf delen één levensbalk. Samen beginnen ze met <b>8</b> levens.",
+            "Max speelt alleen 🐺 wolven: 3 levens, {Kleurloos}, en elke nieuwe wolf geeft álle wolven +1.",
+            "Seraf heeft een eigen witte stapel: elke beurt één kaart, meteen als spell op het bord."],
+    varianten:{
+      "straf":["🐺 Max en Seraf delen één levensbalk. Samen beginnen ze met <b>8</b> levens.",
+               "Max speelt alleen 🐺 wolven: 3 levens, {Kleurloos}, en elke nieuwe wolf geeft álle wolven +1.",
+               "Seraf heeft een eigen witte stapel: elke beurt één kaart, meteen als spell op het bord.",
+               "Je viel in de kuil: je begint met <b>3</b> levens minder."],
+      "hamerstraf":["🐺 Max en Seraf delen één levensbalk. Samen beginnen ze met <b>8</b> levens.",
+                    "Max speelt alleen 🐺 wolven: 3 levens, {Kleurloos}, en elke nieuwe wolf geeft álle wolven +1.",
+                    "Seraf heeft een eigen witte stapel: elke beurt één kaart, meteen als spell op het bord.",
+                    "Gevallen én geraakt: je begint met <b>5</b> levens minder (je houdt er minstens 1)."] } },
+
+  "2-5": { kop:"Open plek in de regen",
+    regels:["🌧 <b>Om de andere ronde regent het</b>, vanaf ronde 1. Dan doet 🔥 Vuur niets meer, behalve tegen je eigen creatures.",
+            "Haar 🌿 Gras is allemaal 🌹 Roos: {Volle slag} en {Groei 1|groei}.",
+            "Er ligt al een 🌿 Gras-spell in haar middelste kolom.",
+            "Zij begint met <b>5</b> levens."],
+    fase2:["🌹 <b>Bloei.</b> Op nul staat ze weer op, met <b>5</b> levens.",
+           "Op al haar spell-plekken komt een 🌹 Roos te liggen; wat er lag is weg. Zij trekt 2 kaarten, jij ook.",
+           "🌧 De regen blijft: om de andere ronde doet 🔥 Vuur niets."] },
+
+  "3-1": { kop:"Lavagrond",
+    regels:["🌋 In haar middelste kolom staat een Lavagolem: <b>20</b> levens, {Kleurloos}.",
+            "De golem gaat niet dood (hooguit naar 0) en krijgt elke beurt van haar <b>2</b> levens terug. 🌿 Tokens houden hem niet thuis.",
+            "🌋 <b>Jouw grond is lava.</b> Begin van jouw beurt: alles van jou dat geen 🔥 Vuur is verliest <b>1</b> leven.",
+            "Zij begint met <b>10</b> levens."] },
+
+  "3-2": { kop:"Dichte rook",
+    regels:["💨 <b>Alles ligt dicht</b>, ook jouw kaarten. Je ziet levens, aanval en wie op wie mikt; wát er ligt moet je onthouden.",
+            "💨 Eind van elke beurt van hem draait de rook: kolom 1↔5 en 2↔4 wisselen, aan allebei de kanten. Het midden blijft.",
+            "Hij begint met drie creatures op het veld, in kolom 1, 3 en 5. Het log schrijft niets op.",
+            "Hij begint met <b>9</b> levens."] },
+
+  "3-3": { kop:"De circustent",
+    regels:["🎪 Drie vonken van <b>2</b> levens: Knetter in kolom 1, Spetter in 3, Fikkie in 5. Samen zijn ze de levensbalk (<b>6</b>).",
+            "Raak een vonk met een aanval in zijn eigen kolom. In kolom 2 en 4 sla je in het niets.",
+            "Elke levende vonk: +1 op hun 🔥-effecten. Knetter: vuur is ☄️ Plasma. Spetter: vuur spat naar de buren. Fikkie: vuur schiet 2×.",
+            "Gaat er een uit, dan is zijn kracht weg en trekken de anderen kaarten: 1 bij de eerste, 2 bij de tweede."] },
+
+  "3-4": { kop:"Lopende band",
+    regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, van jou én van hem, schuift meteen zo ver mogelijk naar rechts.",
+            "🔥 Begin van zijn beurt: de forge eet wat in kolom 5 ligt (creature én spell), aan allebei de kanten. Daarna schuift alles door.",
+            "Hij begint met <b>9</b> levens."] },
+
+  "3-5": { kop:"Vuurzee en lava",
+    regels:["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
+            "🌋 <b>De grond is lava.</b> Eind van elke ronde: alles op het veld dat geen 🔥 Vuur (of ☄️ Plasma) is verliest 1 leven.",
+            "Hij begint met <b>8</b> levens, jij ook met <b>8</b>."],
+    varianten:{
+      "zitten":["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
+                "🌋 <b>De grond is lava.</b> Eind van elke ronde: alles op het veld dat geen 🔥 Vuur (of ☄️ Plasma) is verliest 1 leven.",
+                "Hij begint met <b>8</b> levens, jij met <b>9</b>."],
+      "meteen":["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
+                "🌋 <b>De grond is lava.</b> Eind van elke ronde: alles op het veld dat geen 🔥 Vuur (of ☄️ Plasma) is verliest 1 leven.",
+                "Hij begint met <b>6</b> levens, jij met <b>8</b>."] },
+    fase2:["Het hele veld verbrandt, ook jouw kant. Jij trekt <b>2</b> kaarten bij.",
+           "Zijn nieuwe hand hangt af van hoe je binnenkwam: 2 kaarten (vuurtje), geen (naast hem zitten) of 5 (meteen toeslaan).",
+           "🔥 De vuurzee komt nu elke <b>tweede</b> ronde. De 🌋 lava blijft.",
+           "Hij begint met <b>8</b> levens."] },
+
+  "4-1": { kop:"De sluis",
+    regels:["🚪 <b>De sluis.</b> Elke beurt zit er in één kolom een poort, eerst in kolom 3. Daar valt niemand aan, jij niet en hij niet.",
+            "De poort schuift elke beurt één kolom naar rechts (na kolom 5 weer kolom 1).",
+            "Er ligt al een 💧 Water-spell in zijn middelste kolom.",
+            "Hij begint met <b>8</b> levens."] },
+
+  "4-2": { kop:"Veertig meter diep",
+    regels:["🐙 Begin van haar beurt pakt ze twee van jouw creatures. Heeft ze plek, dan neemt ze ze mee (nu van haar); anders knijpt ze: <b>3</b> schade.",
+            "🫧 Onder water {fizzelt} elk 🔥 Vuur-effect, van iedereen. Een 🔥-creature dooft bovendien meteen als hij het veld raakt.",
+            "Zij begint met <b>9</b> levens."] },
+
+  "4-3": { kop:"Plat als glas",
+    regels:["🪞 Haar deck is veertig keer ✦ Kloon: ze kopieert creatures die al op het veld staan, van wie dan ook.",
+            "Staat er niets op het veld, dan kan zij niets neerzetten.",
+            "Zij begint met <b>8</b> levens."] },
+
+  "4-4": { kop:"Spiegelglad ijs",
+    regels:["❄️ <b>Doorglijden.</b> Raakt een creature de speler zelf, dan glijdt hij door naar de overkant (zelfde kolom) en hoort daar voortaan bij.",
+            "Staat daar al iets, dan blijft hij gewoon liggen. Dit geldt voor jou én voor haar.",
+            "Zij begint met <b>12</b> levens."] },
+
+  "4-5": { kop:"Het getij",
+    regels:["🌊 <b>Het getij</b> schuift elke ronde door: vloed, eb, springtij, en dan weer opnieuw.",
+            "🌊 Vloed: niemand valt aan. 🏖 Eb: 💧 Water slaat <b>+3</b> en 🔥 Vuur dooft.",
+            "🌀 Springtij: eind van elke beurt spoelt alles op het bord naar de overkant en wisselt van eigenaar. Spells blijven liggen.",
+            "Er staat al een 💧 Water in haar middelste kolom.",
+            "Zij begint met <b>14</b> levens."] },
+
+  "5-1": { kop:"Alziende poort",
+    regels:["👁 <b>Het ziet je hand.</b> Begin van jouw beurt noemt het één kaart die je vast hebt. Die mag je die beurt niet spelen.",
+            "Hij begint met <b>10</b> levens."] },
+
+  "5-2": { kop:"Zingende rook",
+    regels:["💨 Alles wat het Koor als creature neerzet ligt dicht: je ziet alleen dát er iets staat en hoeveel levens het heeft.",
+            "Het draait pas om als het aanvalt of als jij het aanwijst, en dán gaat zijn speel-effect alsnog af.",
+            "⛓ <b>Geen chain.</b> Niemand kan ergens tussenkomen: niets is {⚡ Snel|snel}.",
+            "Het Koor begint met <b>11</b> levens."] },
+
+  "5-3": { kop:"Vier tronen",
+    regels:["👑 Vier tronen van <b>5</b> levens: kolom 1 🪨 rotsval, 2 🌧 regen, 4 🌋 lava, 5 🌊 getij. Allemaal {Muur}.",
+            "Zolang een troon staat, draait zijn weer door. Leg hem om en dat weer stopt.",
+            "Elke troon trekt hem aan het eind van zijn beurt een kaart.",
+            "Hij begint met <b>8</b> levens, jij met <b>12</b>."] },
+
+  "5-4": { kop:"Zes vleugels",
+    regels:["🕊 <b>Zes vleugels.</b> Op <b>8</b> levens of minder noemt hij elke beurt een kaart in je hand die je niet mag spelen.",
+            "🕊 Op <b>5</b> of minder verlies je aan het begin van elke beurt van hem <b>1</b> leven.",
+            "🜂 Op <b>2</b> of minder krijgt alles wat jij hebt staan <b>1</b> schade aan het eind van elke beurt van hem.",
+            "Hij begint met <b>11</b> levens, jij met <b>9</b>."] },
+
+  "5-5": { kop:"Jouw eigen deck",
+    regels:["🪞 Ze heeft geen eigen deck: ze speelt met een kopie van het jouwe, met dezelfde mix, upgrades en ✦ lichtkaarten.",
+            "Zij begint met <b>12</b> levens."],
+    fase2:["Beide borden worden leeggeveegd. Jij trekt <b>2</b> kaarten; zij krijgt een eigen deck en 4 kaarten.",
+           "⚖ Elke ronde ander weer, op volgorde: 🪨 rotsval, 🌧 regen, 🌋 lava, 🌊 doodtij (dan valt niemand aan). Daarna opnieuw.",
+           "👁 Begin van jouw beurt noemt ze een kaart in je hand die je die beurt niet mag spelen.",
+           "De Raad begint met <b>14</b> levens."] }
+};
+
+/* De veldteksten gebruiken dezelfde trefwoorden als de kaarten. */
+Object.values(VELD).forEach(V => {
+  const om = a => (a || []).map(kwHTML);
+  V.regels = om(V.regels); if(V.fase2) V.fase2 = om(V.fase2);
+  if(V.varianten) Object.keys(V.varianten).forEach(k => V.varianten[k] = om(V.varianten[k]));
+});
 function levelVan(st){
   const basis = st && STORY[st.id]; if(!basis) return null;
   const V = st.variant !== undefined && basis.varianten && basis.varianten[st.variant];
@@ -15210,41 +15613,54 @@ function deckHTML(p){
     <div style="text-align:center;margin-top:12px"><button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div></div>`;
 }
 function helpHTML(){
+  const begrippen = Object.values(BEGRIPPEN).slice().sort((a, b) =>
+    a.naam.replace(/^[^A-Za-z+]+/, "").localeCompare(b.naam.replace(/^[^A-Za-z+]+/, ""), "nl"))
+    .map(b => `<dt>${b.naam}</dt><dd>${b.uitleg}</dd>`).join("");
   return `<div class="ovbox" style="text-align:left"><h2 style="text-align:center">Spelregels</h2>
   <div class="helptxt">
-    <h3>Doel</h3><p>Breng je tegenstander van 5 naar 0 levens — of laat ze trekken uit een leeg deck (direct verlies).</p>
-    <h3>Beurt</h3><p>Upkeep (per creature gaat één 🌿-token eraf) → Draw (2 kaarten) → Main → Gevecht → Main 2 → Einde. De startende speler krijgt <b>4</b> kaarten en slaat de allereerste draw over; de ander begint met 3 en trekt er in zijn eerste beurt 2 bij. Beginnen is een voordeel — een beurt voorsprong op het bord — dus de starter levert er een kaart voor in.</p>
-    <h3>Je deck bekijken</h3><p>Klik op je eigen deckstapel om te zien wat er nog in zit: per element hoeveel er nog te trekken zijn ten opzichte van waarmee je begon, en waar de rest is (hand, bord, graf, geband). De volgorde is geschud en blijft verborgen, en het deck van je tegenstander kun je niet openen.</p>
-    <h3>Beurt- en fasemeldingen</h3><p>Aan het begin van elke beurt verschijnt kort een melding in beeld: <b>goud</b> als jij aan zet bent, <b>staalblauw</b> als je tegenstander aan de beurt is. Ga je naar de gevechtsfase, dan zie je de rode <b>⚔ GEVECHT</b>-flits. Reactievensters midden in een chain krijgen géén melding — die zie je gewoon aan het chainpaneel links.</p>
-    <h3>Dubbeltikken</h3><p>De zetknoppen staan onderaan op een eigen volle regel, zodat ze groot genoeg zijn voor je duim. Daarnaast doet een <b>dubbeltik op een leeg stuk scherm</b> steeds de meest voor de hand liggende zet: een <b>infoscherm sluiten</b>, in het <em>spelen als…</em>-scherm kiezen voor <b>creature</b>, een reactievenster <b>doorlaten</b> of een optionele keuze <b>overslaan</b> — en staat er niets open, dan ga je door naar de <b>volgende fase</b> (main → gevecht → main 2 → einde beurt). Eén losse tik doet nooit iets, dus mistikken kost je niets. Op de laptop doet de spatiebalk hetzelfde.</p>
-    <h3>Kaartuitleg onderweg</h3><p><b>Houd een kaart in je hand ingedrukt</b> (of hover erover op de laptop) en je ziet precies wat hij doet — handig voor ✦ lichtkaarten. Je 🟣 aether onder je naam is aantikbaar en laat zijn volledige tekst zien. Dubbeltik of Esc sluit zo'n scherm weer.</p>
-    <h3>Autopass</h3><p>Met de <b>⚡</b>-knop rechtsonder (of in het menu onder Geluid &amp; effecten) laat je de chain automatisch door: je wordt dan nooit gevraagd te reageren. Elke speler zet dat voor zichzelf, en je kunt het midden in een potje aan- en uitzetten.</p>
-    <h3>Deck</h3><p>Vier elementen, <b>10 van elk</b> = 40 kaarten. Beide spelers spelen hetzelfde deck.</p>
-    <h3>Kaarten spelen</h3><p>Elke kaart kan als <b>creature</b> of als <b>spell</b> (in de spell-plek van een kolom). Een spell mag ook op een bezette spell-plek: de oude wordt dan gediscard. Een spell triggert direct bij het spelen én telkens wanneer je in die kolom een creature speelt. <b>Alle vier</b> de elementen mogen als creature ook <b>⚡ flash</b> gespeeld worden: als reactie in de chain, buiten je beurt en tijdens je eigen gevechtsfase.</p>
-    <p>✋ <b>Handlimiet: 7 kaarten.</b> Kom je daar met een draw boven, dan gooi je meteen weg tot je er weer zeven hebt — je kunt dus niet eindeloos blijven sparen.</p>
-    <h3>Levens en aanval</h3><p>Een creature start met de levens van zijn element: 💧 Water 2, 🔥 Vuur 2, 🌿 Gras 2, 🪨 Steen <b>3</b>. Zijn <b>aanval is de helft van zijn levens</b>, naar beneden afgerond, minimaal 1 — dat geldt ook voor de schade aan een speler. Een dikke creature slaat dus harder.</p>
-    <h3>Elementcirkel</h3><p>💧 → 🔥 → 🌿 → 🪨 → 💧 (sterk tegen). Sterk tegen zwak = <b>instakill</b>; zwak tegen sterk = <b>immuun</b>. Geldt voor alle schade tussen creatures. Spelers hebben geen element.</p>
-    <h3>De vier elementen</h3><p>
-      <b>💧 Water</b> — kies een eigen creature en speel hem <b>opnieuw</b>, op dezelfde of een andere vrije plek. Hij <b>houdt zijn levens</b>; alleen zijn entangle-tokens vallen weg. Zijn speel-effect en de spell in de kolom waar hij landt triggeren opnieuw. Water mag ook <b>bovenop</b> een eigen creature: die verhuist dan meteen. Na zijn plons is de kaart een 🪞 <b>Waterspiegel</b>: elke volgende trigger (als spell wanneer je er een creature op speelt, of als hij zelf herspeeld wordt) verplaatst niets meer, maar laat het speel-effect van een <b>andere eigen kaart</b> naar keuze nog een keer afgaan. Een spiegel die een spiegel aanwijst spiegelt door — nooit terug.<br>
-      <b>🪨 Steen</b> — 3 levens. Bij het spelen: geef <b>tweemaal +1 leven</b> aan een creature naar keuze (mag dezelfde zijn, mag je eigen of die van de ander).<br>
-      <b>🔥 Vuur</b> — 2 schade aan een creature van je <b>tegenstander</b>. <b>Op 💧 Water doet Vuur niets.</b> Je eigen creatures kun je niet aanwijzen; met 🟣 <b>Brandoffer</b> mag dat wél, en dan is het een offer: instakill + een kaart trekken.<br>
-      <b>🌿 Gras</b> — geef een creature een <b>entangle-token</b>. Elke token draint <b>−1 leven bij het doel en +1 bij de Gras zelf</b>, en kan het doel dus doden. Tegen 🪨 <b>Steen draint elke token dubbel: −2 daar, +2 hier</b> — geen instakill, maar Steen smelt wel twee keer zo snel weg. Op 🔥 Vuur werkt entangle niet.</p>
-    <h3>Entangle</h3><p>Tokens <b>stapelen</b>. Een creature met tokens kan niet aanvallen. In de upkeep van de eigenaar gaat er per creature één token af.</p>
-    <h3>🔥 Vuur richten</h3><p>Vuur kiest bij het spelen één doelwit, en dat staat bij je <b>tegenstander</b>: daar mag je alles aanwijzen. Je eigen kant blijft buiten schot.<br><br>Heb je 🟣 <b>Brandoffer</b>, dan doet je vuur 1 schade extra én mag je je <b>eigen</b> creatures aanwijzen — dat is dan een offer: instakill (ook op je eigen Water) en jij trekt een kaart. Een eigen 🔥 <b>Vuur</b> en alles in een eigen <b>kolom met een 🔥-spell</b> kun je ook dan niet aanwijzen.</p>
-    <h3>Chain</h3><p>Je krijgt een reactievenster op <b>gespeelde kaarten en aanvallen</b> — niet op elk los effect dat daaruit volgt; die resolven meteen. Speel je een kaart of val je aan, dan mogen <b>allebei</b> de spelers reageren met een flash voordat het resolvet: eerst degene die de link er net op zette — die houdt de prioriteit en mag dus op zijn eigen kaart doorchainen — daarna de ander. Pas als ze allebei doorlaten, resolvet de bovenste link. Je ziet daarbij precies wat er op de chain staat, inclusief het doelwit. Reacties resolven in omgekeerde volgorde (laatste eerst).<br><br>De kaart zelf staat er al — alleen zijn <b>effect</b> wacht op de chain. Daar zit de speelruimte: met een 💧 Water-flash schuif je het doelwit weg en fizzelt het effect — of dat nu je tegenstander doet, of jijzelf op je eigen link.</p>
-    <h3>Neerzetten gaat altijd door</h3><p>Een kaart die je speelt <b>verschijnt meteen</b> op het veld — als creature én als spell, en ook een ⚡ flash midden in een chain. Alleen dát neerzetten gaat buiten de chain om en is niet te onderbreken.<br><br>Zijn <b>effect</b> volgt daarna gewoon de chain: je kiest je doelwit, de kaart komt als link op de chain, allebei de spelers mogen reageren, en pas bij het resolven gaat het effect af.</p>
-    <h3>Targeten en fizzelen</h3><p>Je kiest je doelwit zodra de kaart op het veld staat, vóórdat je tegenstander mag reageren. Dat doelwit ligt vast op de chain — hij ziet het en kan erop reageren.<br><br>Een doelwit is een <b>kaart op een plek</b>. Staat die kaart er bij het resolven niet meer — vernietigd, of door 💧 Water naar een andere kolom verhuisd — dan <b>fizzelt</b> dat effect: er gebeurt niets. Zo dodge je een 🔥 Vuur door je eigen creature op tijd weg te spelen.<br><br>Speel je een creature in een kolom waar al een spell ligt, dan target je beide effecten meteen: eerst dat van de creature, dan dat van de spell. 🪨 Steen geeft twee keer +1 en target dus twee keer — die twee fizzelen <b>los van elkaar</b>. De kaart die je net hebt neergezet staat gewoon tussen de doelwitten, dus 🪨 Steen kan zichzelf oppompen.<br><br>Effecten die pas tijdens het resolven ontstaan — een creature die door 💧 Water opnieuw gespeeld wordt, de tweede 🪨 van Bergrug — kiezen hun doelwit op dat moment.</p>
-    <h3>Gevecht</h3><p>Een creature valt altijd recht vooruit: de creature in dezelfde kolom, of anders de speler. Creatures mogen meteen aanvallen in de beurt dat ze gespeeld zijn — alleen in de allereerste beurt van de startende speler geldt summoning sickness.</p>
-    <h3>Eigen bord targeten</h3><p>Zou een effect je dwingen om alléén je eigen kant van het bord te targeten, dan is die keuze automatisch optioneel.</p>
-    <h3>✦ Lichtkaarten (Commander)</h3><p>Elk potje kies je op het draftscherm ook één van drie <b>lichtkaarten</b>. Daarvan gaan er <b>3 exemplaren door je deck</b> — je trekt ze dus gewoon. Een lichtkaart speel je op een <b>spell-plek</b>: hij flitst wit op, doet zijn effect en gaat <b>meteen naar het graf</b>. Lag daar al een spell, dan wordt die gediscard. Lichtkaarten mogen <b>altijd ⚡ als reactie</b> gespeeld worden en kun je niet bannen. Er zijn er negen; op het startscherm staat de <b>✦ Lichtkaarten</b>.<br><br>Twee bijzonderheden: <b>Volledige Negatie</b> gaat <b>meteen</b> af en komt niet als chain-link — de kaart die je tegenstander net speelde verdwijnt naar het graf en al zijn effecten gaan van de chain. En <b>Wolkenzwerm</b> zet wolk-creatures neer: 2 levens, geen element (dus geen instakill of immuniteit), ze mogen gewoon aanvallen, en je mag er later een echte creature overheen spelen — de wolk lost dan op.</p>
-    <h3>Twee spelmodi</h3><p><b>⚜️ Basis</b> — één potje, alleen de vier elementen. <b>🟣 Commander</b> — best of 3 met aether-krachten, ✦ lichtkaarten en een ban-fase. Allebei ook live online te spelen met een roomcode.</p>
-    <h3>🟣 Commander (best of 3)</h3><p>Per potje krijg je één <b>draftscherm</b> waarop je tegelijk je 🟣 aether, je ✦ lichtkaart en je bans kiest — de startende speler eerst, dan de ander uit wat overblijft; wat niemand koos wordt weggelegd. Een aether is een blijvende kracht die niet verwijderd kan worden en <b>cumulatief</b> is: wat je in potje 1 koos houd je in potje 2 en 3. De derde kaart die niemand koos gaat <b>voorgoed uit de pool</b> — over drie potjes komt elk van de negen aethers dus precies één keer langs. Op het startscherm staat een <b>📚 Bibliotheek</b> waarin je ze allemaal rustig kunt doorlezen.<br><br>Op datzelfde scherm doe je de <b>bans</b>: je trekt <b>10</b> kaarten in potje 1 en <b>5</b> in potje 2 en 3, en mag daarvan bannen zoveel je wilt — gebande kaarten zijn weg voor de héle match. Na elk potje drukken beide spelers op <b>Klaar</b> voor het volgende; de <b>verliezer</b> kiest dan als eerste een aether én begint.</p>
-    <h3>🟣 Fusie</h3><p>Vier van de aethers zijn <b>fusies</b>. Heb je er één, dan kun je die kaart uit je hand ook als fusie spelen: je <b>offert direct</b> een willekeurige eigen creature — welk element maakt niet uit — en zet de fusie-creature op precies die plek neer. Het fusie-effect <b>vervangt</b> het gewone speel-effect van die creature, en werkt <b>eenmalig per kaart</b>: herspeel je hem later met 💧 Water, dan doet hij vanaf dan zijn normale elementeffect. <b>Alle vier</b> de fusies zijn <b>quickspell</b>: je mag ze dus ook midden in de chain, buiten je beurt en in je gevechtsfase spelen.</p>
-    <h3>🌐 Live online spelen</h3><p>Op de gehoste versie klik je op <b>Live online</b>. Je krijgt een <b>roomcode</b> van vier tekens (en een link met die code erin). Je vriend opent dezelfde pagina, klikt op <b>Meedoen</b>, vult de code in — en jullie zijn direct verbonden, browser aan browser. Zodra de verbinding staat drukken jullie allebei op <b>Ik ben klaar</b> en begint het potje. Zetten komen meteen aan, er zit een <b>chat</b> naast het bord, en valt de verbinding weg dan komen jullie via dezelfde code terug in dezelfde partij.<br><br>Je ziet alleen je eigen hand, je eigen deck en je eigen bans. Wel eerlijk vermeld: de partij reist als startgetal plus zettenlijst, dus iemand die de pagina uitleest kán de kaarten van de ander afleiden. Prima voor een potje met een vriend, geen bescherming tegen wie per se wil valsspelen.<br><br>Binnen Claude werkt live niet — daar is netwerkverkeer geblokkeerd. Zet het bestand op een gewone webpagina (bijvoorbeeld GitHub Pages), dan werkt het wel.</p>
-    <h3>🔄 Mulligan</h3><p>Bevalt je starthand niet? Vóór de eerste beurt mag je hem <b>terugschudden en opnieuw trekken</b>, voor <b>1 leven</b> per keer. Zo vaak je wilt — tot je op 1 leven staat, want daaraan doodgaan kan niet. <b>E</b> trekt opnieuw, <b>spatie</b> houdt je hand.</p>
-    <h3>Besturing</h3><p><b>Spatie</b> of <b>Enter</b> = doorlaten / overslaan / bevestigen. <b>Esc</b> of het <b>☰</b>-icoon rechtsboven = menu. Tegen de bot speel jij Speler 1.</p>
-    <p><b>Cijfers</b> doen het werk van de muis: in je beurt is <b>1</b> t/m <b>9</b> de zoveelste kaart in je hand (het cijfertje staat erop). Dan <b>1</b> = creature, <b>2</b> = spell, <b>3</b> = fusie. Dan het cijfer van de <b>kolom</b>. Moet je een doelwit kiezen, dan is een cijfer de kolom aan de kant van je tegenstander — met <b>Shift</b> erbij je eigen kant. <b>E</b> (of Esc) gaat steeds één stap terug. In je gevechtsfase valt cijfer <b>N</b> aan met de creature in kolom N, en in een reactievenster speelt een cijfer die flash-kaart.</p>
+    <h3>1 · Doel en beurt</h3>
+    <p>Breng je tegenstander van <b>5</b> naar <b>0</b> levens. Moet iemand trekken uit een leeg deck, dan verliest hij meteen.</p>
+    <p>Het deck: <b>${ORDER.length * 7}</b> kaarten, 7 van elk element. In het verhaal verschilt het per gevecht.</p>
+    <p>Wie begint krijgt <b>${startHand(true)}</b> kaarten en slaat zijn eerste draw over. De ander krijgt er <b>${startHand(false)}</b>. Je hand mag hooguit <b>${HANDMAX}</b> kaarten hebben.</p>
+    <p>Een beurt: <b>Upkeep</b> (van elke creature valt één 🌿 af) → <b>Draw</b> (trek 1) → <b>Main</b> → <b>Gevecht</b> → <b>Main 2</b> → <b>Einde</b>.</p>
+
+    <h3>2 · Kaarten spelen</h3>
+    <p>Elke kaart speel je als <b>creature</b> (op de creature-plek) of als <span class="kw" data-kw="spell">spell</span> (op de spell-plek van een kolom).</p>
+    <p>Een kaart kan twee soorten effect hebben:</p>
+    <p>▶ <span class="kw" data-kw="speel">Speel-effect</span>: gaat één keer af, als de kaart als creature het veld op komt.<br>
+       ◆ <span class="kw" data-kw="veld">Veld-effect</span>: werkt zolang de kaart op het veld ligt.</p>
+    <p>Een spell doet zijn speel-effect bij het neerleggen, en opnieuw bij elke creature die jij in die kolom speelt.</p>
+    <p>De vier elementen zijn allemaal <span class="kw" data-kw="snel">⚡ Snel</span>.</p>
+    <p>💧 <b>Water</b> — ${EL.water.tekst.speel}<br>🔥 <b>Vuur</b> — ${EL.vuur.tekst.speel}<br>
+       🌿 <b>Gras</b> — ${EL.gras.tekst.speel}<br>🪨 <b>Steen</b> (3 levens) — ${EL.steen.tekst.speel}</p>
+
+    <h3>3 · Gevecht en cirkel</h3>
+    <p>Een creature valt recht vooruit aan: de creature tegenover hem, of de speler als die plek leeg is. De schade is de <b>helft van zijn levens</b> (naar beneden, minstens 1).</p>
+    <p>Alleen in de allereerste beurt van het potje mag de beginner nog niet aanvallen.</p>
+    <p>Tussen creatures geldt de cirkel 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak: <span class="kw" data-kw="instakill">instakill</span>. Zwak tegen sterk: <span class="kw" data-kw="immuun">immuun</span>. Spelers hebben geen element.</p>
     <div style="text-align:center;margin:10px 0">${circleSVG(180)}</div>
+
+    <h3>4 · De chain</h3>
+    <p>Een kaart die je speelt, staat er meteen. Zijn effect gaat als link op de chain, met het doelwit dat je meteen kiest.</p>
+    <p>Op elke gespeelde kaart en elke aanval mogen allebei de spelers reageren met iets dat <span class="kw" data-kw="snel">⚡ Snel</span> is: eerst wie de link er net op zette, dan de ander. Laten allebei door, dan resolvet de bovenste link. De laatste reactie gaat dus eerst.</p>
+    <p>Is het doelwit weg of verhuisd, dan <span class="kw" data-kw="fizzelt">fizzelt</span> het effect. Zo ontwijk je een 🔥 Vuur: herspeel je creature op tijd met 💧 Water.</p>
+    <p>Zou een effect alleen je eigen kant kunnen raken, dan mag je het overslaan.</p>
+
+    <h3>5 · Commander, aethers en licht</h3>
+    <p><b>Commander</b> is best of 3. Voor elk potje kies je een <span class="kw" data-kw="aether">🟣 aether</span>, een <span class="kw" data-kw="licht">✦ lichtkaart</span> (daarvan gaan er 3 door je deck) en je bans. Aethers stapelen: in potje 3 heb je er drie. De verliezer kiest daarna eerst en begint.</p>
+    <p>Een 🟣 <span class="kw" data-kw="fusie">fusie</span>-aether laat je een kaart uit je hand ook als fusie spelen.</p>
+    <p>🔄 Bevalt je starthand niet, dan mag je hem opnieuw trekken voor <b>1</b> leven, zo vaak je wilt, tot je op 1 staat.</p>
+
+    <h3>Begrippen</h3>
+    <dl>${begrippen}</dl>
+
+    <h3>Bediening</h3>
+    <p><b>Spatie</b>, <b>Enter</b> of <b>dubbeltik</b> op een leeg stuk scherm = de logische volgende stap (doorlaten, overslaan, bevestigen, volgende fase). <b>Esc</b> of ☰ = menu.</p>
+    <p><b>Cijfers</b>: in je beurt is <b>1</b>–<b>9</b> de zoveelste kaart in je hand. Daarna <b>1</b> = creature, <b>2</b> = spell, <b>3</b> = fusie, en dan de kolom. Bij een doelwit is een cijfer een kolom van je tegenstander (met <b>Shift</b>: je eigen kant). In je gevechtsfase valt cijfer N aan met kolom N. <b>E</b> gaat een stap terug.</p>
+    <p><b>Uitleg</b>: hover over een kaart of houd hem ingedrukt. De ruiten naast de levens zijn de 🟣 aethers, het veld en de ✦ lichtkaarten van je tegenstander; ook die kun je aanwijzen of aantikken. Onderstreepte woorden leggen zichzelf uit.</p>
+    <p><b>Deck en graf</b>: klik op je deck om te zien wat er nog in zit, en op een graf om erdoorheen te bladeren.</p>
+    <p><b>⚡ Autopass</b> (rechtsonder) laat de chain vanzelf door: dan word je nooit gevraagd te reageren.</p>
+    <p><b>🌐 Live online</b>: kies Live online, deel de roomcode van vier tekens, en je vriend doet mee.</p>
   </div>
   <div style="text-align:center"><button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div></div>`;
 }
@@ -15479,6 +15895,18 @@ document.addEventListener("click", e => {
       const o = S.ui.opts[+t.dataset.i];
       if(o) doAct({t:"f", v:o.v});
     }
+    return;
+  }
+  if(act === "veldinfo"){
+    const v = veldInfo();
+    if(v){ M = {type:"info", titel:v.kop, ic:"🗺", kleur:"#e8c870", sub:v.sub,
+      tekst:v.regels.map(r => `<p style="margin:0 0 8px">${r}</p>`).join("")}; render(); }
+    return;
+  }
+  if(act === "ltinfo"){
+    const lt = tegenLichten(+t.dataset.p);
+    if(lt.length){ M = {type:"info", titel:"Zijn lichtkaarten", ic:"✦", kleur:"#fffdf2",
+      sub:"✦ Licht · zit in zijn deck", tekst:ltLijstHTML(lt)}; render(); }
     return;
   }
   if(act === "aeinfo"){
@@ -16451,13 +16879,13 @@ function toonKaartInfo(cd, terug){
   if(cd.lk){
     const d = LIGHTS[cd.lk];
     M = {type:"info", titel:d.name, ic:"✦", kleur:"#ffffff",
-      sub:`Lichtkaart · ${d.n}× in je deck${d.cost ? ` · kost ${d.cost} leven` : ""}${d.tribute ? " · offert een creature" : ""}`,
-      tekst:`${d.txt}<br><br><b>Spelen:</b> op een spell-plek; hij flitst, doet zijn effect en gaat meteen naar het graf. Mag altijd ⚡ als reactie.`};
+      sub:`✦ Licht · ${d.n}× in je deck`,
+      tekst:`${d.txt}<p class="fxnoot">${kwChip("licht")}: ${BEGRIPPEN.licht.uitleg}</p>`};
   } else {
-    const e2 = EL[cd.el];
-    M = {type:"info", titel:e2.name, ic:icon(cd.el), kleur:`var(--${cd.el})`,
-      sub:`${e2.hp} levens · aanval = de helft${e2.strong ? ` · sterk tegen ${icon(e2.strong)} ${EL[e2.strong].name}` : ""}${e2.flash ? " · ⚡ flash" : ""}`,
-      tekst:`<b>Als creature:</b> ${e2.cre}${e2.sp ? `<br><br><b>Als spell:</b> ${e2.sp}` : ""}`};
+    const e2 = EL[cd.el], vk = toonVarKey(cd), t2 = kaartTekst(cd.el, vk);
+    M = {type:"info", titel:vk ? VAR[vk].name : e2.name, ic:vk ? VAR[vk].icon : icon(cd.el), kleur:`var(--${cd.el})`,
+      sub:`${e2.hp} levens${t2.kw.length ? " · " + kwRij(t2.kw) : ""}${e2.strong ? ` · sterk tegen ${icon(e2.strong)} ${EL[e2.strong].name}` : ""}`,
+      tekst:`<div class="fxlijst">${effectHTML(cd.el, vk)}</div>`};
   }
   if(terug) M.terug = terug;
   render();
@@ -16479,13 +16907,61 @@ document.addEventListener("pointerdown", e => {
 document.addEventListener("click", e => {
   if(DRUKGEDAAN && e.target.closest(".hcard")){ DRUKGEDAAN = false; e.stopPropagation(); }
 }, true);
+/* ✦ De uitleg-bubbel bij een trefwoord. Hover op de laptop; tikken op de telefoon (dan
+   pakt de bubbel de tik, zodat je niet per ongeluk de kaart kiest waar het woord op staat). */
+function kwTip(el, aan){
+  let tip = document.getElementById("kwtip");
+  if(!tip){ tip = document.createElement("div"); tip.id = "kwtip"; document.body.appendChild(tip); }
+  if(!aan || !el){ tip.classList.remove("aan"); return; }
+  const b = BEGRIPPEN[el.dataset.kw]; if(!b) return;
+  tip.innerHTML = `<b>${b.naam}</b>${b.uitleg}`;
+  tip.classList.add("aan");
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+  let y = r.top - h - 8; if(y < 8) y = r.bottom + 8;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+let KWT = null, KWPIN = false;
 document.addEventListener("mouseover", e => {
+  const k = e.target.closest && e.target.closest(".kw");
+  if(k){ clearTimeout(KWT); KWPIN = false; kwTip(k, true); }
+  else if(!KWPIN) kwTip(null, false);   // het woord is weggerenderd: bubbel mag weg
+});
+document.addEventListener("mouseout", e => { const k = e.target.closest && e.target.closest(".kw"); if(k) kwTip(null, false); });
+document.addEventListener("click", e => {
+  const k = e.target.closest && e.target.closest(".kw");
+  if(!k) return;
+  e.stopPropagation(); e.preventDefault();
+  kwTip(k, true); KWPIN = true; clearTimeout(KWT); KWT = setTimeout(() => { KWPIN = false; kwTip(null, false); }, 3500);
+}, true);
+function ltLijstHTML(lt){
+  return lt.map(({k, n}) => `<p style="margin:0 0 8px"><b>✦ ${LIGHTS[k].name}</b> <span style="opacity:.7">× ${n}</span><br>${LIGHTS[k].kort || ""}</p>`).join("");
+}
+document.addEventListener("mouseover", e => {
+  const vr = e.target.closest("[data-pvveld]");
+  if(vr){
+    const v = veldInfo(); if(!v) return;
+    setPreview(`<div class="pv" style="border-color:#d9b35a">
+      <div class="pvhead" style="background:linear-gradient(160deg,#9a7430,#3e2c12)"><span class="ic">🗺</span><span class="nm">${v.kop}</span></div>
+      <div class="sec"><div class="sect" style="color:#e8c870">${v.sub}</div>${v.regels.map(r => `<p>${r}</p>`).join("")}</div>
+    </div>`);
+    return;
+  }
+  const lr = e.target.closest("[data-pvlt]");
+  if(lr){
+    const lt = tegenLichten(+lr.dataset.pvlt); if(!lt.length) return;
+    setPreview(`<div class="pv" style="border-color:#f4f1e6">
+      <div class="pvhead el-licht" style="background:linear-gradient(160deg,#f6f3e8,#b6b0a0);color:#2a2721"><span class="ic">✦</span><span class="nm">Zijn lichtkaarten</span></div>
+      <div class="sec"><div class="sect" style="color:#e8e2cc">Zit in zijn deck</div>${ltLijstHTML(lt)}</div>
+    </div>`);
+    return;
+  }
   const ae = e.target.closest("[data-pvae]");
   if(ae){
     const k = ae.dataset.pvae, d = AETHERS[k];
     setPreview(`<div class="pv" style="border-color:#9d6fd8">
       <div class="pvhead" style="background:linear-gradient(160deg,#7a55b8,#3a2560)"><span class="ic">🟣</span><span class="nm">${d.name}</span></div>
-      <div class="sec"><div class="sect" style="color:#b48be0">Aether · passief · niet te verwijderen</div><p>${d.txt}</p></div>
+      <div class="sec"><div class="sect" style="color:#b48be0">Aether · ${d.kind === "fusie" ? "fusie" : "passief"} · niet te verwijderen</div><p>${d.txt}</p></div>
     </div>`);
     return;
   }
@@ -16693,7 +17169,9 @@ function beeldKlaar(pad){
 }
 const KAART_PADEN = new Set([].concat(
   typeof KAART_BEELD === "object" ? Object.values(KAART_BEELD) : [],
-  [LICHT_KAART, AETHER_KAARTVORM]));
+  typeof LICHT_BEELD === "object" ? Object.values(LICHT_BEELD) : [],
+  typeof AETHER_BEELD === "object" ? Object.values(AETHER_BEELD) : [],
+  [LICHT_KAART, AETHER_KAARTVORM, RUIT_VELD, RUIT_LICHT]));
 /* Een download die afknapt is bijna nooit een bestand dat er niet is — het is de
    verbinding die het begeeft omdat we 228 plaatjes tegelijk opvragen. Daarom twee dingen:
    we halen ze in een rij op, een handvol tegelijk, en een mislukking krijgt drie kansen
@@ -16758,6 +17236,9 @@ function beeldenWarm(){
     paden.push(...Object.values(DECOR_BEELD).filter(pad =>
       Object.values(DECOR).some(rij => rij.some(d => DECOR_BEELD[d.b] === pad))));
   if(typeof KAART_BEELD === "object") paden.push(...Object.values(KAART_BEELD));
+  if(typeof LICHT_BEELD === "object") paden.push(...Object.values(LICHT_BEELD));
+  if(typeof AETHER_BEELD === "object") paden.push(...Object.values(AETHER_BEELD));
+  paden.push(RUIT_VELD, RUIT_LICHT);
   if(typeof HORIZON_BEELD === "object") paden.push(...Object.values(HORIZON_BEELD));
   paden.push(LICHT_KAART, AETHER_KAART, AETHER_KAARTVORM);
   if(typeof OVERWORLD_BEELD === "string") paden.push(OVERWORLD_BEELD);
