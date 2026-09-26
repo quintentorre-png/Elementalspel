@@ -995,6 +995,10 @@ h3{font-size:.66rem; line-height:1.9}
 /* ✦ Een lichtkaart herken je aan zijn witte rand — op de hand, op het veld, in de winkel,
    overal. In CSS en niet in de tekening: zo is hij overal even dik en valt hij nooit weg
    onder de naam- of tekstbalk. */
+/* En elke andere kaart net zo, maar in zijn eigen kleur: water blauw, vuur oranje, gras
+   groen, steen zandbruin — en een token of vijandkaart in de kleur van zijn eigen kaartje. */
+.card:not(.light){border-color:var(--c1, var(--ink2));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18), 0 0 6px color-mix(in srgb, var(--c1, #000) 40%, transparent), 3px 3px 0 0 rgba(0,0,0,.5)}
 .card.light{border-color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35), 0 0 6px rgba(255,255,255,.35), 3px 3px 0 0 rgba(0,0,0,.5)}
 .card .ci{position:absolute; inset:0; padding:0; display:block; filter:none; text-shadow:none}
 .card .ci .pix{display:block; width:100%; height:100%; image-rendering:pixelated}
@@ -1344,6 +1348,26 @@ h3{font-size:.66rem; line-height:1.9}
 
 
 /* ================= VERHAALMODUS ================= */
+/* ⌂ homescreen: twee grote knoppen onder elkaar, vier kleine op een rij */
+.ovbox.startbox.home{width:min(540px,94vw); max-width:none; box-sizing:border-box}
+.startbox.home .hgroot{display:flex; flex-direction:column; align-items:stretch; gap:14px; margin-top:22px}
+.startbox.home .obtn.hbig{width:100%; margin:0; padding:18px 16px 14px; font-size:1.02rem}
+.startbox.home .obtn.hbig .bsub{font-size:.62rem; margin-top:8px}
+.ovbox .obtn.b-mp{background:#23708a; color:#e0f6ff; text-shadow:2px 2px 0 rgba(0,0,0,.55)}
+.startbox.home .obtn.aan{filter:brightness(1.15); box-shadow:0 0 0 2px var(--gold), 3px 3px 0 0 rgba(0,0,0,.5)}
+.startbox.home .hopties{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+  padding:12px 10px; border:2px dashed rgba(255,212,71,.35); background:rgba(0,0,0,.2)}
+.startbox.home .hopties .obtn{flex:1 1 110px; margin:0; padding:12px 10px 10px; font-size:.78rem}
+.startbox.home .hkleinrij{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-top:18px}
+.startbox.home .hopties:last-child{margin-top:12px}
+.ovbox .obtn.hklein{margin:0; padding:10px 4px 9px; font-size:.64rem; background:#2a3a58; color:#dfe8f5;
+  display:flex; flex-direction:column; align-items:center; gap:6px; text-shadow:1px 1px 0 rgba(0,0,0,.6)}
+.ovbox .obtn.hklein .hic{font-size:1.25rem; line-height:1}
+@media (max-width:520px){
+  .startbox.home .hkleinrij{gap:6px}
+  .ovbox .obtn.hklein{font-size:.5rem; padding:9px 2px 8px}
+  .startbox.home .obtn.hbig{font-size:.86rem}
+}
 .ovbox.b-story,.obtn.b-story{}
 .ovbox .obtn.b-story{background:#8a5a2a; color:#ffeccc; text-shadow:2px 2px 0 rgba(0,0,0,.55);
   box-shadow:0 4px 0 0 #4b2f13, 0 4px 0 3px var(--ink2)}
@@ -2089,10 +2113,6 @@ h3{font-size:.66rem; line-height:1.9}
   font-family:"VT323",ui-monospace,monospace; font-size:.72rem; line-height:15px; text-align:center;
   color:#f6e9b0; background:#141a22; border:1px solid rgba(201,168,106,.6); opacity:.85; pointer-events:none}
 @media (pointer:coarse){ .hcard .hnr{display:none} }
-/* 🪞 Het spiegeltje in de rechterbovenhoek van een Water dat zijn plons al maakte. */
-.card .wsmerk{position:absolute; top:2px; right:2px; z-index:6; font-size:.8rem; line-height:1;
-  padding:1px 2px; background:rgba(6,20,40,.85); border:1px solid rgba(169,226,255,.7); pointer-events:none}
-.card.ws{box-shadow:inset 0 0 0 1px rgba(169,226,255,.35)}
 .genoemdmerk{position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:7;
   font-size:.8rem; pointer-events:none; text-shadow:0 0 8px rgba(255,230,140,.9)}
 .hittemeter{margin-top:7px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.46rem;
@@ -2609,7 +2629,8 @@ const BEGRIPPEN = {
   verstrik:  {naam:"Verstrik", uitleg:"Leg een 🌿 op een creature. Die verliest meteen 1 leven en de bron krijgt er 1 bij (op 🪨 Steen 2). Met 🌿 kan hij niet aanvallen. In zijn upkeep valt er één 🌿 af. 🔥 Vuur kan niet verstrikt worden."},
   vast:      {naam:"Vast", uitleg:"🕸 Kan niet aanvallen tot zijn volgende upkeep."},
   herspeel:  {naam:"Herspeel", uitleg:"Pak een eigen creature op en zet hem opnieuw neer, op dezelfde of een andere vrije plek. Hij houdt zijn levens, zijn 🌿 vallen weg, en zijn speel-effect gaat opnieuw af (net als de spell in die kolom)."},
-  spiegel:   {naam:"🪞 Spiegel", uitleg:"Triggert deze kaart opnieuw, dan herspeelt hij niets meer: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. Kies je een andere spiegel, dan spiegelt die door."},
+  plons:     {naam:"💧 Plons", uitleg:"Het speel-effect van een Waterplons: herspeel een eigen creature. Daarna is de plons voorbij en heet de kaart gewoon 💧 Water."},
+  spiegel:   {naam:"💧 Water", uitleg:"Een Waterplons die al geplonsd heeft. Triggert Water opnieuw, dan herspeelt het niets meer: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. Kies je ander Water, dan geeft dat het weer door."},
   roepop:    {naam:"Roep op", uitleg:"Zet een kaart uit je graf op het veld. Zijn speel-effect gaat af."},
   offer:     {naam:"Offer", uitleg:"Vernietig een eigen creature als prijs."},
   betaal:    {naam:"Betaal", uitleg:"Verlies levens als prijs. Dat telt niet als schade."},
@@ -2626,7 +2647,7 @@ const BEGRIPPEN = {
 /* Vormen die op een ander trefwoord wijzen. */
 const KW_ALIAS = {herspeelt:"herspeel", herspelen:"herspeel", verstrikt:"verstrik", verstrikken:"verstrik",
   offert:"offer", betaalt:"betaal", negeert:"negeer", fizzelen:"fizzelt", fizzel:"fizzelt",
-  immuniteit:"immuun", flash:"snel", groei1:"groei", spiegel:"spiegel", aethers:"aether"};
+  immuniteit:"immuun", flash:"snel", groei1:"groei", spiegel:"spiegel", plonst:"plons", aethers:"aether"};
 function kwSleutel(w){
   const k = String(w).toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
   return BEGRIPPEN[k] ? k : (KW_ALIAS[k] || null);
@@ -2645,8 +2666,8 @@ const kwChip = k => BEGRIPPEN[k] ? `<span class="kw" data-kw="${k}">${BEGRIPPEN[
    kw: trefwoorden in de kop · speel: ▶ · veld: ◆ · eig: vaste eigenschap zonder moment ·
    spell: wat er als spell nog bij komt (de vaste spell-regel staat er altijd al). */
 const KAART_TEKST = {
-  water:   {kw:["snel"], speel:"{Herspeel} een eigen creature. Daarna is deze kaart een {🪞 Spiegel|spiegel}.",
-            eig:"Speel je hem óp een eigen creature, dan herspeel je die."},
+  water:   {kw:["snel"], speel:"{Plons}: {herspeel} een eigen creature. Daarna heet deze kaart {Water|spiegel}.",
+            eig:"Speel je deze kaart óp een eigen creature, dan herspeel je die."},
   vuur:    {kw:["snel"], speel:"<b>2</b> schade aan een vijandelijke creature."},
   gras:    {kw:["snel"], speel:"{Verstrik} een creature."},
   steen:   {kw:["snel"], speel:"Twee keer <b>+1 leven</b> aan een creature naar keuze. Mag dezelfde, mag zichzelf."},
@@ -2750,7 +2771,12 @@ function kwRij(kw){
 function effectHTML(el, varKey, opt){
   const t = kaartTekst(el, varKey), o = opt || {};
   const r = [];
-  if(t.speel) r.push(`<div class="fxr"><span class="fxi" title="Speel-effect">▶</span><span>${t.speel}</span></div>`);
+  /* 💧 Heeft deze Waterplons al geplonsd, dan is het Water: bij een nieuwe trigger gaat er
+     een andere eigen kaart nog eens, in plaats van een herspeel. */
+  const wsTxt = o.ws && el === "water" && !varKey
+    ? kwHTML("{Water|spiegel}: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. (De plons is al geweest.)") : "";
+  if(wsTxt) r.push(`<div class="fxr"><span class="fxi" title="Speel-effect">▶</span><span>${wsTxt}</span></div>`);
+  else if(t.speel) r.push(`<div class="fxr"><span class="fxi" title="Speel-effect">▶</span><span>${t.speel}</span></div>`);
   t.eig.forEach(e => r.push(`<div class="fxr"><span class="fxi"></span><span>${e}</span></div>`));
   if(t.veld) r.push(`<div class="fxr"><span class="fxi" title="Veld-effect">◆</span><span>${t.veld}</span></div>`);
   const element = !!(EL[el] && EL[el].strong);
@@ -2768,7 +2794,9 @@ function toonVarKey(cd){
   return null;
 }
 const kVar   = cd => { const v = toonVarKey(cd); return v && VAR[v] ? VAR[v] : null; };
-const kNaam  = cd => kVar(cd) ? kVar(cd).name : (cd && cd.lk ? LIGHTS[cd.lk].name : (cd ? EL[cd.el].name : "?"));
+/* 💧 Ongespeeld heet water Waterplons; heeft het eenmaal geplonsd, dan gewoon Water. */
+const waterNaam = cd => (cd && cd.ws) ? "Water" : "Waterplons";
+const kNaam  = cd => kVar(cd) ? kVar(cd).name : (cd && cd.lk ? LIGHTS[cd.lk].name : (cd ? (cd.el === "water" ? waterNaam(cd) : EL[cd.el].name) : "?"));
 const kIcon  = cd => kVar(cd) ? kVar(cd).icon : (cd ? EL[cd.el].icon : "?");
 /* Mag hier een creature overheen? Wolken en skeletten zeggen dat via hun element,
    kiezels via de kaart zelf. */
@@ -3797,20 +3825,20 @@ const SOUNDS = {
    waar het gebleven was. */
 const MUZIEK = {
   /* --- overal --- */
-  titel:          "audio/agni-kai.mp3",   // titelscherm
+  titel:          "audio/w1-00-titel.mp3",   // titelscherm
   winkel:         "audio/winkel.mp3",                     // de kraam van Knort
-  kaart:          "audio/agni-kai.mp3",   // wereldkaart, levelkeuze, lopen tussen gevechten
-  gevecht:        "audio/agni-kai.mp3",   // vrij spel en online potjes
+  kaart:          "audio/w1-01-kaart.mp3",   // wereldkaart, levelkeuze, lopen tussen gevechten
+  gevecht:        "audio/gevecht-vrij.mp3",   // vrij spel en online potjes
   /* --- wereld 1 · Steenrijk --- */
-  w1_rustig:      "",                     // gewone dialoog: Rocky, Brokko die opschept
-  w1_gespannen:   "",                     // als iemand iets zegt wat hij niet had moeten zeggen
-  w1_vuurguy:     "",                     // elke keer dat Flint opduikt
-  w1_gevecht:     "",                     // 1-1, 1-2 en 1-4: het gewone gevecht
-  w1_nimbus:      "",                     // 1-3: Nimbus die zichzelf aankondigt
-  w1_spiegel:     "",                     // 1-3: veertig steen tegen veertig steen
-  w1_terugkeer:   "",                     // 1-4: het zwarte scherm met het silhouet
-  w1_steenbaas:   "",                     // 1-4 en 1-5: Magnus, cutscene en afscheid
-  w1_baasgevecht: "",                     // 1-5: het bazengevecht met de rotsval
+  w1_rustig:      "audio/w1-02-rustig.mp3",                     // gewone dialoog: Rocky, Brokko die opschept
+  w1_gespannen:   "audio/w1-03-gespannen.mp3",                     // als iemand iets zegt wat hij niet had moeten zeggen
+  w1_vuurguy:     "audio/w1-04-vuurguy.mp3",                     // elke keer dat Flint opduikt
+  w1_gevecht:     "audio/w1-05-gevecht.mp3",                     // 1-1, 1-2 en 1-4: het gewone gevecht
+  w1_nimbus:      "audio/w1-06-nimbus.mp3",                     // 1-3: Nimbus die zichzelf aankondigt
+  w1_spiegel:     "audio/w1-07-spiegel.mp3",                     // 1-3: veertig steen tegen veertig steen
+  w1_terugkeer:   "audio/w1-08-terugkeer.mp3",                     // 1-4: het zwarte scherm met het silhouet
+  w1_steenbaas:   "audio/w1-09-steenbaas.mp3",                     // 1-4 en 1-5: Magnus, cutscene en afscheid
+  w1_baasgevecht: "audio/w1-10-baasgevecht.mp3",                     // 1-5: het bazengevecht met de rotsval
   /* --- wereld 2 · Rankenwoud --- */
   w2_woud:        "audio/w2-01-woud.mp3",                     // lopen door het woud, de gewone dialoog
   w2_seraf:       "audio/w2-02-seraf.mp3",                     // elke keer dat Seraf verschijnt
@@ -3840,8 +3868,8 @@ const MUZIEK = {
   w4_ijs:         "",                     // 4-4: de ijsvlakte
   w4_baas:        "",                     // 4-5: het gevecht met de Oceaan
   /* --- korte stingers: spelen één keer over de muziek heen --- */
-  winst:          "",                     // als je een gevecht wint
-  verloren:       ""                      // als je omvalt
+  winst:          "audio/winst.mp3",                     // als je een gevecht wint
+  verloren:       "audio/verloren.mp3"                      // als je omvalt
 };
 const SET = {music:0.5, sfx:0.75, mute:false, fx:"vol", autopass:[false, false], story:{klaar:[], vrij:false}};
 /* Alles wat geluid maakt vraagt zijn volume hier op. Zo hoeft de knop in de hoek alleen
@@ -4699,19 +4727,22 @@ function cardFaceHTML(el, spell, card){
       <div class="cm">${spell?"✦ spell":(vr.token ? "token" : "creature")}</div></div>`;
   }
   /* De vier gewone elementen: eigen tekening als die er is, anders de pixelversie. */
-  const eb = KAART_BEELD[e];
+  /* 💧 Een Waterplons die al geplonsd heeft is gewoon Water: zelfde kaart, zonder de plons. */
+  const eb = (e === "water" && c && c.ws && KAART_BEELD.water_stil && BEELD_KLAAR[KAART_BEELD.water_stil] !== "fout")
+    ? KAART_BEELD.water_stil : KAART_BEELD[e];
   const eimg = eb && BEELD_KLAAR[eb] !== "fout"
     ? `<img class="kaartbeeld" src="${kaartSrc(eb)}" alt="" decoding="sync" onerror="beeldFout(this)">` : "";
-  return `<div class="card el-${e} ${spell?'spellcard':''}${c && c.seraf ? " serafkaart" : ""}${c && c.ws ? " ws" : ""}">
+  return `<div class="card el-${e} ${spell?'spellcard':''}${c && c.seraf ? " serafkaart" : ""}">
     <div class="ci">${eimg}${pixArt(e)}</div>
-    <div class="cn">${EL[e].name}</div>
-    <div class="cm">${spell?"✦ spell":(e === "wolk" ? "wolk" : "creature")}</div>${c && c.ws ? `<span class="wsmerk" title="Waterspiegel">🪞</span>` : ""}</div>`;
+    <div class="cn">${e === "water" ? waterNaam(c) : EL[e].name}</div>
+    <div class="cm">${spell?"✦ spell":(e === "wolk" ? "wolk" : "creature")}</div></div>`;
 }
 /* Eigen tekeningen voor de kaartgezichten van de sterke varianten en de tokens.
    Ontbreekt het bestand, dan zie je het element met een badge erop. */
 const KAART_BEELD = {
   /* De vier gewone elementen. Full art: ze vullen de hele kaart. */
   vuur:"art/kaart-vuur.png", water:"art/kaart-water.png",
+  water_stil:"art/kaart-water-stil.png",   // 💧 dezelfde kaart zónder de plons: Water na het spelen
   gras:"art/kaart-gras.png", steen:"art/kaart-steen.png",
   rots:"art/kaart-rots.png", plasma:"art/kaart-plasma.png", roos:"art/kaart-roos.png", ijs:"art/kaart-ijs.png",
   kiezel:"art/token-kiezel.png",
@@ -4854,7 +4885,7 @@ async function handLimiet(p){
     if(i < 0) i = P(p).hand.length - 1;
     const cd = P(p).hand.splice(i, 1)[0];
     P(cd.owner).grave.push(cd);
-    addLog(`✋ ${pName(p)} zit boven de handlimiet en gooit ${cd.lk ? "✦ " + LIGHTS[cd.lk].name : icon(cd.el) + " " + EL[cd.el].name} weg.`, true);
+    addLog(`✋ ${pName(p)} zit boven de handlimiet en gooit ${cd.lk ? "✦ " + LIGHTS[cd.lk].name : icon(cd.el) + " " + kNaam(cd)} weg.`, true);
     render();
     if(!FAST) await sleep(200);
   }
@@ -5079,7 +5110,7 @@ const effPrompt = {
   gras:  "🌿 Gras: kies wie je verstrikt (−1/+1 · op 🪨 Steen −2/+2)",
   steen: "🪨 Steen: kies nu wie er +1 leven krijgt",
   water: "💧 Water: kies nu een eigen creature om opnieuw te spelen",
-  ws:    "🪞 Waterspiegel: kies een andere eigen kaart op het veld — haar speel-effect gaat nog een keer af"
+  ws:    "💧 Water: kies een andere eigen kaart op het veld — het speel-effect daarvan gaat nog een keer af"
 };
 async function rotsKiezelsVoor(p, card, asSpell, col, o){
   let n = 0;
@@ -5225,7 +5256,7 @@ async function askPriority(p){
     }
     const slots = creSlotsFor(p, card.el, card);
     const s = await waitUI("slot", {p, valid:slots, cancellable:true,
-      prompt:`Kies een plek voor ⚡ ${icon(card.el)} ${EL[card.el].name}${card.el === "water" && !card.var ? " — ook bovenop een eigen creature, die verhuist dan" : ""}`});
+      prompt:`Kies een plek voor ⚡ ${icon(card.el)} ${kNaam(card)}${card.el === "water" && !card.var ? " — ook bovenop een eigen creature, die verhuist dan" : ""}`});
     if(s === "cancel") continue;
     return {cardId:r, col:s.c};
   }
@@ -5294,7 +5325,7 @@ async function placeNow(p, card, asSpell, col, opts){
   if(o.keepHp != null && slot.cre){                       // 💧 herspelen: levens blijven, tokens niet
     slot.cre.hp = o.keepHp;
     if(o.keepHp !== (EL[card.el].hp || 2))
-      addLog(`💧 ${icon(card.el)} ${EL[card.el].name} houdt zijn ${o.keepHp} levens; zijn 🌿 vallen weg.`);
+      addLog(`💧 ${icon(card.el)} ${kNaam(card)} houdt zijn ${o.keepHp} levens; zijn 🌿 vallen weg.`);
   }
   render();
   if(o.splash) fxSplash(creSel(p, col)); else AU.play("place");
@@ -5377,7 +5408,7 @@ async function waterVerdringt(p, card, col, cre, flash){
   const vrij = openCols(p);
   if(!vrij.length){ P(p).hand.push(dc); addLog(`💧 Geen vrije plek voor ${kIcon(dc)} ${kNaam(dc)}: hij keert terug naar de hand.`, true); render(); return; }
   const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})),
-    `💧 Kies waar ${kIcon(dc)} ${kNaam(dc)} opnieuw verschijnt${dc.ws ? " — 🪞 hij spiegelt dan een andere eigen kaart" : ""}`, false, {el:dc.el});
+    `💧 Kies waar ${kIcon(dc)} ${kNaam(dc)} opnieuw verschijnt${dc.ws ? " — als Water laat het dan een andere eigen kaart nog eens gaan" : ""}`, false, {el:dc.el});
   const c2 = sl && sl !== "cancel" ? sl.c : vrij[0];
   addLog(`💧 ${kIcon(dc)} ${kNaam(dc)} wordt opnieuw gespeeld in kolom ${c2+1}.`, true);
   await placeNow(p, dc, false, c2, {splash:true, keepHp});
@@ -5872,7 +5903,7 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
     const t = findCre(tributeId);
     if(!t || t.p !== p){ P(card.owner).grave.push(card); addLog(`De fusie mist zijn offer en verdwijnt in het graf.`, true); return false; }
     col = t.c;
-    addLog(`🟣 Fusie: ${pName(p)} offert ${icon(t.cr.card.el)} ${EL[t.cr.card.el].name} en roept ${icon(card.el)} <em>${EL[card.el].name}</em> op in kolom ${col+1}.`, true);
+    addLog(`🟣 Fusie: ${pName(p)} offert ${icon(t.cr.card.el)} ${kNaam(t.cr.card)} en roept ${icon(card.el)} <em>${kNaam(card)}</em> op in kolom ${col+1}.`, true);
     destroyCre(p, col, "🟣 fusie-offer");
     placeCre(p, col, card);
   }
@@ -5882,8 +5913,8 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
   render(); AU.play("place"); await sleep(180);
   /* Het fusie-effect VERVANGT het gewone speel-effect van de creature. */
   addLog(fuseKey === "fu_water"
-    ? `🟣 Dieptestroom trekt een kaart en laat daarna het gewone ${icon(card.el)} ${EL[card.el].name}-effect gewoon afgaan.`
-    : `🟣 ${AETHERS[fuseKey].name} vervangt het gewone speel-effect van ${icon(card.el)} ${EL[card.el].name}.`);
+    ? `🟣 Dieptestroom trekt een kaart en laat daarna het gewone ${icon(card.el)} ${kNaam(card)}-effect gewoon afgaan.`
+    : `🟣 ${AETHERS[fuseKey].name} vervangt het gewone speel-effect van ${icon(card.el)} ${kNaam(card)}.`);
   const fo = {onField:true, skipOwn:true};
   if(fuseKey === "fu_water") fo.forceEffs = [{el:"water", origin:"fusie"}];   // trek 1 én het gewone effect
   if(fuseKey === "fu_stone"){
@@ -6210,16 +6241,16 @@ async function resolveLight(it){
     if(!card){ addLog("✦ Zielenoproep: die kaart ligt er niet meer."); return; }
     if(m === "hand"){
       P(p).hand.push(card);
-      addLog(`✦ Zielenoproep: ${pName(p)} pakt ${card.lk ? "✦ " + LIGHTS[card.lk].name : icon(card.el) + " " + EL[card.el].name} terug in de hand.`, true);
+      addLog(`✦ Zielenoproep: ${pName(p)} pakt ${card.lk ? "✦ " + LIGHTS[card.lk].name : icon(card.el) + " " + kNaam(card)} terug in de hand.`, true);
       render(); return;
     }
     const slots = openCols(p).map(c => ({p, c, kind:"cre"}));
     if(!slots.length){ g.push(card); addLog("✦ Zielenoproep: geen vrije plek — de kaart blijft in het graf."); return; }
-    const sl = await chooseSlot(p, slots, `✦ Zielenoproep: kies een plek voor ${icon(card.el)} ${EL[card.el].name} (+3 levens)`, false, {el:card.el});
+    const sl = await chooseSlot(p, slots, `✦ Zielenoproep: kies een plek voor ${icon(card.el)} ${kNaam(card)} (+3 levens)`, false, {el:card.el});
     const ok = await placeNow(p, card, false, sl.c, {});
     if(!ok) return;
     P(p).cols[sl.c].cre.hp += 3;
-    addLog(`✦ Zielenoproep roept ${icon(card.el)} <em>${EL[card.el].name}</em> uit het graf op met ${P(p).cols[sl.c].cre.hp} levens.`, true);
+    addLog(`✦ Zielenoproep roept ${icon(card.el)} <em>${kNaam(card)}</em> uit het graf op met ${P(p).cols[sl.c].cre.hp} levens.`, true);
     render();
     const plan = await declarePlan(p, card, false, sl.c, {onField:true});
     pushPlay(p, card, false, sl.c, false, plan === "cancel" ? [] : plan);
@@ -6272,7 +6303,7 @@ function placeCre(p, col, card){
   const bonus = (oerkrachtOp(p, card.el) && hasAe(p, "ae_hp3")) ? 4 : 0;
   const hp = (EL[card.el].hp || 2) + bonus;
   P(p).cols[col].cre = {card, hp, played:S.gTurn, attackedT:-1, ent:0};
-  addLog(`${icon(card.el)} ${EL[card.el].name} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? " (🟣 Oerkracht)" : ""}.`);
+  addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? " (🟣 Oerkracht)" : ""}.`);
 }
 /* 🔥 Vuur is immuun voor entangle — en sommige verhaalbeesten ook. */
 const entBaar = cr => !!cr && cr.card.el !== "vuur" && !EL[cr.card.el].geenEnt;
@@ -6454,14 +6485,14 @@ async function resolveEffect(it){
   if(it.el === "ws"){
     const bron = it.srcCard, keten = (it.keten || []).concat(bron ? [bron.id] : []);
     const ids = wsTargets(p, bron, it.keten);
-    if(!ids.length){ addLog("🪞 Waterspiegel: geen andere eigen kaart om te spiegelen."); return; }
+    if(!ids.length){ addLog("💧 Water: geen andere eigen kaart om nog eens te laten gaan."); return; }
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — ${effPrompt.ws}`, true, {k:"ws"});
-    if(id === "fizzle" || id === null){ if(id === null) addLog("🪞 Spiegelen overgeslagen."); return; }
+    if(id === "fizzle" || id === null){ if(id === null) addLog("💧 Water: overgeslagen."); return; }
     const f = findKaart(id); if(!f) return;
     const origin = f.kind === "spell" ? "spell" : "creature";
     const effs = effsOf(f.card.el, origin, f.card);
-    if(!effs.length){ addLog(`🪞 ${kIcon(f.card)} ${kNaam(f.card)} heeft geen speel-effect om te spiegelen.`); return; }
-    addLog(`🪞 <em>Waterspiegel</em> spiegelt ${kIcon(f.card)} <em>${kNaam(f.card)}</em> (${f.kind === "spell" ? "spell" : "creature"}, kolom ${f.c+1}): haar speel-effect gaat nog een keer af.`, true);
+    if(!effs.length){ addLog(`💧 ${kIcon(f.card)} ${kNaam(f.card)} heeft geen speel-effect om nog eens te laten gaan.`); return; }
+    addLog(`💧 <em>Water</em> laat ${kIcon(f.card)} <em>${kNaam(f.card)}</em> (${f.kind === "spell" ? "spell" : "creature"}, kolom ${f.c+1}) nog een keer gaan: het speel-effect gaat opnieuw af.`, true);
     if(!FAST){ fxSplash(f.kind === "spell" ? `.pside[data-side="${f.p}"] .col:nth-child(${f.c+1}) .slot.sp` : creSel(f.p, f.c)); AU.play("water"); await sleep(220); }
     if(f.card.var === "rots") await rotsKiezel(p, f.card, f.c);
     const selfId = f.kind === "cre" ? f.card.id : null;
@@ -6488,7 +6519,7 @@ async function resolveEffect(it){
         await sleep(260);
         P(owner).cols[fromCol].cre = null; render();
         const sl = await chooseSlot(p, slots,
-          `Kies waar ${kIcon(card)} ${kNaam(card)} opnieuw verschijnt${card.ws ? " — 🪞 hij spiegelt dan een andere eigen kaart" : ""}`,
+          `Kies waar ${kIcon(card)} ${kNaam(card)} opnieuw verschijnt${card.ws ? " — als Water laat het dan een andere eigen kaart nog eens gaan" : ""}`,
           false, {el:card.el});
         addLog(`💧 ${kIcon(card)} ${kNaam(card)} wordt opnieuw gespeeld in kolom ${sl.c+1}.`, true);
         await placeNow(owner, card, false, sl.c, {splash:true, keepHp});
@@ -6981,7 +7012,7 @@ async function playFlashInBattle(cardId){
       return;
     }
     const s = await waitUI("slot", {p, valid:creSlotsFor(p, card.el, card), cancellable:true,
-      prompt:`Kies een plek voor ⚡ ${icon(card.el)} ${EL[card.el].name}${card.el === "water" && !card.var ? " — ook bovenop een eigen creature, die verhuist dan" : ""}`});
+      prompt:`Kies een plek voor ⚡ ${icon(card.el)} ${kNaam(card)}${card.el === "water" && !card.var ? " — ook bovenop een eigen creature, die verhuist dan" : ""}`});
     if(s === "cancel"){ backToPhase(); return; }
     takeFromHand(p, cardId);
     await announcePlay(p, card, false, s.c, true);
@@ -8110,14 +8141,15 @@ function pvHTML(el, opts){
     </div>`;
   }
   const t = kaartTekst(el, varKey);
-  const naam = vk ? vk.name : E.name, ic = vk ? vk.icon : E.icon;
+  const ws = !!(opts && opts.ws);
+  const naam = vk ? vk.name : (el === "water" ? waterNaam({ws}) : E.name), ic = vk ? vk.icon : E.icon;
   const kop = [`${E.hp || 2} levens`, kwRij(t.kw)].filter(Boolean).join(" · ");
   const curHTML = cur ? `<div class="cur">Op het veld: ${cur.hp} ${cur.hp===1?"leven":"levens"}${cur.sick?" · ⏳ summoning sick":""}${cur.ent?` · 🌿 ${cur.ent}`:""}${cur.spent?" · heeft aangevallen":""}${cur.atk?` · ⚔ ${cur.atk} schade`:""}</div>` : "";
   const vs = E.strong ? `<div class="vs"><span>Sterk tegen <b>${icon(E.strong)} ${EL[E.strong].name}</b></span><span>Zwak tegen <b>${icon(weakTo(el))} ${EL[weakTo(el)].name}</b></span></div>` : "";
   return `<div class="pv">
     <div class="pvhead el-${el}"><span class="ic">${ic}</span><span class="nm">${naam}</span></div>
     <div class="sec"><div class="sect">${t.alleenSpell ? kwChip("spell") : kop}${vk ? ` · sterke ${E.name.toLowerCase()}` : ""}</div>
-      <div class="fxlijst">${effectHTML(el, varKey)}</div></div>
+      <div class="fxlijst">${effectHTML(el, varKey, {ws})}</div></div>
     ${vs}${curHTML}
   </div>`;
 }
@@ -8229,7 +8261,7 @@ function slotHTML(p, c, hl){
        geen hover-tekst — en dat geldt ook voor je eigen spells. */
     sp = `<div class="slot sp mist" data-act="spell" data-p="${p}" data-col="${c}">${MIST_KAART}</div>`;
   } else if(col.spell){
-    sp = `<div class="slot sp${spHl}${dood ? " dood" : ""}${!inMist() && hl.tgts.includes(col.spell.card.id) ? " tgt" : ""}${aeBoosts(p, col.spell.card.el) ? " aeup" : ""}" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${col.spell.card.el}"${toonVarKey(col.spell.card) ? ` data-pvvar="${toonVarKey(col.spell.card)}"` : ""}>${cardFaceHTML(col.spell.card.el, true, col.spell.card)}</div>`;
+    sp = `<div class="slot sp${spHl}${dood ? " dood" : ""}${!inMist() && hl.tgts.includes(col.spell.card.id) ? " tgt" : ""}${aeBoosts(p, col.spell.card.el) ? " aeup" : ""}" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${col.spell.card.el}"${col.spell.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(col.spell.card) ? ` data-pvvar="${toonVarKey(col.spell.card)}"` : ""}>${cardFaceHTML(col.spell.card.el, true, col.spell.card)}</div>`;
   } else {
     sp = `<div class="slot sp${spHl}" data-act="spell" data-p="${p}" data-col="${c}"><div class="ph"></div></div>`;
   }
@@ -8267,7 +8299,7 @@ function slotHTML(p, c, hl){
       return `<div class="col${poort0 ? " dicht" : ""}">${vonkMerk}${sp}${cr}${kruis}${rots}${poort0}${bandMerk}</div>`;
     }
     cr = `<div class="slot cr${creHl}${tgt}${atk}${mik}${spent}${aeBoosts(p, u.card.el) ? " aeup" : ""}" data-act="cre" data-p="${p}" data-col="${c}"
-      data-pv="${u.card.el}"${toonVarKey(u.card) ? ` data-pvvar="${toonVarKey(u.card)}"` : ""} data-pvhp="${u.hp}" data-pvent="${u.ent}" data-pvatk="${atkOf(u, p)}" data-pvst="${(sick?"s":"")+(ent?"e":"")+(u.attackedT===S.gTurn?"a":"")}">
+      data-pv="${u.card.el}"${u.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(u.card) ? ` data-pvvar="${toonVarKey(u.card)}"` : ""} data-pvhp="${u.hp}" data-pvent="${u.ent}" data-pvatk="${atkOf(u, p)}" data-pvst="${(sick?"s":"")+(ent?"e":"")+(u.attackedT===S.gTurn?"a":"")}">
       ${gloed}${cardFaceHTML(u.card)}${EL[u.card.el].sprite ? `<div class="cresprite${EL[u.card.el].spriteKlein ? " klein" : ""}">${spriteSVG(EL[u.card.el].sprite)}</div>` : ""}${stat}
       <div class="atkgem">⚔${atkOf(u, p)}</div>
       <div class="hpgem${gemCls}">${u.hp}</div>${mikm}</div>`;
@@ -8862,49 +8894,7 @@ function overlayHTML(){
       <div class="winbig">🔄</div>
       <div class="sub"><b>${pName(S.actor)}</b> is aan zet.</div>
       <button class="obtn" data-act="btn" data-btn="handoffdirect">Ik ben ${pName(S.actor)}</button></div>`;
-  if(u.mode==="start") return `<div class="ovbox startbox">
-    <div class="marquee">
-      <div class="coin">● ● ●</div>
-      <h1 class="bigtitle">ELEMENTAAL</h1>
-      <div class="tagline">EEN DUEL IN VIER ELEMENTEN</div>
-    </div>
-    <div class="attract">
-      ${ORDER.map((e,i) => `<div class="mini m${i}">${cardFaceHTML(e)}</div>`).join("")}
-    </div>
-    <div class="cyclestrip">${(() => {
-      const ring = [ORDER[0]];
-      while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
-      return ring.concat([ring[0]]).map((e,i) => `<span class="cy el-${e}">${icon(e)}</span>`).join(`<span class="ar">&#9654;</span>`);
-    })()}<span class="cylab">sterk tegen</span></div>
-    <div class="sub startfacts">Elk <b>5 levens</b> · deck van <b>${ORDER.length * 7}</b> · wie begint krijgt <b>${startHand(true)}</b> kaarten en slaat de eerste draw over, de ander start met ${startHand(false)} en trekt er meteen 1 bij · <b>max ${HANDMAX}</b> kaarten in je hand.</div>
-    ${LIVE.resume ? `<div style="margin:10px 0 2px"><button class="obtn" style="border-color:#5cb56e;color:#a8ecb5" data-act="btn" data-btn="resumelive">↩ Terug naar room ${LIVE.resume.code}</button></div>` : ""}
-    <div class="mlabel" style="--mc:#e0a24a">📖 VERHAAL</div>
-    <div class="mnote">vijf werelden · praat je een weg naar de bazen van de elementen</div>
-    <div class="mrow">
-      <button class="obtn b-story" data-act="btn" data-btn="story">📖 Verhaalmodus<span class="bsub">${SET.story.klaar.length ? SET.story.klaar.length + " van de " + STORY_ORDER.length + " uitgespeeld" : "begin bij 1-1"}</span></button>
-    </div>
-    <div class="mlabel" style="--mc:#7fd0ff">🌐 LIVE ONLINE</div>
-    <div class="mnote">samen met een vriend, elk op je eigen scherm, met een roomcode</div>
-    ${HOSTED ? `<div class="mrow">
-      <button class="obtn b-cmd" data-act="btn" data-btn="livehost_cmd">🟣 Commander<span class="bsub">room openen</span></button>
-      <button class="obtn b-basis" data-act="btn" data-btn="livehost_classic">⚜️ Basis<span class="bsub">room openen</span></button>
-      <button class="obtn b-live" data-act="btn" data-btn="livejoin">🔗 Meedoen<span class="bsub">met een roomcode</span></button>
-    </div>` : ""}
-    ${HOSTED ? "" : `<div class="sub" style="color:#ffb14d;font-size:.76rem;margin-top:8px">Live spelen werkt niet binnen Claude — hier is netwerkverkeer geblokkeerd. Zet dit bestand op een gewone webpagina (bijv. GitHub Pages), dan werkt de roomcode wél.</div>`}
-    <div class="mlabel" style="--mc:#b48be0">🟣 COMMANDER</div>
-    <div class="mnote">best of 3 · aether-krachten · ✦ lichtkaarten · ban-fase</div>
-    <div class="mrow">
-      <button class="obtn b-cmd" data-act="btn" data-btn="cmdbot">🤖 Tegen de bot<span class="bsub">jij bent Speler 1</span></button>
-    </div>
-    <div class="mlabel" style="--mc:#ffd447">⚜️ BASIS</div>
-    <div class="mnote">één potje, alleen de vier elementen</div>
-    <div class="mrow">
-      <button class="obtn b-basis" data-act="btn" data-btn="startbot">🤖 Tegen de bot<span class="bsub">jij bent Speler 1</span></button>
-    </div>
-    <div class="mrow" style="margin-top:20px">
-      <button class="obtn b-dim" style="padding:8px 16px" data-act="btn" data-btn="tutorial">📖 Tutorial</button>
-      <button class="obtn b-dim" style="padding:8px 16px" data-act="btn" data-btn="aelib">📚 Bibliotheek</button>
-    </div></div>`;
+  if(u.mode==="start") return startHTML();
   if(u.mode==="handoff") return `<div class="ovbox"><h2>Geef het scherm door</h2>
     <div class="winbig">🔄</div>
     <div class="sub"><b>${pName(u.p)}</b> is aan zet.</div>
@@ -8923,7 +8913,7 @@ function overlayHTML(){
     const card = P(u.p).hand.find(cd=>cd.id===u.cardId);
     if(!card) return "";
     const fk = aeFuseKey(u.p, card.el), fuTxt = u.fuseOk && fk ? AETHERS[fk].txt : "";
-    return `<div class="ovbox pickbox"><h2>${icon(card.el)} ${EL[card.el].name} spelen als…</h2>
+    return `<div class="ovbox pickbox"><h2>${icon(card.el)} ${kNaam(card)} spelen als…</h2>
       <div class="pickrow">
         <button class="obtn b-basis" ${u.creOk?"":"disabled style='opacity:.4'"} data-act="btn" data-btn="asCre">🗡 Creature<span class="bsub">${EL[card.el].hp||2} levens${EL[card.el].flash?" · ⚡ Snel":""}<br>dubbeltik = creature</span></button>
         ${u.flashCtx?"":`<button class="obtn" ${u.spOk?"":"disabled style='opacity:.4'"} data-act="btn" data-btn="asSpell">✦ Spell<span class="bsub">triggert bij creatures hier</span></button>`}
@@ -8945,7 +8935,7 @@ const TUT_ALL = [
    b:`Een kaart speel je als <b>creature</b> of als <b>spell</b>.<br><br>▶ Als creature doet hij zijn <span class="kw" data-kw="speel">speel-effect</span>: één keer, als hij het veld op komt.<br>◆ Wat een kaart doet zolang hij er ligt, is zijn <span class="kw" data-kw="veld">veld-effect</span>.<br><br>Een <span class="kw" data-kw="spell">spell</span> doet zijn speel-effect bij het neerleggen, en opnieuw bij elke creature die jij in die kolom speelt.<br><br>Alle vier de elementen zijn <span class="kw" data-kw="snel">⚡ Snel</span>.`,
    v:"twoways"},
   {t:"Wat de elementen doen", ic:"✦",
-   b:`<b>🔥 Vuur</b> — ▶ ${EL.vuur.tekst.speel}<br><br><b>💧 Water</b> — ▶ ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> (3 levens) — ▶ ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> — ▶ ${EL.gras.tekst.speel}<br><br>Onderstreepte woorden leggen zichzelf uit: hover erover of tik erop.`,
+   b:`<b>🔥 Vuur</b> — ▶ ${EL.vuur.tekst.speel}<br><br><b>💧 Waterplons</b> — ▶ ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> (3 levens) — ▶ ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> — ▶ ${EL.gras.tekst.speel}<br><br>Onderstreepte woorden leggen zichzelf uit: hover erover of tik erop.`,
    v:"cards"},
   {t:"Het gevecht", ic:"⚔️",
    b:`In je gevechtsfase klik je je eigen creatures aan. Een creature raakt wie <b>recht tegenover hem</b> staat. Is die plek leeg, dan raakt hij de speler.<br><br>De schade is de <b>helft van zijn levens</b> (⚔ op de kaart), behalve als de cirkel een instakill geeft of immuun maakt.`,
@@ -9151,6 +9141,44 @@ function shareHTML(){
       <button class="obtn" style="padding:8px 14px;font-size:.8rem" data-act="btn" data-btn="savelink">Opslaan</button>
     </div>
     <div style="text-align:center;margin-top:14px"><button class="obtn" style="padding:9px 22px" data-act="btn" data-btn="menuback">Terug</button></div>
+  </div>`;
+}
+/* ⌂ Het homescreen: de titel, twee grote knoppen en vier kleine. Multiplayer en Bots klappen
+   hun keuzes open onder de knop; de rest opent een eigen scherm. */
+const HOME = {open:null};
+function startHTML(){
+  const open = HOME.open;
+  const klaar = SET.story.klaar.length;
+  const mp = open === "mp" ? `<div class="hopties">
+      ${HOSTED ? `<button class="obtn b-cmd" data-act="btn" data-btn="livehost_cmd">🟣 Commander<span class="bsub">room openen</span></button>
+      <button class="obtn b-basis" data-act="btn" data-btn="livehost_classic">⚜️ Basis<span class="bsub">room openen</span></button>
+      <button class="obtn b-live" data-act="btn" data-btn="livejoin">🔗 Meedoen<span class="bsub">met een roomcode</span></button>`
+      : `<div class="sub" style="color:#ffb14d;font-size:.8rem">Live spelen werkt niet binnen Claude — hier is netwerkverkeer geblokkeerd. Zet dit bestand op een gewone webpagina (bijv. GitHub Pages), dan werkt de roomcode wél.</div>`}
+    </div>` : "";
+  const bots = open === "bots" ? `<div class="hopties">
+      <button class="obtn b-cmd" data-act="btn" data-btn="cmdbot">🟣 Commander<span class="bsub">best of 3 · aethers · ✦ licht</span></button>
+      <button class="obtn b-basis" data-act="btn" data-btn="startbot">⚜️ Basis<span class="bsub">één potje · vier elementen</span></button>
+    </div>` : "";
+  const klein = (btn, ic, lab, aan) => `<button class="obtn hklein${aan ? " aan" : ""}" data-act="btn" data-btn="${btn}"><span class="hic">${ic}</span>${lab}</button>`;
+  return `<div class="ovbox startbox home">
+    <div class="marquee">
+      <div class="coin">● ● ●</div>
+      <h1 class="bigtitle">ELEMENTAAL</h1>
+      <div class="tagline">EEN DUEL IN VIER ELEMENTEN</div>
+    </div>
+    ${LIVE.resume ? `<div style="margin:14px 0 0"><button class="obtn" style="border-color:#5cb56e;color:#a8ecb5" data-act="btn" data-btn="resumelive">↩ Terug naar room ${LIVE.resume.code}</button></div>` : ""}
+    <div class="hgroot">
+      <button class="obtn hbig b-story" data-act="btn" data-btn="story">📖 Verhaal<span class="bsub">${klaar ? klaar + " van de " + STORY_ORDER.length + " uitgespeeld" : "begin bij 1-1"}</span></button>
+      <button class="obtn hbig b-mp${open === "mp" ? " aan" : ""}" data-act="btn" data-btn="homemp">🌐 Multiplayer<span class="bsub">${open === "mp" ? "kies hieronder ▾" : "samen met een vriend, elk op je eigen scherm"}</span></button>
+      ${mp}
+    </div>
+    <div class="hkleinrij">
+      ${klein("homebots", "🤖", "Bots", open === "bots")}
+      ${klein("audio", "⚙️", "Settings")}
+      ${klein("aelib", "📚", "Library")}
+      ${klein("tutorial", "📖", "Tutorial")}
+    </div>
+    ${bots}
   </div>`;
 }
 function menuHTML(){
@@ -12008,7 +12036,7 @@ const STORY = {
     ],
     middenNa:3,
     win:[
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Zes."},
+      {mu:"w2_seraf", s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Zes."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dank je."},
       {s:"engel", naam:"…", kleur:"#f6f7fb", t:"Er wordt iets van een mouw geklopt dat er niet zit."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Verderop splitst het pad. Links hangt een web. Rechts loopt het gewoon door."},
@@ -12017,7 +12045,7 @@ const STORY = {
       {s:null, bg:2, naam:"…", t:"Seraf loopt het pad af waar jij vandaan komt. Niet één keer omkijken."}
     ],
     verlies:[
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ah."},
+      {mu:"w2_seraf", s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ah."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Sta maar op. Ik ben nog niet klaar."}
     ],
     na:[
@@ -12094,13 +12122,13 @@ const STORY = {
     ],
     middenNa:1,
     win:[
-      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zakt door zijn twee benen. Het zwaard sist uit en laat een geur van onweer achter."},
+      {mu:"w2_woud", s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zakt door zijn twee benen. Het zwaard sist uit en laat een geur van onweer achter."},
       {s:"struik", naam:"…", kleur:"#7fd18c", t:"Hij is weer een struik."},
       {s:"struik", naam:"De Struik", kleur:"#7fd18c", t:"…"},
       {s:"struik", naam:"…", kleur:"#7fd18c", t:"Het pad achter hem ligt open."}
     ],
     verlies:[
-      {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Het zwaard gaat omhoog, en dan omlaag, en dan is het klaar."},
+      {mu:"w2_woud", s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Het zwaard gaat omhoog, en dan omlaag, en dan is het klaar."},
       {s:"struikrover", groot:true, naam:"…", kleur:"#57d7ff", t:"Hij zegt er niks bij. Hij heeft geen mond."}
     ],
     zegSpr:"struik", tauntSpr:"struik",
@@ -12287,14 +12315,14 @@ const STORY = {
     ],
     middenNa:2,
     win:[
-      {s:"waardin_stuk", groot:true, kleur:"#a8c46b", t:"…Je bent wakker gebleven."},
+      {mu:"w2_herberg", s:"waardin_stuk", groot:true, kleur:"#a8c46b", t:"…Je bent wakker gebleven."},
       {s:"waardin_stuk", groot:true, kleur:"#a8c46b", t:"Dat is niemand ooit gelukt."},
       {s:null, naam:"…", kleur:"#a8c46b", t:"Achter je komen de mosheuveltjes overeind. Negen mensen rekken zich uit alsof ze vergeten waren hoe dat moest."},
       {s:"waardin", groot:true, kleur:"#a8c46b", t:"Nou. Daar gaan ze."},
       {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Ik hoop dat het buiten meevalt."}
     ],
     verlies:[
-      {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Sst. Zo."},
+      {mu:"w2_herberg", s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Sst. Zo."},
       {s:"waardin_zacht", groot:true, kleur:"#a8c46b", t:"Er is niks meer om naartoe te gaan. Slaap maar lekker."}
     ],
     na:[
@@ -12386,7 +12414,7 @@ const STORY = {
     ],
     middenNa:2,
     win:[
-      {s:"max_stuk", groot:true, naam:"…", kleur:"#b9a7e6", t:"Max zakt terug in de schaduw. Er is niks wat erop reageert. Het is gewoon weg."},
+      {mu:"w2_seraf", s:"max_stuk", groot:true, naam:"…", kleur:"#b9a7e6", t:"Max zakt terug in de schaduw. Er is niks wat erop reageert. Het is gewoon weg."},
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Twee keer."},
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Dat is nog nooit gebeurd."},
       {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Seraf gaat in het gras zitten. Voor een afgezant die gaat zitten bestaat geen protocol."},
@@ -12396,7 +12424,7 @@ const STORY = {
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Dat was geen grapje."}
     ],
     verlies:[
-      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Zo. Rechtgezet."},
+      {mu:"w2_seraf", s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Zo. Rechtgezet."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Sta maar weer op, dan doen we het nog een keer."}
     ],
     na:[
@@ -12520,7 +12548,7 @@ const STORY = {
       {s:"moeder", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Wij gaan de paden weer opendoen. Dat duurt even."}
     ],
     verlies:[
-      {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Blijf maar even liggen. Het regent toch."},
+      {mu:"w2_moeder", s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"Blijf maar even liggen. Het regent toch."},
       {s:"moeder_bloei", reus:true, naam:"Moeder Natuur", kleur:"#e08fb0", t:"En kijk. Je hebt al wortel geschoten."}
     ],
     na:[
@@ -17112,6 +17140,8 @@ function onBtn(btn, el, fromAction){
     case "tutgo": if(M && M.type==="tutorial" && el){ M.step = +el.dataset.step; render(); } break;
     case "audio": M = {type:"audio"}; render(); break;
     case "aelib": M = {type:"aelib"}; render(); break;
+    case "homemp":   HOME.open = HOME.open === "mp" ? null : "mp"; render(); break;
+    case "homebots": HOME.open = HOME.open === "bots" ? null : "bots"; render(); break;
     case "deck": {
       const dp = el ? +el.dataset.p : 0;
       if(handVisible(dp)){ M = {type:"deck", p:dp}; render(); }
@@ -17210,9 +17240,9 @@ function toonKaartInfo(cd, terug){
       tekst:`${d.txt}<p class="fxnoot">${kwChip("licht")}: ${BEGRIPPEN.licht.uitleg}</p>`};
   } else {
     const e2 = EL[cd.el], vk = toonVarKey(cd), t2 = kaartTekst(cd.el, vk);
-    M = {type:"info", titel:vk ? VAR[vk].name : e2.name, ic:vk ? VAR[vk].icon : icon(cd.el), kleur:`var(--${cd.el})`,
+    M = {type:"info", titel:kNaam(cd), ic:vk ? VAR[vk].icon : icon(cd.el), kleur:`var(--${cd.el})`,
       sub:`${e2.hp} levens${t2.kw.length ? " · " + kwRij(t2.kw) : ""}${e2.strong ? ` · sterk tegen ${icon(e2.strong)} ${EL[e2.strong].name}` : ""}`,
-      tekst:`<div class="fxlijst">${effectHTML(cd.el, vk)}</div>`};
+      tekst:`<div class="fxlijst">${effectHTML(cd.el, vk, {ws:!!cd.ws})}</div>`};
   }
   if(terug) M.terug = terug;
   render();
@@ -17298,7 +17328,7 @@ document.addEventListener("mouseover", e => {
   const cur = t.dataset.pvhp ? {hp:+t.dataset.pvhp,
     sick:(t.dataset.pvst||"").includes("s"), ent:+(t.dataset.pvent||0), spent:(t.dataset.pvst||"").includes("a"),
     atk:+(t.dataset.pvatk||0)} : null;
-  setPreview(pvHTML(el, {cur, lk:t.dataset.pvlk, var:t.dataset.pvvar}));
+  setPreview(pvHTML(el, {cur, lk:t.dataset.pvlk, var:t.dataset.pvvar, ws:!!t.dataset.pvws}));
 });
 document.addEventListener("mouseout", e => {
   const t = e.target.closest("[data-pv]");
