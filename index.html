@@ -5920,14 +5920,17 @@ async function forgeEet(){
   const weg = [];
   for(const p of [0, 1]){
     const sl = P(p).cols[4];
-    if(sl.cre){ weg.push(`${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} van ${pName(p)}`); destroyCre(p, 4, "⚙️ de forge"); }
+    if(sl.cre){ weg.push(`${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} van ${pName(p)}`); destroyCre(p, 4, "⚙️ de oven"); }
     if(sl.spell){ weg.push(`de spell ${kIcon(sl.spell.card)} van ${pName(p)}`); P(sl.spell.card.owner).grave.push(sl.spell.card); sl.spell = null; }
   }
   if(weg.length){
+    /* VERBRANDEN is zijn woord: je hoort het vlak voordat je iets kwijt bent. */
+    const oz = S.story && S.story.zeg && S.story.zeg.oven;
+    if(oz && oz.length) zegLos(oz[Math.floor(rnd() * oz.length)]);
     if(!FAST){ witFlits(); AU.play("thud"); }
-    addLog(`⚙️ <em>De forge gaat open.</em> Erin: ${weg.join(", ")}.`, true);
+    addLog(`⚙️ <em>De oven gaat open.</em> Erin: ${weg.join(", ")}.`, true);
     render(); await sleep(FAST ? 0 : 480);
-  } else addLog(`⚙️ De forge gaat open. Er ligt niets klaar. De forge gaat weer dicht.`);
+  } else addLog(`⚙️ De oven gaat open. Er ligt niets klaar. De oven gaat weer dicht.`);
   bandSchuif();
 }
 /* 🥚 Hoeveel beurten van haar er nog over zijn voor een ei uitkomt. Dat getal komt als
@@ -11721,7 +11724,12 @@ const SPRITE_BEELD = {
   cultist_boos:   "art/cultist-boos.png",      // de ambtenaar die het even niet meer ambtelijk houdt
   cultist_stuk:   "art/cultist-stuk.png",
   cultist_taunt:  "art/cultist-taunt.png",     // de balk links
-  cultist_agenda: "art/cultist-agenda.png",    // 3-1 · bladert in haar agenda, pen in de hand
+  /* Zuster As is opnieuw ontworpen (27 sept): dezelfde bestandsnamen voor de oude standen,
+     plus vier nieuwe. */
+  cultist_zit:    "art/cultist-zit.png",       // 3-1 · op de rand van het lavameer, voeten erin, rug naar je toe
+  cultist_omkijk: "art/cultist-omkijk.png",    // 3-1 · zelfde, maar alleen haar hoofd draait om
+  cultist_dichtbij:"art/cultist-dichtbij.png", // 3-1 · ineens veel te dichtbij
+  cultist_wijd:   "art/cultist-wijd.png",      // 3-1 · armen gespreid: "Nou. Kom op."
   golem:          "art/lavagolem.png",         // de golem, groot in beeld
   golem_boos:     "art/lavagolem-boos.png",    // vuist omhoog
   golem_stuk:     "art/lavagolem-stuk.png",    // zakt de kloof weer in
@@ -11739,11 +11747,15 @@ const SPRITE_BEELD = {
   trio_een_taunt: "art/trio-een-taunt.png",    // de balk links, alleen
   trio_as:        "art/trio-as.png",           // drie hoopjes as
   klinknagel:     "art/klinknagel.png",
-  klinknagel_boos:"art/Klinknagel-boos.png",   // lampoog rood · hoofdletter K, zo heet het bestand
+  klinknagel_boos:"art/klinknagel-boos.png",   // VERKLAAR! · lens rood (opnieuw ontworpen, kleine k)
+  klinknagel_rug: "art/klinknagel-rug.png",    // 3-5 · lichaam van je af, alleen de lens kijkt om
+  klinknagel_klauw:"art/klinknagel-klauw.png", // 3-5 · VERBRANDEN: gooit iets de oven in
   klinknagel_stuk:"art/klinknagel-stuk.png",
   klinknagel_taunt:"art/klinknagel-taunt.png",
   klinknagel_tellen:"art/klinknagel-tellen.png", // 3-5 · telt op zijn ijzeren vingers
   papieren:       "art/papieren.png",
+  papier_vel:     "art/papier-vel.png",        // 3-5 · één vel, stempel, één regel over
+  suiker:         "art/suiker.png",            // 3-4 · de ongeopende zak suiker van vanochtend
   fireguy_boos:   "art/vuurguy-boos.png",      // voor het eerst in tweehonderd jaar
   fireguy_taunt:  "art/vuurguy-taunt.png",     // de balk links
   fireguy_wit:    "art/vuurguy-wit.png",       // Flints tweede fase
@@ -11784,6 +11796,8 @@ const SPRITE_TERUG = {
   smid_boos:"smid_zuur", smid_stuk:"smid_zuur",
   max_taunt:"max_boos", max_boos:"max", waardin_boos:"waardin", engel_ongemak:"engel",
   cultist_agenda:"cultist", cultist_boos:"cultist", cultist_taunt:"cultist",
+  cultist_zit:"cultist", cultist_omkijk:"cultist_zit", cultist_dichtbij:"cultist", cultist_wijd:"cultist_lach",
+  klinknagel_boos:"klinknagel", klinknagel_rug:"klinknagel", klinknagel_klauw:"klinknagel_boos", papier_vel:"papieren",
   rookman_stuk:"rookman_uit", klinknagel_tellen:"klinknagel",
   sluiswachter_klembord:"sluiswachter", sluiswachter_boos:"sluiswachter",
   inkt_boos:"inkt_wijd", inkt_cape:"inkt",
@@ -12993,72 +13007,133 @@ const STORY = {
        en decor en horizon blijven binnen de middenkolom. Geldt in heel wereld 3. */
     hzruim:true,
     intro:[
-      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Het woud houdt op. Niet geleidelijk — er is een lijn in de grond waar het groen stopt en de as begint, en die lijn is kaarsrecht."},
-      {s:null, bg:3, naam:"…", t:"Aan de andere kant: zwart zand, rode lucht, en een hitte die je op je tanden voelt. Overal staan schoorstenen die niemand gebouwd lijkt te hebben, en ze roken allemaal dezelfde kant op."},
-      {s:null, bg:3, naam:"…", t:"Boven alles uit staat de berg. Hij is niet zwart. Hij is donkerrood, van binnenuit, alsof er iets in hem brandt dat er al heel lang niet meer uit mag."},
-      {s:null, bg:3, naam:"…", t:"Je loopt ernaartoe, want er is niets anders om naartoe te lopen."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", wit:true, t:"En dan gaat hij open. Niet met een knal — met een zucht. De grond klapt weg, de lucht wordt oranje, en het pad achter je is er niet meer. Alleen vóór je is nog iets, en dat is een gat in de berg."},
-      {s:null, bg:3, naam:"…", t:"Je gaat naar binnen. Het is geen keuze. Het lijkt alleen op een keuze omdat je zelf loopt."},
-      {s:null, bg:3, naam:"…", t:"Binnen is het licht. Licht hoort niet uit de grond te komen. Aan de rand van een gloeiende kloof staat iemand in een verbrand gewaad, zoals mensen bij een bushalte staan."},
-      {s:"cultist_agenda", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Ah. Jij bent het. Ik had je pas over een uur ingepland, maar de berg heeft zijn eigen agenda. Dan schuiven we op."},
-      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Zuster As. Derde Kring. Nee, dat zegt je niets, dat is ook een beetje het idee van een derde kring."},
-      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Ik bewaak dit land. Niet met een zwaard — ik ben niet het type. Ik heb iets anders."},
-      {s:"cultist", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze tikt twee keer met haar hak op de rand van de kloof. Onder je voeten begint iets te schuiven. Er komt iets omhoog. Niet snel. Zoals een deur opengaat als er geen haast bij is."},
-      {s:"golem", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het is gemaakt van wat er in de berg zit. Het heeft geen gezicht. Het heeft een plek waar een gezicht zou zitten en daar gloeit het."},
-      {s:"golem_boos", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het heft een vuist. Niet naar jou — naar niets in het bijzonder. Alsof het oefent."},
-      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dit is de golem. Die is van mij. Nou ja — ik stuur de golem. Bij dat soort dingen is dat hetzelfde."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>De lavagolem</b> heeft <b>20 levens</b> en is <b>kleurloos</b>: de cirkel doet er niets mee. De golem slaat met de <b>helft van de eigen levens</b>."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌿 Entangle-tokens zuigen de golem wél leeg, maar ze houden de golem <b>niet</b> thuis. En elke beurt van Zuster As komen er <b>2 levens</b> bij. De golem gaat niet dood. Je kunt de golem op nul zetten. Verder komt het niet en verder gaat het niet."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌋 <b>En de grond aan jouw kant is lava.</b> Aan het begin van elke beurt van jou verliest alles van jou dat geen 🔥 Vuur is <b>1 leven</b>. Haar kant staat op steen."},
-      {s:"cultist_boos", bg:3, naam:"Zuster As", kleur:"#ff8a4a", paars:true, t:"O — en de golem slaat meteen. Niet net wakker geworden. Nooit geslapen. 🟣 <b>Assekern</b> en 🟣 <b>Verzengende Woede</b>, dat hoort bij de functie. Zo. Volgens mij hebben we alles gehad. Ik ben niks vergeten."}
+      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Het woud stopt. Er staan geen bomen meer en er ligt zwart zand."},
+      {s:null, bg:3, naam:"…", t:"Je zet één voet in het zand en het is warm door je zool heen."},
+      {s:null, bg:3, naam:"…", t:"De schoorstenen staan in rijen. Iemand heeft ze neergezet. Er staat niemand bij."},
+      {s:null, bg:3, naam:"…", t:"Je loopt tussen de rijen door. Na een tijdje beginnen ze naar links af te buigen, en je loopt mee, want het is dat of over het zand."},
+      {s:null, bg:3, naam:"…", t:"Je bent er al bijna als je doorhebt dat elke schoorsteen naar de berg wijst."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", wit:true, t:"Er komt lucht uit, zo warm dat je een stap terug doet, en daarna is er een gat en staat het gat open."},
+      {s:null, bg:3, naam:"…", t:"Je gaat naar binnen. Het licht komt van onderen."},
+      {s:"cultist_zit", bg:3, naam:"…", kleur:"#ff8a4a", t:"Er is een meer van lava, en op de rand zit iemand met haar voeten erin. Ze praat. Er is niemand."},
+      {s:"cultist_zit", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"—en ik zei nog, dat gaat niet passen. Dat gaat gewoon niet passen."},
+      {s:"cultist_zit", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"En toen paste het wel. Dus."},
+      {s:"cultist_zit", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nou. Jij weet het altijd beter."},
+      {s:"cultist_zit", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze knikt naar het meer. Het meer doet niks."},
+      {s:"cultist_omkijk", bg:3, naam:"…", kleur:"#ff8a4a", t:"Dan draait ze haar hoofd om. Alleen haar hoofd."},
+      {s:"cultist_omkijk", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"O."},
+      {s:"cultist_omkijk", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze kijkt je aan. Ze blijft je aankijken. Het duurt te lang."},
+      {s:"cultist_omkijk", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Je bent kleiner dan ik gehoopt had."},
+      {s:"cultist", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze staat op. Er druipt iets van haar voeten. Ze veegt het niet weg en ze kijkt er niet naar."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Zuster As."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nee, blijf staan. Ik hou niet van mensen die weglopen terwijl ik mezelf voorstel."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dat is één van mijn dingen."},
+      {s:"cultist", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze loopt om je heen. Eén heel rondje. Ze zegt niks terwijl ze dat doet."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Ik heb een vraag."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Hoe lang denk je dat een mens brandt?"},
+      {s:"cultist_dichtbij", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze wacht echt op antwoord."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nee, raden mag. Iedereen raadt te kort."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"…Ach."},
+      {s:"cultist_lach", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze klapt in haar handen en is die vraag meteen kwijt."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Goed! Jij wil verder. Ik sta ervoor. Dat is de afspraak, die is niet van mij, ik voer hem uit."},
+      {s:"cultist_lach", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"En ik doe het graag, want ik verveel me kapot."},
+      {s:"cultist_wijd", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze stampt twee keer met haar hak op de rand van het meer."},
+      {s:"cultist_wijd", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"MAATJE. Opstaan. Er is iets."},
+      {s:"golem", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Onder je voeten begint iets te schuiven. Er komt iets omhoog. Niet snel."},
+      {s:"golem", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het is gemaakt van wat er in het meer zit. Het heeft geen gezicht. Het heeft een plek waar een gezicht zou moeten zitten, en daar gloeit het."},
+      {s:"golem_boos", reus:true, bg:3, naam:"…", kleur:"#ff6a2a", t:"Het heft een vuist. Niet naar jou. Naar niks."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dat is Maatje."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nee, hij hoort je niet. Praat gerust over hem."},
+      {s:"cultist", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze leunt tegen zijn been aan alsof het een tafel is."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Ik heb hem een keer opengebroken om te kijken wat erin zat."},
+      {s:"cultist", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Niks. Nog meer Maatje."},
+      {s:"cultist_lach", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dat vond ik een beetje flauw van hem."},
+      {s:"cultist_dichtbij", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze kijkt weer naar jou en ze is ineens heel dichtbij."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Weet je wat ik het spannendste vind?"},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Dat ik niet weet welk deel van jou het eerst opgeeft."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Bij de meesten weet ik dat. Bij jou niet."},
+      {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Ik heb er vannacht wakker van gelegen."},
+      {s:"cultist_wijd", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze doet twee stappen achteruit en spreidt haar armen."},
+      {s:"cultist_wijd", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nou. Kom op."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>Maatje</b> heeft <b>20 levens</b> en geen element: de elementcirkel doet hem niks, geen van beide kanten op. Hij slaat als iedereen, met de helft van zijn levens."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌿 Entangle-tokens zuigen hem wél leeg, maar ze houden hem niet thuis. En elke beurt van zijn baas komen er <b>2 levens</b> bij. Hij gaat niet dood. Je kunt hem op nul zetten, en verder komt hij niet en verder gaat hij niet."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌋 <b>De grond aan jouw kant is lava.</b> Aan het begin van elke beurt van jou verliest alles van jou dat geen 🔥 Vuur is <b>1 leven</b>. Haar kant staat op steen."},
+      {s:null, bg:3, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Ze speelt met <b>Assekern</b>: als fusie op 🔥 doet die 2 schade aan al jouw creatures. En met <b>Verzengende Woede</b>: haar 🔥 doet 5 in plaats van 2."},
+      {s:"cultist_lach", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"O ja. Jouw kant staat in de fik."},
+      {s:"cultist_lach", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Die heb ik zo neergelegd."}
     ],
     midden:[
-      {s:"cultist_agenda", naam:"Zuster As", kleur:"#ff8a4a", t:"Je vecht goed. Dat is geen compliment, dat is een observatie. Ik doe niet aan complimenten, ik doe aan notulen."},
-      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik hou het bij, hoor. Niet dat iemand het ooit naleest, maar ik hou het bij."}
+      {s:"cultist_wijd", naam:"Zuster As", kleur:"#ff8a4a", t:"Stop."},
+      {s:"cultist_dichtbij", naam:"Zuster As", kleur:"#ff8a4a", t:"Nee, echt even stoppen. Ik wil iets vragen."},
+      {s:"cultist_dichtbij", naam:"Zuster As", kleur:"#ff8a4a", t:"Slaap jij op je rug of op je zij?"},
+      {s:"cultist_dichtbij", naam:"…", kleur:"#ff8a4a", t:"Ze wacht. Ze wacht echt."},
+      {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", t:"…Nee? Oké."},
+      {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", t:"Doorgaan dan maar."}
     ],
-    middenNa:2,
     win:[
-      {s:"golem_stuk", reus:true, naam:"…", kleur:"#ff6a2a", t:"De golem zakt de kloof weer in alsof iemand er de stekker uit trekt. De gloed waar het gezicht zat, gaat als laatste uit."},
-      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"…Hm. Ja. Dat had ik niet."},
-      {s:"cultist_stuk", naam:"…", kleur:"#ff8a4a", t:"Haar kap valt naar achteren. Eronder zit een doodgewone vermoeide vrouw met roet in haar wenkbrauwen."},
-      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Weet je wat het is: hier hoeft niemand ooit iets uit te leggen. Dat is de gewoonte. Je krijgt de regels pas als je ze al overtreden hebt."},
-      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik heb één keer gevraagd wat ze verderop aan het verbranden zijn. Eén keer. Toen kwam er iemand langs. Die heeft niks gedaan. Die heeft alleen even gekeken."},
-      {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", paars:true, t:"Neem dit. 🟣 <b>Assekern</b> — offer er eentje van jezelf en wat je terugkrijgt zet het hele veld tegenover je in de fik. Ik heb er zelf nooit iets mee gedurfd."},
-      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"En als je verder gaat: niet naar de schoorsteen. Iedereen die dat zegt, zegt het te laat. Ik zeg het nu."}
+      {s:"golem_stuk", reus:true, naam:"…", kleur:"#ff6a2a", t:"Maatje zakt het meer weer in alsof iemand er de stekker uit trekt. De gloed waar zijn gezicht zat gaat als laatste uit."},
+      {s:"cultist", naam:"…", kleur:"#ff8a4a", t:"Ze staat er heel stil naar te kijken."},
+      {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", t:"…"},
+      {s:"cultist_lach", naam:"…", kleur:"#ff8a4a", t:"Dan begint ze te lachen en ze houdt niet op. Ze lacht zo lang dat je ergens anders gaat kijken."},
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Stúk."},
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Hij is stuk. Hij is nog nooit stuk geweest."},
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik heb hem opengebroken en hij ging niet stuk."},
+      {s:"cultist_stuk", naam:"…", kleur:"#ff8a4a", t:"Ze veegt haar ogen af. Er komt roet op haar gezicht. Ze laat het zitten."},
+      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Ga door."},
+      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Ga naar de schoorsteen."},
+      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Ja, ik weet dat dat niet mag. Ga naar de schoorsteen."},
+      {s:"cultist_stuk", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik wil weten wat er dan gebeurt."},
+      {s:"cultist_stuk", naam:"…", kleur:"#ff8a4a", t:"Ze zwaait naar je. Met allebei haar handen."}
     ],
     verlies:[
-      {s:"cultist_agenda", naam:"Zuster As", kleur:"#ff8a4a", t:"Zo. Dat is dan genoteerd. Sta maar op, ik heb je toch pas over een uur ingepland."}
+      {s:"cultist_wijd", naam:"Zuster As", kleur:"#ff8a4a", t:"JA!"},
+      {s:"cultist_lach", naam:"…", kleur:"#ff8a4a", t:"Ze springt op en neer."},
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Het was je knie! Ik dacht al zoiets!"},
+      {s:"cultist_lach", naam:"Zuster As", kleur:"#ff8a4a", t:"Ik had op je knie gegokt."},
+      {s:"cultist_dichtbij", naam:"…", kleur:"#ff8a4a", t:"Ze hurkt bij je neer."},
+      {s:"cultist_dichtbij", naam:"Zuster As", kleur:"#ff8a4a", t:"Blijf nog heel even zo liggen."},
+      {s:"cultist_dichtbij", naam:"Zuster As", kleur:"#ff8a4a", t:"…Zo ja."},
+      {s:"cultist", naam:"Zuster As", kleur:"#ff8a4a", t:"Oké. Opstaan. Nog een keer."}
     ],
     na:[
-      {s:null, bg:3, naam:"…", t:"De berg laat je gaan zoals hij je binnenliet: zonder er iets van te vinden. Buiten is de as nog warm."},
-      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", mu:"w3_flint", t:"Op een rotsblok zit iemand die daar tien seconden geleden nog niet zat. Zonnebril, in een land zonder zon. Hij kijkt niet blij."},
+      {s:null, bg:3, naam:"…", t:"De berg gaat achter je open en laat je gaan. Buiten is het zand nog warm."},
+      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", mu:"w3_flint", t:"Op een rotsblok zit iemand die daar tien seconden geleden nog niet zat. Zonnebril, in een land zonder zon."},
       {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"…Yo."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Dus je bent door de berg gekomen. Door de bérg. Ik had geld gezet op dat café van die mevrouw. Iedereen blijft daar zitten."},
-      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", t:"Hij zegt het zoals je iets zegt dat je grappig had willen laten klinken. Het klinkt niet grappig."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Luister. Ik ga je één ding zeggen en dan ga ik weer zitten waar ik zat."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Verderop staat een fabriek. Je gaat hem ruiken voor je hem ziet. Ga daar niet heen."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Niet omdat het gevaarlijk is. Er is hier niks dat jou pijn kan doen, dat heb je net bewezen. Ga er niet heen omdat je er iets vindt dat je daarna niet meer kwijt kunt."},
-      {s:"fireguy_zwaai", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Je weet niet wat je bent. Dat is het mooiste wat je hebt, en je staat op het punt het kwijt te raken."},
-      {s:null, bg:3, naam:"…", t:"Je zegt dat je toch gaat. Hij knikt alsof hij dat allang wist, en het is de eerste keer dat je hem iets ziet doen zonder er ontspannen bij te kijken."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"…Oké. Dan zie ik je verderop wel. En kleine — ik had liever gehad dat het anders was."},
-      {s:null, bg:3, naam:"…", t:"Hij loopt de as in en is na drie stappen niet meer te zien. Er blijven geen voetsporen achter. Dat valt je pas veel later op."}
+      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Door de berg."},
+      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Ik had geld gezet op die herberg van dat mens."},
+      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", t:"Hij zegt het zoals je iets zegt dat grappig had moeten klinken."},
+      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Luister. Eén ding, en dan ga ik weer zitten."},
+      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Verderop staat een fabriek. Je ruikt hem voor je hem ziet."},
+      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Ga daar niet heen."},
+      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", t:"Hij staat niet op. Hij kijkt niet op."},
+      {s:"fireguy_zwaai", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Dat was het. See ya."},
+      {s:null, bg:3, naam:"…", t:"Hij loopt het zand op en is na drie stappen niet meer te zien. Er blijven geen voetsporen achter. Dat valt je pas veel later op."}
     ],
-    zegSpr:"cultist", tauntSpr:"cultist_taunt",
+    middenNa:2,
+    zegSpr:"cultist_dichtbij", tauntSpr:"cultist_taunt",
     zeg:{ beurt:[
-        "Zo. Dat is één. Ik tel ze. Iemand moet ze tellen.",
-        "De golem bloedt niet. Dat scheelt schoonmaken.",
-        "Ik zou zeggen: probeer het niet. Maar dat staat niet in mijn functie.",
-        "Voel je de grond? Dat is niet persoonlijk. Dat is gewoon lava.",
-        "Ik heb hier een lijst voor. Jij staat er nog niet op. Ik zet je er straks bij.",
-        "Rustig aan. De golem heeft geen haast. Ik ook niet. Jij als enige."
+        "MAATJE. Daar. Nee. DAAR.",
+        "Harder. Hij voelt niks, dat is het mooie.",
+        "O, kijk waar dat terechtkomt.",
+        "Wat is dat voor geluid dat je maakt? Doe nog eens.",
+        "Niet daar. Daar zit niks. Concentreer je.",
+        "Ik heb dit één keer zonder Maatje geprobeerd. Met mijn handen. Dat wilde je niet weten, hè. Sorry. …Ik lieg. Ik heb geen sorry.",
+        "Je bloedt aan de verkeerde kant. Dat is grappig.",
+        "Nog eventjes. Ik wil het nog even.",
+        "Weet je dat je tot nu toe vierentwintig keer geknipperd hebt? Nee. Vijfentwintig.",
+        "HOGER, Maatje. Het is nog heel."
       ],
       popup:[
-        "Weet je wat er in de berg zit? Ik ook niet. Ik stuur alleen wat eruit komt.",
-        "Ik heb ooit gevraagd waar de as heen gaat. Vier maanden niet gepraat daarna. Dat was voor iedereen wel even rustig.",
-        "Je ruikt anders dan de rest. Ik zeg niet hoe. Ik zeg alleen dat het opvalt."
+        "Ik zit hier al zo lang dat ik het meer namen heb gegeven. Alle stukken apart.|Dat daar is Jan. Dat is de rotste.",
+        "Ik heb ooit gevraagd waar al die as naartoe gaat. Vier maanden zei niemand iets tegen me.|Ik heb die vier maanden heel goed gebruikt.|Nee, dat ga ik niet uitleggen. Dat is van mij.",
+        "Er is één ding dat ik nog nooit heb zien gebeuren en jij bent het.|Ik heb geen idee wat je bent. Ik ga het wel zien.",
+        "Ademen jullie eigenlijk? Ik weet niet of jullie ademen."
       ],
-      laag:["…Dat. Dat had ik niet ingepland."],
-      jij:["Zo. Dan is dat afgehandeld. Ik zet je erbij."] },
+      laag:[
+        "Wacht even. Maatje. Sta óp. Sta op sta op sta op."
+      ],
+      jij:[
+        "Ja. Ja! Blijf zo liggen, ik wil kijken."
+      ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{plasma:3, steen:5, vuur:5, gras:5, water:5, siphon:5},
     ltVij:["siphon"], handVij:["siphon"],
@@ -13193,60 +13268,91 @@ const STORY = {
     wereld:3, naam:"Het circus", vijand:"Het vlammende trio", sprite:"trio", zegKleur:"#ffa53c", muziek:"w3_circus",
     hzruim:true,
     intro:[
-      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je zoekt het pad. Er is geen pad. Er is as, en schoorstenen, en de berg achter je die niet kleiner wordt."},
-      {s:null, bg:3, naam:"…", t:"En dan hoor je het. Een trompet. Een trommel. Iets dat lacht en iets dat klapt. Muziek, midden in een land waar alles alleen maar rookt."},
-      {s:null, bg:3, naam:"…", t:"Om een rots heen staat een tent. Rood en geel, gestreept, met vlaggetjes. Er brandt licht in. Er staat op een bord: CIRCUS. Er staat verder niets op, want meer hoeft er niet op te staan."},
+      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je loopt op de muziek af. Het is een trompet, en een trommel, en iets dat klapt."},
+      {s:null, bg:3, naam:"…", t:"Om een rots heen staat een tent. Rood en geel gestreept, met vlaggetjes."},
+      {s:null, bg:3, naam:"…", t:"Er staat een bord bij. Er staat CIRCUS op. Verder staat er niks op, want meer hoeft er niet op te staan."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Iedereen weet dat een elementaal onmogelijk een circus kan weerstaan. Dat is geen zwakte. Dat is gewoon een feit over elementalen, zoals water nat is."},
-      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Ga je naar binnen, tegen beter weten in?",
-        keuze:[{label:"🎪 Ja", ga:"show"}, {label:"🎪 Ja.", ga:"show"}]}
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Ga je naar binnen, tegen beter weten in?", keuze:[{"label": "🎪 Ja", "ga": "show"}, {"label": "🎪 Ja.", "ga": "show"}]}
     ],
     show:[
-      {s:null, bg:3, naam:"…", mu:"w3_circus", t:"Binnen is het warm en het ruikt naar suiker en rook. Er staat één bank. Je gaat erop zitten. Het licht gaat uit."},
-      {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", wit:true, t:"Drie vlammen. Ze komen uit het niets, tegelijk, en ze zijn meteen overal: op het touw, aan de trapeze, door een hoepel die in brand staat omdat zij hem hebben aangeraakt."},
+      {s:null, bg:3, naam:"…", mu:"w3_circus", t:"Binnen is het warm en het ruikt naar suiker. Er staat één bank. Je gaat erop zitten."},
+      {s:null, bg:3, naam:"…", t:"Het licht gaat uit."},
+      {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", wit:true, t:"Drie vlammen. Ze komen uit het niks, tegelijk, en ze zijn meteen overal. Op het touw, aan de trapeze, door een hoepel die vlam vat op het moment dat ze erdoorheen gaan."},
       {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", t:"Eentje maakt een dubbele salto en landt op de kop van de tweede. De derde jongleert met zichzelf. Je weet niet hoe dat kan en je klapt toch."},
-      {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", t:"Het duurt drie minuten en het is het beste wat je in drie werelden hebt gezien. Dat is ook het probleem."},
-      {s:"trio", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"HAHA! Je bent erin geluist!"},
-      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Iedereen weet dat elementalen geen circus kunnen weerstaan!"},
-      {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"Dat stond op het bord. Nou ja. Niet op het bord. Maar het had erop kunnen staan."},
-      {s:"trio_boos", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"Wij zijn Knetter, Spetter en Fikkie. Het vlammende trio. En jij gaat niet verder, want daar hebben ze ons voor betaald. In suiker."},
-      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🎪 <b>Drie vonken, drie levensbalken.</b> Knetter zit in kolom <b>1</b>, Spetter in kolom <b>3</b>, Fikkie in kolom <b>5</b>. Elk heeft <b>2 levens</b>. Sla je een vonk in de eigen kolom, dan raak je die. In kolom 2 en 4 zit niemand — daar sla je in het niets."},
+      {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", t:"Het duurt drie minuten en het is het beste wat je in drie werelden hebt gezien."},
+      {s:"trio", groot:true, bg:3, naam:"…", kleur:"#ffa53c", t:"Dat is ook het probleem."},
+      {s:"trio", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"HAHA! Erin getrapt!"},
+      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Iedereen trapt erin!"},
+      {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"Nou. Jij bent de eerste."},
+      {s:"trio_boos", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"Fikkie."},
+      {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"Sorry."},
+      {s:"trio", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"Knetter. Spetter. Fikkie. Het vlammende trio."},
+      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Dat hebben we zelf verzonnen."},
+      {s:"trio_boos", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"En jij gaat niet verder, want daar zijn we voor betaald."},
+      {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"In suiker."},
+      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Heel veel suiker."},
+      {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"Echt heel veel."},
+      {s:"trio_boos", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"Genoeg, jongens."},
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🎪 <b>Drie vonken, drie levensbalken.</b> Knetter zit in kolom <b>1</b>, Spetter in kolom <b>3</b>, Fikkie in kolom <b>5</b>. Elk heeft <b>2 levens</b>. Sla je hem in zijn kolom, dan raak je hém. In kolom 2 en 4 zit niemand, daar sla je in het niets."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🔥 <b>Elke vonk geeft +1 op al hun vuur-effecten.</b> Knetter maakt hun vuur tot ☄️ plasma. Spetter laat hun vuur naar de buren spatten. Fikkie laat hun vuur twee keer schieten."},
-      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Gaat er een uit, dan is die kracht weg — en trekken de anderen kaarten: <b>1</b> voor de eerste, <b>2</b> voor de tweede. Je wint als ze alle drie uit zijn."},
-      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Muziek!"}
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Gaat er een uit, dan is zijn kracht weg, en trekken de anderen kaarten: <b>1</b> voor de eerste, <b>2</b> voor de tweede. Je wint als ze alle drie uit zijn."},
+      {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Muziek!"},
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Er komt muziek. Er is nog steeds niemand die speelt."}
     ],
-    gevechtNa:{show:"basis"},
     midden:[
-      {s:"trio", groot:true, naam:"Fikkie", kleur:"#ff6a2a", t:"Doet-ie het nog? Doet-ie het nog? — Ja hoor, hij doet het nog."},
-      {s:"trio", groot:true, naam:"Knetter", kleur:"#ffa53c", t:"Niet tegen de mensen praten, Fikkie. Dat hoort niet. Het is een shów."}
+      {s:"trio", groot:true, naam:"Fikkie", kleur:"#ff6a2a", t:"Doet-ie het nog?"},
+      {s:"trio", groot:true, naam:"Spetter", kleur:"#ffd45e", t:"Hij doet het nog."},
+      {s:"trio", groot:true, naam:"Fikkie", kleur:"#ff6a2a", t:"Hij doet het nog!"},
+      {s:"trio_boos", groot:true, naam:"Knetter", kleur:"#ffa53c", t:"Fikkie. Niet tegen ze praten."},
+      {s:"trio", groot:true, naam:"Knetter", kleur:"#ffa53c", t:"Het is een shów."}
     ],
-    middenNa:2,
     win:[
-      {s:null, naam:"…", kleur:"#b9c6d4", mu:"w3_as", t:"Het is stil in de tent."},
-      {s:"trio_as", groot:true, naam:"…", kleur:"#b9c6d4", t:"Op de grond liggen drie hoopjes as. Ze zijn klein. Ze zijn kleiner dan je had gedacht, want zonet waren ze overal."},
-      {s:"trio_as", groot:true, naam:"…", kleur:"#b9c6d4", t:"Er komt niets uit. Geen laatste woord, geen grap, geen gloed die nog even aanhoudt. Je wacht erop. Het komt niet."},
-      {s:null, naam:"…", kleur:"#b9c6d4", t:"Je hebt overal gewonnen sinds het Steenrijk, en iedereen stond daarna weer op en zei iets. Dit is de eerste keer dat er niets opstaat."},
-      {s:null, naam:"…", kleur:"#b9c6d4", t:"Aan de rand van de piste ligt een zak suiker. Ongeopend. Je laat hem liggen."},
-      {s:null, naam:"…", kleur:"#b9c6d4", t:"Je loopt de tent uit. Buiten rookt alles nog precies zoals eerst, en de muziek is opgehouden, en dat merk je pas na een tijdje."}
+      {s:null, naam:"…", kleur:"#b9c6d4", mu:"w3_as", t:"De muziek houdt midden in een maat op."},
+      {s:"trio_as", groot:true, naam:"…", kleur:"#b9c6d4", t:"Op de grond liggen drie hoopjes as."},
+      {s:"trio_as", groot:true, naam:"…", kleur:"#b9c6d4", t:"Ze zijn klein. Ze zijn kleiner dan je had gedacht, want zonet waren ze overal."},
+      {s:"trio_as", groot:true, naam:"…", kleur:"#b9c6d4", t:"Er komt niks uit. Geen laatste woord, geen grap, geen gloed die nog even nagloeit."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Je wacht erop."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Het komt niet."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Je hebt overal gewonnen sinds het Steenrijk, en tot nu toe stond iedereen weer op en zei iets."},
+      {s:"suiker", naam:"…", kleur:"#b9c6d4", t:"Aan de rand van de piste ligt een zak suiker. Ongeopend. Die van vanochtend."},
+      {s:"suiker", naam:"…", kleur:"#b9c6d4", t:"Je laat hem liggen."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Buiten is het precies zoals het was. De rook waait dezelfde kant op."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Pas na een tijdje merk je dat je niks meer hoort."}
     ],
     verlies:[
-      {s:"trio_boos", groot:true, naam:"Knetter", kleur:"#ffa53c", t:"En dat, dames en heren, was het slotnummer! Applaus voor onszelf!"}
+      {s:"trio_boos", groot:true, naam:"Knetter", kleur:"#ffa53c", t:"En dat, dames en heren, was het slotnummer!"},
+      {s:"trio", groot:true, naam:"Spetter", kleur:"#ffd45e", t:"Applaus voor onszelf!"},
+      {s:"trio", groot:true, naam:"Fikkie", kleur:"#ff6a2a", t:"APPLAUS!"}
     ],
+    gevechtNa:{show:"basis"},
+    middenNa:2,
     zegSpr:"trio", tauntSpr:"trio_taunt",
     zeg:{ beurt:[
-        "Kijk naar het vuur! Niet naar de kaarten! Naar het VUUR!",
-        "Spetter, jouw beurt. — Nee, MIJN beurt. — Het is onze beurt, jongens.",
-        "Voor het volgende nummer hebben we een vrijwilliger nodig. Jij bent het.",
-        "Fikkie is de kleinste maar brandt het langst. Dat is niet eerlijk en Fikkie weet dat.",
-        "Ta-daaa!",
-        "Nog een keer! Nog een keer! — Nee, één keer is genoeg, Fikkie."
+        "Kijk naar het vuur! Niet naar de grond! Naar het VUUR!",
+        "Spetter, jouw beurt. Nee, MIJN beurt. Het is onze beurt, jongens.",
+        "Voor het volgende nummer hebben we een vrijwilliger nodig. Dat ben jij.",
+        "TA-DAAA!",
+        "Nog een keer! Nog een keer! Nee Fikkie, één keer is genoeg.",
+        "Fikkie is de kleinste maar hij brandt het langst. Dat is niet eerlijk en dat weet hij.",
+        "Applaus is gratis, hoor.",
+        "Dit is nummer negen. We hebben er vierentwintig.",
+        "We doen ze altijd allemaal. Ook als er niemand is.",
+        "Spetter, je timing. Je timing, Spetter.",
+        "Deze hebben we honderd keer geoefend. Op elkaar.",
+        "Knetter zegt dat we er beter in worden. Ik weet niet hoe hij dat ziet."
       ],
       popup:[
-        "Weet je wie ons betaalt? Wij ook niet. Er ligt gewoon elke ochtend suiker.",
-        "Wij hebben nog nooit een elementaal gezien. Wij hebben nog nooit iemand gezien. Er komt hier nooit iemand.",
-        "Als je wint gaan wij uit. Dat weet je toch? Dat is niet erg. Dat is gewoon hoe vuur werkt."
+        "Weet je wie ons betaalt? Wij ook niet. Er ligt gewoon elke ochtend suiker bij de ingang.|Eén keer lag er niks. Dat was een rare dag.",
+        "Wij hebben nog nooit iemand gezien. Jij bent de eerste.|Nou ja. De eerste die bleef zitten.",
+        "Als jij wint gaan we uit. Dat weet je toch? Dat is gewoon hoe vuur werkt.|Niet flauw doen erover. Wij doen er ook niet flauw over.",
+        "Blijf je daarna nog? Dat hoeft niet.|Het mag wel."
       ],
-      laag:["…Knetter? Knetter, waarom is het zo donker."],
-      jij:["Bravo! Bravo! Blijf liggen, dat hoort bij het nummer!"] },
+      laag:[
+        "Knetter? Knetter, waarom is het zo donker."
+      ],
+      jij:[
+        "BRAVO! Blijf liggen, dat hoort bij het nummer!"
+      ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{vuur:8, steen:5, gras:5, water:5, gamble:5},
     ltVij:["gamble"],
@@ -13257,64 +13363,110 @@ const STORY = {
     ban:10, begint:1
   },
   "3-5":{
-    wereld:3, naam:"De schoorsteen", vijand:"Klinknagel", sprite:"klinknagel", zegKleur:"#c8cedb", muziek:"w3_fabriek",
+    wereld:3, naam:"De fabriek", vijand:"Klinknagel", sprite:"klinknagel", zegKleur:"#c8cedb", muziek:"w3_fabriek",
     hzruim:true,
     intro:[
-      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je ruikt hem voor je hem ziet. Precies zoals gezegd."},
-      {s:null, bg:3, naam:"…", t:"De fabriek is geen gebouw. Het is een berg van ijzer met één schoorsteen erop, en die schoorsteen is de enige in de Asgronden waar níets uit komt. Alle rook gaat erin. Bovenaan is het stil."},
-      {s:null, bg:3, naam:"…", t:"Er staat een bord bij de poort. ARCHIEF. Meer niet. Iemand heeft het ooit netjes geschilderd en daarna nooit meer aangeraakt."},
-      {s:null, bg:3, naam:"…", t:"Binnen loopt alles. Banden, wielen, haken. Er beweegt niets dat leeft, en toch is het het drukste wat je in drie werelden hebt gezien."},
-      {s:"klinknagel", groot:true, bg:3, naam:"…", kleur:"#c8cedb", t:"Aan het eind van de band staat iets van ijzer op twee benen, en het telt. Hardop. Het is al bij achthonderdduizend-en-nog-wat."},
-      {s:"klinknagel_tellen", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"— zes. Zeven. Acht. Bezoek. Dat staat niet in de instructie. Ik zet het erbij."},
-      {s:"klinknagel", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Klinknagel. Zeven. De andere zes zaten in de weg, dus die zijn erin gegaan. Dat is geen klacht. Dat is de procedure."},
-      {s:"klinknagel", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik doe de band. Alles wat op de band komt, gaat naar rechts. Alles wat rechts komt, gaat erin. Ik bedank het. Dat hoeft niet, maar ik doe het."},
-      {s:"klinknagel", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Jij staat op de band. Dat heb je zelf gedaan. Ik zou het niet doen, maar ik ben geen bezoek."},
-      {s:null, bg:3, naam:"…", kleur:"#c8cedb", t:"⚙️ <b>De lopende band.</b> Alles wat je neerlegt — creature of spell, jij of Klinknagel — schuift meteen zo ver mogelijk naar <b>rechts</b>, tot er iets in de weg staat. Valt er iets weg, dan schuift de rest weer door. Schuiven triggert niets."},
-      {s:null, bg:3, naam:"…", kleur:"#c8cedb", t:"🔥 <b>De forge.</b> Aan het begin van elke beurt van Klinknagel gaat de forge open: wat helemaal rechts ligt, aan allebei de kanten, gaat erin. Weg. En dan schuift alles weer een plek op."},
-      {s:"klinknagel", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Ik heb drie dingen die bij de installatie horen. 🟣 <b>Bergrug</b>, en 🟣 <b>Oerkracht</b> op steen én op vuur. Twee keer. Dat mag niet. Ik heb het nooit gevraagd, dus niemand heeft nee gezegd."},
-      {s:"klinknagel_boos", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Negen. Tien. We beginnen."}
+      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je ruikt hem voor je hem ziet."},
+      {s:null, bg:3, naam:"…", t:"De fabriek is geen gebouw. Het is ijzer dat op ijzer is gezet tot het hoog genoeg was. Er zijn geen ramen. Er is één deur en die staat open."},
+      {s:null, bg:3, naam:"…", t:"Binnen loopt alles. Banden, wielen, haken. Er beweegt niks wat leeft en het is het drukste wat je in drie werelden hebt gezien."},
+      {s:"klinknagel_rug", bg:3, naam:"…", kleur:"#c8cedb", t:"Aan het eind van de band staat iets van ijzer."},
+      {s:"klinknagel_klauw", bg:3, naam:"…", kleur:"#c8cedb", t:"Er komt iets aan over de band. Het pakt het op."},
+      {s:"klinknagel_klauw", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"VERBRANDEN."},
+      {s:"klinknagel_klauw", bg:3, naam:"…", kleur:"#c8cedb", t:"Het gooit het in de oven."},
+      {s:"klinknagel_rug", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Dank je."},
+      {s:"klinknagel_rug", bg:3, naam:"…", kleur:"#c8cedb", t:"Er komt niks meer aan. Het blijft staan met zijn klauw open."},
+      {s:"klinknagel_rug", bg:3, naam:"…", kleur:"#c8cedb", t:"Dan draait de lens naar jou. De rest volgt pas daarna."},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"IETS BEWEEGT."},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"IDENTIFICEER!"},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"IDENTIFICEER!"},
+      {s:null, bg:3, naam:"…", t:"Je zegt niks. Dat maakt hem niet onzeker."},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"GEEN IDENTIFICATIE."},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"DAN IS HET BRANDBAAR."},
+      {s:"klinknagel", bg:3, naam:"…", kleur:"#c8cedb", t:"Hij glijdt naar voren en stopt op twee passen afstand."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik ben Klinknagel."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik verbrand."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Er is geen tweede taak."},
+      {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"⚙️ <b>De lopende band.</b> Alles wat je neerlegt, creature of spell, van jou of van hem, schuift meteen zo ver mogelijk naar rechts, tot er iets in de weg staat. Valt er iets weg, dan schuift de rest weer door. Schuiven triggert niks."},
+      {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"🔥 <b>De oven.</b> Aan het begin van elke beurt van hem gaat de oven open: wat helemaal rechts ligt, van jou én van hem, gaat erin. Weg. En dan schuift alles weer een plek op."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Uitrusting: 🟣 Bergrug. 🟣 Oerkracht op steen. 🟣 Oerkracht op vuur."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Twee keer Oerkracht is niet toegestaan."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik heb niks gevraagd. Dus is er niks geweigerd."},
+      {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"BEGINNEN."}
     ],
     midden:[
-      {s:"klinknagel", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Dank je. — Dat was tegen de kaart. Niet tegen jou. Jou bedank ik pas als je erin gaat."},
-      {s:"klinknagel_tellen", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Achthonderdduizend-tweehonderd-en-twaalf. Ik weet niet wat het waren. Ik weet wel hoeveel."}
+      {s:"klinknagel_klauw", naam:"Klinknagel", kleur:"#c8cedb", t:"VERBRANDEN."},
+      {s:"klinknagel_klauw", naam:"Klinknagel", kleur:"#c8cedb", t:"Dank je."},
+      {s:"klinknagel", naam:"…", kleur:"#c8cedb", t:"De lens draait naar jou."},
+      {s:"klinknagel", naam:"Klinknagel", kleur:"#c8cedb", t:"Dat was niet tegen jou."},
+      {s:"klinknagel", naam:"Klinknagel", kleur:"#c8cedb", t:"Dat bewaar ik."}
     ],
-    middenNa:2,
     win:[
-      {s:"klinknagel_stuk", groot:true, naam:"…", kleur:"#c8cedb", t:"De band stopt. Voor het eerst. Het geluid dat ophoudt is zo groot dat je pas hoort dat het er was."},
-      {s:"klinknagel_stuk", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"…Elf."},
-      {s:"klinknagel_stuk", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Dat is niet de procedure. Er is geen procedure voor stilstaan. Ik ga hem schrijven. Ik weet niet hoe lang dat duurt."},
-      {s:"klinknagel_stuk", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Neem dat maar mee. Daar. Het lag al rechts. Het was toch bijna aan de beurt."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Volledige Negatie.</b> Negeer de kaart die je tegenstander zojuist speelde volledig — die verdwijnt van de chain alsof die er nooit was."},
-      {s:"klinknagel_stuk", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik bedank je niet. Je gaat er niet in. Dat is voor het eerst en ik weet niet wat ik daarmee moet."}
+      {s:"klinknagel_stuk", naam:"…", kleur:"#c8cedb", mu:"w3_as", t:"De band stopt."},
+      {s:"klinknagel_stuk", naam:"…", kleur:"#c8cedb", t:"Het geluid dat ophoudt is zo groot dat je pas hoort dat het er was."},
+      {s:"klinknagel_stuk", naam:"…", kleur:"#c8cedb", t:"De lens brandt nog. Verder beweegt er niks aan hem."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"…"},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"De band staat stil."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Er is geen procedure voor stilstaan."},
+      {s:"klinknagel_stuk", naam:"…", kleur:"#c8cedb", t:"Hij zegt het zacht. Dat is het eerste wat hij zacht zegt."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Ik ga er een schrijven."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Ik weet niet hoe lang dat duurt. Ik weet ook niet waarmee."},
+      {s:"klinknagel_stuk", naam:"…", kleur:"#c8cedb", t:"De lens draait naar de oven. De oven staat open en er komt niks aan."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Jij bent niet verbrand."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Dan bedank ik je ook niet."},
+      {s:"klinknagel_stuk", naam:"Klinknagel", kleur:"#c8cedb", t:"Dat is de eerste keer."}
     ],
     verlies:[
-      {s:"klinknagel_boos", groot:true, naam:"Klinknagel", kleur:"#c8cedb", t:"Dank je. Dat was tegen jou. Sta maar op, de band loopt gewoon door."}
+      {s:"klinknagel_klauw", naam:"Klinknagel", kleur:"#c8cedb", t:"VERBRANDEN."},
+      {s:"klinknagel_klauw", naam:"Klinknagel", kleur:"#c8cedb", t:"Dank je."},
+      {s:"klinknagel", naam:"Klinknagel", kleur:"#c8cedb", t:"Dat was wel tegen jou."},
+      {s:"klinknagel", naam:"Klinknagel", kleur:"#c8cedb", t:"Sta op. De band loopt door."}
     ],
     na:[
-      {s:null, bg:3, naam:"…", t:"Bij de forge ligt wat er niet helemaal in is gegaan. Papier. Stapels. De randen staan nog in brand en je pakt ze toch."},
-      {s:"papieren", groot:true, bg:3, naam:"…", kleur:"#f6e9b0", t:"Het zijn lijsten. Namen, jaartallen, rijken. En één woord dat op elke bladzijde terugkomt, in een handschrift dat overal hetzelfde is: <b>Ongedeelden</b>."},
-      {s:"papieren", groot:true, bg:3, naam:"…", kleur:"#f6e9b0", t:"Er staat wat ze bezaten. Er staat hoe lang. Het zijn geen verhalen, het zijn boekhoudingen — duizenden jaren van wie wat kreeg en wie wat gaf, en de kolom \"gaf\" is altijd de langste."},
-      {s:"papieren", groot:true, bg:3, naam:"…", kleur:"#f6e9b0", t:"Het laatste vel is anders. Nieuwer. Er staat een stempel op die je niet kent en een kop die je wel kunt lezen: <b>Project Laatste Hoop</b>."},
-      {s:"papieren", groot:true, bg:3, naam:"…", kleur:"#f6e9b0", t:"Daaronder is het weggebrand. Er is één regel over. Er staat: <em>…draagt alle vier. Zoals zij. Toestemming: geen.</em>"},
-      {s:null, bg:3, naam:"…", t:"Je leest het drie keer. Het wordt er niet duidelijker van. Het wordt er wel van jou van, en dat is erger."},
-      {s:null, bg:3, naam:"…", t:"Achter de fabriek staat de schoorsteen nog. Er zit iemand op een krat aan de voet ervan. Hij wacht al een tijdje."}
+      {s:null, bg:3, naam:"…", t:"Bij de oven ligt wat er niet helemaal in is gegaan."},
+      {s:"papier_vel", bg:3, naam:"…", kleur:"#ffb03a", t:"Papier. De randen staan nog in brand en je pakt het toch."},
+      {s:"papier_vel", bg:3, naam:"…", kleur:"#ffb03a", t:"Het is één vel. Het is nieuwer dan het andere."},
+      {s:"papier_vel", bg:3, naam:"…", kleur:"#ffb03a", t:"Er staat een stempel op die je niet kent."},
+      {s:"papier_vel", bg:3, naam:"…", kleur:"#ffb03a", t:"De rest is weg. Er is één regel over."},
+      {s:"papier_vel", bg:3, naam:"…", kleur:"#ffb03a", t:"<em>…draagt alle vier.</em><br><em>Toestemming: geen.</em>"},
+      {s:null, bg:3, naam:"…", t:"Je leest het drie keer."},
+      {s:null, bg:3, naam:"…", t:"Het wordt er niet duidelijker van. Het wordt er wel van jou van."},
+      {s:null, bg:3, naam:"…", t:"Buiten de fabriek zit iemand op een krat."},
+      {s:null, bg:3, naam:"…", t:"Hij zit daar al een tijdje."}
     ],
-    zegSpr:"klinknagel", tauntSpr:"klinknagel_taunt",
+    middenNa:2,
+    zegSpr:"klinknagel_boos", tauntSpr:"klinknagel_taunt",
     zeg:{ beurt:[
-        "Rechts. Alles gaat naar rechts. Ook jij, uiteindelijk.",
-        "Dank je. — Niet jij. De kaart.",
-        "Ik tel. Ik heb nooit gevraagd wat. Dat is niet mijn afdeling.",
-        "De forge is niet boos. De forge is warm. Dat is iets anders.",
-        "Nog drie plekken. Nog twee. Nog één. Dank je.",
-        "Bezoek hoort links te blijven staan. Jij staat niet links."
+        "VERBRANDEN.",
+        "VERBRANDEN. Dank je.",
+        "Naar rechts. Alles gaat naar rechts.",
+        "Die is bijna aan de beurt. VERBRANDEN.",
+        "WAT DOE JE. VERKLAAR!",
+        "VERKLAAR!",
+        "Dat is geen erkende zet. Ik ga door.",
+        "Jij kijkt naar de oven. Dat doen ze allemaal.",
+        "Je vertraagt. Ik niet.",
+        "Ik heb hier geen mening over. Ik heb hier een taak over.",
+        "De oven is niet boos. De oven is warm. Dat is iets anders.",
+        "ALLES OP DEZE BAND WORDT VERBRAND. OOK HET JOUWE."
       ],
       popup:[
-        "Er is hier één regel: wat rechts ligt, gaat erin. Ik heb hem niet bedacht. Ik ben hem.",
-        "Zes voor mij zijn erin gegaan. Ze telden ook. Ik heb hun getal overgenomen, dat leek me netjes.",
-        "Alles wat hier binnenkomt is van iemand geweest. Dat staat erop. Dat lees ik niet meer."
+        "Er is één regel. Wat rechts ligt gaat erin.|Die regel heb ik niet gekregen. Ik ben die regel.",
+        "Op alles staat van wie het was. Ik lees dat niet.|Ik heb het één keer gelezen. Daarna ging ik langzamer. Dat is niet toegestaan.",
+        "Er is er één die het er niet in gooit. Die draagt het. Met twee handen.|Dat is niet efficiënt. Ik heb er nooit melding van gemaakt.",
+        "Ik ben één keer uitgevallen. Toen stond de band stil.|Tweeënveertig seconden.|Ik denk daar nog aan."
       ],
-      laag:["…Dat is niet de procedure. Dat is niet de procedure."],
-      jij:["Dank je. Je was bezoek. Nu ben je kaart."] },
+      laag:[
+        "DAT IS NIET DE PROCEDURE.",
+        "DAT IS NIET DE PROCEDURE!",
+        "VERKLAAR! VERKLAAR!"
+      ],
+      jij:[
+        "BIJNA. VERBRANDEN."
+      ],
+      oven:[
+        "VERBRANDEN.",
+        "VERBRANDEN. Dank je."
+      ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{plasma:3, rots:3, steen:5, vuur:5, gras:5, water:5, negate:5},
     ltVij:["negate"],
@@ -14540,7 +14692,7 @@ const VELD = {
            "Op al haar spell-plekken komt een 🌹 Roos te liggen; wat er lag is weg. Zij trekt 2 kaarten, jij ook.",
            "🌧 De regen blijft: om de andere ronde doet 🔥 Vuur niets."] },
 
-  "3-1": { regels:["🌋 In haar middelste kolom staat een Lavagolem: <b>20</b> levens, {Kleurloos}.",
+  "3-1": { regels:["🌋 In haar middelste kolom staat Maatje, haar lavagolem: <b>20</b> levens, {Kleurloos}.",
                    "De golem gaat niet dood (hooguit naar 0) en krijgt elke beurt van haar <b>2</b> levens terug. 🌿 Tokens houden de golem niet thuis.",
                    "🌋 <b>Jouw grond is lava.</b> Begin van jouw beurt: alles van jou dat geen 🔥 Vuur is verliest <b>1</b> leven."] },
 
@@ -14556,7 +14708,7 @@ const VELD = {
                    "Gaat er een uit, dan is die kracht weg en trekken de anderen kaarten: 1 bij de eerste, 2 bij de tweede."] },
 
   "3-5": { regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, aan allebei de kanten, schuift meteen zo ver mogelijk naar rechts.",
-                   "🔥 Begin van de beurt van Klinknagel: de forge eet wat in kolom 5 ligt (creature én spell), aan allebei de kanten. Daarna schuift alles door."] },
+                   "🔥 Begin van de beurt van Klinknagel: de oven eet wat in kolom 5 ligt (creature én spell), aan allebei de kanten. Daarna schuift alles door."] },
 
   "3-6": { regels:["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
                    "🌋 <b>De grond is lava.</b> Eind van elke ronde: alles op het veld dat geen 🔥 Vuur (of ☄️ Plasma) is verliest 1 leven.",
@@ -15460,7 +15612,8 @@ function popupRegels(soort){
   const zin = verseZin(lijst, "popI", soort);
   if(!zin) return [];
   noteerGezegd(zin);
-  return [{s: st.zegSpr, naam: st.zegNaam, kleur: st.zegKleur || undefined, t: zin}];
+  /* Een tussendoortje mag uit meer regels bestaan: die staan in één zin, gescheiden door |. */
+  return zin.split("|").map(t => ({s: st.zegSpr, naam: st.zegNaam, kleur: st.zegKleur || undefined, t}));
 }
 /* 💤 Het Wiegelied: elke eigen beurt waarin je niet aanvalt zak je dieper weg — en zíj wordt
    er beter van. Val je aan, dan schud je jezelf weer wakker. Op drie ben je er geweest. */
@@ -16226,9 +16379,12 @@ function upgVak(el){
    vak, y het bovenvlak van de plank, w de breedte van wat erop staat (allemaal in procenten). */
 const WINKEL_DECOR = {
   knort:{beeld:"art/winkel-knort.png", ratio:"3/2",
-    ae:[{x:16.4,y:31},{x:33.2,y:31},{x:50,y:31},{x:66.8,y:31},{x:83.6,y:31}],
-    lt:[{x:16.4,y:59},{x:33.2,y:59},{x:50,y:59},{x:66.8,y:59},{x:83.6,y:59}],
-    hart:{x:24,y:88}, slot:{x:76,y:88}, w:10, wPlek:13},
+    /* Uitgemeten op winkel-knort.png (1536×1024): de schotjes staan op x 230, 436, 658, 884,
+       1098 en 1308; het bovenvlak van de planken ligt op y 330 en 540. Tussen de onderkant
+       van de bovenste plank en de middelste zit 164 pixels, dus een kaartje is 7% breed. */
+    ae:[{x:21.7,y:32.2},{x:35.6,y:32.2},{x:50.2,y:32.2},{x:64.5,y:32.2},{x:78.3,y:32.2}],
+    lt:[{x:21.7,y:52.7},{x:35.6,y:52.7},{x:50.2,y:52.7},{x:64.5,y:52.7},{x:78.3,y:52.7}],
+    hart:{x:23.1,y:83,w:12.5}, slot:{x:76.8,y:83,w:15}, w:7, wPlek:13},
   smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
     upg:{steen:{x:20,y:66}, vuur:{x:40,y:66}, gras:{x:60,y:66}, water:{x:80,y:66}}, w:11}
 };
@@ -16263,8 +16419,8 @@ function winkelScene(kraam){
       const beeld = soort === "lt" ? LICHT_BEELD[k] : AETHER_BEELD[k];
       binnen += wkItem(v, d[soort][i], d.w, beeld);
     }));
-    binnen += wkItem(hartVak(), d.hart, d.wPlek, null);
-    binnen += wkItem(slotVak(), d.slot, d.wPlek, null);
+    binnen += wkItem(hartVak(), d.hart, d.hart.w || d.wPlek, null);
+    binnen += wkItem(slotVak(), d.slot, d.slot.w || d.wPlek, null);
   }
   return `<div class="wkscene" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${binnen}</div>`;
 }
@@ -16795,7 +16951,7 @@ function render(){
     + (S.story && S.story.lavaJij ? `<div class="lavameter">🌋 jouw grond is lava<br>begin van je beurt −1</div>` : "")
     + (S.story && S.story.balrogHeal ? `<div class="rotsmeter">🌋 golem +${S.story.balrogHeal} per beurt van haar</div>` : "")
     + (S.story && (S.story.mistAan || S.story.rookAan) ? `<div class="rotsmeter">💨 alles ligt dicht${S.story.spiegel ? "<br>na zijn beurt: 1↔5 en 2↔4" : ""}</div>` : "")
-    + (S.story && S.story.band ? `<div class="rotsmeter">⚙️ lopende band →<br>forge eet kolom 5 bij zijn beurt</div>` : "")
+    + (S.story && S.story.band ? `<div class="rotsmeter">⚙️ lopende band →<br>oven eet kolom 5 bij zijn beurt</div>` : "")
     + (S.story && S.story.vuurzee ? (() => { const per = S.story.vuurzeeSnel ? 4 : 6, g = S.gTurn;
         const volgende = Math.ceil(g / per) * per, rondes = Math.ceil((volgende - g + 1) / 2);
         return `<div class="lavameter">🔥 vuurzee ${rondes <= 1 ? "<b>eind van deze ronde</b>" : `over <b>${rondes}</b> rondes`}</div>`; })() : "")
