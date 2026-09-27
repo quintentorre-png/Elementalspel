@@ -152,8 +152,15 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
 .slot.tgt .card{box-shadow:0 0 0 2px #ff9d4d, 0 0 20px rgba(255,140,60,.7); animation:tgtpulse 1s ease-in-out infinite}
 @keyframes tgtpulse{0%,100%{box-shadow:0 0 0 2px #ff9d4d,0 0 12px rgba(255,140,60,.5)}50%{box-shadow:0 0 0 2px #ffc78f,0 0 24px rgba(255,160,80,.9)}}
 .slot.atk{cursor:pointer}
-.slot.atk .card{box-shadow:0 0 0 2px var(--danger), 0 0 18px rgba(213,80,60,.65); animation:atkpulse 1.2s ease-in-out infinite}
-@keyframes atkpulse{0%,100%{box-shadow:0 0 0 2px var(--danger),0 0 10px rgba(213,80,60,.45)}50%{box-shadow:0 0 0 2px #ff8f7d,0 0 22px rgba(255,110,90,.85)}}
+/* ⚔ Deze creature kan nog aanvallen: een groene, ademende rand en een zwaardje erboven.
+   Groen, en niet rood: rood betekent op dit bord "doelwit". Na de aanval valt het weg
+   en wordt de kaart wat doffer (.spent), zodat je in één oogopslag ziet wie er nog mag. */
+.slot.atk .card{box-shadow:0 0 0 3px #4ee06a, 0 0 18px rgba(78,224,106,.7) !important; animation:atkpulse 1.1s ease-in-out infinite}
+@keyframes atkpulse{0%,100%{box-shadow:0 0 0 3px #3fbf5a, 0 0 8px rgba(78,224,106,.45)}50%{box-shadow:0 0 0 3px #9dffb0, 0 0 24px rgba(120,255,150,.9)}}
+.slot.atk::after{content:"⚔"; position:absolute; left:50%; top:-15px; transform:translateX(-50%); z-index:7; pointer-events:none;
+  font-size:.85rem; line-height:1; padding:3px 7px 2px; border-radius:10px; background:#17451f; color:#eaffe8;
+  border:2px solid #4ee06a; box-shadow:0 2px 0 rgba(0,0,0,.5); animation:atkbob 1.1s ease-in-out infinite}
+@keyframes atkbob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-3px)}}
 .slot.spent .card{filter:brightness(.7) saturate(.75)}
 /* De spell die onder een creature-plek ligt straalt zijn kleur omhoog: zo zie je in één
    oogopslag wat er afgaat als daar een creature komt te staan. */
@@ -1542,6 +1549,32 @@ h3{font-size:.66rem; line-height:1.9}
   color:var(--muted); text-transform:uppercase; margin:12px 0 6px}
 /* Het schap: vijf plekken naast elkaar. */
 .wkrij{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+/* De winkel met tekening beslaat het hele scherm. De tekening schaalt mee maar houdt haar
+   verhouding, zodat de plekken op de planken blijven kloppen: op een breed scherm valt er
+   boven en onder een randje af, op een smal scherm opzij (nooit meer dan een achtste). */
+.wkvol{position:fixed; inset:0; overflow:hidden; background:#08090b}
+.wkvol .wkscene{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:max(100vw, min(150vh, 133.34vw)); border-radius:0; box-shadow:none}
+.wkbalk{position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:6; width:min(760px, calc(100vw - 24px));
+  background:rgba(8,10,14,.84); border:2px solid #3a2a18; border-radius:6px; padding:8px 14px; box-shadow:0 4px 0 rgba(0,0,0,.45)}
+.wkbalk .wkkop{margin:0}
+.wkhint{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); z-index:6; max-width:calc(100vw - 24px);
+  background:rgba(8,10,14,.8); border-radius:4px; padding:5px 12px; font-family:"VT323",ui-monospace,monospace;
+  font-size:1.05rem; color:var(--dim); white-space:nowrap}
+.wkvol.bev .wkscene{filter:brightness(.45); pointer-events:none}
+.wkvol.bev .wktip{display:none !important}
+.wkbevvol{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:7; width:min(420px, calc(100vw - 32px));
+  background:#0d1119; border:3px solid #3a2a18; border-radius:6px; padding:18px 18px 14px; box-shadow:0 8px 0 rgba(0,0,0,.5)}
+/* Knort staat linksonder vóór zijn kraam, iets kleiner dan in een gevecht, zodat hij de pot niet afdekt. */
+@media (min-width:1000px){
+  #praatbel.winkelbel{max-width:min(240px, 17vw)}
+  #praatbel.winkelbel .pbspr{width:min(250px, 16vw)}
+}
+/* Op de telefoon praat Knort bovenin (zoals in een gevecht), dus daar gaat de kop naar beneden. */
+@media (max-width:999px){
+  .wkbalk{top:auto; bottom:10px}
+  .wkhint{display:none}
+}
 /* 🏪⚒ De winkel als plaatje: de koopwaar staat op de planken van de tekening zelf. Elke plek
    is in procenten uitgemeten; y is het bovenvlak van de plank waar het ding op staat. */
 .ovbox.wkbox.metdecor{width:min(1180px,96vw); max-width:min(1180px,96vw)}
@@ -1640,6 +1673,8 @@ h3{font-size:.66rem; line-height:1.9}
   text-shadow:0 0 4px #000, 0 0 4px #000, 1px 1px 0 #000; pointer-events:none}
 /* Staat er onder een level iets in de weg, dan schuift de naam naar boven of opzij. */
 .lvknop.naamboven .lvnaam{top:auto; bottom:100%; margin-top:0; margin-bottom:7px}
+/* Een verschoven naam komt boven de knoppen eromheen te liggen, zodat hij altijd leesbaar is. */
+.lvknop.naamboven, .lvknop.naamrechts, .lvknop.naamlinks{z-index:4}
 .lvknop.naamrechts .lvnaam{top:50%; left:100%; transform:translateY(-50%); margin:0 0 0 8px; text-align:left}
 .lvknop.naamlinks .lvnaam{top:50%; left:auto; right:100%; transform:translateY(-50%); margin:0 8px 0 0; text-align:right}
 @media (max-width:900px), (pointer:coarse){
@@ -2740,7 +2775,8 @@ const LIGHTS = {
   doortast:{cost:1, name:"Doortastend", n:3},
   vital:   {name:"Vitaliteit", n:3},
   web:     {cost:2, name:"Web", n:3, verhaal:true},
-  siphon:  {name:"Levensroof", n:3}
+  siphon:  {name:"Levensroof", n:3},
+  sterregen:{name:"Sterrenregen", n:3}
 };
 const lName = cd => (cd && cd.lk) ? LIGHTS[cd.lk].name : null;
 const ORDER = ["water","steen","vuur","gras"];   // cirkel: 💧→🔥→🌿→🪨→💧
@@ -2859,7 +2895,8 @@ const LICHT_TEKST = {
   doortast:"{Betaal} <b>1</b>: kies een kaart uit je deck en neem die in je hand.",
   vital:   "{Heel} <b>2</b>. Trek <b>1</b>.",
   web:     "{Betaal} <b>2</b>: trek <b>1</b>. Alle vijandelijke creatures zitten {Vast}.",
-  siphon:  "Een creature verliest alle levens. Jij krijgt de helft daarvan als {+levens|pluslevens}."
+  siphon:  "Een creature verliest alle levens. Jij krijgt de helft daarvan als {+levens|pluslevens}.",
+  sterregen:"<b>1</b> {kleurloze|kleurloos} schade aan elke vijandelijke creature. Trek <b>1</b>."
 };
 const AETHER_TEKST = {
   ae_draw3:     "Trek <b>2</b> per beurt in plaats van 1. {Betaal} dan <b>1</b> aan het eind van die beurt. Op 1 leven trek je er gewoon 1.",
@@ -4961,7 +4998,8 @@ const LICHT_BEELD = {
   reborn:"art/licht-zielenoproep.png", master:"art/licht-meester.png", negate:"art/licht-negatie.png",
   dfusion:"art/licht-fusie.png", gamble:"art/licht-brouwsel.png", brenger:"art/licht-lichtbrenger.png",
   echo:"art/licht-echo.png", kloon:"art/licht-kloon.png", doortast:"art/licht-doortastend.png",
-  vital:"art/licht-vitaliteit.png", web:"art/licht-web.png", siphon:"art/licht-levensroof.png"
+  vital:"art/licht-vitaliteit.png", web:"art/licht-web.png", siphon:"art/licht-levensroof.png",
+  sterregen:"art/licht-sterrenregen.png"
 };
 /* De achterkant van een dichte kaart. Een verhaallevel mag er per kant een eigen geven —
    in 2-5 zie je zo meteen dat de wolven van Max zijn en niet van de Seraf. */
@@ -6419,6 +6457,17 @@ async function resolveLight(it){
     addLog(`✦ <em>Doortastend</em>: ${pName(p)} zoekt ${card.lk ? "✦ " + LIGHTS[card.lk].name : kIcon(card) + " " + kNaam(card)} uit het deck en schudt de rest.`, true);
     if(!FAST){ AU.play("light"); await sleep(220); }
     render(); return;
+  }
+  /* ✦ Sterrenregen: één kleurloze tik op alles van de tegenstander, en een kaart. Kleurloos,
+     dus de cirkel doet er niets mee: geen instakill, en ook niemand is er immuun voor. */
+  if(k === "sterregen"){
+    const foes = allCreIds((cr, pp) => pp === opp(p));
+    addLog(`✦ <em>Sterrenregen</em>: ${foes.length ? `1 schade aan elke creature van ${pName(opp(p))}` : "er staat niets om te raken"}, en ${pName(p)} trekt een kaart.`, true);
+    if(!FAST){ AU.play("light"); await sleep(200); }
+    for(const id of foes){ if(S.over) break; applyDamage(id, "licht", 1, {}); }
+    render(); if(!FAST) await sleep(260);
+    if(!S.over) await drawN(p, 1, "✦ Sterrenregen");
+    return;
   }
   if(k === "vital"){
     /* Genezen tot je startaantal, niet erboven: anders wordt hij in een lang potje een
@@ -7982,6 +8031,9 @@ function botChoosePlayV2(p){
       sc = m > 0 ? 1.5 + m * 1.6 : -9; }
     if(cd.lk === "brenger") sc = open.length ? 5.5 : -9;
     if(cd.lk === "vital")   sc = 3.2 + (P(p).life <= 3 ? 2 : 0);
+    if(cd.lk === "sterregen"){ let n = 0, dood = 0;
+      eachCre((cr, pp) => { if(pp === vij && !EL[cr.card.el].onsterfelijk){ n++; if((cr.hp || 0) <= 1) dood++; } });
+      sc = 2.4 + n * 0.7 + dood * 2; }
     if(cd.lk === "doortast") sc = 2.6 + Math.max(0, 3 - P(p).hand.length) * 0.8;
     if(cd.lk === "web"){ let n = 0; eachCre((cr, pp) => { if(pp === vij && !cr.web && !EL[cr.card.el].stil) n++; });
                          sc = n ? 1.5 + n * 2.2 + (dreiging >= 2 ? 3 : 0) : -9; }
@@ -8092,7 +8144,7 @@ function botDecide(mode){
 /* Gemeten in de arena: 4 onafhankelijke reeksen van ~250 potjes per optie (±1.6). */
 const AE_KRACHT = {ae_draw3:68, fu_stone:61, ae_graf:60, ae_grassx2:56, fu_water:54, ae_genade:52, ae_fire6:46,
                    ae_hp3:46, ae_watercycle:43, ae_alziend:41, ae_offer:40, ae_stonefull:39, fu_fire:39, fu_grass:38};
-const LT_KRACHT = {master:61, greed:59, doortast:58, kloon:57, echo:54, brenger:51, vital:52, siphon:53, gamble:50, reborn:49, kuriboh:46,
+const LT_KRACHT = {master:61, greed:59, doortast:58, kloon:57, echo:54, brenger:51, vital:52, siphon:53, gamble:50, reborn:49, kuriboh:46, sterregen:48,
                    dfusion:45, darkhole:42, negate:0};
 function botDraft(u){
   const p = u.p, aanbod = u.aethers;
@@ -12204,6 +12256,7 @@ const STORY = {
             {s:"nimbus_kip", kleur:"#dfe8f2", t:"Nog een keer? Ik heb alle tijd, ik ben lucht."}
           ] }
     },
+    geeft:"fu_water",          // 💧 zo heb je in wereld 1 van elk element al een aether
     begint:1
   },
   "1-4":{
@@ -12407,7 +12460,7 @@ const STORY = {
     rotsval:true,
     levensVij:8,
     bord:[{p:1, c:2, spell:"steen"}],
-    geeft:["ae_hp3","ae_fire6"],
+    geeft:"ae_fire6",
     ban:10, begint:1
   },
   /* ---------- Wereld 2 · Rankenwoud ---------- */
@@ -12652,9 +12705,7 @@ const STORY = {
     deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:5},
     ltVij:["web"], handVij:["web"],
     aeVij:["ae_grassx2","fu_grass"],
-    geeft:"ae_grassx2", geeftLicht:"web",
-    /* 🟣 Het web is een doodlopend zijpad. Wie het toch loopt, speelt vanaf dan met twee aethers. */
-    geeftAeSlot:2,
+     geeftLicht:"web",
     ban:10, begint:1
   },
   "2-4":{
@@ -12776,7 +12827,7 @@ const STORY = {
     handVij:["siphon"],
     opening:{p:1, lk:"siphon"},
     bord:[{p:1, c:1, spell:"gras"}, {p:1, c:3, spell:"gras"}],
-    geeftLicht:"siphon",
+    geeftAeSlot:2,
     ban:10, begint:1
   },
   "2-5":{
@@ -12885,7 +12936,7 @@ const STORY = {
     /* Serafs eigen stapel naast Max. LET OP: dit is een object, geen `true` — `seraf:true`
        zet de zes-vleugelbaas van 5-4 aan, en die hoort hier niet. */
     seraf:{deck:{vuur:4, gras:4, steen:3, water:3, reborn:3, vital:3}},
-    geeftLicht:"reborn",
+    geeft:"fu_grass",
     varianten:{
       straf:{ startSchade:3 },
       hamerstraf:{ startSchade:5 },
@@ -12998,7 +13049,7 @@ const STORY = {
     levensVij:5,
     regen:true,
     bord:[{p:1, c:2, spell:"gras"}],
-    geeft:"fu_grass",
+    geeftLicht:"siphon",
     ban:10, begint:1
   },
   "3-1":{
@@ -13261,7 +13312,7 @@ const STORY = {
     levensVij:9,
     bord:[{p:1, c:0, el:"steen"},{p:1, c:2, el:"vuur"},{p:1, c:4, el:"gras"}],
     mist:true, mistZicht:true, spiegel:true,
-    geeftLicht:"vital",
+    geeftLicht:"gamble",
     ban:10, begint:1
   },
   "3-4":{
@@ -13360,6 +13411,7 @@ const STORY = {
     trio:[{naam:"Knetter", hp:2, kol:0, kracht:"plasma", uitleg:"vuur is plasma"},
           {naam:"Spetter", hp:2, kol:2, kracht:"spat",   uitleg:"vuur spat naar de buren"},
           {naam:"Fikkie",  hp:2, kol:4, kracht:"dubbel", uitleg:"vuur schiet twee keer"}],
+    geeft:"ae_vonk",           // 🟣 Spetters kunstje: vuur dat naar de buren spat
     ban:10, begint:1
   },
   "3-5":{
@@ -13581,9 +13633,8 @@ const STORY = {
       {s:null, naam:"…", kleur:"#ffd45e", t:"Je steekt hem voor hem aan. Voor de tweede keer, of voor de eerste — dat ligt eraan hoe je hier gekomen bent."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Dankjewel."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Ik ga je niet zeggen wat je bent. Dat heb je zelf gelezen en het is toch niet waar tot je het doet. Dat is het enige wat ik erover kwijt wil."},
-      {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", paars:true, t:"Hier. 🟣 <b>Vonkoverslag</b> — jouw vuur blijft niet netjes op één plek, het springt naar de buren. Dat is van mij. Dat is echt van mij, niet uit de fabriek."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"En je krijgt er een stuk van mij bij. Je gaat het nodig hebben. Waar jij heen gaat is het nat en daar word ik nogal klein van."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu neem je <b>drie aethers</b> én <b>drie lichtkaarten</b> mee naar elk gevecht. En je gaat de Diepstroom in met één leven extra."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu neem je <b>drie aethers</b> mee naar elk gevecht."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Ga maar. En kleine — als je daar iemand tegenkomt die zegt dat het allemaal zo moet: dat heeft die van boven."}
     ],
     verlies:[
@@ -13620,7 +13671,7 @@ const STORY = {
     aeVij:["fu_fire","ae_fire6","ae_draw3"],
     levensVij:8, levensJij:8,
     vuurzee:true, lava:true,
-    geeft:"ae_vonk",
+    
     geeftAeSlot:3,
     ban:10, begint:1
   },
@@ -13911,8 +13962,6 @@ const STORY = {
       {s:"oceaan", reus:true, naam:"…", kleur:"#a9e2ff", t:"Ze zegt het zonder zelfmedelijden. Ze constateert het, zoals ze alles constateert."},
       {s:"oceaan", reus:true, naam:"Oceaan", kleur:"#a9e2ff", t:"Neem dit mee. Het is van mij en het is nooit van boven gekomen."},
       {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Directe Fusie.</b> Betaal een leven en speel een kaart meteen als fusie, zonder te offeren."},
-      {s:"oceaan", reus:true, naam:"Oceaan", kleur:"#a9e2ff", t:"En één leven erbij. Je hebt er vier werelden lang vanaf gemoeten en dat is genoeg geweest."},
-      {s:null, naam:"…", kleur:"#a9e2ff", t:"🫀 Vanaf nu begin je elk gevecht met <b>acht levens</b>."},
       {s:"oceaan_wijd", reus:true, naam:"Oceaan", kleur:"#e8f7ff", t:"Boven het water hangt een rand waar het licht anders is. Daar zitten ze. Die vier afspraken zijn daar bedacht door iemand die er zelf nooit een heeft hoeven houden."},
       {s:"oceaan", reus:true, naam:"Oceaan", kleur:"#a9e2ff", t:"En elementaal — als ze zeggen dat het zo hoort: dat zeggen ze omdat ze het zo hebben opgeschreven. Meer zit er niet achter."},
       {s:"oceaan_wijd", reus:true, naam:"Oceaan", kleur:"#e8f7ff", t:"Ik kom terug. Ik kom altijd terug. Jij mag ook terugkomen."}
@@ -13948,7 +13997,7 @@ const STORY = {
     levensVij:14,
     bord:[{p:1, c:2, el:"water"}],
     geeftLicht:"dfusion",
-    geeftHart:8,
+    
     ban:10, begint:1
   },
   /* ================= Wereld 5 · Hemelrand ================= */
@@ -14182,7 +14231,6 @@ const STORY = {
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Wij zijn niet de bewakers van de hemel. Wij zijn de bewakers van één beslissing die iemand tweehonderd jaar geleden genomen heeft en nooit heeft teruggenomen."},
       {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Loutering.</b> Doet je tegenstander je schade: trek <b>1</b>."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Neem hem. Hij is van mij en hij is het enige aan mij dat nooit uit die oven is gekomen. Ik heb hem verdiend door pijn te hebben."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Ontzag.</b> Het hele bord van je tegenstander houdt zich stil: de volgende beurt van je tegenstander valt er niets aan."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"En dit erbij. Het is het enige wat ik ooit echt gekund heb: iets één tel laten ophouden. Iedereen denkt dat dat kracht is. Het is opluchting."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"De deur erachter zit niet op slot. Dat is de grap. Die heeft nog nooit op slot gezeten."}
     ],
@@ -14216,7 +14264,7 @@ const STORY = {
     levensVij:11,
     levensJij:9,
     seraf:true, glitch:true,
-    geeft:"ae_pijn", geeftLicht:"master",
+    geeft:"ae_pijn",
     ban:10, begint:1
   },
   "5-5":{
@@ -14372,6 +14420,9 @@ function tutBalk(){
   let el = document.getElementById("tutpop");
   const st = tutStap();
   if(!st || !S.story.tut.open){ if(el) el.classList.remove("aan"); return; }
+  /* Een instructie en een taunt nooit tegelijk: wat Rocky zei is weg zodra de balk er is. */
+  if(S.story.zin){ S.story.zin = null; clearTimeout(ZEGT); ZEGT = null; }
+  const pb = document.getElementById("praatbel"); if(pb) pb.classList.remove("show");
   if(!el){ el = document.createElement("div"); el.id = "tutpop"; document.body.appendChild(el); }
   el.innerHTML = `<div class="tutdoos">
     <div class="tutnr">Stap ${S.story.tut.i + 1} van ${S.story.tut.stappen.length}</div>
@@ -14441,10 +14492,19 @@ function tutKlaarStap(soort, data){
   if(soort === "beurt" && st.beurtAf) raak = true;
   if(!raak) return;
   S.story.tut.i++;
-  const tz = (levelVan(S.story) || {}).tutZeg;
-  if(tz && tz[S.story.tut.i - 1]) zegLos(tz[S.story.tut.i - 1]);
-  if(S.story.tut.i >= S.story.tut.stappen.length) tutStop(true);
-  else { S.story.tut.open = true; if(!FAST) AU.play("light"); }
+  const tz = (levelVan(S.story) || {}).tutZeg, zin = tz && tz[S.story.tut.i - 1];
+  if(S.story.tut.i >= S.story.tut.stappen.length){ tutStop(true); if(zin) zegLos(zin); render(); return; }
+  /* Zegt Rocky iets, dan eerst dat, en pas als hij klaar is de volgende instructie. */
+  if(zin && !FAST){
+    S.story.tut.open = false;
+    zegLos(zin);
+    const tut = S.story.tut, stap = tut.i;
+    setTimeout(() => {
+      if(!S || !S.story || S.story.tut !== tut || tut.klaar || tut.i !== stap) return;
+      S.story.zin = null; zegPaint();
+      tut.open = true; AU.play("light"); render();
+    }, 2300);
+  } else { S.story.tut.open = true; if(!FAST) AU.play("light"); }
   render();
 }
 function tutStop(gehaald){
@@ -15439,7 +15499,7 @@ function zegPaint(){
   }
   el.classList.remove("winkelbel");
   const st = S && S.story;
-  if(!st || !st.zin || !S.ui || S.ui.mode === "start" || S.over){
+  if(!st || !st.zin || !S.ui || S.ui.mode === "start" || S.over || tutOpen()){
     el.classList.remove("show"); el.innerHTML = ""; return;
   }
   el.style.setProperty("--pbk", st.zinHard ? "#ffe08a" : (st.zegKleur || "var(--danger)"));
@@ -15479,7 +15539,7 @@ function verseZin(lijst, sleutel, soort){
 }
 /* Eén vaste zin in de praatbalk, buiten de gewone lijstjes om. */
 function zegLos(zin){
-  const st = S && S.story; if(!st || !zin) return;
+  const st = S && S.story; if(!st || !zin || tutOpen()) return;
   st.zin = zin; st.zinHard = false;
   if(FAST) return;
   zegPaint();
@@ -15490,7 +15550,7 @@ function zegLos(zin){
 }
 function zegNu(soort){
   const st = S && S.story, cfg = st && st.zeg;
-  if(!cfg) return;
+  if(!cfg || tutOpen()) return;          // niet door een instructie van de tutorial heen praten
   /* ✦ 2-1: Seraf telt de rondes af. Eén, twee, drie… en in de laatste: bijna. */
   if(soort === "beurt" && st.overleef){
     const ronde = Math.ceil(S.gTurn / 2), tel = (levelVan(st) || {}).tellen || [];
@@ -15604,7 +15664,7 @@ async function storyFase2(F){
    levens kwijt) en verder om de zoveel rondes. Ze komen als een klein cutscene-schermpje. */
 function popupRegels(soort){
   const st = S && S.story, cfg = st && st.zeg;
-  if(!cfg) return [];
+  if(!cfg || tutAan()) return [];         // tijdens de tutorial geen tussendoortjes over de instructies heen
   /* Géén terugval op de zinnen uit de tekstballon: een pop-up die hetzelfde zegt als
      wat er al in de hoek staat, is geen pop-up maar een echo. */
   const lijst = cfg[soort];
@@ -16120,8 +16180,8 @@ const OVERWORLD_BEELD = "art/overworld.png";
 const OVERWORLD = {
   "1-1":{x:48,y:81}, "1-2":{x:32,y:78}, "1-3":{x:46,y:70}, "1-4":{x:33,y:67}, "1-5":{x:42,y:57},
   /* Eén bolletje op het pad is 2,1 procent. */
-  "2-1":{x:35.8,y:47}, "2-2":{x:22.8,y:52.2}, "2-3":{x:21.9,y:38.3}, "2-4":{x:20.1,y:43.9}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
-  "3-1":{x:61.7,y:40.1}, "3-2":{x:80.2,y:36.8}, "3-3":{x:68.3,y:39.3}, "3-4":{x:68.3,y:27.9}, "3-5":{x:72,y:22}, "3-6":{x:81,y:11},
+  "2-1":{x:39,y:47}, "2-2":{x:24.9,y:50.1}, "2-3":{x:26.1,y:36.2}, "2-4":{x:20.1,y:43.9}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
+  "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:72.5,y:35.1}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
   "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
 /* Welke paden er zijn. [van, naar] verschijnt zodra "van" gehaald is. Met een derde naam
@@ -16139,15 +16199,13 @@ const OVERWORLD_RANDEN = [
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
   "1-4>1-5":[[38,62]],
-  "1-5>2-1":[[41,52],[38.5,49]],
-  "2-1>2-2":[[29.5,50.5]],
-  /* Het web ligt aan de westkant om de herberg heen, zodat het pad naar 2-5 er niet doorheen loopt. */
-  "2-2>2-3":[[18,49.5],[16.5,44],[18.5,40]],
-  "2-4>2-5":[[26,41],[31,35]],
-  "2-1>3-1":[[46,45],[55,42.5]],
+  "1-5>2-1":[[41.5,52],[40,49.5]],
+  "2-1>2-2":[[32,50]],
+  /* Het pad van de herberg naar 2-5 loopt boven het web langs, zodat het het pad naar het web niet kruist. */
+  "2-4>2-5":[[18.5,38.5],[21,32.5],[29,30.5]],
+  "2-1>3-1":[[47,45],[55,41.5]],
   /* Naar Tang loopt het pad onder het Rookgordijn door; terug naar het Rookgordijn gaat rechtstreeks. */
   "3-1>3-2":[[67,44.5],[75,42]],
-  "3-3>3-4":[[67.5,33.5]],
   "3-1>4-1":[[63,47],[64,52]],
   "3-1>hemel":[[58,33],[55,24]]
 };
@@ -16158,7 +16216,7 @@ const OVERWORLD_HEMEL = {x:51, y:17};
 const OVERWORLD_WINKEL = {x:44.1, y:38.9, na:"2-1"};
 /* ⚒ De smidse van Tang, in de Asgronden. Gaat open zodra je Tang (3-2) verslagen hebt,
    en ligt dan als zijpaadje naast haar level. */
-const OVERWORLD_SMID = {x:88, y:31, na:"3-2"};
+const OVERWORLD_SMID = {na:"3-2"};   // de smidse zit op de plek van het level zelf
 /* ================= 🏪 DE WINKEL =================
    Knorst staat achter een kraam die hij zelf een kraam noemt. Hij verkoopt de krachten die
    geen enkele baas weggeeft. Je betaalt met ★ sterren — dezelfde sterren die je per level
@@ -16169,15 +16227,17 @@ const OVERWORLD_SMID = {x:88, y:31, na:"3-2"};
    nog niet; de rest staat als lege plank in beeld. Zet er een sleutel neer zodra de kaart
    bestaat en hij ligt meteen in de winkel. */
 const KOOPWAAR = {
-  ae: ["ae_draw3", "ae_offer", "ae_graf", "fu_water", null],
-  lt: ["greed", "gamble", "darkhole", null, null]
+  ae: ["ae_draw3", "ae_offer", "ae_graf", "ae_hp3", null],
+  lt: ["greed", "vital", "darkhole", "master", "sterregen"]
 };
 /* Wat het kost, in sterren. Over alle 26 levels perfect gespeeld liggen er 78 sterren,
    en alles bij Knort kopen kost er precies 78. Alles krijgen kan dus — maar alleen als je
    nergens een ster laat liggen. Eén misser en je moet kiezen. */
+/* Dieptestroom zit nu in 1-3 en Gokkersbrouwsel in het Rookgordijn; daarvoor liggen hier
+   Oerkracht (weg bij Magnus), Vitaliteit en Elementaal Meester. Het totaal blijft gelijk. */
 const KOOP_PRIJS = {
-  ae_draw3:12, ae_offer:9, ae_graf:7, fu_water:6,
-  greed:4, gamble:3, darkhole:2
+  ae_draw3:9, ae_offer:7, ae_graf:5, ae_hp3:7,
+  greed:4, vital:3, darkhole:2, master:3, sterregen:3
 };
 const HART_PRIJS = [3, 5, 5];            // elk volgend hartje kost meer
 /* ⚒ Bij Tang de smid: elk element dat je laat smeden kost meer dan het vorige.
@@ -16424,12 +16484,34 @@ function winkelScene(kraam){
   }
   return `<div class="wkscene" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${binnen}</div>`;
 }
+/* Met een tekening is de winkel het hele scherm: de tekening vult het beeld, de kop en de
+   uitleg liggen er los overheen, en een koop bevestig je in een kaartje in het midden. */
+function winkelVolHTML(kop){
+  const kraam = M.kraam || "knort", b = M.bevestig;
+  let bev = "";
+  if(b){
+    const ic = b.soort === "hart" ? "❤" : (b.soort === "upg" ? b.ic : (b.soort === "lt" || b.soort === "slot" ? "✦" : "🟣"));
+    const na = sterVrij() - b.prijs;
+    bev = `<div class="wkbevvol"><div class="wkbevestig">
+        <div class="wkbic">${ic}</div><h3>${b.naam}</h3><div class="sub">${b.kort}</div>
+        <div class="wkprijs">★ <b>${b.prijs}</b> ${b.prijs === 1 ? "ster" : "sterren"} · je houdt er <b>${na}</b> over</div>
+        <div class="mrow"><button class="obtn b-story" data-act="btn" data-btn="koopja">Kopen</button>
+          <button class="obtn b-dim" data-act="btn" data-btn="koopnee">Toch niet</button></div></div></div>`;
+  }
+  const hint = kraam === "smid" ? "Wijs een kaart aan om te zien wat smeden doet. Klik om te laten smeden."
+                                : "Wijs iets aan om te zien wat het doet. Klik om het te kopen.";
+  return `<div class="wkvol${b ? " bev" : ""}">${winkelScene(kraam)}
+    <div class="wkbalk">${kop}</div><div class="wkhint">${hint}</div>${bev}</div>`;
+}
 function winkelHTML(){
   const sp = spriteSVG(M.spr || "knorst");
+  const smidK = M.kraam === "smid";
   const kop = `<div class="wkkop"><h2>${kraamVan().kop}</h2>
-      <span class="sterbalk" title="sterren — die geef je hier uit">★ <b id="wksaldo">${sterVrij()}</b></span>
+      <span class="sterbalk" title="sterren, die geef je hier uit">★ <b id="wksaldo">${sterVrij()}</b></span>
+      ${smidK ? `<button class="obtn b-dim" data-act="btn" data-btn="smidvecht" title="voor meer sterren">⚔ ${storyKlaar("3-2") ? "Nog een keer tegen Tang" : "Tegen Tang"}</button>` : ""}
       <button class="obtn b-dim" data-act="btn" data-btn="winkelweg">Terug</button></div>`;
   const praat = "";   // Knort praat in de pop-up linksonder (zegPaint)
+  if(winkelDecorOk(M.kraam || "knort")) return winkelVolHTML(kop);
   if(M.bevestig){
     const b = M.bevestig;
     const ic = b.soort === "hart" ? "❤" : (b.soort === "upg" ? b.ic : (b.soort === "lt" || b.soort === "slot" ? "✦" : "🟣"));
@@ -16457,12 +16539,6 @@ function winkelHTML(){
       <div class="wkvk">${v.kort}</div><div class="wkvp">${knop}</div></div>`;
   };
   const rij = soort => `<div class="wkrij">${KOOPWAAR[soort].map((k, i) => vak(koopVak(soort, k, i))).join("")}</div>`;
-  /* Is de tekening van deze winkel binnen, dan staat alles op de planken. */
-  if(winkelDecorOk(M.kraam || "knort")) return `<div class="ovbox wkbox metdecor">${kop}${praat}
-    ${winkelScene(M.kraam || "knort")}
-    <div class="sub" style="text-align:left;margin:10px 0 0">${M.kraam === "smid"
-      ? "Wat je laat smeden krijgt een upgrade-slot in je voorbereiding. Wijs een kaart aan om te zien wat het doet."
-      : "Wijs iets aan om te zien wat het doet. Klik om het te kopen."}</div></div>`;
   if(M.kraam === "smid") return `<div class="ovbox wkbox">${kop}${praat}
     <div class="wklab">⚒ Laten smeden</div>
     <div class="sub" style="text-align:left;margin:-2px 0 8px">Elk element dat je hier laat smeden krijgt een upgrade-slot in je voorbereiding. Daar kies je zelf hoeveel kaarten de sterke versie worden.</div>
@@ -16614,17 +16690,6 @@ function kaartHTML(){
       stippen += `<circle class="owstip${nieuwW ? " nieuw" : ""}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r=".55"${nieuwW ? ` style="animation-delay:${wacht}ms"` : ""}/>`;
     });
   }
-  if(smidOpen() && OVERWORLD[OVERWORLD_SMID.na]){
-    const a = OVERWORLD[OVERWORLD_SMID.na], w = OVERWORLD_SMID;
-    const lijn = [[a.x, a.y], [w.x, w.y]];
-    padMask += `<polyline points="${lijn.map(q => q.join(",")).join(" ")}"/>`;
-    const nieuwS = !oud.smid;
-    kaartStippen(lijn, 2.1).slice(1).forEach(([x, y], k, arr) => {
-      if(k >= arr.length - 1) return;
-      const wacht = nieuwS ? stipTel++ * 55 : 0;
-      stippen += `<circle class="owstip${nieuwS ? " nieuw" : ""}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r=".55"${nieuwS ? ` style="animation-delay:${wacht}ms"` : ""}/>`;
-    });
-  }
   const vertraag = stipTel ? stipTel * 55 + 200 : 0;
   /* De mist wijkt rond elk level dat je kent. Een net onthuld level: het gat groeit open
      zodra het pad er is. */
@@ -16647,10 +16712,12 @@ function kaartHTML(){
     gaten += gat(pos.x, pos.y, OVERWORLD_ZICHT * (baas ? 1.15 : 1), anim === " netopen");
     const binnen = st === "vraag" ? "?" : lvPortret(id);
     const bestS = st === "klaar" ? sterrenBest(id) : 0;
-    const naam = (st === "vraag" ? id : `${id} · ${L.naam}`)
+    /* Heb je Tang verslagen, dan ís haar plek de smidse. Vanuit de smidse kun je haar opnieuw uitdagen. */
+    const smidHier = id === OVERWORLD_SMID.na && smidOpen();
+    const naam = (st === "vraag" ? id : `${id} · ${smidHier ? "⚒ Smidse" : L.naam}`)
       + (st === "klaar" ? `<span class="lvsterren">${[0,1,2].map(j => `<i class="${j < bestS ? "aan" : ""}">★</i>`).join("")}</span>` : "");
     return `<button class="lvknop ${st}${baas ? " baas" : ""}${anim}" style="left:${pos.x}%;top:${pos.y}%;--wk:${W.kleur};--vertraag:${anim === " netopen" ? vertraag : 0}ms"
-      data-act="btn" data-btn="storylevel" data-id="${id}" title="${st === "vraag" ? id : L.naam}">
+      data-act="btn" data-btn="${smidHier ? "smid" : "storylevel"}" data-id="${id}" title="${st === "vraag" ? id : (smidHier ? "De smidse van Tang" : L.naam)}">
       <span class="lvbinnen">${binnen}</span>${st === "klaar" ? `<span class="lvvink">✔</span>` : ""}
       <span class="lvnaam">${naam}</span></button>`;
   };
@@ -16661,12 +16728,6 @@ function kaartHTML(){
     gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwW);
     winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De kraam van Knort">
         <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.knorst) ? `<img class="lvport" src="${SPRITE_BEELD.knorst}" alt="" draggable="false">` : "🏪"}</span><span class="lvnaam">Knort · winkel</span></button>`;
-  }
-  if(smidOpen() && OVERWORLD[OVERWORLD_SMID.na]){
-    const w = OVERWORLD_SMID, nieuwS = !oud.smid;
-    gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwS);
-    winkel += `<button class="lvknop winkel smid${nieuwS ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwS ? vertraag : 0}ms" data-act="btn" data-btn="smid" title="De smidse van Tang">
-        <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.smid) ? `<img class="lvport" src="${SPRITE_BEELD.smid}" alt="" draggable="false">` : "⚒"}</span><span class="lvnaam">⚒ Smidse</span></button>`;
   }
   let hemel = "";
   if(storyVrij("5-1") && STORY["5-1"]){
@@ -18132,6 +18193,13 @@ function onBtn(btn, el, fromAction){
     case "belverder": beloningKlaar(); break;
     case "winkel": winkelOpenen("knort"); break;
     case "smid": winkelOpenen("smid"); break;
+    /* ⚔ Tang opnieuw uitdagen, voor sterren. Wie haar al verslagen heeft gaat meteen het gevecht in. */
+    case "smidvecht": {
+      clearTimeout(WINKELT); WINKELT = null;
+      const id = OVERWORLD_SMID.na; M = null; storySkin(STORY[id].wereld);
+      if(storyKlaar(id)) startStoryGevecht(id); else praatStart(id, "intro");
+      break;
+    }
     case "winkelweg": winkelSluit(); break;
     case "koopvraag": koopVraag(el && el.dataset.soort, el && el.dataset.key); break;
     case "koopja": koopDoen(); break;
