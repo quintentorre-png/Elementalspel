@@ -1542,6 +1542,38 @@ h3{font-size:.66rem; line-height:1.9}
   color:var(--muted); text-transform:uppercase; margin:12px 0 6px}
 /* Het schap: vijf plekken naast elkaar. */
 .wkrij{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+/* 🏪⚒ De winkel als plaatje: de koopwaar staat op de planken van de tekening zelf. Elke plek
+   is in procenten uitgemeten; y is het bovenvlak van de plank waar het ding op staat. */
+.ovbox.wkbox.metdecor{width:min(1180px,96vw); max-width:min(1180px,96vw)}
+@media (min-width:1000px){ .ovbox.wkbox.metdecor{width:min(1180px, calc(100vw - min(390px,27vw) - 40px))} }
+.wkscene{position:relative; width:100%; aspect-ratio:var(--wkr,16/9); border-radius:6px; overflow:visible;
+  background:#140d08 center/100% 100% no-repeat; box-shadow:inset 0 0 0 2px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.5);
+  image-rendering:pixelated}
+.wkitem{position:absolute; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;
+  background:none; border:0; padding:0; cursor:pointer; font:inherit; color:inherit}
+.wkitem img{width:100%; display:block; image-rendering:pixelated; border:2px solid #2a1a0c; border-radius:3px;
+  box-shadow:0 4px 0 rgba(0,0,0,.45); transition:transform .12s}
+.wkitem.kan:hover img, .wkitem.kan:focus-visible img{transform:translateY(-6%) scale(1.06); border-color:var(--gold)}
+.wkitem.duur img{filter:saturate(.55) brightness(.75)}
+.wkitem.mijn{cursor:default}
+.wkgeen{display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:3/4; font-size:clamp(1.2rem,2.4vw,2.2rem);
+  background:#1a1410; border:2px solid #2a1a0c; border-radius:3px}
+.wkitem.mijn img{filter:grayscale(.6) brightness(.55)}
+.wkitem.plek{border:2px dashed transparent; border-radius:10px}
+.wkitem.plek.kan:hover{border-color:var(--gold); background:rgba(255,212,71,.08)}
+.wktag{position:absolute; top:100%; margin-top:4px; z-index:3; white-space:nowrap; font-family:"Press Start 2P",ui-monospace,monospace;
+  font-size:clamp(.45rem,.8vw,.66rem); padding:5px 7px 4px; background:#efe2c2; color:#3a2410; border:2px solid #3a2410;
+  border-radius:2px; box-shadow:0 2px 0 rgba(0,0,0,.5); transform:rotate(-3deg)}
+.wkitem.duur .wktag{color:#8f2d20}
+.wkitem.mijn .wktag{background:#2f7a41; color:#e8ffe8; border-color:#123a1a}
+.wktip{position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); width:max-content; max-width:240px;
+  display:none; z-index:5; text-align:left; padding:8px 10px; background:#0d1119; border:2px solid var(--gold-soft,#a88a3a);
+  border-radius:4px; font-family:"VT323",ui-monospace,monospace; font-size:1.05rem; line-height:1.15; color:var(--ink);
+  pointer-events:none; box-shadow:0 4px 0 rgba(0,0,0,.5)}
+.wktip .wktn{display:block; color:var(--gold); margin-bottom:3px; font-weight:bold}
+.wkitem.tiponder .wktip{bottom:auto; top:calc(100% + 30px)}
+.wkitem:hover .wktip, .wkitem:focus-visible .wktip{display:block}
+.wkitem:hover, .wkitem:focus-visible{z-index:10}
 .wkrij.een .wkvak:first-child{grid-column:span 2}
 .wkvak{display:flex; flex-direction:column; gap:3px; padding:9px 9px 8px; min-height:112px;
   border:2px solid var(--ink2); background:#151b23; box-shadow:0 3px 0 0 rgba(0,0,0,.5);
@@ -1606,6 +1638,10 @@ h3{font-size:.66rem; line-height:1.9}
 .lvknop .lvnaam{position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:7px; white-space:nowrap;
   font-family:"VT323",ui-monospace,monospace; font-size:1rem; letter-spacing:.04em; color:#f6f4e4; line-height:1;
   text-shadow:0 0 4px #000, 0 0 4px #000, 1px 1px 0 #000; pointer-events:none}
+/* Staat er onder een level iets in de weg, dan schuift de naam naar boven of opzij. */
+.lvknop.naamboven .lvnaam{top:auto; bottom:100%; margin-top:0; margin-bottom:7px}
+.lvknop.naamrechts .lvnaam{top:50%; left:100%; transform:translateY(-50%); margin:0 0 0 8px; text-align:left}
+.lvknop.naamlinks .lvnaam{top:50%; left:auto; right:100%; transform:translateY(-50%); margin:0 8px 0 0; text-align:right}
 @media (max-width:900px), (pointer:coarse){
   .kaartkop{padding-right:56px}   /* het geluidsknopje zit rechtsboven */
   .kaartvlak{--kh:max(200vw, 100dvh)}
@@ -2071,8 +2107,26 @@ h3{font-size:.66rem; line-height:1.9}
 .rotsmeter{margin-top:7px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem;
   line-height:1.7; padding:5px 6px; border-radius:3px; border:2px solid #7a5b3a;
   color:#e6c88a; background:#211708}
-#app.lavajij #row0 .slot.cr{box-shadow:inset 0 -16px 22px -8px rgba(255,90,20,.75), 0 6px 14px -6px rgba(255,80,20,.6)}
-#app.lavajij #row0{background:linear-gradient(0deg, rgba(255,70,10,.16), transparent 70%)}
+/* 🌋 Lava onder je voeten (3-1: alleen jouw kant; de schoorsteen: allebei). De vloer onder
+   de kaartplekken is gestold gesteente met gloeiende scheuren die langzaam oplichten, de
+   creature-plekken gloeien van onderen, en wat erop staat heeft een rode rand aan de voet. */
+#app.lavajij #row0, #app.lavaveld #row0, #app.lavaveld #row1{position:relative; isolation:isolate}
+#app.lavajij #row0::before, #app.lavaveld #row0::before, #app.lavaveld #row1::before{content:""; position:absolute; inset:-8px -14px; z-index:-1;
+  pointer-events:none; border-radius:10px;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='90' viewBox='0 0 160 90'><g fill='none' stroke='%23ff8a2a' stroke-linecap='square' stroke-linejoin='miter'><path stroke-width='3' d='M0 22 L18 26 L30 18 L52 24 L60 40 L84 36 L96 46 L120 42 L134 30 L160 34'/><path stroke-width='2' d='M60 40 L56 58 L70 72 L66 90'/><path stroke-width='2' d='M120 42 L126 60 L146 66 L160 62'/><path stroke-width='2' d='M0 70 L14 66 L26 74 L40 70'/><path stroke-width='2' d='M96 46 L92 62 L104 78 L100 90'/><path stroke-width='2' d='M30 18 L26 0'/></g><g fill='%23ffd45e'><rect x='58' y='38' width='4' height='4'/><rect x='118' y='40' width='4' height='4'/><rect x='24' y='72' width='3' height='3'/></g></svg>") 0 0/160px 90px repeat,
+    radial-gradient(60% 90% at 20% 100%, rgba(255,120,30,.45), transparent 70%),
+    radial-gradient(60% 90% at 80% 100%, rgba(255,90,20,.40), transparent 70%),
+    linear-gradient(0deg, #5a1606 0%, #2c0b04 55%, #160603 100%);
+  box-shadow:0 0 26px 4px rgba(255,80,20,.35), inset 0 0 18px rgba(0,0,0,.7);
+  animation:lavavloer 3.2s ease-in-out infinite}
+@keyframes lavavloer{0%,100%{filter:brightness(.8) saturate(1)} 50%{filter:brightness(1.25) saturate(1.2)}}
+#app.lavajij #row0 .slot.cr, #app.lavaveld #row0 .slot.cr, #app.lavaveld #row1 .slot.cr{border-color:#ff7a2a !important;
+  background:linear-gradient(0deg, rgba(255,120,30,.55), rgba(110,20,4,.35) 55%, rgba(30,8,2,.25)) !important;
+  box-shadow:inset 0 -18px 26px -8px rgba(255,140,40,.95), 0 0 14px rgba(255,80,20,.6);
+  animation:lavaslot 2.6s ease-in-out infinite}
+@keyframes lavaslot{0%,100%{box-shadow:inset 0 -16px 22px -8px rgba(255,120,30,.8), 0 0 10px rgba(255,80,20,.45)}
+  50%{box-shadow:inset 0 -22px 30px -6px rgba(255,170,60,1), 0 0 20px rgba(255,100,20,.8)}}
+#app.lavajij #row0 .slot.cr .card, #app.lavaveld .slot.cr .card{box-shadow:0 10px 14px -6px rgba(255,110,20,.95), 0 0 0 2px rgba(255,120,30,.55)}
 .lavameter{margin-top:7px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem;
   line-height:1.7; padding:5px 6px; border-radius:3px; border:2px solid #9a3a12;
   color:#ffb03a; background:#2a1006}
@@ -2225,15 +2279,24 @@ h3{font-size:.66rem; line-height:1.9}
    en kan hij helemaal onderaan staan zonder over je levensbalk of het speelveld te vallen. */
 #praatbel.winkelbel{z-index:120}
 /* De winkel schuift op zodat Knort linksonder in beeld kan staan zonder het schap te bedekken. */
-@media (min-width:1000px){ .ovbox.wkbox{margin-left:min(300px,24vw); max-width:calc(100vw - min(300px,24vw) - 40px)} }
-@media (max-width:999px){ #praatbel.winkelbel .pbspr{width:130px; flex-basis:130px} }
+@media (min-width:1000px){ .ovbox.wkbox{margin-left:min(390px,27vw); max-width:calc(100vw - min(390px,27vw) - 40px)} }
+@media (max-width:999px){ #praatbel.winkelbel .pbspr{width:169px; flex-basis:auto} }
 #praatbel{position:fixed; left:14px; bottom:0; z-index:60; display:none;
   flex-direction:column-reverse; align-items:flex-start; gap:7px;
   pointer-events:none; max-width:min(300px,28vw)}
 #praatbel.show{display:flex}
+/* De taunt staat 1,3× zo groot linksonder en steekt daardoor een stukje het speelveld in.
+   Jouw naam, levens en stapel schuiven in het verhaal zo ver op dat hij er niet overheen valt. */
+@media (min-width:901px) and (min-height:621px) and (pointer:fine){
+  body.verhaal #pside0 .pinfo{margin-left:96px; max-width:180px}
+  body.verhaal #pside0 .pdeckinfo{white-space:normal}
+}
 /* Hij staat plat op de onderrand van het scherm en zweeft niet: geen deining, geen marge.
    Daardoor hoeft de rest van de bel geen ruimte vrij te houden voor dat op-en-neer. */
-#praatbel .pbspr{width:280px; flex:0 0 280px; image-rendering:pixelated;
+/* LET OP: de bel staat in een kolom, dus flex-basis is hier een HOOGTE. Stond die op 280px,
+   dan was het vak altijd 280 hoog en bleef er onder een brede taunt een lege strook over:
+   dáárom zweefden ze. De hoogte volgt nu gewoon de tekening. */
+#praatbel .pbspr{width:364px; flex:0 0 auto; image-rendering:pixelated;
   align-self:flex-start; margin-bottom:0; animation:none;
   filter:drop-shadow(4px 4px 0 rgba(0,0,0,.6))}
 #praatbel .pbspr svg{width:100%; height:auto; display:block}
@@ -2253,12 +2316,12 @@ h3{font-size:.66rem; line-height:1.9}
      hij hangt dus over diens dichte kaarten, niet over informatie die je nodig hebt. */
   /* op de telefoon staat hij bovenin en is er breedte zat: daar weer naast elkaar */
   #praatbel{flex-direction:row; align-items:flex-start; max-width:none}
-  #praatbel .pbspr{width:150px; flex:0 0 150px; align-self:flex-end}
+  #praatbel .pbspr{width:195px; flex:0 0 195px; align-self:flex-end}
   #praatbel .pbbel::after{left:-11px; top:15px; bottom:auto;
     border-top-color:transparent; border-right-color:var(--pbk,var(--danger))}
   #praatbel{left:6px; right:64px; bottom:auto; top:calc(env(safe-area-inset-top,0px) + 30px);
     max-width:none; gap:7px}   /* rechts blijft de ☰-knop vrij */
-  #praatbel .pbspr{width:80px; flex:0 0 80px}
+  #praatbel .pbspr{width:104px; flex:0 0 104px}
   #praatbel .pbbel{font-size:1.15rem; padding:8px 10px}
 }
 /* 🌧 Regen over het hele scherm — schuine strepen die naar beneden lopen. */
@@ -2457,10 +2520,11 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
 #app.w2.lv2-5{--raster:rgba(160,205,210,.05);  --vlak:#243a38; --diep:#0d1a19}    /* storm op komst, groengrijs */
 #app.w2.lv2-6{--raster:rgba(120,200,120,.06);  --vlak:#16301b; --diep:#07120a}    /* het woud zelf, bijna zwart */
 #app.w3.lv3-1{--raster:rgba(255,120,60,.07);   --vlak:#4a1a10; --diep:#1c0806}    /* in de berg: donkerrood */
-#app.w3.lv3-2{--raster:rgba(200,210,220,.05);  --vlak:#33363c; --diep:#141519}    /* rook: grijs */
-#app.w3.lv3-3{--raster:rgba(255,200,80,.07);   --vlak:#4a2a12; --diep:#1e1008}    /* de tent: warm geel-rood */
-#app.w3.lv3-4{--raster:rgba(190,200,210,.06);  --vlak:#2e3238; --diep:#111316}    /* de fabriek: staal */
-#app.w3.lv3-5{--raster:rgba(255,140,80,.06);   --vlak:#3b2016; --diep:#170a06}    /* de schoorsteen */
+#app.w3.lv3-2{--raster:rgba(255,160,90,.06);   --vlak:#3a2414; --diep:#160b05}    /* de smidse: gloed van het vuur */
+#app.w3.lv3-3{--raster:rgba(200,210,220,.05);  --vlak:#33363c; --diep:#141519}    /* rook: grijs */
+#app.w3.lv3-4{--raster:rgba(255,200,80,.07);   --vlak:#4a2a12; --diep:#1e1008}    /* de tent: warm geel-rood */
+#app.w3.lv3-5{--raster:rgba(190,200,210,.06);  --vlak:#2e3238; --diep:#111316}    /* de fabriek: staal */
+#app.w3.lv3-6{--raster:rgba(255,140,80,.06);   --vlak:#3b2016; --diep:#170a06}    /* de schoorsteen */
 #app.w2{background:
   repeating-linear-gradient(0deg, rgba(127,209,140,.07) 0 1px, transparent 1px 8px),
   repeating-linear-gradient(90deg, rgba(127,209,140,.07) 0 1px, transparent 1px 8px),
@@ -2489,7 +2553,7 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
 /* Gekanteld is er nauwelijks hoogte: de praatbel gaat in de lege strook links naast het bord. */
 @media (orientation:landscape) and (max-height:620px){
   #praatbel{left:4px; right:auto; top:auto; bottom:0; max-width:min(300px,38vw); gap:6px}
-  #praatbel .pbspr{width:70px; flex:0 0 70px}
+  #praatbel .pbspr{width:91px; flex:0 0 auto}
   #praatbel .pbbel{font-size:1.02rem; padding:6px 9px; line-height:1.12}
   #praatbel .pbnaam{font-size:.38rem; margin-bottom:4px}
 }
@@ -3370,7 +3434,7 @@ function regenBij(){
      en dan giet het. Alleen bij het aanzetten, anders staat er om de ronde een animatie. */
   if(nat && !FAST && S.story.bosslag) baasSlag("moeder_laadop", "moeder_slag");
 }
-/* 🔥 De ovenmond (3-4): aan het eind van elke ronde moet er iets in. Het pakt aan
+/* 🔥 De ovenmond (3-5): aan het eind van elke ronde moet er iets in. Het pakt aan
    allebei de kanten wat het minste leven over heeft. Er gaat altijd iets in. */
 async function ovenEet(){
   const st = S && S.story;
@@ -3508,7 +3572,7 @@ function raadBij(){
   addLog(`⚖ <em>De Raad slaat een bladzijde om.</em> ${RAAD_TXT[nu]}`, true);
   if(!FAST){ lavaVerf(nu === "lava"); regenVerf(nu === "regen"); witFlits(); AU.play("light"); }
 }
-/* 🔥 Hitte (3-5): het wordt elke ronde warmer. In de eerste fase gebeurt er niets mee —
+/* 🔥 Hitte (3-6): het wordt elke ronde warmer. In de eerste fase gebeurt er niets mee —
    hij staat er alleen bij en het loopt op. Daarna is precies dát zijn voorsprong. */
 const HITTE_MAX = 6;
 function hitteBonus(p){
@@ -3941,13 +4005,13 @@ const MUZIEK = {
   w2_bloei:       "audio/w2-12-bloei.mp3",                     // 2-6: de tweede fase
   /* --- wereld 3 · Asgronden --- */
   w3_as:          "audio/w3-01-as.mp3",                     // lopen door de as, de gewone dialoog
-  w3_flint:       "audio/w3-02-flint.mp3",                     // Flint in wereld 3: na 3-1, en het krat bij 3-5
+  w3_flint:       "audio/w3-02-flint.mp3",                     // Flint in wereld 3: na 3-1, en het krat bij 3-6
   w3_gevecht:     "audio/w3-03-gevecht.mp3",                     // 3-1: Zuster As en de golem
-  w3_rook:        "audio/w3-04-rook.mp3",                     // 3-2: het Rookgordijn
-  w3_circus:      "audio/w3-05-circus.mp3",                     // 3-3: de tent en het trio
-  w3_fabriek:     "audio/w3-06-fabriek.mp3",                     // 3-4: de band en Klinknagel
-  w3_flintgevecht:"audio/w3-07-flintgevecht.mp3",                     // 3-5: het gevecht met Flint
-  w3_wit:         "audio/w3-08-wit.mp3",                     // 3-5: als het wit wordt
+  w3_rook:        "audio/w3-04-rook.mp3",                     // 3-3: het Rookgordijn
+  w3_circus:      "audio/w3-05-circus.mp3",                     // 3-4: de tent en het trio
+  w3_fabriek:     "audio/w3-06-fabriek.mp3",                     // 3-5: de band en Klinknagel
+  w3_flintgevecht:"audio/w3-07-flintgevecht.mp3",                     // 3-6: het gevecht met Flint
+  w3_wit:         "audio/w3-08-wit.mp3",                     // 3-6: als het wit wordt
   /* --- wereld 4 · de Diepstroom --- */
   w4_water:       "",                     // varen en zakken, de gewone dialoog
   w4_diep:        "",                     // 4-2: de verzameling van Inkt
@@ -3988,6 +4052,17 @@ if(!SET.story.w2num){
     const o = SET.story[k]; if(!o || typeof o !== "object") return;
     const n = {}; Object.keys(o).forEach(x => { n[om2(x)] = o[x]; }); SET.story[k] = n; });
   SET.story.w2num = true;
+  try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){}
+}
+/* Wereld 3 omgenummerd: Tang de smid is 3-2, de rest schuift één op. */
+if(!SET.story.w3num){
+  const om3 = id => ({"3-2":"3-3","3-3":"3-4","3-4":"3-5","3-5":"3-6"})[id] || id;
+  ["klaar","ontmoet","kaartGezien"].forEach(k => { if(Array.isArray(SET.story[k])) SET.story[k] = SET.story[k].map(om3); });
+  ["sterren","extra","kaartStand"].forEach(k => {
+    const o = SET.story[k]; if(!o || typeof o !== "object") return;
+    const n = {}; Object.keys(o).forEach(x => { n[om3(x)] = o[x]; }); SET.story[k] = n; });
+  if(SET.story.kaartStand) delete SET.story.kaartStand.smid;   // de smidse gaat nu pas open na Tang
+  SET.story.w3num = true;
   try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){}
 }
 function saveSet(){ try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){} }
@@ -5738,7 +5813,7 @@ const TRIO_STADIA = [
     laag:["…Kom maar."],
     jij:["…Sorry. Dat meen ik. Het was een show, het had een show moeten blijven."] }}
 ];
-/* 🎪 Het vlammende trio (3-3): drie vonken, elk met eigen levens, in kolom 1, 3 en 5.
+/* 🎪 Het vlammende trio (3-4): drie vonken, elk met eigen levens, in kolom 1, 3 en 5.
    Zolang een vonk leeft, geldt zijn kracht. Zijn levens samen zijn de levensbalk. */
 const trioLevend = () => (S && S.story && S.story.trio ? S.story.trio.filter(v => v.hp > 0) : []);
 const trioKracht = (p, k) => p === 1 && trioLevend().some(v => v.kracht === k);
@@ -5783,7 +5858,7 @@ async function lavaGrondJij(){
   }
   if(n){ addLog(`🌋 <em>De grond onder je gloeit.</em> Alles van jou dat geen 🔥 Vuur is verliest 1 leven.`, true); render(); await sleep(FAST ? 0 : 320); }
 }
-/* 🔥 De vuurzee (3-5): aan het eind van elke derde ronde gaat álles op het veld eraan. */
+/* 🔥 De vuurzee (3-6): aan het eind van elke derde ronde gaat álles op het veld eraan. */
 async function vuurzee(){
   const st = S.story;
   /* Flint haalt uit, en dan gaat het veld in vlammen op — net als de vuist van Magnus. */
@@ -5810,7 +5885,7 @@ async function flintTrektZwartGat(){
   addLog(`✦ <em>Flint voelt de vuurzee aankomen</em> en haalt ✦ Zwart Gat uit zijn stapel.`, true);
   render(); await sleep(FAST ? 0 : 260);
 }
-/* 💨 Het bord spiegelt (3-2): aan het eind van zijn beurt wisselen de buitenste kolommen
+/* 💨 Het bord spiegelt (3-3): aan het eind van zijn beurt wisselen de buitenste kolommen
    van plek, en de middelste blijft liggen. Aan allebei de kanten, creatures én spells. */
 async function bordSpiegel(){
   for(const p of [0, 1]){
@@ -5822,7 +5897,7 @@ async function bordSpiegel(){
   if(!FAST){ grijsFlits(); AU.play("water"); render(); await sleep(520); }
   render();
 }
-/* ⚙️ De lopende band (3-4). Alles schuift zo ver mogelijk naar rechts — bij het spelen, en
+/* ⚙️ De lopende band (3-5). Alles schuift zo ver mogelijk naar rechts — bij het spelen, en
    telkens als er iets wegvalt. Dat schuiven triggert niets. */
 function bandSchuif(stil){
   if(!S || !S.story || !S.story.band) return false;
@@ -8437,7 +8512,7 @@ function uiHl(){
 /* 💨 In de rook liggen zijn creatures dicht. Ze draaien om zodra ze aanvallen of
    aangewezen worden — en dán pas gaat hun speel-effect alsnog af. */
 const inRook = () => !!(S && S.story && S.story.rookAan);
-/* 💨 De dichte mist (3-3). Anders dan de gewone rook: hier zie je van níemand nog
+/* 💨 De dichte mist (3-4). Anders dan de gewone rook: hier zie je van níemand nog
    iets — niet van hem en niet van jezelf. Alles op het bord is een naamloze vlek.
    Je weet wat je speelt op het moment dat je het speelt; daarna moet je het onthouden. */
 const inMist = () => !!(S && S.story && S.story.mistAan);
@@ -9541,10 +9616,11 @@ const WERELDEN = {
   5:{naam:"Hemelrand",   ic:"✦",  el:"licht", kleur:"#fffdf2"}
 };
 /* Na 2-1 splitst het pad: 2-2 (het pad) of 2-3 (het web). Allebei komen ze uit bij 2-4. */
-const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => w === 2
-  ? ["2-1","2-2","2-3","2-4","2-5","2-6"]
-  : [1,2,3,4,5].map(n => w + "-" + n)));
-const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"]};
+/* Wereld 2 en 3 hebben zes levels (in 3 is Tang de smid er als 3-2 bij gekomen). */
+const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => (w === 2 || w === 3 ? [1,2,3,4,5,6] : [1,2,3,4,5]).map(n => w + "-" + n)));
+/* Wereld 2: na 2-1 alleen het pad (2-2). Na het pad splitst het: het web (2-3) is een
+   doodlopend zijpad, de herberg (2-4) is de weg verder. */
+const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-2"], "2-4":["2-2"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -11051,22 +11127,22 @@ const HORIZON_BEELD = {
   "h31_kloof":   "art/hz-31-kloof.png",      // de kloof zelf, met het licht dat omhoog waaiert
   "h31_pilaren": "art/hz-31-pilaren.png",    // rotspilaren en stalactieten uit het gewelf
   "h31_rand":    "art/hz-31-rand.png",       // de donkere rotsrand vlak boven je
-  /* 3-2 · het rookgordijn */
+  /* 3-3 · het rookgordijn */
   "h32_lucht":   "art/hz-32-lucht.png",      // rode lucht, bijna niets te zien
   "h32_silhouet":"art/hz-32-silhouet.png",   // dode bomen en schoorstenen, vaag door de rook
   "h32_rook1":   "art/hz-32-rook1.png",      // een brede bank rook
   "h32_rook2":   "art/hz-32-rook2.png",      // een dichtere bank, dichterbij
-  /* 3-3 · het circus */
+  /* 3-4 · het circus */
   "h33_lucht":   "art/hz-33-lucht.png",      // rode lucht met as
   "h33_tent":    "art/hz-33-tent.png",       // de grote tent, ver weg
   "h33_slinger": "art/hz-33-slinger.png",    // een slinger die het hele beeld overspant
   "h33_doek":    "art/hz-33-doek.png",       // het tentdoek vlak boven je hoofd
-  /* 3-4 · de fabriek */
+  /* 3-5 · de fabriek */
   "h34_lucht":   "art/hz-34-lucht.png",      // oranjezwarte lucht
   "h34_fabriek": "art/hz-34-fabriek.png",    // de skyline: schoorstenen, daken, tanks
   "h34_leiding": "art/hz-34-leidingen.png",  // een wirwar van pijpen en loopbruggen
   "h34_balk":    "art/hz-34-balk.png",       // een stalen balk dwars over de bovenkant
-  /* 3-5 · de voet van de grote schoorsteen */
+  /* 3-6 · de voet van de grote schoorsteen */
   "h35_lucht":   "art/hz-35-lucht.png",      // donkerrode lucht, alle rook trekt naar één punt
   "h35_voet":    "art/hz-35-voet.png",       // de voet van de schoorsteen, breder dan het beeld
   "h35_slakken": "art/hz-35-slakken.png",    // hopen slak en as, met een krat ertussen
@@ -11160,23 +11236,26 @@ const HORIZON = {
   /* Zelfde opzet als 3-1: de lucht is het achtergrondvlak over de volle hoogte, de
      herkenningspunten staan op ooghoogte, en de dichtstbijzijnde laag hangt bovenin.
      Onderin nog een tweede exemplaar, zodat het landschap tot op de bodem doorloopt. */
-  "3-2":[{b:"h32_lucht",   y:0,  h:100, w:110, d:.02, op:1},
+  /* 3-2 · de smidse. Geen eigen stroken (nog): de fabriek staat in de verte, daar kwam ze vandaan. */
+  "3-2":[{b:"h34_lucht",   y:0,  h:100, w:110, d:.03, op:1},
+         {b:"h34_fabriek", y:30,        w:112, d:.22, op:.7}],
+  "3-3":[{b:"h32_lucht",   y:0,  h:100, w:110, d:.02, op:1},
          {b:"h32_silhouet",y:30,        w:114, d:.22, op:.6},
          {b:"h32_rook1",   y:44,        w:124, d:.55, op:.7},
          {b:"h32_rook2",   y:70,        w:140, d:.80, op:.55},
          {b:"h32_rook2",   y:0,         w:136, d:.92, op:.85}],
-  "3-3":[{b:"h33_lucht",   y:0,  h:100, w:110, d:.04, op:1},
+  "3-4":[{b:"h33_lucht",   y:0,  h:100, w:110, d:.04, op:1},
          {b:"h33_tent",    y:26,        w:116, d:.35, op:.9},
          {b:"h33_slinger", y:74,        w:132, d:.55, op:.6},
          {b:"h33_slinger", y:4,         w:126, d:.70, op:.95},
          {b:"h33_doek",    y:0,         w:134, d:.96, op:1}],
-  "3-4":[{b:"h34_lucht",   y:0,  h:100, w:110, d:.03, op:1},
+  "3-5":[{b:"h34_lucht",   y:0,  h:100, w:110, d:.03, op:1},
          {b:"h34_fabriek", y:24,        w:116, d:.32, op:.9},
          {b:"h34_leiding", y:48,        w:124, d:.62, op:.8},
          {b:"h34_leiding", y:78,        w:132, d:.72, op:.6},
          {b:"h34_balk",    y:0,         w:134, d:.96, op:1}],
-  /* 3-5 · onder aan de schoorsteen. De voet staat in het midden en is het enige wat telt. */
-  "3-5":[{b:"h35_lucht",   y:0,  h:100, w:110, d:.03, op:1},
+  /* 3-6 · onder aan de schoorsteen. De voet staat in het midden en is het enige wat telt. */
+  "3-6":[{b:"h35_lucht",   y:0,  h:100, w:110, d:.03, op:1},
          {b:"h35_voet",    y:10,        w:118, d:.30, op:.95},
          {b:"h35_slakken", bot:0,       w:132, d:.66, op:.9},
          {b:"h35_rook",    y:-6,        w:138, d:.95, op:.9}],
@@ -11512,6 +11591,8 @@ const SPRITE_BEELD = {
   smid_blij:         "art/smid-blij.png",            // als je iets laat smeden
   smid_zuur:         "art/smid-zuur.png",            // als je te weinig sterren hebt
   smid_taunt:        "art/smid-taunt.png",           // haar praatbalkje
+  smid_boos:         "art/smid-boos.png",            // 3-2 · in het gevecht: hamer omhoog
+  smid_stuk:         "art/smid-stuk.png",            // 3-2 · verslagen, leunt op haar hamer
   sluiswachter:      "art/sluiswachter.png",         // 4-1 · pet, klembord, poort
   sluiswachter_poort:"art/sluiswachter-poort.png",   // 4-1 · hij haalt de poort omhoog (na de winst)
   sluiswachter_taunt:"art/sluiswachter-taunt.png",   // 4-1 · de balk linksonder
@@ -11648,7 +11729,7 @@ const SPRITE_BEELD = {
   rookman_boos:   "art/rookman-boos.png",      // de rook wordt dicht en donker
   rookman_uit:    "art/rookman-uit.png",
   rookman_taunt:  "art/rookman-taunt.png",
-  rookman_stuk:   "art/rookman-stuk.png",      // 3-2 · wat er overblijft als de rook dun is
+  rookman_stuk:   "art/rookman-stuk.png",      // 3-3 · wat er overblijft als de rook dun is
   trio:           "art/trio.png",              // Knetter, Spetter en Fikkie
   trio_boos:      "art/trio-boos.png",         // alle drie op scherp
   trio_taunt:     "art/trio-taunt.png",        // de balk links, met z'n drieën
@@ -11661,7 +11742,7 @@ const SPRITE_BEELD = {
   klinknagel_boos:"art/Klinknagel-boos.png",   // lampoog rood · hoofdletter K, zo heet het bestand
   klinknagel_stuk:"art/klinknagel-stuk.png",
   klinknagel_taunt:"art/klinknagel-taunt.png",
-  klinknagel_tellen:"art/klinknagel-tellen.png", // 3-4 · telt op zijn ijzeren vingers
+  klinknagel_tellen:"art/klinknagel-tellen.png", // 3-5 · telt op zijn ijzeren vingers
   papieren:       "art/papieren.png",
   fireguy_boos:   "art/vuurguy-boos.png",      // voor het eerst in tweehonderd jaar
   fireguy_taunt:  "art/vuurguy-taunt.png",     // de balk links
@@ -11675,7 +11756,7 @@ const SPRITE_BEELD = {
   fireguy_uit:    "art/vuurguy-uit.png",   // uitgedoofd
   fireguy_baas:   "art/vuurguy-baas.png",   // zijn grote vorm
   fireguy_stuk:   "art/vuurguy-stuk.png",
-  /* --- de vuurzee in 3-5: hij haalt uit en het veld gaat in vlammen op --- */
+  /* --- de vuurzee in 3-6: hij haalt uit en het veld gaat in vlammen op --- */
   fireguy_laadop: "art/vuurguy-loadup.png",
   fireguy_slag:   "art/vuurguy-slag.png",
   fireguy_wit_laadop:"art/vuurguy-wit-loadup.png",
@@ -11687,7 +11768,7 @@ const SPRITE_BEELD = {
    sowieso van de pixels. */
 const SPR_LEEN = {
   knorst:"bosbos", knorst_blij:"bosbos", knorst_zuur:"bosbos_boos", knorst_taunt:"bosbos",
-  smid:"cultist", smid_blij:"cultist", smid_zuur:"cultist", smid_taunt:"cultist",
+  smid:"cultist", smid_blij:"cultist", smid_zuur:"cultist", smid_taunt:"cultist", smid_boos:"cultist", smid_stuk:"cultist",
   sluiswachter_poort:"sluiswachter", sluiswachter_taunt:"sluiswachter",
   inkt:"bosbos", inkt_wijd:"bosbos_boos", inkt_stuk:"bosbos_stuk", inkt_taunt:"bosbos",
   spiegelbeeld:"eerste", spiegelbeeld_stuk:"eerste", spiegelbeeld_taunt:"eerste",
@@ -11700,6 +11781,7 @@ const SPRITE_TERUG = {
   rock1_zit:"rock1", rock1_papier:"rock1", kees:"rock1",
   rocky_til:"rocky", rocky_boekje:"rocky",
   engel_rug:"engel", kaelid_ogen:"shelob",
+  smid_boos:"smid_zuur", smid_stuk:"smid_zuur",
   max_taunt:"max_boos", max_boos:"max", waardin_boos:"waardin", engel_ongemak:"engel",
   cultist_agenda:"cultist", cultist_boos:"cultist", cultist_taunt:"cultist",
   rookman_stuk:"rookman_uit", klinknagel_tellen:"klinknagel",
@@ -12359,8 +12441,8 @@ const STORY = {
       {mu:"w2_seraf", s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Zes."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dank je."},
       {s:"engel", naam:"…", kleur:"#f6f7fb", t:"Er wordt iets van een mouw geklopt dat er niet zit."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Verderop splitst het pad. Links hangt een web. Rechts loopt het gewoon door."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik zou rechts nemen."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Verderop loopt een pad. Ergens langs dat pad hangt een web."},
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik zou op het pad blijven."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Maar ik ben ook niet zoals jij."},
       {s:null, bg:2, naam:"…", t:"Seraf loopt het pad af waar jij vandaan komt. Niet één keer omkijken."}
     ],
@@ -12419,7 +12501,7 @@ const STORY = {
     ban:10, begint:1
   },
   "2-2":{
-    wereld:2, tak:true, naam:"Het pad", vijand:"De Struik", sprite:"struik", zegKleur:"#7fd18c", muziek:"w2_struik",
+    wereld:2, naam:"Het pad", vijand:"De Struik", sprite:"struik", zegKleur:"#7fd18c", muziek:"w2_struik",
     hzruim:true,
     intro:[
       {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Je neemt het pad. Natuurlijk neem je het pad."},
@@ -12490,7 +12572,7 @@ const STORY = {
     wereld:2, tak:true, naam:"Het web", vijand:"Kaelid", sprite:"shelob", zegSpr:"shelob", tauntSpr:"shelob_taunt", zegKleur:"#c9b6ff", muziek:"w2_web",
     hzruim:true,
     intro:[
-      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", mu:"w2_web", t:"Je gaat links."},
+      {s:null, bg:2, naam:"…", kleur:"#c9b6ff", mu:"w2_web", t:"Je gaat van het pad af, naar links, waar het web hangt."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Het web kleeft niet. Het gaat open zoals een deur opengaat: omdat iemand dat wil."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Daarachter is het donker en droog en warm. Overal om je heen hangen bleke bolletjes aan draden."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"Sommige bewegen."},
@@ -12557,6 +12639,8 @@ const STORY = {
     ltVij:["web"], handVij:["web"],
     aeVij:["ae_grassx2","fu_grass"],
     geeft:"ae_grassx2", geeftLicht:"web",
+    /* 🟣 Het web is een doodlopend zijpad. Wie het toch loopt, speelt vanaf dan met twee aethers. */
+    geeftAeSlot:2,
     ban:10, begint:1
   },
   "2-4":{
@@ -12755,10 +12839,6 @@ const STORY = {
       {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Maar even serieus, en ik doe niet vaak serieus."},
       {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Wat hier verderop zit is geen afgezant met een halo. Dat ding ís het woud. Alles wat groen is, tegelijk, in één klap."},
       {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"That's big, kid. Daar ga je niet met één trucje langs."},
-      {s:"fireguy", bg:2, naam:"…", kleur:"#ff8a4a", t:"Hij tikt met twee vingers tegen je borstbeen. Het voelt alsof iemand een tweede lade opentrekt die er altijd al zat."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Vanaf nu kies je vóór elk gevecht <b>twee aethers</b> in plaats van één."},
-      {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"Ja, dat mag ik niet doen. Nee, ik krijg daar geen last mee."},
-      {s:"fireguy", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"En nee, ik help je niet. Ik maak het interessanter voor mezelf. Dat is iets anders."},
       {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"See ya."}
     ],
     rug:[null, "schaduw"],
@@ -12792,8 +12872,6 @@ const STORY = {
        zet de zes-vleugelbaas van 5-4 aan, en die hoort hier niet. */
     seraf:{deck:{vuur:4, gras:4, steen:3, water:3, reborn:3, vital:3}},
     geeftLicht:"reborn",
-    /* 🟣 Flint trekt hier de tweede lade open: vanaf 2-6 speel je met twee aethers. */
-    geeftAeSlot:2,
     varianten:{
       straf:{ startSchade:3 },
       hamerstraf:{ startSchade:5 },
@@ -12991,7 +13069,67 @@ const STORY = {
     geeft:"fu_fire",
     ban:10, begint:1
   },
+  /* ---------- 3-2 · Tang, de smid ----------
+     Een oude vakvrouw die bij de fabriek werkte tot de fabriek zonder haar kon. Ze smeedt
+     niet voor iemand die ze niet heeft zien slaan. Haar stapel is alleen gesmeed spul, en
+     met Bron van Overvloed werkt ze zich letterlijk kapot. Win je, dan gaat de smidse open. */
   "3-2":{
+    wereld:3, naam:"Het aambeeld", vijand:"Tang", sprite:"smid", zegKleur:"#ff9a5a", muziek:"w3_gevecht",
+    hzruim:true,
+    intro:[
+      {s:null, bg:3, naam:"…", mu:"smidse", t:"Achter de berg, waar de as dunner wordt, klinkt iets dat niet rookt en niet sist. Het klinkt als tellen."},
+      {s:null, bg:3, naam:"…", t:"Een aambeeld onder een afdak van golfplaat. Een vuur dat iemand met zorg heet houdt. En iemand die slaat."},
+      {s:"smid", bg:3, naam:"…", kleur:"#ff9a5a", t:"Ze kijkt niet op. Ze slaat nog vier keer, telt ze hardop, en legt dan pas de hamer neer."},
+      {s:"smid", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Blijf daar staan. Dichterbij en je staat in mijn vonken."},
+      {s:"smid", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Tang. Smid. Ik stond bij de fabriek, tot de fabriek zonder mij kon."},
+      {s:null, bg:3, naam:"…", t:"Je vraagt of ze iets voor je kan smeden."},
+      {s:"smid", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Kan ik. Doe ik niet. Ik smeed niet voor iemand die ik niet heb zien slaan."},
+      {s:"smid_zuur", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Bij de fabriek smeedde ik voor iedereen. Veertig jaar. Ik weet nog steeds niet waar het allemaal heen ging."},
+      {s:"smid", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Dus eerst slaan. Jij tegen mij. Dan weet ik wat ik van je in het vuur leg, en of het de moeite is."},
+      {s:null, bg:3, naam:"…", kleur:"#ff9a5a", t:"⚒ <b>Alles wat Tang heeft, is gesmeed.</b> Haar stapel is alleen ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs."},
+      {s:null, bg:3, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 En ze werkt zich kapot. <b>Bron van Overvloed</b>: ze trekt 2 kaarten per beurt en betaalt daar elke beurt 1 leven voor. <b>Verzengende Woede</b>: haar vuur doet 5."},
+      {s:"smid_boos", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Handen uit het vuur. We beginnen bij één."}
+    ],
+    midden:[
+      {s:"smid", naam:"Tang", kleur:"#ff9a5a", t:"Twintig. Eenentwintig. Je slaat harder dan je eruitziet."},
+      {s:"smid_zuur", naam:"Tang", kleur:"#ff9a5a", t:"Ik ben moe. Dat is geen tactiek. Dat is gewoon zestig jaar."}
+    ],
+    middenNa:2,
+    win:[
+      {s:"smid_stuk", naam:"…", kleur:"#ff9a5a", t:"Ze zet de hamer rechtop tegen het aambeeld en blijft er even op leunen."},
+      {s:"smid_stuk", naam:"Tang", kleur:"#ff9a5a", t:"…Achtenveertig. Daar hield ik op met tellen."},
+      {s:"smid", naam:"Tang", kleur:"#ff9a5a", t:"Je slaat scheef. Maar je slaat door. Dat kun je niet leren, dat heb je of niet."},
+      {s:"smid", naam:"Tang", kleur:"#ff9a5a", t:"Goed. De smidse is open. Kom terug met sterren, dan gaat er iets van jou het vuur in. Eén soort per keer."},
+      {s:"smid_blij", naam:"Tang", kleur:"#ff9a5a", t:"En blijf daar staan. Je staat alweer in mijn vonken."}
+    ],
+    verlies:[
+      {s:"smid_zuur", naam:"Tang", kleur:"#ff9a5a", t:"Te licht. Kom terug als je zwaarder bent. Het vuur blijft wel aan."}
+    ],
+    zegSpr:"smid_boos", tauntSpr:"smid_taunt",
+    zeg:{ beurt:[
+        "Eén. Twee. Drie. Nee, die telde niet.",
+        "Te licht. Alles wat je bij je hebt is te licht.",
+        "Dit is gesmeed. Dat van jou is gevonden. Dat merk je.",
+        "Handen uit het vuur.",
+        "Bij de fabriek telde iemand anders. Nu tel ik zelf.",
+        "Ik werk me kapot. Dat heb ik daar geleerd."
+      ],
+      popup:[
+        "Flint komt hier soms zitten. Zegt niks. Warmt zijn handen. Dat mag.",
+        "Een aambeeld is nergens goed voor. Tot je erop slaat.",
+        "Bij de fabriek had ik een nummer. Ik heb het van mijn schort geschuurd. Als je goed kijkt staat het er nog."
+      ],
+      laag:["Hm. Je slaat door. Dat schrijf ik niet op, dat onthoud ik."],
+      jij:["Blijf liggen. Ik tel tot tien. Daarna sta je op."] },
+    deckJij:{steen:6, vuur:6, gras:6, water:6},
+    deckVij:{rots:7, plasma:7, roos:7, ijs:7},
+    ltVij:[],
+    aeVij:["ae_draw3","ae_fire6"],
+    levensVij:10,
+    opentSmid:true,
+    ban:10, begint:1
+  },
+  "3-3":{
     wereld:3, naam:"Rookgordijn", vijand:"Het Rookgordijn", sprite:"rookman", zegKleur:"#b9c6d4", muziek:"w3_rook",
     hzruim:true,
     intro:[
@@ -13051,7 +13189,7 @@ const STORY = {
     geeftLicht:"vital",
     ban:10, begint:1
   },
-  "3-3":{
+  "3-4":{
     wereld:3, naam:"Het circus", vijand:"Het vlammende trio", sprite:"trio", zegKleur:"#ffa53c", muziek:"w3_circus",
     hzruim:true,
     intro:[
@@ -13118,7 +13256,7 @@ const STORY = {
           {naam:"Fikkie",  hp:2, kol:4, kracht:"dubbel", uitleg:"vuur schiet twee keer"}],
     ban:10, begint:1
   },
-  "3-4":{
+  "3-5":{
     wereld:3, naam:"De schoorsteen", vijand:"Klinknagel", sprite:"klinknagel", zegKleur:"#c8cedb", muziek:"w3_fabriek",
     hzruim:true,
     intro:[
@@ -13186,7 +13324,7 @@ const STORY = {
     geeftLicht:"negate",
     ban:10, begint:1
   },
-  "3-5":{
+  "3-6":{
     wereld:3, naam:"De schoorsteen", vijand:"Flint", sprite:"fireguy", zegKleur:"#ff8a4a", muziek:"w3_flintgevecht",
     hzruim:true,
     intro:[
@@ -14201,6 +14339,7 @@ function heeftKeuze(id){
 const storyKlaar = id => SET.story.klaar.indexOf(id) >= 0;
 function storyVrij(id){
   if(SET.story.vrij) return true;
+  if(storyKlaar(id)) return true;
   if(STORY_VEREIST[id]) return STORY_VEREIST[id].some(storyKlaar);
   let i = STORY_ORDER.indexOf(id);
   if(i <= 0) return true;
@@ -14234,6 +14373,7 @@ function beloningMaak(id, extra){
   const lichten = [].concat(L.geeftLicht || [], extra && extra.licht ? extra.licht : []);
   lichten.forEach(k => { if(LIGHTS[k]) items.push({k:"lt", key:k, ic:"✦", naam:LIGHTS[k].name, sub:LIGHTS[k].kort, oud:hadL(k)}); });
   if(L.geeftHart) items.push({k:"hart", ic:"❤", naam:`${L.geeftHart} levens`, sub:"je begint elk gevecht met meer", oud:!eerste});
+  if(L.opentSmid) items.push({k:"smid", ic:"⚒", naam:"De smidse van Tang", sub:"hier laat je je kaarten smeden", oud:!eerste});
   if(L.geeftAeSlot) items.push({k:"slot", ic:"🟣", naam:`${L.geeftAeSlot}e aether-slot`, sub:"nog een kracht tegelijk", oud:!eerste});
   return items;
 }
@@ -14404,19 +14544,21 @@ const VELD = {
                    "De golem gaat niet dood (hooguit naar 0) en krijgt elke beurt van haar <b>2</b> levens terug. 🌿 Tokens houden de golem niet thuis.",
                    "🌋 <b>Jouw grond is lava.</b> Begin van jouw beurt: alles van jou dat geen 🔥 Vuur is verliest <b>1</b> leven."] },
 
-  "3-2": { regels:["💨 <b>Alles ligt dicht</b>, ook jouw kaarten. Je ziet levens, aanval en wie op wie mikt; wát er ligt moet je onthouden.",
+  "3-2": { regels:["⚒ <b>Alles in haar stapel is gesmeed</b>: alleen ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs."] },
+
+  "3-3": { regels:["💨 <b>Alles ligt dicht</b>, ook jouw kaarten. Je ziet levens, aanval en wie op wie mikt; wát er ligt moet je onthouden.",
                    "💨 Eind van elke beurt van het Rookgordijn draait de rook: kolom 1↔5 en 2↔4 wisselen, aan allebei de kanten. Het midden blijft.",
                    "Het Rookgordijn begint met drie creatures op het veld, in kolom 1, 3 en 5. Het log schrijft niets op."] },
 
-  "3-3": { regels:["🎪 Drie vonken van <b>2</b> levens: Knetter in kolom 1, Spetter in 3, Fikkie in 5. Samen zijn ze de levensbalk.",
+  "3-4": { regels:["🎪 Drie vonken van <b>2</b> levens: Knetter in kolom 1, Spetter in 3, Fikkie in 5. Samen zijn ze de levensbalk.",
                    "Raak een vonk met een aanval in de kolom van die vonk. In kolom 2 en 4 sla je in het niets.",
                    "Elke levende vonk: +1 op hun 🔥-effecten. Knetter: vuur is ☄️ Plasma. Spetter: vuur spat naar de buren. Fikkie: vuur schiet 2×.",
                    "Gaat er een uit, dan is die kracht weg en trekken de anderen kaarten: 1 bij de eerste, 2 bij de tweede."] },
 
-  "3-4": { regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, aan allebei de kanten, schuift meteen zo ver mogelijk naar rechts.",
+  "3-5": { regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, aan allebei de kanten, schuift meteen zo ver mogelijk naar rechts.",
                    "🔥 Begin van de beurt van Klinknagel: de forge eet wat in kolom 5 ligt (creature én spell), aan allebei de kanten. Daarna schuift alles door."] },
 
-  "3-5": { regels:["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
+  "3-6": { regels:["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle creatures op het veld eraan, van allebei. Spells blijven.",
                    "🌋 <b>De grond is lava.</b> Eind van elke ronde: alles op het veld dat geen 🔥 Vuur (of ☄️ Plasma) is verliest 1 leven.",
                    "Jij begint met <b>8</b> levens."],
     varianten:{
@@ -15258,7 +15400,7 @@ async function storyFase2(F){
     if(weg) addLog(`🔥 Alles wat op tafel stond verbrandt — ${weg} kaart${weg===1?"":"en"} naar het graf.`, true);
     render();
   }
-  /* Een omslag mag zijn eigen muziek meenemen (3-5: het wit). Anders springt het gevecht
+  /* Een omslag mag zijn eigen muziek meenemen (3-6: het wit). Anders springt het gevecht
      na het praatje terug naar het nummer van de eerste fase. */
   if(F.muziek){ st.muziek = F.muziek; AU.zet(F.muziek); }
   /* Nieuwe veldregels bij de omslag. */
@@ -15824,8 +15966,9 @@ const OVERWORLD_BEELD = "art/overworld.png";
    zelf: de open plekken langs het pad, de steiger, de herberg, de tent, de sluis, de kolk. */
 const OVERWORLD = {
   "1-1":{x:48,y:81}, "1-2":{x:32,y:78}, "1-3":{x:46,y:70}, "1-4":{x:33,y:67}, "1-5":{x:42,y:57},
-  "2-1":{x:40,y:47}, "2-2":{x:27,y:48}, "2-3":{x:24,y:32}, "2-4":{x:18,y:46}, "2-5":{x:40,y:31}, "2-6":{x:28,y:23},
-  "3-1":{x:68,y:38}, "3-2":{x:83,y:33}, "3-3":{x:62,y:30}, "3-4":{x:72,y:22}, "3-5":{x:81,y:11},
+  /* Eén bolletje op het pad is 2,1 procent. */
+  "2-1":{x:35.8,y:47}, "2-2":{x:22.8,y:52.2}, "2-3":{x:21.9,y:38.3}, "2-4":{x:20.1,y:43.9}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
+  "3-1":{x:61.7,y:40.1}, "3-2":{x:80.2,y:36.8}, "3-3":{x:68.3,y:39.3}, "3-4":{x:68.3,y:27.9}, "3-5":{x:72,y:22}, "3-6":{x:81,y:11},
   "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
 /* Welke paden er zijn. [van, naar] verschijnt zodra "van" gehaald is. Met een derde naam
@@ -15833,33 +15976,36 @@ const OVERWORLD = {
    eerste level van de vorige, niet uit de zaal van de baas — die is een doodlopend eind. */
 const OVERWORLD_RANDEN = [
   ["1-1","1-2"], ["1-2","1-3"], ["1-3","1-4"], ["1-4","1-5"], ["1-5","2-1"],
-  ["2-1","2-2"], ["2-1","2-3"], ["2-2","2-4"], ["2-3","2-4"], ["2-4","2-5"], ["2-5","2-6"],
+  ["2-1","2-2"], ["2-2","2-3"], ["2-2","2-4"], ["2-4","2-5"], ["2-5","2-6"],
   ["2-1","3-1","2-6"],
-  ["3-1","3-2"], ["3-2","3-3"], ["3-3","3-4"], ["3-4","3-5"],
-  ["3-1","4-1","3-5"],
+  ["3-1","3-2"], ["3-2","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
+  ["3-1","4-1","3-6"],
   ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
   ["3-1","hemel","4-5"]
 ];
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
   "1-4>1-5":[[38,62]],
-  "1-5>2-1":[[42,52],[41,49]],
-  "2-1>2-2":[[33,48.5]],
-  "2-1>2-3":[[34,42],[28,37]],
-  "2-3>2-4":[[20,39]],
-  "2-4>2-5":[[27,40],[35,34]],
-  "2-1>3-1":[[48,44],[58,42]],
-  "3-2>3-3":[[76,29]],
-  "3-1>4-1":[[70,45],[66,51]],
-  "3-1>hemel":[[60,32],[55,24]]
+  "1-5>2-1":[[41,52],[38.5,49]],
+  "2-1>2-2":[[29.5,50.5]],
+  /* Het web ligt aan de westkant om de herberg heen, zodat het pad naar 2-5 er niet doorheen loopt. */
+  "2-2>2-3":[[18,49.5],[16.5,44],[18.5,40]],
+  "2-4>2-5":[[26,41],[31,35]],
+  "2-1>3-1":[[46,45],[55,42.5]],
+  /* Naar Tang loopt het pad onder het Rookgordijn door; terug naar het Rookgordijn gaat rechtstreeks. */
+  "3-1>3-2":[[67,44.5],[75,42]],
+  "3-3>3-4":[[67.5,33.5]],
+  "3-1>4-1":[[63,47],[64,52]],
+  "3-1>hemel":[[58,33],[55,24]]
 };
 /* De trap de wolken in: daar zit wereld 5, die (nog) niet op het eiland ligt. */
 const OVERWORLD_HEMEL = {x:51, y:17};
 /* 🏪 De winkel in het Rankenwoud. Gaat open zodra 2-1 gehaald is, en ligt er pal ten
    noorden van — een zijpaadje van twee bolletjes, meer niet. */
-const OVERWORLD_WINKEL = {x:42, y:41, na:"2-1"};
-/* ⚒ De smidse van Tang, in de Asgronden. Gaat open zodra 3-1 gehaald is. */
-const OVERWORLD_SMID = {x:76, y:41, na:"3-1"};
+const OVERWORLD_WINKEL = {x:44.1, y:38.9, na:"2-1"};
+/* ⚒ De smidse van Tang, in de Asgronden. Gaat open zodra je Tang (3-2) verslagen hebt,
+   en ligt dan als zijpaadje naast haar level. */
+const OVERWORLD_SMID = {x:88, y:31, na:"3-2"};
 /* ================= 🏪 DE WINKEL =================
    Knorst staat achter een kraam die hij zelf een kraam noemt. Hij verkoopt de krachten die
    geen enkele baas weggeeft. Je betaalt met ★ sterren — dezelfde sterren die je per level
@@ -15882,8 +16028,8 @@ const KOOP_PRIJS = {
 };
 const HART_PRIJS = [3, 5, 5];            // elk volgend hartje kost meer
 /* ⚒ Bij Tang de smid: elk element dat je laat smeden kost meer dan het vorige.
-   Knort 62 + Tang 16 = 78: alles kopen kost nog steeds precies alle sterren. */
-const SMID_PRIJS = [3, 4, 4, 5];
+   Met Tang als eigen level (3-2) zijn er 27 levels en dus 81 sterren: Knort 62 + Tang 19. */
+const SMID_PRIJS = [4, 4, 5, 6];
 /* ✦ Lichtkaart-slots: in 2-1 krijg je er 3, de 4e, 5e en 6e koop je hier. Het eerste is
    goedkoop. Met 26 levels liggen er 78 sterren; alles hier kost er samen precies 78. */
 const SLOT_PRIJS = [1, 2, 3];
@@ -15950,8 +16096,7 @@ const KNORT_DAG = [
 ];
 /* ⚒ Wat Tang zegt. Oude vakvrouw, werkte bij de fabriek tot die haar niet meer nodig had. */
 const SMID_EERSTE = [
-  "Blijf daar staan. Dichterbij en je staat in mijn vonken.",
-  "Tang. Smid. Ik stond bij de fabriek, tot de fabriek zonder mij kon.",
+  "Daar ben je. Handen uit het vuur.",
   "Nu maak ik stukken zwaarder. Voor wie ervoor betaalt.",
   "Je stenen, je vuur, je gras, je water. Van elk kan ik iets maken. Eén soort per keer."
 ];
@@ -16076,6 +16221,53 @@ function upgVak(el){
   return {soort:"upg", key:el, ic:vr.icon, naam:`${EL[el].icon} ${EL[el].name} → ${vr.name}`,
     kort:UPG_KORT[el] || `sterke ${EL[el].name.toLowerCase()} in je deck`, prijs, mijn, kan:sterVrij() >= prijs};
 }
+/* De winkels als tekening. Staat het plaatje er (nog) niet, dan valt de winkel terug op de
+   gewone vakjes eronder. De plekken zijn uitgemeten op de tekening: x is het midden van het
+   vak, y het bovenvlak van de plank, w de breedte van wat erop staat (allemaal in procenten). */
+const WINKEL_DECOR = {
+  knort:{beeld:"art/winkel-knort.png", ratio:"3/2",
+    ae:[{x:16.4,y:31},{x:33.2,y:31},{x:50,y:31},{x:66.8,y:31},{x:83.6,y:31}],
+    lt:[{x:16.4,y:59},{x:33.2,y:59},{x:50,y:59},{x:66.8,y:59},{x:83.6,y:59}],
+    hart:{x:24,y:88}, slot:{x:76,y:88}, w:10, wPlek:13},
+  smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
+    upg:{steen:{x:20,y:66}, vuur:{x:40,y:66}, gras:{x:60,y:66}, water:{x:80,y:66}}, w:11}
+};
+function winkelDecorOk(kraam){
+  const d = WINKEL_DECOR[kraam];
+  return !!(d && BEELD_KLAAR[d.beeld] === true);
+}
+/* Eén ding op de plank. Met een prent staat het er als kaartje; zonder (hartjes, een slot)
+   is het een onzichtbaar vlak over wat er al op de tekening staat. */
+function wkItem(v, pos, w, beeld){
+  if(!pos || v.leeg) return "";
+  const staat = v.op ? "mijn" : (v.mijn ? "mijn" : (v.kan ? "kan" : "duur"));
+  const tag = v.op ? "op" : (v.mijn ? (v.soort === "upg" ? "gesmeed" : "verkocht") : `★ ${v.prijs}`);
+  const klik = (v.mijn || v.op) ? "" : ` data-act="btn" data-btn="koopvraag" data-soort="${v.soort}" data-key="${v.key || ""}"`;
+  const ic = v.soort === "upg" ? (v.ic || "⚒") : (v.soort === "lt" ? "✦" : (v.soort === "ae" ? "🟣" : ""));
+  const bin = beeld && BEELD_KLAAR[beeld] !== "fout"
+    ? `<img src="${beeld}" alt="" draggable="false" onerror="this.outerHTML='<span class=wkgeen>${ic}</span>'">`
+    : (beeld ? `<span class="wkgeen">${ic}</span>` : `<span style="display:block;width:100%;aspect-ratio:1"></span>`);
+  /* Bovenin het plaatje klapt de uitleg naar beneden open, onderin naar boven. */
+  const onder = pos.y < 70 ? " tiponder" : "";
+  return `<button class="wkitem ${staat}${beeld ? "" : " plek"}${onder}" style="left:${pos.x}%;bottom:${100 - pos.y}%;width:${w}%"${klik}>
+    ${bin}<span class="wktag">${tag}</span><span class="wktip"><span class="wktn">${v.naam}</span>${v.kort || ""}</span></button>`;
+}
+function winkelScene(kraam){
+  const d = WINKEL_DECOR[kraam];
+  let binnen = "";
+  if(kraam === "smid"){
+    ORDER.forEach(el => { const v = upgVak(el); binnen += wkItem(v, d.upg[el], d.w, KAART_BEELD[UPG_VAN[el]]); });
+  } else {
+    ["ae", "lt"].forEach(soort => KOOPWAAR[soort].forEach((k, i) => {
+      const v = koopVak(soort, k, i);
+      const beeld = soort === "lt" ? LICHT_BEELD[k] : AETHER_BEELD[k];
+      binnen += wkItem(v, d[soort][i], d.w, beeld);
+    }));
+    binnen += wkItem(hartVak(), d.hart, d.wPlek, null);
+    binnen += wkItem(slotVak(), d.slot, d.wPlek, null);
+  }
+  return `<div class="wkscene" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${binnen}</div>`;
+}
 function winkelHTML(){
   const sp = spriteSVG(M.spr || "knorst");
   const kop = `<div class="wkkop"><h2>${kraamVan().kop}</h2>
@@ -16109,6 +16301,12 @@ function winkelHTML(){
       <div class="wkvk">${v.kort}</div><div class="wkvp">${knop}</div></div>`;
   };
   const rij = soort => `<div class="wkrij">${KOOPWAAR[soort].map((k, i) => vak(koopVak(soort, k, i))).join("")}</div>`;
+  /* Is de tekening van deze winkel binnen, dan staat alles op de planken. */
+  if(winkelDecorOk(M.kraam || "knort")) return `<div class="ovbox wkbox metdecor">${kop}${praat}
+    ${winkelScene(M.kraam || "knort")}
+    <div class="sub" style="text-align:left;margin:10px 0 0">${M.kraam === "smid"
+      ? "Wat je laat smeden krijgt een upgrade-slot in je voorbereiding. Wijs een kaart aan om te zien wat het doet."
+      : "Wijs iets aan om te zien wat het doet. Klik om het te kopen."}</div></div>`;
   if(M.kraam === "smid") return `<div class="ovbox wkbox">${kop}${praat}
     <div class="wklab">⚒ Laten smeden</div>
     <div class="sub" style="text-align:left;margin:-2px 0 8px">Elk element dat je hier laat smeden krijgt een upgrade-slot in je voorbereiding. Daar kies je zelf hoeveel kaarten de sterke versie worden.</div>
@@ -16146,6 +16344,8 @@ function koopDoen(){
 }
 /* Hoe ver de mist wijkt rond een plek waar je geweest bent, in procenten van de kaart. */
 const OVERWORLD_ZICHT = 15;
+/* De baas van een wereld is het laatste level ervan: 1-5, 2-6, 3-6, 4-5. */
+const lvBaas = id => { const w = id.split("-")[0] + "-"; const rij = STORY_ORDER.filter(x => x.startsWith(w)); return rij[rij.length - 1] === id; };
 /* Het portret op een level: de tegenstander zelf. Zijn tekening als die er is, anders zijn
    pixelvorm — en als er echt niets is, het teken van zijn wereld. */
 function lvPortret(id){
@@ -16279,7 +16479,7 @@ function kaartHTML(){
     const st = stand[id]; if(!st) return "";
     const pos = OVERWORLD[id], L = STORY[id];
     const w = +id.split("-")[0], W = WERELDEN[w];
-    const baas = id.endsWith("-5");
+    const baas = lvBaas(id);
     const was = oud[id] || "";
     /* Welke animatie hoort bij deze overgang? */
     let anim = "";
@@ -16310,7 +16510,7 @@ function kaartHTML(){
     const w = OVERWORLD_SMID, nieuwS = !oud.smid;
     gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwS);
     winkel += `<button class="lvknop winkel smid${nieuwS ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwS ? vertraag : 0}ms" data-act="btn" data-btn="smid" title="De smidse van Tang">
-        <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.smid) ? `<img class="lvport" src="${SPRITE_BEELD.smid}" alt="" draggable="false">` : "⚒"}</span><span class="lvnaam">Tang · smidse</span></button>`;
+        <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.smid) ? `<img class="lvport" src="${SPRITE_BEELD.smid}" alt="" draggable="false">` : "⚒"}</span><span class="lvnaam">⚒ Smidse</span></button>`;
   }
   let hemel = "";
   if(storyVrij("5-1") && STORY["5-1"]){
@@ -16343,8 +16543,39 @@ function kaartHTML(){
 }
 /* Na het tekenen: onthouden wat er nu staat (dan speelt de animatie niet nog een keer),
    naar het huidige level scrollen, en de kaart sleepbaar maken. */
+/* Namen op de kaart mogen niet over een ander level of een andere naam heen vallen. Na het
+   tekenen meten we het echt na: botst de naam onder een level, dan probeert hij boven,
+   rechts en links, en neemt de plek waar het minst overlapt. */
+function kaartNamen(){
+  const vlak = document.getElementById("kaartvlak"); if(!vlak) return;
+  const knoppen = [...vlak.querySelectorAll(".lvknop")];
+  const kl = ["naamboven", "naamrechts", "naamlinks"];
+  knoppen.forEach(k => k.classList.remove(...kl));
+  const box = el => el.getBoundingClientRect();
+  const over = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  const knopRect = knoppen.map(k => box(k));
+  const geplaatst = [];
+  knoppen.forEach((k, i) => {
+    const naam = k.querySelector(".lvnaam"); if(!naam) return;
+    const botsing = () => { const r = box(naam); let n = 0;
+      knopRect.forEach((b, j) => { if(j !== i) n += over(r, b); });
+      geplaatst.forEach(g => { n += over(r, g); });
+      return n; };
+    let beste = null, besteN = botsing();
+    if(besteN > 0) for(const c of kl){
+      k.classList.add(c);
+      const n = botsing();
+      if(n < besteN){ besteN = n; beste = c; }
+      k.classList.remove(c);
+      if(n === 0) break;
+    }
+    if(beste) k.classList.add(beste);
+    geplaatst.push(box(naam));
+  });
+}
 function kaartScrol(){
   if(!M || M.type !== "story" || M.lijst) return;
+  kaartNamen();
   const oud = kaartStand(); let anders = false;
   STORY_ORDER.filter(id => OVERWORLD[id]).forEach(id => {
     const st = lvStand(id);
@@ -16549,7 +16780,8 @@ function render(){
   $("#row1").innerHTML = [0,1,2,3,4].map(c=>slotHTML(TOP,c,hl)).join("");
   $("#row0").innerHTML = [0,1,2,3,4].map(c=>slotHTML(BOT,c,hl)).join("");
   /* 🌋 3-1: jouw kant van het veld gloeit, zodat je ziet dát het daar heet is. */
-  { const app = document.getElementById("app"); if(app) app.classList.toggle("lavajij", !!(S.story && S.story.lavaJij)); }
+  { const app = document.getElementById("app"); if(app){ app.classList.toggle("lavajij", !!(S.story && S.story.lavaJij));
+      app.classList.toggle("lavaveld", !!(S.story && S.story.lavaAan)); } }
   $("#piles1").innerHTML = pilesHTML(TOP);
   $("#piles0").innerHTML = pilesHTML(BOT);
   $("#ribbon").innerHTML = PHASES.map(([k,lab])=>
@@ -18144,6 +18376,7 @@ function beeldenWarm(){
   if(typeof HORIZON_BEELD === "object") paden.push(...Object.values(HORIZON_BEELD));
   paden.push(LICHT_KAART, AETHER_KAART, AETHER_KAARTVORM);
   if(typeof OVERWORLD_BEELD === "string") paden.push(OVERWORLD_BEELD);
+  if(typeof WINKEL_DECOR === "object") Object.values(WINKEL_DECOR).forEach(d => paden.push(d.beeld));
   const nieuw = [...new Set(paden.filter(pad => pad && BEELD_KLAAR[pad] === undefined))];
   LAAD.tot += nieuw.length; LAAD.beeldTot += nieuw.length;
   /* De kaarten en de sprites die je meteen ziet gaan voorop; de vergezichten achteraan. */
