@@ -2651,10 +2651,12 @@ body:not(.geladen) #app{visibility:hidden}
   body.verhaal #portretvak{display:block; position:relative; margin-top:auto; flex:0 0 auto}
   body.verhaal #praatbel:not(.winkelbel){display:none !important}
 }
+/* De rand heeft de kleur van wie er vecht; de binnenrand die van de wereld. */
 #portret{position:relative; width:100%; height:min(368px,48vh); overflow:hidden; isolation:isolate;
-  border:3px solid var(--ink2,#0b0f14); outline:2px solid var(--ptk,#6b7d92); outline-offset:-5px;
+  border:4px solid var(--ptrand,#6b7d92); outline:2px solid var(--ptl1,#1b2633); outline-offset:-7px;
   background:linear-gradient(180deg, var(--ptl1,#1b2633) 0%, var(--ptl2,#0b1018) 100%);
-  box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 8px 18px rgba(0,0,0,.45); image-rendering:pixelated}
+  box-shadow:0 0 0 2px #05070b, 0 0 16px var(--ptgloed,rgba(107,125,146,.35)), 0 8px 18px rgba(0,0,0,.45);
+  image-rendering:pixelated}
 #portret .ptbg{position:absolute; inset:0; z-index:0}
 #portret .ptbg .pthz{position:absolute; left:50%; transform:translateX(-50%)}
 #portret .ptbg .pthz img{width:100%; height:auto; display:block; image-rendering:pixelated}
@@ -2664,14 +2666,14 @@ body:not(.geladen) #app{visibility:hidden}
 #portret .ptfig{position:absolute; left:0; right:0; bottom:0; height:90%; z-index:1;
   display:flex; justify-content:center; align-items:flex-end}
 #portret .ptfig .sprwrap{position:relative; height:100%; width:auto; --sprgroei:1;
-  animation:ptdein 3.4s ease-in-out infinite}
+  animation:ptdein 7s ease-in-out infinite}
 /* Hij deint zachtjes op en neer, zoals op de kaart en in de praatschermen. */
 @keyframes ptdein{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
 #portret .ptfig .sprwrap .sprbeeld{height:100%; width:auto; max-width:none;
   transform:translateY(calc(var(--onder,0) * 100%))}
 #portret .ptfig svg{height:100%; width:auto}
 /* Een taunt is een uitsnede van dichtbij: die mag groter, en wat buiten het venster valt is weg. */
-#portret.pt-taunt .ptfig{height:118%}
+#portret.pt-taunt .ptfig{height:100%}
 #portret .ptnaam{position:absolute; left:0; right:0; bottom:0; z-index:2; padding:5px 8px 4px;
   font-family:"Press Start 2P","VT323",ui-monospace,monospace; font-size:.62rem; letter-spacing:.08em;
   color:var(--ptk,#cfd8e0); text-shadow:0 2px 0 #000; background:linear-gradient(0deg, rgba(4,6,10,.85), rgba(4,6,10,0))}
@@ -5891,6 +5893,7 @@ async function moederBloei(B){
   await praatLosAwait(B.praat || []);
   busyFlag = false;
   P(1).life = 5;
+  st.omslagBezig = false;
   let weg = 0;
   for(let c=0;c<5;c++){
     const sl = P(1).cols[c];
@@ -7340,11 +7343,14 @@ function sterUitgeven(n){ SET.story.sterUit = sterUit() + n; saveSet(); }
 function gameOver(winner, reason){
   if(S.over) return;
   /* Sommige tegenstanders zijn nog niet klaar als hun levens op zijn. */
+  /* Zolang de omslag naar een tweede fase nog bezig is, telt een tweede "hij is op nul" niet:
+     anders eindigde het gevecht alsnog in de halve seconde voordat hij weer opstond. */
+  if(winner === 0 && S.story && S.story.omslagBezig) return;
   if(winner === 0 && S.story && !S.story.fase2Gedaan){
     const Lx = levelVan(S.story), L2 = Lx && Lx.fase2;
-    if(L2){ S.story.fase2Gedaan = true; setTimeout(() => storyFase2(L2), 500); return; }
+    if(L2){ S.story.fase2Gedaan = true; S.story.omslagBezig = true; setTimeout(() => storyFase2(L2), 500); return; }
     /* 🌹 Moeder Natuur staat op nul en weigert dat. */
-    if(Lx && Lx.bloei && !S.story.bloeiGedaan){ S.story.bloeiGedaan = true; setTimeout(() => moederBloei(Lx.bloei), 500); return; }
+    if(Lx && Lx.bloei && !S.story.bloeiGedaan){ S.story.bloeiGedaan = true; S.story.omslagBezig = true; setTimeout(() => moederBloei(Lx.bloei), 500); return; }
   }
   S.over = {winner, reason};
   /* Het beeldbederf hoort bij het gevecht. Is dat beslist, dan houdt het scherm op met
@@ -7978,16 +7984,24 @@ function botChoosePlayV2(p){
     }
   }
 
-  /* 2. Wie begint, zet precies één spell neer en past. */
-  if(W.eerste && S.gTurn === 1 && S.tp === p){
-    if(P(p).cols.some(x => x.spell) || !gewoon.length) return null;
+  /* 2. Wie begint, zet precies één spell neer en past. Ligt er al een spell (een level
+     dat met iets op tafel begint), dan speelt hij gewoon, in plaats van een hele beurt niks. */
+  if(W.eerste && S.gTurn === 1 && S.tp === p && !P(p).cols.some(x => x.spell) && gewoon.length){
     let best = null, bs = -99;
     for(const cd of gewoon){ const sc = (spellVal0[cd.el] || 1) + rnd() * 0.4;
       if(sc > bs){ bs = sc; best = cd; } }
     return best ? {cardId: best.id, mode:"spell", col: 2} : null;
   }
 
-  const limiet = nood ? 9 : (P(p).hand.length > 5 ? W.limiet + 1 : W.limiet);
+  let limiet = nood ? 9 : (P(p).hand.length > 5 ? W.limiet + 1 : W.limiet);
+  /* 📖 In het verhaal speelt een tegenstander die het zwaar krijgt, of die zijn hand vol heeft,
+     meer tegelijk. Op 3 levens of minder gooit hij alles erin wat helpt: niemand gaat dood
+     met een hand vol kaarten die hij had kunnen spelen. */
+  if(S.story && p === 1 && !nood){
+    const start = (S.story.startLevens && S.story.startLevens[1]) || P(p).life;
+    if(P(p).life <= Math.ceil(start / 2) || P(p).hand.length >= 4) limiet += 1;
+    if(P(p).life <= 3) limiet = 9;
+  }
   if(S.botPlays >= limiet){
     /* Boven de zetlimiet mag alleen nog een lichtkaart die zichzelf terugverdient:
        ✦ Gulzigheid (leven + offer) en ✦ Gokkersbrouwsel kosten wat, maar leveren kaarten op. */
@@ -9797,7 +9811,9 @@ const WERELDEN = {
 const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => (w === 2 || w === 3 ? [1,2,3,4,5,6] : [1,2,3,4,5]).map(n => w + "-" + n)));
 /* Wereld 2: na 2-1 alleen het pad (2-2). Na het pad splitst het: de herberg (2-4) is een
    doodlopend zijpad, het web (2-3) is de weg verder naar 2-5. */
-const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-2"], "2-4":["2-2"], "2-5":["2-3"]};
+/* Wereld 3: na 3-1 splitst het. Tang (3-2) is een doodlopend zijpad met de smidse,
+   het Rookgordijn (3-3) is de weg verder. */
+const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-2"], "2-4":["2-2"], "2-5":["2-3"], "3-2":["3-1"], "3-3":["3-1"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -12082,7 +12098,7 @@ const INZET_24 = [
   {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", t:"Het heeft de vorm van een hond. Het is geen hond. Er zit niemand in."},
   {s:"engel", bg:2, naam:"Seraf", kleur:"#f6f7fb", t:"Max."},
   {s:"max", groot:true, bg:2, naam:"…", kleur:"#b9a7e6", t:"Verder wordt er niks over gezegd. Max zegt sowieso niks. Max is geen iemand."},
-  {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Twee handen, één leven.</b> Ze delen één levensbalk, maar niet één stapel. <b>Max</b> zet de wolven neer — 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1; die kaarten liggen <b>zwart</b> op tafel. <b>Seraf</b> heeft een eigen <b>witte</b> stapel: elke beurt één kaart, meteen als spell neergelegd, met een ✦ in de hoek. Max zet de wolven daar bovenop."}
+  {s:null, bg:2, naam:"…", kleur:"#b9a7e6", t:"🐺 <b>Max.</b> Hij zet wolven neer: 3 levens, kleurloos, en elke nieuwe wolf geeft <b>álle</b> wolven +1. Legt hij een wolf als spell neer, dan gaat dat opnieuw af zodra er een wolf bovenop komt. Seraf vecht niet mee. Seraf kijkt, en zegt af en toe iets."}
 ];
 const STORY = {
   "1-1":{
@@ -12702,7 +12718,7 @@ const STORY = {
     ltVij:["kuriboh","reborn"],
     aeVij:["ae_hemel"],
     glitch:true,
-    levensVij:8,
+    levensVij:10,
     overleef:6,
     geeftLicht:["reborn","kuriboh","doortast"], geeftLichtSlot:3,
     handVij:["kuriboh"],
@@ -12766,7 +12782,7 @@ const STORY = {
         {s:null, naam:"…", kleur:"#57d7ff", t:"🗡 <b>De Struikrover legt drie dingen neer.</b> Het zijn spells, en ze gaan af zoals spells afgaan: zodra er iets bovenop gezet wordt. Niet eerder. Ze liggen dus te wachten tot ze nodig zijn."},
         {s:null, naam:"…", kleur:"#57d7ff", t:"<b>Swipe</b> raakt alles wat jij hebt staan, en wordt elke keer dat die afgaat één harder. <b>Stab</b> doet 10 aan wat er recht tegenover ligt, en 1 aan jou. <b>Schild</b> geeft alles aan die kant +1 en zet een schildje op elke lege plek."}
       ],
-      deck:{vuur:5, gras:5, steen:5, water:8, roos:4, siphon:4},
+      deck:{steen:5, vuur:5, gras:5, water:5, roos:4, siphon:5},   // dezelfde verdeling als Kaelid
       lt:["siphon"],
       ae:["ae_grassx2","fu_grass"], aeUitleg:true,
       hand:5, struikSpells:true,
@@ -12841,7 +12857,7 @@ const STORY = {
       laag:["…Nee. Nee. Dit is precies zo begonnen."],
       jij:["Sst. Niet spartelen. Dat maakt de draad alleen strakker."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    levensVij:10, eieren:true,
+    levensVij:6, eieren:true,
     /* Er hangt er al een als je binnenkomt. Precies in het midden, op ooghoogte. */
     bord:[{p:1, c:2, el:"ei", hp:4}],
     deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:5},
@@ -12964,7 +12980,7 @@ const STORY = {
     deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, siphon:4},
     ltVij:["siphon"],
     aeVij:["ae_grassx2"],
-    levensVij:7,
+    levensVij:5,
     slaap:true,
     handVij:["siphon"],
     opening:{p:1, lk:"siphon"},
@@ -12973,7 +12989,7 @@ const STORY = {
     ban:10, begint:1
   },
   "2-5":{
-    wereld:2, naam:"Het lokaas", vijand:"Seraf", vechtNaam:"Seraf & Max", muziek:"w2_gevecht", sprite:"engel", zegKleur:"#f6f7fb",
+    wereld:2, naam:"Het lokaas", vijand:"Max", vechtNaam:"Max", muziek:"w2_gevecht", sprite:"max", zegKleur:"#b9a7e6",
     hzruim:true,
     intro:[
       {s:null, bg:2, naam:"…", mu:"w2_valletjes", t:"Je loopt verder. Het woud wordt zachter, warmer, aardiger. Precies waar Magnus voor waarschuwde."},
@@ -13021,9 +13037,13 @@ const STORY = {
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Het heeft nog nooit iets losgelaten dat het eenmaal had."},
       {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Dat is het enige wat ik ervan weet. Dat is ook genoeg."},
       {s:"max", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Nee, ik stuur het niet aan. Dat kan niemand."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb het alleen meegenomen."}
+      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb het alleen meegenomen."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#ffe08a", t:"Hier. Dit mag hij van mij lenen."},
+      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Seraf geeft Max <b>Lichtval</b>: elke keer dat hij een ✦ speelt, trekt hij een kaart."}
     ],
     middenNa:2,
+    /* Seraf zet iets tussendoor: halverwege krijgt Max haar aether. Die krijg jij na de winst. */
+    middenAeVij:"ae_lichtval",
     win:[
       {mu:"w2_seraf", s:"max_stuk", groot:true, naam:"…", kleur:"#b9a7e6", t:"Max zakt terug in de schaduw. Er is niks wat erop reageert. Het is gewoon weg."},
       {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Twee keer."},
@@ -13049,16 +13069,19 @@ const STORY = {
       {s:"fireguy_zwaai", bg:2, naam:"Flint", kleur:"#ff8a4a", t:"See ya."}
     ],
     rug:[null, "schaduw"],
-    zegSpr:"max", tauntSpr:"max_taunt", zegNaamVast:"Seraf",
+    /* Max zegt niks. Max gromt. Seraf praat tussendoor, in de pop-ups. */
+    zegSpr:"max", tauntSpr:"max_taunt", zegNaamVast:"Max",
     zeg:{ beurt:[
-        "Nette zet. Dat blijf ik zeggen en ik blijf het menen.",
-        "Elke wolf maakt de vorige dikker. Dat heb ik het niet geleerd. Zo is het gewoon.",
-        "Ik heb dit al een keer gedaan. In mijn hoofd. Gisteren.",
-        "Loof had me verteld dat je hier langs zou komen.",
-        "Je bent moeilijker geworden. Dat is genoteerd.",
-        "We hebben allebei tijd. Ik alleen wat meer.",
-        "Kijk er niet te lang naar. Dat helpt niet, maar het is prettiger."
+        "Grrr.",
+        "Grrrrrr…",
+        "Wrraf.",
+        "WRAF!",
+        "Hrrm.",
+        "…",
+        "Snuf. Snuf.",
+        "Auuuuuu."
       ],
+      popupSpreker:{s:"engel", naam:"Seraf", kleur:"#f6f7fb"},
       popup:[
         "Je slaat, het wordt sterker. Je slaat nog eens, het wordt nog sterker. Dat is het hele idee.",
         "De kuil was voor het geval je aardig was. De hamer was voor het geval je dom was. Je was geen van beide.",
@@ -13066,19 +13089,18 @@ const STORY = {
         "Vorige keer telde ik tot zes. Dat doe ik nu niet.",
         "Ik heb dit ding niet zelf gevonden. Ik heb er alleen om gevraagd."
       ],
-      laag:["Hm. Dit is de tweede keer dat ik hier sta en dat had er nul moeten zijn."],
-      jij:["Blijf zitten als je wilt. Ik heb geen haast en jij geen levens."] },
+      sterf:"WOEF.", sterfKans:0.18,
+      laag:["Jank."],
+      jij:["Grrrrr."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{wolf:20},
-    ltVij:[],
-    aeVij:["ae_lichtval"],
-    glitch:true,
-    levensVij:8,
+    /* Een roedel: wolven, en twee soorten licht die bij een roedel horen. Zielenoproep haalt
+       een gevallen wolf terug, Vitaliteit is wonden likken. */
+    deckVij:{wolf:16, reborn:2, vital:2},
+    ltVij:["reborn","vital"],
+    aeVij:[],
+    levensVij:6,
     wolfScript:true,
-    /* Serafs eigen stapel naast Max. LET OP: dit is een object, geen `true` — `seraf:true`
-       zet de zes-vleugelbaas van 5-4 aan, en die hoort hier niet. */
-    seraf:{deck:{vuur:4, gras:4, steen:3, water:3, reborn:3, vital:3}},
-    /* Seraf speelt hier met Lichtval, en die krijg je daarna mee. Wurgranken ligt nu bij Knort. */
+    /* Lichtval krijgt Max halverwege van Seraf, en jij na de winst. Wurgranken ligt bij Knort. */
     geeft:"ae_lichtval",
     varianten:{
       straf:{ startSchade:3 },
@@ -13333,7 +13355,7 @@ const STORY = {
     deckVij:{plasma:3, steen:5, vuur:5, gras:5, water:5, siphon:5},
     ltVij:["siphon"], handVij:["siphon"],
     aeVij:["fu_fire","ae_fire6"],
-    levensVij:10,
+    levensVij:5,
     bord:[{p:1, c:2, el:"balrog", hp:20, wakker:true}],
     balrogHeal:2, lavaJij:true,
     geeft:"fu_fire",
@@ -13344,7 +13366,7 @@ const STORY = {
      niet voor iemand die ze niet heeft zien slaan. Haar stapel is alleen gesmeed spul, en
      met Bron van Overvloed werkt ze zich letterlijk kapot. Win je, dan gaat de smidse open. */
   "3-2":{
-    wereld:3, naam:"Het aambeeld", vijand:"Tang", sprite:"smid", zegKleur:"#ff9a5a", muziek:"w3_gevecht",
+    wereld:3, tak:true, naam:"Het aambeeld", vijand:"Tang", sprite:"smid", zegKleur:"#ff9a5a", muziek:"w3_gevecht",
     hzruim:true,
     intro:[
       {s:null, bg:3, naam:"…", mu:"smidse", t:"Achter de berg, waar de as dunner wordt, klinkt iets dat niet rookt en niet sist. Het klinkt als tellen."},
@@ -13357,7 +13379,7 @@ const STORY = {
       {s:"smid_zuur", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Bij de fabriek smeedde ik voor iedereen. Veertig jaar. Ik weet nog steeds niet waar het allemaal heen ging."},
       {s:"smid", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Dus eerst slaan. Jij tegen mij. Dan weet ik wat ik van je in het vuur leg, en of het de moeite is."},
       {s:null, bg:3, naam:"…", kleur:"#ff9a5a", t:"⚒ <b>Alles wat Tang heeft, is gesmeed.</b> Haar stapel is alleen ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs."},
-      {s:null, bg:3, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 En ze werkt zich kapot. <b>Bron van Overvloed</b>: ze trekt 2 kaarten per beurt en betaalt daar elke beurt 1 leven voor. <b>Verzengende Woede</b>: haar vuur doet 5."},
+      {s:null, bg:3, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 En ze slaat hard. <b>Verzengende Woede</b>: haar vuur doet 5. <b>Onwrikbaar</b>: haar steen slaat met al zijn levens. <b>Bergrug</b>: als fusie zet ze twee stenen van 4 neer."},
       {s:"smid_boos", bg:3, naam:"Tang", kleur:"#ff9a5a", t:"Handen uit het vuur. We beginnen bij één."}
     ],
     midden:[
@@ -13394,66 +13416,118 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:7, plasma:7, roos:7, ijs:7},
     ltVij:[],
-    aeVij:["ae_draw3","ae_fire6"],
-    levensVij:10,
+    aeVij:["ae_fire6","ae_stonefull","fu_stone"],
+    levensVij:6,
     opentSmid:true,
     ban:10, begint:1
   },
+  /* ---------- 3-3 · Het Rookgordijn ----------
+     Het Rookgordijn zegt niets. Nooit: niet ervoor, niet tijdens, niet erna. Het is rook.
+     Door de rook loopt een weg met keuzes, en wie precies ⬆⬆⬇⬇⬅➡⬅➡ B A START kiest,
+     komt er zonder gevecht langs. Elke andere keuze loopt de rook in, en dan wordt er gevochten. */
   "3-3":{
     wereld:3, naam:"Rookgordijn", vijand:"Het Rookgordijn", sprite:"rookman", zegKleur:"#b9c6d4", muziek:"w3_rook",
     hzruim:true,
     intro:[
-      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Achter de berg wordt de lucht dikker. Niet warmer — dikker. Je merkt dat je ondieper bent gaan ademen zonder dat je dat besloten hebt."},
-      {s:null, bg:3, naam:"…", t:"Het land vóór je rookt. Niet uit één punt — overal, uit elke barst in de grond tegelijk, alsof er onder alles iets smeult wat er niet uit kan."},
-      {s:null, bg:3, naam:"…", t:"Na twintig stappen zie je je eigen handen niet meer goed. Na veertig weet je niet meer waar je vandaan kwam."},
-      {s:null, bg:3, naam:"…", t:"Je bent verdwaald. Dat is geen gevoel, dat is gewoon een feit dat je nu over jezelf weet."},
-      {s:"rookman", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", mu:"w3_rook", t:"Er staat iets. Vlak voor je. Het stond er de hele tijd al en het beweegt niet."},
-      {s:"rookman", groot:true, bg:3, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"…Hoe ver je ook loopt, je komt hier uit. Iedereen komt hier uit."},
-      {s:"rookman", groot:true, bg:3, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Ik heb er al drie klaarliggen voor je. Wat het zijn weet ik zelf ook niet meer. Dat is niet erg. Jij weet straks ook niet meer wat je zelf neerlegt."},
-      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"💨 <b>Alles ligt dicht.</b> Creatures aan beide kanten, spells aan beide kanten — alles ligt omgedraaid en blijft omgedraaid. Je ziet levens en aanval, en je ziet wie er op wie mikt. Wát er ligt, moet je zelf onthouden."},
-      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"💨 <b>En aan het eind van elke beurt van het Rookgordijn draait de rook.</b> Links wordt rechts, rechts wordt links. Alleen het midden ligt waar het lag. Aan allebei de kanten."},
-      {s:"rookman_boos", groot:true, bg:3, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Succes met onthouden. Ik ben er tweehonderd jaar geleden mee gestopt."}
+      {s:null, bg:3, naam:"…", mu:"w3_as", t:"Achter de berg wordt de lucht dikker. Niet warmer: dikker. Je merkt dat je ondieper bent gaan ademen zonder dat je dat besloten hebt."},
+      {s:null, bg:3, naam:"…", mu:"w3_rook", t:"Het land vóór je rookt. Niet uit één punt: overal, uit elke barst in de grond tegelijk, alsof er onder alles iets smeult wat er niet uit kan."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Na twintig stappen zie je je eigen handen niet meer goed. Na veertig weet je niet meer waar je vandaan kwam."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Je bent verdwaald. Dat is geen gevoel, dat is gewoon een feit dat je nu over jezelf weet."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De grond loopt hier schuin. Je kunt klimmen, of je kunt je laten zakken.",
+        keuze:[{label:"⬆️ Omhoog klimmen", ga:"k2"}, {label:"⬇️ Verder afdalen", ga:"mist"}]}
     ],
-    midden:[
-      {s:"rookman", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Je vecht tegen iets waarvan je niet weet wat het is. Dat doe je al de hele reis. Nu zie je het alleen."}
+    k2:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Boven je wordt de rook dunner. Heel iets. Genoeg om te weten dat het klopte."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Er ligt een richel. Je kunt jezelf eroverheen hijsen, of eronderdoor kruipen naar wat lager ligt.",
+        keuze:[{label:"⬆️ Erover hijsen", ga:"k3"}, {label:"⬇️ Eronderdoor", ga:"mist"}]}
     ],
-    middenNa:2,
+    k3:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Boven de richel houdt het op. Massief gesteente. Hier ga je niet verder omhoog."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Maar rechts van je gaat er een trap naar beneden. Iemand heeft die uitgehakt. Dat is een geruststellende en een verontrustende gedachte tegelijk.",
+        keuze:[{label:"⬇️ De trap af", ga:"k4"}, {label:"⬆️ Toch blijven klimmen", ga:"mist"}]}
+    ],
+    k4:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De trap gaat verder naar beneden dan een trap hoort te gaan. De rook wordt kouder in plaats van warmer."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Onderaan is nóg een trap. En daaronder waarschijnlijk ook.",
+        keuze:[{label:"⬇️ Nog verder omlaag", ga:"k5"}, {label:"⬆️ Terug naar boven", ga:"mist"}]}
+    ],
+    k5:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De trap komt uit op een vlakte. Er staan twee paaltjes met een touw ertussen, en dat touw wijst twee kanten op."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Links. Of rechts.",
+        keuze:[{label:"⬅️ Links", ga:"k6"}, {label:"➡️ Rechts", ga:"mist"}]}
+    ],
+    k6:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Het touw houdt op bij een paal met twee pijlen erop. Ze wijzen allebei ergens heen. Er staat niets bij."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Je krijgt het rare gevoel dat dit ergens over gaat.",
+        keuze:[{label:"➡️ Rechts", ga:"k7"}, {label:"⬅️ Links", ga:"mist"}]}
+    ],
+    k7:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Er ligt een omgevallen wegwijzer in de as. Hij is verkoold, maar je voelt met je vingers nog waar de letters zaten."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Je weet welke kant. Je weet alleen niet waaróm je dat weet.",
+        keuze:[{label:"⬅️ Links", ga:"k8"}, {label:"➡️ Rechts", ga:"mist"}]}
+    ],
+    k8:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De rook staat hier stil. Volkomen stil. Alsof hij wacht tot je klaar bent."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"En dan nog één keer.",
+        keuze:[{label:"➡️ Rechts", ga:"k9"}, {label:"⬅️ Links", ga:"mist"}]}
+    ],
+    k9:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Voor je liggen twee ronde stenen in het zand. Ze zijn glad gesleten. In de ene is een <b>B</b> gekrast, in de andere een <b>A</b>."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Je weet zeker dat je dit ergens eerder hebt gedaan, en je weet zeker dat het niet in dit leven was.",
+        keuze:[{label:"🅱 De B", ga:"k10"}, {label:"🅰 De A", ga:"mist"}]}
+    ],
+    k10:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De steen zakt met een klik weg in het zand. Ergens ver weg schuift er iets open dat al heel lang dicht zat."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"De andere steen ligt er nog.",
+        keuze:[{label:"🅰 De A", ga:"k11"}, {label:"🅱 Nog een keer de B", ga:"mist"}]}
+    ],
+    k11:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Klik. En dan, midden in het niets, op ooghoogte: een verroeste hendel aan een paal die nergens aan vastzit."},
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Er staat één woord op. Het is er heel netjes ingeslagen, door iemand met veel geduld: <b>START</b>."},
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Trek je eraan?",
+        keuze:[{label:"▶ START", ga:"konami"}, {label:"🚶 Doorlopen", ga:"mist"}]}
+    ],
+    konami:[
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"De hendel gaat om met een klap die je in je kaken voelt."},
+      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"De rook trekt weg. Niet langzaam. In één keer, alsof iemand een laken van een tafel trekt."},
+      {s:"rookman", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Er stond iets. Vlak achter je. De hele tijd. Het staat er nog en het beweegt niet."},
+      {s:"rookman", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Het zegt niets. Het heeft nog nooit iets gezegd."},
+      {s:"rookman_uit", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Het staart je aan. Er gebeurt iets in zijn gezicht dat je niet kunt lezen, wat vooral komt doordat het geen gezicht heeft."},
+      {s:"rookman_uit", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Dan schuift het opzij. Heel langzaam, zoals rook opzij schuift als er een deur opengaat."},
+      {s:null, bg:3, naam:"…", t:"Je loopt de vlakte af zonder één kaart te hebben gespeeld. Achter je blijft het stil."}
+    ],
+    mist:[
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"Je loopt door. Vijf minuten. Tien. Je komt langs een verkoolde wegwijzer die je al eerder hebt gezien."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"En dan nog een keer. En dan besef je dat de rook niet om je heen hangt. De rook hángt niet. De rook kíjkt."},
+      {s:"rookman", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Vlak voor je, op twee meter, staat het. Het heeft daar de hele tijd gestaan."},
+      {s:"rookman", groot:true, bg:3, naam:"…", kleur:"#b9c6d4", t:"Het zegt niets. Het beweegt niet. Het wacht."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"💨 <b>Alles ligt dicht.</b> Creatures aan beide kanten, spells aan beide kanten: alles ligt omgedraaid en blijft omgedraaid. Je ziet levens en aanval, en je ziet wie er op wie mikt. Wát er ligt, moet je zelf onthouden."},
+      {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"💨 <b>En aan het eind van elke beurt van het Rookgordijn draait de rook.</b> Links wordt rechts, rechts wordt links. Alleen het midden ligt waar het lag. Aan allebei de kanten."}
+    ],
+    gevechtNa:{mist:"verdwaald"},
+    klaarNa:{konami:{}},   // geen gevecht; de gewone buit (Gokkersbrouwsel) krijg je toch
+    varianten:{verdwaald:{}},
     win:[
       {s:"rookman_uit", groot:true, naam:"…", kleur:"#b9c6d4", t:"De rook wordt dun. Wat eronder zat is kleiner dan je dacht, en het kijkt naar de grond."},
-      {s:"rookman_stuk", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Je hebt op dingen geslagen die je niet kon zien. Dat is het enige wat werkt en niemand doet het."},
-      {s:"rookman_stuk", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Ik ben rook. Alles wat ik heb is rook. Ik was het bijna vergeten, en dat is het treurigste wat ik over mezelf kan zeggen."},
-      {s:"rookman_uit", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"…Wacht. Er ligt hier één ding dat níet oplost. Dat is dus nooit van mij geweest."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"Het schuift iets over de grond naar je toe dat níet oplost. ✦ <b>Gokkersbrouwsel</b> — betaal een leven, noem een type, trek er drie en gooi weg wat het niet is."},
-      {s:"rookman_uit", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Van iemand die hier ooit geluk had. Ik weet niet meer of die weg is gelopen of dat ik die heb tegengehouden. Neem het maar mee, dan hoef ik daar niet meer over na te denken."}
+      {s:"rookman_stuk", groot:true, naam:"…", kleur:"#b9c6d4", t:"Het zegt niets. Het lost op, gewoon, tussen de stenen door, alsof het nooit iets anders is geweest dan rook."},
+      {s:null, naam:"…", kleur:"#b9c6d4", t:"Waar het stond, ligt iets dat níet oplost."}
     ],
     verlies:[
-      {s:"rookman_boos", groot:true, naam:"Het Rookgordijn", kleur:"#b9c6d4", t:"Zie je. Iedereen komt hier uit. En bijna niemand komt er weer uit."}
+      {s:"rookman_boos", groot:true, naam:"…", kleur:"#b9c6d4", t:"De rook sluit zich. Je gaat zitten, want dat doet iedereen hier."},
+      {s:"rookman", groot:true, naam:"…", kleur:"#b9c6d4", t:"Over een tijdje weet je niet meer dat je ergens heen wilde."}
     ],
     na:[
       {s:null, bg:3, naam:"…", t:"Je loopt weg zonder te weten in welke richting, en na een tijdje wordt de grond weer hard onder je voeten."},
       {s:null, bg:3, naam:"…", t:"Ergens vóór je klinkt muziek. Dat kan niet. Het klinkt toch."}
     ],
     zegSpr:"rookman", tauntSpr:"rookman_taunt",
-    zeg:{ beurt:[
-        "Weet je nog wat daar lag? Ik ook niet.",
-        "Links. Nee — rechts. Nee. Kijk maar.",
-        "Je aarzelt. Dat is goed. Aarzelen is het enige eerlijke hier.",
-        "Ik draai zo weer. Onthoud dat, als je toch iets onthoudt.",
-        "…",
-        "Het is niet erg om te vergeten. Het is erg om te denken dat je het nog weet."
-      ],
-      popup:[
-        "Ik sta hier tweehonderd jaar. Er is nog nooit iemand langs mij gekomen. Dat is niet omdat ik sterk ben.",
-        "Wat je neerlegt ben je kwijt zodra je het loslaat. Dat is hier niet anders dan ergens anders. Hier zie je het alleen.",
-        "Er zit iets onder deze grond dat er niet uit mag. Ik ben wat er wél uit komt."
-      ],
-      laag:["…Dat. Dat had niemand nog gedaan."],
-      jij:["Blijf maar. Het is hier rustig als je eenmaal stopt met zoeken."] },
+    /* Het Rookgordijn zegt niets: geen taunts, geen pop-ups, niets. */
+    zeg:{ beurt:[], popup:[], laag:[], jij:[] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:7, vuur:7, gras:7, water:7, greed:3},
     ltVij:["greed"],
     aeVij:["ae_draw3"],
-    levensVij:9,
+    levensVij:7,
     bord:[{p:1, c:0, el:"steen"},{p:1, c:2, el:"vuur"},{p:1, c:4, el:"gras"}],
     mist:true, mistZicht:true, spiegel:true,
     geeftLicht:"gamble",
@@ -13584,7 +13658,7 @@ const STORY = {
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Er is geen tweede taak."},
       {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"⚙️ <b>De lopende band.</b> Alles wat je neerlegt, creature of spell, van jou of van hem, schuift meteen zo ver mogelijk naar rechts, tot er iets in de weg staat. Valt er iets weg, dan schuift de rest weer door. Schuiven triggert niks."},
       {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"🔥 <b>De oven.</b> Aan het begin van elke beurt van hem gaat de oven open: wat helemaal rechts ligt, van jou én van hem, gaat erin. Weg. En dan schuift alles weer een plek op."},
-      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Uitrusting: 🟣 Bergrug. 🟣 Oerkracht op steen. 🟣 Oerkracht op vuur."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Uitrusting: 🟣 Brandoffer. 🟣 Vonkoverslag. 🟣 Oerkracht op steen."},
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Twee keer Oerkracht is niet toegestaan."},
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik heb niks gevraagd. Dus is er niks geweigerd."},
       {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"BEGINNEN."}
@@ -13666,8 +13740,8 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{plasma:3, rots:3, steen:5, vuur:5, gras:5, water:5, negate:5},
     ltVij:["negate"],
-    aeVij:["fu_stone","ae_hp3"], keuzeVij:["steen","vuur"],
-    levensVij:9,
+    aeVij:["ae_offer","ae_vonk","ae_hp3"], keuzeVij:"steen",
+    levensVij:7,
     band:true,
     geeftLicht:"negate",
     ban:10, begint:1
@@ -13981,11 +14055,14 @@ const STORY = {
       laag:[],
       jij:["Blijf zitten. Niet opstaan. Nooit opstaan in een boot.", "Bijna. Echt bijna."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    /* Zes vissen: drie in het deck, drie al in het graf. Zielenoproep haalt ze terug. */
-    deckVij:{vis:3, water:8, ijs:4, gras:3, reborn:4, siphon:2, darkhole:2},
+    /* Een deck volgens dezelfde regels als het jouwe: 6 van elk element (3 van haar water is
+       al ijs), 6 lichtkaarten (hoogstens 3 van een soort), 3 aethers. Daarbovenop haar eigen
+       kaart: zes vliegende vissen, drie in het deck en drie al in het graf. */
+    deckVij:{steen:6, vuur:6, gras:6, water:3, ijs:3, vis:3, reborn:3, darkhole:2, siphon:1},
     grafVij:["vis","vis","vis"],
     ltVij:["reborn","siphon","darkhole"],
-    aeVij:["ae_watercycle","fu_water"],
+    /* Eeuwige terugkeer is haar thema: wat in het water verdwijnt, komt terug. */
+    aeVij:["ae_watercycle","fu_water","ae_graf"], keuzeVij:"water",
     levensVij:20,
     overleef:6,
     sluis:false,
@@ -14074,10 +14151,13 @@ const STORY = {
       laag:["Hé!", "Hé! Terug!"],
       jij:["Blijven liggen.", "Jij ook mooi."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:9, gras:6, steen:6, ijs:5, kloon:3, siphon:3, vital:3},
+    /* Zelfde regels als jij: 6 van elk element, een paar geüpgraded (ze verzamelt het mooiste),
+       6 lichtkaarten, 3 aethers. Haar vuur doet onder water niets, net als dat van jou. */
+    deckVij:{steen:4, rots:2, vuur:6, gras:4, roos:2, water:4, ijs:2, kloon:3, vital:2, siphon:1},
     ltVij:["kloon","siphon","vital"],
-    aeVij:["fu_water"],
-    levensVij:9,
+    /* Acht armen die vastgrijpen, en haar stenen knijpen met alles wat ze hebben. */
+    aeVij:["fu_grass","ae_grassx2","ae_stonefull"],
+    levensVij:7,
     inkt:true, geenVuur:true, verzuipt:true, biome:"diepte",
     geeftLicht:"kloon",
     ban:10, begint:1
@@ -14177,10 +14257,13 @@ const STORY = {
       laag:["Nee.", "NEE.", "Ik scheur. Ik scheur en het is jouw schuld."],
       jij:["Ja.", "Blijf liggen. Het gaat vanzelf.", "Nog even. Nog heel even."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{vuur:6, water:6, gras:6, ijs:9, negate:3},
-    ltVij:["negate"],
-    aeVij:["fu_water","ae_stonefull"],
-    levensVij:12,
+    /* Zelfde regels als jij: 6 van elk element, al haar water is ijs, 6 lichtkaarten, 3 aethers.
+       Onder haar ligt de Lichtbrenger al heel lang; die speelt ze zelf ook. */
+    deckVij:{steen:6, vuur:6, gras:6, ijs:6, negate:3, brenger:3},
+    ltVij:["negate","brenger"],
+    /* "Ik vries altijd weer dicht": wat van haar is komt terug. */
+    aeVij:["ae_graf","ae_offer","ae_draw3"], keuzeVij:"water",
+    levensVij:7,
     ijsvlakte:true, biome:"ijs",
     geeftLicht:"brenger",
     ban:10, begint:1
@@ -14395,10 +14478,11 @@ const STORY = {
       laag:["Er zit een gat in de beweging. Dat had ik niet."],
       jij:["Blijf liggen. Het water draagt je wel.", "Zo ja."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:12, ijs:6, steen:5, gras:4, dfusion:3, negate:3, vital:3},
+    /* Zelfde regels als jij: 6 van elk element, een deel geüpgraded, 6 lichtkaarten, 3 aethers. */
+    deckVij:{steen:4, rots:2, vuur:6, gras:6, water:2, ijs:4, dfusion:2, negate:2, vital:2},
     ltVij:["dfusion","negate","vital"],
     aeVij:["fu_water","ae_watercycle","ae_hemel"],
-    levensVij:14,
+    levensVij:10,
     bord:[{p:1, c:2, el:"water"}],
     geeftLicht:"dfusion",
     ban:10, begint:1
@@ -15983,7 +16067,8 @@ function portretPaint(){
   const sig = [key, cls.join(" "), em ? em.n : 0, st.id, kleur].join("|");
   if(vak.dataset.sig !== sig){
     vak.dataset.sig = sig;
-    vak.innerHTML = `<div id="portret" class="${cls.join(" ")}" style="--ptk:${kleur};--ptl1:${l1};--ptl2:${l2}">`
+    const rand = L.zegKleur || st.zegKleur || l1;
+    vak.innerHTML = `<div id="portret" class="${cls.join(" ")}" style="--ptk:${kleur};--ptl1:${l1};--ptl2:${l2};--ptrand:${rand};--ptgloed:${/^#[0-9a-f]{6}$/i.test(rand) ? rand + "66" : "rgba(107,125,146,.35)"}">`
       + `<div class="ptbg">${st.ptBg}</div><div class="ptfig">${spriteSVG(key)}</div>`
       + `<div class="ptnaam">${naam}</div></div><div id="ptbel"></div>`;
     vak.dataset.bel = "";
@@ -16107,6 +16192,7 @@ async function storyFase2(F){
   await praatLosAwait(F.praat || []);
   busyFlag = false;
   P(1).life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0));
+  st.omslagBezig = false;
   P(1).deck = deckUit(F.deck || {steen:20}, 1);
   P(1).hand = []; P(1).grave = [];
   P(1).cols.forEach(c => { c.cre = null; c.spell = null; });
@@ -16189,7 +16275,10 @@ function popupRegels(soort){
   if(!zin) return [];
   noteerGezegd(zin);
   /* Een tussendoortje mag uit meer regels bestaan: die staan in één zin, gescheiden door |. */
-  return zin.split("|").map(t => ({s: st.zegSpr, naam: st.zegNaam, kleur: st.zegKleur || undefined, t}));
+  /* Soms praat er in de pop-ups iemand anders dan wie er vecht (2-5: Max gromt, Seraf praat). */
+  const sp = soort === "popup" && cfg.popupSpreker;
+  return zin.split("|").map(t => sp ? ({s: sp.s, naam: sp.naam, kleur: sp.kleur, t})
+                                    : ({s: st.zegSpr, naam: st.zegNaam, kleur: st.zegKleur || undefined, t}));
 }
 /* 💤 Het Wiegelied: elke eigen beurt waarin je niet aanvalt zak je dieper weg — en zíj wordt
    er beter van. Val je aan, dan schud je jezelf weer wakker. Op drie ben je er geweest. */
@@ -16682,6 +16771,10 @@ async function storyEindeBeurt(){
   if(S.tp !== 1 || S.turnNo[1] < (L.middenNa || 1)) return;
   S.story.middenGedaan = true;
   await praatAwait(S.story.id, "midden");
+  if(L.middenAeVij){
+    S.ae[1].push(L.middenAeVij);
+    addLog(`🟣 ${pName(1)} krijgt <em>${AETHERS[L.middenAeVij].name}</em>.`, true);
+  }
   if(L.middenAe){
     S.ae[0].push(L.middenAe);
     addLog(`🟣 Je krijgt <em>${AETHERS[L.middenAe].name}</em> — ${AETHERS[L.middenAe].kort}.`, true);
@@ -16722,7 +16815,7 @@ const OVERWORLD_RANDEN = [
   ["1-1","1-2"], ["1-2","1-3"], ["1-3","1-4"], ["1-4","1-5"], ["1-5","2-1"],
   ["2-1","2-2"], ["2-2","2-3"], ["2-2","2-4"], ["2-3","2-5"], ["2-5","2-6"],
   ["2-1","3-1","2-6"],
-  ["3-1","3-2"], ["3-2","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
+  ["3-1","3-2"], ["3-1","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
   ["3-1","4-1","3-6"],
   ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
   ["3-1","hemel","4-5"]
@@ -16733,7 +16826,7 @@ const OVERWORLD_PAD = {
   "1-5>2-1":[[41.5,52],[40,49.5]],
   "2-1>2-2":[[32,50]],
   "2-1>3-1":[[47,45],[55,41.5]],
-  /* Naar Tang loopt het pad onder het Rookgordijn door; terug naar het Rookgordijn gaat rechtstreeks. */
+  /* Naar Tang loopt het pad onder het Rookgordijn door; naar het Rookgordijn gaat het rechtstreeks. */
   "3-1>3-2":[[67,44.5],[75,42]],
   "3-1>4-1":[[63,47],[64,52]],
   "3-1>hemel":[[58,33],[55,24]]
