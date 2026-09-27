@@ -1606,6 +1606,7 @@ h3{font-size:.66rem; line-height:1.9}
 .wkscene{position:relative; width:100%; aspect-ratio:var(--wkr,16/9); border-radius:6px; overflow:visible;
   background:#140d08 center/100% 100% no-repeat; box-shadow:inset 0 0 0 2px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.5);
   image-rendering:pixelated}
+.wkscene.voorbaas .wkitem{z-index:2}
 .wkitem{position:absolute; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;
   background:none; border:0; padding:0; cursor:pointer; font:inherit; color:inherit}
 .wkitem img{width:100%; display:block; image-rendering:pixelated; border:2px solid #2a1a0c; border-radius:3px;
@@ -2167,19 +2168,9 @@ h3{font-size:.66rem; line-height:1.9}
 .rotsmeter{margin-top:7px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem;
   line-height:1.7; padding:5px 6px; border-radius:3px; border:2px solid #7a5b3a;
   color:#e6c88a; background:#211708}
-/* 🌋 Lava onder je voeten (3-1: alleen jouw kant; de schoorsteen: allebei). De vloer onder
-   de kaartplekken is gestold gesteente met gloeiende scheuren die langzaam oplichten, de
-   creature-plekken gloeien van onderen, en wat erop staat heeft een rode rand aan de voet. */
+/* 🌋 Lava onder je voeten (3-1: alleen jouw kant; de schoorsteen: allebei). Geen vloerplaat
+   meer: alleen de creature-plekken gloeien van onderen, en wat erop staat heeft een rode rand. */
 #app.lavajij #row0, #app.lavaveld #row0, #app.lavaveld #row1{position:relative; isolation:isolate}
-#app.lavajij #row0::before, #app.lavaveld #row0::before, #app.lavaveld #row1::before{content:""; position:absolute; inset:-8px -14px; z-index:-1;
-  pointer-events:none; border-radius:10px;
-  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='90' viewBox='0 0 160 90'><g fill='none' stroke='%23ff8a2a' stroke-linecap='square' stroke-linejoin='miter'><path stroke-width='3' d='M0 22 L18 26 L30 18 L52 24 L60 40 L84 36 L96 46 L120 42 L134 30 L160 34'/><path stroke-width='2' d='M60 40 L56 58 L70 72 L66 90'/><path stroke-width='2' d='M120 42 L126 60 L146 66 L160 62'/><path stroke-width='2' d='M0 70 L14 66 L26 74 L40 70'/><path stroke-width='2' d='M96 46 L92 62 L104 78 L100 90'/><path stroke-width='2' d='M30 18 L26 0'/></g><g fill='%23ffd45e'><rect x='58' y='38' width='4' height='4'/><rect x='118' y='40' width='4' height='4'/><rect x='24' y='72' width='3' height='3'/></g></svg>") 0 0/160px 90px repeat,
-    radial-gradient(60% 90% at 20% 100%, rgba(255,120,30,.45), transparent 70%),
-    radial-gradient(60% 90% at 80% 100%, rgba(255,90,20,.40), transparent 70%),
-    linear-gradient(0deg, #5a1606 0%, #2c0b04 55%, #160603 100%);
-  box-shadow:0 0 26px 4px rgba(255,80,20,.35), inset 0 0 18px rgba(0,0,0,.7);
-  animation:lavavloer 3.2s ease-in-out infinite}
-@keyframes lavavloer{0%,100%{filter:brightness(.8) saturate(1)} 50%{filter:brightness(1.25) saturate(1.2)}}
 #app.lavajij #row0 .slot.cr, #app.lavaveld #row0 .slot.cr, #app.lavaveld #row1 .slot.cr{border-color:#ff7a2a !important;
   background:linear-gradient(0deg, rgba(255,120,30,.55), rgba(110,20,4,.35) 55%, rgba(30,8,2,.25)) !important;
   box-shadow:inset 0 -18px 26px -8px rgba(255,140,40,.95), 0 0 14px rgba(255,80,20,.6);
@@ -2651,14 +2642,16 @@ body:not(.geladen) #app{visibility:hidden}
   body.verhaal #app{grid-template-columns:minmax(242px,310px) minmax(0,1fr) minmax(150px,190px)}
   /* Het veld schuift 40px onder de bredere balk door, zodat de kolommen blijven waar ze stonden. */
   body.verhaal #fieldwrap{margin-left:-40px}
+  /* ...en de balk ligt daar bovenop, met zijn eigen vulling over de volle breedte. */
+  body.verhaal #left{z-index:5}
   body.verhaal #left #chain,body.verhaal #left #logknop,body.verhaal #left #log,body.verhaal #left #chatbox{display:none !important}
   body.verhaal #left{gap:12px}
   body.verhaal #preview{flex:0 1 auto; min-height:0; overflow:hidden}
   body.verhaal #preview .pv,body.verhaal #preview .circ{width:min(286px,100%)}
-  body.verhaal #portretvak{display:flex; flex-direction:column; gap:8px; margin-top:auto; flex:0 0 auto}
+  body.verhaal #portretvak{display:block; position:relative; margin-top:auto; flex:0 0 auto}
   body.verhaal #praatbel:not(.winkelbel){display:none !important}
 }
-#portret{position:relative; width:100%; height:min(286px,38vh); overflow:hidden; isolation:isolate;
+#portret{position:relative; width:100%; height:min(368px,48vh); overflow:hidden; isolation:isolate;
   border:3px solid var(--ink2,#0b0f14); outline:2px solid var(--ptk,#6b7d92); outline-offset:-5px;
   background:linear-gradient(180deg, var(--ptl1,#1b2633) 0%, var(--ptl2,#0b1018) 100%);
   box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 8px 18px rgba(0,0,0,.45); image-rendering:pixelated}
@@ -2670,7 +2663,10 @@ body:not(.geladen) #app{visibility:hidden}
   background:linear-gradient(180deg, rgba(6,8,12,.05) 0%, rgba(6,8,12,.35) 70%, rgba(6,8,12,.7) 100%)}
 #portret .ptfig{position:absolute; left:0; right:0; bottom:0; height:90%; z-index:1;
   display:flex; justify-content:center; align-items:flex-end}
-#portret .ptfig .sprwrap{position:relative; height:100%; width:auto; --sprgroei:1}
+#portret .ptfig .sprwrap{position:relative; height:100%; width:auto; --sprgroei:1;
+  animation:ptdein 3.4s ease-in-out infinite}
+/* Hij deint zachtjes op en neer, zoals op de kaart en in de praatschermen. */
+@keyframes ptdein{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
 #portret .ptfig .sprwrap .sprbeeld{height:100%; width:auto; max-width:none;
   transform:translateY(calc(var(--onder,0) * 100%))}
 #portret .ptfig svg{height:100%; width:auto}
@@ -2689,14 +2685,19 @@ body:not(.geladen) #app{visibility:hidden}
 @keyframes ptflits{0%{opacity:1} 100%{opacity:0}}
 @keyframes ptsprong{0%,100%{transform:translateY(0)} 40%{transform:translateY(-10px) scale(1.04)} 70%{transform:translateY(-3px)}}
 #portret.pt-stuk .ptfig{filter:grayscale(.6) brightness(.8)}
-#ptbel{min-height:66px; padding:8px 10px; border:2px solid var(--ptk,#6b7d92); background:rgba(8,11,20,.94);
-  font-family:"VT323",ui-monospace,monospace; font-size:1.08rem; line-height:1.2; color:var(--ink);
-  position:relative; visibility:hidden}
-#ptbel.show{visibility:visible}
-#ptbel::before{content:""; position:absolute; left:50%; top:-9px; transform:translateX(-50%);
-  border:8px solid transparent; border-top:0; border-bottom:9px solid var(--ptk,#6b7d92)}
-#ptbel .pbnaam{display:block; font-size:.8rem; color:var(--ptk,#6b7d92); margin-bottom:2px; letter-spacing:.06em}
-#ptbel.hard{border-color:#ffe08a; color:#fff3c8}
+/* De tekstballon hoort niet in het venster: hij hangt erboven en valt er half overheen,
+   net als de oude ballon linksonder. Het pijltje wijst omlaag, naar wie er praat. */
+#ptbel{position:absolute; left:6px; right:6px; bottom:calc(100% - 26px); z-index:6; display:none;
+  background:#0d1119; border:3px solid var(--ptk,var(--danger)); border-radius:4px; padding:9px 12px;
+  color:var(--ink); font-family:"VT323",ui-monospace,monospace; font-size:1.18rem; line-height:1.16;
+  box-shadow:0 4px 0 rgba(0,0,0,.5); pointer-events:none}
+#ptbel.show{display:block; animation:pbpuls .5s steps(3,end) 1}
+#ptbel::after{content:""; position:absolute; left:50%; bottom:-13px; transform:translateX(-50%);
+  border:7px solid transparent; border-top-color:var(--ptk,var(--danger))}
+#ptbel .pbnaam{display:block; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.44rem;
+  letter-spacing:.1em; color:var(--ptk,var(--danger)); margin-bottom:6px}
+#ptbel.hard{border-width:4px; border-color:#ffe08a; color:#fffdf2; background:#1a1408}
+#ptbel.hard .pbnaam{display:none}
 @media (max-width:1080px){ #portretvak{display:none !important} }
 /* ================= HORIZON · ACHTERGROND =================
    LET OP, dit blok hoort HELEMAAL ONDERAAN te staan. De wereldregels hierboven
@@ -2753,12 +2754,12 @@ body:not(.geladen) #app{visibility:hidden}
     <div id="piles0"></div>
     <div id="rtools">
       <button class="tbtn" id="apbtn" data-act="btn" data-btn="autopass" title="Autopass: chain automatisch doorlaten">&#9889;</button>
+      <button class="tbtn" id="klokbtn" data-act="btn" data-btn="klokstart" title="Start de klok: 5 minuten per speler, +2 minuten per afgeronde beurt">&#9201;</button>
       <button class="tbtn" data-act="btn" data-btn="help" title="Regels">?</button>
       <button class="tbtn" data-act="btn" data-btn="tutorial" title="Tutorial">📖</button>
       <button class="tbtn" id="rtmute" data-act="btn" data-btn="mute" title="Geluid aan of uit" style="display:none">&#128266;</button>
       <button class="tbtn" id="privbtn" data-act="btn" data-btn="handofftoggle" title="Hotseat-privacy aan/uit">👁</button>
       <button class="tbtn mobonly" data-act="btn" data-btn="mlog" title="Logboek &amp; chain">&#128220;</button>
-      <button class="tbtn" id="klokbtn" data-act="btn" data-btn="klokstart" title="Start de klok: 5 minuten per speler, +2 minuten per afgeronde beurt">&#9201;</button>
       <button class="tbtn" data-act="btn" data-btn="restart" title="Opnieuw">↺</button>
     </div>
   </aside>
@@ -4227,7 +4228,7 @@ const AU = {
     if(!C) { this.started = true; return; }
     try{
       this.ctx = new C();
-      this.master = this.ctx.createGain(); this.master.gain.value = 0.9; this.master.connect(this.ctx.destination);
+      this.master = this.ctx.createGain(); this.master.gain.value = SET.mute ? 0 : 0.9; this.master.connect(this.ctx.destination);
       this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = volS(); this.sfxG.connect(this.master);
     }catch(e){ this.ctx = null; }
     this.started = true;
@@ -4235,8 +4236,14 @@ const AU = {
   resume(){ if(this.ctx && this.ctx.state === "suspended") this.ctx.resume(); },
   setSfx(v){ SET.sfx = v; if(this.sfxG) this.sfxG.gain.value = volS(); },
   /* De knop in de hoek: alles uit, of alles terug op de stand die je had. */
+  /* Elke geluidsknop is een hoofdschakelaar: uit is ALLES stil (muziek, effecten, stingers).
+     Naast het volume zetten we ook `muted` en pauzeren we: op telefoons (iOS) doet het
+     volume van een audiospeler namelijk niets, en dan bleef de muziek gewoon doorspelen. */
   stil(uit){ SET.mute = !!uit; saveSet();
     if(this.sfxG) this.sfxG.gain.value = volS();
+    if(this.master) this.master.gain.value = SET.mute ? 0 : 0.9;
+    [...Object.values(this.lagen), ...Object.values(this.warm), ...(this.losse || [])].forEach(a => { if(a) a.muted = SET.mute; });
+    if(SET.mute) (this.losse || []).forEach(a => { try{ a.pause(); }catch(e){} });
     /* Uitzetten is meteen stil — daar hoort geen overvloeier bij. */
     if(SET.mute) Object.values(this.lagen).forEach(a => { if(a){ a.volume = 0; if(!a.paused) a.pause(); } });
     this.vloei();
@@ -4264,7 +4271,7 @@ const AU = {
         /* Het laadscherm heeft hem meestal al opgehaald; dan pakken we die. */
         const a = this.warm[pad] || new Audio(pad);
         delete this.warm[pad];
-        a.loop = true; a.volume = 0; a.preload = "auto";
+        a.loop = true; a.volume = 0; a.preload = "auto"; a.muted = !!SET.mute;
         /* Ontbreekt het bestand, dan halen we elke naam weg die ernaar wees. */
         a.addEventListener("error", () => {
           Object.keys(MUZIEK).forEach(k => { if(MUZIEK[k] === pad) MUZIEK[k] = ""; });
@@ -4276,7 +4283,7 @@ const AU = {
     /* Het nieuwe nummer begint pas als het oude weg is: vloei() start het zelf. Is er
        niets anders te horen, dan meteen. */
     const doel = this.lagen[pad];
-    if(doel && !this.anderHoorbaar()){ const pr = doel.play(); if(pr && pr.catch) pr.catch(()=>{}); }
+    if(doel && !SET.mute && !this.anderHoorbaar()){ const pr = doel.play(); if(pr && pr.catch) pr.catch(()=>{}); }
     this.vloei();
   },
   anderHoorbaar(){
@@ -4312,7 +4319,7 @@ const AU = {
           if(el.paused) { klaar = false; return; }
           wil = Math.min(wil, el.volume); klaar = false;
         }
-        if(huidig && magIn && el.paused && wil > 0){ const pr = el.play(); if(pr && pr.catch) pr.catch(()=>{}); }
+        if(huidig && magIn && el.paused && wil > 0 && !SET.mute){ const pr = el.play(); if(pr && pr.catch) pr.catch(()=>{}); }
         const d = wil - el.volume, stap = d < 0 ? UIT : IN;
         if(Math.abs(d) <= stap) el.volume = Math.max(0, Math.min(1, wil));
         else { el.volume = Math.max(0, Math.min(1, el.volume + Math.sign(d)*stap)); klaar = false; }
@@ -4327,9 +4334,12 @@ const AU = {
   stinger(sleutel){
     if(FAST) return false;
     if(!MUZIEK[sleutel]) return false;
+    if(SET.mute) return true;          // stil = ook geen stinger (en ook niet de synth ervoor in de plaats)
     this.boot(); this.resume();
     try{
       const a = new Audio(MUZIEK[sleutel]);
+      (this.losse = this.losse || []).push(a);
+      a.addEventListener("ended", () => { this.losse = (this.losse || []).filter(x => x !== a); }, {once:true});
       a.volume = Math.max(0, Math.min(1, volM()));
       const terug = () => { this.duik = 1; this.vloei(); };
       a.addEventListener("ended", terug, {once:true});
@@ -4341,7 +4351,7 @@ const AU = {
   },
   /* eigen bestand als die er is, anders de synth */
   play(name, opt){
-    if(FAST) return;
+    if(FAST || SET.mute) return;
     this.boot(); this.resume();
     const src = SOUNDS[name];
     if(src){
@@ -11305,6 +11315,7 @@ const HORIZON_BEELD = {
   "h33_slinger": "art/hz-33-slinger.png",    // een slinger die het hele beeld overspant
   "h33_doek":    "art/hz-33-doek.png",       // het tentdoek vlak boven je hoofd
   /* 3-5 · de fabriek */
+  "h32s_smidse": "art/winkel-smidse.png",    // 3-2 · Tang vecht in haar eigen smidse
   "h34_lucht":   "art/hz-34-lucht.png",      // oranjezwarte lucht
   "h34_fabriek": "art/hz-34-fabriek.png",    // de skyline: schoorstenen, daken, tanks
   "h34_leiding": "art/hz-34-leidingen.png",  // een wirwar van pijpen en loopbruggen
@@ -11375,6 +11386,8 @@ const HORIZON_BEELD = {
   "h42_hoop":    "art/hz-42-hoop.png",       // 4-2 · haar stapels op de voorgrond
   "h42_armen":   "art/hz-42-armen.png",      // 4-2 · armen die van boven naar binnen komen
   /* 4-3: de lagen die er echt op GitHub staan (vlakte, lijn, spiegel, niets). */
+  "hsp_paleis":  "art/hz-spiegel-paleis.png",  // 4-4 · het spiegelpaleis, vol
+  "hsp_lijsten": "art/hz-spiegel-lijsten.png", // 4-4 · twee spiegellijsten vlak voor je
   "h43_vlakte":  "art/hz-43-vlakte.png",     // 4-3 · het spiegelvlak tot aan de horizon, vol
   "h43_lijn":    "art/hz-43-lijn.png",       // 4-3 · de horizonlijn met paaltjes en hun spiegeling
   "h43_spiegel": "art/hz-43-spiegel.png",    // 4-3 · de weerspiegeling die in het water ligt
@@ -11406,8 +11419,7 @@ const HORIZON = {
      herkenningspunten staan op ooghoogte, en de dichtstbijzijnde laag hangt bovenin.
      Onderin nog een tweede exemplaar, zodat het landschap tot op de bodem doorloopt. */
   /* 3-2 · de smidse. Geen eigen stroken (nog): de fabriek staat in de verte, daar kwam ze vandaan. */
-  "3-2":[{b:"h34_lucht",   y:0,  h:100, w:110, d:.03, op:1},
-         {b:"h34_fabriek", y:30,        w:112, d:.22, op:.7}],
+  "3-2":[{b:"h32s_smidse", y:0,  h:100, w:108, d:.05, op:1}],
   "3-3":[{b:"h32_lucht",   y:0,  h:100, w:110, d:.02, op:1},
          {b:"h32_silhouet",y:30,        w:114, d:.22, op:.6},
          {b:"h32_rook1",   y:44,        w:124, d:.55, op:.7},
@@ -11490,10 +11502,9 @@ const HORIZON = {
          {b:"h42_wand",    y:18,        w:120, d:.30, op:.9},
          {b:"h42_hoop",    bot:0,       w:132, d:.66, op:.9},
          {b:"h42_armen",   y:-10,       w:138, d:.95, op:1}],
-  "4-4":[{b:"h43_vlakte",  y:0,  h:100, w:110, d:.03, op:1},
-         {b:"h43_lijn",    y:34,        w:120, d:.25, op:.95},
-         {b:"h43_spiegel", y:46,        w:125, d:.55, op:.85},
-         {b:"h43_niets",   y:-4,        w:136, d:.90, op:.9}],
+  /* 4-4: het spiegelpaleis. Eén volle zaal die zichzelf herhaalt, en twee lijsten vlak voor je. */
+  "4-4":[{b:"hsp_paleis",  y:0,  h:100, w:110, d:.04, op:1},
+         {b:"hsp_lijsten", y:0,  h:100, w:122, d:.90, op:1}],
   "4-3":[{b:"h44_wit",     y:0,  h:100, w:110, d:.03, op:1},
          {b:"h44_scheur",  y:14,        w:120, d:.28, op:.85},
          {b:"h44_richel",  bot:0,       w:130, d:.66, op:.9},
@@ -15038,13 +15049,50 @@ function storyVoltooi(id, extra){
   if(L0.geeftHart) SET.story.hart = L0.geeftHart;
   saveSet();
 }
+/* 🎵 Vrij spel krijgt het decor van een echt level: het vergezicht van dat level en de
+   gevechtsmuziek die erbij hoort, uit één wereld. Een gewoon potje kiest elke keer een
+   willekeurig level. Een Commander-match kiest één wereld en neemt voor elk van de drie
+   potjes een ander level daaruit, met ander muziek als dat kan. Dit is alleen versiering:
+   Math.random en niet rnd(), zodat een online potje niet uit de pas loopt. */
+function decorKandidaten(w){
+  return STORY_ORDER.filter(id => { const L = STORY[id];
+    return L && (w == null || L.wereld === w) && L.muziek && MUZIEK[L.muziek] && HORIZON[id] && HORIZON[id].length; });
+}
+function vrijDecor(){
+  if(!S || S.story || !S.ui || S.ui.mode === "start") return;
+  const m = S.mode === "commander" && S.match ? S.match : null;
+  const sleutel = m ? "c" + m.game : "g";
+  if(S.decor && S.decor.sleutel === sleutel) return;
+  const kies = a => a[Math.floor(Math.random() * a.length)];
+  let w = m ? m.decorW : null;
+  if(w == null){
+    const ws = [...new Set(decorKandidaten().map(id => STORY[id].wereld))];
+    if(!ws.length){ S.decor = {sleutel}; return; }
+    w = kies(ws); if(m) m.decorW = w;
+  }
+  let ids = decorKandidaten(w);
+  if(m){
+    m.decorGehad = m.decorGehad || []; m.decorMu = m.decorMu || [];
+    const vers = ids.filter(id => !m.decorGehad.includes(id) && !m.decorMu.includes(STORY[id].muziek));
+    const nieuw = ids.filter(id => !m.decorGehad.includes(id));
+    ids = vers.length ? vers : (nieuw.length ? nieuw : ids);
+  }
+  if(!ids.length){ S.decor = {sleutel}; return; }
+  const id = kies(ids);
+  if(m){ m.decorGehad.push(id); m.decorMu.push(STORY[id].muziek); }
+  S.decor = {sleutel, id, wereld:STORY[id].wereld, muziek:STORY[id].muziek};
+  horizonVerf(id);
+}
 function storySkin(w){
   const app = document.getElementById("app");
   if(!app) return;
   for(let i=0;i<=5;i++) app.classList.toggle("w" + i, w === i);
   /* Binnen een wereld heeft elk level zijn eigen kleurzweem. */
   [...app.classList].forEach(c => { if(/^lv\d/.test(c)) app.classList.remove(c); });
-  const id = (S && S.story && S.story.id) || (M && M.type === "praat" && M.id) || null;
+  /* Vrij spel (bots, hotseat, online) leent het decor van een level uit één wereld. */
+  const vrijId = (S && !S.story && S.decor && S.decor.id && S.ui && S.ui.mode !== "start"
+                  && !(M && M.type === "praat")) ? S.decor.id : null;
+  const id = (S && S.story && S.story.id) || (M && M.type === "praat" && M.id) || vrijId || null;
   if(id) app.classList.add("lv" + id);
   /* Levels die met de horizon experimenteren: kleiner veld, doorzichtige achtergrond. */
   const Lz = id ? STORY[id] : null;
@@ -15052,7 +15100,7 @@ function storySkin(w){
   /* Staat er een horizon, dan wordt de achtergrond van het veld doorzichtig zodat je hem
      ziet. Alleen levels met `hzruim` schuiven het veld ook nog kleiner en naar beneden. */
   app.classList.toggle("hzdoor", hzAan);
-  const ruim = hzAan && !!(Lz && Lz.hzruim);
+  const ruim = hzAan && !!(Lz && Lz.hzruim) && !vrijId;
   app.classList.toggle("hzruim", ruim);
   /* #horizon hangt aan de body en niet in #app, dus die heeft de klasse zelf nodig. */
   document.body.classList.toggle("hzruim", ruim);
@@ -15919,7 +15967,7 @@ function portretPaint(){
     if(st.tauntSpr) cls.push("pt-taunt");
   }
   if(em){ clearTimeout(PT_TIMER); PT_TIMER = setTimeout(portretPaint, Math.max(40, em.tot - Date.now() + 30)); }
-  const kleur = st.zinHard ? "#ffe08a" : (L.zegKleur || st.zegKleur || "#8fa3b8");
+  const kleur = st.zinHard ? "#ffe08a" : (st.zegKleur || L.zegKleur || "var(--danger)");
   const [l1, l2] = PT_WERELD[L.wereld] || PT_WERELD[1];
   if(st.ptBg == null){
     const rij = HORIZON[hzSleutel(st.id)] || [];
@@ -16742,7 +16790,8 @@ function koopState(){
 const alGekocht = key => { const k = koopState(); return k.ae.indexOf(key) >= 0 || k.lt.indexOf(key) >= 0; };
 /* Codewoord "unlock" zet alles open, de winkel dus ook. */
 const winkelOpen = () => !!(SET.story && SET.story.vrij) || storyKlaar(OVERWORLD_WINKEL.na);
-const smidOpen = () => !!(SET.story && SET.story.vrij) || storyKlaar(OVERWORLD_SMID.na);
+/* De smidse gaat pas open als je Tang echt verslagen hebt, ook met het codewoord: de eerste keer moet je vechten. */
+const smidOpen = () => storyKlaar(OVERWORLD_SMID.na);
 /* Wat Knort zegt. Hij hoort nergens bij en hij verkoopt aan iedereen. */
 const KNORT_EERSTE = [
   "Hé. Jij.",
@@ -16929,11 +16978,12 @@ const WINKEL_DECOR = {
     /* Knort staat achter de toonbank, in het midden. Zijn onderrand (zijn middel) ligt precies
        op de achterrand van de toonbank: y 815 van 1024. Zijn hoofd blijft onder de prijskaartjes
        van de middelste plank. */
-    baas:{x:50, y:79.6, h:23}},
+    baas:{x:50, y:79.6, h:34.5}},   // Knort 1,5× zo groot; de onderrand blijft op de toonbank
   smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
-    /* Doel uit prompts-smidse.md (werkbank op 80%, houders 15/31/69/85); opnieuw meten zodra het plaatje er is. */
-    upg:{steen:{x:15,y:78}, vuur:{x:31,y:78}, gras:{x:69,y:78}, water:{x:85,y:78}}, w:11,
-    baas:{x:50, y:80, h:34}}
+    /* Gemeten op winkel-smidse.png (1536×1024): de houders staan op x 383, 639, 885 en 1130,
+       de gleuf zit op y ≈ 570 en de achterrand van het werkblad op y ≈ 581. */
+    upg:{steen:{x:24.9,y:56.5}, vuur:{x:41.6,y:56.5}, gras:{x:57.6,y:56.5}, water:{x:73.6,y:56.5}}, w:7.3,
+    baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true}   // de kaarten staan op de werkbank, dus vóór Tang
 };
 function winkelDecorOk(kraam){
   const d = WINKEL_DECOR[kraam];
@@ -16969,7 +17019,7 @@ function winkelScene(kraam){
     binnen += wkItem(hartVak(), d.hart, d.hart.w || d.wPlek, null);
     binnen += wkItem(slotVak(), d.slot, d.slot.w || d.wPlek, null);
   }
-  return `<div class="wkscene" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas) : ""}${binnen}</div>`;
+  return `<div class="wkscene${d.voorBaas ? " voorbaas" : ""}" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas) : ""}${binnen}</div>`;
 }
 /* De tekening die er voor een stand is, of anders de stand waar hij op terugvalt. */
 function sprBeeldPad(key){
@@ -17501,12 +17551,16 @@ function muziekScherm(){
   if(S.ui.mode === "start"){ AU.zet(M && M.type === "story" ? "kaart" : "titel"); return; }
   if(S.over) return;                       // de winst- of verliesstinger uit laten spelen
   if(S.story){ AU.zet(S.story.muziek || "gevecht"); return; }
-  AU.zet("gevecht");
+  /* Vrij spel: de gevechtsmuziek van het level waarvan je het decor ziet. */
+  AU.zet(S.decor && S.decor.muziek && MUZIEK[S.decor.muziek] ? S.decor.muziek : "gevecht");
 }
 function render(){
   if(!S || FAST) return;
-  document.body.classList.toggle("verhaal", !!(S.story && !S.over));
+  { const vh = !!(S.story && !S.over);
+    /* De zijbalk is in het verhaal breder; het vergezicht moet dan opnieuw passen. */
+    if(document.body.classList.contains("verhaal") !== vh){ document.body.classList.toggle("verhaal", vh); setTimeout(laagPassen, 30); } }
   portretPaint();
+  vrijDecor();
   muziekScherm();
   const hl = uiHl();
   const BOT = (NET.on && NET.seat === 1) ? 1 : 0, TOP = 1 - BOT;   // je eigen kant staat altijd onderaan
@@ -17597,7 +17651,10 @@ function render(){
     apb.classList.toggle("on", !!on);
     apb.title = on ? "Autopass staat AAN — je wordt niet meer gevraagd te reageren" : "Autopass staat uit — klik om de chain automatisch door te laten";
   }
-  if(typeof storySkin === "function" && !(S.story || (M && (M.type === "praat")))) storySkin(0);
+  if(typeof storySkin === "function" && !(S.story || (M && (M.type === "praat")))){
+    vrijDecor();
+    storySkin(S.decor && S.decor.id && S.ui.mode !== "start" ? S.decor.wereld : 0);
+  }
   if(typeof regenVerf === "function" && !(S.story && S.story.regen)) regenVerf(false);
   if(typeof lavaVerf === "function" && !(S.story && S.story.lavaAan)) lavaVerf(false);
   if(typeof rookVerf === "function" && !(S.story && (S.story.rookAan || S.story.mistAan))) rookVerf(false);
@@ -17612,12 +17669,19 @@ function render(){
   }
   if(typeof glitchAan === "function" && !(S.story && S.story.glitchAan)) glitchAan(false);
   if(typeof mulliganPaneel === "function") mulliganPaneel();
-  /* In het verhaal is er geen hotseat: daar zit op die plek de geluidsknop. */
+  /* Rechtsonder staan er altijd vier knoppen.
+       Verhaal:    ⚡ autopass · 📖 tutorial · 🔊 geluid · ↺ opnieuw
+       Vrij spel:  ⚡ autopass · ⏱ klok · 🔊 geluid · ↺ opnieuw (hotseat: 👁 privacy in plaats van ↺)
+       Regels en tutorial staan in vrij spel in het menu (☰). */
   {
-    const verhaal = !!S.story;
+    const verhaal = !!S.story, hotseat = !verhaal && !S.vsBot && !NET.on;
     const pb = document.getElementById("privbtn"), mb = document.getElementById("rtmute");
-    if(pb) pb.style.display = verhaal ? "none" : "";
-    if(mb){ mb.style.display = verhaal ? "" : "none";
+    const zet = (sel, aan) => { const el = document.querySelector("#rtools " + sel); if(el) el.style.display = aan ? "" : "none"; };
+    zet('[data-btn="help"]', false);
+    zet('[data-btn="tutorial"]', verhaal);
+    zet('[data-btn="restart"]', !hotseat);
+    if(pb) pb.style.display = hotseat ? "" : "none";
+    if(mb){ mb.style.display = "";
             mb.innerHTML = SET.mute ? "&#128263;" : "&#128266;";
             mb.classList.toggle("on", !SET.mute);
             mb.title = SET.mute ? "Geluid staat uit — klik om aan te zetten" : "Geluid aan — klik om uit te zetten"; }
@@ -18383,12 +18447,12 @@ const BODY_SKELETON = `<div id="app">
     <div id="piles0"></div>
     <div id="rtools">
       <button class="tbtn" id="apbtn" data-act="btn" data-btn="autopass" title="Autopass: chain automatisch doorlaten">&#9889;</button>
+      <button class="tbtn" id="klokbtn" data-act="btn" data-btn="klokstart" title="Start de klok: 5 minuten per speler, +2 minuten per afgeronde beurt">&#9201;</button>
       <button class="tbtn" data-act="btn" data-btn="help" title="Regels">?</button>
       <button class="tbtn" data-act="btn" data-btn="tutorial" title="Tutorial">&#128214;</button>
       <button class="tbtn" id="rtmute" data-act="btn" data-btn="mute" title="Geluid aan of uit" style="display:none">&#128266;</button>
       <button class="tbtn" id="privbtn" data-act="btn" data-btn="handofftoggle" title="Hotseat-privacy aan/uit">&#128065;</button>
       <button class="tbtn mobonly" data-act="btn" data-btn="mlog" title="Logboek &amp; chain">&#128220;</button>
-      <button class="tbtn" id="klokbtn" data-act="btn" data-btn="klokstart" title="Start de klok: 5 minuten per speler, +2 minuten per afgeronde beurt">&#9201;</button>
       <button class="tbtn" data-act="btn" data-btn="restart" title="Opnieuw">&#8634;</button>
     </div>
   </aside>
@@ -19144,7 +19208,7 @@ function muziekWarm(){
     const tik = () => { if(af) return; af = true; laadTik("muziek"); };
     try{
       const a = new Audio();
-      a.loop = true; a.volume = 0; a.preload = "auto";
+      a.loop = true; a.volume = 0; a.preload = "auto"; a.muted = !!SET.mute;
       a.addEventListener("canplaythrough", tik, {once:true});
       a.addEventListener("error", () => {
         Object.keys(MUZIEK).forEach(k => { if(MUZIEK[k] === pad) MUZIEK[k] = ""; });
