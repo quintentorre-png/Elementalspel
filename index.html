@@ -365,6 +365,21 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
   border:1px solid var(--gold-soft); color:#f0e6c8; font-size:.88rem; box-shadow:0 4px 18px rgba(0,0,0,.6)}
 #banner .btxt b{color:var(--gold)}
 #banner.hidden{opacity:0}
+/* Geen emoji: mini-prentjes van de kaarten, een paars ruitje voor aethers, pixel-iconen op knoppen. */
+.elic{display:inline-block; width:1.05em; height:1.05em; vertical-align:-.2em; margin:0 .08em;
+  background-size:cover; background-position:center 38%; image-rendering:pixelated;
+  border:1px solid rgba(0,0,0,.7); box-shadow:0 0 0 1px rgba(255,255,255,.12); border-radius:2px}
+.aeic{display:inline-block; width:.62em; height:.62em; margin:0 .22em; vertical-align:.02em; transform:rotate(45deg);
+  background:linear-gradient(135deg,#d7a6ff,#8a3fd1 60%,#4b1f7a); border:1px solid #1a0b2b}
+.hartic{display:inline-block; width:.95em; height:.85em; vertical-align:-.1em; margin:0 .08em}
+.hartic svg,.pixic{display:block; width:100%; height:100%}
+.pixspan{display:inline-block; width:.9em; height:.9em; vertical-align:-.1em; opacity:.75}
+.pixic{image-rendering:pixelated}
+.tbtn .pixic,#geluidfab .pixic{width:18px; height:16px; margin:0 auto}
+.genoemdmerk .pixic{width:18px; height:10px}
+#banner .bskip{pointer-events:auto; margin:6px 0 0 10px; padding:5px 12px; border:2px solid var(--gold-soft);
+  background:#2a2418; color:var(--gold); font:inherit; font-size:.85em; cursor:pointer; vertical-align:middle}
+#banner .bskip:hover{border-color:var(--gold); filter:brightness(1.2)}
 /* ---------- cards ---------- */
 .card{position:absolute; inset:0; border-radius:9px; overflow:hidden;
   border:1px solid rgba(255,255,255,.14);
@@ -1257,7 +1272,7 @@ h3{font-size:.66rem; line-height:1.9}
   #app.showlog #left #preview{display:flex; margin-bottom:8px}
   #app.showlog #left #log{display:none}
   #app.showlog #left #chatbox{display:block; margin-top:8px}
-  #app.showlog #left::after{content:"tik 📜 rechtsonder om te sluiten"; display:block;
+  #app.showlog #left::after{content:"tik de logboekknop rechtsonder om te sluiten"; display:block;
     text-align:center; color:var(--dim); font-size:.85rem; margin-top:10px}
   /* rechterbalk wordt een bedieningsbalk onderaan */
   #right{flex:0 0 auto; flex-direction:row; align-items:center; justify-content:space-between;
@@ -2712,7 +2727,7 @@ body:not(.geladen) #app{visibility:hidden}
   body.verhaal #preview .circ.circnieuw{width:100%; border:4px solid var(--ptrand,#6b7d92); outline:2px solid #1b2633; outline-offset:-7px;
     box-shadow:0 0 0 2px #05070b, 0 8px 18px rgba(0,0,0,.45); background:linear-gradient(180deg,#161d26,#0b1018); padding:10px 8px 6px}
   body.verhaal #preview .circ.circnieuw svg{display:block; margin:0 auto; width:100%; height:auto;
-    max-height:max(150px, calc(100dvh - min(368px,48vh) - 190px))}
+    max-height:max(180px, calc(100dvh - min(368px,48vh) - 150px))}
   body.verhaal #praatbel:not(.winkelbel){display:none !important}
 }
 /* De rand heeft de kleur van wie er vecht; de binnenrand die van de wereld. */
@@ -5622,7 +5637,7 @@ async function declarePlan(p, card, asSpell, col, opts){
     const id = await chooseCre(p, ids,
       `<b>${pName(p)}</b> — ${effPrompt[e.el].replace("%D%", String((hasAe(p, "ae_fire6") ? 5 : 2) + (hasAe(p, "ae_offer") ? 1 : 0) + trioBonus(p)))
         .replace("%O%", hasAe(p, "ae_offer") ? "; een eigen creature offer je: instakill + trek een kaart — eigen 🔥 Vuur en eigen kolommen met een 🔥-spell kun je niet aanwijzen" : "")}${nr}${bron}`,
-      e.el === "steen", {k:e.el, selfId});
+      e.el === "steen" || (!isBot(p) && (e.el === "vuur" || e.el === "gras")), {k:e.el, selfId, eigenEffect:true});
     if(id === "cancel") return "cancel";
     e.tid = id;
     if(id != null){ const f = e.el === "ws" ? findKaart(id) : findCre(id); if(f){ e.tp = f.p; e.tc = f.c; } }
@@ -6982,7 +6997,7 @@ async function resolveEffect(it){
     }
     const ids = fireTargets(p).filter(id => !(it.excl || []).includes(id));
     if(!ids.length){ addLog(offerAe ? "🔥 Geen doelwit: aan je eigen kant tellen 🔥 Vuur en kolommen met een 🔥-spell niet mee." : "🔥 Geen doelwit: er staat niets bij je tegenstander."); return; }
-    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🔥 Vuur: kies een creature (${dmg} schade${offerAe ? "; een eigen creature offer je: instakill + trek een kaart" : ""})`, false, {k:"vuur"});
+    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🔥 Vuur: kies een creature (${dmg} schade${offerAe ? "; een eigen creature offer je: instakill + trek een kaart" : ""})`, !isBot(p), {eigenEffect:true, k:"vuur"});
     if(id === "fizzle") return;
     if(id === null){ addLog("🔥 Effect overgeslagen."); return; }
     const f = findCre(id);
@@ -7009,7 +7024,7 @@ async function resolveEffect(it){
   if(it.el === "gras"){
     const ids = allCreIds(entBaar);                        // 🔥 (en de Balrog) is immuun voor entangle
     if(!ids.length){ addLog("🌿 Geen geldig doelwit (🔥 Vuur kan niet verstrikt worden)."); return; }
-    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🌿 Gras: kies een creature om te verstrikken (−1 leven daar, +1 hier · op 🪨 Steen −2/+2)`, false, {k:"gras"});
+    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🌿 Gras: kies een creature om te verstrikken (−1 leven daar, +1 hier · op 🪨 Steen −2/+2)`, !isBot(p), {eigenEffect:true, k:"gras"});
     if(id === "fizzle") return;
     if(id === null){ addLog("🌿 Entangle overgeslagen."); return; }
     const f = findCre(id);
@@ -8764,14 +8779,15 @@ function cirkelBeeldSVG(){
   const ring = [ORDER[0]];
   while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
   ORDER.forEach(el => { if(!ring.includes(el)) ring.push(el); });
-  const plek = [[120,36],[206,120],[120,204],[34,120]];
-  const T = 50, h = T/2;
+  /* 1,25 keer zo hoog als breed: de tegels staan verder uit elkaar, de pijlen worden langer. */
+  const plek = [[120,44],[196,150],[120,256],[44,150]];
+  const T = 58, h = T/2;
   const pos = ring.map((el, k) => ({el, x:plek[k % 4][0], y:plek[k % 4][1]}));
   let pijlen = "", tegels = "", defs = "";
   pos.forEach(a => {
     const b = pos.find(q => q.el === EL[a.el].strong); if(!b) return;
     const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy), ux = dx/L, uy = dy/L;
-    const m0 = 36, m1 = 44;
+    const m0 = 44, m1 = 52;
     const x1 = a.x + ux*m0, y1 = a.y + uy*m0, x2 = b.x - ux*m1, y2 = b.y - uy*m1;
     pijlen += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#05070b" stroke-width="7" stroke-linecap="square"/>`
       + `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e8c67a" stroke-width="3.2" stroke-linecap="square" marker-end="url(#cpijl)"/>`;
@@ -8779,21 +8795,19 @@ function cirkelBeeldSVG(){
   pos.forEach((q, k) => {
     const pad = KAART_BEELD[q.el], kl = CIRC_KLEUR[q.el] || "#8b96a0";
     defs += `<clipPath id="cclip${k}"><rect x="${q.x-h}" y="${q.y-h}" width="${T}" height="${T}"/></clipPath>`;
+    /* Geen emoji: alleen de tekening van de kaart zelf, in een lijst in de kleur van het element. */
     tegels += `<rect x="${q.x-h-4}" y="${q.y-h-4}" width="${T+8}" height="${T+8}" fill="#05070b"/>`
-      + `<rect x="${q.x-h}" y="${q.y-h}" width="${T}" height="${T}" fill="#141a20"/>`
-      + `<text x="${q.x}" y="${q.y+7}" text-anchor="middle" font-size="20">${icon(q.el)}</text>`
+      + `<rect x="${q.x-h}" y="${q.y-h}" width="${T}" height="${T}" fill="${kl}" opacity=".35"/>`
       + (pad ? `<image href="${pad}" x="${q.x-h}" y="${q.y-h-6}" width="${T}" height="${T*1.4}" preserveAspectRatio="xMidYMid slice" clip-path="url(#cclip${k})"/>` : "")
-      + `<rect x="${q.x-h+1.5}" y="${q.y-h+1.5}" width="${T-3}" height="${T-3}" fill="none" stroke="${kl}" stroke-width="3"/>`
-      + `<rect x="${q.x+h-15}" y="${q.y+h-15}" width="18" height="18" fill="#0b0f15" stroke="${kl}" stroke-width="2"/>`
-      + `<text x="${q.x+h-6}" y="${q.y+h-2}" text-anchor="middle" font-size="10">${icon(q.el)}</text>`;
+      + `<rect x="${q.x-h+1.5}" y="${q.y-h+1.5}" width="${T-3}" height="${T-3}" fill="none" stroke="${kl}" stroke-width="3"/>`;
   });
-  return `<svg class="cirkelbeeld" viewBox="0 0 240 240">
+  return `<svg class="cirkelbeeld" viewBox="0 0 240 300">
     <defs><marker id="cpijl" markerWidth="4" markerHeight="4" refX="1.2" refY="2" orient="auto" markerUnits="strokeWidth">
       <polygon points="0 0, 3 2, 0 4" fill="#e8c67a" stroke="#05070b" stroke-width=".5"/></marker>${defs}</defs>
-    <rect x="61" y="61" width="118" height="118" fill="none" stroke="#2a3440" stroke-width="2" stroke-dasharray="4 4" transform="rotate(45 120 120)"/>
+    <polygon points="120,82 158,150 120,218 82,150" fill="none" stroke="#2a3440" stroke-width="2" stroke-dasharray="4 4"/>
     ${pijlen}${tegels}
-    <text x="120" y="117" text-anchor="middle" font-size="7" fill="#c9a86a" font-family="'Press Start 2P',monospace">STERK</text>
-    <text x="120" y="131" text-anchor="middle" font-size="7" fill="#c9a86a" font-family="'Press Start 2P',monospace">TEGEN</text>
+    <text x="120" y="147" text-anchor="middle" font-size="7" fill="#c9a86a" font-family="'Press Start 2P',monospace">STERK</text>
+    <text x="120" y="161" text-anchor="middle" font-size="7" fill="#c9a86a" font-family="'Press Start 2P',monospace">TEGEN</text>
   </svg>`;
 }
 const CIRC_HTML = `<div class="circ circnieuw"><div class="t">Elementaal · cirkel</div>${cirkelBeeldSVG()}</div>`;
@@ -9082,7 +9096,7 @@ function handHTML(p, hl){
     const pv = up ? ` data-pv="${cd.el}"${cd.lk ? ` data-pvlk="${cd.lk}"` : ""}${toonVarKey(cd) ? ` data-pvvar="${toonVarKey(cd)}"` : ""}` : "";
     if(up && aeBoosts(p, cd.el)) cls += " aeup";
     const nr = up && iControl(p) && i < 9 ? `<span class="hnr">${i + 1}</span>` : "";
-    return `<div class="hcard${cls}" data-act="hand" data-p="${p}" data-id="${cd.id}"${pv}>${up?cardFaceHTML(cd):backHTML(p)}${nr}${genoemd ? '<div class="genoemdmerk">👁</div>' : ""}</div>`;
+    return `<div class="hcard${cls}" data-act="hand" data-p="${p}" data-id="${cd.id}"${pv}>${up?cardFaceHTML(cd):backHTML(p)}${nr}${genoemd ? `<div class="genoemdmerk">${pixIcoon("oog")}</div>` : ""}</div>`;
   }).join("");
 }
 /* 🟣 De ruitenrij naast je levens. Elke aether is één ruit met zijn prent; hover of tik en je
@@ -9161,7 +9175,7 @@ function psideHTML(p){
   const pips = Array.from({length:Math.max(pStart, pl.life)},(_,i)=>`<span class="hp${i < pl.life ? "" : " off"}"></span>`).join("");
   const active = S.tp===p ? " active":"";
   const ae = ruitenHTML(p)
-    + (NET.on && p === NET.seat ? `<div class="aemini" style="border-color:#4d8fbf;color:#7fd0ff;background:rgba(80,160,220,.1)">🌐 jouw kant</div>` : "");
+    + (NET.on && p === NET.seat ? `<div class="aemini" style="border-color:#4d8fbf;color:#7fd0ff;background:rgba(80,160,220,.1)">jouw kant</div>` : "");
   /* 🎪 Het trio is niet één tegenstander met zes levens maar drie vlammen met elk twee.
      Eén balk liegt daarover: je slaat op een kolom en ziet een getal zakken zonder te weten
      wie je raakte. Dus drie balken, met naam, kolom en wat die vlam doet. */
@@ -9260,7 +9274,7 @@ function actionsHTML(){
     return `<div style="color:var(--dim);font-size:.8rem">🔄 kies hierboven: houden of opnieuw</div>`;
   }
   if(u.mode==="slot" && u.cancellable) return `${u.fuseKnop ? `<button class="abtn primary" data-act="btn" data-btn="slotfuse" style="background:#6b45a0;color:#f2e6ff">🟣 ${u.fuseNaam || "Fusie"}</button>` : ""}<button class="abtn ghost" data-act="btn" data-btn="cancel">✕ Annuleer</button>`;
-  if(u.mode==="choice" && u.optional && !isBot(u.p)) return `<button class="abtn ghost" data-act="btn" data-btn="skip">Overslaan</button>`;
+  if(u.mode==="choice" && u.optional && !isBot(u.p)) return `<button class="abtn ghost" data-act="btn" data-btn="skip">${u.meta && u.meta.eigenEffect ? "Effect niet doen" : "Overslaan"}</button>`;
   if(u.mode==="choice" && isBot(u.p)) return `<div style="color:var(--dim);font-size:.8rem">🤖 kiest…</div>`;
   if(u.mode==="busy") return `<div style="color:var(--dim);font-size:.8rem">⋯</div>`;
   return "";
@@ -9302,7 +9316,13 @@ function bannerHTML(){
   if(u.mode==="mulligan") return (iControl(u.p) && !isBot(u.p)) ? null
     : `<b>${pName(u.p)}</b> bekijkt de starthand.`;
   if(u.mode==="slot") return u.prompt || "Kies een plek";
-  if(u.mode==="choice") return u.prompt || "Kies een doelwit";
+  if(u.mode==="choice"){
+    /* Is de keuze optioneel (je eigen 🔥 of 🌿 hoeft niet af te gaan), dan staat de knop
+       om hem over te slaan meteen naast de vraag, niet ergens in de zijbalk. */
+    const skip = u.optional && !isBot(u.p) && iControl(u.p)
+      ? ` <button class="bskip" data-act="btn" data-btn="skip">${u.meta && u.meta.eigenEffect ? "Effect niet doen" : "Overslaan"}</button>` : "";
+    return (u.prompt || "Kies een doelwit") + skip;
+  }
   if(u.mode==="battle") return `<b>${pName(S.tp)}</b> — klik een creature om aan te vallen${flashFuseOk(S.tp)||handHasFlash(S.tp)?"; ⚡ gemarkeerde handkaarten mag je nu ook spelen":""}`;
   return null;
 }
@@ -9391,7 +9411,7 @@ function overlayHTML(){
   if(liveLobby()){
     const host = LIVE.role === "host";
     const link = SHARE.url ? SHARE.url.split("#")[0] + "#room=" + LIVE.code : "";
-    return `<div class="ovbox" style="max-width:min(560px,94vw)"><h1 style="font-size:1.5rem">🌐 Live spelen</h1>
+    return `<div class="ovbox" style="max-width:min(560px,94vw)"><h1 style="font-size:1.5rem">Live spelen</h1>
       <div class="sub">${kindLabel(NET.kind)}</div>
       ${host ? `
         <div class="roomcode">${LIVE.code}</div>
@@ -9423,7 +9443,7 @@ function overlayHTML(){
   }
   if(netLobby()){
     const host = NET.seat === 0;
-    return `<div class="ovbox"><h1 style="font-size:1.5rem">🌐 Online partij</h1>
+    return `<div class="ovbox"><h1 style="font-size:1.5rem">Online partij</h1>
       <div class="sub">${kindLabel(NET.kind)}</div>
       <div class="winbig">${host ? "⏳" : "🤝"}</div>
       ${host
@@ -9743,7 +9763,7 @@ function tutVecht(){
 function tutVisual(v){
   const card = (el,lab) => `<div style="width:52px;height:73px;position:relative;flex:0 0 auto">${cardFaceHTML(el, lab==="spell")}</div>`;
   const ae = (name,txt) => `<div class="aecard" style="width:150px;cursor:default;transform:none"><div class="aet">${name}</div><div class="aex" style="padding:8px 10px">${txt}</div></div>`;
-  if(v === "circle") return `<div style="margin:6px auto 0;max-width:190px">${circleSVG(180)}</div>
+  if(v === "circle") return `<div style="margin:6px auto 0;max-width:170px">${cirkelBeeldSVG()}</div>
     <div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:.74rem">
       <span style="color:#ffb14d">🔥 → 🌿 <b>instakill</b></span>
       <span style="color:#bcd5ea">🌿 → 🔥 <b>immuun</b></span>
@@ -9926,7 +9946,7 @@ function shareHTML(){
     ${SHARE.guess ? `<div class="sub" style="text-align:center;color:#ffb14d;font-size:.78rem">Deze link heb ik afgeleid; controleer de link even en verbeter die zo nodig hieronder.</div>` : ""}
     ${row("game", "🎮", "Het spel delen", "om zelf te spelen: hotseat, tegen de bot, of de tutorials",
         SHARE.url, "Deel met <b>alleen-lezen</b> rechten. Wie de link opent kan alles spelen wat op één scherm gebeurt.")}
-    ${row("join", "🌐", "Samen online spelen", "de link die je vriend nodig heeft om mee te doen",
+    ${row("join", "", "Samen online spelen", "de link die je vriend nodig heeft om mee te doen",
         joinURL(), "Werkt alleen als je vriend deze pagina mág opslaan — je vriend moet zetten kunnen doorgeven.")}
     <div class="shpaste">
       <input id="shinput" type="text" placeholder="https://claude.ai/code/artifact/… plakken" value="">
@@ -9961,7 +9981,7 @@ function startHTML(){
     ${LIVE.resume ? `<div style="margin:14px 0 0"><button class="obtn" style="border-color:#5cb56e;color:#a8ecb5" data-act="btn" data-btn="resumelive">↩ Terug naar room ${LIVE.resume.code}</button></div>` : ""}
     <div class="hgroot">
       <button class="obtn hbig b-story" data-act="btn" data-btn="story">📖 Verhaal<span class="bsub">${klaar ? klaar + " van de " + STORY_ORDER.length + " uitgespeeld" : "begin bij 1-1"}</span></button>
-      <button class="obtn hbig b-mp${open === "mp" ? " aan" : ""}" data-act="btn" data-btn="homemp">🌐 Multiplayer<span class="bsub">${open === "mp" ? "kies hieronder ▾" : "samen met een vriend, elk op je eigen scherm"}</span></button>
+      <button class="obtn hbig b-mp${open === "mp" ? " aan" : ""}" data-act="btn" data-btn="homemp">Multiplayer<span class="bsub">${open === "mp" ? "kies hieronder ▾" : "samen met een vriend, elk op je eigen scherm"}</span></button>
       ${mp}
     </div>
     <div class="hkleinrij">
@@ -9998,13 +10018,13 @@ function menuHTML(){
   }
   return `<div class="ovbox" style="max-width:min(420px,92vw)"><h2>Menu</h2>
     <div class="sub" style="margin-bottom:4px">${online
-      ? `🌐 Online · jij bent <b>${pName(mySeat)}</b>${NET.seat < 0 ? " (toeschouwer)" : ""}`
+      ? `Online · jij bent <b>${pName(mySeat)}</b>${NET.seat < 0 ? " (toeschouwer)" : ""}`
       : (S && S.vsBot ? "🤖 Tegen de bot" : "🧑‍🤝‍🧑 Hotseat")}${S && S.mode === "commander" && S.match ? ` · 🟣 potje ${S.match.game} (${S.match.wins[0]}–${S.match.wins[1]})` : ""}</div>
     <div class="menucol">
       <button class="mbtn" data-act="btn" data-btn="closemodal">▶ Hervatten <span class="mk">esc</span></button>
       ${inGame && (!online || NET.seat >= 0) ? `<button class="mbtn danger" data-act="btn" data-btn="askSurrender">🏳️ Opgeven</button>` : ""}
       ${online
-        ? `<button class="mbtn" data-act="btn" data-btn="${NET.chan === "live" ? "askLeaveLive" : "askLeave"}">🌐 Verbinding verbreken · hoofdmenu</button>`
+        ? `<button class="mbtn" data-act="btn" data-btn="${NET.chan === "live" ? "askLeaveLive" : "askLeave"}">Verbinding verbreken · hoofdmenu</button>`
         : `<button class="mbtn" data-act="btn" data-btn="tomain">⌂ Terug naar hoofdmenu</button>`}
 
       ${NET.on && NET.chan === "live" ? `<button class="mbtn" data-act="btn" data-btn="copyroom">🔗 Roomlink kopiëren <span class="mk">${LIVE.code}</span></button>` : ""}
@@ -17418,9 +17438,13 @@ const WINKEL_DECOR = {
     upg:{steen:{x:24.9,y:56.5}, vuur:{x:41.6,y:56.5}, gras:{x:57.6,y:56.5}, water:{x:73.6,y:56.5}}, w:7.3,
     baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true}   // de kaarten staan op de werkbank, dus vóór Tang
 };
+/* De winkel is altijd de tekening. Is hij nog niet binnen, dan komt hij binnen terwijl je
+   er staat (de achtergrond laadt zichzelf); alleen als het bestand echt niet bestaat valt
+   de winkel terug op de losse vakjes. Vroeger moest hij eerst helemaal geladen zijn, en
+   met ruim driehonderd tekeningen in de rij zag je dan de noodversie. */
 function winkelDecorOk(kraam){
   const d = WINKEL_DECOR[kraam];
-  return !!(d && BEELD_KLAAR[d.beeld] === true);
+  return !!(d && BEELD_KLAAR[d.beeld] !== "fout");
 }
 /* Eén ding op de plank. Met een prent staat het er als kaartje; zonder (hartjes, een slot)
    is het een onzichtbaar vlak over wat er al op de tekening staat. */
@@ -17891,7 +17915,7 @@ function storyHTML(){
       <button class="obtn b-dim" style="padding:10px 16px" data-act="btn" data-btn="storycode">Invoeren</button>
     </div>
     <div style="margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="obtn b-dim" style="padding:10px 20px" data-act="btn" data-btn="storykaart">🗺 Kaart</button>
+      <button class="obtn b-dim" style="padding:10px 20px" data-act="btn" data-btn="storykaart">Kaart</button>
       <button class="obtn b-dim" style="padding:10px 20px" data-act="btn" data-btn="closemodal">Terug</button></div>
   </div>`;
 }
@@ -17974,7 +17998,7 @@ function helpHTML(){
     <p>Een creature valt recht vooruit aan: de creature tegenover hem, of de speler als die plek leeg is. De schade is de <b>helft van zijn levens</b> (naar beneden, minstens 1).</p>
     <p>Alleen in de allereerste beurt van het potje mag de beginner nog niet aanvallen.</p>
     <p>Tussen creatures geldt de cirkel 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak: <span class="kw" data-kw="instakill">instakill</span>. Zwak tegen sterk: <span class="kw" data-kw="immuun">immuun</span>. Spelers hebben geen element.</p>
-    <div style="text-align:center;margin:10px 0">${circleSVG(180)}</div>
+    <div style="margin:10px auto;max-width:170px">${cirkelBeeldSVG()}</div>
 
     <h3>4 · De chain</h3>
     <p>Een kaart die je speelt, staat er meteen. Zijn effect gaat als link op de chain, met het doelwit dat je meteen kiest.</p>
@@ -17996,7 +18020,7 @@ function helpHTML(){
     <p><b>Uitleg</b>: hover over een kaart of houd hem ingedrukt. De ruiten naast de levens zijn de 🟣 aethers, het veld en de ✦ lichtkaarten van je tegenstander; ook die kun je aanwijzen of aantikken. Onderstreepte woorden leggen zichzelf uit.</p>
     <p><b>Deck en graf</b>: klik op je deck om te zien wat er nog in zit, en op een graf om erdoorheen te bladeren.</p>
     <p><b>⚡ Autopass</b> (rechtsonder) laat de chain vanzelf door: dan word je nooit gevraagd te reageren.</p>
-    <p><b>🌐 Live online</b>: kies Live online, deel de roomcode van vier tekens, en je vriend doet mee.</p>
+    <p><b>Live online</b>: kies Live online, deel de roomcode van vier tekens, en je vriend doet mee.</p>
   </div>
   <div style="text-align:center"><button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div></div>`;
 }
@@ -18078,8 +18102,6 @@ function render(){
         : "");
   $("#turnbadge").innerHTML = (S.mode==="commander" && S.match ? `🟣 Potje ${S.match.game} · ${S.match.wins[0]}–${S.match.wins[1]}<br>` : "") + `Beurt ${S.turnNo[S.tp]}<b>${pName(S.tp)}</b>`
     + (S.story ? `<div class="tijdmeter${(S.story.mijnTijd || 0) >= STER_SNEL ? " traag" : ""}" id="tijdbalk" title="je eigen gevechtstijd · onder 3 minuten = ★">⏱ ${tijdTekst(S.story.mijnTijd || 0)}</div>` : "")
-    + (S.story && S.story.opdracht && (S.story.opdracht.ae || S.story.opdracht.lt) && !(levelVan(S.story) || {}).sterNimbus
-        ? (() => { const op = opdrachtOk(S.story); return `<div class="tijdmeter opdmeter${op.ok ? "" : " traag"}" title="ster 1: ${opdrachtTekst(S.story.opdracht).replace(/"/g, "")}">${S.story.opdracht.ae ? halfSter("l", op.ae) : ""}${S.story.opdracht.lt ? halfSter("r", op.lt) : ""} ster 1 ${op.ok ? "✓" : "✗"}</div>`; })() : "")
     + badgeExtra;
   if(typeof tutBalk === "function") tutBalk();
   $("#actions").innerHTML = actionsHTML();
@@ -18149,7 +18171,7 @@ function render(){
     zet('[data-btn="restart"]', !hotseat);
     if(pb) pb.style.display = hotseat ? "" : "none";
     if(mb){ mb.style.display = "";
-            mb.innerHTML = SET.mute ? "&#128263;" : "&#128266;";
+            mb.innerHTML = pixIcoon(SET.mute ? "stil" : "luid");
             mb.classList.toggle("on", !SET.mute);
             mb.title = SET.mute ? "Geluid staat uit — klik om aan te zetten" : "Geluid aan — klik om uit te zetten"; }
   }
@@ -18174,7 +18196,7 @@ function render(){
   if(gf){ gf.classList.toggle("show", S.ui.mode === "start" || opKaart);
           gf.classList.toggle("naastmenu", gfNaast);
           gf.classList.toggle("uit", !!SET.mute);
-          gf.innerHTML = SET.mute ? "&#128263;" : "&#128266;";
+          gf.innerHTML = pixIcoon(SET.mute ? "stil" : "luid");
           gf.title = SET.mute ? "Geluid staat uit — klik om aan te zetten" : "Geluid aan — klik om uit te zetten"; }
   const b = bannerHTML();
   const bn = $("#banner");
@@ -18237,7 +18259,8 @@ function snelActie(){
     if(u.mode === "pickmode" && u.creOk){ doAct({t:"f", v:"cre"}); return true; }
     if(u.mode === "mulligan"){ doAct({t:"f", v:"houden"}); return true; }
     if(u.mode === "priority"){ doAct({t:"f", v:"pass"}); return true; }
-    if(u.mode === "choice" && u.optional){ doAct({t:"f", v:null}); return true; }
+    /* Je eigen 🔥 of 🌿 niet doen gaat alleen met de knop (of Esc), nooit per ongeluk met spatie. */
+    if(u.mode === "choice" && u.optional && !(u.meta && u.meta.eigenEffect)){ doAct({t:"f", v:null}); return true; }
     return false;
   }
   if(pending || busyFlag) return false;
@@ -19083,7 +19106,7 @@ function onBtn(btn, el, fromAction){
       if(u.mode==="start"){
         S.vsBot = (btn === "startbot" || btn === "cmdbot");
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
-        addLog(NET.on ? "🌐 Online partij — jij bent <em>" + pName(NET.seat) + "</em>."
+        addLog(NET.on ? "Online partij — jij bent <em>" + pName(NET.seat) + "</em>."
           : (S.vsBot ? "Je speelt tegen <em>de Bot 🤖</em>. Veel succes!" : "Hotseat: twee spelers op één scherm."), true);
         MUT++;
         if(btn.indexOf("cmd") === 0){
@@ -19542,7 +19565,7 @@ document.addEventListener("keydown", e => {
   const u = S.ui;
   if(u.p != null && isBot(u.p)) return;
   if(u.mode === "priority") doAct({t:"f", v:"pass"});
-  else if(u.mode === "choice" && u.optional) doAct({t:"f", v:null});
+  else if(u.mode === "choice" && u.optional && !(u.meta && u.meta.eigenEffect)) doAct({t:"f", v:null});
   else if(u.mode === "handoff") doAct({t:"f", v:true});
   else if(u.mode === "aeuitleg") doAct({t:"f", v:true});
   else if(u.mode === "varuitleg") doAct({t:"f", v:true});
@@ -19682,7 +19705,9 @@ function beeldenWarm(){
   const nieuw = [...new Set(paden.filter(pad => pad && BEELD_KLAAR[pad] === undefined))];
   LAAD.tot += nieuw.length; LAAD.beeldTot += nieuw.length;
   /* De kaarten en de sprites die je meteen ziet gaan voorop; de vergezichten achteraan. */
-  const vroeg = pad => KAART_PADEN.has(pad) || (typeof SPRITE_BEELD === "object" && Object.values(SPRITE_BEELD).indexOf(pad) >= 0);
+  const winkels = typeof WINKEL_DECOR === "object" ? Object.values(WINKEL_DECOR).map(d => d.beeld) : [];
+  const vroeg = pad => KAART_PADEN.has(pad) || winkels.indexOf(pad) >= 0 || pad === OVERWORLD_BEELD
+    || (typeof SPRITE_BEELD === "object" && Object.values(SPRITE_BEELD).indexOf(pad) >= 0);
   nieuw.sort((a, b) => (vroeg(b) ? 1 : 0) - (vroeg(a) ? 1 : 0));
   nieuw.forEach(pad => { BEELD_KLAAR[pad] = false; BEELD_RIJ.push(pad); });
   beeldVolgende();
@@ -19744,6 +19769,131 @@ function laadKlaar(){
     if(el){ el.classList.add("weg"); setTimeout(() => el.remove(), 650); }
   }, rest);
 }
+
+/* ================= GEEN EMOJI =================
+   Het spel gebruikt geen emoji meer. Waar een eigen tekening bestaat (de vier elementen,
+   hun sterke varianten en de beesten met een kaart) komt er een mini-prentje van die
+   kaart; de 🟣 van de aethers wordt een klein paars ruitje en ❤ een pixelhartje; al het
+   andere gaat gewoon weg. Dat gebeurt op één plek: alles wat er op het scherm verschijnt
+   gaat hier langs, dus de teksten zelf hoeven niet overhoop.
+   Een paar tekens zijn geen emoji maar onze eigen tekens (▶ ◆ ✦ ★ ☰ ↺ en de pijltjes van
+   het Rookgordijn); die blijven, altijd als gewone tekst. */
+const EMOJI_BEELD = {
+  "🔥":"art/kaart-vuur.png", "💧":"art/kaart-water.png", "🌿":"art/kaart-gras.png", "🪨":"art/kaart-steen.png",
+  "⛰":"art/kaart-rots.png", "☄":"art/kaart-plasma.png", "🌹":"art/kaart-roos.png", "🧊":"art/kaart-ijs.png", "❄":"art/kaart-ijs.png",
+  "🐺":"art/kaart-wolf.png", "🐟":"art/kaart-vliegendevis.png", "🕷":"art/kaart-spin.png", "🥚":"art/token-ei.png",
+  "🛡":"art/token-schild.png", "🗡":"art/kaart-swipe.png", "🔪":"art/kaart-stab.png", "🕸":"art/kaart-web.png"
+};
+const EMOJI_HOUD = new Set(["▶","◀","✔","✓","↔","↕","⬆","⬇","⬅","➡","↩","↪","©","®","™","‼","⁉","〰","☰","★","☆"]);
+const EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:️|⃣|[\u{1F3FB}-\u{1F3FF}]|‍\p{Extended_Pictographic}️?)*/gu;
+const EMOJI_IS = /\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]/u;
+/* Kleine pixel-iconen voor de knoppen die alleen een plaatje hadden. '#' = gevuld. */
+const PIXIC = {
+  bliksem:["....####.","...####..","...###...","..###....",".#######.","..#####..","....###..","...###...","...##....","..##.....","..#......"],
+  luid:["....#........","...##...#....","..###....#...","####...#..#..","####....#.#..","####....#.#..","####...#..#..","..###....#...","...##...#....","....#........"],
+  stil:["....#........","...##........","..###..#...#.","####....#.#..","####.....#...","####....#.#..","..###..#...#.","...##........","....#........"],
+  boek:[".####...####.","#....#.#....#","#.##.#.#.##.#","#....#.#....#","#.##.#.#.##.#","#....#.#....#","#.##.#.#.##.#","#....###....#",".#####.#####."],
+  klok:["...#####...","..#.....#..",".#...#...#.","#....#....#","#....#....#","#....###..#","#.........#",".#.......#.","..#.....#..","...#####..."],
+  oog:["....#####....","..##.....##..",".#...###...#.","#...#####...#",".#...###...#.","..##.....##..","....#####...."],
+  rol:[".#########.","#.#.......#",".#.#####.#.",".#.......#.",".#.#####.#.",".#.......#.",".#.####..#.",".#.......#.","#.#.......#",".#########."],
+  hart:[".##.##.","#######","#######",".#####.","..###..","...#..."],
+  slot:["..###..",".#...#.",".#...#.","#######","###.###","###.###","#######"]
+};
+function pixIcoon(naam, kleur){
+  const g = PIXIC[naam]; if(!g) return "";
+  const w = Math.max(...g.map(r => r.length)), h = g.length;
+  let r = "";
+  g.forEach((rij, y) => { let x = 0; while(x < rij.length){ if(rij[x] !== "#"){ x++; continue; }
+    let n = 1; while(rij[x + n] === "#") n++; r += `<rect x="${x}" y="${y}" width="${n}" height="1"/>`; x += n; } });
+  return `<svg class="pixic" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" fill="${kleur || "currentColor"}" aria-hidden="true">${r}</svg>`;
+}
+function emojiVervang(tekst, inSvg){
+  let uit = [], laatst = 0, m, veranderd = false;
+  EMOJI_RE.lastIndex = 0;
+  while((m = EMOJI_RE.exec(tekst))){
+    const heel = m[0], basis = heel.replace(/[️⃣‍]|[\u{1F3FB}-\u{1F3FF}]/gu, "").slice(0, [...heel][0].length);
+    uit.push(tekst.slice(laatst, m.index));
+    laatst = m.index + heel.length;
+    if(EMOJI_HOUD.has(basis)){
+      /* Staat hij al als gewone tekst (met het tekst-teken erachter), dan is er niets te doen. */
+      if(heel === basis && tekst[laatst] === "\uFE0E"){ uit.push(basis); continue; }
+      uit.push(basis + (tekst[laatst] === "\uFE0E" ? "" : "\uFE0E")); veranderd = true; continue; }
+    veranderd = true;
+    if(!inSvg && EMOJI_BEELD[basis]){ uit.push({beeld:EMOJI_BEELD[basis]}); continue; }
+    if(!inSvg && basis === "🟣"){ uit.push({klas:"aeic"}); continue; }
+    if(!inSvg && basis === "❤"){ uit.push({hart:true}); continue; }
+    if(!inSvg && basis === "🔒"){ uit.push({pix:"slot"}); continue; }
+    /* Weg ermee, en de spatie erachter ook als hij vooraan stond of er al een spatie voor stond. */
+    const voor = tekst.slice(0, m.index);
+    if(tekst[laatst] === " " && (!voor.trim() || /\s$/.test(voor))) laatst++;
+  }
+  if(!veranderd) return null;
+  uit.push(tekst.slice(laatst));
+  return uit;
+}
+function emojiTekstNode(node){
+  const t = node.nodeValue;
+  if(!t || !EMOJI_IS.test(t)) return;
+  const ouder = node.parentNode; if(!ouder) return;
+  const tag = ouder.nodeName;
+  if(tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA") return;
+  const inSvg = ouder.namespaceURI === "http://www.w3.org/2000/svg";
+  const delen = emojiVervang(t, inSvg); if(!delen) return;
+  if(delen.every(d => typeof d === "string")){ node.nodeValue = delen.join(""); return; }
+  const frag = document.createDocumentFragment();
+  delen.forEach(d => {
+    if(typeof d === "string"){ if(d) frag.appendChild(document.createTextNode(d)); return; }
+    const s = document.createElement("span");
+    if(d.beeld){ s.className = "elic"; s.style.backgroundImage = `url('${kaartSrc(d.beeld)}')`; }
+    else if(d.hart){ s.className = "hartic"; s.innerHTML = pixIcoon("hart", "#e0503c"); }
+    else if(d.pix){ s.className = "pixspan"; s.innerHTML = pixIcoon(d.pix); }
+    else s.className = d.klas;
+    frag.appendChild(s);
+  });
+  ouder.replaceChild(frag, node);
+}
+function emojiAttr(el){
+  ["title", "placeholder", "aria-label"].forEach(a => {
+    const v = el.getAttribute && el.getAttribute(a);
+    if(v && EMOJI_IS.test(v)){ const d = emojiVervang(v, true); if(d) el.setAttribute(a, d.join("").replace(/\s{2,}/g, " ").trim()); }
+  });
+}
+function emojiWeg(wortel){
+  if(!wortel) return;
+  if(wortel.nodeType === 3){ emojiTekstNode(wortel); return; }
+  if(wortel.nodeType !== 1 && wortel.nodeType !== 11) return;
+  if(wortel.nodeType === 1){ if(wortel.nodeName === "SCRIPT" || wortel.nodeName === "STYLE") return; emojiAttr(wortel); }
+  const tw = document.createTreeWalker(wortel, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  const tekst = [];
+  for(let n = tw.nextNode(); n; n = tw.nextNode()){
+    if(n.nodeType === 3){ if(EMOJI_IS.test(n.nodeValue)) tekst.push(n); }
+    else emojiAttr(n);
+  }
+  tekst.forEach(emojiTekstNode);
+}
+function knopIconen(){
+  const zet = (sel, naam) => document.querySelectorAll(sel).forEach(el => { el.innerHTML = pixIcoon(naam); });
+  zet('[data-btn="autopass"].tbtn', "bliksem");
+  zet('[data-btn="klokstart"].tbtn', "klok");
+  zet('.tbtn[data-btn="tutorial"]', "boek");
+  zet('.tbtn[data-btn="handofftoggle"]', "oog");
+  zet('.tbtn[data-btn="mlog"]', "rol");
+  const lb = document.getElementById("logknop"); if(lb) lb.textContent = "Logboek";
+}
+knopIconen();
+if(typeof MutationObserver !== "undefined"){
+  const EMOJI_WACHT = new MutationObserver(lijst => {
+    for(const mu of lijst){
+      if(mu.type === "characterData") emojiTekstNode(mu.target);
+      else if(mu.type === "attributes") emojiAttr(mu.target);
+      else mu.addedNodes.forEach(emojiWeg);
+    }
+  });
+  EMOJI_WACHT.observe(document.body || document.documentElement, {childList:true, subtree:true, characterData:true,
+    attributes:true, attributeFilter:["title", "placeholder", "aria-label"]});
+  emojiWeg(document.body);
+}
+if(document.title) document.title = document.title.replace(EMOJI_RE, "").trim();
 
 /* start */
 beeldenWarm();
