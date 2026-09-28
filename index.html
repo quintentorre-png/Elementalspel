@@ -2875,7 +2875,6 @@ const EL = {
 /* Aether-kaarten (Commander) — passieve krachten en fusies, 🟣 paars, niet te verwijderen */
 const AETHERS = {
   ae_draw3:  {el:null, name:"Bron van Overvloed", kind:"passief"},
-  ae_vonk:   {el:"vuur", name:"Vonkoverslag", kind:"passief"},
   ae_watercycle:{el:"water", name:"Getijdenstroom", kind:"passief"},
   ae_offer:  {el:"vuur", name:"Brandoffer", kind:"passief"},
   ae_fire6:  {el:"vuur", name:"Verzengende Woede", kind:"passief"},
@@ -3075,10 +3074,9 @@ const LICHT_TEKST = {
 };
 const AETHER_TEKST = {
   ae_draw3:     "Trek <b>2</b> per beurt in plaats van 1. {Betaal} dan <b>1</b> aan het eind van die beurt. Op 1 leven trek je er gewoon 1.",
-  ae_vonk:      "Je 🔥 hebben {Volle slag}. Je 🔥-schade doet ook <b>1</b> schade aan de creatures ernaast (ook aan 💧 Water).",
   ae_watercycle:"Wat je {herspeelt}, doet het speel-effect <b>twee keer</b>.",
   ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen creature mee kiezen: {offer} die en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-spell.",
-  ae_fire6:     "Je 🔥 doet <b>5</b> in plaats van 2.",
+  ae_fire6:     "Het 🔥-effect doet <b>3</b> meer aan zijn doelwit (dus <b>5</b>), en <b>1</b> aan de creatures ernaast (ook aan 💧 Water).",
   ae_stonefull: "Je 🪨 hebben {Volle slag}.",
   ae_grassx2:   "Je 🌿 {verstrikt} met <b>2</b> tokens in plaats van 1.",
   ae_hp3:       "Kies bij de start een element. Je creatures van dat element komen binnen met <b>+4</b> levens.",
@@ -3237,8 +3235,8 @@ function fuseOk(p, el, speed){
   return fuseTributes(p, el).length > 0;
 }
 const aeBoosts = (p, el) => aeList(p).some(k => AETHERS[k].el && AETHERS[k].el === el);   // typeloze aethers kleuren niets
-/* 🟣 Volle slag door een aether: Onwrikbaar voor 🪨, Vonkoverslag voor 🔥. */
-const aeVolleSlag = (p, el) => (el === "steen" && hasAe(p, "ae_stonefull")) || (el === "vuur" && hasAe(p, "ae_vonk"));
+/* 🟣 Volle slag door een aether: Onwrikbaar voor 🪨. (Vonkoverslag is uit het spel.) */
+const aeVolleSlag = (p, el) => (el === "steen" && hasAe(p, "ae_stonefull"));
 const atkOf = (cr, p) => {            // aanvalskracht: helft van de levens, minimaal 1
   if(!cr) return 1;
   const hb = (typeof hitteBonus === "function" ? hitteBonus(p) : 0)
@@ -5278,7 +5276,7 @@ const AETHER_KAARTVORM = "art/kaart-aether.png";   // staand full art, 480×672
    met per kracht één onderwerp in het midden. Het midden is wat je in het spel ziet: daar wordt
    de ruit naast je levens uit gesneden. In de winkel en bij het kiezen zie je meer. */
 const AETHER_BEELD = {
-  ae_draw3:"art/aether-overvloed.png", ae_vonk:"art/aether-vonkoverslag.png",
+  ae_draw3:"art/aether-overvloed.png",
   ae_watercycle:"art/aether-getijdenstroom.png", ae_offer:"art/aether-brandoffer.png",
   ae_fire6:"art/aether-woede.png", ae_stonefull:"art/aether-onwrikbaar.png",
   ae_grassx2:"art/aether-woekergroei.png", ae_hp3:"art/aether-oerkracht.png",
@@ -5438,7 +5436,7 @@ function applyDamage(id, srcEl, base, o){
       return {destroyed:false};
     }
   }
-  /* 🟣 Vonkoverslag springt sowieso naar de buren — ook als dit doelwit zelf niets voelt. */
+  /* 🟣 De vonken van Verzengende Woede springen sowieso naar de buren, ook als dit doelwit zelf niets voelt. */
   vonkOverslag(f.p, f.c, srcEl, o);
   if(!findCre(id)) return {destroyed:true, wasP:f.p, raak:true};
   if(o && o.ignoreImmune && out === "immuun") out = base;    // 🟣 Verzengende Woede raakt ook Water
@@ -5475,19 +5473,22 @@ function applyDamage(id, srcEl, base, o){
   if(weg) destroyCre(f.p, f.c, "schade");
   return weg ? {destroyed:true, wasP:f.p, raak:true} : {destroyed:false, raak:true};
 }
-/* 🟣 Vonkoverslag: elk 🔥 dat raak is springt naar de buurkolommen aan diezelfde kant.
+/* 🔥 Vonken: het vuur springt naar de buurkolommen aan diezelfde kant.
    Die overslag is elementloos (dus 💧 voelt hem ook) en springt zelf niet verder. */
 function vonkOverslag(tp, tc, srcEl, o){
   if(srcEl !== "vuur" || (o && o.geenVonk)) return;
   const baas = (o && o.ctrl != null) ? o.ctrl : S.actor;
-  if(!hasAe(baas, "ae_vonk") && !trioKracht(baas, "spat")) return;
+  /* 🟣 Verzengende Woede (alleen het 🔥-effect zelf) en het trio laten de vonk overspringen.
+     (Vonkoverslag bestaat niet meer.) */
+  const woede = !!(o && o.woede);
+  if(!woede && !trioKracht(baas, "spat")) return;
   [tc-1, tc+1].forEach(c => {
     if(c < 0 || c > 4) return;
     const cr = P(tp).cols[c].cre; if(!cr) return;
     cr.hp -= 1;
     pop(creSel(tp, c), "-1", "dmg");
-    addLog(`🟣 <em>Vonkoverslag</em>: de vonk springt naar kolom ${c+1} van ${pName(tp)} — 1 schade aan ${icon(cr.card.el)} ${EL[cr.card.el].name}.`, true);
-    if(cr.hp <= 0) destroyCre(tp, c, "🟣 Vonkoverslag");
+    addLog(`🟣 <em>${woede ? "Verzengende Woede" : "Vonken"}</em>: het vuur springt naar kolom ${c+1} van ${pName(tp)}, 1 schade aan ${icon(cr.card.el)} ${EL[cr.card.el].name}.`, true);
+    if(cr.hp <= 0) destroyCre(tp, c, woede ? "🟣 Verzengende Woede" : "vonken");
   });
   render();
 }
@@ -7011,7 +7012,7 @@ async function resolveEffect(it){
       destroyCre(f.p, f.c, "🔥 offer");
       offer = true;
     } else {
-      applyDamage(id, "vuur", dmg, {ignoreImmune:heet, srcSel:fSrc});
+      applyDamage(id, "vuur", dmg, {ignoreImmune:heet, srcSel:fSrc, woede:big});
     }
     render();
     if(offer && it.srcId !== id){
@@ -12828,7 +12829,7 @@ const STORY = {
     midden:[
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Wow. It's getting hot in here."},
       {s:"fireguy", naam:"…", kleur:"#ff8a4a", t:"Hij staat gewoon in de zaal van de baas. Niemand weet hoe hij binnen is gekomen; de deur is een muur."},
-      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Zonder wat firepower ga je dit niet redden, kid. Hier — 🟣 Verzengende Woede. Je vuur doet nu 5 schade in plaats van 2."},
+      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Zonder wat firepower ga je dit niet redden, kid. Hier. 🟣 Verzengende Woede. Je vuur doet nu 5 schade, en wat ernaast staat krijgt de vonken."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"En baas, with all due respect: deze is er eentje van ons nu."},
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Van jullie."},
       {s:"rotsbaas_licht", reus:true, naam:"Magnus", kleur:"#ff5a3c", t:"Magnus weet waar jij je woorden vandaan hebt. En je kaarten."},
@@ -13918,7 +13919,7 @@ const STORY = {
     trio:[{naam:"Knetter", hp:2, kol:0, kracht:"plasma", uitleg:"vuur is plasma"},
           {naam:"Spetter", hp:2, kol:2, kracht:"spat",   uitleg:"vuur spat naar de buren"},
           {naam:"Fikkie",  hp:2, kol:4, kracht:"dubbel", uitleg:"vuur schiet twee keer"}],
-    geeft:"ae_vonk",           // 🟣 Spetters kunstje: vuur dat naar de buren spat
+    /* beloning: nog te kiezen (Vonkoverslag is uit het spel) */
     ban:10, begint:1
   },
   "3-5":{
@@ -13947,7 +13948,7 @@ const STORY = {
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Er is geen tweede taak."},
       {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"⚙️ <b>De lopende band.</b> Alles wat je neerlegt, creature of spell, van jou of van hem, schuift meteen zo ver mogelijk naar rechts, tot er iets in de weg staat. Valt er iets weg, dan schuift de rest weer door. Schuiven triggert niks."},
       {s:null, bg:3, naam:"…", kleur:"#e6c88a", t:"🔥 <b>De oven.</b> Aan het begin van elke beurt van hem gaat de oven open: wat helemaal rechts ligt, van jou én van hem, gaat erin. Weg. En dan schuift alles weer een plek op."},
-      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Uitrusting: 🟣 Brandoffer. 🟣 Vonkoverslag. 🟣 Oerkracht op steen."},
+      {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", paars:true, t:"Uitrusting: 🟣 Brandoffer. 🟣 Verzengende Woede. 🟣 Oerkracht op steen."},
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Twee keer Oerkracht is niet toegestaan."},
       {s:"klinknagel", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"Ik heb niks gevraagd. Dus is er niks geweigerd."},
       {s:"klinknagel_boos", bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"BEGINNEN."}
@@ -14029,7 +14030,7 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{plasma:3, rots:3, steen:5, vuur:5, gras:5, water:5, negate:6},
     ltVij:["negate"],
-    aeVij:["ae_offer","ae_vonk","ae_hp3"], keuzeVij:"steen",
+    aeVij:["ae_offer","ae_fire6","ae_hp3"], keuzeVij:"steen",
     levensVij:7,
     band:true,
     geeftLicht:"negate",
