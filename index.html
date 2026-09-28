@@ -1440,6 +1440,9 @@ h3{font-size:.66rem; line-height:1.9}
 .voorbox.nieuw .vgetal{font-size:1.7rem; min-width:2.2em; text-align:center}
 .voorbox.nieuw .vnotch{width:84px; height:11px}
 .voorbox.nieuw .vnotch.hier{height:13px}
+.voorbox.nieuw .vmixrij.vrij .vnotch{height:6px}
+.voorbox.nieuw .vmixrij.vrij .vnotch.hier{height:8px}
+.voorbox.nieuw .vmixrij.vrij .vslider{gap:1px}
 .voorbox.nieuw .vkol .vnaam{font-size:.8rem}
 .vteller{display:flex; align-items:center; gap:6px}
 .vknop{width:30px; height:30px; padding:0; font-size:1.1rem; line-height:1; cursor:pointer; color:var(--gold);
@@ -2263,6 +2266,17 @@ h3{font-size:.66rem; line-height:1.9}
 .getijmeter.op{animation:getijop 1.2s cubic-bezier(.2,1.4,.35,1) 1 both}
 @keyframes getijop{0%{transform:scale(1)}22%{transform:scale(1.4); box-shadow:0 0 24px 8px rgba(79,176,236,.55)}
   100%{transform:scale(1)}}
+/* ⛓ 5-3: een kolom die de Naad heeft dichtgetrokken */
+.col.kolketting{position:relative}
+.col.kolketting .slot{opacity:.22; filter:grayscale(1) brightness(.6)}
+.kettinglaag{position:absolute; inset:-4px; z-index:7; pointer-events:none; border-radius:8px;
+  background:
+    repeating-linear-gradient(35deg, rgba(0,0,0,0) 0 10px, #e6c46a 10px 13px, #8a6a24 13px 15px, rgba(0,0,0,0) 15px 26px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,0) 0 10px, #e6c46a 10px 13px, #8a6a24 13px 15px, rgba(0,0,0,0) 15px 26px),
+    rgba(12,10,20,.72);
+  box-shadow:inset 0 0 0 3px #d9b35a, 0 0 20px rgba(230,196,106,.35);
+  animation:kettingin .5s ease-out 1}
+@keyframes kettingin{0%{transform:scaleY(.2); opacity:0}70%{transform:scaleY(1.05); opacity:1}100%{transform:scaleY(1)}}
 /* 🚪 een dichte sluis over de hele kolom */
 .col.dicht{position:relative}
 .col.dicht::after{content:""; position:absolute; inset:-3px; z-index:7; pointer-events:none; border-radius:8px;
@@ -2544,6 +2558,8 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
   background:rgba(30,20,8,.34); border:3px dashed #b8874f; border-radius:9px;
   text-shadow:0 0 10px rgba(255,200,110,.9), 0 2px 0 #2a1a06;
   animation:rotsmerk .9s ease-in-out infinite}
+.rotsmerk.inktmerk{color:#e3b6f2; background:rgba(40,12,52,.36); border-color:#9b5fb8;
+  text-shadow:0 0 10px rgba(214,150,255,.9), 0 2px 0 #1e0a28}
 @keyframes rotsmerk{0%,100%{opacity:.55; transform:translateY(0)}50%{opacity:1; transform:translateY(-3px)}}
 .rotsblok{position:fixed; z-index:420; pointer-events:none; width:14px; height:14px;
   background:#7a5b3a; border:2px solid #4a382a; border-radius:2px}
@@ -2961,7 +2977,15 @@ const VAR = {
   plasma:{basis:"vuur",  name:"Plasma", icon:"☄️", badge:"☄"},
   roos:  {basis:"gras",  name:"Roos",   icon:"🌹", badge:"🌹"},
   ijs:   {basis:"water", name:"IJs",    icon:"🧊", badge:"🧊"},
-  kiezel:{basis:"steen", name:"Kiezel", icon:"🪨", badge:"·", token:true}
+  kiezel:{basis:"steen", name:"Kiezel", icon:"🪨", badge:"·", token:true},
+  /* 5-2 · de achterkamer van de Verzamelaar: vier stukken die nooit ergens gestaan hebben.
+     Belachelijke getallen, maar ze hebben een element, en dáár zit de zwakke plek: de cirkel
+     werkt gewoon (sterk tegen = instakill, zwak tegen = immuun). Ze zijn traag: de beurt dat
+     ze binnenkomen slaan ze nog niet. */
+  draak:    {basis:"vuur",  name:"De Oerdraak",        icon:"🐉", badge:"🐉", monster:true, hp:199, vol:true, traag:true},
+  leviathan:{basis:"water", name:"De Leviathan",       icon:"🐍", badge:"🐍", monster:true, hp:260, vol:true, traag:true},
+  woud:     {basis:"gras",  name:"Het Woud dat loopt", icon:"🌳", badge:"🌳", monster:true, hp:150, atk:125, traag:true},
+  kolos:    {basis:"steen", name:"De Kolos",           icon:"🗿", badge:"🗿", monster:true, hp:333, atk:111, traag:true}
 };
 /* ================= TEKSTEN =================
    Eén taal voor alle kaarten. Een kaart heeft een ▶ speel-effect (gaat één keer af als hij
@@ -3051,7 +3075,11 @@ const VAR_TEKST = {
   roos:   {kw:["volleslag","groei"], speel:"{Verstrik} een creature.",
            spell:"De creature op deze plek krijgt {Volle slag} en {Groei 1|groei}."},
   ijs:    {speel:"Een eigen creature gaat terug naar je hand (ook 💧 Water). Speel je IJs óp een eigen creature, dan gaat die. Daarna smelt IJs tot 💧 Water, zonder trigger."},
-  kiezel: {kw:["wijkt"], eig:"Telt als 🪨 Steen."}
+  kiezel: {kw:["wijkt"], eig:"Telt als 🪨 Steen."},
+  draak:    {kw:["volleslag"], eig:"<b>199</b> levens. Traag: slaat niet in de beurt dat hij binnenkomt."},
+  leviathan:{kw:["volleslag"], eig:"<b>260</b> levens. Traag: slaat niet in de beurt dat hij binnenkomt."},
+  woud:     {eig:"<b>150</b> levens, slaat <b>125</b>. Traag: slaat niet in de beurt dat hij binnenkomt."},
+  kolos:    {eig:"<b>333</b> levens, slaat <b>111</b>. Traag: slaat niet in de beurt dat hij binnenkomt."}
 };
 const LICHT_TEKST = {
   greed:   "{Betaal} <b>2</b> en {offer} een eigen creature: trek <b>2</b>.",
@@ -3080,7 +3108,7 @@ const AETHER_TEKST = {
   ae_stonefull: "Je 🪨 hebben {Volle slag}.",
   ae_grassx2:   "Je 🌿 {verstrikt} met <b>2</b> tokens in plaats van 1.",
   ae_hp3:       "Kies bij de start een element. Je creatures van dat element komen binnen met <b>+4</b> levens.",
-  ae_graf:      "Kies bij de start een element. Einde van je beurt: {roep|roepop} er één {op|roepop} uit je graf.",
+  ae_graf:      "Kies bij de start een kaart uit je deck (geen ✦). Einde van je beurt: {roep|roepop} er één van die soort {op|roepop} uit je graf.",
   fu_water:     "{Fusie} 💧: de kaart komt binnen als Waterplons. Trek <b>1</b>, dan de plons ({herspeel}); daarna is het Water.",
   fu_fire:      "{Fusie} 🔥: <b>2</b> schade aan elke vijandelijke creature. Met Verzengende Woede krijgt één ervan naar keuze <b>5</b>.",
   fu_stone:     "{Fusie} 🪨 met <b>4</b> levens, plus een tweede 🪨 van <b>4</b> op een vrije plek. Allebei doen hun speel-effect.",
@@ -3244,6 +3272,9 @@ const atkOf = (cr, p) => {            // aanvalskracht: helft van de levens, min
   if(cr.card.cheat) return 100;                                    // 🔥 cheaton
   const bodem = cr.minAtk || EL[cr.card.el].minAtk || 1;          // sommigen slaan nooit zachter dan dit
   if(EL[cr.card.el].vastAtk != null) return EL[cr.card.el].vastAtk + hb;   // sommige beesten slaan altijd even hard (of nooit)
+  const vv = cr.card.var && VAR[cr.card.var];
+  if(vv && vv.atk) return vv.atk + hb;                             // 🐉 de stukken van de Verzamelaar
+  if(vv && vv.vol) return Math.max(bodem, cr.hp) + hb;
   if(EL[cr.card.el].volAtk) return Math.max(bodem, cr.hp) + hb;    // 🕯 slaat met alles wat hij heeft
   if(roosKracht(cr)) return Math.max(bodem, cr.hp) + hb;           // 🌹 Roos: volle levens
   if(aeVolleSlag(p, cr.card.el)) return Math.max(bodem, cr.hp) + hb;
@@ -3399,6 +3430,7 @@ function nextGame(){
   SET.autopass = [false, false]; saveSet();      // autopass begint elk potje uit
   const loser = opp(S.over.winner);
   S.match.game++; S.match.firstPicker = loser; S.ready = [false, false];
+  S.mulliganGedaan = false; S.aeKeuzeGedaan = false;   // elk potje weer een mulligan, en keuzes voor nieuwe aethers
   resetBoard();
   S.ui = {mode:"busy"}; render();
   commanderSetup();
@@ -3428,19 +3460,21 @@ function wsTargets(p, bron, keten){
   }
   return uit;
 }
+/* ⛓ 5-3 · De Naad: een kolom die dicht is, is voor iedereen weg. Daar komt niets meer. */
+const kolDicht = c => !!(S && S.story && S.story.dicht && S.story.dicht.includes(c));
 /* Plekken waar een creature mag verschijnen: leeg, of bezet door een oplosbare wolk. */
 function openCols(p, excl){
   const out = [];
   for(let c=0;c<5;c++){
     const cr = P(p).cols[c].cre;
-    if((!cr || overheenOk(cr)) && c !== excl) out.push(c);
+    if((!cr || overheenOk(cr)) && c !== excl && !kolDicht(c)) out.push(c);
   }
   return out;
 }
-function emptyCols(p, excl){ const out=[]; for(let c=0;c<5;c++) if(!P(p).cols[c].cre && c!==excl) out.push(c); return out; }
+function emptyCols(p, excl){ const out=[]; for(let c=0;c<5;c++) if(!P(p).cols[c].cre && c!==excl && !kolDicht(c)) out.push(c); return out; }
 /* Spells mogen een bezette spell-plek overschrijven (de oude wordt gediscard) — behalve de
    speciale spells van een baas: die blijven liggen. */
-function freeSpellCols(p){ return [0,1,2,3,4].filter(c => !(P(p).cols[c].spell && EL[P(p).cols[c].spell.card.el].alleenSpell)); }
+function freeSpellCols(p){ return [0,1,2,3,4].filter(c => !kolDicht(c) && !(P(p).cols[c].spell && EL[P(p).cols[c].spell.card.el].alleenSpell)); }
 function handHasFlash(p){ return P(p).hand.some(cd => EL[cd.el].flash); }
 function flashFuseOk(p){
   if(!aeFuseAny(p)) return false;
@@ -3469,6 +3503,9 @@ function canAttack(cr, p){
   const st = S && S.story;
   if(st){
     if(st.stilstand) return false;                       // 🌊 doodtij: er beweegt niets
+    /* 🐉 De monsters van de Verzamelaar zijn traag: de beurt dat ze binnenkomen slaan ze nog niet. */
+    if(cr.card.var && VAR[cr.card.var] && VAR[cr.card.var].traag && cr.played === S.gTurn) return false;
+    { const c = P(p).cols.findIndex(x => x.cre === cr); if(c >= 0 && kolDicht(c)) return false; }
     if(st.sluis != null){
       const c = P(p).cols.findIndex(x => x.cre === cr);  // 🚪 door een dichte sluis gaat niets
       if(c >= 0 && c === st.sluis) return false;
@@ -3583,7 +3620,8 @@ function getijBij(){
   const st = S && S.story;
   if(!st || !st.getijAan || S.over) return;
   const ronde = Math.ceil(S.gTurn / 2);
-  const nu = GETIJ[(ronde - 1 + (st.getijOffset || 0)) % 3];
+  const cyclus = st.getijLijst || GETIJ;                 // 5-4: springtij komt twee keer zo vaak
+  const nu = cyclus[(ronde - 1 + (st.getijOffset || 0)) % cyclus.length];
   st.stilstand = nu === "vloed";                 // bij vloed valt niemand aan
   st.regen = nu === "eb";                        // bij eb dooft vuur, net als in de regen
   if(st.getij === nu) return;
@@ -3639,7 +3677,7 @@ const regentHet = () => !!(S && S.story && S.story.regen) && !(SET.story && SET.
 function regenBij(){
   if(!S || !S.story || !S.story.regenAan) return;
   const ronde = Math.ceil(S.gTurn / 2);
-  const nat = (ronde % 2) === 1;
+  const nat = S.story.regenAltijd ? true : (ronde % 2) === 1;   // 5-4: bij het gezicht van Moeder Natuur houdt het niet op
   if(nat === !!S.story.regen) return;
   S.story.regen = nat;
   addLog(nat ? `🌧 <em>Het begint te regenen.</em> Vuur raakt niemand meer behalve je eigen creatures.`
@@ -3787,6 +3825,13 @@ function raadBij(){
   addLog(`⚖ <em>De Raad slaat een bladzijde om.</em> ${RAAD_TXT[nu]}`, true);
   if(!FAST){ lavaVerf(nu === "lava"); regenVerf(nu === "regen"); witFlits(); AU.play("light"); }
 }
+/* Al het weer uit, in één keer: voor een omslag die met een schone lucht begint (5-4). */
+function weerUit(){
+  const st = S && S.story; if(!st) return;
+  ["rotsAan","rotsDubbel","regenAan","regenAltijd","regen","lavaAan","vuurzee","vuurzeeSnel","getijAan","stilstand"].forEach(k => st[k] = false);
+  st.rots = null; st.getij = null; st.getijLijst = null; st.springOp = null;
+  if(!FAST){ lavaVerf(false); regenVerf(false); if(typeof getijVerf === "function") getijVerf(); }
+}
 /* 🔥 Hitte (3-6): het wordt elke ronde warmer. In de eerste fase gebeurt er niets mee —
    hij staat er alleen bij en het loopt op. Daarna is precies dát zijn voorsprong. */
 const HITTE_MAX = 6;
@@ -3825,8 +3870,15 @@ function rotsMerkBij(){
   if(!S || !S.story || !S.story.rotsAan || S.over) return;
   /* Aan allebei de kanten een willekeurige plek — het plafond kiest geen partij. */
   const merken = [0, 1].map(p => ({p, c: Math.floor(rnd() * 5)}));
+  /* 5-4: het gezicht van Magnus laat het twee keer zo vaak vallen: twee plekken per kant. */
+  if(S.story.rotsDubbel) [0, 1].forEach(p => {
+    const al = merken.find(m => m.p === p).c;
+    const rest = [0,1,2,3,4].filter(c => c !== al);
+    merken.push({p, c: rest[Math.floor(rnd() * rest.length)]});
+  });
   S.story.rots = merken;
-  addLog(`🪨 Er valt gruis uit het plafond: boven kolom ${merken[0].c+1} van ${pName(0)} én boven kolom ${merken[1].c+1} van ${pName(1)}. <em>Daar komt het naar beneden zodra de beurt doorgaat.</em>`, true);
+  const bij = p => merken.filter(m => m.p === p).map(m => m.c + 1).sort((a, b) => a - b).join(" en ");
+  addLog(`🪨 Er valt gruis uit het plafond: boven kolom ${bij(0)} van ${pName(0)} én boven kolom ${bij(1)} van ${pName(1)}. <em>Daar komt het naar beneden zodra de beurt doorgaat.</em>`, true);
   render();
 }
 /* Het beest van de Balrog likt elke beurt zijn wonden. */
@@ -4232,6 +4284,21 @@ const MUZIEK = {
   w4_spiegel:     "audio/w4-06-spiegel.mp3",    // 4-4: het vlak dat terugkijkt
   w4_baas:        "audio/w4-07-oceaan.mp3",     // 4-5: het gevecht met de Oceaan
   w4_vlak:        "audio/w4-08-vlak.mp3",       // het laatste stille vlak, en bovenkomen
+  /* --- wereld 5 · Hemelrand --- */
+  w5_trap:        "audio/w5-01-trap.mp3",       // de trap uit de zee, Nimbus, en de terugweg
+  w5_seraf:       "audio/w5-02-seraf.mp3",      // 5-1: Seraf boven aan de trap, praatje en gevecht
+  w5_zaal:        "audio/w5-03-zaal.mp3",       // 5-2: de zaal met de vitrines, het praatje
+  w5_verzameling: "audio/w5-04-verzameling.mp3",// 5-2: het gevecht met de verzameling
+  w5_achterkamer: "audio/w5-05-achterkamer.mp3",// 5-2: de achterkamer en de vier stukken
+  w5_naad:        "audio/w5-06-naad.mp3",       // 5-3: de Naad, praatje en gevecht
+  w5_gebroken:    "audio/w5-07-gebroken.mp3",   // 5-4: Seraf gebroken, het begin en het laatste gezicht
+  w5_kantoor:     "audio/w5-08-kantoor.mp3",    // 5-5: het kantoor, het praatje
+  w5_eerste:      "audio/w5-09-eerste.mp3",     // 5-5: potje 1 en 2 tegen De Eerste
+  w5_stoel:       "audio/w5-10-stoel.mp3",      // 5-5: de stoel, de keuze
+  w5_zit:         "audio/w5-11-zit.mp3",        // 5-5: potje 3 als je bent gaan zitten
+  w5_staan:       "audio/w5-12-staan.mp3",      // 5-5: potje 3 als je bent blijven staan
+  w5_einde_zit:   "audio/w5-13-einde-zit.mp3",  // het einde als je zat
+  w5_einde_leeg:  "audio/w5-14-einde-leeg.mp3", // het einde als je bleef staan
   /* --- korte stingers: spelen één keer over de muziek heen --- */
   winst:          "audio/winst.mp3",                     // als je een gevecht wint
   verloren:       "audio/verloren.mp3"                      // als je omvalt
@@ -5236,6 +5303,8 @@ const KAART_BEELD = {
   ei:"art/token-ei.png", spin:"art/kaart-spin.png", schildje:"art/token-schild.png",
   swipe:"art/kaart-swipe.png", stab:"art/kaart-stab.png", schild:"art/kaart-schild.png",
   web:"art/kaart-web.png", wolf:"art/kaart-wolf.png", vis:"art/kaart-vliegendevis.png",
+  /* 5-2 · de vier stukken uit de achterkamer */
+  draak:"art/kaart-draak.png", leviathan:"art/kaart-leviathan.png", woud:"art/kaart-woud.png", kolos:"art/kaart-kolos.png",
   /* De golem heeft geen apart kaartje nodig: zijn eigen tekening wordt bijgesneden en
      in het kaartvenster gepast, en er staat een kleine versie van hem bovenop. */
   balrog:"art/lavagolem.png"
@@ -5311,8 +5380,11 @@ function waitUI(mode, data){
     if(data && isBot(data.p) && mode !== "handoff")
       setTimeout(() => { if(GEN === g) botDecide(mode); }, FAST ? 0 : 550 + Math.random()*450);
     else if(mode === "priority" && data && autoPassOn(data.p))
-      setTimeout(() => {
+      setTimeout(function autoPas(){
         if(GEN === g && pending && S.ui.mode === "priority" && S.ui.p === data.p){
+          /* Online niet doorlaten terwijl zetten van de ander nog binnenkomen: dan zou act()
+             hem weigeren en bleef het venster hangen. Even later opnieuw proberen. */
+          if(NET.on && NET.chan === "live" && applyingRemote){ setTimeout(autoPas, 150); return; }
           addLog(`⚡ Autopass staat aan voor ${pName(data.p)} — reactie automatisch doorgelaten.`);
           act({t:"f", v:"pass"});
         }
@@ -5420,7 +5492,7 @@ function destroyCre(p, c, cause){
   }
   if(!bewaard) P(cr.card.owner).grave.push(cr.card);
   pop(creSel(p,c), "✝", "kill");
-  addLog(`${icon(cr.card.el)} ${EL[cr.card.el].name} van ${pName(p)} wordt vernietigd${cause ? ` (${cause})` : ""}.`, true);
+  addLog(`${kIcon(cr.card)} ${kNaam(cr.card)} van ${pName(p)} wordt vernietigd${cause ? ` (${cause})` : ""}.`, true);
 }
 function applyDamage(id, srcEl, base, o){
   const f = findCre(id); if(!f) return {done:false};
@@ -5460,7 +5532,7 @@ function applyDamage(id, srcEl, base, o){
     return {destroyed:false, raak: lost > 0};
   }
   if(out === "kill"){
-    addLog(`${icon(srcEl)} ${EL[srcEl].name} is sterk tegen ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}: <em>instakill</em>!`, true);
+    addLog(`${icon(srcEl)} ${EL[srcEl].name} is sterk tegen ${kIcon(f.cr.card)} ${kNaam(f.cr.card)}: <em>instakill</em>!`, true);
     pop(sel, "INSTAKILL", "kill");
     destroyCre(f.p, f.c, "instakill");
     return {destroyed:true, wasP:f.p, raak:true};
@@ -5700,6 +5772,67 @@ function grensZet(pl, grens){
       leven = v;
     }});
 }
+/* ⛓ 5-3 · De Naad. Vier levens, en per klap gaat er hooguit één af, hoe hard je ook slaat.
+   Helen kan niet. Elke keer dat er een leven af gaat trekt de Naad een kaart, en de eerste
+   twee keer trekt de ketting het veld dichter: eerst de buitenste kolommen, dan de twee
+   daarnaast. Wat daar stond, van allebei, is uit het spel. */
+function naadZet(pl){
+  let leven = pl.life;
+  Object.defineProperty(pl, "life", {configurable:true, enumerable:true,
+    get(){ return leven; },
+    set(v){
+      const st = S && S.story;
+      if(!st || !st.naad){ leven = v; return; }
+      if(v > leven){
+        if(!st.naadHeelGezegd){ st.naadHeelGezegd = true; addLog(`⛓ <em>De Naad heelt niet.</em> Wat eraf is, blijft eraf.`, true); }
+        return;
+      }
+      if(v === leven) return;
+      leven = Math.max(v, leven - 1);
+      st.naadWacht = (st.naadWacht || 0) + 1;
+    }});
+}
+function sluitKolommen(cols){
+  const st = S.story;
+  st.dicht = (st.dicht || []).concat(cols.filter(c => !(st.dicht || []).includes(c)));
+  const weg = [];
+  cols.forEach(c => [0, 1].forEach(p => {
+    const sl = P(p).cols[c];
+    if(sl.cre){ weg.push(`${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} van ${pName(p)}`); sl.cre = null; }
+    if(sl.spell){ weg.push(`de spell ${kIcon(sl.spell.card)} van ${pName(p)}`); sl.spell = null; }
+  }));
+  if(st.rots) st.rots = rotsLijst(st.rots).filter(m => !cols.includes(m.c));
+  addLog(`⛓ <em>De ketting trekt aan.</em> Kolom ${cols.map(c => c + 1).join(" en ")} ${cols.length === 1 ? "is" : "zijn"} dicht, aan allebei de kanten.${weg.length ? ` Uit het spel: ${weg.join(", ")}.` : ""}`, true);
+  if(5 - st.dicht.length <= 1){
+    st.doorslaan = true;
+    addLog(`⛓ <em>Nog één kolom.</em> Vanaf nu slaat een aanval die de creature tegenover vernietigt door op de speler: <b>1</b> schade.`, true);
+  }
+}
+async function naadNa(){
+  const st = S && S.story;
+  if(!st || !st.naad || !st.naadWacht || S.over) return;
+  while(st.naadWacht > 0 && !S.over){
+    st.naadWacht--;
+    st.naadHits = (st.naadHits || 0) + 1;
+    const L = levelVan(st) || {};
+    if(st.naadHits <= 2){
+      busyFlag = true;
+      await praatLosAwait((st.naadHits === 1 ? L.naadKlap1 : L.naadKlap2) || []);
+      busyFlag = false;
+      if(!FAST){
+        witFlits(); AU.play("thud");
+        const app = document.getElementById("app");
+        if(app){ app.classList.remove("beefthard"); void app.offsetWidth; app.classList.add("beefthard");
+                 setTimeout(() => app.classList.remove("beefthard"), 700); }
+      }
+      sluitKolommen(st.naadHits === 1 ? [0, 4] : [1, 3]);
+      render();
+      if(!FAST) await sleep(500);
+    }
+    if(P(1).deck.length){ addLog(`⛓ De Naad is geraakt en trekt een kaart.`, true); await drawN(1, 1); }
+  }
+  if(!S.over){ S.ui = {mode:"busy"}; render(); }
+}
 /* Wat er gebeurt als die grens geraakt is: hij zegt iets, en daarna trekken jullie allebei 3. */
 async function grensNa(){
   const st = S && S.story; if(!st || !st.grensWacht || S.over) return;
@@ -5751,6 +5884,7 @@ async function chainLoop(){
     await resolveTop();
   }
   if(S.story && S.story.grensWacht) await grensNa();
+  if(S.story && S.story.naadWacht) await naadNa();
   if(!S.over) backToPhase();
 }
 async function askPriority(p){
@@ -6042,7 +6176,12 @@ async function loofGeeft(B){
   addLog(`🟣 <em>Loof geeft je ${AETHERS[k].name}.</em> Vanaf nu, deze partij.`, true);
   if(!FAST){ paarsFlits(); AU.play("light"); }
   /* Vraagt de nieuwe kracht om een element, dan kies je dat nu ook. */
-  if((k === "ae_hp3" || k === "ae_graf") && !(S.aeKeuze && S.aeKeuze[0])){
+  if(k === "ae_graf" && !(S.terug && S.terug[0])){
+    if(!S.terug) S.terug = [null, null];
+    await terugKiezen(0);
+    addLog(`🟣 Je kiest ${soortIc(S.terug[0])} <em>${soortNaam(S.terug[0])}</em>.`, true);
+  }
+  if(k === "ae_hp3" && !(S.aeKeuze && S.aeKeuze[0])){
     if(!S.aeKeuze) S.aeKeuze = [null, null];
     const v = await chooseOpt(0, `<b>${pName(0)}</b> — 🟣 ${AETHERS[k].name}: kies een element`,
       ORDER.map(e => ({v:e, label:EL[e].name, ic:icon(e)})));
@@ -6289,6 +6428,7 @@ async function shelobEieren(){
     addLog(`🥚 <em>Het ei in kolom ${c+1} komt uit.</em> Er staat een 🕷 spin: 7 levens, slaat voor 7.`, true);
     if(!FAST){ AU.play("thud"); render(); await sleep(420); }
   }
+  if(st.eiLeg === false){ render(); return; }        // de Verzamelaar legt zelf geen eieren: die heeft er één, uit de vitrine
   const vrij = emptyCols(1);
   if(!vrij.length){ addLog(`🥚 Shelob heeft geen plek voor een nieuw ei.`); render(); return; }
   const c = vrij[Math.floor(rnd() * vrij.length)];
@@ -6334,26 +6474,35 @@ async function vuurVerzuipt(p, card, asSpell, col){
   destroyCre(p, col, "het water");
   render();
 }
-/* 🐙 Inkt pakt wat ze mooi vindt. Aan het begin van haar beurt kiest ze twee plekken aan
-   jouw kant: heeft ze zelf nog ruimte, dan neemt ze die creature mee naar haar eigen bord;
-   is haar bord vol, dan knijpt ze in plaats daarvan — 3 schade. */
+/* 🐙 Inkt pakt wat ze mooi vindt. Net als bij de rotsval zie je het aankomen: aan het begin
+   van jouw beurt wijzen twee armen elk een plek aan jouw kant aan. Staat daar aan het eind
+   van je beurt nog een creature, dan pakt ze die. Heeft ze zelf nog ruimte, dan neemt ze die
+   creature mee naar haar eigen bord; is haar bord vol, dan knijpt ze: 3 schade. */
+function inktMerkBij(){
+  const st = S && S.story;
+  if(!st || !st.inkt || S.over || S.tp !== 0) return;
+  const cols = shuffle([0,1,2,3,4]).slice(0, 2).sort((a, b) => a - b);
+  st.inktMerk = cols;
+  addLog(`🐙 <em>Twee armen wijzen</em>: kolom ${cols[0]+1} en kolom ${cols[1]+1} van ${pName(0)}. Staat daar aan het eind van je beurt iets, dan pakt ze het.`, true);
+  render();
+}
+const inktHier = (p, c) => !!(p === 0 && S && S.story && S.story.inkt && (S.story.inktMerk || []).includes(c));
 async function inktGrijpt(){
   const st = S && S.story;
-  if(!st || !st.inkt || S.over || S.tp !== 1) return;
-  const mijn = [];
-  for(let c = 0; c < 5; c++) if(P(0).cols[c].cre) mijn.push(c);
-  if(!mijn.length){ addLog(`🐙 <em>Inkt tast rond en vindt niets.</em> Ze wacht gewoon.`, true); return; }
-  shuffle(mijn);
-  const doelen = mijn.slice(0, 2);
-  addLog(`🐙 <em>Inkt steekt twee armen uit.</em>`, true);
-  for(const c of doelen){
+  if(!st || !st.inkt || S.over || S.tp !== 0) return;
+  const doelen = (st.inktMerk || []).slice();
+  st.inktMerk = null;
+  if(!doelen.length) return;
+  const raak = doelen.filter(c => P(0).cols[c].cre);
+  if(!raak.length){ addLog(`🐙 <em>De armen grijpen in het niets.</em> Ze trekt ze langzaam terug.`, true); render(); return; }
+  for(const c of raak){
     if(S.over) break;
     const cr = P(0).cols[c].cre;
     if(!cr) continue;
     const vrij = emptyCols(1);
     if(vrij.length){
-      /* meenemen: dezelfde kaart, nieuwe eigenaar, en hij mag deze beurt nog niet slaan */
-      const naar = vrij[Math.floor(rnd() * vrij.length)];
+      /* meenemen: dezelfde kaart, nieuwe eigenaar */
+      const naar = vrij.includes(c) ? c : vrij[Math.floor(rnd() * vrij.length)];
       const kaart = cr.card;
       P(0).cols[c].cre = null;
       placeCre(1, naar, Object.assign({}, kaart, {owner:1}));
@@ -6865,7 +7014,8 @@ function oerkrachtOp(p, el){
 function placeCre(p, col, card){
   /* 🟣 Oerkracht: creatures van het gekozen element komen met +4 levens binnen. */
   const bonus = (oerkrachtOp(p, card.el) && hasAe(p, "ae_hp3")) ? 4 : 0;
-  const hp = (EL[card.el].hp || 2) + bonus;
+  const vv = card.var && VAR[card.var];
+  const hp = ((vv && vv.hp) || EL[card.el].hp || 2) + bonus;
   P(p).cols[col].cre = {card, hp, played:S.gTurn, attackedT:-1, ent:0};
   addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? " (🟣 Oerkracht)" : ""}.`);
 }
@@ -7181,7 +7331,10 @@ async function resolveAttack(it){
       if(P(1).life <= 0) return gameOver(0, "Alle drie de vonken zijn uit.");
       return;
     }
+    const levVoor = P(opp(p)).life;
     P(opp(p)).life -= power;
+    const af = levVoor - P(opp(p)).life;          // ⛓ de Naad laat er maar één af gaan
+    if(af !== power && af >= 0) addLog(`⛓ <em>${power} schade, en er gaat er ${af} af.</em> Meer dan één per klap laat de Naad niet los.`, true);
     if(power > 0 && opp(p) === 0 && S.story) S.story.schadeJij = (S.story.schadeJij || 0) + power;   // ★ telt voor de sterren
     if(power > 0) raakAanval(p);
     /* 🟣 Lichtval: neem je schade, trek een kaart. */
@@ -7191,14 +7344,24 @@ async function resolveAttack(it){
     }
     const lifeEl = document.querySelector(`.pside[data-side="${opp(p)}"]`);
     if(lifeEl) lifeEl.classList.add("shake");
-    pop(rectOf(`.pside[data-side="${opp(p)}"] .plife`), "-" + power, "dmg");
-    addLog(`${icon(att.card.el)} ${EL[att.card.el].name} raakt <em>${pName(opp(p))}</em> direct voor ${power} leven${power>1?"s":""}.`, true);
+    pop(rectOf(`.pside[data-side="${opp(p)}"] .plife`), "-" + af, "dmg");
+    addLog(`${icon(att.card.el)} ${EL[att.card.el].name} raakt <em>${pName(opp(p))}</em> direct voor ${af} leven${af>1?"s":""}.`, true);
     if(P(opp(p)).life <= 0) return gameOver(p, pName(opp(p)) + " heeft geen levens meer.");
     await ijsGlijdt(p, col);
     return;
   }
   const uit = applyDamage(def.card.id, att.card.el, power, {srcCre: att, noFx:true, ignoreImmune: !!att.card.cheat || att.card.var === "plasma" || (att.card.el === "vuur" && trioKracht(p, "plasma"))});
   if(uit && uit.raak) raakAanval(p);
+  /* ⛓ Nog één kolom over (5-3): wie de creature tegenover omlegt, slaat door op de speler. */
+  if(uit && uit.destroyed && S.story && S.story.doorslaan && !S.over){
+    const d = opp(p);
+    P(d).life -= 1;
+    if(d === 0 && S.story) S.story.schadeJij = (S.story.schadeJij || 0) + 1;
+    pop(rectOf(`.pside[data-side="${d}"] .plife`), "-1", "dmg");
+    addLog(`⛓ <em>Doorgeslagen.</em> ${icon(att.card.el)} ${kNaam(att.card)} gaat door en raakt ${pName(d)} voor <b>1</b>.`, true);
+    render();
+    if(P(d).life <= 0) return gameOver(p, pName(d) + " heeft geen levens meer.");
+  }
 }
 /* 💤 Alleen een aanval die écht leven afneemt telt: fizzelt hij, wordt hij geblokt door
    immuniteit of houdt een entangle-token je creature thuis, dan blijf je slapen. */
@@ -7262,31 +7425,78 @@ async function aetherKeuzes(){
   if(!S || S.aeKeuzeGedaan) return;
   S.aeKeuzeGedaan = true;
   if(!S.aeKeuze) S.aeKeuze = [null, null];
+  if(!S.terug) S.terug = [null, null];
   for(const p of [S.tp, opp(S.tp)]){
-    const k = hasAe(p, "ae_hp3") ? "ae_hp3" : (hasAe(p, "ae_graf") ? "ae_graf" : null);
-    if(!k || S.aeKeuze[p]) continue;
-    const v = await chooseOpt(p, `<b>${pName(p)}</b> — 🟣 ${AETHERS[k].name}: kies een element`,
-      ORDER.map(e => ({v:e, label:EL[e].name, ic:icon(e)})));
-    S.aeKeuze[p] = ORDER.includes(v) ? v : "steen";
+    /* 🟣 Oerkracht hangt aan een element. */
+    if(hasAe(p, "ae_hp3") && !S.aeKeuze[p]){
+      const v = await chooseOpt(p, `<b>${pName(p)}</b> · 🟣 ${AETHERS.ae_hp3.name}: kies een element`,
+        ORDER.map(e => ({v:e, label:EL[e].name, ic:icon(e)})));
+      S.aeKeuze[p] = ORDER.includes(v) ? v : "steen";
+    }
+    /* 🟣 Eeuwige Terugkeer hangt aan een kaart uit je deck: een element, een sterke variant,
+       of een eigen beest (de Zee kiest haar vliegende vis). */
+    if(hasAe(p, "ae_graf") && !S.terug[p]) await terugKiezen(p);
   }
   [0,1].forEach(p => {
-    if(S.aeKeuze[p] && (hasAe(p, "ae_hp3") || hasAe(p, "ae_graf")))
-      addLog(`🟣 ${pName(p)} kiest ${[].concat(S.aeKeuze[p]).map(e => icon(e) + " <em>" + EL[e].name + "</em>").join(" én ")}.`, true);
+    if(S.aeKeuze[p] && hasAe(p, "ae_hp3"))
+      addLog(`🟣 ${pName(p)} kiest ${[].concat(S.aeKeuze[p]).map(e => icon(e) + " <em>" + EL[e].name + "</em>").join(" én ")} voor ${AETHERS.ae_hp3.name}.`, true);
+    if(S.terug[p] && hasAe(p, "ae_graf"))
+      addLog(`🟣 ${pName(p)} kiest ${soortIc(S.terug[p])} <em>${soortNaam(S.terug[p])}</em> voor ${AETHERS.ae_graf.name}.`, true);
   });
   render();
 }
-/* 🟣 Eeuwige Terugkeer: in je eindfase komt er een kaart van je element terug uit het graf. */
+/* Een "soort" kaart: de sterke variant als die er is (Rots, Roos…), anders het element of het beest. */
+const kaartSoort = c => c ? (c.var || c.el) : null;
+const soortNaam = k => k === "*" ? "alles wat valt" : (VAR[k] ? VAR[k].name : (EL[k] ? EL[k].name : k));
+const soortIc = k => k === "*" ? "✦" : (VAR[k] ? VAR[k].icon : (EL[k] ? EL[k].icon : ""));
+function terugSoorten(p){
+  const tel = {};
+  P(p).deck.concat(P(p).hand, P(p).grave).forEach(c => {
+    if(!c || c.lk || !EL[c.el] || EL[c.el].alleenSpell || EL[c.el].light) return;
+    const k = kaartSoort(c); tel[k] = (tel[k] || 0) + 1;
+  });
+  return tel;
+}
+async function terugKiezen(p){
+  const tel = terugSoorten(p);
+  const soorten = Object.keys(tel);
+  if(!soorten.length){ S.terug[p] = "steen"; return; }
+  if(isBot(p)){
+    /* De bot neemt wat hij het vaakst heeft; een eigen beest gaat voor. */
+    soorten.sort((a, b) => ((EL[b] && EL[b].speciaal ? 10 : 0) + tel[b]) - ((EL[a] && EL[a].speciaal ? 10 : 0) + tel[a]) || (a < b ? -1 : 1));
+    S.terug[p] = soorten[0];
+    return;
+  }
+  const v = await chooseOpt(p, `<b>${pName(p)}</b> · 🟣 ${AETHERS.ae_graf.name}: welke kaart komt steeds terug?`,
+    soorten.map(k => ({v:k, label:`${soortNaam(k)} ×${tel[k]}`, ic:soortIc(k)})));
+  S.terug[p] = soorten.includes(v) ? v : soorten[0];
+}
+/* 🟣 Eeuwige Terugkeer: in je eindfase komt er een kaart van de gekozen soort terug uit het graf.
+   "*" betekent: welke dan ook (de Verzamelaar kiest niet, die haalt terug wat er ligt). */
+function terugUitGraf(p){
+  const k = S.terug && S.terug[p];
+  if(!k) return -1;
+  const g = P(p).grave;
+  if(k !== "*") return g.findIndex(c => !c.lk && kaartSoort(c) === k && !c.uniek);
+  let best = -1, bs = -1;
+  g.forEach((c, i) => {
+    if(!c || c.lk || c.uniek || !EL[c.el] || EL[c.el].alleenSpell || EL[c.el].token) return;
+    const sc = (EL[c.el].speciaal ? 100 : 0) + (EL[c.el].hp || 2) + i * 0.01;
+    if(sc > bs){ bs = sc; best = i; }
+  });
+  return best;
+}
 async function grafOproep(p){
-  const el = S.aeKeuze && S.aeKeuze[p];
-  if(!el) return;
+  const k = S.terug && S.terug[p];
+  if(!k) return;
   const vrij = openCols(p);
   if(!vrij.length){ addLog(`🟣 ${AETHERS.ae_graf.name}: het bord van ${pName(p)} zit vol.`); return; }
-  const i = P(p).grave.findIndex(c => c.el === el);
-  if(i < 0){ addLog(`🟣 ${AETHERS.ae_graf.name}: geen ${icon(el)} meer in het graf van ${pName(p)}.`); return; }
+  const i = terugUitGraf(p);
+  if(i < 0){ addLog(`🟣 ${AETHERS.ae_graf.name}: geen ${soortIc(k)} ${soortNaam(k)} meer in het graf van ${pName(p)}.`); return; }
   const card = P(p).grave.splice(i, 1)[0];
-  addLog(`🟣 <em>${AETHERS.ae_graf.name}</em>: ${pName(p)} haalt ${icon(el)} ${EL[el].name} terug uit het graf.`, true);
+  addLog(`🟣 <em>${AETHERS.ae_graf.name}</em>: ${pName(p)} haalt ${kIcon(card)} ${kNaam(card)} terug uit het graf.`, true);
   const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})),
-    `🟣 ${AETHERS.ae_graf.name}: kies een plek voor ${icon(el)} ${EL[el].name}`, false, {el});
+    `🟣 ${AETHERS.ae_graf.name}: kies een plek voor ${kIcon(card)} ${kNaam(card)}`, false, {el:card.el});
   if(!sl){ P(p).grave.push(card); return; }
   await announcePlay(p, card, false, sl.c, false);
   await chainLoop();
@@ -7302,7 +7512,7 @@ async function startTurnSequence(){
     S.story.zin = null; S.story.zinHard = false; clearTimeout(ZEGT); ZEGT = null; zegPaint();
   }
   if(S.story){ tronenBij(); raadBij(); serafBij();
-               regenBij(); getijBij(); rotsMerkBij(); balrogHeelt(); hitteBij(); sluisBij(); wolkBij();
+               regenBij(); getijBij(); rotsMerkBij(); inktMerkBij(); balrogHeelt(); hitteBij(); sluisBij(); wolkBij();
                ogenNoemen(); }
   if(!S.over && S.story && S.story.vrees) await serafVrees();
   if(S.story && S.story.zeg && S.tp === 1) zegNu("beurt");
@@ -7321,14 +7531,13 @@ async function startTurnSequence(){
   if(S.tp === 0 && S.story && S.story.lavaJij) await lavaGrondJij();
   if(S.over) return;
   if(S.tp === 1 && S.story && S.story.band) await forgeEet();
-  if(!S.over && S.tp === 1 && S.story && S.story.inkt) await inktGrijpt();
   if(S.over) return;
   if(S.tp === 1 && S.story && S.story.vuurzee) await flintTrektZwartGat();
 
   if(S.over) return;
   S.phase = "draw"; render();
   S.trok3 = false;                               // 🟣 Bron van Overvloed rekent alleen af als je écht 3 trok
-  if(S.story && S.story.stil && S.tp === 1){ addLog(`${pName(S.tp)} doet niets. Het is een struik.`); await sleep(FAST ? 0 : 300); }
+  if(S.story && S.story.stil && S.tp === 1){ addLog(S.story.stilTekst || `${pName(S.tp)} doet niets. Het is een struik.`); await sleep(FAST ? 0 : 300); }
   else if(S.gTurn === 1 || (S.story && S.story.gelijkStart && S.gTurn === 2)){
     addLog(`${pName(S.tp)} slaat de eerste draw phase over.`); await sleep(300); }
   else {
@@ -7380,6 +7589,7 @@ function backToPhase(){
 }
 async function endTurn(){
   S.phase = "end"; S.ui = {mode:"busy"}; render();
+  if(S.story && S.story.naadWacht) await naadNa();
   addLog(`${pName(S.tp)} beëindigt de beurt.`);
   /* 🟣 Bron van Overvloed: heb je die derde kaart deze beurt écht getrokken, dan kost dat
      je aan het eind van diezelfde beurt 1 leven. Sloeg je de draw phase over, dan niet. */
@@ -7400,6 +7610,7 @@ async function endTurn(){
   }
   if(!S.over && hasAe(S.tp, "ae_graf")) await grafOproep(S.tp);
   if(!S.over && S.story && S.story.rotsAan) await rotsValNu();
+  if(!S.over && S.story && S.story.inkt) await inktGrijpt();
   if(!S.over && S.story && S.story.lavaAan && S.gTurn % 2 === 0) await lavaBrandt();
   if(!S.over && S.story && S.story.vuurzee && S.gTurn % (S.story.vuurzeeSnel ? 4 : 6) === 0) await vuurzee();
   if(!S.over && S.story && S.story.spiegel && S.tp === 1) await bordSpiegel();
@@ -7561,9 +7772,21 @@ function gameOver(winner, reason){
   /* Zolang de omslag naar een tweede fase nog bezig is, telt een tweede "hij is op nul" niet:
      anders eindigde het gevecht alsnog in de halve seconde voordat hij weer opstond. */
   if(winner === 0 && S.story && S.story.omslagBezig) return;
+  if(winner === 0 && S.story){
+    const Lx = levelVan(S.story);
+    /* Een level mag meer dan één omslag hebben (5-2, 5-4, 5-5): een lijst `fases`. */
+    const lijst = Lx ? (Lx.fases || (Lx.fase2 ? [Lx.fase2] : [])) : [];
+    const i = S.story.faseI || 0;
+    if(i < lijst.length){ S.story.faseI = i + 1; S.story.fase2Gedaan = true; S.story.omslagBezig = true;
+      setTimeout(() => storyFase2(lijst[i]), FAST ? 0 : 500); return; }
+  }
+  if(winner === 1 && S.story && S.story.id){
+    /* 5-5: verlies je in een latere fase, dan begin je daar opnieuw, niet helemaal vooraan. */
+    const Lh = levelVan(S.story);
+    HERSTART = (Lh && Lh.herstartFase && (S.story.faseI || 0) > 0) ? {id:S.story.id, fase:S.story.faseI} : null;
+  }
   if(winner === 0 && S.story && !S.story.fase2Gedaan){
-    const Lx = levelVan(S.story), L2 = Lx && Lx.fase2;
-    if(L2){ S.story.fase2Gedaan = true; S.story.omslagBezig = true; setTimeout(() => storyFase2(L2), 500); return; }
+    const Lx = levelVan(S.story);
     /* 🌹 Moeder Natuur staat op nul en weigert dat. */
     if(Lx && Lx.bloei && !S.story.bloeiGedaan){ S.story.bloeiGedaan = true; S.story.omslagBezig = true; setTimeout(() => moederBloei(Lx.bloei), 500); return; }
   }
@@ -8127,6 +8350,8 @@ function plekWaarde(p, el, c){
   const W = wOf(p);
   const vij = opp(p), enemy = P(vij).cols[c].cre;
   let s = 2.5;
+  /* Een plek waar straks iets op valt of iets naar grijpt: liever niet. */
+  if(S.story && ((rotsHier(p, c) && el !== "steen") || inktHier(p, c) || (typeof kolDicht === "function" && kolDicht(c)))) s -= 30;
   if(enemy){
     const wijKillen = EL[el].strong === enemy.card.el;
     const zijKillen = EL[enemy.card.el].strong === el;
@@ -8901,12 +9126,12 @@ function pvHTML(el, opts){
   const t = kaartTekst(el, varKey);
   const ws = !!(opts && opts.ws);
   const naam = vk ? vk.name : (el === "water" ? waterNaam({ws}) : E.name), ic = vk ? vk.icon : E.icon;
-  const kop = [`${E.hp || 2} levens`, kwRij(t.kw)].filter(Boolean).join(" · ");
+  const kop = [`${(vk && vk.hp) || E.hp || 2} levens`, kwRij(t.kw)].filter(Boolean).join(" · ");
   const curHTML = cur ? `<div class="cur">Op het veld: ${cur.hp} ${cur.hp===1?"leven":"levens"}${cur.sick?" · ⏳ summoning sick":""}${cur.ent?` · 🌿 ${cur.ent}`:""}${cur.spent?" · heeft aangevallen":""}${cur.atk?` · ⚔ ${cur.atk} schade`:""}</div>` : "";
   const vs = E.strong ? `<div class="vs"><span>Sterk tegen <b>${icon(E.strong)} ${EL[E.strong].name}</b></span><span>Zwak tegen <b>${icon(weakTo(el))} ${EL[weakTo(el)].name}</b></span></div>` : "";
   return `<div class="pv">
     <div class="pvhead el-${el}"><span class="ic">${ic}</span><span class="nm">${naam}</span></div>
-    <div class="sec"><div class="sect">${t.alleenSpell ? kwChip("spell") : kop}${vk ? ` · sterke ${E.name.toLowerCase()}` : ""}</div>
+    <div class="sec"><div class="sect">${t.alleenSpell ? kwChip("spell") : kop}${vk ? (vk.monster ? ` · ${E.name.toLowerCase()}` : ` · sterke ${E.name.toLowerCase()}`) : ""}</div>
       <div class="fxlijst">${effectHTML(el, varKey, {ws})}</div></div>
     ${vs}${curHTML}
   </div>`;
@@ -8992,6 +9217,8 @@ function rookOnthul(id, reden){
 }
 function slotHTML(p, c, hl){
   const col = P(p).cols[c];
+  /* ⛓ Een kolom die de Naad heeft dichtgetrokken: kettingen erover, en er kan niets meer. */
+  if(kolDicht(c)) return `<div class="col kolketting"><div class="slot sp leegk"><div class="ph"></div></div><div class="slot cr leegk"><div class="ph"></div></div><div class="kettinglaag"></div></div>`;
   /* 🎪 Boven zijn kolom staat welke vonk daar zit en hoeveel hij nog heeft. Alleen daar kun
      je hem raken, dus dat moet je kunnen zien zonder te gokken. */
   const vonk = (p === 1 && S.story && S.story.trio) ? S.story.trio.find(v => v.kol === c) : null;
@@ -9036,7 +9263,8 @@ function slotHTML(p, c, hl){
   // de spell onder deze plek kleurt de creature-plek: zo zie je wat er straks afgaat
   const gloed = (col.spell && !inMist()) ? `<div class="spelgloed" data-spel="${col.spell.card.el}"></div>` : "";
   const rots = (S.story && rotsHier(p, c))
-    ? `<div class="rotsmerk" data-p="${p}" data-col="${c}">✕</div>` : "";
+    ? `<div class="rotsmerk" data-p="${p}" data-col="${c}">✕</div>`
+    : (S.story && inktHier(p, c) ? `<div class="rotsmerk inktmerk" data-p="${p}" data-col="${c}">✕</div>` : "");
   let cr;
   if(col.cre){
     const u = col.cre;
@@ -9117,6 +9345,12 @@ function veldInfo(){
   let regels = (st.variant && V.varianten && V.varianten[st.variant]) || V.regels || [];
   let fase = "";
   if(V.fase2 && (st.fase2Gedaan || st.bloeiGedaan)){ regels = V.fase2; fase = " · fase 2"; }
+  /* Meer fases (wereld 5): per fase een eigen lijst, eventueel per gekozen tak. */
+  if(V.fasen && st.faseI && V.fasen[st.faseI - 1]){
+    const f = V.fasen[st.faseI - 1];
+    regels = Array.isArray(f) ? f : (f[st.variant] || f.standaard || []);
+    fase = ` · fase ${st.faseI + 1}`;
+  }
   /* Niets bijzonders aan dit gevecht? Dan is er ook geen ruit voor. */
   if(!regels.length) return null;
   return {kop:"Veldcondities", regels, sub:`${st.id} · ${L.naam || ""}${fase}`};
@@ -9141,8 +9375,10 @@ function ruitenHTML(p){
     ? `<img class="ruitbeeld" src="${pad}" alt="" decoding="async" onerror="this.remove()">` : "";
   const ruiten = aeList(p).filter(k => AETHERS[k]).map(k => {
     /* 🟣 Oerkracht en 🟣 Eeuwige Terugkeer hangen aan één element — laat zien welk. */
-    const merk = (k === "ae_hp3" || k === "ae_graf") && aeEl
-      ? `<span class="ruitmerk">${[].concat(aeEl).filter(e => EL[e]).map(e => EL[e].icon).join("")}</span>` : "";
+    const tk = S.terug && S.terug[p];
+    const merk = (k === "ae_hp3" && aeEl)
+      ? `<span class="ruitmerk">${[].concat(aeEl).filter(e => EL[e]).map(e => EL[e].icon).join("")}</span>`
+      : (k === "ae_graf" && tk ? `<span class="ruitmerk">${soortIc(tk)}</span>` : "");
     return {cls:"ae", attr:`data-act="aeinfo" data-k="${k}" data-pvae="${k}" title="${AETHERS[k].name}"`,
       ic:aeIcon(k), img:beeld(AETHER_BEELD[k]), merk};
   });
@@ -9470,7 +9706,8 @@ function overlayHTML(){
       ${aeVak(k, true)}<div class="aesub">${LIGHTS[k].n}× in je deck${LIGHTS[k].cost?` · ${LIGHTS[k].cost} leven`:""}</div>
       <div class="aex">${LIGHTS[k].txt}</div></div>`;
     return `<div class="ovbox draftbox"><h2>Draft · potje ${S.match.game} · ${pName(u0.p)}</h2>
-      <div class="sub">${u0.first ? "Jij kiest als eerste" : "Je kiest uit wat er over is"} — 🟣 aether${u0.lights.length ? ", ✦ lichtkaart" : ""} én je bans, allemaal op dit scherm.</div>
+      <div class="sub">${NET.on && !iControl(u0.p) ? (u0.first ? `${pName(u0.p)} kiest nu als eerste. Daarna ben jij aan de beurt.` : `${pName(u0.p)} kiest nu uit wat er over is.`)
+        : `${u0.first ? "Jij kiest als eerste" : "Je kiest uit wat er over is"} — 🟣 aether${u0.lights.length ? ", ✦ lichtkaart" : ""} én je bans, allemaal op dit scherm.`}</div>
       <div class="dgrid">
         <div class="dsec dae"><div class="dsect">🟣 Aether · passieve kracht</div>
           <div class="aerow">${u0.aethers.map(aeCard).join("")}</div></div>
@@ -9570,9 +9807,11 @@ function overlayHTML(){
       const mix = u0.mix, basis = u0.basis, upg = u0.upg || {}, vrij = u0.upgVrij || [];
       const saldo = mixSaldo(mix, basis);
       mixblok = `<div class="vmix">
-        <div class="sub" style="margin-bottom:4px">Je deck: <b>${mixTotaal(basis)}</b> kaarten. Haal je er ergens af, dan moet je ze elders bij doen.</div>
-        <div class="vmixrij">${ORDER.map(el => {
-          const b = basis[el], n = mix[el], hoog = b + MIX_SPEEL, laag = b - MIX_SPEEL;
+        <div class="sub" style="margin-bottom:4px">${u0.vrij
+          ? `Je bouwt je deck zelf: per element <b>0</b> tot <b>${VRIJ_EL_MAX}</b>, samen met je lichtkaarten <b>${VRIJ_MIN}</b> tot <b>${VRIJ_MAX}</b> kaarten. Geen aethers.`
+          : `Je deck: <b>${mixTotaal(basis)}</b> kaarten. Haal je er ergens af, dan moet je ze elders bij doen.`}</div>
+        <div class="vmixrij${u0.vrij ? " vrij" : ""}">${ORDER.map(el => {
+          const b = basis[el], n = mix[el], [laag, hoog] = mixGrens(u0, el);
           const open = vrij.indexOf(el) >= 0;
           const g = upg[el], echt = upgEcht(upg, mix, el);
           const nep = {id:-1, el, owner:0}; if(echt > 0) nep.var = UPG_VAN[el];
@@ -9581,7 +9820,7 @@ function overlayHTML(){
             const kl = v === n ? "hier" : (v > b && v <= n ? "erbij" : (v < b && v >= n ? "eraf" : (v === b ? "basis" : "")));
             notches.push(`<div class="vnotch ${kl}" data-act="voormix" data-el="${el}" data-v="${v}" title="${v}×"></div>`);
           }
-          const d = n - b;
+          const d = u0.vrij ? 0 : n - b;
           return `<div class="vkol">
             <div class="vupg ${g != null ? "gezet" : ""} ${open ? "" : "dicht"}"
                  ${open ? `data-act="voorupg" data-el="${el}"` : ""}
@@ -9599,6 +9838,14 @@ function overlayHTML(){
         </div>`;
       /* De meter hoort bij de knop, niet bij de sliders: samen staan ze onderaan vast, zodat
          je altijd ziet of het klopt — ook als je nog aan het scrollen bent. */
+      if(u0.vrij){
+        const tot = vrijTotaal(u0), ok = vrijOk(u0);
+        meter = `<div class="vmeter">
+          <div class="vbalk ${ok ? "" : "mis"}"><i style="left:0;width:${Math.min(100, tot / VRIJ_MAX * 100)}%"></i></div>
+          <div class="vmelding ${ok ? "goed" : "mis"}">${ok ? `✓ ${tot} kaarten.`
+            : (tot < VRIJ_MIN ? `Nog <b>${VRIJ_MIN - tot}</b> kaart${VRIJ_MIN - tot === 1 ? "" : "en"} te weinig: minstens ${VRIJ_MIN}.`
+                              : `<b>${tot - VRIJ_MAX}</b> kaart${tot - VRIJ_MAX === 1 ? "" : "en"} te veel: hooguit ${VRIJ_MAX}.`)}</div></div>`;
+      } else
       meter = `<div class="vmeter">
           <div class="vbalk ${saldo ? "mis" : ""}"><i style="${saldo >= 0
             ? `left:50%;width:${Math.min(50, Math.abs(saldo) * 6)}%`
@@ -9609,7 +9856,7 @@ function overlayHTML(){
                          : `Nog <b>${-saldo}</b> kaart${saldo===-1?"":"en"} te kort — doe er ergens ${-saldo} bij.`)}</div>
         </div>`;
     }
-    const klaar = !u0.basis || mixSaldo(u0.mix, u0.basis) === 0;
+    const klaar = voorKlaar(u0);
     const knop = `<div class="voorvoet">${meter}<button class="obtn ${klaar ? "" : "kanniet"}" data-act="btn" data-btn="banconfirm">${voorBtnTxt(u0)}${klaar ? ' <span style="opacity:.6;font-size:.7rem">[spatie]</span>' : ""}</button></div>`;
     if(!u0.cards.length)
       return `<div class="ovbox voorbox nieuw" style="max-width:min(960px,96vw)"><h2>Voorbereiding</h2>${mixblok}
@@ -11694,7 +11941,32 @@ const HORIZON_BEELD = {
   "h45_diep":    "art/hz-45-diep.png",       // 4-5 · water zonder boven of onder
   "h45_stroom":  "art/hz-45-stroom.png",     // 4-5 · stroming als banden door het beeld
   "h45_wier":    "art/hz-45-wier.png",       // 4-5 · wier en zwerfvuil op de voorgrond
-  "h45_golf":    "art/hz-45-golf.png"        // 4-5 · de onderkant van een golf boven je hoofd
+  "h45_golf":    "art/hz-45-golf.png",       // 4-5 · de onderkant van een golf boven je hoofd
+  /* ---------- wereld 5 · Hemelrand: vijf plekken die niets met elkaar gemeen hebben ---------- */
+  "h51_lucht":   "art/hz-51-lucht.png",      // 5-1 · wit, koud licht, een lage zon die niet warmt
+  "h51_ring":    "art/hz-51-ring.png",       // 5-1 · een reusachtige halo, half weggezakt in de wolken
+  "h51_veren":   "art/hz-51-veren.png",      // 5-1 · rijen witte veren rechtop in de wolken, als grafpaaltjes
+  "h51_dons":    "art/hz-51-dons.png",       // 5-1 · losse veertjes die van boven naar beneden dwarrelen
+  "h52_zaal":    "art/hz-52-zaal.png",       // 5-2 · een museumzaal die niet ophoudt
+  "h52_vitrines":"art/hz-52-vitrines.png",   // 5-2 · vitrines met handgeschreven kaartjes
+  "h52_touw":    "art/hz-52-touw.png",       // 5-2 · fluwelen touw op koperen paaltjes, vooraan
+  "h52_lampen":  "art/hz-52-lampen.png",     // 5-2 · museumlampen die van boven hangen
+  "h52a_opslag": "art/hz-52a-opslag.png",    // 5-2 fase 2 · de achterkamer, één kale lamp
+  "h52a_doeken": "art/hz-52a-doeken.png",    // 5-2 fase 2 · enorme vormen onder stoflakens
+  "h52a_kisten": "art/hz-52a-kisten.png",    // 5-2 fase 2 · kratten en stro vooraan
+  "h53_leegte":  "art/hz-53-leegte.png",     // 5-3 · niets: violet donker boven een wolkenvloer
+  "h53_gat":     "art/hz-53-gat.png",        // 5-3 · een gat in de wolken met de kaarsrechte streep groen/zwart
+  "h53_kettingen":"art/hz-53-kettingen.png", // 5-3 · vier gouden kettingen schuin omlaag
+  "h54_puin":    "art/hz-54-puin.png",       // 5-4 · dezelfde leegte, maar kapot en flakkerend
+  "h54_schakels":"art/hz-54-schakels.png",   // 5-4 · losse, geknapte schakels die zweven
+  "h54_steen":   "art/hz-54-steen.png",      // 5-4 · gezicht Magnus: brokken plafond die stilhangen
+  "h54_takken":  "art/hz-54-takken.png",     // 5-4 · gezicht Moeder Natuur: takken, rozen en regen
+  "h54_gloed":   "art/hz-54-gloed.png",      // 5-4 · gezicht Flint: gloeiende scheuren en as
+  "h54_water":   "art/hz-54-water.png",      // 5-4 · gezicht Oceaan: water dat omhoog stroomt
+  "h55_kantoor": "art/hz-55-kantoor.png",    // 5-5 · een hoog kantoor met één smal raam
+  "h55_stapels": "art/hz-55-stapels.png",    // 5-5 · stapels papier tot aan het plafond
+  "h55_bureau":  "art/hz-55-bureau.png",     // 5-5 · de rand van het bureau: stempel, koude thee
+  "h55_stof":    "art/hz-55-stof.png"        // 5-5 · stof dat stilhangt in een baan licht
 };
 /* y = hoe ver van de bovenkant (in vh), bot = juist vanaf de ONDERkant (dan raakt de laag
    het scherm precies aan de onderrand, wat de hoogte van het plaatje ook is), w = breedte in
@@ -11808,6 +12080,39 @@ const HORIZON = {
          {b:"h45_stroom",  y:44,        w:128, d:.50, op:.6},
          {b:"h45_wier",    bot:0,       w:134, d:.70, op:.9},
          {b:"h45_golf",    y:-14,       w:140, d:.96, op:1}],
+  /* ---------- wereld 5 · Hemelrand ---------- */
+  "5-1":[{b:"h51_lucht",   y:0,  h:100, w:110, d:.03, op:1},
+         {b:"h51_ring",    y:18,        w:118, d:.26, op:.9},
+         {b:"h51_veren",   bot:0,       w:132, d:.66, op:.95},
+         {b:"h51_dons",    y:-6,        w:138, d:.95, op:.85}],
+  "5-2":[{b:"h52_zaal",    y:0,  h:100, w:110, d:.04, op:1},
+         {b:"h52_vitrines",y:22,        w:120, d:.32, op:.95},
+         {b:"h52_touw",    bot:0,       w:132, d:.68, op:.95},
+         {b:"h52_lampen",  y:-8,        w:136, d:.95, op:1}],
+  "5-2:achter":[{b:"h52a_opslag", y:0, h:100, w:110, d:.04, op:1},
+         {b:"h52a_doeken", y:16,        w:122, d:.36, op:.95},
+         {b:"h52a_kisten", bot:0,       w:134, d:.70, op:.95}],
+  "5-3":[{b:"h53_leegte",  y:0,  h:100, w:110, d:.02, op:1},
+         {b:"h53_gat",     y:44,        w:118, d:.30, op:.95},
+         {b:"h53_kettingen",y:-4,       w:138, d:.92, op:1}],
+  "5-4":[{b:"h54_puin",    y:0,  h:100, w:110, d:.03, op:1},
+         {b:"h54_schakels",y:30,        w:122, d:.40, op:.9},
+         {b:"h54_steen",   y:-8,        w:138, d:.94, op:1}],
+  "5-4:moeder":[{b:"h54_puin", y:0, h:100, w:110, d:.03, op:1},
+         {b:"h54_schakels",y:30,        w:122, d:.40, op:.9},
+         {b:"h54_takken",  y:-8,        w:138, d:.94, op:1}],
+  "5-4:flint":[{b:"h54_puin",  y:0, h:100, w:110, d:.03, op:1},
+         {b:"h54_schakels",y:30,        w:122, d:.40, op:.9},
+         {b:"h54_gloed",   bot:0,       w:136, d:.80, op:1}],
+  "5-4:oceaan":[{b:"h54_puin", y:0, h:100, w:110, d:.03, op:1},
+         {b:"h54_schakels",y:30,        w:122, d:.40, op:.9},
+         {b:"h54_water",   y:-6,        w:138, d:.92, op:.95}],
+  "5-4:kapot":[{b:"h54_puin",  y:0, h:100, w:110, d:.03, op:1},
+         {b:"h54_schakels",y:30,        w:122, d:.40, op:.9}],
+  "5-5":[{b:"h55_kantoor", y:0,  h:100, w:110, d:.04, op:1},
+         {b:"h55_stapels", y:10,        w:124, d:.34, op:.95},
+         {b:"h55_bureau",  bot:0,       w:134, d:.72, op:1},
+         {b:"h55_stof",    y:-4,        w:138, d:.95, op:.7}],
   "2-6":[{b:"h25_kathed",  y:0,  h:100, w:110, d:.04, op:1},
          {b:"h25_zuilen",  y:12,        w:120, d:.26, op:.9},
          {b:"h25_scherm",  y:40,        w:126, d:.50, op:.9},
@@ -12056,6 +12361,35 @@ const SPRITE_MAAT = {
    iedereen normaal op ware grootte; wie daar te veel plek inneemt krijgt hier een maat. */
 const SPRITE_PB = { waardin_taunt: 0.6, max_taunt: 0.7 };
 const SPRITE_BEELD = {
+  /* --- wereld 5 · Hemelrand. Ontbreekt een bestand, dan leent hij een verwante tekening. --- */
+  nimbus_trap:        "art/nimbus-trap.png",          // op een tree van de trap, kroontje scheef
+  nimbus_recht:       "art/nimbus-recht.png",         // goede einde: het kroontje blijft recht
+  verzamelaar:        "art/verzamelaar.png",          // 5-2 · witte handschoenen, loep aan een koordje
+  verzamelaar_poets:  "art/verzamelaar-poets.png",    // poetst een glas dat al schoon is
+  verzamelaar_loep:   "art/verzamelaar-loep.png",     // loep voor één oog, buigt naar je toe
+  verzamelaar_kaartje:"art/verzamelaar-kaartje.png",  // houdt een klein kaartje omhoog
+  verzamelaar_stuk:   "art/verzamelaar-stuk.png",     // tussen de scherven, lepel en halve hoepel
+  verzamelaar_taunt:  "art/verzamelaar-taunt.png",    // de balk links
+  vitrine_elementaal: "art/vitrine-elementaal.png",   // de oude vitrine achterin
+  vitrine_elementaal_stuk:"art/vitrine-elementaal-stuk.png", // dezelfde, gebarsten
+  vier_stukken:       "art/stukken.png",              // de vier stukken onder de doek vandaan
+  naad:               "art/naad.png",                 // 5-3 · een gouden knoop, vier kettingen omlaag
+  naad_strak:         "art/naad-strak.png",           // de kettingen staan strak, het goud gloeit
+  naad_knap:          "art/naad-knap.png",            // een schakel knapt, de kettingen vallen slap
+  schakels:           "art/schakels.png",             // losse gouden schakels op de wolken
+  seraf_kapot:        "art/seraf-kapot.png",          // 5-4 · gebroken, het licht flakkert
+  seraf_magnus:       "art/seraf-magnus.png",         // met het gezicht van Magnus
+  seraf_moeder:       "art/seraf-moeder.png",         // met een gezicht van takken en bladeren
+  seraf_flint:        "art/seraf-flint.png",          // met een zonnebril die net niet past
+  seraf_oceaan:       "art/seraf-oceaan.png",         // water dat over het gezicht loopt
+  seraf_zit:          "art/seraf-zit.png",            // zit tussen de schakels, voor het eerst
+  eerste:             "art/eerste.png",               // 5-5 · jouw gezicht met tweehonderd jaar erbij
+  eerste_schrijft:    "art/eerste-schrijft.png",      // achter het bureau, schrijft, kijkt niet op
+  eerste_op:          "art/eerste-op.png",            // staat, het stof blijft hangen
+  eerste_opzij:       "art/eerste-opzij.png",         // doet een stap opzij bij de stoel
+  eerste_grond:       "art/eerste-grond.png",         // zit op de grond tegen de stapels
+  eerste_taunt:       "art/eerste-taunt.png",         // de balk links
+  stoel:              "art/stoel.png",                // de ene stoel achter het bureau
   /* --- wereld 4, opnieuw opgebouwd. Zet het bestand in art/ en het staat er meteen. --- */
   /* --- 🏪 Knorst, de winkelier (wereld 2, achter de herberg) --- */
   knorst:            "art/knorst.png",               // achter zijn kraam
@@ -12267,6 +12601,7 @@ const SPRITE_BEELD = {
    tenminste iets in beeld in plaats van een gat. Zodra het bestand in art/ staat wint dat
    sowieso van de pixels. */
 const SPR_LEEN = {
+  verzamelaar:"koor", naad:"poortwachter",
   knorst:"bosbos", knorst_blij:"bosbos", knorst_zuur:"bosbos_boos", knorst_taunt:"bosbos",
   smid:"cultist", smid_blij:"cultist", smid_zuur:"cultist", smid_taunt:"cultist", smid_boos:"cultist", smid_stuk:"cultist",
   sluiswachter_poort:"sluiswachter", sluiswachter_taunt:"sluiswachter",
@@ -12278,6 +12613,14 @@ const SPR_LEEN = {
 /* Een nieuwe stand die nog niet getekend is, leent de tekening van een bestaande stand van
    hetzelfde personage — dan staat er iets herkenbaars in plaats van niets. */
 const SPRITE_TERUG = {
+  /* wereld 5 */
+  nimbus_trap:"nimbus", nimbus_recht:"nimbus",
+  verzamelaar_poets:"verzamelaar", verzamelaar_loep:"verzamelaar", verzamelaar_kaartje:"verzamelaar",
+  verzamelaar_stuk:"verzamelaar", verzamelaar_taunt:"verzamelaar", vitrine_elementaal_stuk:"vitrine_elementaal",
+  naad_strak:"naad", naad_knap:"naad", naad_taunt:"naad",
+  seraf_kapot:"engel_stuk", seraf_magnus:"seraf_kapot", seraf_moeder:"seraf_kapot", seraf_flint:"seraf_kapot",
+  seraf_oceaan:"seraf_kapot", seraf_zit:"engel_stuk",
+  eerste_schrijft:"eerste", eerste_op:"eerste", eerste_opzij:"eerste", eerste_grond:"eerste", eerste_taunt:"eerste",
   rock1_zit:"rock1", rock1_papier:"rock1", kees:"rock1",
   rocky_til:"rocky", rocky_boekje:"rocky",
   engel_rug:"engel", kaelid_ogen:"shelob",
@@ -13153,7 +13496,7 @@ const STORY = {
     bord:[{p:1, c:2, el:"ei", hp:4}],
     deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:6},
     ltVij:["web"], handVij:["web"],
-    aeVij:["ae_graf","ae_hp3"], keuzeVij:"gras",   // 🟣 Eeuwige Terugkeer en Oerkracht, allebei op gras
+    aeVij:["ae_graf","ae_hp3"], keuzeVij:"gras", terugVij:"gras",   // 🟣 Eeuwige Terugkeer en Oerkracht, allebei op gras
      geeftLicht:"web",
     ban:10, begint:1
   },
@@ -14253,7 +14596,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Meer kan ik niet doen. Meer heb ik ook nooit hoeven doen."},
       {s:null, bg:4, naam:"…", kleur:"#e6c88a", t:"🛶 <b>De veerman.</b> Elke beurt is er één kolom afgesloten. Daar komt niks doorheen, van geen van beide kanten. De afgesloten kolom schuift elke beurt één plek op."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er liggen er al drie in het graf van de Zee, en ze haalt ze terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er staan er al twee op het veld, en wat valt haalt de Zee terug."}
     ],
     nee:[
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"…"},
@@ -14265,7 +14608,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Zes keer. Dan bent u er."},
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Tel maar mee. Ik tel ook mee."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er liggen er al drie in het graf van de Zee, en ze haalt ze terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er staan er al twee op het veld, en wat valt haalt de Zee terug."}
     ],
     gevechtNa:{ja:"veer", nee:"zelf"},
     varianten:{
@@ -14347,12 +14690,12 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Een deck volgens dezelfde regels als het jouwe: 6 van elk element (3 van haar water is
        al ijs), 6 lichtkaarten (hoogstens 3 van een soort), 3 aethers. Daarbovenop haar eigen
-       kaart: zes vliegende vissen, drie in het deck en drie al in het graf. */
+       kaart: vijf vliegende vissen, twee al op het veld en drie in het deck. */
     deckVij:{steen:6, vuur:6, gras:6, water:3, ijs:3, vis:3, reborn:3, darkhole:2, siphon:1},
-    grafVij:["vis","vis","vis"],
+    bord:[{p:1, c:1, el:"vis"}, {p:1, c:3, el:"vis"}],
     ltVij:["reborn","siphon","darkhole"],
     /* Eeuwige terugkeer is haar thema: wat in het water verdwijnt, komt terug. */
-    aeVij:["ae_watercycle","fu_water","ae_graf"], keuzeVij:"water",
+    aeVij:["ae_watercycle","fu_water","ae_graf"], terugVij:"vis",
     levensVij:20,
     overleef:6,
     sluis:false,
@@ -14379,7 +14722,7 @@ const STORY = {
       {s:"inkt_wijd", groot:true, bg:4, naam:"…", kleur:"#e0b6ec", t:"Acht armen komen tegelijk omhoog."},
       {s:"inkt_wijd", groot:true, bg:4, naam:"Inkt", kleur:"#e0b6ec", t:"Mooi mooi mooi."},
       {s:"inkt_wijd", groot:true, bg:4, naam:"Inkt", kleur:"#e0b6ec", t:"Van Inkt."},
-      {s:null, bg:4, naam:"…", kleur:"#c58fd6", t:"🐙 <b>Twee armen per beurt.</b> Aan het begin van elke beurt van haar pakt ze <b>twee plekken</b> aan jouw kant. Heeft ze ruimte, dan <b>neemt ze die creature mee</b>, en dan is die van haar. Zit haar bord vol, dan <b>knijpt</b> ze: 3 schade."},
+      {s:null, bg:4, naam:"…", kleur:"#c58fd6", t:"🐙 <b>Twee armen per beurt.</b> Aan het begin van jouw beurt wijzen ze <b>twee plekken</b> aan jouw kant aan. Staat daar aan het eind van je beurt een creature, dan <b>neemt ze die mee</b>, en dan is die van haar. Zit haar bord vol, dan <b>knijpt</b> ze: 3 schade."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🫧 Je staat veertig meter onder water. <b>Elk 🔥 Vuur-effect fizzelt hier.</b> Er komt geen vlam en er gebeurt niks."},
       {s:"inkt_boos", groot:true, bg:4, naam:"Inkt", kleur:"#c58fd6", t:"Pakken!"}
     ],
@@ -14552,7 +14895,7 @@ const STORY = {
     deckVij:{steen:6, vuur:6, gras:6, ijs:6, negate:3, brenger:3},
     ltVij:["negate","brenger"],
     /* "Ik vries altijd weer dicht": wat van haar is komt terug. */
-    aeVij:["ae_graf","ae_offer","ae_draw3"], keuzeVij:"water",
+    aeVij:["ae_graf","ae_offer","ae_draw3"], terugVij:"ijs",
     levensVij:7,
     ijsvlakte:true, biome:"ijs",
     geeftLicht:"brenger",
@@ -14778,409 +15121,597 @@ const STORY = {
     ban:10, begint:1
   },
   /* ================= Wereld 5 · Hemelrand ================= */
+  /* ================= WERELD 5 · HEMELRAND =================
+     Vijf gevechten, en alle vijf zijn anders dan wat je ervoor had:
+       5-1 Seraf · de toets        je bouwt je deck zelf, geen aethers
+       5-2 de Verzamelaar           een verzameling van alles, en dan de achterkamer
+       5-3 de Naad                  vier levens, en elke klap trekt het veld dichter
+       5-4 Seraf · gebroken         vier gezichten achter elkaar, en dan Seraf zelf
+       5-5 De Eerste                drie potjes, en voor het laatste de stoel
+     De speler zegt nooit iets. Seraf, de Verzamelaar, de Naad en De Eerste zijn geen man. */
   "5-1":{
-    wereld:5, naam:"De drempel", vijand:"De Poortwachter", sprite:"poortwachter", zegKleur:"#f6e9b0",
-    biome:"ogen",
+    wereld:5, naam:"De toets", vijand:"Seraf", sprite:"engel", zegKleur:"#f6f7fb", muziek:"w5_seraf",
+    tauntSpr:"engel_taunt",
     intro:[
-      {s:null, bg:5, naam:"…", t:"De trap begint gewoon in het water. Geen fundering, geen aanloop: er is water, en dan is er een trede, en dan nog een."},
-      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"Je klimt een dag. Misschien twee. Boven een bepaalde hoogte houdt honger op en dat is een slecht teken."},
-      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"En dan houdt de trap op bij een deur die nergens in staat. Geen muur eromheen. Alleen een deur, en ervoor iets dat draait."},
-      {s:"poortwachter", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Het is een wiel. In het wiel zit nog een wiel, dwars, en dat kan niet, en het draait toch."},
-      {s:"poortwachter", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"De rand is bezet met ogen. Niet geschilderd. Ogen. Ze knipperen niet tegelijk en dat maakt het erger."},
-      {s:"poortwachter", groot:true, bg:5, naam:"De Poortwachter", kleur:"#f6e9b0", t:"ZEVEN."},
-      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"Je zegt hallo."},
-      {s:"poortwachter", groot:true, bg:5, naam:"De Poortwachter", kleur:"#f6e9b0", t:"ZEVEN. VIER. ZEVEN. ZEVEN."},
-      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"Het praat niet tegen je. Het telt. Je begint te vermoeden dat het jou aan het tellen is."},
-      {s:"poortwachter", groot:true, bg:5, naam:"De Poortwachter", kleur:"#f6e9b0", t:"…ELEMENTAAL. VIER. NIET VIER. VIJF."},
-      {s:"poortwachter", groot:true, bg:5, naam:"De Poortwachter", kleur:"#f6e9b0", t:"JE DRAAGT ER VIJF. DAT STAAT NERGENS. DAT MAG NIET STAAN."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Voor het eerst sinds je hier staat, staan alle ogen tegelijk stil, en ze staan allemaal op jou."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"👁 <b>Het ziet je hand.</b> Aan het begin van elke beurt <b>noemt</b> het één kaart die je vast hebt. Die kaart mag je die beurt <b>niet spelen</b>."},
-      {s:"poortwachter", groot:true, bg:5, naam:"De Poortwachter", kleur:"#f6e9b0", t:"IK BEN NIET DE DEUR. IK BEN DE LIJST. GA NIET DOOR DE DEUR."}
+      {s:null, bg:5, naam:"…", mu:"w5_trap", t:"Waar de zee ophoudt, begint een trap. Hij staat nergens op. Hij gaat gewoon omhoog."},
+      {s:null, bg:5, naam:"…", kleur:"#dfe8f2", t:"Halverwege zit iets kleins en grijs op een tree. Met een kroontje."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"O. Jij weer."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Verder dan hier ga ik niet."},
+      {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Nimbus kijkt je aan alsof je iets gezegd hebt."},
+      {s:"nimbus", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Niet omdat ik bang ben. Ik ben de ware heerser der elementen. Ik ben nergens bang voor."},
+      {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Nimbus kijkt omhoog, en dan snel weer weg."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Ik ben één keer boven geweest. Daarna heb ik een week lang geregend. Dat was niet de bedoeling."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Daar is iets. Het kijkt niet naar je. Het kijkt door je heen."},
+      {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Het kroontje gaat recht. Het zakt meteen weer scheef."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Ga maar. Ik wacht hier wel."},
+      {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Nimbus schuift een stukje op."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"En kom terug, hè. Ik hoor nooit hoe iets afloopt."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", mu:"w5_seraf", t:"Boven aan de trap houden de treden op. De wolken zijn hier zo dicht dat je erop kunt staan."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"Het is stil. Er waait niks."},
+      {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Er staat iemand. Je hebt het niet zien aankomen."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Wees niet bang."},
+      {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Seraf zegt het zoals je het zegt tegen een dier, vlak voordat je het afmaakt."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Het duurt niet lang."},
+      {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Seraf komt niet dichterbij. Dat hoeft ook niet."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Ik weet wat je bent. Ik wist het al toen je bij de steen naar binnen liep."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Jij niet. Dat is het mooie. Je loopt hier rond alsof je nergens schuld aan hebt."},
+      {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Een lange stilte."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"De vorige keer waren jullie met duizenden. Jullie hadden alles, dus jullie namen alles."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Toen hebben ze ons geroepen. En wij kwamen. Ik was erbij."},
+      {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Seraf kijkt je aan en er zit niks in die blik. Behalve iets wat heel lang is weggestopt."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb er zoveel gedood dat ik ben opgehouden met tellen."},
+      {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Jij bent de laatste. In het woud heb ik je laten gaan. Dat was een fout."},
+      {s:"engel_wijd", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Die maak ik niet nog een keer."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ <b>De toets.</b> Geen aethers. Je stelt zelf samen wat je meeneemt: per element <b>0</b> tot <b>12</b> kaarten, lichtkaarten zoveel je wilt (hooguit <b>4</b> van een soort), samen <b>20</b> tot <b>40</b>."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ Seraf heeft <b>12</b> levens en speelt met 🟣 Hemelschoon en 🟣 Genade. Jij hebt er <b>8</b>."}
     ],
     midden:[
-      {s:"poortwachter", naam:"De Poortwachter", kleur:"#f6e9b0", t:"JE STAAT ER NIET OP. IK HEB DRIE KEER GEKEKEN. JE STAAT ER NIET OP EN JE BENT ER WEL."},
-      {s:"poortwachter", naam:"De Poortwachter", kleur:"#f6e9b0", t:"DAT IS NIET MIJN FOUT. DAT IS EEN FOUT."}
+      {s:"engel", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dat had je niet moeten kunnen."},
+      {s:"engel", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"…Maakt niet uit."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Je gaat hier toch dood."}
     ],
-    middenNa:2,
+    middenLevens:6,
     win:[
-      {s:"poortwachter", groot:true, naam:"…", kleur:"#f6e9b0", t:"Het wiel gaat langzamer draaien. Dan stopt het. Alle ogen doen tegelijk dicht, wat er onverwacht vredig uitziet."},
-      {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"…IK MOET JE MELDEN."},
-      {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"IK MELD JE NIET."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"Er valt iets uit het wiel. Het is warm en het kijkt terug."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Alziend.</b> Je ziet de hand van je tegenstander."},
-      {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"NEEM ER EEN. IK HEB ER GENOEG. IK HEB ER TWEEHONDERD JAAR NIETS MEE GEDAAN BEHALVE KIJKEN."},
-      {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"ACHTER DE DEUR ZINGEN ZE. LET OP WAT ZE ZINGEN. NIEMAND LET OOIT OP WAT ZE ZINGEN."}
+      {s:"engel_stuk", groot:true, naam:"…", kleur:"#f6f7fb", mu:"w5_trap", t:"Seraf staat nog. Maar er is iets mis met hoe Seraf staat."},
+      {s:"engel_stuk", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"…"},
+      {s:"engel_stuk", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dat kan niet."},
+      {s:"engel_stuk", groot:true, naam:"…", kleur:"#f6f7fb", t:"Seraf doet een stap achteruit. Voor het eerst."},
+      {s:"engel_stuk", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb jullie allemaal zien vallen. Jou ook. Dat had ik al gezien. Voor je hier kwam."},
+      {s:"engel_wijd", groot:true, naam:"…", kleur:"#f6f7fb", t:"Seraf kijkt naar je, en nu zit er wel iets in die blik."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dit is niet afgelopen. Ga maar door."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Verderop is een zaal waar ze alles bewaren wat ooit ergens stond. Daar hoor jij ook."},
+      {s:null, naam:"…", kleur:"#f6f7fb", wit:true, t:"En dan is Seraf er ineens niet meer."}
     ],
     verlies:[
-      {s:"poortwachter", groot:true, naam:"De Poortwachter", kleur:"#f6e9b0", t:"GECORRIGEERD. GA NAAR BENEDEN. DANK U."}
+      {s:"engel", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Zo."},
+      {s:"engel", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Zo hoort het."},
+      {s:"engel_wijd", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Sta op. Dan doe ik het nog een keer. Dat vind ik niet erg."}
     ],
-    zegSpr:"poortwachter",
+    zegSpr:"engel",
     zeg:{ beurt:[
-        "VIER. NOG STEEDS VIER. JIJ BENT VIJF.",
-        "IK ZIE WAT JE VASTHOUDT. IK ZIE HET AL SINDS DE STEEN.",
-        "ER STAAT NERGENS DAT IEMAND HIER MAG KOMEN. ER STAAT OOK NERGENS DAT HET NIET MAG.",
-        "IK TEL JE ZETTEN. IK TEL ALLES. DAT IS ALLES WAT IK DOE.",
-        "DE VORIGE KWAM OOK ZO VER. DIE STAAT ER NU WEL OP.",
-        "JE ADEMT ONREGELMATIG. DAT IS GENOTEERD.",
-        "IK HEB GEEN HEKEL AAN JE. IK HEB NERGENS EEN HEKEL AAN."
+        "Wees niet bang.", "Nog even.", "Ik ben niet boos. Ik ben precies.", "Je loopt net als zij.",
+        "Stribbel maar tegen. Dat deden zij ook.", "Ik heb dit vaker gedaan dan jij adem hebt gehaald.",
+        "Het is niet persoonlijk.", "Het is wel persoonlijk.",
+        "Je gaat hier dood. Dat is geen dreigement. Dat is de planning.",
+        "Ik voel niks als ik dit doe. Behalve bij jou."
       ],
       popup:[
-        "ER ZIJN VIER RIJKEN, VIER BAZEN EN VIER AFSPRAKEN. DAT ZIJN ZESTIEN GETALLEN. IK KEN ZE ALLEMAAL EN GEEN ENKELE KLOPT.",
-        "IK HEB NOOIT IEMAND NAAR BOVEN ZIEN GAAN DIE NIET AL BOVEN WAS. JIJ WAS NIET BOVEN.",
-        "DE OVEN LEVERT ELKE DAG. IK TEKEN ELKE DAG. IK HEB NOOIT GEVRAAGD WAT ER IN DE KIST ZIT.",
-        "ÉÉN KEER STOND ER IETS OP MIJN LIJST DAT IK NIET GESCHREVEN HAD. IK DENK DAAR NOG ELKE DAG AAN."
+        "Ze hadden vier elementen en vonden dat genoeg reden om over de rest te heersen.",
+        "Ze waren niet wreed omdat ze wreed waren. Ze waren wreed omdat het kon.",
+        "En het kon, omdat ze alles tegelijk waren. Net als jij.",
+        "Je denkt dat je anders bent. Dat dachten ze allemaal.",
+        "De steen, het woud, de as. Ze hebben je niet zien aankomen. Ik wel.",
+        "Tweehonderd jaar heb ik gewacht of er nog eentje zou komen. Ik hoopte van niet.|Ik hoopte ook van wel."
       ],
-      laag:["DIT STAAT ER NIET OP. DIT STAAT ER NIET OP."],
-      jij:["JE BENT BIJNA NUL. NUL IS EEN NET GETAL."] },
+      laag:["Nee.", "Dat klopt niet.", "Dat klopt niet. Dat klopt niet.", "Ik heb dit honderd keer gedaan. Honderd keer."],
+      jij:["Zo.", "Ga maar liggen. Ogen dicht. Dat deden zij ook."] },
+    /* Seraf: dertig kaarten, vijf van elk element, en tien lichtkaarten. */
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:7, steen:7, gras:6, vuur:6, negate:3, gamble:3, master:3},
-    ltVij:["negate","gamble","master"],
-    aeVij:["ae_alziend","ae_draw3","ae_hemel"],
-    levensVij:10,
-    ogen:true,
-    geeft:"ae_alziend",
-    ban:10, begint:1
-  },
-  "5-2":{
-    wereld:5, naam:"Het koor", vijand:"Het Koor", sprite:"koor", zegKleur:"#c8cedb",
-    biome:"hemel",
-    intro:[
-      {s:null, bg:5, naam:"…", t:"Achter de deur is een zaal zonder muren en zonder plafond, en er staat zo veel licht in dat je pas na een tijdje doorhebt dat het niet ergens vandaan komt."},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"Er wordt gezongen. Niet mooi. Niet lelijk. Áltijd. Het is aan geweest voordat jij hier was en het gaat door als je weg bent."},
-      {s:"koor", groot:true, bg:5, naam:"…", kleur:"#c8cedb", t:"Ze staan in een rij. Elk van hen heeft drie gezichten boven elkaar en vier vleugels, en ze doen alle drie hun mond open op hetzelfde moment."},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"heilig · heilig · heilig"},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"Ze zeggen het niet tegen elkaar en niet tegen jou. Ze zeggen het naar boven, en boven is er niets, want jij staat al bijna boven."},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"heilig · heilig · heilig"},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"Je vraagt tegen wie ze het hebben."},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"…"},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"Dat is nooit gevraagd."},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"heilig · heilig · hei—"},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"…"},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"Voor het eerst in tweehonderd jaar houdt het zingen op. Dat is het ergste geluid dat je ooit gehoord hebt."},
-      {s:"koor", groot:true, bg:5, naam:"Het Koor", kleur:"#c8cedb", t:"Ga weg. Ga alsjeblieft weg. Als wij nadenken staat het stil, en als het stilstaat komt er iemand kijken."},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"💨 <b>Ze zingen door je heen.</b> Alles wat het Koor als creature neerzet ligt <b>dicht</b>: je ziet dát er iets staat en hoeveel levens het heeft, verder niets. Het draait pas om als het <b>aanvalt</b> of als jij het <b>aanwijst</b>."},
-      {s:null, bg:5, naam:"…", kleur:"#c8cedb", t:"⛓ En er is <b>geen chain</b>. Je kunt niet tussen het zingen komen: geen flash, geen dodgen, geen negeren."}
-    ],
-    midden:[
-      {s:"koor", naam:"Het Koor", kleur:"#c8cedb", t:"Wij hebben niets tegen jou. Wij hebben nooit iets tegen iemand gehad. Dat is de afspraak."},
-      {s:"koor", naam:"Het Koor", kleur:"#c8cedb", t:"Wij zingen. Zolang wij zingen hoeft niemand iets te vragen. Dat is waar wij voor zijn."}
-    ],
-    middenNa:2,
-    win:[
-      {s:"koor", groot:true, naam:"…", kleur:"#c8cedb", t:"De drie gezichten kijken drie kanten op. Voor het eerst kijken ze niet dezelfde kant op."},
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"…Het is stil."},
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Wij hebben tweehonderd jaar gezongen omdat ons verteld is dat het anders misgaat. Er is nooit gezegd wát er misgaat."},
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Er gaat niets mis. Er is gewoon stilte. Weet je hoe lang wij bang zijn geweest voor stilte?"},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Hemelschoon.</b> Speel je een ✦: <b>+1</b> leven en trek <b>1</b>."},
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Neem het. Het is van de afgezant geweest en die heeft het van boven en boven heeft het van de oven. Zo gaat alles hier."},
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"Er zit iemand vier zalen verder. Die weet al dat je komt — weet alles al, dat is de hele functie, en het maakt doodmoe."}
-    ],
-    verlies:[
-      {s:"koor", groot:true, naam:"Het Koor", kleur:"#c8cedb", t:"heilig · heilig · heilig. Zie je wel. Zolang wij doorgaan is er niks gebeurd."}
-    ],
-    zegSpr:"koor",
-    zeg:{ beurt:[
-        "heilig · heilig · heilig",
-        "Wij kijken je niet aan. Wij kijken nergens naar. Dat is niet onbeleefd, dat is de opdracht.",
-        "Als je goed luistert hoor je dat er één stem uit is. Die is er al honderd jaar uit.",
-        "Wij weten niet wat wij neerzetten. Wij zetten neer wat gezongen wordt.",
-        "Je speelt in de maat. Dat doet bijna niemand.",
-        "Er heeft hier ooit iemand meegezongen. Die staat er nog. Die is er nooit meer uit gekomen.",
-        "heilig · heilig · hei—"
-      ],
-      popup:[
-        "Wij zijn met negen begonnen. Wij zijn nu met zes. Er is nooit iets over gezegd en wij hebben nooit iets gevraagd.",
-        "De afgezant komt hier soms staan. Zingt niet mee. Luistert of wij het goed doen.",
-        "Eén keer per honderd jaar gaat de kist open die uit de oven komt. Wij mogen er niet bij zijn. Wij zingen dan harder.",
-        "Als jij wint gaat het zingen uit. Wij weten niet wat er dan gebeurt. Wij hopen: niets. Wij hopen zo erg: niets."
-      ],
-      laag:["Er is een stem uitgevallen. Er is een stem uitgevallen."],
-      jij:["Blijf. Je hoeft niks te doen. Je hoeft alleen maar mee te zingen."] },
-    deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:8, gras:6, steen:6, vuur:6, kuriboh:3, reborn:3, vital:3},
-    ltVij:["kuriboh","reborn","vital"],
-    aeVij:["ae_hemel","ae_watercycle","ae_draw3","ae_genade"],
-    levensVij:11,
-    rook:true, geenChain:true,
+    vrijDeck:true,
+    deckVij:{steen:5, vuur:5, gras:5, water:5, kuriboh:3, vital:3, negate:4},
+    ltVij:["kuriboh","vital","negate"],
+    aeVij:["ae_hemel","ae_genade"],
+    levensVij:12, levensJij:8,
     geeft:"ae_hemel",
     ban:10, begint:1
   },
-  "5-3":{
-    wereld:5, naam:"De vier tronen", vijand:"De Tronen", sprite:"troonsp", zegKleur:"#d9c6f5",
-    biome:"troon",
+  "5-2":{
+    wereld:5, naam:"De zaal", vijand:"De Verzamelaar", sprite:"verzamelaar", zegKleur:"#e8d6a8", muziek:"w5_verzameling",
+    tauntSpr:"verzamelaar_taunt",
     intro:[
-      {s:null, bg:5, naam:"…", t:"De volgende zaal is rond en er staat niets in behalve vier stoelen, en boven elke stoel hangt zijn eigen weer."},
-      {s:null, bg:5, naam:"…", kleur:"#cfa06a", t:"Boven de eerste hangt steengruis. Er valt af en toe iets naar beneden dat je herkent van een zaal waar je bijna doodging."},
-      {s:null, bg:5, naam:"…", kleur:"#a9e2ff", t:"Boven de tweede regent het. Boven de derde staat de lucht in brand. Boven de vierde komt en gaat het water zonder dat er water is."},
-      {s:"troonsp", groot:true, bg:5, naam:"De Tronen", kleur:"#d9c6f5", t:"Vier."},
-      {s:"troonsp", groot:true, bg:5, naam:"De Tronen", kleur:"#d9c6f5", t:"Vier rijken. Vier bazen. Vier afspraken. Vier stoelen. Wij zitten er niet op — wij zíjn ze."},
-      {s:null, bg:5, naam:"…", kleur:"#d9c6f5", t:"Het weer boven de vier stoelen is precies het weer waar je onderdoor bent gegaan. Iemand heeft het hier bewaard."},
-      {s:"troonsp", groot:true, bg:5, naam:"De Tronen", kleur:"#d9c6f5", t:"Jij hebt daar gestaan en jij bent doorgelopen. Dat mag niet één keer. Jij deed het vier keer."},
-      {s:"troonsp", groot:true, bg:5, naam:"De Tronen", kleur:"#d9c6f5", t:"Dus zetten wij het allemaal tegelijk aan. Kijken hoe leuk het dan nog is."},
-      {s:null, bg:5, naam:"…", kleur:"#d9c6f5", t:"👑 <b>Vier tronen op het veld</b>, elk met het weer van één wereld: 🪨 rotsval, 🌧 regen, 🌋 lava en 🌊 het getij. Zolang een troon staat, <b>draait dat weer door</b>."},
-      {s:null, bg:5, naam:"…", kleur:"#d9c6f5", t:"👑 En elke troon <b>laat de tegenstander elke beurt een kaart trekken</b>. Leg er een om en je zet dat weer uit én je snijdt de aanvoer af. Kies goed."},
-      {s:null, bg:5, naam:"…", kleur:"#d9c6f5", t:"👑 Een troon <b>valt zelf nooit aan</b>. Die staat er alleen. Dat is precies wat een troon doet en precies waarom die zo moeilijk weg te krijgen is."},
-      {s:null, bg:5, naam:"…", kleur:"#a9e2ff", t:"Je haalt diep adem en zet je schrap: je gaat deze zaal in met <b>twaalf levens</b>."},
-      {s:"troonsp", groot:true, bg:5, naam:"De Tronen", kleur:"#d9c6f5", t:"Welke doe je eerst? Denk er even over na. Wij hebben tweehonderd jaar; jij ongeveer zes beurten."}
+      {s:null, bg:5, naam:"…", mu:"w5_zaal", t:"Verderop staat een zaal. Hij houdt niet op."},
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Overal staan vitrines, en in die vitrines staat alles wat je onderweg bent tegengekomen."},
+      {s:null, groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Een kiezel. Op het kaartje: <i>Wachter. Steenrijk. Staat al lang.</i>"},
+      {s:null, groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Een halve struik. <i>Onbekend. Zegt niks.</i>"},
+      {s:"suiker", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Een zak suiker. Dicht."},
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Eén vitrine is leeg. Op het kaartje staat: <i>Kees. Gereserveerd.</i>"},
+      {s:"verzamelaar_poets", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Tussen de vitrines staat iemand met witte handschoenen aan, een glas te poetsen dat al schoon is."},
+      {s:"verzamelaar_poets", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Sst."},
+      {s:"verzamelaar_poets", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar kijkt niet op."},
+      {s:"verzamelaar_poets", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Achter de lijn blijven, graag."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er is geen lijn. De Verzamelaar trekt er een met de punt van een schoen."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Zo."},
+      {s:"verzamelaar_loep", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Nu pas kijkt de Verzamelaar op. De loep zakt voor één oog."},
+      {s:"verzamelaar_loep", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"O."},
+      {s:"verzamelaar_loep", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"O, kijk nou toch."},
+      {s:"verzamelaar_loep", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar komt heel langzaam dichterbij, zoals je loopt naar iets wat van een tafel kan vallen."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Alles wat ooit ergens stond, staat hier ook. Daar zorg ik voor."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Alles wat jij bent tegengekomen, heb ik al. Behalve jou."},
+      {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar wijst naar achteren. Daar staat een vitrine die ouder is dan de rest."},
+      {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er staat iets in. Het is verschrompeld en grijs, maar je ziet nog vier kleuren, heel vaag. Op het kaartje staat alleen: <i>Elementaal.</i>"},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Die heb ik al heel lang. Ik dacht dat het de laatste was. Daar had ik al een kaartje voor geschreven."},
+      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar haalt dat kaartje uit een borstzak en houdt het omhoog. <i>Elementaal. Laatste.</i>"},
+      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Nu weet ik waar het heen moet."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil blijven staan, dan is het zo gebeurd."},
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Alle vitrines gaan tegelijk open, met een zacht klikje."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", mu:"w5_verzameling", t:"Niks aanraken. Dat doe ik wel."},
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"🥚 <b>De verzameling.</b> De Verzamelaar vecht met alles wat je al eens bent tegengekomen: wolven, vissen, spinnen, de kapitein. Er ligt al een ei op het bord, en onder drie kolommen liggen 🐺 wolvenspells."},
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"🟣 <b>Eeuwige Terugkeer, zonder keuze.</b> Einde van elke beurt van de Verzamelaar komt er een beest terug uit het graf, welk dan ook. En er zit veel ✦ Zielenoproep in het deck. Wat je afmaakt, komt terug: raak de Verzamelaar zelf."}
     ],
     midden:[
-      {s:"troonsp", naam:"De Tronen", kleur:"#d9c6f5", t:"Voel je hoe vermoeiend het is om alles tegelijk te zijn? Wij ook."},
-      {s:"troonsp", naam:"De Tronen", kleur:"#d9c6f5", t:"Wij zijn niet vier dingen. Wij zijn één ding dat in vieren geknipt is zodat niemand de vorm herkent."}
+      {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Kijk uit. Die is oud."},
+      {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Ik heb er meer van. Van alles heb ik er meer van."}
     ],
     middenNa:2,
+    fases:[{
+      vijand:"De Verzamelaar", sprite:"verzamelaar", tauntSpr:"verzamelaar_taunt", levens:8,
+      wit:true, jijTrekt:3, hand:4, muziek:"w5_achterkamer", hz:"achter",
+      praat:[
+        {s:"verzamelaar_loep", groot:true, naam:"…", kleur:"#e8d6a8", mu:"w5_achterkamer", t:"De Verzamelaar zet de loep af en veegt hem schoon."},
+        {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar staat op. Er zit stof op de handschoenen. Het gaat er niet af."},
+        {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Dat was de voorkant."},
+        {s:null, naam:"…", kleur:"#e8d6a8", t:"Alles wat op de tafel van de Verzamelaar lag, gaat terug in de vitrines. De hand, het bord, het graf. Klik, klik, klik."},
+        {s:"golem", groot:true, naam:"…", kleur:"#ff8a4a", t:"Achterin staat iets groots met een doek eroverheen. Ernaast staat Maatje."},
+        {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Die komt altijd terug. Daarom heb ik hem. Daarom kan ik hem ook missen."},
+        {s:"golem_stuk", groot:true, naam:"…", kleur:"#ff8a4a", t:"Maatje zakt in elkaar. De gloed waar zijn gezicht zat, trekt de doek in."},
+        {s:"vier_stukken", reus:true, naam:"…", kleur:"#e8d6a8", wit:true, t:"De Verzamelaar trekt de doek eraf."},
+        {s:"vier_stukken", reus:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Deze heeft niemand ooit gezien. Ze hebben ook nooit ergens gestaan. Ik heb ze gewoon gehouden."},
+        {s:null, naam:"…", kleur:"#e8d6a8", t:"🐉 <b>De vier stukken.</b> Een draak, een leviathan, een woud dat loopt en een kolos. Ze hebben honderden levens en slaan honderden. Maar elk heeft een element, en de cirkel werkt gewoon: sterk tegen is een instakill, zwak tegen is immuun."},
+        {s:null, naam:"…", kleur:"#e8d6a8", t:"🐉 Ze zijn <b>traag</b>: de beurt dat ze binnenkomen slaan ze nog niet. Het deck van de Verzamelaar is nu die vier en een stapel ✦ Zielenoproep, en de enige 🟣 is Bron van Overvloed. Jij trekt <b>3</b>."}
+      ],
+      deck:{draak:1, leviathan:1, woud:1, kolos:1, reborn:12},
+      lt:["reborn"],
+      ae:["ae_draw3"],
+      zeg:{ beurt:["Dit is de achterkamer.", "Hier komt niemand.", "Kijk niet te lang naar de draak.",
+          "Die kolos stond hier op een ochtend. Ik weet niet waar hij vandaan kwam.", "Stil nou.",
+          "Dit zijn de enige. Snap je dat? De enige."],
+        popup:["Een steen met een gezichtje erop. Die wil ik nog. Hij laat hem niet los.",
+          "Een wolk met een kroontje. Die krijg ik niet in een vitrine. Ik blijf het proberen.",
+          "Er is nog nooit iets weggegaan uit deze zaal.",
+          "Wat doe je als je verzameling af is? Geen idee. Zover ben ik nooit gekomen."],
+        laag:["Nee. Die zijn uniek.", "Die zijn úniek."],
+        jij:["Rustig blijven liggen.", "Ik leg je netjes neer."] }
+    }],
     win:[
-      {s:"troonsp", groot:true, naam:"…", kleur:"#d9c6f5", t:"De laatste stoel valt om, en daarmee valt het weer. Het gruis blijft halverwege hangen en zakt dan gewoon naar beneden als gruis."},
-      {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"…Vier is niets bijzonders. Dat weet je nu."},
-      {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Wij hebben vier rijken uit elkaar gehouden met vier soorten weer en vier afspraken, en jij hebt er in één zaal doorheen gelopen."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Genade.</b> Eén keer per beurt: je eerste creature die vernietigd zou worden, blijft staan op <b>1</b>."},
-      {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Neem dit. Het is nooit uitgedeeld. Er is tweehonderd jaar geleden besloten dat het te duur was."},
-      {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Hierna komt de afgezant. Kijk niet te lang. Wij menen dat."}
+      {s:null, naam:"…", kleur:"#e8d6a8", mu:"w5_zaal", t:"De vitrines springen. Het begint vooraan en het gaat door tot je het niet meer ziet."},
+      {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar rent erlangs en probeert te redden wat er valt. Het lukt twee keer."},
+      {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil."},
+      {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil nou."},
+      {s:"verzamelaar_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar staat midden in de scherven, met een lepel in de ene hand en een halve hoepel in de andere."},
+      {s:"verzamelaar_kaartje", groot:true, naam:"…", kleur:"#e8d6a8", t:"Dan komt er een pen tevoorschijn, en het kaartje met jouw naam, en er wordt iets doorgestreept."},
+      {s:"verzamelaar_kaartje", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Niet te bewaren."},
+      {s:"verzamelaar_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"Het wordt hardop voorgelezen. Het klinkt niet boos. Het klinkt als een beschrijving."},
+      {s:"verzamelaar_stuk", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Ga maar. Ik moet vegen."},
+      {s:"vitrine_elementaal_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"Achterin is de oude vitrine ook gebarsten. Wat erin staat, staat er nog. Grijs, met vier kleuren die je bijna niet meer ziet."},
+      {s:"vitrine_elementaal_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"Je kijkt er langer naar dan je van plan was."}
     ],
     verlies:[
-      {s:"troonsp", groot:true, naam:"De Tronen", kleur:"#d9c6f5", t:"Vier. Altijd vier. Dat is het hele punt van vier."}
+      {s:"verzamelaar_kaartje", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Zo."},
+      {s:"verzamelaar_kaartje", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Naast die achterin. Dan zijn jullie niet alleen."}
     ],
-    zegSpr:"troonsp",
+    na:[
+      {s:null, bg:5, naam:"…", kleur:"#e8d6a8", mu:"w5_naad", t:"Aan het eind van de zaal is een deur. Hij staat open."},
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"Daarachter is het stil op een manier die je nog niet kende. Geen wind, geen water, geen stemmen. Zelfs je voetstappen komen niet terug."}
+    ],
+    zegSpr:"verzamelaar",
     zeg:{ beurt:[
-        "Vier tegelijk. Zo voelde het voor iedereen die jij bent tegengekomen.",
-        "Elke stoel die blijft staan, geeft ons een kaart. Dat is geen truc, dat is een begroting.",
-        "Welke haat je het meest? Het antwoord daarop zegt meer over jou dan over ons.",
-        "Steen wachtte. Het woud hield vast. Vuur werkte. Water keek. Wij doen alle vier tegelijk.",
-        "Er is nooit een vijfde stoel geweest. Daar is over vergaderd.",
-        "Je speelt alsof je weet welke eerst moet. Dat is een gok en dat weten wij.",
-        "Nog steeds vier."
+        "Sst.", "Voorzichtig.", "Niet aankomen.", "Achter de lijn.", "Die ken je nog, hè. Mooi van dichtbij.",
+        "Die heb ik drie keer.", "Je maakt het kapot. Ik zet het terug. Wie houdt dat langer vol, denk je?",
+        "Rustig ademen. Anders beslaat het glas.", "Ik heb een kaartje voor alles. Ook voor dit.",
+        "Wat een mooi exemplaar ben je eigenlijk."
       ],
       popup:[
-        "Wij hebben ooit één keer met z'n vieren tegelijk gepraat. Toen bleek dat wij alle vier hetzelfde was verteld, door dezelfde persoon, op dezelfde dag.",
-        "De bazen weten niet dat wij bestaan. Ze denken dat het weer van hen is.",
-        "Er staat in geen enkel besluit waarom het vier moesten zijn. Er staat alleen dat het er vier zijn.",
-        "Als jij hier doorheen loopt, staat er straks één ding aan de top in plaats van vier. Dat is niet minder eng, dat is preciezer."
+        "Een steen met een gezichtje erop. Die wil ik nog. Hij laat hem niet los.",
+        "Een wolk met een kroontje. Die krijg ik niet in een vitrine. Ik blijf het proberen.",
+        "Wat de dingen betekenen weet ik niet. Ik weet alleen dat ze moeten blijven.",
+        "Er is nog nooit iets weggegaan uit deze zaal.",
+        "Die achterin heb ik tweehonderd jaar geleden gekregen. Hij was nog warm.",
+        "Jij bent het laatste wat nog ontbrak. Daarna is de verzameling af."
       ],
-      laag:["Er is er een om. Er is er een om. Dat is nog nooit gebeurd."],
-      jij:["Blijf liggen onder het weer. Iedereen blijft uiteindelijk liggen onder het weer."] },
+      sterf:"STIL.", sterfKans:0.14,
+      laag:["Pas op het glas.", "Pas op het glás."],
+      jij:["Rustig blijven liggen.", "Ik leg je netjes neer."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:7, steen:7, gras:6, vuur:6, dfusion:3, vital:3, siphon:3},
-    ltVij:["dfusion","vital","siphon"],
-    aeVij:["ae_genade","fu_water","ae_alziend"],
-    levensVij:8,
-    tronen:true,
-    levensJij:12,
-    bord:[{p:1, c:0, el:"troon", weer:"rots", hp:5, wakker:true},
-          {p:1, c:1, el:"troon", weer:"regen", hp:5, wakker:true},
-          {p:1, c:3, el:"troon", weer:"lava", hp:5, wakker:true},
-          {p:1, c:4, el:"troon", weer:"getij", hp:5, wakker:true}],
+    /* Alles wat ooit ergens stond: de roedel van Max, de vissen van de Zee, de spinnen van
+       Kaelid, de kapitein, en een stapel Zielenoproep om het allemaal terug te halen. */
+    deckVij:{wolf:5, vis:3, spin:2, kapitein:2, steen:2, water:2, vuur:2, gras:2, reborn:8, brenger:2},
+    ltVij:["reborn","brenger"],
+    aeVij:["ae_graf"], terugVij:"*",
+    eieren:true, eiLeg:false,
+    bord:[{p:1, c:1, el:"ei"}, {p:1, c:0, spell:"wolf"}, {p:1, c:2, spell:"wolf"}, {p:1, c:4, spell:"wolf"}],
+    levensVij:9, levensJij:8,
     geeft:"ae_genade",
     ban:10, begint:1
   },
-  "5-4":{
-    wereld:5, naam:"Wees niet bang", vijand:"Seraf", sprite:"seraf_echt", zegKleur:"#fffdf2",
-    biome:"troon",
+  "5-3":{
+    wereld:5, naam:"De naad", vijand:"De Naad", sprite:"naad", zegKleur:"#e6c46a", muziek:"w5_naad",
+    tauntSpr:"naad_taunt",
     intro:[
-      {s:null, bg:5, naam:"…", t:"De vierde zaal heeft een deur die je kent. Hij is te klein voor wat erachter staat, en dat weet je nog voor je hem opendoet."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Elementaal."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Twee keer heb ik je laten gaan. Eén keer omdat je beter was, één keer omdat ik niet mocht winnen van mezelf."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"En nu sta je hier. In een gang waar niets hoort te lopen wat een naam heeft."},
-      {s:"engel_stuk", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Weet je wat het probleem is? Ik heb je gemogen. Dat is voor mij een beroepsfout."},
-      {s:"engel", bg:5, naam:"…", kleur:"#f6f7fb", t:"Seraf haalt adem. Dat heb je Seraf nooit zien doen."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Beneden trek ik een vorm aan waar mensen tegen kunnen. Twee armen, een halo, een gezicht om naar te kijken. Dat is beleefdheid."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Hier hoef ik niet beleefd te zijn."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", wit:true, glitch:true, t:"Het licht in de zaal gaat niet aan. Het gaat óm."},
-      {s:"seraf_echt", reus:true, bg:5, naam:"…", kleur:"#fffdf2", t:"Er staat geen man met vleugels. Er staan zes vleugels, en daartussen zit iets wat de vleugels bij elkaar houdt."},
-      {s:"seraf_echt", reus:true, bg:5, naam:"…", kleur:"#fffdf2", t:"Met twee bedekt Seraf het gezicht. Met twee de voeten. Met twee vliegt Seraf. Op alle zes zitten ogen en ze staan alle zes open."},
-      {s:"seraf_echt", reus:true, bg:5, naam:"Seraf", kleur:"#fffdf2", t:"WEES NIET BANG."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", t:"Het is geen troost. Het is een instructie, en je merkt dat je hem niet kunt opvolgen."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", t:"🕊 <b>Zes vleugels.</b> Elke keer dat je Seraf verder omlaag krijgt, brandt er een paar weg — en gaat er iets áán. Dit wordt niet makkelijker naarmate je wint. Dit wordt erger."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", t:"👁 Op <b>8 levens</b> gaan de ogen open: Seraf noemt elke beurt een kaart in je hand die je niet mag spelen."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", t:"🕊 Op <b>5 levens</b> zegt Seraf het hardop, elke beurt, en het kost je telkens <b>1 leven</b>."},
-      {s:null, bg:5, naam:"…", kleur:"#fffdf2", t:"🜂 Op <b>2 levens</b> vouwt Seraf het laatste paar open: aan het eind van elke beurt van Seraf krijgt <b>alles wat jij hebt staan 1 schade</b>."},
-      {s:"seraf_echt", reus:true, bg:5, naam:"Seraf", kleur:"#fffdf2", t:"Ik kan hier niet mee ophouden. Dat is niet hetzelfde als niet willen. Onthoud dat straks."}
+      {s:null, bg:5, naam:"…", mu:"w5_naad", t:"Achter de deur is niks."},
+      {s:"naad", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Alleen in het midden hangt iets van goud. Er lopen vier kettingen uit, schuin omlaag, door de wolken heen."},
+      {s:"naad", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Je hoeft niet te kijken om te weten waar ze heen gaan. Steen. Woud. As. Water."},
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"Door een gat in de wolken zie je ver beneden een streep. Kaarsrecht. Aan de ene kant groen, aan de andere kant zwart. De ketting komt precies daar uit."},
+      {s:"naad_strak", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Er komt geen geluid van. Je hoort je eigen adem niet eens."},
+      {s:"naad_strak", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Dan staat er iets. Niet gezegd. Gewoon geweten."},
+      {s:"naad", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Hier houdt steen op."},
+      {s:"naad", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Hier begint groen."},
+      {s:"naad", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Hier houdt groen op."},
+      {s:"naad", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Het gaat door, rustig, alsof het al tweehonderd jaar zo doorgaat."},
+      {s:"naad", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Hier begint as. Hier houdt as op. Hier begint water."},
+      {s:"naad_strak", reus:true, bg:5, naam:"…", kleur:"#e6c46a", t:"Dan houdt het op."},
+      {s:"naad_strak", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Hier ben jij."},
+      {s:"naad_strak", reus:true, bg:5, naam:"De Naad", kleur:"#e6c46a", t:"Jij houdt nergens op."},
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ <b>De Naad.</b> Vier levens, en per klap gaat er hooguit <b>één</b> af, hoe hard je ook slaat. Helen kan het niet. Elke keer dat het geraakt wordt, trekt het een kaart."},
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ En elke keer dat je raak slaat, trekt de ketting het veld dichter. De eerste keer gaan kolom <b>1</b> en <b>5</b> dicht, de tweede keer kolom <b>2</b> en <b>4</b>. Wat daar staat, van jou en van de Naad, is <b>uit het spel</b>. Meteen, midden in je beurt."},
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ Is er nog één kolom over, dan slaat een aanval die de creature tegenover vernietigt <b>door</b> op de speler: <b>1</b> schade. Voor allebei. En 🟣 Alziend: de Naad ziet wat je in je hand hebt, en er staan al twee 🪨 stenen blokkers."}
     ],
-    midden:[
-      {s:"seraf_echt", naam:"Seraf", kleur:"#fffdf2", t:"Je vraagt je af wat er in de kist zit die uit de oven komt. Dat vroeg ik ook. Één keer."},
-      {s:"seraf_echt", naam:"Seraf", kleur:"#fffdf2", t:"Ik ben daarna dit geworden. Ik zeg niet dat het een straf was. Ik zeg dat het erna was."}
+    naadKlap1:[
+      {s:"naad_strak", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Tot hier."},
+      {s:null, naam:"…", kleur:"#e6c46a", t:"Aan de buitenkant slaat iets dicht. Wat daar stond, is er niet meer."}
     ],
-    middenNa:3,
+    naadKlap2:[
+      {s:"naad_strak", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Tot hier."},
+      {s:null, naam:"…", kleur:"#e6c46a", t:"Er is nog één strook over, in het midden. Hij is smal."},
+      {s:"naad", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Eén weg."},
+      {s:"naad", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Zo hoort het."}
+    ],
     win:[
-      {s:"seraf_echt", reus:true, naam:"…", kleur:"#fffdf2", t:"De vleugels gaan uit zoals lampen uitgaan: niet allemaal tegelijk, en de laatste doet er het langst over."},
-      {s:"engel_stuk", naam:"…", kleur:"#f6f7fb", t:"Wat overblijft is de vorm waarin je Seraf in het woud hebt ontmoet. Het past nauwelijks nog."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"…Drie keer. Dat is nu drie keer."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Ik ga je nu iets vertellen en dan ga ik zitten, want ik ben tweehonderd jaar niet gaan zitten."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Er is geen raad. Er is nooit een raad geweest. Er is één stoel en daar zit één iemand op, en die is ooit precies zo binnengekomen als jij."},
-      {s:"engel_stuk", naam:"Seraf", kleur:"#f6f7fb", t:"Wij zijn niet de bewakers van de hemel. Wij zijn de bewakers van één beslissing die iemand tweehonderd jaar geleden genomen heeft en nooit heeft teruggenomen."},
-      {s:null, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 <b>Loutering.</b> Aan het begin van haar beurt legt ze een kaart weg en trekt er twee voor terug."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"Neem hem. Hij is van mij en hij is het enige aan mij dat nooit uit die oven is gekomen. Ik heb hem verdiend door pijn te hebben."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"En dit erbij. Het is het enige wat ik ooit echt gekund heb: iets één tel laten ophouden. Iedereen denkt dat dat kracht is. Het is opluchting."},
-      {s:"engel", naam:"Seraf", kleur:"#f6f7fb", t:"De deur erachter zit niet op slot. Dat is de grap. Die heeft nog nooit op slot gezeten."}
+      {s:"naad_knap", reus:true, naam:"…", kleur:"#e6c46a", t:"Er knapt iets."},
+      {s:"naad_knap", reus:true, naam:"…", kleur:"#e6c46a", t:"Het maakt geen geluid, net als al het andere hier. Maar de vier kettingen worden slap, en dan zakken ze, en dan zijn ze weg."},
+      {s:"naad_knap", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Hier houdt…"},
+      {s:null, naam:"…", kleur:"#e6c46a", t:"Het maakt de zin niet af."},
+      {s:"schakels", groot:true, naam:"…", kleur:"#e6c46a", t:"Het goud valt uit elkaar in losse schakels. Ze rollen alle kanten op."},
+      {s:null, naam:"…", kleur:"#e6c46a", t:"Ver beneden wordt de streep tussen groen en zwart vaag. Niet weg. Gewoon niet meer zo recht."},
+      {s:null, naam:"…", kleur:"#e6c46a", mu:"w5_gebroken", t:"En dan hoor je iets. Voor het eerst sinds de zaal. Steen die over steen schuift. Iets in bladeren dat geen wind is."},
+      {s:null, naam:"…", kleur:"#a9e2ff", t:"En ergens komt het water tot aan een boot."}
     ],
     verlies:[
-      {s:"seraf_echt", reus:true, naam:"Seraf", kleur:"#fffdf2", t:"WEES NIET BANG."},
-      {s:"seraf_echt", reus:true, naam:"Seraf", kleur:"#fffdf2", t:"Sta op. Ik heb geen haast en jij hebt geen keuze. Dat is precies dezelfde zin die ik ooit zelf te horen kreeg, en dat is geen toeval."}
+      {s:"naad_strak", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Tot hier."},
+      {s:"naad_strak", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Jouw kant."}
     ],
-    zegSpr:"seraf_echt",
-    zeg:{ beurt:[
-        "WEES NIET BANG.",
-        "Ik weet welke kaart je vasthoudt. Ik wist het voor je die trok.",
-        "Beneden was ik beleefd tegen je. Dat was voor jou, niet voor mij.",
-        "Elk stukje licht dat ik gebruik geeft mij een leven terug. Dat is nooit veranderd.",
-        "Je bent drie werelden geleden begonnen en je hebt niet één keer omgekeken. Dat is het enge aan jou.",
-        "Ik heb dit al gezien. Niet dit gevecht. Deze afloop.",
-        "Vraag het straks. Vraag het maar aan wie daar zit. Dan hoor je het van iemand die er wél voor gekozen heeft."
-      ],
-      popup:[
-        "Ik ben één keer bij de oven geweest. Ik heb gevraagd wat erin gaat. Er is niets met mij gebeurd. Er is alleen iets bíj mij gekomen, en dat zit er nog.",
-        "De kist die eruit komt gaat naar boven. Ik draag hem. Ik heb hem nooit opengedaan. Ik heb hem gewogen — hij is elke keer lichter.",
-        "Weet je waarom niemand hier ooit komt? Niet omdat het bewaakt wordt. Omdat wij tweehonderd jaar hebben gezegd dat er iets te bewaken viel.",
-        "Als jij wint, blijft er van mij een vorm over waar mensen tegen kunnen. Ik weet niet of ik daar blij mee moet zijn."
-      ],
-      sterf:"WEES NIET BANG.", sterfKans:0.22,
-      laag:["…Zo. Ja. Zo dus."],
-      jij:["Ga liggen. Het is niet erg. Het is alleen definitief."] },
+    na:[
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"Tussen de losse schakels staat iemand."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Scheef."}
+    ],
+    zegSpr:"naad",
+    zeg:{ beurt:["Tot hier.", "Niet verder.", "Jouw kant.", "Mijn kant.", "Je gaat naar links.", "…Links.",
+        "Dat hou je achter.", "Smaller.", "Niks gaat over.", "Hier houdt het op."],
+      popup:["Steen is steen. Groen is groen. Daar zit ik tussen.",
+        "De muren zijn weg. De poorten staan open. Ik ben er nog.",
+        "Ze staan allemaal aan de rand. Ze kijken naar de overkant. Ze gaan niet.",
+        "Ik ben niet gebouwd. Ik ben getrokken.",
+        "Door jou loopt geen lijn. Dat klopt niet.|Dat klopt niet."],
+      sterf:"TOT.", sterfKans:0.14,
+      laag:["Hier houdt…", "Hier houdt het op.", "Hier houdt het óp."],
+      jij:["Blijf aan je kant.", "Daar hoor je."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{water:7, gras:6, steen:6, vuur:6, kuriboh:3, reborn:3, vital:3, negate:3},
-    ltVij:["kuriboh","reborn","vital"],
-    aeVij:["ae_hemel","ae_pijn","ae_alziend","ae_genade"],
-    levensVij:11,
-    levensJij:9,
-    seraf:true, glitch:true,
+    /* Stevige blokkers voor iemand die je maar vier keer mag raken: 🟣 Oerkracht op steen. */
+    deckVij:{steen:4, rots:4, water:6, vuur:6, gras:6, negate:3, kuriboh:3},
+    ltVij:["negate","kuriboh"],
+    aeVij:["ae_alziend","ae_hp3"], keuzeVij:"steen",
+    naad:true,
+    /* Twee stenen blokkers staan er al: de eerste klap moet je verdienen. */
+    bord:[{p:1, c:1, el:"steen"}, {p:1, c:3, el:"steen"}],
+    levensVij:4, levensJij:8,
+    geeft:"ae_alziend",
+    ban:10, begint:1
+  },
+  "5-4":{
+    wereld:5, naam:"Gebroken", vijand:"Seraf", vechtNaam:"Seraf · Magnus", sprite:"seraf_magnus", zegKleur:"#f6f7fb", muziek:"w1_baasgevecht",
+    tauntSpr:"seraf_magnus",
+    intro:[
+      {s:"seraf_kapot", groot:true, bg:5, naam:"…", mu:"w5_gebroken", t:"Tussen de schakels staat Seraf. Niet zoals op de trap. Het licht flakkert. Het staat scheef."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Weet je wat je gedaan hebt?"},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Seraf schopt tegen een schakel. Hij rolt weg en valt door een gat in de wolken."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Tweehonderd jaar heeft dat gehouden. Nu gaan ze naar elkaar toe. Steen naar groen. Groen naar as."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"En dan gaat het weer zoals toen."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", glitch:true, t:"Seraf lacht. Het klinkt niet goed."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Ik was erbij toen het de vorige keer misging. Ik heb het opgeruimd. Ik heb geen zin om het nog een keer op te ruimen."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Het licht flakkert harder."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Ik heb geen ketting meer. Geen opdracht. Niks."},
+      {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Maar ik heb ze allemaal gezien. Ik stond erbij toen jij ze versloeg. Ik weet precies hoe ze vochten."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ <b>Vier gezichten.</b> Seraf vecht als de vier bazen die je versloeg, één voor één, en zwaarder dan toen. Jij hebt <b>15</b> levens voor alles bij elkaar. Tussendoor krijg je er niets bij."},
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ Bij elke wissel wordt het hele veld leeggeveegd en gaat je graf terug je deck in. Jij houdt je hand en trekt <b>2</b>; het nieuwe gezicht begint met een verse hand."},
+      {s:"seraf_magnus", groot:true, bg:5, naam:"…", kleur:"#cfa06a", mu:"w1_baasgevecht", t:"Serafs gezicht verschuift. Er groeit steen overheen."},
+      {s:"seraf_magnus", groot:true, bg:5, naam:"Seraf", kleur:"#cfa06a", t:"Magnus hoorde je aankomen."},
+      {s:"seraf_magnus", groot:true, bg:5, naam:"…", kleur:"#cfa06a", t:"De stem is die van Magnus. Bijna."},
+      {s:"seraf_magnus", groot:true, bg:5, naam:"Seraf", kleur:"#cfa06a", t:"Magnus was bang voor je. Terecht."},
+      {s:null, bg:5, naam:"…", kleur:"#cfa06a", t:"🪨 <b>Het plafond valt, twee keer zo vaak als toen.</b> Begin van elke beurt twee kruizen per kant; aan het eind van die beurt valt het. Steen overleeft het. Magnus heeft <b>3</b> levens."}
+    ],
+    fases:[
+      { vijand:"Seraf · Moeder Natuur", sprite:"seraf_moeder", tauntSpr:"seraf_moeder", levens:3, hand:5, jijTrekt:2,
+        bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", grafTerug:true, weerUit:true, regenAltijd:true, muziek:"w2_baasgevecht", hz:"moeder",
+        praat:[
+          {s:"seraf_magnus", groot:true, naam:"…", kleur:"#cfa06a", t:"Het stenen gezicht barst en valt in brokken van Seraf af."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Past niet."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
+          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", mu:"w2_baasgevecht", t:"Er groeien takken over het gezicht. Het begint te regenen."},
+          {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Kind."},
+          {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Wij zijn niet boos. Wij…"},
+          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", t:"Het gezicht trekt."},
+          {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Ik ben geen wij. Ik ben alleen."},
+          {s:null, naam:"…", kleur:"#e08fb0", t:"🌧 <b>Het regent, en het houdt niet op.</b> 🔥 Vuur doet niets tegen de tegenstander, alleen tegen je eigen creatures. En er zitten 🌹 rozen in dit deck. <b>3</b> levens."}
+        ],
+        deck:{roos:8, vuur:5, water:5, steen:5, siphon:3}, lt:["siphon"],
+        ae:["ae_grassx2"],
+        zeg:{ beurt:["Kind.", "Wij zijn langzaam. Ik niet.", "Voel je de regen? Dat ben ik.",
+            "Het gras is zacht hier. Dat is met opzet.", "Moeder Natuur heeft je laten gaan. Ik niet."],
+          popup:["Ik stond bij de steen. In het woud. In de as. Ik heb ze allemaal zien vallen.",
+            "Ik heb geen eigen gezicht om mee te vechten. Nooit gehad. Nooit nodig gehad.",
+            "Jullie namen alles. Nu neem ik dit."],
+          laag:["Te veel stemmen."], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] } },
+      { vijand:"Seraf · Flint", sprite:"seraf_flint", tauntSpr:"seraf_flint", levens:3, hand:5, jijTrekt:2,
+        bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", grafTerug:true, weerUit:true, vuurzee:true, vuurzeeSnel:true, lava:true, muziek:"w3_flintgevecht", hz:"flint",
+        praat:[
+          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", t:"De takken knappen. De bladeren vallen van Serafs gezicht."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Te veel stemmen."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
+          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", mu:"w3_flintgevecht", t:"Er staat ineens een zonnebril op die net niet past. Alles eromheen gloeit."},
+          {s:"seraf_flint", groot:true, naam:"Seraf", kleur:"#ff8a4a", t:"Yo."},
+          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", t:"Het is bijna goed. Net niet."},
+          {s:"seraf_flint", groot:true, naam:"Seraf", kleur:"#ff8a4a", t:"Hij vond je aardig. Dat heb ik nooit begrepen."},
+          {s:null, naam:"…", kleur:"#ff8a4a", t:"🔥 <b>Alles brandt elke tweede ronde</b>: dan gaan alle creatures op het veld eraan, van allebei. 🌋 En de grond is lava: eind van elke tweede beurt verbrandt 🌿, voelt 💧 niets en verliest de rest 1 leven. <b>3</b> levens."}
+        ],
+        deck:{plasma:8, steen:5, gras:5, water:5, darkhole:3}, lt:["darkhole"],
+        ae:["ae_fire6"],
+        zeg:{ beurt:["Yo.", "Nice. Serieus.", "Ga naar huis.", "Dat heeft hij nooit gezegd. Ik wel.", "Hij meende alles. Dat kan ik niet nadoen."],
+          popup:["Weet je wat er gebeurt als ze naar elkaar toe gaan? Ik wel.",
+            "Elk gezicht is zwaarder dan het vorige.", "Jullie namen alles. Nu neem ik dit."],
+          laag:["Die was het moeilijkst."], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] } },
+      { vijand:"Seraf · de Oceaan", sprite:"seraf_oceaan", tauntSpr:"seraf_oceaan", levens:3, hand:5, jijTrekt:2,
+        bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", grafTerug:true, weerUit:true, getij:true, getijLijst:["vloed","springtij","eb","springtij"], muziek:"w4_baas", hz:"oceaan",
+        praat:[
+          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", t:"De zonnebril breekt doormidden. Het gloeien dooft."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Die was het moeilijkst."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
+          {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", mu:"w4_baas", t:"Er is geen vast gezicht meer. Er loopt water overheen, alle kanten op."},
+          {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"Heen."},
+          {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"En weer."},
+          {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", t:"Het water loopt over het gezicht en het blijft niet liggen."},
+          {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"De Oceaan heeft één keer zelf iets besloten. Ik nog nooit."},
+          {s:null, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Het getij, en het water keert twee keer zo vaak.</b> Elke ronde schuift het door: vloed, springtij, eb, springtij. Bij vloed valt niemand aan; bij springtij spoelt alles naar de overkant; bij eb slaat 💧 +3 en dooft 🔥. <b>3</b> levens."}
+        ],
+        deck:{steen:4, rots:2, vuur:6, gras:6, water:2, ijs:4, dfusion:2, negate:2, vital:2}, lt:["dfusion","negate","vital"],
+        ae:["ae_watercycle"],
+        zeg:{ beurt:["Heen.", "En weer.", "Ik ben overal waar je heen gaat.", "Niemand heeft haar ooit iets gevraagd. Mij altijd.", "Ik word niet moe. Ik word niet…"],
+          popup:["Ik stond bij de steen. In het woud. In de as. Ik heb ze allemaal zien vallen.",
+            "Weet je wat er gebeurt als ze naar elkaar toe gaan? Ik wel.", "Elk gezicht is zwaarder dan het vorige."],
+          laag:["…"], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] } },
+      { vijand:"Seraf", sprite:"seraf_kapot", tauntSpr:"seraf_kapot", levens:1, hand:0, jijTrekt:0,
+        bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", grafTerug:true, weerUit:true, stil:true, stilTekst:"Seraf doet niets meer. Seraf blijft staan.", deck:{}, lt:[], ae:[], muziek:"w5_gebroken", hz:"kapot",
+        praat:[
+          {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", mu:"w5_gebroken", t:"Het water loopt weg. Wat eronder zit is Seraf. Verder niks."},
+          {s:"seraf_kapot", groot:true, naam:"…", kleur:"#f6f7fb", t:"Het licht flakkert nauwelijks nog."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Toe dan."},
+          {s:"seraf_kapot", groot:true, naam:"…", kleur:"#f6f7fb", t:"Seraf blijft staan. Seraf doet niks meer."},
+          {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Toe dan."},
+          {s:null, naam:"…", kleur:"#f6f7fb", t:"✦ Seraf heeft nog <b>1</b> leven, niets in de hand en niets op het veld. Eén klap."}
+        ],
+        zeg:{ beurt:["Toe dan."], popup:[], laag:["Toe dan."], jij:["…"] } }
+    ],
+    win:[
+      {s:"seraf_zit", groot:true, naam:"…", kleur:"#f6f7fb", mu:"w5_gebroken", t:"Seraf zakt door de knieën en gaat zitten, tussen het goud."},
+      {s:"seraf_zit", groot:true, naam:"…", kleur:"#f6f7fb", t:"Het ziet er ongemakkelijk uit. Alsof het lichaam niet weet hoe dat moet."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Ik zit."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dat heb ik nog nooit gedaan."},
+      {s:"seraf_zit", groot:true, naam:"…", kleur:"#f6f7fb", t:"Het blijft even stil."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Tweehonderd jaar heb ik gezegd dat de Hemelraad het zo wilde. Iedereen geloofde dat. Ik ook."},
+      {s:"seraf_zit", groot:true, naam:"…", kleur:"#f6f7fb", t:"Seraf kijkt naar de grond."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Er is nooit een raad geweest."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Er is één stoel. En die is nooit leeg."},
+      {s:null, naam:"…", kleur:"#f6f7fb", t:"Achter Seraf staat een deur die er net nog niet was."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Ga maar."},
+      {s:"seraf_zit", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Je gaat het gezicht herkennen."}
+    ],
+    verlies:[
+      {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Zo."},
+      {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dat is dan…"},
+      {s:"seraf_kapot", groot:true, naam:"…", kleur:"#f6f7fb", t:"Seraf maakt de zin niet af."},
+      {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Sta op. Ik weet niet wat ik anders moet doen."}
+    ],
+    zegSpr:"seraf_magnus",
+    zegNaamVast:"Seraf",
+    zeg:{ beurt:["Magnus heeft tijd.", "Steen onthoudt alles. Ik ook.", "Hij zei ik tegen je. Dat heb ik gehoord.",
+        "Tweehonderd jaar bang. En dan zegt hij ik tegen jou.", "Deze zaal is van Magnus. Het plafond niet."],
+      popup:["Ik stond bij de steen. In het woud. In de as. Ik heb ze allemaal zien vallen.",
+        "Ik heb geen eigen gezicht om mee te vechten. Nooit gehad. Nooit nodig gehad.",
+        "Jullie namen alles. Nu neem ik dit.",
+        "Weet je wat er gebeurt als ze naar elkaar toe gaan? Ik wel.",
+        "Elk gezicht is zwaarder dan het vorige."],
+      laag:["Past niet."], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] },
+    deckJij:{steen:6, vuur:6, gras:6, water:6},
+    deckVij:{rots:6, steen:3, vuur:5, gras:5, water:5},
+    aeVij:["ae_stonefull"],
+    rotsval:true, rotsDubbel:true,
+    levensVij:3, levensJij:15,
     geeft:"ae_pijn",
     ban:10, begint:1
   },
   "5-5":{
-    wereld:5, naam:"De stoel", vijand:"De Eerste", sprite:"eerste", zegKleur:"#f6e9b0",
-    biome:"hemel",
+    wereld:5, naam:"De Eerste", vijand:"De Eerste", sprite:"eerste", zegKleur:"#f6e9b0", muziek:"w5_eerste",
+    tauntSpr:"eerste_taunt",
+    herstartFase:true,
     intro:[
-      {s:null, bg:5, naam:"…", t:"Achter de deur is geen troonzaal. Er is een kamer. Er staat een bureau, er staat een stoel, en er ligt papier — heel veel papier, in stapels die tot je middel komen."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Op elk vel staat hetzelfde soort ding. Een datum. Een rijk. Een naam. En daaronder: <b>toegewezen</b>."},
-      {s:"eerste", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"In de stoel zit iemand. Ze kijkt op als je binnenkomt, zoals je opkijkt als er eindelijk iemand langskomt."},
-      {s:"eerste", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Ze ziet eruit als jij. Niet een beetje. Niet als familie. Als jij, met tweehonderd jaar erbij."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Daar ben je."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben de Hemelraad. Ja. Eén stoel. Er is nooit iets vergaderd; er is alleen ondertekend."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben hier binnengekomen zoals jij. Vier rijken, vier bazen, een engel en een trap. Ik heb alles verslagen wat jij verslagen hebt."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"En toen zat er iemand in deze stoel die eruitzag als ik, en die stond op, en die zei: hier. Neem maar."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Ze legt haar hand op de papierstapel alsof ze hem geruststelt."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb ja gezegd. Dat is alles wat er gebeurd is. Eén ja, tweehonderd jaar geleden, en daar hangt sindsdien alles aan."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"De oven is niet om iets te maken. De oven is om te zorgen dat er iets te vérdelen valt. Wie verdeelt, wordt niet weggestuurd."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"En vuur brandt goed. Dat is het hele geheim. Het is niet dieper dan dat en het is precies zo erg als het klinkt."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Je vraagt waarom ze dan nu tegen je gaat spelen."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Omdat ik wil weten of je het kunt. Niet of je goed bent — of je het kúnt. Er komt hier straks iemand zitten en ik wil dat het iemand is die hier hoort."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb geen deck. Ik heb nooit een deck gehad."},
-      {s:null, bg:5, naam:"…", kleur:"#c684ff", paars:true, t:"🪞 <b>Ze speelt met jouw deck, jouw krachten en jouw lichtkaarten.</b> Alles wat je hebt meegenomen staat vanaf nu ook aan de overkant."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Wat je onderweg gekregen hebt, is van mij geweest. Ik geef het even terug zodat je het van de andere kant ziet."}
+      {s:null, bg:5, naam:"…", mu:"w5_kantoor", t:"Achter de deur is geen troonzaal."},
+      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Het is een kantoor. Er staat een bureau, er liggen stapels papier tot aan het plafond, en er staat één stoel."},
+      {s:null, groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Op het bureau ligt een stempel. Die ken je. Je hebt hem gezien op een half verbrand vel, naast een oven."},
+      {s:"eerste_schrijft", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Achter het bureau zit iemand te schrijven. Er wordt niet opgekeken."},
+      {s:"eerste_schrijft", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Je bent er."},
+      {s:"eerste_schrijft", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"De zin wordt afgemaakt. Er komt een stempel onder. Dan kijkt De Eerste op."},
+      {s:"eerste", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Het is jouw gezicht. Met tweehonderd jaar erbij."},
+      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik voelde het toen de ketting brak. Tweehonderd jaar heeft niemand eraan getrokken."},
+      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"En Seraf zit. Dat heeft Seraf voor niemand gedaan."},
+      {s:"papier_vel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Er wordt een vel naar je toe geschoven. Eén regel. <i>…draagt alle vier. Toestemming: geen.</i>"},
+      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Die heb ik geschreven. Voor jou, en voor iedereen voor jou."},
+      {s:"eerste_op", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"De Eerste staat op. Alles in de kamer houdt op met bewegen. Het stof in de lucht blijft hangen."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik kwam net zo binnen als jij. Met vier. Met een plan."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Er zat hier iemand. Die stond op en zei: hier, neem maar. Ik zei ja."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik wilde alles openzetten. Dat heb ik een week volgehouden."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Toen begreep ik wat samen is. Samen is dat er één de baas wordt. Een andere uitkomst heeft het nooit gehad."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"De vorige keer waren dat wij. Je weet hoe dat ging."},
+      {s:"eerste_op", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Er komt een stap naar voren. Niet snel."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik hou je niet tegen omdat ik je haat. Ik hou je tegen omdat ik weet wie je over tweehonderd jaar bent."},
+      {s:"eerste_op", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", mu:"w5_eerste", t:"Kom."},
+      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Drie potjes.</b> Na elk potje gaat alles terug naar het begin: decks, handen, levens. Maar De Eerste krijgt er steeds <b>vier</b> 🟣 aethers bij: eerst de vier fusies, dan de vier elementen, dan de vier algemene."},
+      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"✦ Verlies je in potje 2 of 3, dan begin je opnieuw bij dat potje. De Eerste heeft <b>8</b> levens, jij <b>10</b>."}
     ],
-    midden:[
-      {s:"eerste", naam:"De Eerste", kleur:"#f6e9b0", t:"Je speelt zoals ik speelde. Dat is geen compliment, dat is ongemakkelijk."},
-      {s:"eerste", naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb hier één keer iemand laten winnen. Die is naar beneden gelopen en heeft er nooit iets mee gedaan. Dat was erger dan verliezen."}
+    fases:[
+      { volReset:true, vijand:"De Eerste", sprite:"eerste_op", levens:9, levensJij:10, muziek:"w5_eerste",
+        praat:[
+          {s:"eerste_op", groot:true, naam:"…", kleur:"#f6e9b0", t:"Alles gaat terug naar hoe het was. Het stof hangt weer stil."},
+          {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Nog een keer."},
+          {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb geen haast."},
+          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Weet je wie Magnus vertelde hoe het hoort? Weet je wie die afspraak heeft opgeschreven? Vier rijken. Ieder voor zich."},
+          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ze zeiden allemaal dat het hun zo verteld was."},
+          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben degene die het verteld heeft."},
+          {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Potje 2.</b> De Eerste heeft er de vier element-aethers bij: Getijdenstroom, Verzengende Woede, Onwrikbaar en Woekergroei. <b>9</b> levens tegen jouw <b>10</b>."}
+        ],
+        deck:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3}, lt:["negate","echo"],
+        ae:["fu_water","fu_fire","fu_stone","fu_grass","ae_watercycle","ae_fire6","ae_stonefull","ae_grassx2"],
+        zeg:{ beurt:["Jij hebt ze verslagen. Ik heb ze daar neergezet.", "Steen onthoudt alles. Dat zei Magnus. Dat heeft hij van mij.",
+            "Je bent goed. Dat verandert niks.", "Alles wat jij hebt opengebroken, heb ik ooit dichtgedaan.", "Ik heb geen hekel aan je. Ik ken je gewoon."],
+          popup:["Die oven in de as. Daar gaat alles in wat van ons was. Zodat niemand nog weet hoe het was.",
+            "Ik heb nooit zelf iemand gedood. Ik heb alleen nooit toestemming gegeven.",
+            "De vorige die hier binnenkwam wilde ook samen. Seraf heeft het opgelost.",
+            "Hoeveel er voor mij zaten, weet ik niet. Het staat nergens. Dat is met opzet.",
+            "Je lijkt op mij. Dat is geen toeval."],
+          laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } },
+      { volReset:true, vijand:"De Eerste", sprite:"eerste_op", levens:10, levensJij:10, muziek:"w5_staan",
+        keuzeNaam:"stoel", keuzeStandaard:"staan",
+        praat:[
+          {s:"eerste_op", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_stoel", t:"Alles gaat weer terug. Maar deze keer gaat De Eerste niet meteen verder."},
+          {s:"eerste_opzij", groot:true, naam:"…", kleur:"#f6e9b0", t:"De Eerste staat op, en doet een stap opzij."},
+          {s:"stoel", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Hier."},
+          {s:"stoel", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Neem maar."}
+        ],
+        keuzePraat:[
+          {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", t:"🪑 <b>Ga je zitten</b>, dan krijg jij de vier algemene 🟣 aethers van De Eerste (Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade), die De Eerste dan kwijt is, en je begint met <b>4</b> levens extra. Win je zo, dan ben jij de nieuwe Eerste."},
+          {s:"eerste_opzij", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Je hoeft niet. Zo werd het mij ook gevraagd.",
+            keuze:[{label:"🪑 Ga zitten", ga:"zit"}, {label:"🚶 Blijf staan", ga:"staan"}]}
+        ],
+        takken:{
+          zit:[
+            {s:null, groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_zit", t:"Je gaat zitten. De stoel past meteen."},
+            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zie je."},
+            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan maken we het af. Het maakt niet meer uit wie er wint. Er zit al iemand."}
+          ],
+          staan:[
+            {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_staan", t:"De stoel blijft leeg. De Eerste kijkt ernaar, en dan naar jou."},
+            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zo."},
+            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dat heb ik toen niet gedaan. Dan weet ik niet hoe dit afloopt. Dat is lang geleden."},
+            {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Goed. Dan laat ik je zien wat die stoel van iemand maakt."}
+          ]
+        },
+        keuzes:{
+          zit:{ variant:"zit", jijAe:["ae_draw3","ae_hp3","ae_graf","ae_genade"], vijWeg:["ae_draw3","ae_hp3","ae_graf","ae_genade"], levensJij:4, muziek:"w5_zit",
+            zeg:{ beurt:["Voel je het? Hij is warm. Dat blijft hij.", "Zo zat ik ook.", "Je wint dit. Dat wist ik ook.", "Het went."],
+              popup:[], laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } },
+          staan:{ variant:"staan", muziek:"w5_staan",
+            zeg:{ beurt:["Je had kunnen zitten.", "Je staat. Dat is moedig. Het verandert niks.", "Dit is alles wat ik heb. Kijk goed.",
+                "Denk je dat ze het samen doen, als niemand zit?", "Ik hoop dat je gelijk hebt. Ik geloof het niet."],
+              popup:[], laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } }
+        },
+        deck:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3}, lt:["negate","echo"],
+        ae:["fu_water","fu_fire","fu_stone","fu_grass","ae_watercycle","ae_fire6","ae_stonefull","ae_grassx2","ae_draw3","ae_hp3","ae_graf","ae_genade"],
+        keuze:"steen", terug:"rots" }
     ],
-    middenNa:3,
-    fase2:{
-      vijand:"De Raad", sprite:"eerste", levens:14,
-      wit:true, bordLeeg:true, raad:true, ogen:true, jijTrekt:2, aeUitleg:true,
-      praat:[
-        {s:"eerste", naam:"…", kleur:"#f6e9b0", t:"Ze kijkt naar haar eigen bord. Er staat niets meer. Ze knikt, één keer, alsof ze een formulier afvinkt."},
-        {s:"eerste", naam:"De Eerste", kleur:"#f6e9b0", t:"Goed. Ja. Dat kun je."},
-        {s:"eerste", naam:"De Eerste", kleur:"#f6e9b0", t:"Dan moet ik je nu iets laten zien, want anders loop je straks weg met het idee dat je mij verslagen hebt, en dat is niet zo."},
-        {s:"eerste", naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben niet de raad. Ik ben degene die tekent."},
-        {s:null, naam:"…", kleur:"#fffdf2", wit:true, t:"Ze staat op en de kamer gaat niet mee omhoog. De kamer blijft waar hij is en jullie niet."},
-        {s:null, naam:"…", kleur:"#fffdf2", t:"Achter het bureau zat geen muur. Achter het bureau zat de rest."},
-        {s:"seraf_echt", reus:true, naam:"…", kleur:"#fffdf2", t:"Vier soorten weer tegelijk. De ogen van de poort. Het zingen dat nooit ophield. En daarachter nog iets, en daar kijk je niet naar."},
-        {s:"eerste", groot:true, naam:"De Raad", kleur:"#f6e9b0", t:"Dít is de Hemelraad. Eén stoel, en alles wat er omheen gebouwd is om die stoel nooit leeg te laten staan."},
-        {s:null, naam:"…", kleur:"#f6e9b0", t:"⚖ <b>De Raad slaat elke ronde een bladzijde om.</b> Het weer van alle vier de werelden komt langs, één per ronde: 🪨 rotsval, 🌧 regen, 🌋 lava, 🌊 doodtij. En dan weer van voren af aan."},
-        {s:null, naam:"…", kleur:"#f6e9b0", t:"👁 <b>En ze kijkt mee.</b> Elke beurt noemt ze een kaart in je hand die je niet mag spelen."},
-        {s:"eerste", groot:true, naam:"De Raad", kleur:"#f6e9b0", t:"Je bord is weg. Het mijne ook. Pak er twee bij. Ik wil dit eerlijk verliezen als ik het verlies."}
-      ],
-      deck:{water:8, steen:8, gras:7, vuur:7, vital:3, negate:3, master:3, reborn:3},
-      lt:["vital","negate","master"],
-      ae:["ae_hemel","ae_genade","ae_draw3","ae_alziend"],
-      hand:4,
-      zeg:{ beurt:[
-          "Alles wat je onderweg gekregen hebt, is hier ondertekend. Door mij.",
-          "Ik heb dit weer tweehonderd jaar uit elkaar gehouden. Nu doe ik het één keer tegelijk.",
-          "Voel je hoe zwaar het is om alles te zijn? Ik voel het al twee eeuwen.",
-          "Ik hoop dat je wint. Ik speel wel gewoon door. Die twee dingen kunnen tegelijk.",
-          "Er is nooit iemand geweest die zei dat het zo moest. Er was alleen niemand die zei dat het niet hoefde.",
-          "Ik heb je naam al ingevuld. Dat was optimistisch van me.",
-          "Kijk niet naar de stapels. Kijk naar mij. Dat is makkelijker."
+    varianten:{
+      zit:{
+        win:[
+          {s:"eerste_grond", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_einde_zit", t:"De Eerste valt niet om. Het zakt tegen de stapels aan en blijft daar zitten, op de grond."},
+          {s:"eerste_grond", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Goed."},
+          {s:"eerste_grond", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Goed zo."},
+          {s:"eerste_grond", groot:true, naam:"…", kleur:"#f6e9b0", t:"De ogen gaan dicht."}
         ],
-        popup:[
-          "Ik heb de eerste honderd jaar geloofd dat het nodig was. De tweede honderd jaar heb ik geloofd dat het te laat was. Dat tweede is veel comfortabeler.",
-          "Flint heeft hier één keer gezeten, op de onderste trede, met een sigaret die niet aan wilde. Daar denk ik vaker aan dan aan alles wat ik ondertekend heb.",
-          "Het is niet zo dat ik niet kon stoppen. Het is zo dat stoppen betekende dat ik het tweehonderd jaar voor niets had gedaan.",
-          "De vorige zat hier ook zo. Ik heb toen precies dit zitten aanhoren. Ik dacht: dat overkomt mij niet."
+        na:[
+          {s:null, groot:true, bg:5, naam:"…", kleur:"#f6e9b0", mu:"w5_einde_zit", t:"Jij zit. Het bureau ligt voor je. De stempel ligt ernaast."},
+          {s:"papier_vel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Er komt een vel papier binnen. Je leest het. Je zet er een stempel onder."},
+          {s:"papier_vel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Er komt er nog een."},
+          {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"De thee wordt koud. Er komt nieuwe. Die wordt ook koud."},
+          {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Na een tijd komt Seraf binnen en blijft bij de deur staan."},
+          {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Er is er weer een."},
+          {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Met vier."},
+          {s:"papier_vel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"Je pakt een leeg vel. Je schrijft één regel. <i>Toestemming: geen.</i>"},
+          {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"De deur gaat open. Er staat iemand. Stof in het haar. Vier dingen tegelijk."},
+          {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Je staat op."},
+          {s:null, bg:5, naam:"EINDE", kleur:"#f6e9b0", groot:true, t:"Hier. Neem maar."}
+        ]
+      },
+      staan:{
+        win:[
+          {s:"eerste_grond", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_einde_leeg", t:"De Eerste zakt tegen de stapels aan en blijft zitten, op de grond."},
+          {s:"eerste_grond", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan is het aan hen."}
         ],
-        sterf:"TOEGEWEZEN.", sterfKans:0.16,
-        laag:["…O. Ja. Zo voelt dat."],
-        jij:["Kom overeind. Ik wil dit niet zo winnen."] }
+        na:[
+          {s:"papier_vel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", mu:"w5_einde_leeg", t:"Je pakt het bovenste vel van een stapel. Het scheurt makkelijk. Het tweede ook."},
+          {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Je scheurt ze allemaal."},
+          {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Ver weg, in de as, gaat een oven uit."},
+          {s:"schakels", groot:true, bg:5, naam:"…", kleur:"#e6c46a", t:"De laatste schakels worden grijs en vallen uit elkaar."},
+          {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"En dan beweegt er iets. Overal tegelijk."},
+          {s:"rotsbaas_licht", reus:true, bg:1, naam:"…", kleur:"#cfa06a", t:"Aan de rand van het Steenrijk zet Magnus één voet in het groen. Achter hem staan twee broers. Ze zeggen niks, voor het eerst."},
+          {s:"veerman", groot:true, bg:4, naam:"…", kleur:"#d8cfb8", t:"Op een strand drijft een boot. Er zit een skelet op de bank, met een stok."},
+          {s:"veerman_kijk", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Kijk nou."},
+          {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Twee keer per dag."},
+          {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"Diep onder water gaat iets heen en weer, en het luistert, en het hoort voetstappen de andere kant op gaan."},
+          {s:"seraf_zit", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Ergens boven de wolken zit Seraf op de grond. Er komt niemand met een opdracht. Seraf blijft zitten."},
+          {s:"stoel", groot:true, bg:5, naam:"…", kleur:"#f6e9b0", t:"In het kantoor staat een stoel. Er zit niemand op."},
+          {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", mu:"w5_trap", t:"Op de terugweg. Halverwege de trap zit iets kleins en grijs."},
+          {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"En?"},
+          {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Je zegt niks. Nimbus kijkt je een tijdje aan."},
+          {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Hm."},
+          {s:"nimbus", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Ik had het ook gekund, hoor."},
+          {s:"nimbus_recht", bg:5, naam:"…", kleur:"#dfe8f2", t:"Het kroontje gaat recht. Het blijft recht staan."},
+          {s:"rock1_zit", bg:1, naam:"…", kleur:"#cfa06a", mu:"titel", t:"Bruin. Stof. Een paaltje met een bordje waar niks op staat. Op het krukje zit iemand van steen met een kleinere steen op schoot."},
+          {s:"rock1_zit", bg:1, naam:"Rocky", t:"Kees. Kees, kijk."},
+          {s:"rock1", bg:1, naam:"…", t:"Hij staat op en zet Kees heel voorzichtig neer."},
+          {s:"rock1", bg:1, naam:"Rocky", t:"Je bent teruggekomen."},
+          {s:"rock1", bg:1, naam:"Rocky", t:"En? Hoe liep het af?"},
+          {s:"rock1", bg:1, naam:"…", t:"Je zegt niks. Hij kijkt je een tijdje aan."},
+          {s:"rock1", bg:1, naam:"Rocky", t:"…Goed, zie ik."},
+          {s:"rock1_zit", bg:1, naam:"…", t:"Hij gaat weer zitten."},
+          {s:"rock1_zit", bg:1, naam:"Rocky", t:"Kees. Het liep goed af."},
+          {s:null, bg:1, naam:"EINDE", kleur:"#f6e9b0", groot:true, t:"Leeg."}
+        ]
+      }
     },
     win:[
-      {s:null, naam:"…", kleur:"#fffdf2", t:"Het weer valt tegelijk stil. Vier soorten weer die tegelijk ophouden klinkt als één grote ademteug die niemand neemt."},
-      {s:"eerste", groot:true, naam:"…", kleur:"#f6e9b0", t:"De kamer komt terug. Het bureau staat er nog. De stapels ook. Zij staat ernaast en houdt zich vast aan de rugleuning."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"…Zo."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dat is het dan. Ik heb tweehonderd jaar gedacht dat dit een ramp zou zijn. Het is gewoon een dinsdag."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"Ze schuift de stoel naar achteren. Hij schraapt over de vloer. Het is het meest gewone geluid dat je in dagen gehoord hebt."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Hier. Neem maar."},
-      {s:null, naam:"…", kleur:"#f6e9b0", t:"Precies dezelfde zin. Op precies dezelfde plek. Tweehonderd jaar later."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Je krijgt hier niets van mij. Er is hier niets meer te geven — dat is wat er van tweehonderd jaar uitdelen overblijft."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"En dan is er nu één ding dat je moet doen, en het is niet vechten. Dat deel is voorbij."}
-    ],
-    verlies:[
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Nee. Nog niet. Sta op."},
-      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb tweehonderd jaar gewacht op iemand die dit kan. Ik ga niet accepteren dat jij het niet bent."}
+      {s:"eerste_grond", groot:true, naam:"…", kleur:"#f6e9b0", t:"De Eerste zakt tegen de stapels aan en blijft zitten, op de grond."},
+      {s:"eerste_grond", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan is het aan hen."}
     ],
     na:[
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Twee dingen kunnen. Ga zitten, dan loopt alles door zoals het loopt — en je hebt het verdiend, dat meen ik."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Of geef het weg. Alles. De oven uit, de stapels leeg, de vier rijken open. En dan ben je gewoon iemand die een trap af loopt."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik zeg niet welke goed is. Dat heeft de vorige bij mij ook niet gezegd en daar ben ik die nog dankbaar voor.",
-        keuze:[{label:"👑 Ik ga zitten", ga:"troon"}, {label:"🕊 Ik geef het weg", ga:"terug"}]}
+      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Je scheurt de papieren. Ver weg gaat een oven uit."}
     ],
-    troon:[
-      {s:null, bg:5, naam:"…", t:"Je gaat zitten. De stoel past. Dat is het akeligste eraan: hij past meteen."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Dank je."},
-      {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"Ze loopt de kamer uit zonder om te kijken en je hoort haar de trap af gaan, en na een tijdje hoor je haar niet meer."},
-      {s:null, bg:5, naam:"…", t:"Op het bureau ligt een vel dat nog niet af is. Er staat een datum op van vandaag, en een rijk, en er is ruimte voor een naam."},
-      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Ver beneden je gaat de oven weer aan. Je hebt er niets voor hoeven doen. Hij ging gewoon weer aan."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"…Yo."},
-      {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Ik zei toch: ga naar huis, kleine."},
-      {s:null, bg:5, naam:"…", t:"Je tekent het vel. Je weet niet precies wanneer je besloten hebt dat te doen."},
-      {s:null, bg:5, naam:"EINDE", kleur:"#f6e9b0", groot:true, t:"👑 <b>Toegewezen.</b> De stoel staat niet leeg. Dat is altijd het enige geweest dat telde."}
-    ],
-    terug:[
-      {s:null, bg:5, naam:"…", t:"Je gaat niet zitten. Je pakt de bovenste stapel en je scheurt hem doormidden, en dat gaat verrassend makkelijk voor tweehonderd jaar papier."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"…"},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Weet je wat er dan gebeurt? Ik ook niet. Dat is precies waarom ik het nooit gedaan heb."},
-      {s:null, bg:3, naam:"…", kleur:"#ffb03a", t:"Diep beneden je gaat er iets uit dat tweehonderd jaar aan heeft gestaan. Eerst hoor je het niet. Dan hoor je dat je iets niet meer hoort."},
-      {s:"fireguy", bg:3, naam:"…", kleur:"#ff8a4a", t:"Op een krat in de as gaat iemand rechtop zitten die daar al heel lang niet rechtop heeft gezeten."},
-      {s:"cultist_stuk", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"…Hij is uit. Hij is uit. Ik heb er geen formulier voor."},
-      {s:"klinknagel_stuk", groot:true, bg:3, naam:"Klinknagel", kleur:"#c8cedb", t:"De band staat stil. Ik tel niet meer. Er is niks om te tellen en ik vind dat — ik weet niet wat ik dat vind."},
-      {s:"moeder", reus:true, bg:2, naam:"Moeder Natuur", kleur:"#e08fb0", t:"De paden gaan open. Dat duurt even. Ik ben een woud."},
-      {s:"rocky", bg:1, naam:"Brokko", kleur:"#cfa06a", t:"Er staat iemand aan de rand van het Steenrijk die naar buiten kijkt en niet weet of dat mag. Er is niemand meer om het aan te vragen."},
-      {s:"engel", bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"En in een lege gang staat een afgezant zonder opdracht. Voor het eerst hoeft die niemand iets te vertellen. En weet even niet hoe dat moet."},
-      {s:"eerste", groot:true, bg:5, naam:"De Eerste", kleur:"#f6e9b0", t:"Ga je nou echt gewoon de trap af."},
-      {s:null, bg:5, naam:"…", t:"Ja."},
-      {s:null, bg:5, naam:"EINDE", kleur:"#f6e9b0", groot:true, t:"🕊 <b>Weggegeven.</b> Vier rijken, geen afspraken, en een stoel waar niemand meer op zit. Je loopt de trap af met precies niets, en dat is voor het eerst in tweehonderd jaar de bedoeling."}
+    verlies:[
+      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zo."},
+      {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan wacht ik op de volgende. Er komt altijd een volgende."}
     ],
     zegSpr:"eerste",
-    zeg:{ beurt:[
-        "Je speelt met mijn oude deck. Nou ja — jouw deck. Dat is hier hetzelfde.",
-        "Ik heb dit potje al vaker gespeeld. Nooit tegen iemand die zo ver kwam.",
-        "Zeg het maar als je iets wilt vragen. Iedereen vraagt hier hetzelfde en niemand vraagt het hardop.",
-        "Ik heb geen hekel aan je. Ik heb nergens meer een hekel aan, dat gaat er na een eeuw af.",
-        "Vier rijken en jij bent er dwars doorheen gelopen. Ik heb er zeven jaar over gedaan.",
-        "Ik zie precies wat je gaat doen. Dat komt niet door mijn krachten, dat komt omdat ik het zelf ook zou doen.",
-        "Het is niet erg als je verliest. Het is alleen dan wel klaar."
-      ],
-      popup:[
-        "Ik heb elk vel op dit bureau zelf getekend. Er staat geen enkele naam op van iemand die het gevraagd heeft.",
-        "De steen heeft mij ooit een brief gestuurd. Eén. Er stond in dat hij het zo niet bedoeld had. Ik heb hem nooit beantwoord.",
-        "Je bent de vijfde die de trap op is gekomen. De andere vier zijn allemaal gaan zitten. Ik was de eerste, dus dat telt eigenlijk niet.",
-        "Weet je wat ik het meest gemist heb? Dat iemand een keer iets bracht in plaats van kwam halen."
-      ],
-      laag:["…Hm. Ja. Dat had ik moeten zien aankomen, en ik zag het aankomen."],
-      jij:["Bijna. Weet je zeker dat je niet gewoon wilt gaan zitten? Het scheelt zoveel."] },
+    zeg:{ beurt:["Rustig.", "Dat heb ik ook geprobeerd. Lang geleden.", "Je hebt kracht. Je weet nog niet wat je ermee gaat doen.",
+        "Ik zag je al voor je het strand op liep.", "Je denkt dat je het anders zou doen. Dat denkt iedereen die hier staat.", "Neem je tijd."],
+      popup:["Die oven in de as. Daar gaat alles in wat van ons was. Zodat niemand nog weet hoe het was.",
+        "Ik heb nooit zelf iemand gedood. Ik heb alleen nooit toestemming gegeven.",
+        "De vorige die hier binnenkwam wilde ook samen. Seraf heeft het opgelost.",
+        "Hoeveel er voor mij zaten, weet ik niet. Het staat nergens. Dat is met opzet.",
+        "Je lijkt op mij. Dat is geen toeval."],
+      laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{steen:7, vuur:7, gras:7, water:7},
-    spiegelJij:true,
-    levensVij:12,
+    /* Hetzelfde soort deck als jij: zeven van elk element, waarvan de helft gesmeed, en zes lichtkaarten. */
+    deckVij:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3},
+    ltVij:["negate","echo"],
+    aeVij:["fu_water","fu_fire","fu_stone","fu_grass"],
+    levensVij:8, levensJij:10,
     ban:10, begint:1
-  },
+  }
 };
 /* ================= TUTORIAL =================
    1-1 leert je drie dingen en verder niets: de elementcirkel, het dodgen van een effect,
@@ -15437,7 +15968,13 @@ function vrijDecor(){
   const m = S.mode === "commander" && S.match ? S.match : null;
   const sleutel = m ? "c" + m.game : "g";
   if(S.decor && S.decor.sleutel === sleutel) return;
-  const kies = a => a[Math.floor(Math.random() * a.length)];
+  /* Online kiezen beide spelers hetzelfde decor (en dus dezelfde muziek): afgeleid van de
+     gedeelde seed, zonder de spel-RNG aan te raken. */
+  let ds = NET.on ? ((NET.seed ^ (sleutel.charCodeAt(0) * 7919 + (m ? m.game : 0) * 104729)) >>> 0) || 1 : 0;
+  const trek = () => { if(!NET.on) return Math.random();
+    ds = (ds + 0x6D2B79F5) >>> 0; let t = ds; t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const kies = a => a[Math.floor(trek() * a.length)];
   let w = m ? m.decorW : null;
   if(w == null){
     const ws = [...new Set(decorKandidaten().map(id => STORY[id].wereld))];
@@ -15601,10 +16138,10 @@ const VELD = {
            "🔥 De vuurzee komt nu elke <b>tweede</b> ronde. De 🌋 lava blijft."] },
 
   "4-1": { regels:["🌊 <b>Hou het 6 rondes vol.</b> Dan ben je aan de overkant; je hoeft de Zee niet te verslaan.",
-                   "🐟 <b>Vliegende vis</b>: 4 levens, {Kleurloos}, {Volle slag}, {Wijkt} en {Direct}. Drie liggen er al in het graf van de Zee, en ze speelt veel ✦ Zielenoproep.",
+                   "🐟 <b>Vliegende vis</b>: 4 levens, {Kleurloos}, {Volle slag}, {Wijkt} en {Direct}. Er staan er al twee op het veld en er zitten er drie in haar deck. Haar 🟣 Eeuwige Terugkeer haalt er elke beurt één terug uit het graf.",
                    "🛶 Zei je ja tegen de veerman, dan is er elke beurt één kolom dicht (eerst kolom 3). Die schuift elke beurt één op. Daar valt niemand aan."] },
 
-  "4-2": { regels:["🐙 Begin van haar beurt pakt ze twee van jouw creatures. Heeft ze plek, dan neemt ze ze mee (nu van haar); anders knijpt ze: <b>3</b> schade.",
+  "4-2": { regels:["🐙 Begin van jouw beurt wijzen twee armen elk een plek aan jouw kant aan. Staat daar aan het eind van je beurt een creature, dan pakt ze die: heeft ze plek, dan neemt ze die mee (nu van haar), anders knijpt ze: <b>3</b> schade.",
                    "🫧 Onder water {fizzelt} elk 🔥 Vuur-effect, van iedereen. Een 🔥-creature dooft bovendien meteen zodra die het veld raakt."] },
 
   "4-3": { regels:["❄️ <b>Doorglijden.</b> Raakt een creature de speler zelf, dan glijdt die door naar de overkant (zelfde kolom) en hoort daar voortaan bij.",
@@ -15618,32 +16155,44 @@ const VELD = {
                    "🌀 Springtij: eind van elke beurt spoelt alles op het bord naar de overkant en wisselt van eigenaar. Spells blijven liggen.",
                    "Ze begint met een 💧 Water in haar middelste kolom."] },
 
-  "5-1": { regels:["👁 <b>De poort ziet je hand.</b> Begin van jouw beurt wordt er één kaart genoemd die je vast hebt. Die mag je die beurt niet spelen."] },
+  "5-1": { regels:["✦ <b>De toets.</b> Geen aethers. Je bouwt je deck zelf: per element 0 tot 12, lichtkaarten zoveel je wilt (hooguit 4 van een soort), samen 20 tot 40 kaarten.",
+                   "Seraf: <b>12</b> levens, 🟣 Hemelschoon (speelt Seraf een ✦: +1 leven en trek 1) en 🟣 Genade (eens per beurt blijft de eerste creature die zou sterven op 1 staan).",
+                   "Jij begint met <b>8</b> levens."] },
 
-  "5-2": { regels:["💨 Alles wat het Koor als creature neerzet ligt dicht: je ziet alleen dát er iets staat en hoeveel levens het heeft.",
-                   "Het draait pas om als het aanvalt of als jij het aanwijst, en dán gaat het speel-effect alsnog af.",
-                   "⛓ <b>Geen chain.</b> Niemand kan ergens tussenkomen: je speelt alleen in je eigen beurt."] },
+  "5-2": { regels:["🥚 Er ligt een ei op het bord (na 2 beurten van de Verzamelaar komt er een 🕷 Spin uit) en onder kolom 1, 3 en 5 liggen 🐺 wolvenspells.",
+                   "🟣 <b>Eeuwige Terugkeer, zonder keuze.</b> Einde van elke beurt van de Verzamelaar komt er een beest terug uit het graf, welk dan ook. Veel ✦ Zielenoproep in het deck.",
+                   "Jij begint met <b>8</b> levens, de Verzamelaar met <b>9</b>."],
+    fasen:[["🐉 <b>De achterkamer.</b> Nieuw deck: vier stukken en een stapel ✦ Zielenoproep. Hand, bord en graf van de Verzamelaar zijn leeg begonnen; jij trok <b>3</b>.",
+            "🐉 De vier stukken hebben honderden levens en slaan honderden, maar de cirkel werkt gewoon: sterk tegen is een instakill, zwak tegen is immuun. De beurt dat ze binnenkomen slaan ze nog niet.",
+            "🟣 De enige aether is nu Bron van Overvloed: 2 kaarten per beurt, en dat kost 1 leven."]] },
 
-  "5-3": { regels:["👑 Vier tronen van <b>5</b> levens: kolom 1 🪨 rotsval, 2 🌧 regen, 4 🌋 lava, 5 🌊 getij. Allemaal {Muur}.",
-                   "Zolang een troon staat, draait dat weer door. Leg de troon om en dat weer stopt.",
-                   "Elke troon laat de tegenstander aan het eind van diens beurt een kaart trekken.",
-                   "Jij begint met <b>12</b> levens."] },
+  "5-3": { regels:["⛓ <b>Vier levens.</b> Per klap gaat er hooguit <b>1</b> af, hoe hard je ook slaat. De Naad heelt niet en trekt een kaart elke keer dat er een leven af gaat.",
+                   "⛓ Eerste keer geraakt: kolom 1 en 5 gaan dicht, aan allebei de kanten. Tweede keer: kolom 2 en 4. Wat daar staat is uit het spel.",
+                   "⛓ Nog één kolom over: een aanval die de creature tegenover vernietigt slaat door op de speler, <b>1</b> schade. Voor allebei.",
+                   "🟣 Alziend (de Naad ziet je hand) en Oerkracht op 🪨 (+4 levens). Er staan al twee 🪨 blokkers. Jij begint met <b>8</b> levens."] },
 
-  "5-4": { regels:["🕊 <b>Zes vleugels.</b> Op <b>8</b> levens of minder noemt Seraf elke beurt een kaart in je hand die je niet mag spelen.",
-                   "🕊 Op <b>5</b> of minder verlies je aan het begin van elke beurt van Seraf <b>1</b> leven.",
-                   "🜂 Op <b>2</b> of minder krijgt alles wat jij hebt staan <b>1</b> schade aan het eind van elke beurt van Seraf.",
-                   "Jij begint met <b>9</b> levens."] },
+  "5-4": { regels:["🪨 <b>Het gezicht van Magnus.</b> Het plafond valt twee keer zo vaak: twee kruizen per kant, elke beurt. Steen overleeft het. <b>3</b> levens.",
+                   "Jij hebt <b>15</b> levens voor het hele gevecht. Bij elke wissel wordt het veld leeggeveegd, gaat je graf terug je deck in, en houd je je hand en trek je 2."],
+    fasen:[["🌧 <b>Het gezicht van Moeder Natuur.</b> Het regent, altijd: 🔥 Vuur doet niets tegen de tegenstander. 🌹 Rozen in het deck. <b>3</b> levens."],
+           ["🔥 <b>Het gezicht van Flint.</b> Vuurzee elke tweede ronde: alle creatures gaan eraan. 🌋 De grond is lava. <b>3</b> levens."],
+           ["🌊 <b>Het gezicht van de Oceaan.</b> Het getij keert elke ronde: vloed, springtij, eb, springtij. <b>3</b> levens."],
+           ["✦ <b>Seraf.</b> Eén leven. Niets in de hand, niets op het veld. Seraf verdedigt zich niet."]] },
 
-  "5-5": { regels:["🪞 De Eerste heeft geen eigen deck en speelt met een kopie van het jouwe: dezelfde mix, upgrades en ✦ lichtkaarten."],
-    fase2:["Beide borden worden leeggeveegd. Jij trekt <b>2</b> kaarten; De Eerste krijgt een eigen deck en 4 kaarten.",
-           "⚖ Elke ronde ander weer, op volgorde: 🪨 rotsval, 🌧 regen, 🌋 lava, 🌊 doodtij (dan valt niemand aan). Daarna opnieuw.",
-           "👁 Begin van jouw beurt wordt er een kaart in je hand genoemd die je die beurt niet mag spelen."] }
+  "5-5": { regels:["✦ <b>Potje 1 van 3.</b> De Eerste speelt met een deck als het jouwe en de vier fusies: Dieptestroom, Assekern, Bergrug en Wurgranken.",
+                   "Na elk potje gaat alles terug naar het begin. Verlies je in potje 2 of 3, dan begin je opnieuw bij dat potje.",
+                   "De Eerste <b>8</b> levens, jij <b>10</b>."],
+    fasen:[["✦ <b>Potje 2 van 3.</b> Erbij: Getijdenstroom, Verzengende Woede, Onwrikbaar en Woekergroei. De Eerste <b>9</b> levens, jij <b>10</b>."],
+           {zit:["🪑 <b>Je zit.</b> Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade zijn nu van jou, en je hebt 4 levens extra. De Eerste houdt de andere acht.",
+                 "Win je, dan ben jij de nieuwe Eerste."],
+            staan:["🚶 <b>Je staat.</b> De Eerste speelt met alle twaalf: de fusies, de vier elementen, en Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade. <b>10</b> levens tegen jouw <b>10</b>."],
+            standaard:["✦ <b>Potje 3 van 3.</b>"]}] }
 };
 
 /* De veldteksten gebruiken dezelfde trefwoorden als de kaarten. */
 Object.values(VELD).forEach(V => {
   const om = a => (a || []).map(kwHTML);
   V.regels = om(V.regels); if(V.fase2) V.fase2 = om(V.fase2);
+  if(V.fasen) V.fasen = V.fasen.map(f => Array.isArray(f) ? om(f) : Object.fromEntries(Object.entries(f).map(([k, a]) => [k, om(a)])));
   if(V.varianten) Object.keys(V.varianten).forEach(k => V.varianten[k] = om(V.varianten[k]));
 });
 function levelVan(st){
@@ -16071,8 +16620,10 @@ async function storyOpening(){
   clearTimeout(botT);
   if(!S.over){ S.phase = "beurt"; S.botStap = 0; S.ui = {mode:"busy"}; render(); }
 }
-async function startStoryGevecht(id, variant){
+async function startStoryGevecht(id, variant, opts){
   const basis = STORY[id]; if(!basis) return;
+  opts = opts || {};
+  if(!opts.vanafFase) HERSTART = null;
   /* Een level mag varianten hebben: een tak van het praatje kiest er één en die
      wordt over de basisopzet heen gelegd. */
   const L = (variant !== undefined && basis.varianten && basis.varianten[variant])
@@ -16106,6 +16657,7 @@ async function startStoryGevecht(id, variant){
   if(L.grensVij) grensZet(P(1), L.grensVij);
   S.ae = [ (L.aeJij || []).slice(), (L.aeVij || []).slice() ];
   S.aeKeuze = [ L.keuzeJij || null, L.keuzeVij || null ];
+  S.terug = [ L.terugJij || null, L.terugVij || null ];
   P(0).deck = deckMetUpgrades(deckUit(L.deckJij, 0), buit0.vars);
   cheatDeck();
   P(1).deck = deckUit(L.deckVij, 1);
@@ -16121,7 +16673,8 @@ async function startStoryGevecht(id, variant){
   });
   S.lt = [ (L.ltJij || []).slice(), (L.ltVij || []).slice() ];
   if(L.stil) S.story.stil = true;
-  if(L.eieren){ S.story.eieren = true; S.story.eiN = 0; }
+  if(L.eieren){ S.story.eieren = true; S.story.eiN = 0; if(L.eiLeg === false) S.story.eiLeg = false; }
+  if(L.naad){ S.story.naad = true; S.story.dicht = []; S.story.naadHits = 0; naadZet(P(1)); }
   if(L.wolfScript) S.story.wolfScript = true;
   if(L.lavaJij) S.story.lavaJij = true;
   /* --- wereld 4 --- */
@@ -16156,6 +16709,9 @@ async function startStoryGevecht(id, variant){
      staat er gewoon wie het is, in de balken, in het log en in de praatbel. */
   if(L.vechtNaam) S.story.vijandNaam = L.vechtNaam;
   if(L.rotsval){ S.story.rotsAan = true; S.story.rots = null; }
+  if(L.rotsDubbel) S.story.rotsDubbel = true;
+  if(L.regenAltijd){ S.story.regenAan = true; S.story.regenAltijd = true; }
+  if(L.getijLijst) S.story.getijLijst = L.getijLijst.slice();
   if(L.lava){ S.story.lavaAan = true; if(!FAST) lavaVerf(true); }
   if(L.rook){ S.story.rookAan = true; if(!FAST) rookVerf(true); }
   if(L.mist){ S.story.mistAan = true; if(!FAST) rookVerf(true); }
@@ -16208,12 +16764,32 @@ async function startStoryGevecht(id, variant){
   /* Pas nú de kaarten: je hebt eerst geband en gekozen, daarna wordt er geschud en
      getrokken. Anders zou je hand al vastliggen voordat je iets weggooide. */
   if(L.spiegelJij) storySpiegel(L);
+  /* 🔁 Levels met volledige resets onthouden je deck zoals het na de voorbereiding was. */
+  if(L.fases && L.fases.some(F => F.volReset)){
+    S.story.deck0 = P(0).deck.map(c => Object.assign({}, c));
+    S.story.ae0 = (S.ae[0] || []).slice();
+  }
+  /* Opnieuw beginnen in een latere fase (5-5): die fase meteen neerzetten. */
+  if(opts.vanafFase && L.fases && L.fases[opts.vanafFase - 1]){
+    const F = L.fases[opts.vanafFase - 1];
+    S.story.faseI = opts.vanafFase; S.story.fase2Gedaan = true;
+    addLog(`🔁 <em>Je begint opnieuw bij fase ${opts.vanafFase + 1}.</em>`, true);
+    if(F.keuzePraat){
+      const ga = await praatKeuzeAwait(F.keuzePraat, F.keuzeStandaard);
+      await praatLosAwait((F.takken && F.takken[ga]) || []);
+      faseKeuze(F, ga);
+    }
+    faseInstellen(F);
+    HERSTART = null;
+    if(S.story.muziek) AU.zet(S.story.muziek, {hard:true, begin:true});
+  }
   /* 🪞 4-3: zij speelt met jouw krachten. Niet met je deck — alleen met wat je hebt
      meegenomen aan 🟣 aethers, want dáár gaat het gesprek over. */
   if(L.spiegelAe){
     const van = (S.ae[0] || []).slice();
     S.ae[1] = (S.ae[1] || []).concat(van.filter(k => (S.ae[1] || []).indexOf(k) < 0));
     if(S.aeKeuze[0]) S.aeKeuze[1] = S.aeKeuze[0];
+    if(S.terug && S.terug[0]) S.terug[1] = S.terug[0];
     if(van.length) addLog(`🪞 <em>Ze pakt je krachten over:</em> ${van.map(k => "🟣 " + AETHERS[k].name).join(", ")}. Alles wat jij hebt staat nu ook aan de overkant.`, true);
   }
   storyDeel(L);
@@ -16245,6 +16821,7 @@ function storySpiegel(L){
     for(let i=0;i<n;i++) P(1).deck.push({id:++cid, el:"licht", lk:k, owner:1}); });
   S.ae[1] = (S.ae[0] || []).slice();
   if(S.aeKeuze[0]) S.aeKeuze[1] = S.aeKeuze[0];
+  if(S.terug && S.terug[0]) S.terug[1] = S.terug[0];
   shuffle(P(1).deck);
   addLog(`🪞 <em>De tegenstander speelt met jouw deck, jouw krachten en jouw licht.</em> Alles wat je hebt meegenomen staat ook aan de overkant.`, true);
 }
@@ -16488,18 +17065,104 @@ function zegNu(soort){
 }
 /* Een tegenstander die halverwege iets anders wordt. Zijn levens gaan omhoog, hij krijgt een
    nieuw deck, nieuwe krachten en een nieuw bord — en het potje loopt gewoon door. */
+/* ---------- meerdere fases (wereld 5) ---------- */
+let HERSTART = null;              // 5-5: {id, fase} als je in een latere fase verloor
+/* Een praatje met een keuze eronder dat midden in een gevecht staat. Geeft terug welke tak.
+   In de snelle modus (tests) is er niemand om te kiezen: dan de standaard. */
+function praatKeuzeAwait(regels, standaard){
+  return new Promise(res => {
+    const laatste = regels[regels.length - 1] || {};
+    const opties = (laatste.keuze || []).map(k => k.ga);
+    const stand = standaard || opties[0];
+    if(FAST || !opties.length){ res(typeof window !== "undefined" && window.SIMKEUZE ? window.SIMKEUZE : stand); return; }
+    praatLos(regels, null);
+    if(M && M.type === "praat") M.opKeuze = ga => res(opties.includes(ga) ? ga : stand);
+    else res(stand);
+  });
+}
+/* Wat een keuze in een omslag verandert. */
+function faseKeuze(F, ga){
+  const st = S.story; if(!st) return;
+  const k = (F.keuzes && F.keuzes[ga]) || {};
+  st.keuzes = st.keuzes || {};
+  st.keuzes[F.keuzeNaam || "keuze"] = ga;
+  if(k.variant) st.variant = k.variant;         // de winst- en eindteksten horen bij deze tak
+  st.keuzeNu = k;
+  if(k.zeg){ st.zeg = k.zeg; st.zegI = {}; st.popI = {}; st.popOoit = {}; st.zin = null; }
+  if(k.muziek){ st.muziek = k.muziek; }
+}
+/* Een fase die een volledig nieuw potje is: decks, handen, graven en het veld terug naar het
+   begin, levens opnieuw, en de tegenstander krijgt de aethers van die fase. */
+function faseInstellen(F){
+  const st = S.story, k = st.keuzeNu || {};
+  for(const p of [0, 1]){
+    P(p).hand = []; P(p).grave = [];
+    P(p).cols.forEach(c => { c.cre = null; c.spell = null; });
+  }
+  P(0).deck = (st.deck0 || []).map(c => Object.assign({}, c));
+  P(1).deck = deckUit(F.deck || {steen:7, water:7, vuur:7, gras:7}, 1);
+  S.ae[0] = (st.ae0 || S.ae[0] || []).slice();
+  let aeVij = (F.ae || []).slice();
+  /* 🪑 Ga je zitten, dan krijg jij wat er bij de stoel hoort en is De Eerste het kwijt. */
+  if(k.jijAe) k.jijAe.forEach(x => { if(S.ae[0].indexOf(x) < 0) S.ae[0].push(x); });
+  if(k.vijWeg) aeVij = aeVij.filter(x => k.vijWeg.indexOf(x) < 0);
+  S.ae[1] = aeVij;
+  S.lt[1] = (F.lt || []).slice();
+  S.aeKeuze = [st.aeKeuze0 != null ? st.aeKeuze0 : null, F.keuze || null];
+  S.terug = [st.terug0 != null ? st.terug0 : null, F.terug || null];
+  P(0).life = (F.levensJij || st.startLevens[0]) + (k.levensJij || 0);
+  P(1).life = F.levens || 8;
+  S.genade = [-1, -1];
+  S.mulliganGedaan = false; S.aeKeuzeGedaan = false;
+  if(F.vijand) st.vijandNaam = F.vijand;
+  if(F.sprite){ st.zegSpr = F.sprite; st.ptSpr = F.sprite; }
+  if(F.tauntSpr) st.tauntSpr = F.tauntSpr;
+  if(F.zeg && !k.zeg){ st.zeg = F.zeg; st.zegI = {}; st.popI = {}; st.popOoit = {}; st.zin = null; }
+  if(F.muziek && !k.muziek) st.muziek = F.muziek;
+  st.startLevens = [P(0).life, P(1).life];
+  st.middenGedaan = false;
+}
+async function volReset(F){
+  const st = S.story;
+  GEN++;                                    // wat er nog van het vorige potje liep, stopt hier
+  pending = null; busyFlag = false; botPlan = null; clearTimeout(botT);
+  S.stack = []; S.over = null;
+  faseInstellen(F);
+  if(!FAST){ witFlits(); AU.play("thud"); }
+  if(st.muziek) AU.zet(st.muziek, {hard:true, begin:true});
+  addLog(`🔁 <em>Alles gaat terug naar het begin.</em> Nieuwe handen, nieuwe decks, ${pName(1)} op ${P(1).life} levens en jij op ${P(0).life}.`, true);
+  if((S.ae[1] || []).length) addLog(`🟣 ${pName(1)} speelt nu met ${S.ae[1].map(x => AETHERS[x].name).join(", ")}.`, true);
+  S.gTurn = 1; S.phase = "upkeep"; S.trok3 = false;
+  shuffle(P(0).deck); shuffle(P(1).deck);
+  dealHands(1);
+  st.fase2Klaar = true;
+  S.ui = {mode:"busy"}; render();
+  startTurnSequence();
+}
 async function storyFase2(F){
   const st = S.story;
-  st.stil = false;
+  st.stil = false; st.stilTekst = null;
   S.ui = {mode:"busy"}; busyFlag = true; render();
   clearTimeout(botT);
   await praatLosAwait(F.praat || []);
+  /* 🪑 Een omslag mag een keuze bevatten (5-5: de stoel). Die tak loopt dan nog even door. */
+  if(F.keuzePraat && !S.over){
+    const ga = await praatKeuzeAwait(F.keuzePraat, F.keuzeStandaard);
+    await praatLosAwait((F.takken && F.takken[ga]) || []);
+    faseKeuze(F, ga);
+  }
   busyFlag = false;
+  /* 🔁 Een volledig nieuw potje (5-5): alles terug naar het begin, voor allebei. */
+  if(F.volReset){ st.omslagBezig = false; return volReset(F); }
   P(1).life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0));
   st.omslagBezig = false;
   P(1).deck = deckUit(F.deck || {steen:20}, 1);
   P(1).hand = []; P(1).grave = [];
   P(1).cols.forEach(c => { c.cre = null; c.spell = null; });
+  if(F.levensJij) P(0).life = F.levensJij;
+  if(F.weerUit) weerUit();
+  if(F.hz && !FAST){ horizonWeg(); horizonVerf(st.id, F.hz); }
+  if(F.stil){ st.stil = true; st.stilTekst = F.stilTekst || null; }
   if(F.wit && !FAST){
     witFlits(); AU.play("thud");
     const app = document.getElementById("app");
@@ -16515,8 +17178,16 @@ async function storyFase2(F){
       if(sl.cre){ P(sl.cre.card.owner).grave.push(sl.cre.card); sl.cre = null; weg++; }
       if(sl.spell){ P(sl.spell.card.owner).grave.push(sl.spell.card); sl.spell = null; weg++; }
     }
-    if(weg) addLog(`🔥 Alles wat op tafel stond verbrandt — ${weg} kaart${weg===1?"":"en"} naar het graf.`, true);
+    if(weg) addLog(F.bordLeegTekst ? F.bordLeegTekst.replace("{n}", weg) : `🔥 Alles wat op tafel stond verbrandt — ${weg} kaart${weg===1?"":"en"} naar het graf.`, true);
     render();
+  }
+  /* 5-4: bij elke wissel gaat jouw graf terug je deck in. Anders is je deck op voordat
+     het vierde gezicht er is. */
+  if(F.grafTerug && P(0).grave.length){
+    const n = P(0).grave.length;
+    P(0).deck.push(...P(0).grave.splice(0).filter(c => !c.token && !(EL[c.el] && EL[c.el].token && !EL[c.el].kaart)));
+    shuffle(P(0).deck);
+    addLog(`♻ Je graf gaat terug je deck in: ${n} kaart${n === 1 ? "" : "en"}, geschud.`, true);
   }
   /* Een omslag mag zijn eigen muziek meenemen (3-6: het wit). Anders springt het gevecht
      na het praatje terug naar het nummer van de eerste fase. */
@@ -16525,6 +17196,11 @@ async function storyFase2(F){
   if(F.geenAanval === false) st.geenAanval = false;
   if(F.lava){ st.lavaAan = true; if(!FAST) lavaVerf(true); }
   if(F.regen){ st.regenAan = true; st.regen = false; }
+  if(F.regenAltijd){ st.regenAan = true; st.regenAltijd = true; st.regen = false; regenBij(); }
+  if(F.rotsval){ st.rotsAan = true; st.rots = null; }
+  if(F.rotsDubbel) st.rotsDubbel = true;
+  if(F.vuurzee) st.vuurzee = true;
+  if(F.getij){ st.getijAan = true; st.getij = null; st.getijLijst = F.getijLijst || null; getijBij(); }
   ["raad","ogen","tronen","ovenAan","rookAan","mistAan","geenChain","drukAan","struikSpells","vuurzeeSnel"].forEach(k => { if(F[k]) st[k] = true; });
   if(F.hitteAan){ st.hitteAan = true; addLog(`🔥 <em>Alle hitte die je hebt laten oplopen, staat nu in zijn vuist.</em> Elke aanval van hem doet <b>+${hitteBonus(1)}</b>.`, true); }
   if(F.vijand){ st.vijandNaam = F.vijand; }
@@ -16536,12 +17212,14 @@ async function storyFase2(F){
   if(F.pakAethers){
     (S.ae[0] || []).forEach(k => { if(AETHERS[k] && S.ae[1].indexOf(k) < 0) S.ae[1].push(k); });
     if(S.aeKeuze[0]) S.aeKeuze[1] = S.aeKeuze[0];
+    if(S.terug && S.terug[0]) S.terug[1] = S.terug[0];
     const mee = (S.ae[0] || []).filter(k => AETHERS[k]);
     addLog(mee.length
       ? `🟣 <em>Hij pakt jouw krachten over:</em> ${mee.map(k => AETHERS[k].name).join(" en ")}. Vanaf nu speelt hij ze ook.`
       : `🟣 Hij kijkt naar je lege handen. "Niks meegenomen? Dat scheelt mij weer."`, true);
   }
   if(F.keuze) S.aeKeuze[1] = F.keuze;
+  if(F.terug){ if(!S.terug) S.terug = [null, null]; S.terug[1] = F.terug; }
   S.lt[1] = (F.lt || []).slice();
   st.startLevens = [st.startLevens ? st.startLevens[0] : P(0).life, P(1).life];
   if(F.zwaard){ zwaardSlag(); await sleep(FAST ? 0 : 520); }
@@ -16733,6 +17411,12 @@ function buitVoor(id){
    mag er drie bij of drie af. Wat je er ergens afhaalt moet je er elders bij doen: het deck
    houdt altijd precies dezelfde grootte. De meter onderaan zegt of het klopt. */
 const MIX_SPEEL = 3;                      // hoeveel je per element omhoog of omlaag mag
+/* ✦ 5-1 · De toets: je bouwt je deck helemaal zelf. Per element 0 tot 12, samen 20 tot 40,
+   lichtkaarten zonder slot-limiet (hooguit 4 per kaart), en geen aethers. */
+const VRIJ_EL_MAX = 12, VRIJ_MIN = 20, VRIJ_MAX = 40, VRIJ_LT_PER = 4;
+const mixGrens = (u, el) => (u && u.vrij) ? [0, VRIJ_EL_MAX] : [u.basis[el] - MIX_SPEEL, u.basis[el] + MIX_SPEEL];
+const vrijTotaal = u => mixTotaal(u.mix) + ltGebruikt(u.ltN || {});
+const vrijOk = u => { const n = vrijTotaal(u); return n >= VRIJ_MIN && n <= VRIJ_MAX; };
 const UPG_VAN = {steen:"rots", vuur:"plasma", gras:"roos", water:"ijs"};
 const UPG_GETAL = [5, 3, 2, 0];           // elk getal precies één keer te vergeven
 /* Gebruikt dit level het gewone vier-elementendeck? Alleen dan heeft schuiven zin —
@@ -16877,6 +17561,14 @@ function voorLoadHTML(u0){
   if(lt.length){
     const ltN = u0.ltN || {}, ltMax = u0.ltMax || 0, op = ltGebruikt(ltN);
     const sel = lt.filter(k => (ltN[k] || 0) > 0);
+    if(u0.vrij){
+      const vk = sel.map(k => lkHTML(k, true, {kl:"chosen" + (k === o.lt ? " opdracht" : ""), badge:`${k === o.lt ? halfSter("r", ltN[k] >= 3) + " " : ""}${ltN[k]}×`, attr:`data-act="libopen" data-w="lt" title="${LIGHTS[k].name}"`})).join("")
+        + `<div class="lk leeg" data-act="libopen" data-w="lt" title="Kies lichtkaarten"><span>+</span></div>`;
+      out += `<div class="lsec licht"><div class="lkop">✦ Licht <span>${op} kaart${op === 1 ? "" : "en"} · zoveel als je wilt, hooguit ${VRIJ_LT_PER} per soort</span></div>
+        <div class="lrij">${vk}</div>
+        <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button></div>`;
+      return opdrachtBalk(u0) + `<div class="lload">${out}</div>`;
+    }
     const vakken = sel.map(k => lkHTML(k, true, {kl:"chosen" + (k === o.lt ? " opdracht" : ""), badge:`${k === o.lt ? halfSter("r", ltN[k] >= 3) + " " : ""}${ltN[k]}×`, attr:`data-act="libopen" data-w="lt" title="${LIGHTS[k].name}"`})).join("")
       + (op < ltMax ? `<div class="lk leeg" data-act="libopen" data-w="lt" title="Kies lichtkaarten"><span>+</span><small>nog ${ltMax - op}</small></div>` : "");
     out += `<div class="lsec licht"><div class="lkop">✦ Licht <span>${op} van ${ltMax} kopieën</span></div>
@@ -16913,13 +17605,14 @@ function libHTML(){
   } else {
     const keys = Object.keys(LIGHTS).filter(k => !LIGHTS[k].verhaal || bz.lt.has(k) || (u && (u.lichten || []).indexOf(k) >= 0));
     const ltN = u ? (u.ltN || {}) : {}, op = ltGebruikt(ltN), max = u ? (u.ltMax || 0) : 0;
-    if(u){ kop = "✦ Kies je lichtkaarten"; sub = `${op} van ${max} kopieën vergeven. Per kaart 1, 2 of 3.`; }
+    const per = u ? (u.ltPer || 3) : 3;
+    if(u){ kop = "✦ Kies je lichtkaarten"; sub = u.vrij ? `${op} gekozen. Zoveel als je wilt, hooguit ${per} per kaart.` : `${op} van ${max} kopieën vergeven. Per kaart 1, 2 of 3.`; }
     items = keys.map(k => {
       const vrij = u ? (u.lichten || []).indexOf(k) >= 0 : (alles || bz.lt.has(k));
       const n = ltN[k] || 0;
       const knoppen = u && vrij ? `<div class="ltn"><span class="ltnknop${n <= 0 ? " uit" : ""}" data-act="voorltn" data-k="${k}" data-d="-1">&minus;</span>
           <span class="ltnaantal">${n}&times;</span>
-          <span class="ltnknop${(n >= 3 || op >= max) ? " uit" : ""}" data-act="voorltn" data-k="${k}" data-d="1">+</span></div>` : "";
+          <span class="ltnknop${(n >= per || op >= max) ? " uit" : ""}" data-act="voorltn" data-k="${k}" data-d="1">+</span></div>` : "";
       const attr = u && vrij ? `data-act="voorltn" data-k="${k}" data-d="1"` : "";
       const opd = u && u.opdracht && u.opdracht.lt === k;
       return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}">${lkHTML(k, true, {kl:(n ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("r", n >= 3) + " " : "") + (n ? n + "×" : (opd ? "3× nodig" : ""))})}
@@ -16946,7 +17639,7 @@ function voorBtnTxt(u){
                     .map(el => `${upgEcht(u.upg, u.mix, el)}× ${VAR[UPG_VAN[el]].icon}`);
     if(op.length) d.push(op.join(" "));
   }
-  if(!voorKlaar(u)) return "Eerst in balans brengen";
+  if(!voorKlaar(u)) return u.vrij ? (vrijTotaal(u) < VRIJ_MIN ? `Minstens ${VRIJ_MIN} kaarten` : `Hooguit ${VRIJ_MAX} kaarten`) : "Eerst in balans brengen";
   return d.length ? "Beginnen · " + d.join(" · ") : "Beginnen";
 }
 /* Wat het voorbereidingsscherm teruggeeft: je aethers, je lichtkaarten met hun aantallen,
@@ -16958,15 +17651,17 @@ function voorKeus(u){
           ltN: Object.assign({}, u.ltN || {})};
 }
 /* Uit balans? Dan gaat de knop niet af — ook niet met de spatiebalk. */
-const voorKlaar = u => !u || !u.basis || mixSaldo(u.mix, u.basis) === 0;
+const voorKlaar = u => !u || !u.basis || (u.vrij ? vrijOk(u) : mixSaldo(u.mix, u.basis) === 0);
 const ltBezit = () => (Array.isArray(SET.story.lichten) ? SET.story.lichten : []).filter(k => LIGHTS[k]);
 async function storyVoorbereiding(L, id){
   const buit = buitVoor(id || (S.story && S.story.id));
-  const keus = L.geenAether ? [] : buit.ae.slice();
+  const vrijD = !!L.vrijDeck;
+  const keus = (L.geenAether || vrijD) ? [] : buit.ae.slice();
   const lkeus = L.geenAether ? [] : buit.lt.slice();
-  const ltMax = L.ltMax || buit.ltMax || 0;
+  const ltMax = vrijD ? 999 : (L.ltMax || buit.ltMax || 0);
+  const ltPer = vrijD ? VRIJ_LT_PER : 3;
   const aeMax = L.aeMax || buit.aeMax || 1;
-  const basis = mixBasis(L);
+  const basis = vrijD ? {water:0, steen:0, vuur:0, gras:0} : mixBasis(L);
   /* ★ De opdracht voor ster 1: alleen wat je echt vrij hebt, en alleen als er iets te kiezen valt. */
   const trek = a => a[Math.floor(Math.random() * a.length)];
   S.story.opdracht = {ae:keus.length >= 2 ? trek(keus) : null,
@@ -16977,7 +17672,8 @@ async function storyVoorbereiding(L, id){
      niet vrij hebt, een lichtkaart die je niet bezit) valt er vanzelf uit. */
   const vrij = buit.upg.slice();
   const mix = {}, upg = {};
-  if(basis){
+  if(basis && vrijD){ ORDER.forEach(el => mix[el] = 0); }
+  else if(basis){
     const oud = (SET.story && SET.story.mix) || {};
     ORDER.forEach(el => {
       const v = +oud[el];
@@ -16991,13 +17687,13 @@ async function storyVoorbereiding(L, id){
   }
   const ltN = {};
   const oudL = (SET.story && SET.story.ltN) || {};
-  lkeus.forEach(k => { const v = Math.min(3, Math.max(0, +oudL[k] || 0));
+  if(!vrijD) lkeus.forEach(k => { const v = Math.min(3, Math.max(0, +oudL[k] || 0));
     if(v > 0 && ltGebruikt(ltN) + v <= ltMax) ltN[k] = v; });
   /* Je aethers van de vorige keer staan alvast klaar. */
   const oudA = (SET.story && Array.isArray(SET.story.aeKeus)) ? SET.story.aeKeus : [];
   const aeSel0 = oudA.map(k => keus.indexOf(k)).filter(i => i >= 0).slice(0, aeMax);
   const res = await waitUI("banpick", {p:0, cards:[], sel:[], opdracht:S.story.opdracht,
-    aethers:keus, aeSel:aeSel0, aeMax, lichten:lkeus, ltSel:[], ltMax, ltN,
+    aethers:keus, aeSel:aeSel0, aeMax, lichten:lkeus, ltSel:[], ltMax, ltN, ltPer, vrij:vrijD,
     basis, mix, upg, upgVrij:vrij});
   const weg = (res && Array.isArray(res.ban)) ? res.ban : (Array.isArray(res) ? res : []);
   const gekozen = res && Array.isArray(res.ae) ? res.ae.filter(k => AETHERS[k]).slice(0, aeMax)
@@ -17007,16 +17703,25 @@ async function storyVoorbereiding(L, id){
      opgebouwd uit wat je hebt ingesteld, mét de upgrades die je in de slots hebt gezet. */
   if(basis){
     const kies = (res && res.mix) || mix, gekozenU = (res && res.upg) || upg;
+    if(vrijD){
+      ORDER.forEach(el => { const v = +kies[el]; kies[el] = Number.isFinite(v) ? Math.max(0, Math.min(VRIJ_EL_MAX, v)) : 0; });
+      const nL = res && res.ltN ? ltGebruikt(res.ltN) : 0;
+      /* Klopt het niet (de bot, of iets vreemds), dan gewoon zes van elk. */
+      if(mixTotaal(kies) + nL < VRIJ_MIN || mixTotaal(kies) + nL > VRIJ_MAX) ORDER.forEach(el => kies[el] = 6);
+    } else {
     ORDER.forEach(el => { const v = +kies[el];
       kies[el] = (Number.isFinite(v) && v >= basis[el] - MIX_SPEEL && v <= basis[el] + MIX_SPEEL)
                ? v : basis[el]; });
     if(mixSaldo(kies, basis) !== 0) ORDER.forEach(el => kies[el] = basis[el]);
+    }
     const vars = upgVars(gekozenU, kies);
     P(0).deck = deckMetUpgrades(deckUit(kies, 0), vars);
     S.story.mix = Object.assign({}, kies);
     S.story.upg = Object.assign({}, gekozenU);
-    SET.story.mix = Object.assign({}, kies);
-    SET.story.upg = Object.assign({}, gekozenU);
+    if(!vrijD){                                   // de toets telt niet als je vaste loadout
+      SET.story.mix = Object.assign({}, kies);
+      SET.story.upg = Object.assign({}, gekozenU);
+    }
     const anders = ORDER.filter(el => kies[el] !== basis[el])
       .map(el => `${icon(el)} ${kies[el]}`).join(" · ");
     addLog(`🎴 Je deck: ${mixTotaal(kies)} kaarten${anders ? " — " + anders : " (gelijk verdeeld)"}.`, true);
@@ -17034,19 +17739,23 @@ async function storyVoorbereiding(L, id){
      tot je slots op zijn. */
   const gekozenL = (res && res.ltN && typeof res.ltN === "object") ? res.ltN : ltN;
   const echteL = {};
-  lkeus.forEach(k => { const v = Math.min(3, Math.max(0, +gekozenL[k] || 0));
+  lkeus.forEach(k => { const v = Math.min(ltPer, Math.max(0, +gekozenL[k] || 0));
     if(v > 0 && ltGebruikt(echteL) + v <= ltMax) echteL[k] = v; });
+  /* De toets: alles bij elkaar hooguit 40. Te veel licht? Dan gaat er licht af. */
+  if(vrijD && basis){ const el = mixTotaal(S.story.mix || {});
+    let ks = Object.keys(echteL);
+    while(ks.length && el + ltGebruikt(echteL) > VRIJ_MAX){ const k = ks[ks.length - 1]; echteL[k]--; if(!echteL[k]){ delete echteL[k]; ks = Object.keys(echteL); } } }
   const ltKeys = Object.keys(echteL);
   if(ltKeys.length){
     S.lt[0] = ltKeys.slice();
     S.ltN = Object.assign({}, echteL);
-    SET.story.ltN = Object.assign({}, echteL);
+    if(!vrijD) SET.story.ltN = Object.assign({}, echteL);
     ltKeys.forEach(k => {
       for(let i=0;i<echteL[k];i++) P(0).deck.push({id:++cid, el:"licht", lk:k, owner:0});
       addLog(`✦ Je schudt ${echteL[k]}× <em>${LIGHTS[k].name}</em> door je deck.`, true);
     });
     shuffle(P(0).deck);
-  } else if(lkeus.length){ S.lt[0] = []; S.ltN = {}; SET.story.ltN = {}; }
+  } else if(lkeus.length){ S.lt[0] = []; S.ltN = {}; if(!vrijD) SET.story.ltN = {}; }
   saveSet();
   render();
 }
@@ -17094,6 +17803,7 @@ async function storyEindeBeurt(){
   }
   if(!L || !L.midden || S.story.middenGedaan) return;
   if(S.tp !== 1 || S.turnNo[1] < (L.middenNa || 1)) return;
+  if(L.middenLevens != null && (P(1).life > L.middenLevens || (S.story.faseI || 0) > 0)) return;   // 5-1: pas op de helft
   S.story.middenGedaan = true;
   await praatAwait(S.story.id, "midden");
   if(L.middenAeVij){
@@ -18084,7 +18794,7 @@ function render(){
     + (S.story && S.story.vuurzee ? (() => { const per = S.story.vuurzeeSnel ? 4 : 6, g = S.gTurn;
         const volgende = Math.ceil(g / per) * per, rondes = Math.ceil((volgende - g + 1) / 2);
         return `<div class="lavameter">🔥 vuurzee ${rondes <= 1 ? "<b>eind van deze ronde</b>" : `over <b>${rondes}</b> rondes`}</div>`; })() : "")
-    + (S.story && S.story.inkt ? `<div class="rotsmeter">🐙 pakt 2 van jouw creatures<br>begin van haar beurt</div>` : "")
+    + (S.story && S.story.inkt ? `<div class="rotsmeter">🐙 twee armen wijzen plekken aan<br>eind van je beurt: wat daar staat is van haar</div>` : "")
     + (S.story && S.story.geenVuur ? `<div class="rotsmeter">🫧 onder water: 🔥 fizzelt</div>` : "")
     + (S.story && S.story.ijsvlakte ? `<div class="rotsmeter">❄️ glad: raak je de speler, dan glij je door</div>` : "")
     + (S.story && S.story.sluisAan && S.story.sluis != null
@@ -18348,7 +19058,7 @@ document.addEventListener("click", e => {
       const nu = ui.ltN[k] || 0, max = ui.ltMax || 0;
       let volgend = nu + d;
       if(volgend < 0) volgend = 0;
-      if(volgend > 3) volgend = 3;
+      if(volgend > (ui.ltPer || 3)) volgend = ui.ltPer || 3;
       /* Je budget is het aantal kopieën, niet het aantal kaarten: drie van één kaart kost
          net zo veel als drie verschillende. */
       if(d > 0 && ltGebruikt(ui.ltN) - nu + volgend > max) return;
@@ -18360,8 +19070,8 @@ document.addEventListener("click", e => {
   }
   if(act === "voormix"){
     if(S.ui.mode === "banpick" && !isBot(S.ui.p) && S.ui.basis){
-      const el = t.dataset.el, v = +t.dataset.v, b = S.ui.basis[el];
-      if(v >= b - MIX_SPEEL && v <= b + MIX_SPEEL) S.ui.mix[el] = v;
+      const el = t.dataset.el, v = +t.dataset.v, [lo, hi] = mixGrens(S.ui, el);
+      if(v >= lo && v <= hi) S.ui.mix[el] = v;
       render();
     }
     return;
@@ -18647,23 +19357,36 @@ const startBtnFor = k => k === "commander" ? "cmdpvp" : "startpvp";
 const kindLabel = k => k === "commander" ? "🟣 Commander · best of 3" : "⚜️ Basis · één potje";
 function liveSync(){ liveSend({t:"sync", seed:NET.seed, kind:NET.kind, log:NET.log, chat:LIVE.chat}); }
 let applyingRemote = false;
+/* Elke volledige herbouw (sync) krijgt een nieuw nummer. Een toepas-lus of replay die nog van
+   vóór die herbouw liep, merkt dat en stopt, in plaats van oude zetten op het nieuwe potje te
+   zetten. Zo liepen twee spelers na een sync soms toch uit elkaar. */
+let NETGEN = 0, REPLAY_LOOPT = false;
 async function applyRemote(acts){
+  /* Loopt er nog een herbouw, dan eerst die afwachten. */
+  for(let i = 0; REPLAY_LOOPT && i < 500; i++) await new Promise(r => setTimeout(r, 20));
+  const g = NETGEN;
   applyingRemote = true;
   try{
     for(const a of acts){
       const w = await waitFor(needsPending(a) ? "input" : "idle");
+      if(g !== NETGEN) return;
       if(w === "timeout"){ liveSend({t:"need"}); break; }
       NET.log.push(a);
       runAction(a);
     }
     await settleAll();
-  } finally { applyingRemote = false; render(); }
+  } finally { if(g === NETGEN){ applyingRemote = false; render(); } }
 }
 async function onLiveData(m){
   if(!m || !m.t) return;
+  if(!(NET.on && NET.chan === "live")) return;      // al weg uit het online potje: niets meer toepassen
   if(m.t === "hello"){
-    if(m.len > NET.log.length) liveSend({t:"need"});
-    else if(m.len < NET.log.length) liveSync();
+    /* Zelfde potje? Dan moeten seed én lengte kloppen. Anders wint de langste zettenlijst,
+       en bij gelijke lengte de host. Zo spelen de twee nooit langs elkaar heen. */
+    if(m.seed !== NET.seed || m.len !== NET.log.length){
+      const ikWin = NET.log.length > m.len || (NET.log.length === m.len && LIVE.role === "host");
+      if(ikWin) liveSync(); else liveSend({t:"need"});
+    }
     return;
   }
   if(m.t === "need"){ liveSync(); return; }
@@ -18820,6 +19543,15 @@ async function netRestart(){
   if(!NET.on || NET.seat < 0) return;
   NET.seed = (Date.now() ^ Math.floor(Math.random()*1e9)) >>> 0;
   NET.log = [{t:"b", b: startBtnFor(NET.kind)}];
+  if(NET.chan === "live"){
+    /* Live: één kant kiest de nieuwe seed en stuurt hem mee; allebei spelen dan exact
+       hetzelfde nieuwe potje. (Vroeger koos elke kant zijn eigen seed: twee andere potjes.) */
+    NET.buf = []; M = null;
+    liveMsg("nieuwe partij gestart", true);
+    liveSync();
+    await replay(NET.seed, NET.log);
+    render(); return;
+  }
   NET.buf = []; NET.status = "nieuwe partij opzetten…"; render();
   const ok = await netPublish();
   if(ok) await replay(NET.seed, NET.log);
@@ -18901,18 +19633,26 @@ async function settleAll(max){
   return "timeout";
 }
 async function replay(seed, log){
+  const g = ++NETGEN;
+  applyingRemote = false; REPLAY_LOOPT = true;
+  /* Eerst opruimen wat een eerder (verhaal)gevecht achterliet: decor, horizon, muziek.
+     newGame() slaat dat over zolang FAST aan staat. */
+  try{ if(S) S.story = null; FAST = false; partijWeg(); horizonWeg(); storySkin(0);
+       document.body.classList.remove("praatzwart", "praatlicht");
+       if(M && ["story","praat","lib","winkel","kaart","level","restart"].includes(M.type)) M = null; }catch(e){}
   FAST = true;
   try{
     srand(seed); newGame(true);
     S.set.handoff = false; S.vsBot = false;   // online/replay kent geen scherm-doorgeven
     for(const a of log){
       const w = await waitFor(needsPending(a) ? "input" : "idle");
+      if(g !== NETGEN) return;          // er is intussen een nieuwere herbouw begonnen
       if(w === "timeout") break;
       runAction(a);
     }
     await settleAll();
-  } finally { FAST = false; }
-  render();
+  } finally { if(g === NETGEN){ FAST = false; REPLAY_LOOPT = false; } }
+  if(g === NETGEN) render();
 }
 /* --- staat publiceren als nieuwe versie van deze pagina --- */
 let PAGE_SCRIPT = "";
@@ -19059,6 +19799,7 @@ function gevechtOpnieuw(){
   if(S.story && S.story.id && STORY[S.story.id]){
     const id = S.story.id, variant = S.story.variant;
     M = null; S.over = null;
+    if(HERSTART && HERSTART.id === id){ startStoryGevecht(id, undefined, {vanafFase:HERSTART.fase}); return; }
     startStoryGevecht(id, variant);
     return;
   }
@@ -19098,6 +19839,8 @@ function act(a){
 }
 function onBtn(btn, el, fromAction){
   const u = S.ui;
+  /* Online is "opnieuw" geen zet in het potje maar een nieuwe partij voor allebei. */
+  if(!fromAction && btn === "newgame" && NET.on){ M = null; netRestart(); return; }
   if(!fromAction && GAME_BTNS.includes(btn)){
     if(btn === "banconfirm" || btn === "draftconfirm") return;
     return act({t:"b", b:btn});
@@ -19107,7 +19850,7 @@ function onBtn(btn, el, fromAction){
       if(u.mode==="start"){
         S.vsBot = (btn === "startbot" || btn === "cmdbot");
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
-        addLog(NET.on ? "Online partij — jij bent <em>" + pName(NET.seat) + "</em>."
+        addLog(NET.on ? "Online partij: jij bent <em>Speler " + (NET.seat + 1) + "</em>."
           : (S.vsBot ? "Je speelt tegen <em>de Bot 🤖</em>. Veel succes!" : "Hotseat: twee spelers op één scherm."), true);
         MUT++;
         if(btn.indexOf("cmd") === 0){
@@ -19132,10 +19875,15 @@ function onBtn(btn, el, fromAction){
       if(!st) break;
       NET.kind = st.kind || "classic";
       if(st.role === "host"){
-        NET.on = true; NET.chan = "live"; NET.seat = 0; NET.log = []; NET.buf = [];
+        /* Terug als host: meteen een vers potje klaarzetten. Zit je vriend nog in het oude
+           (langere zettenlijst), dan neemt de begroeting dat potje over. */
+        NET.on = true; NET.chan = "live"; NET.seat = 0; NET.buf = [];
+        NET.seed = (Date.now() ^ Math.floor(Math.random()*1e9)) >>> 0;
+        NET.log = [{t:"b", b: startBtnFor(NET.kind)}]; NET.seats = ["host", "guest"];
         LIVE.role = "host"; LIVE.code = st.code; LIVE.joined = false; LIVE.chat = [];
+        LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0;
         S.vsBot = false; S.set.handoff = false;
-        openPeer(); render();
+        replay(NET.seed, NET.log).then(() => { openPeer(); render(); });
       } else liveJoin(st.code);
       break;
     }
@@ -19160,16 +19908,17 @@ function onBtn(btn, el, fromAction){
       break;
     case "mute": AU.stil(!SET.mute); render(); break;
     case "praatskip": praatSkip(); break;
-    case "aeuitlegok": if(u.mode==="aeuitleg") feed(true); break;
-    case "varuitlegok": if(u.mode==="varuitleg") feed(true); break;
+    case "aeuitlegok": if(u.mode==="aeuitleg") act({t:"f", v:true}); break;
+    case "varuitlegok": if(u.mode==="varuitleg") act({t:"f", v:true}); break;
     case "handoffok": if(u.mode==="handoff") feed(true); break;
     case "handoffdirect": MUT++; S.holder = S.actor; render(); break;
     case "tobattle": case "endbattle": case "endturn":
       if((u.mode==="main"||u.mode==="battle") && !S.over) advancePhase(btn); break;
     case "pass": if(u.mode==="priority" && !isBot(u.p)){ if(u.p === 0 && !tutMag("pass")) break; feed("pass"); } break;
     case "cancel": if(u.mode==="slot" && u.cancellable && !isBot(u.p)) feed("cancel"); break;
-    case "mullhouden": if(u.mode==="mulligan" && !isBot(u.p)) feed("houden"); break;
-    case "mullopnieuw": if(u.mode==="mulligan" && !isBot(u.p) && P(u.p).life > 1) feed("opnieuw"); break;
+    /* Via act(), zodat de keuze online ook bij de ander aankomt (anders loopt het potje uiteen). */
+    case "mullhouden": if(u.mode==="mulligan" && !isBot(u.p)) act({t:"f", v:"houden"}); break;
+    case "mullopnieuw": if(u.mode==="mulligan" && !isBot(u.p) && P(u.p).life > 1) act({t:"f", v:"opnieuw"}); break;
     case "skip": if(u.mode==="choice" && u.optional && !isBot(u.p)){ if(u.p === 0 && !tutMag("pass")) break; feed(null); } break;
     case "asCre": if(u.mode==="pickmode" && u.creOk && !isBot(u.p)) feed("cre"); break;
     case "asSpell": if(u.mode==="pickmode" && u.spOk && !isBot(u.p)) feed("spell"); break;
@@ -19208,7 +19957,8 @@ function onBtn(btn, el, fromAction){
       break;
     case "leavegame": M = null; if(NET.chan === "live") liveLeave(); else netLeave(); break;
     case "askLeaveLive": M = {type:"menu", confirm:"leave"}; render(); break;
-    case "tomain": M = null; NET.on = false; NET.seat = -1; NET.log = []; NET.buf = []; newGame(); break;
+    case "tomain": if(NET.on && NET.chan === "live"){ M = null; liveLeave(); break; }
+      M = null; NET.on = false; NET.seat = -1; NET.log = []; NET.buf = []; newGame(); break;
     case "help": M = {type:"help"}; render(); break;
     case "tutorial": M = {type:"tutorial", step:0, deck:(el && el.dataset.deck) || (S.mode==="commander" ? "commander" : "classic")}; render(); break;
     case "tutnext": if(M && M.type==="tutorial" && M.step < TUTS[M.deck].length-1){ M.step++; render(); } break;
@@ -19256,6 +20006,10 @@ function onBtn(btn, el, fromAction){
     case "storykaart": M = {type:"story"}; render(); break;
     case "praatkeus": {
       const ga = el && el.dataset.ga;
+      /* Een keuze midden in een gevecht (de stoel): die gaat terug naar wie erom vroeg. */
+      if(ga && M && M.type === "praat" && M.opKeuze){
+        const cb = M.opKeuze; clearInterval(PRAAT); PRAAT = null; M = null; render(); cb(ga); break;
+      }
       if(ga) praatGa(ga, el.dataset.tel || null);
       break;
     }
@@ -19282,6 +20036,7 @@ function onBtn(btn, el, fromAction){
       if(!id) break;
       /* Zat er een keuze in het praatje, dan begin je weer bij het begin daarvan —
          anders zou je vastzitten aan een tak die je niet meer kunt kiezen. */
+      if(HERSTART && HERSTART.id === id){ M = null; S.over = null; startStoryGevecht(id, undefined, {vanafFase:HERSTART.fase}); break; }
       if(heeftKeuze(id)){ M = null; S.over = null; storySkin(STORY[id].wereld); praatStart(id, "intro"); break; }
       startStoryGevecht(id); break; }
     case "storyterug": { AU.zet("kaart"); decorWeg(); S.story = null; newGame(); M = {type:"story"}; storySkin(0); render(); break; }
@@ -19392,7 +20147,7 @@ document.addEventListener("mouseover", e => {
     const v = veldInfo(); if(!v) return;
     setPreview(`<div class="pv" style="border-color:#d9b35a">
       <div class="pvhead" style="background:linear-gradient(160deg,#9a7430,#3e2c12)"><span class="ic">🌦</span><span class="nm">${v.kop}</span></div>
-      ${prentHTML(RUIT_VELD, "pv")}<div class="sec"><div class="sect" style="color:#e8c870">${v.sub}</div>${v.regels.map(r => `<p>${r}</p>`).join("")}</div>
+      <div class="sec"><div class="sect" style="color:#e8c870">${v.sub}</div>${v.regels.map(r => `<p>${r}</p>`).join("")}</div>
     </div>`);
     return;
   }
@@ -19783,7 +20538,8 @@ const EMOJI_BEELD = {
   "🔥":"art/kaart-vuur.png", "💧":"art/kaart-water.png", "🌿":"art/kaart-gras.png", "🪨":"art/kaart-steen.png",
   "⛰":"art/kaart-rots.png", "☄":"art/kaart-plasma.png", "🌹":"art/kaart-roos.png", "🧊":"art/kaart-ijs.png", "❄":"art/kaart-ijs.png",
   "🐺":"art/kaart-wolf.png", "🐟":"art/kaart-vliegendevis.png", "🕷":"art/kaart-spin.png", "🥚":"art/token-ei.png",
-  "🛡":"art/token-schild.png", "🗡":"art/kaart-swipe.png", "🔪":"art/kaart-stab.png", "🕸":"art/kaart-web.png"
+  "🛡":"art/token-schild.png", "🗡":"art/kaart-swipe.png", "🔪":"art/kaart-stab.png", "🕸":"art/kaart-web.png",
+  "🐉":"art/kaart-draak.png", "🐍":"art/kaart-leviathan.png", "🌳":"art/kaart-woud.png", "🗿":"art/kaart-kolos.png"
 };
 const EMOJI_HOUD = new Set(["▶","◀","✔","✓","↔","↕","⬆","⬇","⬅","➡","↩","↪","©","®","™","‼","⁉","〰","☰","★","☆"]);
 const EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:️|⃣|[\u{1F3FB}-\u{1F3FF}]|‍\p{Extended_Pictographic}️?)*/gu;
