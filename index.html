@@ -2917,9 +2917,18 @@ body.venster .vscheid{height:0; border-top:2px solid rgba(230,233,255,.18); marg
 html, body.venster, body.venster *{scrollbar-width:none; -ms-overflow-style:none}
 body.venster *::-webkit-scrollbar, html::-webkit-scrollbar{display:none; width:0; height:0}
 /* ---- achter het homescreen en de levelkeuze: de wereldkaart, verduisterd ---- */
-body.venster #kaartbanen{background:linear-gradient(180deg, rgba(8,10,30,.6), rgba(8,10,30,.84)), url("art/overworld.png") center/cover no-repeat;
-  backdrop-filter:none}
+body.venster #kaartbanen{background:#080a1e; backdrop-filter:none; overflow:hidden}
+/* De kaart deint heel langzaam heen en weer, zodat het homescreen niet stilstaat. */
+body.venster #kaartbanen::before{content:""; position:absolute; inset:-6% -10%;
+  background:linear-gradient(180deg, rgba(8,10,30,.6), rgba(8,10,30,.84)), url("art/overworld.png") center/cover no-repeat;
+  animation:kaartdein 46s ease-in-out infinite alternate; will-change:transform}
+@keyframes kaartdein{0%{transform:translate(-5%,1%) scale(1.02)} 50%{transform:translate(0,-1.5%) scale(1.05)} 100%{transform:translate(5%,1%) scale(1.02)}}
+@media (prefers-reduced-motion:reduce){ body.venster #kaartbanen::before{animation:none} }
 body.venster #kaartbanen .kaartbanen{display:none}
+/* ---- de achterkant van de kaarten: een eigen tekening zodra art/kaart-achterkant.png er is ---- */
+body.rugbeeld .cardback:not(.verdorven):not(.verzopen){background:url("art/kaart-achterkant.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.rugbeeld .cardback:not(.verdorven):not(.verzopen)::after{display:none}
 /* ---- homescreen ---- */
 body.venster .vhome{position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:26px;
   width:min(860px,94vw); max-height:94vh}
@@ -2985,6 +2994,10 @@ body.venster .vmenu .vstatus{padding:16px 22px; font-family:"Press Start 2P",ui-
 body.venster .vmenu .vstatus .vrij{display:flex; justify-content:space-between; gap:10px; padding:5px 0}
 body.venster .vmenu .vstatus .vrij b{color:var(--vng); font-weight:normal; text-align:right}
 
+/* Wereld 5 zolang de vergezichten er nog niet zijn: een hemelse lucht onder het veld in
+   plaats van zwart. Komen de tekeningen, dan liggen die er gewoon overheen. */
+body:has(#app.w5.hzdoor){background:
+  radial-gradient(1200px 700px at 50% 30%, #6b7898 0%, #3a4462 45%, #1b1f2e 85%) fixed}
 /* ---- de kaart: de kop is een klein venster ---- */
 body.venster .kaartkop{top:16px; left:16px; right:auto; padding:10px 16px; border-radius:8px; pointer-events:auto;
   background:var(--vnbg); border:2px solid var(--vnd); box-shadow:var(--vnrand)}
@@ -3006,7 +3019,10 @@ body.venster .pkbtn:hover{color:var(--vng) !important}
 body.venster .kaartkop h2{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.7rem; color:var(--vng); text-shadow:2px 2px 0 var(--vnd)}
 
 /* ---- de balken naast het gevecht ---- */
-body.venster #left, body.venster #right{background:#070a1c; border-color:#0b0d22 !important}
+/* De balken zijn altijd dicht, ook als er een vergezicht achter het veld hangt (en in
+   wereld 5, waar de wereldkleuren niet gezet zijn): het vergezicht mag er nooit doorheen. */
+body.venster #left, body.venster #right,
+body.venster #app.hzdoor #left, body.venster #app.hzdoor #right{background:#070a1c !important; border-color:#0b0d22 !important}
 body.venster #preview .circ, body.venster #preview .pv{border:2px solid var(--vnd) !important; border-radius:8px; outline:0 !important;
   background:var(--vnbg) !important; box-shadow:var(--vnrand) !important; position:relative}
 body.venster #preview .circ .t{color:var(--vng); text-shadow:2px 2px 0 var(--vnd)}
@@ -3021,7 +3037,7 @@ body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
 #cstrip,#vijandbalk{display:none}
 @media (min-width:1081px){
   /* Rechts: één lang venster. Zijn stapels, de beurt, jouw stapels en de knoppen. */
-  body.venster #right{margin:14px 10px 14px 8px; padding:16px 8px 12px; border-radius:8px; background:var(--vnbg);
+  body.venster #right, body.venster #app.hzdoor #right{margin:14px 10px 14px 8px; padding:16px 8px 12px; border-radius:8px; background:var(--vnbg) !important;
     border:2px solid var(--vnd) !important; box-shadow:var(--vnrand); gap:0}
   body.venster #piles1, body.venster #piles0{justify-content:center; padding:4px 0 20px}
   body.venster #piles0{margin-bottom:0}
@@ -3031,24 +3047,26 @@ body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
   body.venster #rtools .tbtn .pixic{width:15px; height:13px}
   /* Links, in het verhaal: één lang venster over je tegenstander. Bovenin de cirkel als
      strookje, dan naam en levens, dan het portret. */
-  body.venster.verhaal #left{margin:14px 6px 14px 14px; padding:16px 14px 14px; border-radius:8px; background:var(--vnbg);
+  body.venster.verhaal #left, body.venster.verhaal #app.hzdoor #left{margin:14px 6px 14px 14px; padding:16px 14px 14px; border-radius:8px; background:var(--vnbg) !important;
     border:2px solid var(--vnd) !important; box-shadow:var(--vnrand); gap:14px; position:relative; z-index:6}
   body.venster.verhaal #cstrip{display:block}
   body.venster.verhaal #vijandbalk{display:none}
-  body.venster.verhaal.vbaan #vijandbalk{display:flex; flex-direction:column; gap:10px}
+  body.venster.verhaal.vbaan #vijandbalk{display:flex; flex-direction:column; gap:14px}
   body.venster.verhaal #preview{position:absolute; left:14px; right:14px; top:auto; z-index:9; display:none}
   body.venster.verhaal.pvuitleg #preview, body.venster.verhaal.cirkelopen #preview{display:flex}
   body.venster.verhaal #preview .circ.circnieuw{width:100%}
   body.venster.verhaal #preview .pv{width:100% !important; max-width:100%}
   body.venster.verhaal #preview .pvhead .nm{white-space:normal; overflow-wrap:anywhere; font-size:.56rem; line-height:1.5}
-  body.venster.verhaal #portretvak{flex:1 1 auto; min-height:220px; max-height:none}
+  /* Het portret staat onderin en is een derde lager dan de hele kolom; de ruimte erboven is
+     voor de uitleg als je ergens overheen gaat. */
+  body.venster.verhaal #portretvak{flex:0 0 auto; height:max(200px, calc((100dvh - 230px) * .66)); min-height:0; max-height:none; margin-top:auto}
   body.venster.verhaal #portret{height:auto; flex:1 1 auto; border:0 !important; outline:0 !important; border-radius:6px;
     box-shadow:0 0 0 2px var(--vnd), 0 0 0 4px rgba(230,233,255,.4), 0 0 14px var(--ptgloed,transparent) !important}
   body.venster.verhaal #portret .ptnaam{display:none}
   /* de tekstballon hangt in het portret, niet over de naam en de levens heen */
   body.venster.verhaal #ptbel{top:12px; bottom:auto; left:10px; right:10px}
-  body.venster.verhaal.vbaan .pside[data-side="1"] .pinfo > .pname,
-  body.venster.verhaal.vbaan .pside[data-side="1"] .pinfo > .plife{display:none}
+  body.venster.verhaal.vbaan .pside .pinfo > .pname,
+  body.venster.verhaal.vbaan .pside .pinfo > .plife{display:none}
 }
 .cstrip{display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; padding:2px 0; background:none; border:0; cursor:pointer}
 .cstrij{display:flex; align-items:center; justify-content:center; gap:5px}
@@ -3056,8 +3074,12 @@ body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
 .cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
 .cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:#aab3ea; text-shadow:1px 1px 0 #0b0d22}
 .cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
+.vbrij{display:flex; flex-direction:column; gap:8px}
+.vbrij.aan .vbnaam::after{content:""; display:inline-block; width:7px; height:7px; margin-left:10px; vertical-align:2px;
+  background:#fff; transform:rotate(45deg); box-shadow:1px 1px 0 #0b0d22}
 .vbnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:var(--vng,#e8c67a); text-shadow:2px 2px 0 #0b0d22; line-height:1.5}
 #vijandbalk .hpbalk{width:100%}
+#vijandbalk .vbrij[data-side="0"] .vbnaam{color:#c9d0ff}
 #vijandbalk .hpb{flex:1 1 auto; width:auto}
 /* de levensbalk */
 body.venster .hpbalk{display:flex; align-items:center; gap:12px}
@@ -3415,6 +3437,9 @@ function kaartTekst(el, varKey){
   const b = E.tekst || {kw:[], speel:"", veld:"", eig:"", spell:""};
   const v = (V && V.tekst) || {};
   const kw = [...new Set([].concat(b.kw || [], v.kw || []))];
+  /* Een monster (5-2) heeft alleen zijn element: geen speel-effect, geen veld-effect. */
+  if(V && V.monster) return {kw:v.kw || [], speel:"", veld:"", eig:[v.eig, "Alleen het element telt: geen effecten."].filter(Boolean),
+    spell:"", alleenSpell:false};
   return {kw, speel:v.speel || b.speel, veld:v.veld || b.veld,
     eig:[b.eig, v.eig].filter(Boolean), spell:v.spell || b.spell, alleenSpell:!!E.alleenSpell};
 }
@@ -4486,7 +4511,10 @@ const icon = el => {
 function rectOf(sel){ if(FAST) return null; const e=document.querySelector(sel); if(!e) return null;
   const r = e.getBoundingClientRect();
   /* In het verhaal staan de levens van de tegenstander in de linkerkolom, niet op het veld. */
-  if(!r.width && /\.plife/.test(sel)){ const alt = document.querySelector("#vijandbalk .plife"); if(alt) return alt.getBoundingClientRect(); }
+  if(!r.width && /\.plife/.test(sel)){
+    const m = sel.match(/data-side="(\d)"/);
+    const alt = document.querySelector(`#vijandbalk .vbrij[data-side="${m ? m[1] : 1}"] .plife`);
+    if(alt) return alt.getBoundingClientRect(); }
   return r; }
 function creSel(p,c){ return `.slot[data-act="cre"][data-p="${p}"][data-col="${c}"]`; }
 async function flyCard(fromR, toR, inner, ms=450){
@@ -5943,6 +5971,8 @@ async function chooseSlot(p, slots, prompt, cancellable, meta){
    is het bij het resolven weg (dood, verplaatst, teruggehaald), dan fizzelt dat effect. */
 function effsOf(el, origin, card){
   const vr = card && card.var ? card.var : undefined;
+  /* 5-2 · De monsters van de Verzamelaar hebben alleen hun element, geen effecten. */
+  if(vr && VAR[vr] && VAR[vr].monster) return [];
   if(el === "wolf") return [{el, origin}];                     // 🐺 de roedel groeit — geen doelwit nodig
   if(el === "steen") return [{el, origin, var:vr}, {el, origin, var:vr}];      // tweemaal +1, los van elkaar
   /* 💧 Water dat zijn plons al gemaakt heeft is een 🪞 Waterspiegel: vanaf dan spiegelt hij
@@ -9335,19 +9365,26 @@ function cstripPaint(){
   const h = aan ? cstripHTML() : "";
   if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
   if(!aan) document.body.classList.remove("cirkelopen");
-  /* De uitleg en de grote cirkel komen direct onder het strookje, over de rest heen. */
-  const pv = document.getElementById("preview");
-  if(pv) pv.style.top = aan ? (el.offsetTop + el.offsetHeight + 12) + "px" : "";
+  /* De uitleg en de grote cirkel komen onder de levensbalken, in de vrije ruimte boven het
+     portret (en eroverheen als ze groter zijn). */
+  const pv = document.getElementById("preview"), vb = document.getElementById("vijandbalk");
+  const onder = vb && vb.offsetHeight ? vb : el;
+  if(pv) pv.style.top = aan ? (onder.offsetTop + onder.offsetHeight + 14) + "px" : "";
 }
 /* De naam en levens van je tegenstander, bovenaan de linkerkolom. */
 function vijandBalkPaint(){
   const el = document.getElementById("vijandbalk"); if(!el) return;
   let h = "";
   if(portretAan() && S && S.story){
-    const L = levelVan(S.story) || {}, pl = P(1);
-    const naam = S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1);
-    const start = (S.story.startLevens && S.story.startLevens[1] != null) ? S.story.startLevens[1] : pl.life;
-    h = `<div class="vbnaam">${naam}</div>` + (S.story.trio ? "" : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`);
+    const L = levelVan(S.story) || {};
+    const rij = (p, naam) => {
+      const pl = P(p);
+      const start = (S.story.startLevens && S.story.startLevens[p] != null) ? S.story.startLevens[p] : pl.life;
+      const trio = p === 1 && S.story.trio;
+      return `<div class="vbrij${S.tp === p ? " aan" : ""}" data-side="${p}"><div class="vbnaam">${naam}</div>`
+        + (trio ? "" : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`) + `</div>`;
+    };
+    h = rij(1, S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1)) + rij(0, pName(0));
   }
   if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
   document.body.classList.toggle("vbaan", !!h);
@@ -15561,7 +15598,7 @@ const STORY = {
       {s:"engel", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Jij bent de laatste. In het woud heb ik je laten gaan. Dat was een fout."},
       {s:"engel_wijd", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Die maak ik niet nog een keer."},
       {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ <b>De toets.</b> Geen aethers. Je stelt zelf samen wat je meeneemt: per element <b>0</b> tot <b>12</b> kaarten, lichtkaarten zoveel je wilt (hooguit <b>4</b> van een soort), samen <b>20</b> tot <b>40</b>."},
-      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ Seraf heeft <b>12</b> levens en speelt met 🟣 Hemelschoon en 🟣 Genade. Jij hebt er <b>8</b>."}
+      {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ Seraf heeft <b>10</b> levens en speelt alleen met licht: Lichtbrengers, wolken, kopieën en wat er uit het graf terugkomt. 🟣 Genade. Jij hebt er <b>8</b>."}
     ],
     midden:[
       {s:"engel", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Dat had je niet moeten kunnen."},
@@ -15606,10 +15643,14 @@ const STORY = {
     /* Seraf: dertig kaarten, vijf van elk element, en tien lichtkaarten. */
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     vrijDeck:true,
-    deckVij:{steen:5, vuur:5, gras:5, water:5, kuriboh:3, vital:3, negate:4},
-    ltVij:["kuriboh","vital","negate"],
-    aeVij:["ae_hemel","ae_genade"],
-    levensVij:12, levensJij:8,
+    /* Seraf speelt alleen licht, maar wel licht dat iets op het veld zet: Lichtbrengers,
+       wolken, kopieën, wat er uit het graf terugkomt, en de Meester die elk element kan zijn.
+       Twee Lichtbrengers heeft ze al in haar openingshand. */
+    deckVij:{brenger:9, kuriboh:5, kloon:5, reborn:4, master:4, negate:3},
+    ltVij:["brenger","kuriboh","kloon","reborn","master","negate"],
+    handVij:["brenger","brenger"],
+    aeVij:["ae_genade"],        // geen Hemelschoon: met een deck vol licht heelt ze zich anders elke kaart
+    levensVij:10, levensJij:8,
     geeft:"ae_hemel",
     ban:10, begint:1
   },
@@ -16556,7 +16597,8 @@ const VELD = {
                    "Ze begint met een 💧 Water in haar middelste kolom."] },
 
   "5-1": { regels:["✦ <b>De toets.</b> Geen aethers. Je bouwt je deck zelf: per element 0 tot 12, lichtkaarten zoveel je wilt (hooguit 4 van een soort), samen 20 tot 40 kaarten.",
-                   "Seraf: <b>12</b> levens, 🟣 Hemelschoon (speelt Seraf een ✦: +1 leven en trek 1) en 🟣 Genade (eens per beurt blijft de eerste creature die zou sterven op 1 staan).",
+                   "Seraf: <b>10</b> levens en een deck van alleen ✦ licht dat creatures maakt: 9 Lichtbrenger, 5 Wolkenzwerm, 5 Kloon, 4 Zielenoproep, 4 Elementaal Meester, 3 Volledige Negatie. Twee Lichtbrengers heeft ze al in haar hand.",
+                   "🟣 Genade: eens per beurt blijft de eerste creature van Seraf die zou sterven op 1 staan.",
                    "Jij begint met <b>8</b> levens."] },
 
   "5-2": { regels:["🥚 Er ligt een ei op het bord (na 2 beurten van de Verzamelaar komt er een 🕷 Spin uit) en onder kolom 1, 3 en 5 liggen 🐺 wolvenspells.",
@@ -16897,7 +16939,7 @@ function praatHTML(){
     ${r.keuze
       ? `<div class="praatkeus">${r.keuze.map((k,i) =>
           `<button class="pkbtn" data-act="btn" data-btn="praatkeus" data-ga="${k.ga}"${k.tel ? ` data-tel="${k.tel}"` : ""}>${k.label}</button>`).join("")}</div>`
-      : `<div class="praathint">spatie of tik om verder te gaan</div>`}
+      : ""}
     ${r.keuze ? "" : `<button class="praatskip" data-act="btn" data-btn="praatskip" title="Het gesprek overslaan (S)">⏭ Overslaan</button>`}
   </div>`;
 }
@@ -19192,8 +19234,8 @@ function render(){
     /* De zijbalk is in het verhaal breder; het vergezicht moet dan opnieuw passen. */
     if(document.body.classList.contains("verhaal") !== vh){ document.body.classList.toggle("verhaal", vh); setTimeout(laagPassen, 30); } }
   portretPaint();
-  cstripPaint();
   vijandBalkPaint();
+  cstripPaint();
   vrijDecor();
   muziekScherm();
   const hl = uiHl();
@@ -21186,7 +21228,8 @@ document.addEventListener("keydown", e => {
   e.preventDefault();
 });
 /* start */
-document.body.classList.add("venster");     // stijl C: de vensters
+document.body.classList.add("venster");
+{ const rug = new Image(); rug.onload = () => document.body.classList.add("rugbeeld"); rug.src = "art/kaart-achterkant.png"; }     // stijl C: de vensters
 beeldenWarm();
 muziekWarm();
 laadPaint();
