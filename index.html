@@ -1597,7 +1597,16 @@ body.pvuitleg #ptbel{display:none !important}
   background:#ffd447; color:#2a2000; border:2px solid #3a2a06; font-size:.9rem; font-weight:700;
   display:flex; align-items:center; justify-content:center; box-shadow:0 2px 0 rgba(0,0,0,.6)}
 /* De vijf levels op de trap staan dicht op elkaar: iets kleiner. */
-.lvknop.hemelknop, .lvknop.hemelknop.baas{width:46px; height:46px; font-size:1.2rem}
+/* 🌥 De Hemelrand-laag over de kaart */
+.kaartvlak .hemeldim{position:absolute; inset:0; z-index:1; pointer-events:none; background:rgba(6,8,16,.55); animation:hemelin .6s ease-out}
+.kaartvlak .hemellaag{position:absolute; inset:0; z-index:2; pointer-events:none; animation:hemelin .8s ease-out}
+/* Zolang de tekening er niet is: een grijze wolkenlaag over de bovenkant. */
+.kaartvlak .hemelnood{position:absolute; left:0; right:0; top:0; height:40%; z-index:1; pointer-events:none;
+  background:radial-gradient(60% 90% at 50% 0%, rgba(214,220,232,.55), rgba(140,150,170,.35) 55%, transparent 100%)}
+.kaartvlak .hemellaag + .hemelnood{display:none}
+@keyframes hemelin{from{opacity:0; transform:translateY(-3%)} to{opacity:1; transform:none}}
+.kaartvlak.inhemel .kaartlaag, .kaartvlak.inhemel .lvknop{z-index:3}
+.lvknop.trapknop .lvbinnen{font-size:1.4rem; color:#2a2721}
 .lvknop.hemel{background:#f2ecd6; border-color:var(--gold); color:#2a2721; animation:lvpuls 2.2s ease-in-out infinite}
 .lvknop.winkel{background:radial-gradient(circle at 40% 35%, #4a3a22, #1c150a 70%); border-color:#e0c07a; font-size:1.6rem}
 /* De sterren onder een gehaald level, en de balkjes in de kop. */
@@ -1973,6 +1982,14 @@ body.pvuitleg #ptbel{display:none !important}
   border:1px solid #ff9a3c; color:#ffd08a; background:rgba(38,20,8,.92);
   box-shadow:0 0 10px rgba(255,140,60,.45)}
 .vonkmerk b{color:#fff2cf}
+/* 🎪 Een creature van het trio waarvan de vonk van dat element brandt: +3 levens, effect 2×. */
+.slot.cr.vonkup::before{content:"VONK +3 · 2×"; position:absolute; left:50%; bottom:-9px; transform:translateX(-50%); z-index:6;
+  font-family:"Press Start 2P",ui-monospace,monospace; font-size:.36rem; white-space:nowrap; padding:2px 5px;
+  background:#5a1a08; color:#ffd08a; border:1px solid #ff9a3a; pointer-events:none}
+.vonkmerk .vonkkracht{margin-left:5px; color:#ffe7a8; opacity:.85; font-size:.9em}
+.vonkmerk .vonkimg{position:absolute; left:50%; bottom:100%; transform:translateX(-50%); height:54px; width:auto;
+  image-rendering:pixelated; pointer-events:none; filter:drop-shadow(0 2px 0 rgba(0,0,0,.6))}
+.vonkmerk.uit .vonkimg{filter:grayscale(1) brightness(.5)}
 .vonkmerk.uit{border-color:var(--line); color:var(--dim); background:#12171d; box-shadow:none}
 .col.leegvonk{opacity:.9}
 .triouitleg{display:flex; flex-direction:column; gap:6px; margin:12px 0 4px}
@@ -3115,7 +3132,8 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
   /* de tekstballon hangt in het portret, niet over de naam en de levens heen */
   body.venster.verhaal #ptbel{top:12px; bottom:auto; left:10px; right:10px}
   body.venster.verhaal.vbaan .pside .pinfo > .pname,
-  body.venster.verhaal.vbaan .pside .pinfo > .plife{display:none}
+  body.venster.verhaal.vbaan .pside .pinfo > .plife,
+  body.venster.verhaal.vbaan .pside .pinfo > .triorij{display:none}
 }
 .cstrip{display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; padding:2px 0; background:none; border:0; cursor:pointer}
 .cstrij{display:flex; align-items:center; justify-content:center; gap:5px}
@@ -3128,6 +3146,12 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
   border:5px solid transparent; border-right:7px solid #fff; border-left:0; filter:drop-shadow(1px 1px 0 #0b0d22)}
 .vbnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:var(--vng,#e8c67a); text-shadow:2px 2px 0 #0b0d22; line-height:1.5}
 #vijandbalk .hpbalk{width:100%}
+.vbtrio{display:flex; flex-direction:column; gap:6px}
+.vbvonk{display:flex; align-items:center; gap:10px; cursor:pointer}
+.vbvonk .vbvnaam{flex:0 0 92px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; color:#fff; text-shadow:1px 1px 0 #0b0d22; white-space:nowrap}
+.vbvonk .hpbalk{flex:1 1 auto; gap:8px}
+.vbvonk .hpb{width:auto; flex:1 1 auto; height:10px}
+.vbvonk.uit{opacity:.45}
 #vijandbalk .vbrij[data-side="0"] .vbnaam{color:var(--vsub)}
 #vijandbalk .hpb{flex:1 1 auto; width:auto}
 /* de levensbalk */
@@ -3262,8 +3286,12 @@ EL.wolk  = {name:"Wolk", icon:"☁️", strong:null, flash:false, hp:1, token:tr
 EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true, speciaal:true};
 /* 🐟 De vliegende vis van de Zee (4-1). Geen element, slaat met alles wat hij heeft, en hij
    slaat altijd jou: wat er tegenover hem staat, springt hij overheen. */
-EL.vis = {name:"Vliegende vis", icon:"🐟", strong:null, flash:false, hp:4, kaart:true, speciaal:true,
-  volAtk:true, overheen:true, direct:true};
+EL.vis = {name:"Vliegende vis", icon:"🐟", strong:null, flash:false, hp:3, kaart:true, speciaal:true,
+  direct:true, vis:true};
+/* 🐠 De clownsvis: bij binnenkomst +2 levens voor alle vissen, en zolang hij er is slaan alle
+   vissen met volle slag. 🐡 De kogelvis: wie hem aanvalt, krijgt er zelf 3 terug. */
+EL.clown = {name:"Clownsvis", icon:"🐠", strong:null, flash:false, hp:1, kaart:true, speciaal:true, vis:true};
+EL.kogel = {name:"Kogelvis", icon:"🐡", strong:null, flash:false, hp:3, kaart:true, speciaal:true, vis:true};
 /* 🥚 Het ei van Shelob. Vier levens, valt nooit aan, en na twee van haar beurten komt het uit. */
 EL.ei = {name:"Ei", icon:"🥚", strong:null, flash:false, hp:4, token:true, speciaal:true, stil:true, vastAtk:0, geenOffer:true,
   kaart:true, geenEnt:true};
@@ -3396,7 +3424,9 @@ const KAART_TEKST = {
   skelet:  {kw:["kleurloos","wijkt"]},
   wolk:    {kw:["kleurloos","wijkt"]},
   wolf:    {kw:["kleurloos"], speel:"Alle wolven van de eigenaar <b>+1</b> leven."},
-  vis:     {kw:["kleurloos","volleslag","wijkt","direct"]},
+  vis:     {kw:["kleurloos","direct"]},
+  clown:   {kw:["kleurloos"], speel:"Alle eigen vissen <b>+2</b> levens, ook deze.", veld:"Alle eigen vissen hebben {Volle slag}."},
+  kogel:   {kw:["kleurloos"], eig:"Valt een creature deze kaart aan, dan krijgt die zelf <b>3</b> schade."},
   ei:      {kw:["kleurloos","muur"], veld:"Na <b>2</b> beurten van de eigenaar komt er een 🕷 Spin uit."},
   spin:    {kw:["kleurloos"], eig:"Slaat altijd <b>7</b>."},
   swipe:   {spell:"<b>1</b> schade aan elke vijandelijke creature."},
@@ -3625,6 +3655,8 @@ const atkOf = (cr, p) => {            // aanvalskracht: helft van de levens, min
   if(vv && vv.atk) return vv.atk + hb;                             // 🐉 de stukken van de Verzamelaar
   if(vv && vv.vol) return Math.max(bodem, cr.hp) + hb;
   if(EL[cr.card.el].volAtk) return Math.max(bodem, cr.hp) + hb;    // 🕯 slaat met alles wat hij heeft
+  if(EL[cr.card.el].vis && p != null && P(p) && P(p).cols.some(k => k.cre && k.cre.card.el === "clown"))
+    return Math.max(bodem, cr.hp) + hb;                            // 🐠 zolang de clownsvis er is: volle slag
   if(roosKracht(cr)) return Math.max(bodem, cr.hp) + hb;           // 🌹 Roos: volle levens
   if(aeVolleSlag(p, cr.card.el)) return Math.max(bodem, cr.hp) + hb;
   return Math.max(bodem, Math.floor(cr.hp / 2)) + hb;
@@ -5684,6 +5716,7 @@ const KAART_BEELD = {
   ei:"art/token-ei.png", spin:"art/kaart-spin.png", schildje:"art/token-schild.png",
   swipe:"art/kaart-swipe.png", stab:"art/kaart-stab.png", schild:"art/kaart-schild.png",
   web:"art/kaart-web.png", wolf:"art/kaart-wolf.png", vis:"art/kaart-vliegendevis.png",
+  clown:"art/kaart-clownsvis.png", kogel:"art/kaart-kogelvis.png",
   /* 5-2 · de vier stukken uit de achterkamer */
   knoop:"art/kaart-knoop.png", draak:"art/kaart-draak.png", leviathan:"art/kaart-leviathan.png", woud:"art/kaart-woud.png", kolos:"art/kaart-kolos.png",
   /* De golem heeft geen apart kaartje nodig: zijn eigen tekening wordt bijgesneden en
@@ -6023,6 +6056,7 @@ function effsOf(el, origin, card){
   /* 5-2 · De monsters van de Verzamelaar hebben alleen hun element, geen effecten. */
   if(vr && VAR[vr] && VAR[vr].monster) return [];
   if(el === "wolf") return [{el, origin}];                     // 🐺 de roedel groeit — geen doelwit nodig
+  if(el === "clown") return [{el, origin}];                    // 🐠 alle vissen +2
   if(el === "steen") return [{el, origin, var:vr}, {el, origin, var:vr}];      // tweemaal +1, los van elkaar
   /* 💧 Water dat zijn plons al gemaakt heeft is een 🪞 Waterspiegel: vanaf dan spiegelt hij
      het speel-effect van een andere eigen kaart in plaats van iets te verplaatsen. */
@@ -6036,17 +6070,19 @@ function effsOf(el, origin, card){
 }
 /* De effecten die deze zet triggert, in de volgorde waarin ze straks resolven. */
 function plannedEffects(p, card, asSpell, col, opts){
-  if(asSpell) return effsOf(card.el, "spell", card);
+  const trioDubbel = (el, lijst) => trioKracht(p, el) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
+  if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card));
   const o = opts || {};
   let own = o.forceEffs ? o.forceEffs.slice() : (o.skipOwn ? [] : effsOf(card.el, "creature", card));
   if(o.dubbel) own = own.concat(own.map(e => Object.assign({}, e)));   // 🟣 Getijdenstroom
-  if(!asSpell && card.el === "vuur" && trioKracht(p, "dubbel")) own = own.concat(own.map(e => Object.assign({}, e)));   // 🎪 twee keer
+  /* 🎪 Het trio: zolang de vonk van dit element brandt, gaat het speel-effect twee keer. */
+  if(trioKracht(p, card.el)) own = own.concat(own.map(e => Object.assign({}, e)));
   const sp = P(p).cols[col] && P(p).cols[col].spell;
   if(sp && sp.card.el === "wolf" && card.el !== "wolf") return own;   // een wolvenspell reageert alleen op wolven
   /* ⛓ De knoop: het eigen speel-effect gaat er nog twee keer bij. */
   if(sp && sp.card.el === "knoop") return own.concat(own.map(e => Object.assign({}, e)), own.map(e => Object.assign({}, e)));
   /* Een spell weet in welke kolom hij ligt — de Struikrover heeft dat nodig. */
-  return own.concat(sp ? effsOf(sp.card.el, "spell", sp.card).map(e => Object.assign(e, {col})) : []);
+  return own.concat(sp ? trioDubbel(sp.card.el, effsOf(sp.card.el, "spell", sp.card)).map(e => Object.assign(e, {col})) : []);
 }
 /* Geldige doelwitten. De gespeelde kaart staat op dit moment al op het veld, dus hij zit
    gewoon in allCreIds(); selfId dient alleen nog om hem waar nodig uit te sluiten. */
@@ -6646,39 +6682,53 @@ async function serafSpeelt(){
   await chainLoop();
 }
 /* 🎪 Wat er van het trio over is, praat anders. */
-const TRIO_STADIA = [
-  {spr:"trio_twee", taunt:"trio_twee_taunt", zeg:{ beurt:[
-      "NEEEE. Knetter. KNETTER.",
-      "Knetter is uit. Gewoon uit. Zo hoort het niet, we hadden nog een nummer.",
-      "Spetter, blijf bij me. Blijf gewoon bij me staan.",
-      "Ik kan niet jongleren zonder Knetter. Ik kan het wel. Maar ik wil niet.",
-      "Applaus. — Nee. Geen applaus. Niet nu."
-    ],
-    popup:[
-      "Knetter deed altijd de eerste salto. Ik deed de tweede. Wie doet nu de eerste?",
-      "We hebben nog nooit iemand zien uitgaan. We wisten niet dat het er zó uitzag."
-    ],
-    laag:["…Niet ook. Alsjeblieft niet ook."],
-    jij:["Ga liggen. Ga gewoon liggen. Dan is het klaar en hoeft er niemand meer uit."] }},
-  {spr:"trio_een", taunt:"trio_een_taunt", zeg:{ beurt:[
+/* 🎪 Wat de overgebleven vonken zeggen. Wie er uit is, en wie er nog staan, bepaalt de
+   namen in de zinnen: je kunt ze in elke volgorde uitschakelen. */
+function trioStadium(){
+  const T = S.story.trio, dood = T.filter(v => v.hp <= 0), lev = T.filter(v => v.hp > 0);
+  if(lev.length === 2){
+    const D = dood[0].naam, [A, B] = lev.map(v => v.naam);
+    return {zeg:{ beurt:[
+        `NEEEE. ${D}. ${D.toUpperCase()}.`,
+        `${D} is uit. Gewoon uit. Zo hoort het niet, we hadden nog een nummer.`,
+        `${B}, blijf bij me. Blijf gewoon bij me staan.`,
+        `Ik kan niet jongleren zonder ${D}. Ik kan het wel. Maar ik wil niet.`,
+        "Applaus. Nee. Geen applaus. Niet nu."
+      ],
+      popup:[
+        `${D} deed altijd de eerste salto. ${A} deed de tweede. Wie doet nu de eerste?`,
+        "We hebben nog nooit iemand zien uitgaan. We wisten niet dat het er zó uitzag."
+      ],
+      laag:["…Niet ook. Alsjeblieft niet ook."],
+      jij:["Ga liggen. Ga gewoon liggen. Dan is het klaar en hoeft er niemand meer uit."] }};
+  }
+  const L = lev[0] ? lev[0].naam : "";
+  return {zeg:{ beurt:[
       "…",
       "Er is niemand meer om tegen te praten. Ik praat toch.",
-      "Ik was de kleinste. Ik zou als eerste gaan, zeiden ze. Grapje, zeiden ze.",
+      L === "Fikkie" ? "Ik was de kleinste. Ik zou als eerste gaan, zeiden ze. Grapje, zeiden ze."
+                     : `${dood[0].naam} en ${dood[1].naam}. Ik zeg ze nog één keer allebei.`,
       "Het is stil in de tent. Ik heb dat nog nooit gehoord.",
       "Doe het maar. Ik ga toch."
     ],
     popup:[
-      "Ik heet Fikkie. Dat weet je al. Ik zeg het nog een keer, zodat iemand het gehoord heeft.",
+      `Ik heet ${L}. Dat weet je al. Ik zeg het nog een keer, zodat iemand het gehoord heeft.`,
       "Er ligt nog suiker. Ik hoef het niet. Er is niemand om het mee te delen."
     ],
     laag:["…Kom maar."],
-    jij:["…Sorry. Dat meen ik. Het was een show, het had een show moeten blijven."] }}
-];
+    jij:["…Sorry. Dat meen ik. Het was een show, het had een show moeten blijven."] }};
+}
+/* De tekening die bij wie er nog staan hoort: trio_vuur_gras, trio_steen, enzovoort. */
+function trioSprKey(){
+  const lev = S.story.trio.filter(v => v.hp > 0).map(v => v.kracht);
+  const orde = ["vuur", "gras", "steen"].filter(e => lev.includes(e));
+  return orde.length === 3 ? "trio" : (orde.length ? "trio_" + orde.join("_") : "trio_as");
+}
 /* 🎪 Het vlammende trio (3-4): drie vonken, elk met eigen levens, in kolom 1, 3 en 5.
    Zolang een vonk leeft, geldt zijn kracht. Zijn levens samen zijn de levensbalk. */
 const trioLevend = () => (S && S.story && S.story.trio ? S.story.trio.filter(v => v.hp > 0) : []);
 const trioKracht = (p, k) => p === 1 && trioLevend().some(v => v.kracht === k);
-const trioBonus  = p => p === 1 ? trioLevend().length : 0;
+const trioBonus  = p => 0;      // de oude +1 per vonk is weg: elke vonk is nu een element
 function trioSync(){ if(S.story && S.story.trio) P(1).life = S.story.trio.reduce((a, v) => a + Math.max(0, v.hp), 0); }
 async function trioRaak(col, power){
   const st = S.story;
@@ -6696,10 +6746,12 @@ async function trioRaak(col, power){
   if(v.hp <= 0){
     st.trioDoden = (st.trioDoden || 0) + 1;
     const n = st.trioDoden;
-    /* de twee (en dan de één) die overblijven: andere tekening, andere praat */
-    const stadium = TRIO_STADIA[n - 1];
-    if(stadium){ st.zegSpr = stadium.spr; st.ptSpr = stadium.spr; st.tauntSpr = stadium.taunt || stadium.spr; st.zeg = stadium.zeg; st.zegI = {}; st.popI = {}; st.popOoit = {}; st.zin = null; }
-    addLog(`🎪 <em>${v.naam} gaat uit.</em> Die kracht (${v.uitleg}) is weg. De andere${n < 3 ? "n trekken " + n + " kaart" + (n === 1 ? "" : "en") : "…"}`, true);
+    /* de twee (en dan de één) die overblijven: de tekening van precies wie er nog staan, en praat met hun namen */
+    if(n < 3){
+      const k = trioSprKey(), stadium = trioStadium();
+      st.zegSpr = k; st.ptSpr = k; st.tauntSpr = k; st.zeg = stadium.zeg; st.zegI = {}; st.popI = {}; st.popOoit = {}; st.zin = null;
+    }
+    addLog(`🎪 <em>${v.naam} gaat uit.</em> ${icon(v.kracht)} ${EL[v.kracht].name} is geen Oerkracht en geen dubbel effect meer. De andere${n < 3 ? "n trekken " + n + " kaart" + (n === 1 ? "" : "en") : "…"}`, true);
     if(!FAST){ witFlits(); AU.play("thud"); render(); await sleep(400); }
     if(n < 3 && !S.over) await drawN(1, n, "🎪 een vonk minder");
   }
@@ -7409,11 +7461,12 @@ function oerkrachtOp(p, el){
 }
 function placeCre(p, col, card){
   /* 🟣 Oerkracht: creatures van het gekozen element komen met +4 levens binnen. */
-  const bonus = (oerkrachtOp(p, card.el) && hasAe(p, "ae_hp3")) ? 4 : 0;
+  const bonus = ((oerkrachtOp(p, card.el) && hasAe(p, "ae_hp3")) ? 4 : 0)
+    + (trioKracht(p, card.el) ? 3 : 0);          // 🎪 de vonk van dit element: +3 levens
   const vv = card.var && VAR[card.var];
   const hp = ((vv && vv.hp) || EL[card.el].hp || 2) + bonus;
   P(p).cols[col].cre = {card, hp, played:S.gTurn, attackedT:-1, ent:0};
-  addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? " (🟣 Oerkracht)" : ""}.`);
+  addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? (trioKracht(p, card.el) ? " (🎪 vonk)" : " (🟣 Oerkracht)") : ""}.`);
 }
 /* ✦ Levensroof: wie niet dood kan (de lavagolem), valt ook niet leeg te zuigen. */
 const siphonDoelen = () => allCreIds().filter(id => { const f = findCre(id); return f && !EL[f.cr.card.el].onsterfelijk; });
@@ -7476,6 +7529,12 @@ async function effTarget(it, p, ids, prompt, optional, meta){
 async function resolveEffect(it){
   const p = it.ctrl;
 
+  if(it.el === "clown"){
+    let n = 0;
+    for(let c=0;c<5;c++){ const cr = P(p).cols[c].cre; if(cr && EL[cr.card.el].vis){ cr.hp += 2; n++; pop(creSel(p, c), "+2", "heal"); } }
+    addLog(`🐠 <em>Clownsvis</em>: ${n} vis${n === 1 ? "" : "sen"} van ${pName(p)} +2 levens.`, true);
+    render(); return;
+  }
   if(it.el === "wolf"){
     let n = 0;
     for(let c=0;c<5;c++){ const cr = P(p).cols[c].cre; if(cr && cr.card.el === "wolf"){ cr.hp += 1; n++; pop(creSel(p, c), "+1", "heal"); } }
@@ -7746,8 +7805,20 @@ async function resolveAttack(it){
     await ijsGlijdt(p, col);
     return;
   }
+  const kogelDef = def.card.el === "kogel";
   const uit = applyDamage(def.card.id, att.card.el, power, {srcCre: att, noFx:true, ignoreImmune: !!att.card.cheat || att.card.var === "plasma" || (att.card.el === "vuur" && trioKracht(p, "plasma"))});
   if(uit && uit.raak) raakAanval(p);
+  /* 🐡 De kogelvis prikt terug: wie hem aanvalt, krijgt er 3. */
+  if(kogelDef){
+    const a = P(p).cols[col] && P(p).cols[col].cre;
+    if(a && a.card.id === att.card.id){
+      a.hp -= 3;
+      pop(creSel(p, col), "-3", "dmg");
+      addLog(`🐡 <em>Kogelvis</em>: ${kIcon(att.card)} ${kNaam(att.card)} prikt zich en krijgt <b>3</b> schade.`, true);
+      if(a.hp <= 0) destroyCre(p, col, "🐡 de kogelvis");
+      render();
+    }
+  }
   /* ⛓ Nog één kolom over (5-3): wie de creature tegenover omlegt, slaat door op de speler. */
   if(uit && uit.destroyed && S.story && S.story.doorslaan && !S.over){
     const d = opp(p);
@@ -9430,8 +9501,11 @@ function vijandBalkPaint(){
       const pl = P(p);
       const start = (S.story.startLevens && S.story.startLevens[p] != null) ? S.story.startLevens[p] : pl.life;
       const trio = p === 1 && S.story.trio;
+      /* 🎪 Het trio: drie kleine balken, één per vonk, met zijn element. */
+      const trioRij = trio ? `<div class="vbtrio">${S.story.trio.map((v, i) => `<div class="vbvonk${v.hp <= 0 ? " uit" : ""}" data-act="trioinfo" data-i="${i}">
+          <span class="vbvnaam">${v.hp <= 0 ? "🌑" : icon(v.kracht)} ${v.naam}</span><span class="plife hpbalk">${levensBalk(v.hp, 2)}</span></div>`).join("")}</div>` : "";
       return `<div class="vbrij${S.tp === p ? " aan" : ""}" data-side="${p}"><div class="vbnaam">${naam}</div>`
-        + (trio ? "" : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`) + `</div>`;
+        + (trio ? trioRij : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`) + `</div>`;
     };
     h = rij(1, S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1)) + rij(0, pName(0));
   }
@@ -9658,6 +9732,11 @@ function rookOnthul(id, reden){
   render();
   return true;
 }
+/* De eigen tekening van een vonk (art/vonk-knetter.png enz.), als die er is. */
+function vonkBeeld(v){
+  const pad = "art/vonk-" + v.naam.toLowerCase() + ".png";
+  return BEELD_KLAAR[pad] === true ? `<img class="vonkimg" src="${pad}" alt="">` : "";
+}
 function slotHTML(p, c, hl){
   const col = P(p).cols[c];
   /* ⛓ Een kolom die de Naad heeft dichtgetrokken: kettingen erover, en er kan niets meer. */
@@ -9667,7 +9746,7 @@ function slotHTML(p, c, hl){
   const vonk = (p === 1 && S.story && S.story.trio) ? S.story.trio.find(v => v.kol === c) : null;
   const vonkMerk = vonk
     ? `<div class="vonkmerk${vonk.hp <= 0 ? " uit" : ""}" data-act="trioinfo" data-i="${S.story.trio.indexOf(vonk)}"
-        title="${vonk.naam} — ${vonk.hp <= 0 ? "uit" : vonk.uitleg}">${vonk.hp <= 0 ? "🌑" : "🔥"} ${vonk.naam} <b>${Math.max(0, vonk.hp)}</b></div>`
+        title="${vonk.naam}: ${vonk.hp <= 0 ? "uit" : vonk.uitleg}">${vonkBeeld(vonk)}${vonk.hp <= 0 ? "🌑" : icon(vonk.kracht)} ${vonk.naam} <b>${Math.max(0, vonk.hp)}</b>${vonk.hp > 0 ? `<span class="vonkkracht">+3 · 2×</span>` : ""}</div>`
     : "";
   /* ⚙️ De band schuift naar rechts. Pijlen tussen de kolommen zeggen welke kant op, en de
      laatste plek is de plek waar de forge alles opeet. */
@@ -9737,7 +9816,7 @@ function slotHTML(p, c, hl){
       const poort0 = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
       return `<div class="col${poort0 ? " dicht" : ""}">${vonkMerk}${sp}${cr}${kruis}${rots}${poort0}${bandMerk}</div>`;
     }
-    cr = `<div class="slot cr${creHl}${tgt}${atk}${mik}${spent}${aeBoosts(p, u.card.el) ? " aeup" : ""}" data-act="cre" data-p="${p}" data-col="${c}"
+    cr = `<div class="slot cr${creHl}${tgt}${atk}${mik}${spent}${aeBoosts(p, u.card.el) ? " aeup" : ""}${trioKracht(p, u.card.el) ? " vonkup" : ""}" data-act="cre" data-p="${p}" data-col="${c}"
       data-pv="${u.card.el}"${u.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(u.card) ? ` data-pvvar="${toonVarKey(u.card)}"` : ""} data-pvhp="${u.hp}" data-pvent="${u.ent}" data-pvatk="${atkOf(u, p)}" data-pvst="${(sick?"s":"")+(ent?"e":"")+(u.attackedT===S.gTurn?"a":"")}">
       ${gloed}${cardFaceHTML(u.card)}${EL[u.card.el].sprite ? `<div class="cresprite${EL[u.card.el].spriteKlein ? " klein" : ""}">${spriteSVG(EL[u.card.el].sprite)}</div>` : ""}${stat}
       <div class="atkgem">⚔${atkOf(u, p)}</div>
@@ -9874,7 +9953,7 @@ function psideHTML(p){
         const pipsv = Array.from({length:2},(_,j)=>`<span class="hp${j < v.hp ? "" : " off"}"></span>`).join("");
         return `<div class="triobalk${dood ? " uit" : ""}" data-act="trioinfo" data-i="${i}"
           title="${v.naam} · kolom ${v.kol+1} · ${dood ? "uit" : v.uitleg}">
-          <span class="triovlam v${i}">${dood ? "•" : "🔥"}</span>
+          <span class="triovlam v${i}">${dood ? "•" : icon(v.kracht)}</span>
           <span class="trionaam">${v.naam}</span>
           <span class="triokol">k${v.kol+1}</span>
           <span class="plife">${pipsv}</span></div>`;
@@ -10351,13 +10430,14 @@ function overlayHTML(){
         <div class="sub">Drie vonken met elk hun eigen levens. Je raakt er eentje door de kolom
         te kiezen waar die in staat — sla je ergens anders, dan raak je niets.</div>
         <div class="triouitleg">${T.map(v => `<div class="trioregel${v.hp<=0?" uit":""}">
-          <div class="trionaam">${v.hp<=0 ? "🌑" : "🔥"} ${v.naam}</div>
+          <div class="trionaam">${v.hp<=0 ? "🌑" : icon(v.kracht)} ${v.naam}</div>
           <div class="triokol">kolom ${v.kol+1}</div>
           <div class="triohp">${Math.max(0,v.hp)} / 2</div>
           <div class="triowat">${v.hp<=0 ? "<em>uit — zijn kracht is weg</em>" : v.uitleg}</div>
         </div>`).join("")}</div>
-        <div class="sub" style="margin-top:10px">Zolang er nog vonken branden geven ze samen
-        <b>+1 per vonk</b> op al hun vuur-effecten. Gaat er eentje uit, dan trekken de anderen kaarten.</div>
+        <div class="sub" style="margin-top:10px">Elke vonk is een element. Zolang die brandt, komen hun
+        creatures van dat element binnen met <b>+3</b> levens en gaat het speel-effect van dat element
+        <b>twee keer</b>, ook als spell. Gaat er eentje uit, dan is dat weg en trekken de anderen kaarten.</div>
         <button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div>`;
     }
     if(M.type==="help") return helpHTML();
@@ -12745,6 +12825,8 @@ SPR_ART.trio_boos       = SPR_ART.vonk_gek;
 SPR_ART.trio_taunt      = SPR_ART.vonk_gek;
 SPR_ART.trio_twee_taunt = SPR_ART.vonk;
 SPR_ART.trio_een_taunt  = SPR_ART.vonk_stuk;
+["trio_vuur_gras","trio_vuur_steen","trio_gras_steen"].forEach(k => SPR_ART[k] = SPR_ART.vonk);
+["trio_vuur","trio_gras","trio_steen"].forEach(k => SPR_ART[k] = SPR_ART.vonk_stuk);
 SPR_ART.klinknagel_boos = SPR_ART.sintel;
 SPR_ART.klinknagel_taunt= SPR_ART.sintel;
 SPR_ART.fireguy_boos    = SPR_ART.fireguy_zwaai;
@@ -13039,6 +13121,13 @@ const SPRITE_BEELD = {
   trio_een:       "art/trio-een.png",          // als er nog één over is
   trio_een_taunt: "art/trio-een-taunt.png",    // de balk links, alleen
   trio_as:        "art/trio-as.png",           // drie hoopjes as
+  /* Wie er nog staat nadat je er een (of twee) hebt uitgeschakeld: per combinatie een tekening. */
+  trio_vuur_gras: "art/trio-vuur-gras.png",    // Knetter en Spetter (Fikkie is uit)
+  trio_vuur_steen:"art/trio-vuur-steen.png",   // Knetter en Fikkie
+  trio_gras_steen:"art/trio-gras-steen.png",   // Spetter en Fikkie
+  trio_vuur:      "art/trio-vuur.png",         // alleen Knetter
+  trio_gras:      "art/trio-gras.png",         // alleen Spetter
+  trio_steen:     "art/trio-steen.png",        // alleen Fikkie
   klinknagel:     "art/klinknagel.png",
   klinknagel_boos:"art/klinknagel-boos.png",   // VERKLAAR! · lens rood (opnieuw ontworpen, kleine k)
   klinknagel_rug: "art/klinknagel-rug.png",    // 3-5 · lichaam van je af, alleen de lens kijkt om
@@ -13084,6 +13173,9 @@ const SPR_LEEN = {
 /* Een nieuwe stand die nog niet getekend is, leent de tekening van een bestaande stand van
    hetzelfde personage — dan staat er iets herkenbaars in plaats van niets. */
 const SPRITE_TERUG = {
+  /* 3-4: tot de nieuwe tekeningen er zijn, de oude twee */
+  trio_vuur_gras:"trio_twee", trio_vuur_steen:"trio_twee", trio_gras_steen:"trio_twee",
+  trio_vuur:"trio_een", trio_gras:"trio_een", trio_steen:"trio_een",
   /* wereld 5 */
   nimbus_trap:"nimbus", nimbus_recht:"nimbus",
   verzamelaar_poets:"verzamelaar", verzamelaar_loep:"verzamelaar", verzamelaar_kaartje:"verzamelaar",
@@ -14680,7 +14772,7 @@ const STORY = {
       {s:"trio", groot:true, bg:3, naam:"Fikkie", kleur:"#ff6a2a", t:"Echt heel veel."},
       {s:"trio_boos", groot:true, bg:3, naam:"Knetter", kleur:"#ffa53c", t:"Genoeg, jongens."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🎪 <b>Drie vonken, drie levensbalken.</b> Knetter zit in kolom <b>1</b>, Spetter in kolom <b>3</b>, Fikkie in kolom <b>5</b>. Elk heeft <b>2 levens</b>. Sla je hem in zijn kolom, dan raak je hém. In kolom 2 en 4 zit niemand, daar sla je in het niets."},
-      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🔥 <b>Elke vonk geeft +1 op al hun vuur-effecten.</b> Knetter maakt hun vuur tot ☄️ plasma. Spetter laat hun vuur naar de buren spatten. Fikkie laat hun vuur twee keer schieten."},
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"🔥 <b>Elke vonk is een element.</b> Knetter is 🔥 Vuur, Spetter is 🌿 Gras, Fikkie is 🪨 Steen. Zolang een vonk brandt, komen hun creatures van dat element binnen met <b>+3</b> levens, en gaat het speel-effect van dat element <b>twee keer</b>, ook als spell."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Gaat er een uit, dan is zijn kracht weg, en trekken de anderen kaarten: <b>1</b> voor de eerste, <b>2</b> voor de tweede. Je wint als ze alle drie uit zijn."},
       {s:"trio", groot:true, bg:3, naam:"Spetter", kleur:"#ffd45e", t:"Muziek!"},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Er komt muziek. Er is nog steeds niemand die speelt."}
@@ -14740,12 +14832,13 @@ const STORY = {
         "BRAVO! Blijf liggen, dat hoort bij het nummer!"
       ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{vuur:8, steen:5, gras:5, water:5, gamble:6},
+    /* Geen water: elke vonk is een van hun drie elementen. */
+    deckVij:{vuur:7, gras:7, steen:7, gamble:6},
     ltVij:["gamble"],
     levensVij:6,
-    trio:[{naam:"Knetter", hp:2, kol:0, kracht:"plasma", uitleg:"vuur is plasma"},
-          {naam:"Spetter", hp:2, kol:2, kracht:"spat",   uitleg:"vuur spat naar de buren"},
-          {naam:"Fikkie",  hp:2, kol:4, kracht:"dubbel", uitleg:"vuur schiet twee keer"}],
+    trio:[{naam:"Knetter", hp:2, kol:0, kracht:"vuur",  uitleg:"🔥 Vuur: +3 levens en het speel-effect twee keer"},
+          {naam:"Spetter", hp:2, kol:2, kracht:"gras",  uitleg:"🌿 Gras: +3 levens en het speel-effect twee keer"},
+          {naam:"Fikkie",  hp:2, kol:4, kracht:"steen", uitleg:"🪨 Steen: +3 levens en het speel-effect twee keer"}],
     /* beloning: nog te kiezen (Vonkoverslag is uit het spel) */
     ban:10, begint:1
   },
@@ -15080,7 +15173,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Meer kan ik niet doen. Meer heb ik ook nooit hoeven doen."},
       {s:null, bg:4, naam:"…", kleur:"#e6c88a", t:"🛶 <b>De veerman.</b> Elke beurt is er één kolom afgesloten. Daar komt niks doorheen, van geen van beide kanten. De afgesloten kolom schuift elke beurt één plek op."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er staan er al twee op het veld, en wat valt haalt de Zee terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Clownsvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
     ],
     nee:[
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"…"},
@@ -15092,7 +15185,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Zes keer. Dan bent u er."},
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Tel maar mee. Ik tel ook mee."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>Vliegende vis.</b> 4 levens, kleurloos, volle slag. Hij slaat altijd jou, ook als er iets tegenover hem staat. Er staan er al twee op het veld, en wat valt haalt de Zee terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Clownsvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
     ],
     gevechtNa:{ja:"veer", nee:"zelf"},
     varianten:{
@@ -15175,9 +15268,10 @@ const STORY = {
     /* Een deck volgens dezelfde regels als het jouwe: 6 van elk element (3 van haar water is
        al ijs), 6 lichtkaarten (hoogstens 3 van een soort), 3 aethers. Daarbovenop haar eigen
        kaart: vijf vliegende vissen, twee al op het veld en drie in het deck. */
-    deckVij:{steen:6, vuur:6, gras:6, water:3, ijs:3, vis:3, reborn:3, darkhole:2, siphon:1},
+    /* Alleen vissen en water, eerlijk verdeeld. Twee vliegende vissen staan al op het veld. */
+    deckVij:{vis:6, clown:6, kogel:6, water:6},
     bord:[{p:1, c:1, el:"vis"}, {p:1, c:3, el:"vis"}],
-    ltVij:["reborn","siphon","darkhole"],
+    ltVij:[],
     /* Eeuwige terugkeer is haar thema: wat in het water verdwijnt, komt terug. */
     aeVij:["ae_watercycle","fu_water","ae_graf"], terugVij:"vis",
     levensVij:20,
@@ -15616,7 +15710,8 @@ const STORY = {
   "5-1":{
     wereld:5, naam:"De toets", vijand:"Seraf", sprite:"engel", zegKleur:"#f6f7fb", muziek:"w5_seraf",
     tauntSpr:"engel_taunt",
-    intro:[
+    /* De trap (op de wereldkaart): geen gevecht, alleen Nimbus. Daarna ga je de Hemelrand in. */
+    trap:[
       {s:null, bg:5, naam:"…", mu:"w5_trap", t:"Waar de zee ophoudt, begint een trap. Hij staat nergens op. Hij gaat gewoon omhoog."},
       {s:null, bg:5, naam:"…", kleur:"#dfe8f2", t:"Halverwege zit iets kleins en grijs op een tree. Met een kroontje."},
       {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"O. Jij weer."},
@@ -15629,7 +15724,9 @@ const STORY = {
       {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Het kroontje gaat recht. Het zakt meteen weer scheef."},
       {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"Ga maar. Ik wacht hier wel."},
       {s:"nimbus_trap", bg:5, naam:"…", kleur:"#dfe8f2", t:"Nimbus schuift een stukje op."},
-      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"En kom terug, hè. Ik hoor nooit hoe iets afloopt."},
+      {s:"nimbus_trap", bg:5, naam:"Nimbus", kleur:"#dfe8f2", t:"En kom terug, hè. Ik hoor nooit hoe iets afloopt."}
+    ],
+    intro:[
       {s:null, bg:5, naam:"…", kleur:"#f6f7fb", mu:"w5_seraf", t:"Boven aan de trap houden de treden op. De wolken zijn hier zo dicht dat je erop kunt staan."},
       {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"Het is stil. Er waait niks."},
       {s:"engel", groot:true, bg:5, naam:"…", kleur:"#f6f7fb", t:"Er staat iemand. Je hebt het niet zien aankomen."},
@@ -16678,7 +16775,7 @@ const VELD = {
 
   "3-4": { regels:["🎪 Drie vonken van <b>2</b> levens: Knetter in kolom 1, Spetter in 3, Fikkie in 5. Samen zijn ze de levensbalk.",
                    "Raak een vonk met een aanval in de kolom van die vonk. In kolom 2 en 4 sla je in het niets.",
-                   "Elke levende vonk: +1 op hun 🔥-effecten. Knetter: vuur is ☄️ Plasma. Spetter: vuur spat naar de buren. Fikkie: vuur schiet 2×.",
+                   "Elke vonk is een element: Knetter 🔥 Vuur, Spetter 🌿 Gras, Fikkie 🪨 Steen. Zolang die brandt: hun creatures van dat element +3 levens, en het speel-effect van dat element twee keer (ook als spell).",
                    "Gaat er een uit, dan is die kracht weg en trekken de anderen kaarten: 1 bij de eerste, 2 bij de tweede."] },
 
   "3-5": { regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, aan allebei de kanten, schuift meteen zo ver mogelijk naar rechts.",
@@ -16699,7 +16796,10 @@ const VELD = {
            "🔥 De vuurzee komt nu elke <b>tweede</b> ronde. De 🌋 lava blijft."] },
 
   "4-1": { regels:["🌊 <b>Hou het 6 rondes vol.</b> Dan ben je aan de overkant; je hoeft de Zee niet te verslaan.",
-                   "🐟 <b>Vliegende vis</b>: 4 levens, {Kleurloos}, {Volle slag}, {Wijkt} en {Direct}. Er staan er al twee op het veld en er zitten er drie in haar deck. Haar 🟣 Eeuwige Terugkeer haalt er elke beurt één terug uit het graf.",
+                   "🐟 De Zee speelt alleen vissen en 💧 water, eerlijk verdeeld. <b>Vliegende vis</b>: 3 levens, {Kleurloos}, {Direct}. Er staan er al twee op het veld.",
+                   "🐠 <b>Clownsvis</b>: 1 leven. Komt hij binnen, dan krijgen alle vissen van de Zee <b>+2</b> levens (hij ook). Zolang hij er is, slaan alle vissen met {Volle slag}.",
+                   "🐡 <b>Kogelvis</b>: 3 levens. Val je hem aan, dan krijgt jouw creature er zelf <b>3</b> schade bij. Vuur-effecten tellen niet als aanval.",
+                   "🟣 Haar Eeuwige Terugkeer haalt elke beurt een vliegende vis terug uit het graf.",
                    "🛶 Zei je ja tegen de veerman, dan is er elke beurt één kolom dicht (eerst kolom 3). Die schuift elke beurt één op. Daar valt niemand aan."] },
 
   "4-2": { regels:["🐙 Begin van jouw beurt wijzen twee armen elk een plek aan jouw kant aan. Staat daar aan het eind van je beurt een creature, dan pakt ze die: heeft ze plek, dan neemt ze die mee (nu van haar), anders knijpt ze: <b>3</b> schade.",
@@ -17005,6 +17105,8 @@ function praatKlaar(id, fase){
     M = {type:"praat", id, fase:Lv.doodBij.fase, i:0, klaar:null};
     praatScene(); render(); praatTyp(); return;
   }
+  /* De trap op de wereldkaart: na Nimbus sta je in de Hemelrand. */
+  if(fase === "trap"){ SET.story.trapGezien = true; saveSet(); M = {type:"story", hemel:true}; storySkin(0); render(); return; }
   /* Een tak die terug naar de levelkeuze gaat zonder gevecht en zonder winst. */
   if(Lv && Lv.terugNa && Lv.terugNa[fase]){ M = {type:"story"}; storySkin(0); render(); return; }
   /* Takken die op een gevecht uitkomen; het level zegt zelf welke variant erbij hoort. */
@@ -18422,10 +18524,16 @@ const OVERWORLD = {
   /* Eén bolletje op het pad is 2,1 procent. */
   "2-1":{x:39,y:47}, "2-2":{x:24.9,y:50.1}, "2-3":{x:20.1,y:43.9}, "2-4":{x:25.05,y:35.15}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
   "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:74.6,y:31.95}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
-  "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64},
-  /* Hemelrand: de trap op, dicht op elkaar. */
-  "5-1":{x:51,y:17}, "5-2":{x:48.4,y:13.7}, "5-3":{x:52.6,y:10.4}, "5-4":{x:48.8,y:7.1}, "5-5":{x:51.3,y:3.8}
+  "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
+/* 🌥 De Hemelrand is een laag over de bovenkant van de kaart (art/overworld-hemel.png). Die
+   verschijnt als je de trap neemt. De vijf levels staan op die laag; op de plek van de trap
+   staat dan de weg terug naar beneden. Plekken voorlopig: opnieuw meten zodra de tekening er is. */
+const HEMEL_BEELD = "art/overworld-hemel.png";
+const HEMEL_POS = {
+  "5-1":{x:40,y:27}, "5-2":{x:25,y:19}, "5-3":{x:37,y:9}, "5-4":{x:63,y:9}, "5-5":{x:76,y:20}
+};
+const HEMEL_RANDEN = [["hemel","5-1"], ["5-1","5-2"], ["5-2","5-3"], ["5-3","5-4"], ["5-4","5-5"]];
 /* Welke paden er zijn. [van, naar] verschijnt zodra "van" gehaald is. Met een derde naam
    verschijnt hij pas als díé gehaald is: de weg naar de volgende wereld begint bij het
    eerste level van de vorige, niet uit de zaal van de baas — die is een doodlopend eind. */
@@ -18436,8 +18544,7 @@ const OVERWORLD_RANDEN = [
   ["3-1","3-2"], ["3-1","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
   ["3-1","4-1","3-6"],
   ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
-  ["3-1","5-1","4-5"],
-  ["5-1","5-2"], ["5-2","5-3"], ["5-3","5-4"], ["5-4","5-5"]
+  ["3-1","hemel","4-5"]
 ];
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
@@ -18447,7 +18554,7 @@ const OVERWORLD_PAD = {
   "2-1>3-1":[[47,45],[55,41.5]],
   /* Naar Tang: zie OVERWORLD_SAMEN, dat pad begint op dat naar het Rookgordijn. */
   "3-1>4-1":[[63,47],[64,52]],
-  "3-1>5-1":[[58,33],[55,24]]
+  "3-1>hemel":[[58,33],[55,24]]
 };
 /* Paden die een stuk samen oplopen: 3-1 → 3-2 (Tang) volgt de eerste 2,5 bolletjes van het
    pad naar 3-3 (het Rookgordijn) en buigt daarna af. */
@@ -18950,7 +19057,7 @@ function kaartStippen(pts, stap){
 /* Het pad van a naar b loopt niet kaarsrecht: een zachte bocht door de tussenpunten, en
    daaroverheen een lichte slinger — als een voetpad dat om stenen heen gaat. De uiteinden
    blijven precies op de levels liggen. */
-const owPos = id => id === "hemel" ? OVERWORLD_HEMEL : OVERWORLD[id];
+const owPos = id => id === "hemel" ? OVERWORLD_HEMEL : (OVERWORLD[id] || HEMEL_POS[id]);
 function kaartRoute(id, volgende){
   const samen = OVERWORLD_SAMEN[id + ">" + volgende];
   if(samen){
@@ -19011,14 +19118,17 @@ function kaartHTML(){
   const n = SET.story.klaar.length;
   const artOk = BEELD_KLAAR[OVERWORLD_BEELD] !== "fout";
   const oud = kaartStand();
-  const ids = STORY_ORDER.filter(id => OVERWORLD[id]);
+  /* 🌥 In de Hemelrand zie je alleen de vijf levels daarboven; de rest van de kaart zakt weg. */
+  const hemelAan = !!M.hemel;
+  const ids = hemelAan ? STORY_ORDER.filter(id => HEMEL_POS[id]) : STORY_ORDER.filter(id => OVERWORLD[id]);
   const stand = {}; ids.forEach(id => { stand[id] = lvStand(id); });
   const nieuw = id => stand[id] && stand[id] !== (oud[id] || "");
   /* Eerst het pad, want hoe lang dat erover doet bepaalt wanneer de rest mag beginnen. */
   let stipTel = 0, stippen = "", padMask = "";
-  OVERWORLD_RANDEN.forEach(([id, volgende, na]) => {
+  (hemelAan ? HEMEL_RANDEN : OVERWORLD_RANDEN).forEach(([id, volgende, na]) => {
     const trigger = na || id;
-    if(!owPos(id) || !owPos(volgende) || !storyKlaar(trigger)) return;
+    if(!owPos(id) || !owPos(volgende)) return;
+    if(!(id === "hemel" ? storyVrij("5-1") : (storyKlaar(trigger) || SET.story.vrij))) return;   // codewoord unlock: alle paden   // codewoord unlock: alle paden
     if(volgende === "hemel" ? !STORY["5-1"] : !STORY[volgende]) return;
     const pts = kaartRoute(id, volgende);
     padMask += `<polyline points="${pts.map(q => q.join(",")).join(" ")}"/>`;
@@ -19030,7 +19140,7 @@ function kaartHTML(){
     });
   });
   /* Het zijpaadje naar de winkel. Kort en recht: het is geen reis, het is een omweg. */
-  if(winkelOpen() && OVERWORLD[OVERWORLD_WINKEL.na]){
+  if(!hemelAan && winkelOpen() && OVERWORLD[OVERWORLD_WINKEL.na]){
     const a = OVERWORLD[OVERWORLD_WINKEL.na], w = OVERWORLD_WINKEL;
     const lijn = [[a.x, a.y], [w.x, w.y]];
     padMask += `<polyline points="${lijn.map(q => q.join(",")).join(" ")}"/>`;
@@ -19049,7 +19159,7 @@ function kaartHTML(){
     laat ? `<animate attributeName="r" from="0" to="${r}" begin="${(vertraag / 1000).toFixed(2)}s" dur=".9s" fill="freeze" calcMode="spline" keySplines=".2 .7 .3 1"/>` : ""}</circle>`;
   const knop = id => {
     const st = stand[id]; if(!st) return "";
-    const pos = OVERWORLD[id], L = STORY[id];
+    const pos = owPos(id), L = STORY[id];
     const w = +id.split("-")[0], W = WERELDEN[w];
     const baas = lvBaas(id);
     const was = oud[id] || "";
@@ -19074,18 +19184,26 @@ function kaartHTML(){
   };
   const knoppen = ids.map(knop).join("");
   let winkel = "";
-  if(winkelOpen()){
+  if(!hemelAan && winkelOpen()){
     const w = OVERWORLD_WINKEL, nieuwW = !oud.winkel;
     gaten += gat(w.x, w.y, OVERWORLD_ZICHT * .8, nieuwW);
     winkel = `<button class="lvknop winkel${nieuwW ? " netopen" : ""}" style="left:${w.x}%;top:${w.y}%;--vertraag:${nieuwW ? vertraag : 0}ms" data-act="btn" data-btn="winkel" title="De kraam van Knort">
         <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.knorst) ? `<img class="lvport" src="${SPRITE_BEELD.knorst}" alt="" draggable="false">` : "🏪"}</span><span class="lvnaam">Knort · winkel</span></button>`;
   }
+  /* De trap: op de gewone kaart de weg omhoog (de eerste keer met Nimbus), in de Hemelrand
+     de weg terug naar beneden. Allebei op dezelfde plek. */
   let hemel = "";
-  if(false && storyVrij("5-1") && STORY["5-1"]){     // de losse Hemelrand-knop is vervangen door de vijf levels op de trap
+  if(storyVrij("5-1") && STORY["5-1"]){
     gaten += gat(OVERWORLD_HEMEL.x, OVERWORLD_HEMEL.y, OVERWORLD_ZICHT, false);
-    hemel = `<button class="lvknop hemel baas" style="left:${OVERWORLD_HEMEL.x}%;top:${OVERWORLD_HEMEL.y}%" data-act="btn" data-btn="storylijst" title="Hemelrand">
-        <span class="lvbinnen">✦</span><span class="lvnaam">✦ Hemelrand</span></button>`;
+    hemel = hemelAan
+      ? `<button class="lvknop hemel trapknop" style="left:${OVERWORLD_HEMEL.x}%;top:${OVERWORLD_HEMEL.y}%" data-act="btn" data-btn="hemelaf" title="De trap af">
+          <span class="lvbinnen">&#9660;</span><span class="lvnaam">De trap af</span></button>`
+      : `<button class="lvknop hemel trapknop baas" style="left:${OVERWORLD_HEMEL.x}%;top:${OVERWORLD_HEMEL.y}%" data-act="btn" data-btn="hemelop" title="De trap">
+          <span class="lvbinnen">&#9650;</span><span class="lvnaam">De trap</span></button>`;
   }
+  const hemelLaag = hemelAan
+    ? `<div class="hemeldim"></div>${BEELD_KLAAR[HEMEL_BEELD] !== "fout" ? `<img class="kaartart hemellaag" src="${HEMEL_BEELD}" alt="" draggable="false" onerror="this.remove()">` : ""}<div class="hemelnood"></div>`
+    : "";
   const alles = !!SET.story.vrij;
   return `<div class="ovbox kaartbox">
     <div class="kaartkop"><h2>📖 Verhaal</h2>
@@ -19093,8 +19211,9 @@ function kaartHTML(){
       <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
-    <div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}" id="kaartvlak">
+    <div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}${hemelAan ? " inhemel" : ""}" id="kaartvlak">
       ${artOk ? `<img class="kaartart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">` : ""}
+      ${hemelLaag}
       <svg class="kaartlaag" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
           <filter id="owzacht" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
@@ -19103,7 +19222,7 @@ function kaartHTML(){
             <g class="owgaten" filter="url(#owzacht)">${gaten}${padMask}</g>
           </mask>
         </defs>
-        ${alles ? "" : `<rect class="owmist" width="100" height="100" mask="url(#owmask)"/>`}
+        ${alles || hemelAan ? "" : `<rect class="owmist" width="100" height="100" mask="url(#owmask)"/>`}
         <g class="owpad">${stippen}</g>
       </svg>
       ${knoppen}${winkel}${hemel}
@@ -19145,7 +19264,7 @@ function kaartScrol(){
   if(!M || M.type !== "story" || M.lijst) return;
   kaartNamen();
   const oud = kaartStand(); let anders = false;
-  STORY_ORDER.filter(id => OVERWORLD[id]).forEach(id => {
+  STORY_ORDER.filter(id => OVERWORLD[id] || (M.hemel && HEMEL_POS[id])).forEach(id => {
     const st = lvStand(id);
     if(st && oud[id] !== st){ oud[id] = st; anders = true; }
   });
@@ -19391,7 +19510,7 @@ function render(){
     + (S.story && S.story.regen ? `<div class="regenmeter">🌧 het regent</div>` : "")
     + (S.story && S.story.rotsAan ? `<div class="rotsmeter">🧱 rotsval</div>` : "")
     + (S.story && S.story.serafDeck ? `<div class="rotsmeter serafmeter"><span class="serafrug"></span> Seraf · ${S.story.serafDeck.length}</div>` : "")
-    + (S.story && S.story.trio ? `<div class="rotsmeter triometer">${S.story.trio.map(v => `${v.hp > 0 ? "🔥" : "🌑"} ${v.naam} ${v.hp}`).join(" · ")}</div>` : "")
+    + (S.story && S.story.trio ? `<div class="rotsmeter triometer">${S.story.trio.map(v => `${v.hp > 0 ? icon(v.kracht) : "🌑"} ${v.naam} ${v.hp}`).join(" · ")}</div>` : "")
     + (S.story && S.story.overleef ? (() => { const n = S.story.overleef, klaar = Math.min(n, Math.floor(S.gTurn / 2)),
           nu = Math.min(n, klaar + 1), vers = S.story.rondeNet && Date.now() - S.story.rondeNet < 1500;
         return `<div class="rondeklok${vers ? " vers" : ""}" title="hou het ${n} rondes vol"><div class="rkkop">ronde <b>${nu}</b> van ${n}</div>
@@ -20615,6 +20734,12 @@ function onBtn(btn, el, fromAction){
       break;
     case "story": M = {type:"story"}; storySkin(0); render(); break;
     case "storylijst": M = {type:"story", lijst:true}; render(); break;
+    /* 🌥 De trap: de eerste keer eerst Nimbus, daarna meteen omhoog. */
+    case "hemelop":
+      if(!SET.story.trapGezien && STORY["5-1"] && STORY["5-1"].trap){ storySkin(5); praatStart("5-1", "trap"); }
+      else { M = {type:"story", hemel:true}; render(); }
+      break;
+    case "hemelaf": M = {type:"story"}; render(); break;
     case "cirkeltoggle": document.body.classList.toggle("cirkelopen"); break;
     case "lvwereld": if(M && M.lijst){ M.wereld = +(el && el.dataset.w) || 1; M.lvInfo = null; render(); } break;
     case "storykaart": M = {type:"story"}; render(); break;
@@ -21081,6 +21206,7 @@ function beeldenWarm(){
   if(typeof LICHT_BEELD === "object") paden.push(...Object.values(LICHT_BEELD));
   if(typeof AETHER_BEELD === "object") paden.push(...Object.values(AETHER_BEELD));
   paden.push(RUIT_VELD, RUIT_LICHT);
+  paden.push("art/vonk-knetter.png", "art/vonk-spetter.png", "art/vonk-fikkie.png");   // 🎪 de losse vonken op het veld
   if(typeof HORIZON_BEELD === "object") paden.push(...Object.values(HORIZON_BEELD));
   paden.push(LICHT_KAART, AETHER_KAART, AETHER_KAARTVORM);
   if(typeof OVERWORLD_BEELD === "string") paden.push(OVERWORLD_BEELD);
@@ -21217,7 +21343,7 @@ const EMOJI_ICOON = {
 const EMOJI_BEELD = {
   "🔥":"art/kaart-vuur.png", "💧":"art/kaart-water.png", "🌿":"art/kaart-gras.png", "🪨":"art/kaart-steen.png",
   "⛰":"art/kaart-rots.png", "☄":"art/kaart-plasma.png", "🌹":"art/kaart-roos.png", "🧊":"art/kaart-ijs.png", "❄":"art/kaart-ijs.png",
-  "🐺":"art/kaart-wolf.png", "🐟":"art/kaart-vliegendevis.png", "🕷":"art/kaart-spin.png", "🥚":"art/token-ei.png",
+  "🐺":"art/kaart-wolf.png", "🐟":"art/kaart-vliegendevis.png", "🐠":"art/kaart-clownsvis.png", "🐡":"art/kaart-kogelvis.png", "🕷":"art/kaart-spin.png", "🥚":"art/token-ei.png",
   "🛡":"art/token-schild.png", "🗡":"art/kaart-swipe.png", "🔪":"art/kaart-stab.png", "🕸":"art/kaart-web.png",
   "⛓":"art/kaart-knoop.png", "🐉":"art/kaart-draak.png", "🐍":"art/kaart-leviathan.png", "🌳":"art/kaart-woud.png", "🗿":"art/kaart-kolos.png"
 };
