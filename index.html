@@ -376,8 +376,12 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
 .hartic svg,.pixic{display:block; width:100%; height:100%}
 .pixspan{display:inline-block; width:.9em; height:.9em; vertical-align:-.1em; opacity:.75}
 .pixic{image-rendering:pixelated}
-.icoic{display:inline-block; width:1.1em; height:1.1em; vertical-align:-.22em; margin:0 .06em;
-  background:center/contain no-repeat}
+.icoic{display:inline-block; width:1em; height:1em; vertical-align:-.16em; margin:0 .06em;
+  background:center/contain no-repeat; max-width:100%; max-height:100%; flex:0 0 auto}
+/* In een klein vakje (badge, knopje, ruit, chainregel) past het icoon zich aan het vakje aan. */
+.varbadge .icoic, .stat .icoic, .chic .icoic, .hic .icoic, .ruitmerk .icoic, .ruitic .icoic, .pvhead .ic .icoic,
+.lvbinnen .icoic, .tbtn .icoic, .zmdoel .icoic, .mikmerk .icoic, .cnt .icoic, .kw .icoic{width:.9em; height:.9em; vertical-align:-.1em; margin:0}
+.ruitic .allel{display:inline-grid; grid-template-columns:1fr 1fr; gap:1px; font-size:.5em; line-height:1}
 .winbig .icoic{width:1.5em; height:1.5em; image-rendering:pixelated}
 .tbtn .pixic,#geluidfab .pixic{width:18px; height:16px; margin:0 auto}
 .genoemdmerk .pixic{width:18px; height:10px}
@@ -1592,6 +1596,8 @@ body.pvuitleg #ptbel{display:none !important}
 .lvknop .lvvink{position:absolute; right:-8px; top:-8px; width:24px; height:24px;
   background:#ffd447; color:#2a2000; border:2px solid #3a2a06; font-size:.9rem; font-weight:700;
   display:flex; align-items:center; justify-content:center; box-shadow:0 2px 0 rgba(0,0,0,.6)}
+/* De vijf levels op de trap staan dicht op elkaar: iets kleiner. */
+.lvknop.hemelknop, .lvknop.hemelknop.baas{width:46px; height:46px; font-size:1.2rem}
 .lvknop.hemel{background:#f2ecd6; border-color:var(--gold); color:#2a2721; animation:lvpuls 2.2s ease-in-out infinite}
 .lvknop.winkel{background:radial-gradient(circle at 40% 35%, #4a3a22, #1c150a 70%); border-color:#e0c07a; font-size:1.6rem}
 /* De sterren onder een gehaald level, en de balkjes in de kop. */
@@ -2842,8 +2848,25 @@ body:not(.geladen) #app{visibility:hidden}
    Eén venster dat overal terugkomt, zoals in de oude 16-bit RPG's: diepblauw, een witte
    rand met een blauwe en een donkere lijn erbinnen, gouden hoekjes en een wijzend handje
    als cursor. Alles hieronder hangt aan body.venster, zodat het in één keer uit kan. */
+/* De kleur van de vensters volgt de wereld: zwart op het homescreen en de kaart, bruin in
+   Steenrijk, groen in het Rankenwoud, rood in de Asgronden, blauw in Diepstroom en
+   leigrijs-lila in Hemelrand. vn1-3: het verloop, vnm: de binnenlijn, vk1-2: de knoppen,
+   vsub/vdim: bijschriften, vbalk: achter de zijbalken, vin: invoervelden. */
+body.venster, body.venster.vw0{
+  --vn1:#30333e; --vn2:#1e2029; --vn3:#121319; --vnm:#6a6f82; --vk1:#4a4f62; --vk2:#2a2d3a; --vk3:#5d6378; --vk4:#363a4a;
+  --vsub:#c4c8d6; --vdim:#9ba0b3; --vgrijs:#6f7486; --vbalk:#08090d; --vin:#0c0d12; --vglans:rgba(200,205,220,.35)}
+body.venster.vw1{--vn1:#6e4b2c; --vn2:#4b321c; --vn3:#2e1f12; --vnm:#a8805a; --vk1:#8a6038; --vk2:#553820; --vk3:#a5744a; --vk4:#6a4628;
+  --vsub:#ecd9bf; --vdim:#c9ab88; --vgrijs:#8a7358; --vbalk:#110b06; --vin:#1c120a; --vglans:rgba(255,210,160,.35)}
+body.venster.vw2{--vn1:#2e6a3a; --vn2:#1e4a28; --vn3:#11301a; --vnm:#6aa874; --vk1:#3f8a4c; --vk2:#24562e; --vk3:#52a560; --vk4:#2e6a3a;
+  --vsub:#d2eccf; --vdim:#9fc8a2; --vgrijs:#5f8a66; --vbalk:#060f08; --vin:#0a1a0e; --vglans:rgba(170,255,180,.35)}
+body.venster.vw3{--vn1:#8a2f1c; --vn2:#5e1d12; --vn3:#3a100a; --vnm:#c8684e; --vk1:#a8402a; --vk2:#6a2216; --vk3:#c4553a; --vk4:#80301e;
+  --vsub:#f6d2c4; --vdim:#d99a86; --vgrijs:#9a6454; --vbalk:#120504; --vin:#1e0806; --vglans:rgba(255,160,120,.35)}
+body.venster.vw4{--vn1:#2b3f9e; --vn2:#1a2670; --vn3:#121a52; --vnm:#6b77c9; --vk1:#3a52c0; --vk2:#22307e; --vk3:#4d67dc; --vk4:#2b3c9a;
+  --vsub:#c9d0ff; --vdim:#aab3ea; --vgrijs:#6f78b0; --vbalk:#070a1c; --vin:#0e1440; --vglans:rgba(120,150,255,.45)}
+body.venster.vw5{--vn1:#5a5e86; --vn2:#3e4266; --vn3:#282b47; --vnm:#a8acd6; --vk1:#6c70a0; --vk2:#454972; --vk3:#8286b8; --vk4:#555a88;
+  --vsub:#e2e3f6; --vdim:#b8badb; --vgrijs:#7f82a8; --vbalk:#0d0e18; --vin:#16182a; --vglans:rgba(220,220,255,.4)}
 body.venster{
-  --vn1:#2b3f9e; --vn2:#1a2670; --vn3:#121a52; --vnl:#e6e9ff; --vnm:#6b77c9; --vnd:#0b0d22; --vng:#e8c67a;
+  --vnl:#e6e9ff; --vnd:#0b0d22; --vng:#e8c67a;
   --vnbg:linear-gradient(180deg,var(--vn1),var(--vn2) 55%,var(--vn3));
   /* De rand ligt buiten het venster (plus één echte rand van 2px): inhoud die scrollt kan er
      zo nooit overheen schuiven. Van buiten naar binnen: donker, wit, blauw, donker. */
@@ -2854,32 +2877,30 @@ body.venster{
 body.venster .vn,
 body.venster .ovbox:not(.kaartbox):not(.wkbox){
   position:relative; background:var(--vnbg); color:#f4f4ff; border:2px solid var(--vnd) !important; border-radius:8px;
-  box-shadow:var(--vnrand) !important; text-shadow:2px 2px 0 var(--vnd)}
-body.venster .vn::before, body.venster .vn::after{
-  content:""; position:absolute; top:-15px; width:13px; height:13px; transform:rotate(45deg); z-index:3; pointer-events:none;
-  background:var(--vng); box-shadow:0 0 0 2px var(--vnd), inset -2px -2px 0 rgba(0,0,0,.25)}
-body.venster .vn::before{left:-15px}
-body.venster .vn::after{right:-15px}
+  box-shadow:var(--vnrand) !important}
+/* Geen schaduw op alle tekst in een venster: op kleine letters (een kaarttitel, "3×") leest
+   dat als dubbele tekst. Alleen koppen, lijst-items en knoppen hebben er een. */
+body.venster .ovbox .card, body.venster .ovbox .card *{text-shadow:none !important}
 body.venster .ovbox:not(.kaartbox):not(.wkbox){overflow-y:auto}
 body.venster .ovbox h1, body.venster .ovbox h2{font-family:"Press Start 2P",ui-monospace,monospace; color:var(--vng);
   text-shadow:2px 2px 0 var(--vnd); letter-spacing:.08em}
 body.venster .ovbox h2{font-size:.78rem; line-height:1.6}
-body.venster .ovbox .sub{color:#c9d0ff}
+body.venster .ovbox .sub{color:var(--vsub)}
 body.venster .ovbox .sub b{color:#fff}
-body.venster .ovbox .helptxt{color:#dfe3ff}
+body.venster .ovbox .helptxt{color:var(--vsub)}
 body.venster .ovbox .helptxt b{color:#fff}
 body.venster .ovbox .helptxt h3{color:var(--vng)}
 
 /* knoppen in een venster: kleine blauwe blokjes met een lichte rand */
 body.venster .ovbox .obtn, body.venster .kaartkop .obtn, body.venster .abtn, body.venster .seg{
-  background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
+  background:linear-gradient(180deg,var(--vk1),var(--vk2)) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px;
   box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important; text-shadow:2px 2px 0 var(--vnd)}
 body.venster .ovbox .obtn:hover, body.venster .kaartkop .obtn:hover, body.venster .abtn:hover, body.venster .seg:hover{
-  background:linear-gradient(180deg,#4d67dc,#2b3c9a) !important; color:var(--vng) !important; filter:none}
-body.venster .ovbox .obtn .bsub{color:#c9d0ff}
+  background:linear-gradient(180deg,var(--vk3),var(--vk4)) !important; color:var(--vng) !important; filter:none}
+body.venster .ovbox .obtn .bsub{color:var(--vsub)}
 body.venster .seg.on{background:linear-gradient(180deg,#e8c67a,#b8924a) !important; color:var(--vnd) !important; text-shadow:none}
-body.venster .abtn.ghost{background:linear-gradient(180deg,#2a3570,#172050) !important}
+body.venster .abtn.ghost{background:linear-gradient(180deg,var(--vk2),var(--vn3)) !important}
 
 /* een keuzelijst: tekst zonder knop, met het handje ervoor als je erop staat */
 body.venster .vr, body.venster .mbtn{
@@ -2888,27 +2909,24 @@ body.venster .vr, body.venster .mbtn{
   font-family:"Press Start 2P",ui-monospace,monospace; font-size:.62rem; line-height:1.6; letter-spacing:.04em;
   padding:9px 10px 9px 42px; text-shadow:2px 2px 0 var(--vnd); cursor:pointer; transform:none !important}
 body.venster .vr .bsub, body.venster .vr small{display:block; font-family:"VT323",ui-monospace,monospace; font-size:1.05rem;
-  letter-spacing:0; color:#aab3ea; margin-top:3px}
+  letter-spacing:0; color:var(--vdim); margin-top:3px}
 body.venster .vr > span:first-child{display:block}
 body.venster .vr::before, body.venster .mbtn::before{content:""; position:absolute; left:6px; top:18px; width:26px; height:16px;
   transform:translateY(-50%); background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 8' shape-rendering='crispEdges'><rect x='4' y='0' width='1' height='1' fill='%230b0d22'/><rect x='5' y='0' width='1' height='1' fill='%230b0d22'/><rect x='6' y='0' width='1' height='1' fill='%230b0d22'/><rect x='7' y='0' width='1' height='1' fill='%230b0d22'/><rect x='8' y='0' width='1' height='1' fill='%230b0d22'/><rect x='9' y='0' width='1' height='1' fill='%230b0d22'/><rect x='10' y='0' width='1' height='1' fill='%230b0d22'/><rect x='11' y='0' width='1' height='1' fill='%230b0d22'/><rect x='3' y='1' width='1' height='1' fill='%230b0d22'/><rect x='4' y='1' width='1' height='1' fill='%23ffffff'/><rect x='5' y='1' width='1' height='1' fill='%23ffffff'/><rect x='6' y='1' width='1' height='1' fill='%23ffffff'/><rect x='7' y='1' width='1' height='1' fill='%23ffffff'/><rect x='8' y='1' width='1' height='1' fill='%23ffffff'/><rect x='9' y='1' width='1' height='1' fill='%23ffffff'/><rect x='10' y='1' width='1' height='1' fill='%23ffffff'/><rect x='11' y='1' width='1' height='1' fill='%23ffffff'/><rect x='12' y='1' width='1' height='1' fill='%230b0d22'/><rect x='1' y='2' width='1' height='1' fill='%230b0d22'/><rect x='2' y='2' width='1' height='1' fill='%230b0d22'/><rect x='3' y='2' width='1' height='1' fill='%230b0d22'/><rect x='4' y='2' width='1' height='1' fill='%23ffffff'/><rect x='5' y='2' width='1' height='1' fill='%23ffffff'/><rect x='6' y='2' width='1' height='1' fill='%23ffffff'/><rect x='7' y='2' width='1' height='1' fill='%230b0d22'/><rect x='8' y='2' width='1' height='1' fill='%230b0d22'/><rect x='9' y='2' width='1' height='1' fill='%230b0d22'/><rect x='10' y='2' width='1' height='1' fill='%230b0d22'/><rect x='11' y='2' width='1' height='1' fill='%230b0d22'/><rect x='12' y='2' width='1' height='1' fill='%230b0d22'/><rect x='0' y='3' width='1' height='1' fill='%230b0d22'/><rect x='1' y='3' width='1' height='1' fill='%23ffffff'/><rect x='2' y='3' width='1' height='1' fill='%23ffffff'/><rect x='3' y='3' width='1' height='1' fill='%23ffffff'/><rect x='4' y='3' width='1' height='1' fill='%230b0d22'/><rect x='5' y='3' width='1' height='1' fill='%23ffffff'/><rect x='6' y='3' width='1' height='1' fill='%23ffffff'/><rect x='7' y='3' width='1' height='1' fill='%230b0d22'/><rect x='0' y='4' width='1' height='1' fill='%230b0d22'/><rect x='1' y='4' width='1' height='1' fill='%23ffffff'/><rect x='2' y='4' width='1' height='1' fill='%23ffffff'/><rect x='3' y='4' width='1' height='1' fill='%23ffffff'/><rect x='4' y='4' width='1' height='1' fill='%23ffffff'/><rect x='5' y='4' width='1' height='1' fill='%23ffffff'/><rect x='6' y='4' width='1' height='1' fill='%23ffffff'/><rect x='7' y='4' width='1' height='1' fill='%230b0d22'/><rect x='0' y='5' width='1' height='1' fill='%230b0d22'/><rect x='1' y='5' width='1' height='1' fill='%23ffffff'/><rect x='2' y='5' width='1' height='1' fill='%23ffffff'/><rect x='3' y='5' width='1' height='1' fill='%23ffffff'/><rect x='4' y='5' width='1' height='1' fill='%230b0d22'/><rect x='5' y='5' width='1' height='1' fill='%23ffffff'/><rect x='6' y='5' width='1' height='1' fill='%23ffffff'/><rect x='7' y='5' width='1' height='1' fill='%230b0d22'/><rect x='0' y='6' width='1' height='1' fill='%230b0d22'/><rect x='1' y='6' width='1' height='1' fill='%23ffffff'/><rect x='2' y='6' width='1' height='1' fill='%23ffffff'/><rect x='3' y='6' width='1' height='1' fill='%23ffffff'/><rect x='4' y='6' width='1' height='1' fill='%23ffffff'/><rect x='5' y='6' width='1' height='1' fill='%23ffffff'/><rect x='6' y='6' width='1' height='1' fill='%23ffffff'/><rect x='7' y='6' width='1' height='1' fill='%230b0d22'/><rect x='1' y='7' width='1' height='1' fill='%230b0d22'/><rect x='2' y='7' width='1' height='1' fill='%230b0d22'/><rect x='3' y='7' width='1' height='1' fill='%230b0d22'/><rect x='4' y='7' width='1' height='1' fill='%230b0d22'/><rect x='5' y='7' width='1' height='1' fill='%230b0d22'/><rect x='6' y='7' width='1' height='1' fill='%230b0d22'/><rect x='7' y='7' width='1' height='1' fill='%230b0d22'/></svg>") center/contain no-repeat; image-rendering:pixelated;
   filter:drop-shadow(2px 2px 0 var(--vnd)); opacity:0}
-body.venster .vr:hover, body.venster .vr:focus-visible, body.venster .vr.aan,
-body.venster .mbtn:hover, body.venster .mbtn:focus-visible, body.venster .mbtn.aan{color:var(--vng); outline:none}
-body.venster .vr:hover::before, body.venster .vr:focus-visible::before, body.venster .vr.aan::before,
-body.venster .mbtn:hover::before, body.venster .mbtn:focus-visible::before, body.venster .mbtn.aan::before{opacity:1; animation:vnwijs 1s steps(2) infinite}
-/* staat de muis op een ander item, dan gaat het handje daarheen */
-body.venster .vlijst:hover .vr.aan:not(:hover)::before, body.venster .menucol:hover .mbtn.aan:not(:hover)::before,
-body.venster .vlvlijst:hover .vr.aan:not(:hover)::before{opacity:0}
-body.venster .vlijst:hover .vr.aan:not(:hover), body.venster .menucol:hover .mbtn.aan:not(:hover){color:#fff}
+/* Er staat altijd precies één handje per lijst: op het item met .aan. De muis en de
+   pijltjes verplaatsen die klas (zie vnKies), zodat het handje nooit verdubbelt of verdwijnt. */
+body.venster .vr.aan, body.venster .mbtn.aan{color:var(--vng); outline:none}
+body.venster .vr:focus-visible, body.venster .mbtn:focus-visible{outline:none}
+body.venster .vr.aan::before, body.venster .mbtn.aan::before{opacity:1; animation:vnwijs 1s steps(2) infinite}
 @keyframes vnwijs{50%{transform:translate(4px,-50%)}}
-body.venster .vr.grijs{color:#8088b8}
-body.venster .vr.dicht{color:#6f78b0; cursor:default}
+body.venster .vr.grijs{color:var(--vgrijs)}
+body.venster .vr.dicht{color:var(--vgrijs); cursor:default}
 body.venster .vr.dicht::before{display:none}
 body.venster .vr.in{padding-left:58px; font-size:.54rem}
 body.venster .vr.in::before{left:30px}
 body.venster .mbtn.danger{color:#ffb3a6}
-body.venster .mbtn .mk{margin-left:auto; font-family:"VT323",monospace; font-size:.9rem; color:#aab3ea;
+body.venster .mbtn .mk{margin-left:auto; font-family:"VT323",monospace; font-size:.9rem; color:var(--vdim);
   border:1px solid #6b77c9; border-radius:4px; padding:0 6px}
 body.venster .menucol{gap:2px; margin-top:12px}
 body.venster .vscheid{height:0; border-top:2px solid rgba(230,233,255,.18); margin:6px 8px}
@@ -2925,10 +2943,34 @@ body.venster #kaartbanen::before{content:""; position:absolute; inset:-6% -10%;
 @keyframes kaartdein{0%{transform:translate(-5%,1%) scale(1.02)} 50%{transform:translate(0,-1.5%) scale(1.05)} 100%{transform:translate(5%,1%) scale(1.02)}}
 @media (prefers-reduced-motion:reduce){ body.venster #kaartbanen::before{animation:none} }
 body.venster #kaartbanen .kaartbanen{display:none}
-/* ---- de achterkant van de kaarten: een eigen tekening zodra art/kaart-achterkant.png er is ---- */
-body.rugbeeld .cardback:not(.verdorven):not(.verzopen){background:url("art/kaart-achterkant.png") center/cover no-repeat !important;
+/* ---- de achterkant van de kaarten ----
+   Zonder tekening: strepen in de kleur van de wereld. Met art/kaart-achterkant-w0.png t/m
+   -w5.png: de tekening van die wereld (w0 = vrij spel en menu's). */
+body.venster .cardback:not(.verdorven):not(.verzopen):not(.hemel){
+  background:repeating-linear-gradient(45deg, var(--vk1) 0 5px, var(--vk2) 5px 10px) !important;
+  box-shadow:inset 0 0 0 2px var(--vnm), 3px 3px 0 0 rgba(0,0,0,.5) !important}
+body.venster.vw0.rugw0 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w0.png") center/cover no-repeat !important;
   box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
-body.rugbeeld .cardback:not(.verdorven):not(.verzopen)::after{display:none}
+body.venster.vw0.rugw0 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+body.venster.vw1.rugw1 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w1.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.vw1.rugw1 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+body.venster.vw2.rugw2 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w2.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.vw2.rugw2 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+body.venster.vw3.rugw3 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w3.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.vw3.rugw3 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+body.venster.vw4.rugw4 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w4.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.vw4.rugw4 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+body.venster.vw5.rugw5 .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant-w5.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.vw5.rugw5 .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
+/* (oud) één achterkant voor alles, als die er is en de wereld er geen eigen heeft */
+body.venster.rugbeeld .cardback:not(.verdorven):not(.verzopen):not(.hemel){background:url("art/kaart-achterkant.png") center/cover no-repeat !important;
+  box-shadow:3px 3px 0 0 rgba(0,0,0,.5) !important; image-rendering:pixelated}
+body.venster.rugbeeld .cardback:not(.verdorven):not(.verzopen):not(.hemel)::after{display:none}
 /* ---- homescreen ---- */
 body.venster .vhome{position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:26px;
   width:min(860px,94vw); max-height:94vh}
@@ -2936,16 +2978,16 @@ body.venster .vlogo{text-align:center}
 body.venster .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(1.6rem,6vw,3.4rem);
   letter-spacing:.08em; line-height:1.1;
   background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(4px 4px 0 var(--vnd)) drop-shadow(0 0 18px rgba(120,150,255,.45))}
+  filter:drop-shadow(4px 4px 0 var(--vnd)) drop-shadow(0 0 18px var(--vglans))}
 body.venster .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.42rem,1.2vw,.62rem); letter-spacing:.3em;
-  color:#c9d0ff; margin-top:14px; text-shadow:2px 2px 0 var(--vnd)}
+  color:var(--vsub); margin-top:14px; text-shadow:2px 2px 0 var(--vnd)}
 body.venster .vhome .vn, body.venster .vlevels .vn, body.venster .vmenu .vn{text-align:left}
 body.venster .vhrij{display:flex; gap:44px; align-items:flex-start; justify-content:center; width:100%}
 body.venster .vhlijst{width:min(420px,92vw); padding:18px 16px}
-body.venster .vster{display:inline-block; width:12px; height:10px; margin:0 1px; vertical-align:-1px; color:#5a64a8}
+body.venster .vster{display:inline-block; width:12px; height:10px; margin:0 1px; vertical-align:-1px; color:var(--vgrijs)}
 body.venster .vster.vol{color:var(--vng)}
 body.venster .vster svg{display:block; width:100%; height:100%; filter:drop-shadow(1px 1px 0 var(--vnd))}
-body.venster .vn .obtn{background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
+body.venster .vn .obtn{background:linear-gradient(180deg,var(--vk1),var(--vk2)) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px; box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important}
 body.venster .vhinfo{width:230px; padding:18px 20px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; line-height:1.4}
 body.venster .vhinfo .vkop{color:var(--vng); margin-bottom:10px}
@@ -2964,21 +3006,21 @@ body.venster .vwerelden{grid-row:1 / span 2; display:flex; flex-direction:column
 body.venster .vwerelden .vr{font-size:.52rem}
 body.venster .vwerelden .vr i{flex:0 0 12px; height:12px; background:var(--w); box-shadow:0 0 0 2px var(--vnd)}
 body.venster .vwerelden .vr.kies{background:rgba(255,255,255,.12) !important; box-shadow:inset 0 0 0 2px rgba(230,233,255,.3) !important}
-body.venster .vwerelden .vr .vtel{margin-left:auto; color:#aab3ea}
+body.venster .vwerelden .vr .vtel{margin-left:auto; color:var(--vdim)}
 body.venster .vwerelden .vonder{margin-top:auto; padding-top:14px; display:flex; flex-direction:column; gap:10px}
 body.venster .vlvlijst .vr{font-size:.56rem}
-body.venster .vlvlijst .vr .vnr{flex:0 0 42px; color:#aab3ea}
+body.venster .vlvlijst .vr .vnr{flex:0 0 42px; color:var(--vdim)}
 body.venster .vlvlijst .vr .vst{margin-left:auto; color:var(--vng); letter-spacing:.1em}
 body.venster .vlvlijst .vr.klaar .vst{color:var(--vng)}
 body.venster .vlvuitleg{display:flex; gap:16px; min-height:170px}
 body.venster .vlvuitleg .vport{flex:0 0 130px; height:150px; border-radius:6px; overflow:hidden; position:relative;
-  box-shadow:inset 0 0 0 2px var(--vnd); background:linear-gradient(180deg,#34406a,#1a2250)}
+  box-shadow:inset 0 0 0 2px var(--vnd); background:linear-gradient(180deg,var(--vn1),var(--vn3))}
 body.venster .vlvuitleg .vport img{position:absolute; left:50%; bottom:0; height:112%; transform:translateX(-50%); image-rendering:pixelated}
 body.venster .vlvuitleg .vtxt{flex:1; min-width:0}
 body.venster .vlvuitleg .vtxt .vkop{margin-left:0}
-body.venster .vlvuitleg .vtxt p{font-family:"VT323",ui-monospace,monospace; font-size:1.15rem; line-height:1.25; color:#dfe3ff; margin:6px 0}
+body.venster .vlvuitleg .vtxt p{font-family:"VT323",ui-monospace,monospace; font-size:1.15rem; line-height:1.25; color:var(--vsub); margin:6px 0}
 body.venster .vcode{display:flex; gap:8px}
-body.venster .vcode input{flex:1; min-width:0; background:#0e1440; color:#fff; border:2px solid var(--vnm); border-radius:5px;
+body.venster .vcode input{flex:1; min-width:0; background:var(--vin); color:#fff; border:2px solid var(--vnm); border-radius:5px;
   padding:6px 8px; font-family:"VT323",monospace; font-size:1rem}
 @media (max-width:760px){
   body.venster .vlevels{grid-template-columns:1fr; overflow-y:auto}
@@ -3001,18 +3043,14 @@ body:has(#app.w5.hzdoor){background:
 /* ---- de kaart: de kop is een klein venster ---- */
 body.venster .kaartkop{top:16px; left:16px; right:auto; padding:10px 16px; border-radius:8px; pointer-events:auto;
   background:var(--vnbg); border:2px solid var(--vnd); box-shadow:var(--vnrand)}
-body.venster .kaartkop .sub{color:#c9d0ff !important}
-body.venster .voorbox .voorvoet::before{background:#141d5e !important; box-shadow:0 -14px 18px -8px #141d5e !important}
+body.venster .kaartkop .sub{color:var(--vsub) !important}
+body.venster .voorbox .voorvoet::before{background:var(--vn3) !important; box-shadow:0 -14px 18px -8px var(--vn3) !important}
 /* ---- het praatscherm: de tekst staat in hetzelfde venster ---- */
 body.venster .praatbox{background:var(--vnbg); border:2px solid var(--vnd); border-radius:8px; box-shadow:var(--vnrand);
   color:#fff; text-shadow:2px 2px 0 var(--vnd); padding:18px 22px 22px}
 body.venster .praatnaam{color:var(--vng)}
 body.venster .praatpijl{color:#fff}
-body.venster .praatbox::before, body.venster .praatbox::after{content:""; position:absolute; top:-15px; width:13px; height:13px;
-  transform:rotate(45deg); background:var(--vng); box-shadow:0 0 0 2px var(--vnd); pointer-events:none}
-body.venster .praatbox::before{left:-15px}
-body.venster .praatbox::after{right:-15px}
-body.venster .pkbtn{background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
+body.venster .pkbtn{background:linear-gradient(180deg,var(--vk1),var(--vk2)) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px; box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important;
   text-shadow:2px 2px 0 var(--vnd)}
 body.venster .pkbtn:hover{color:var(--vng) !important}
@@ -3022,7 +3060,7 @@ body.venster .kaartkop h2{font-family:"Press Start 2P",ui-monospace,monospace; f
 /* De balken zijn altijd dicht, ook als er een vergezicht achter het veld hangt (en in
    wereld 5, waar de wereldkleuren niet gezet zijn): het vergezicht mag er nooit doorheen. */
 body.venster #left, body.venster #right,
-body.venster #app.hzdoor #left, body.venster #app.hzdoor #right{background:#070a1c !important; border-color:#0b0d22 !important}
+body.venster #app.hzdoor #left, body.venster #app.hzdoor #right{background:var(--vbalk) !important; border-color:#0b0d22 !important}
 body.venster #preview .circ, body.venster #preview .pv{border:2px solid var(--vnd) !important; border-radius:8px; outline:0 !important;
   background:var(--vnbg) !important; box-shadow:var(--vnrand) !important; position:relative}
 body.venster #preview .circ .t{color:var(--vng); text-shadow:2px 2px 0 var(--vnd)}
@@ -3031,9 +3069,9 @@ body.venster #ptbel{background:var(--vnbg); border:2px solid var(--vnd); box-sha
 body.venster #ptbel::after{border-top-color:var(--vnl)}
 body.venster #ptbel .pbnaam{color:var(--vng)}
 body.venster #ptbel.hard{background:linear-gradient(180deg,#5a4a1a,#2e2408)}
-body.venster #turnbadge{color:#c9d0ff; text-shadow:2px 2px 0 var(--vnd)}
+body.venster #turnbadge{color:var(--vsub); text-shadow:2px 2px 0 var(--vnd)}
 body.venster #turnbadge b{color:var(--vng)}
-body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
+body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
 #cstrip,#vijandbalk{display:none}
 @media (min-width:1081px){
   /* Rechts: één lang venster. Zijn stapels, de beurt, jouw stapels en de knoppen. */
@@ -3072,14 +3110,14 @@ body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
 .cstrij{display:flex; align-items:center; justify-content:center; gap:5px}
 .cst{width:38px; height:38px; background-size:cover; background-position:center 40%; box-shadow:0 0 0 2px var(--vnl,#e6e9ff), 0 0 0 4px var(--vnd,#0b0d22); image-rendering:pixelated}
 .cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
-.cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:#aab3ea; text-shadow:1px 1px 0 #0b0d22}
+.cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:var(--vdim); text-shadow:1px 1px 0 #0b0d22}
 .cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
 .vbrij{display:flex; flex-direction:column; gap:8px}
-.vbrij.aan .vbnaam::after{content:""; display:inline-block; width:7px; height:7px; margin-left:10px; vertical-align:2px;
-  background:#fff; transform:rotate(45deg); box-shadow:1px 1px 0 #0b0d22}
+.vbrij.aan .vbnaam::after{content:""; display:inline-block; margin-left:10px; vertical-align:1px;
+  border:5px solid transparent; border-right:7px solid #fff; border-left:0; filter:drop-shadow(1px 1px 0 #0b0d22)}
 .vbnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:var(--vng,#e8c67a); text-shadow:2px 2px 0 #0b0d22; line-height:1.5}
 #vijandbalk .hpbalk{width:100%}
-#vijandbalk .vbrij[data-side="0"] .vbnaam{color:#c9d0ff}
+#vijandbalk .vbrij[data-side="0"] .vbnaam{color:var(--vsub)}
 #vijandbalk .hpb{flex:1 1 auto; width:auto}
 /* de levensbalk */
 body.venster .hpbalk{display:flex; align-items:center; gap:12px}
@@ -3093,11 +3131,11 @@ body.venster .hpb b{position:absolute; inset:0; pointer-events:none;
   background:repeating-linear-gradient(90deg, transparent 0 calc(100% / var(--n) - 2px), rgba(11,13,34,.6) calc(100% / var(--n) - 2px) calc(100% / var(--n)))}
 body.venster .hpbalk .lnum{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:#fff; margin:0;
   text-shadow:2px 2px 0 #0b0d22; white-space:nowrap}
-body.venster .hpbalk .lnum small{font-size:.5rem; color:#aab3ea}
+body.venster .hpbalk .lnum small{font-size:.5rem; color:var(--vdim)}
 body.venster .lnum{color:#fff}
-body.venster .tbtn{background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
+body.venster .tbtn{background:linear-gradient(180deg,var(--vk1),var(--vk2)) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px; box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important}
-body.venster .tbtn:hover{background:linear-gradient(180deg,#4d67dc,#2b3c9a) !important; color:var(--vng) !important}
+body.venster .tbtn:hover{background:linear-gradient(180deg,var(--vk3),var(--vk4)) !important; color:var(--vng) !important}
 body.venster .tbtn.on, body.venster .tbtn.aan{color:var(--vng) !important}
 </style>
 <div id="laadscherm"><div class="ldbox">
@@ -16439,6 +16477,8 @@ function storySkin(w){
   const app = document.getElementById("app");
   if(!app) return;
   for(let i=0;i<=5;i++) app.classList.toggle("w" + i, w === i);
+  /* Stijl C: de vensters krijgen de kleur van de wereld (0 = homescreen en kaart). */
+  for(let i=0;i<=5;i++) document.body.classList.toggle("vw" + i, (w || 0) === i);
   /* Binnen een wereld heeft elk level zijn eigen kleurzweem. */
   [...app.classList].forEach(c => { if(/^lv\d/.test(c)) app.classList.remove(c); });
   /* Vrij spel (bots, hotseat, online) leent het decor van een level uit één wereld. */
@@ -16796,13 +16836,17 @@ function praatTyp(){
   M.typt = true;
   const pijl = document.getElementById("praatpijl");
   if(pijl) pijl.style.visibility = "hidden";
+  /* Sneller dan eerst: drie letters per tik (±130 per seconde). */
+  let tik = 0;
   PRAAT = setInterval(() => {
     if(n >= toks.length){ praatAf(); return; }
-    do { n++; } while(n < toks.length && toks[n-1] && toks[n-1].tag);
+    for(let k = 0; k < 3 && n < toks.length; k++){
+      do { n++; } while(n < toks.length && toks[n-1] && toks[n-1].tag);
+    }
     el.innerHTML = typHTML(toks, n);
     const laatst = toks[n-1];
-    if(laatst && laatst.c && n % 2 === 0 && laatst.c !== " ") AU.play("blip");
-  }, 26);
+    if(laatst && laatst.c && (tik++ % 2 === 0) && laatst.c !== " ") AU.play("blip");
+  }, 22);
 }
 function praatAf(){
   clearInterval(PRAAT); PRAAT = null;
@@ -18298,7 +18342,9 @@ const OVERWORLD = {
   /* Eén bolletje op het pad is 2,1 procent. */
   "2-1":{x:39,y:47}, "2-2":{x:24.9,y:50.1}, "2-3":{x:20.1,y:43.9}, "2-4":{x:25.05,y:35.15}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
   "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:74.6,y:31.95}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
-  "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
+  "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64},
+  /* Hemelrand: de trap op, dicht op elkaar. */
+  "5-1":{x:51,y:17}, "5-2":{x:48.4,y:13.7}, "5-3":{x:52.6,y:10.4}, "5-4":{x:48.8,y:7.1}, "5-5":{x:51.3,y:3.8}
 };
 /* Welke paden er zijn. [van, naar] verschijnt zodra "van" gehaald is. Met een derde naam
    verschijnt hij pas als díé gehaald is: de weg naar de volgende wereld begint bij het
@@ -18310,7 +18356,8 @@ const OVERWORLD_RANDEN = [
   ["3-1","3-2"], ["3-1","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
   ["3-1","4-1","3-6"],
   ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
-  ["3-1","hemel","4-5"]
+  ["3-1","5-1","4-5"],
+  ["5-1","5-2"], ["5-2","5-3"], ["5-3","5-4"], ["5-4","5-5"]
 ];
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
@@ -18320,7 +18367,7 @@ const OVERWORLD_PAD = {
   "2-1>3-1":[[47,45],[55,41.5]],
   /* Naar Tang: zie OVERWORLD_SAMEN, dat pad begint op dat naar het Rookgordijn. */
   "3-1>4-1":[[63,47],[64,52]],
-  "3-1>hemel":[[58,33],[55,24]]
+  "3-1>5-1":[[58,33],[55,24]]
 };
 /* Paden die een stuk samen oplopen: 3-1 → 3-2 (Tang) volgt de eerste 2,5 bolletjes van het
    pad naar 3-3 (het Rookgordijn) en buigt daarna af. */
@@ -18940,7 +18987,7 @@ function kaartHTML(){
     const smidHier = id === OVERWORLD_SMID.na && smidOpen();
     const naam = (st === "vraag" ? id : `${id} · ${smidHier ? "⚒ Smidse" : L.naam}`)
       + (st === "klaar" ? `<span class="lvsterren">${[0,1,2].map(j => `<i class="${j < bestS ? "aan" : ""}">★</i>`).join("")}</span>` : "");
-    return `<button class="lvknop ${st}${baas ? " baas" : ""}${anim}" style="left:${pos.x}%;top:${pos.y}%;--wk:${W.kleur};--vertraag:${anim === " netopen" ? vertraag : 0}ms"
+    return `<button class="lvknop ${st}${baas ? " baas" : ""}${w === 5 ? " hemelknop" : ""}${anim}" style="left:${pos.x}%;top:${pos.y}%;--wk:${W.kleur};--vertraag:${anim === " netopen" ? vertraag : 0}ms"
       data-act="btn" data-btn="${smidHier ? "smid" : "storylevel"}" data-id="${id}" title="${st === "vraag" ? id : (smidHier ? "De smidse van Tang" : L.naam)}">
       <span class="lvbinnen">${binnen}</span>${st === "klaar" ? `<span class="lvvink">✔</span>` : ""}
       <span class="lvnaam">${naam}</span></button>`;
@@ -18954,7 +19001,7 @@ function kaartHTML(){
         <span class="lvbinnen">${beeldKlaar(SPRITE_BEELD.knorst) ? `<img class="lvport" src="${SPRITE_BEELD.knorst}" alt="" draggable="false">` : "🏪"}</span><span class="lvnaam">Knort · winkel</span></button>`;
   }
   let hemel = "";
-  if(storyVrij("5-1") && STORY["5-1"]){
+  if(false && storyVrij("5-1") && STORY["5-1"]){     // de losse Hemelrand-knop is vervangen door de vijf levels op de trap
     gaten += gat(OVERWORLD_HEMEL.x, OVERWORLD_HEMEL.y, OVERWORLD_ZICHT, false);
     hemel = `<button class="lvknop hemel baas" style="left:${OVERWORLD_HEMEL.x}%;top:${OVERWORLD_HEMEL.y}%" data-act="btn" data-btn="storylijst" title="Hemelrand">
         <span class="lvbinnen">✦</span><span class="lvnaam">✦ Hemelrand</span></button>`;
@@ -21213,6 +21260,17 @@ if(typeof MutationObserver !== "undefined"){
 }
 if(document.title) document.title = document.title.replace(EMOJI_RE, "").trim();
 
+/* Stijl C: het handje staat op één item per lijst. De muis neemt het mee. */
+function vnKies(b){
+  if(!b || b.classList.contains("aan") || b.classList.contains("dicht")) return;
+  const lijst = b.closest(".menucol, .vn, .ovbox") || b.parentElement;
+  lijst.querySelectorAll("button.vr.aan, button.mbtn.aan").forEach(x => x.classList.remove("aan"));
+  b.classList.add("aan");
+}
+document.addEventListener("mouseover", e => {
+  const b = e.target.closest && e.target.closest("button.vr, button.mbtn");
+  if(b && !b.disabled) vnKies(b);
+});
 /* Stijl C: in een keuzelijst loopt het handje mee met de pijltjestoetsen; Enter kiest. */
 document.addEventListener("keydown", e => {
   if(e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
@@ -21223,13 +21281,14 @@ document.addEventListener("keydown", e => {
   let i = knoppen.indexOf(document.activeElement);
   if(i < 0) i = knoppen.findIndex(b => b.classList.contains("aan")) - (e.key === "ArrowDown" ? 1 : -1);
   i = (i + (e.key === "ArrowDown" ? 1 : -1) + knoppen.length) % knoppen.length;
-  knoppen.forEach(b => b.classList.remove("aan"));
   knoppen[i].focus();
+  vnKies(knoppen[i]);
   e.preventDefault();
 });
 /* start */
 document.body.classList.add("venster");
-{ const rug = new Image(); rug.onload = () => document.body.classList.add("rugbeeld"); rug.src = "art/kaart-achterkant.png"; }     // stijl C: de vensters
+{ const rug = new Image(); rug.onload = () => document.body.classList.add("rugbeeld"); rug.src = "art/kaart-achterkant.png";
+  for(let i = 0; i <= 5; i++){ const r = new Image(); r.onload = () => document.body.classList.add("rugw" + i); r.src = `art/kaart-achterkant-w${i}.png`; } }     // stijl C: de vensters
 beeldenWarm();
 muziekWarm();
 laadPaint();
