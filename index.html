@@ -2845,24 +2845,22 @@ body:not(.geladen) #app{visibility:hidden}
 body.venster{
   --vn1:#2b3f9e; --vn2:#1a2670; --vn3:#121a52; --vnl:#e6e9ff; --vnm:#6b77c9; --vnd:#0b0d22; --vng:#e8c67a;
   --vnbg:linear-gradient(180deg,var(--vn1),var(--vn2) 55%,var(--vn3));
-  --vnrand:0 0 0 3px var(--vnd), inset 0 0 0 3px var(--vnl), inset 0 0 0 5px var(--vnm), inset 0 0 0 7px var(--vnd), 0 7px 0 rgba(0,0,0,.45);
+  /* De rand ligt buiten het venster (plus één echte rand van 2px): inhoud die scrollt kan er
+     zo nooit overheen schuiven. Van buiten naar binnen: donker, wit, blauw, donker. */
+  --vnrand:0 0 0 2px var(--vnm), 0 0 0 5px var(--vnl), 0 0 0 8px var(--vnd), 0 12px 0 6px rgba(0,0,0,.4);
   --vnhand:"\261B";
 }
 /* het venster zelf */
 body.venster .vn,
 body.venster .ovbox:not(.kaartbox):not(.wkbox){
-  position:relative; background:var(--vnbg); color:#f4f4ff; border:0 !important; border-radius:10px;
+  position:relative; background:var(--vnbg); color:#f4f4ff; border:2px solid var(--vnd) !important; border-radius:8px;
   box-shadow:var(--vnrand) !important; text-shadow:2px 2px 0 var(--vnd)}
-body.venster .vn::before, body.venster .vn::after,
-body.venster .ovbox:not(.kaartbox):not(.wkbox)::before, body.venster .ovbox:not(.kaartbox):not(.wkbox)::after{
-  content:""; position:absolute; top:-5px; width:11px; height:11px; transform:rotate(45deg); z-index:3; pointer-events:none;
+body.venster .vn::before, body.venster .vn::after{
+  content:""; position:absolute; top:-15px; width:13px; height:13px; transform:rotate(45deg); z-index:3; pointer-events:none;
   background:var(--vng); box-shadow:0 0 0 2px var(--vnd), inset -2px -2px 0 rgba(0,0,0,.25)}
-body.venster .vn::before, body.venster .ovbox:not(.kaartbox):not(.wkbox)::before{left:-5px}
-body.venster .vn::after, body.venster .ovbox:not(.kaartbox):not(.wkbox)::after{right:-5px}
-/* een venster dat scrollt, knipt zijn hoekjes af: die zetten we er dan binnenin */
+body.venster .vn::before{left:-15px}
+body.venster .vn::after{right:-15px}
 body.venster .ovbox:not(.kaartbox):not(.wkbox){overflow-y:auto}
-body.venster .ovbox:not(.kaartbox):not(.wkbox)::before{left:4px; top:4px}
-body.venster .ovbox:not(.kaartbox):not(.wkbox)::after{right:4px; top:4px}
 body.venster .ovbox h1, body.venster .ovbox h2{font-family:"Press Start 2P",ui-monospace,monospace; color:var(--vng);
   text-shadow:2px 2px 0 var(--vnd); letter-spacing:.08em}
 body.venster .ovbox h2{font-size:.78rem; line-height:1.6}
@@ -2915,6 +2913,13 @@ body.venster .mbtn .mk{margin-left:auto; font-family:"VT323",monospace; font-siz
 body.venster .menucol{gap:2px; margin-top:12px}
 body.venster .vscheid{height:0; border-top:2px solid rgba(230,233,255,.18); margin:6px 8px}
 
+/* ---- nergens een schuifbalk: scrollen kan wel, maar je ziet het balkje niet ---- */
+html, body.venster, body.venster *{scrollbar-width:none; -ms-overflow-style:none}
+body.venster *::-webkit-scrollbar, html::-webkit-scrollbar{display:none; width:0; height:0}
+/* ---- achter het homescreen en de levelkeuze: de wereldkaart, verduisterd ---- */
+body.venster #kaartbanen{background:linear-gradient(180deg, rgba(8,10,30,.6), rgba(8,10,30,.84)), url("art/overworld.png") center/cover no-repeat;
+  backdrop-filter:none}
+body.venster #kaartbanen .kaartbanen{display:none}
 /* ---- homescreen ---- */
 body.venster .vhome{position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:26px;
   width:min(860px,94vw); max-height:94vh}
@@ -2926,7 +2931,7 @@ body.venster .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospa
 body.venster .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.42rem,1.2vw,.62rem); letter-spacing:.3em;
   color:#c9d0ff; margin-top:14px; text-shadow:2px 2px 0 var(--vnd)}
 body.venster .vhome .vn, body.venster .vlevels .vn, body.venster .vmenu .vn{text-align:left}
-body.venster .vhrij{display:flex; gap:26px; align-items:flex-start; justify-content:center; width:100%}
+body.venster .vhrij{display:flex; gap:44px; align-items:flex-start; justify-content:center; width:100%}
 body.venster .vhlijst{width:min(420px,92vw); padding:18px 16px}
 body.venster .vster{display:inline-block; width:12px; height:10px; margin:0 1px; vertical-align:-1px; color:#5a64a8}
 body.venster .vster.vol{color:var(--vng)}
@@ -2981,19 +2986,19 @@ body.venster .vmenu .vstatus .vrij{display:flex; justify-content:space-between; 
 body.venster .vmenu .vstatus .vrij b{color:var(--vng); font-weight:normal; text-align:right}
 
 /* ---- de kaart: de kop is een klein venster ---- */
-body.venster .kaartkop{top:12px; left:12px; right:auto; padding:10px 16px; border-radius:10px; pointer-events:auto;
-  background:var(--vnbg); box-shadow:var(--vnrand)}
+body.venster .kaartkop{top:16px; left:16px; right:auto; padding:10px 16px; border-radius:8px; pointer-events:auto;
+  background:var(--vnbg); border:2px solid var(--vnd); box-shadow:var(--vnrand)}
 body.venster .kaartkop .sub{color:#c9d0ff !important}
 body.venster .voorbox .voorvoet::before{background:#141d5e !important; box-shadow:0 -14px 18px -8px #141d5e !important}
 /* ---- het praatscherm: de tekst staat in hetzelfde venster ---- */
-body.venster .praatbox{background:var(--vnbg); border:0; border-radius:10px; box-shadow:var(--vnrand);
+body.venster .praatbox{background:var(--vnbg); border:2px solid var(--vnd); border-radius:8px; box-shadow:var(--vnrand);
   color:#fff; text-shadow:2px 2px 0 var(--vnd); padding:18px 22px 22px}
 body.venster .praatnaam{color:var(--vng)}
 body.venster .praatpijl{color:#fff}
-body.venster .praatbox::before, body.venster .praatbox::after{content:""; position:absolute; top:-5px; width:11px; height:11px;
+body.venster .praatbox::before, body.venster .praatbox::after{content:""; position:absolute; top:-15px; width:13px; height:13px;
   transform:rotate(45deg); background:var(--vng); box-shadow:0 0 0 2px var(--vnd); pointer-events:none}
-body.venster .praatbox::before{left:-5px}
-body.venster .praatbox::after{right:-5px}
+body.venster .praatbox::before{left:-15px}
+body.venster .praatbox::after{right:-15px}
 body.venster .pkbtn{background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px; box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important;
   text-shadow:2px 2px 0 var(--vnd)}
@@ -3002,24 +3007,72 @@ body.venster .kaartkop h2{font-family:"Press Start 2P",ui-monospace,monospace; f
 
 /* ---- de balken naast het gevecht ---- */
 body.venster #left, body.venster #right{background:#070a1c; border-color:#0b0d22 !important}
-body.venster #preview .circ, body.venster #preview .pv{border:0 !important; border-radius:10px; outline:0 !important;
+body.venster #preview .circ, body.venster #preview .pv{border:2px solid var(--vnd) !important; border-radius:8px; outline:0 !important;
   background:var(--vnbg) !important; box-shadow:var(--vnrand) !important; position:relative}
 body.venster #preview .circ .t{color:var(--vng); text-shadow:2px 2px 0 var(--vnd)}
-body.venster #preview .pvhead{border-radius:8px 8px 0 0; margin:3px 3px 0}
-body.venster #portret{border:0 !important; outline:0 !important; border-radius:10px;
-  box-shadow:var(--vnrand), 0 0 16px var(--ptgloed,transparent) !important}
-body.venster #portret .ptbg{inset:7px; border-radius:4px; overflow:hidden}
-body.venster #portret .ptfig{left:7px; right:7px; bottom:7px; overflow:hidden; border-radius:0 0 4px 4px}
-body.venster #portret .ptnaam{left:7px; right:7px; bottom:7px; font-size:.58rem; color:#fff; text-shadow:2px 2px 0 var(--vnd)}
-body.venster #ptbel{background:var(--vnbg); border:0; box-shadow:var(--vnrand); border-radius:8px; color:#fff; text-shadow:2px 2px 0 var(--vnd)}
+body.venster #preview .pvhead{border-radius:6px 6px 0 0}
+body.venster #ptbel{background:var(--vnbg); border:2px solid var(--vnd); box-shadow:var(--vnrand); border-radius:8px; color:#fff; text-shadow:2px 2px 0 var(--vnd)}
 body.venster #ptbel::after{border-top-color:var(--vnl)}
 body.venster #ptbel .pbnaam{color:var(--vng)}
 body.venster #ptbel.hard{background:linear-gradient(180deg,#5a4a1a,#2e2408)}
-body.venster #rmid{padding:14px 10px; border-radius:10px; background:var(--vnbg); box-shadow:var(--vnrand); flex:0 0 auto; margin:auto 0; position:relative}
 body.venster #turnbadge{color:#c9d0ff; text-shadow:2px 2px 0 var(--vnd)}
 body.venster #turnbadge b{color:var(--vng)}
-body.venster #piles1, body.venster #piles0{padding:12px 10px 22px; border-radius:10px; background:var(--vnbg); box-shadow:var(--vnrand); justify-content:center}
 body.venster .pile .lab{color:#c9d0ff; text-shadow:1px 1px 0 var(--vnd)}
+#cstrip,#vijandbalk{display:none}
+@media (min-width:1081px){
+  /* Rechts: één lang venster. Zijn stapels, de beurt, jouw stapels en de knoppen. */
+  body.venster #right{margin:14px 10px 14px 8px; padding:16px 8px 12px; border-radius:8px; background:var(--vnbg);
+    border:2px solid var(--vnd) !important; box-shadow:var(--vnrand); gap:0}
+  body.venster #piles1, body.venster #piles0{justify-content:center; padding:4px 0 20px}
+  body.venster #piles0{margin-bottom:0}
+  body.venster #rmid{flex:1 1 0; margin:6px 0; padding:10px 2px; border-top:2px solid rgba(230,233,255,.18); border-bottom:2px solid rgba(230,233,255,.18)}
+  body.venster #rtools{justify-content:center; flex-wrap:wrap; gap:4px; padding-top:12px; margin-top:6px; border-top:2px solid rgba(230,233,255,.18)}
+  body.venster #rtools .tbtn{width:26px; height:26px}
+  body.venster #rtools .tbtn .pixic{width:15px; height:13px}
+  /* Links, in het verhaal: één lang venster over je tegenstander. Bovenin de cirkel als
+     strookje, dan naam en levens, dan het portret. */
+  body.venster.verhaal #left{margin:14px 6px 14px 14px; padding:16px 14px 14px; border-radius:8px; background:var(--vnbg);
+    border:2px solid var(--vnd) !important; box-shadow:var(--vnrand); gap:14px; position:relative; z-index:6}
+  body.venster.verhaal #cstrip{display:block}
+  body.venster.verhaal #vijandbalk{display:none}
+  body.venster.verhaal.vbaan #vijandbalk{display:flex; flex-direction:column; gap:10px}
+  body.venster.verhaal #preview{position:absolute; left:14px; right:14px; top:auto; z-index:9; display:none}
+  body.venster.verhaal.pvuitleg #preview, body.venster.verhaal.cirkelopen #preview{display:flex}
+  body.venster.verhaal #preview .circ.circnieuw{width:100%}
+  body.venster.verhaal #preview .pv{width:100% !important; max-width:100%}
+  body.venster.verhaal #preview .pvhead .nm{white-space:normal; overflow-wrap:anywhere; font-size:.56rem; line-height:1.5}
+  body.venster.verhaal #portretvak{flex:1 1 auto; min-height:220px; max-height:none}
+  body.venster.verhaal #portret{height:auto; flex:1 1 auto; border:0 !important; outline:0 !important; border-radius:6px;
+    box-shadow:0 0 0 2px var(--vnd), 0 0 0 4px rgba(230,233,255,.4), 0 0 14px var(--ptgloed,transparent) !important}
+  body.venster.verhaal #portret .ptnaam{display:none}
+  /* de tekstballon hangt in het portret, niet over de naam en de levens heen */
+  body.venster.verhaal #ptbel{top:12px; bottom:auto; left:10px; right:10px}
+  body.venster.verhaal.vbaan .pside[data-side="1"] .pinfo > .pname,
+  body.venster.verhaal.vbaan .pside[data-side="1"] .pinfo > .plife{display:none}
+}
+.cstrip{display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; padding:2px 0; background:none; border:0; cursor:pointer}
+.cstrij{display:flex; align-items:center; justify-content:center; gap:5px}
+.cst{width:38px; height:38px; background-size:cover; background-position:center 40%; box-shadow:0 0 0 2px var(--vnl,#e6e9ff), 0 0 0 4px var(--vnd,#0b0d22); image-rendering:pixelated}
+.cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
+.cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:#aab3ea; text-shadow:1px 1px 0 #0b0d22}
+.cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
+.vbnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:var(--vng,#e8c67a); text-shadow:2px 2px 0 #0b0d22; line-height:1.5}
+#vijandbalk .hpbalk{width:100%}
+#vijandbalk .hpb{flex:1 1 auto; width:auto}
+/* de levensbalk */
+body.venster .hpbalk{display:flex; align-items:center; gap:12px}
+body.venster .hpb{position:relative; display:block; width:clamp(120px,14vw,230px); height:14px; background:#0b0d22; border-radius:2px;
+  box-shadow:0 0 0 2px var(--vnl), 0 0 0 4px var(--vnd); overflow:hidden}
+body.venster .hpb i{position:absolute; left:0; top:0; bottom:0; transition:width .45s steps(6);
+  background:linear-gradient(180deg,#c8ffcc 0 22%,#43d862 22% 68%,#1f9a3c 68%)}
+body.venster .hpb.geel i{background:linear-gradient(180deg,#fff3b8 0 22%,#f2c83a 22% 68%,#b88a14 68%)}
+body.venster .hpb.rood i{background:linear-gradient(180deg,#ffc2b8 0 22%,#ea4a36 22% 68%,#a8231a 68%)}
+body.venster .hpb b{position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(90deg, transparent 0 calc(100% / var(--n) - 2px), rgba(11,13,34,.6) calc(100% / var(--n) - 2px) calc(100% / var(--n)))}
+body.venster .hpbalk .lnum{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.66rem; color:#fff; margin:0;
+  text-shadow:2px 2px 0 #0b0d22; white-space:nowrap}
+body.venster .hpbalk .lnum small{font-size:.5rem; color:#aab3ea}
+body.venster .lnum{color:#fff}
 body.venster .tbtn{background:linear-gradient(180deg,#3a52c0,#22307e) !important; color:#fff !important;
   border:2px solid var(--vnl) !important; border-radius:6px; box-shadow:0 0 0 2px var(--vnd), 0 3px 0 2px var(--vnd) !important}
 body.venster .tbtn:hover{background:linear-gradient(180deg,#4d67dc,#2b3c9a) !important; color:var(--vng) !important}
@@ -3033,11 +3086,13 @@ body.venster .tbtn.on, body.venster .tbtn.aan{color:var(--vng) !important}
 </div></div>
 <div id="app">
   <aside id="left">
+    <div id="cstrip"></div>
     <div id="preview"></div>
     <div id="chain"></div>
     <button id="logknop" data-act="btn" data-btn="logtoggle">📜 Logboek</button>
     <div id="log"></div>
     <div id="chatbox"></div>
+    <div id="vijandbalk"></div>
     <div id="portretvak"></div>
   </aside>
   <main id="center">
@@ -4428,7 +4483,11 @@ const icon = el => {
   try{ console.warn("icon zonder element:", el, (new Error().stack || "").split("\n").slice(2, 6).join(" | ")); }catch(e){}
   return "❔";
 };
-function rectOf(sel){ if(FAST) return null; const e=document.querySelector(sel); return e ? e.getBoundingClientRect() : null; }
+function rectOf(sel){ if(FAST) return null; const e=document.querySelector(sel); if(!e) return null;
+  const r = e.getBoundingClientRect();
+  /* In het verhaal staan de levens van de tegenstander in de linkerkolom, niet op het veld. */
+  if(!r.width && /\.plife/.test(sel)){ const alt = document.querySelector("#vijandbalk .plife"); if(alt) return alt.getBoundingClientRect(); }
+  return r; }
 function creSel(p,c){ return `.slot[data-act="cre"][data-p="${p}"][data-col="${c}"]`; }
 async function flyCard(fromR, toR, inner, ms=450){
   if(FAST || !fromR || !toR){ return; }
@@ -9260,6 +9319,39 @@ function circleSVG(w){
 /* De cirkel in de zijbalk: de vier elementen als kleine kaarttekeningen, met dikke pijlen
    van sterk naar zwak. Staat een tekening er (nog) niet, dan zie je het symbool eronder. */
 const CIRC_KLEUR = {water:"#3f8fd8", steen:"#b8874f", vuur:"#d5503c", gras:"#4da35c"};
+/* Stijl C, verhaal: de cirkel als smal strookje bovenin de linkerkolom. Klik erop en de
+   grote cirkel klapt over het portret open. */
+function cstripHTML(){
+  const ring = [ORDER[0]];
+  while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
+  const tegel = el => `<span class="cst" style="background-image:url('${kaartSrc(KAART_BEELD[el])}')" title="${EL[el].name}"></span>`;
+  return `<button class="cstrip" data-act="btn" data-btn="cirkeltoggle" title="De elementcirkel: klik voor de grote versie">
+    <span class="cstrij">${ring.map(tegel).join('<span class="cspijl">&#9656;</span>')}<span class="cspijl">&#9656;</span></span>
+    <span class="cstxt">&#9656; STERK TEGEN &middot; KLIK VOOR MEER</span></button>`;
+}
+function cstripPaint(){
+  const el = document.getElementById("cstrip"); if(!el) return;
+  const aan = portretAan();
+  const h = aan ? cstripHTML() : "";
+  if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
+  if(!aan) document.body.classList.remove("cirkelopen");
+  /* De uitleg en de grote cirkel komen direct onder het strookje, over de rest heen. */
+  const pv = document.getElementById("preview");
+  if(pv) pv.style.top = aan ? (el.offsetTop + el.offsetHeight + 12) + "px" : "";
+}
+/* De naam en levens van je tegenstander, bovenaan de linkerkolom. */
+function vijandBalkPaint(){
+  const el = document.getElementById("vijandbalk"); if(!el) return;
+  let h = "";
+  if(portretAan() && S && S.story){
+    const L = levelVan(S.story) || {}, pl = P(1);
+    const naam = S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1);
+    const start = (S.story.startLevens && S.story.startLevens[1] != null) ? S.story.startLevens[1] : pl.life;
+    h = `<div class="vbnaam">${naam}</div>` + (S.story.trio ? "" : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`);
+  }
+  if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
+  document.body.classList.toggle("vbaan", !!h);
+}
 function cirkelBeeldSVG(){
   const ring = [ORDER[0]];
   while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
@@ -9670,11 +9762,20 @@ function ruitenRij(ruiten, boven){
         <div class="ruit"><div class="ruitin"><span class="ruitic">${r.ic}</span>${r.img}</div></div>${r.merk}</div>`;
     }).join("") + `</div>`;
 }
+/* Stijl C: levens als een groene balk, zoals in een RPG. Elk leven is een vakje; onder de
+   helft wordt hij geel, onder een kwart rood. */
+function levensBalk(n, max){
+  max = Math.max(1, max || n);
+  const pct = Math.max(0, Math.min(100, n / max * 100));
+  const kl = pct <= 25 ? " rood" : (pct <= 50 ? " geel" : "");
+  return `<span class="hpb${kl}" style="--n:${max}"><i style="width:${pct}%"></i><b></b></span><span class="lnum">${Math.max(0, n)}<small>/${max}</small></span>`;
+}
 function psideHTML(p){
   const pl = P(p);
   /* Zoveel blokjes als je aan het begin had — niet altijd vijf. Begin je met 4, dan zie je er 4. */
   const pStart = (S.story && S.story.startLevens && S.story.startLevens[p] != null) ? S.story.startLevens[p] : (S.story ? pl.life : 5);
   const pips = Array.from({length:Math.max(pStart, pl.life)},(_,i)=>`<span class="hp${i < pl.life ? "" : " off"}"></span>`).join("");
+  const balk = levensBalk(pl.life, Math.max(pStart, pl.life));
   const active = S.tp===p ? " active":"";
   const ae = ruitenHTML(p)
     + (NET.on && p === NET.seat ? `<div class="aemini" style="border-color:#4d8fbf;color:#7fd0ff;background:rgba(80,160,220,.1)">jouw kant</div>` : "");
@@ -9695,7 +9796,7 @@ function psideHTML(p){
     : "";
   return `<div class="pinfo">
       <div class="pname${active}">${pName(p)}</div>
-      ${trioBalken || `<div class="plife">${pips}<span class="lnum">${pl.life}</span></div>`}
+      ${trioBalken || `<div class="plife hpbalk">${balk}</div>`}
       <div class="pdeckinfo">Deck ${pl.deck.length} · Hand ${pl.hand.length} · Graf ${pl.grave.length}</div>
       ${S.klok && S.klok.aan ? `<div class="pklok" data-kp="${p}">⏱ ${klokTekst(S.klok.t[p])}</div>` : ""}
       ${ae}
@@ -19091,6 +19192,8 @@ function render(){
     /* De zijbalk is in het verhaal breder; het vergezicht moet dan opnieuw passen. */
     if(document.body.classList.contains("verhaal") !== vh){ document.body.classList.toggle("verhaal", vh); setTimeout(laagPassen, 30); } }
   portretPaint();
+  cstripPaint();
+  vijandBalkPaint();
   vrijDecor();
   muziekScherm();
   const hl = uiHl();
@@ -20006,7 +20109,7 @@ const STATIC_HEAD = (() => {
   return out.join("\n");
 })();
 const BODY_SKELETON = `<div id="app">
-  <aside id="left"><div id="preview"></div><div id="chain"></div><button id="logknop" data-act="btn" data-btn="logtoggle">📜 Logboek</button><div id="log"></div><div id="chatbox"></div><div id="portretvak"></div></aside>
+  <aside id="left"><div id="cstrip"></div><div id="preview"></div><div id="chain"></div><button id="logknop" data-act="btn" data-btn="logtoggle">📜 Logboek</button><div id="log"></div><div id="chatbox"></div><div id="vijandbalk"></div><div id="portretvak"></div></aside>
   <main id="center">
     <div class="pside top" id="pside1"></div>
     <div id="fieldwrap"><div class="frow rowtop" id="row1"></div><div id="ribbon"></div><div class="frow rowbot" id="row0"></div></div>
@@ -20342,6 +20445,7 @@ function onBtn(btn, el, fromAction){
       break;
     case "story": M = {type:"story"}; storySkin(0); render(); break;
     case "storylijst": M = {type:"story", lijst:true}; render(); break;
+    case "cirkeltoggle": document.body.classList.toggle("cirkelopen"); break;
     case "lvwereld": if(M && M.lijst){ M.wereld = +(el && el.dataset.w) || 1; M.lvInfo = null; render(); } break;
     case "storykaart": M = {type:"story"}; render(); break;
     case "praatkeus": {
