@@ -3009,7 +3009,8 @@ body.venster .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-siz
   color:var(--vsub); margin-top:14px; text-shadow:2px 2px 0 var(--vnd)}
 body.venster .vhome .vn, body.venster .vlevels .vn, body.venster .vmenu .vn{text-align:left}
 body.venster .vhrij{display:flex; gap:44px; align-items:flex-start; justify-content:center; width:100%}
-body.venster .vhlijst{width:min(420px,92vw); padding:18px 16px}
+/* Klap je iets open, dan scrollt de lijst binnen het venster: de onderrand blijft altijd in beeld. */
+body.venster .vhlijst{width:min(420px,92vw); padding:18px 16px; max-height:calc(100dvh - 210px); overflow-y:auto}
 body.venster .vster{display:inline-block; width:12px; height:10px; margin:0 1px; vertical-align:-1px; color:var(--vgrijs)}
 body.venster .vster.vol{color:var(--vng)}
 body.venster .vster svg{display:block; width:100%; height:100%; filter:drop-shadow(1px 1px 0 var(--vnd))}
@@ -3091,8 +3092,10 @@ body.venster #preview .circ, body.venster #preview .pv{border:2px solid var(--vn
   background:var(--vnbg) !important; box-shadow:var(--vnrand) !important; position:relative}
 body.venster #preview .circ .t{color:var(--vng); text-shadow:2px 2px 0 var(--vnd)}
 body.venster #preview .pvhead{border-radius:6px 6px 0 0}
-body.venster #ptbel{background:var(--vnbg); border:2px solid var(--vnd); box-shadow:var(--vnrand); border-radius:8px; color:#fff; text-shadow:2px 2px 0 var(--vnd)}
-body.venster #ptbel::after{border-top-color:var(--vnl)}
+/* De tekstballon hangt half boven het portret, donker, met een rand in de kleur van het level. */
+body.venster #ptbel{background:var(--vin,#0d1119); border:3px solid var(--vk3,#6b77c9); box-shadow:0 0 0 2px var(--vnd), 0 4px 0 2px rgba(0,0,0,.45);
+  border-radius:4px; color:#fff; text-shadow:none}
+body.venster #ptbel::after{border-top-color:var(--vk3,#6b77c9)}
 body.venster #ptbel .pbnaam{color:var(--vng)}
 body.venster #ptbel.hard{background:linear-gradient(180deg,#5a4a1a,#2e2408)}
 body.venster #turnbadge{color:var(--vsub); text-shadow:2px 2px 0 var(--vnd)}
@@ -3130,7 +3133,7 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
     box-shadow:0 0 0 2px var(--vnd), 0 0 0 4px rgba(230,233,255,.4), 0 0 14px var(--ptgloed,transparent) !important}
   body.venster.verhaal #portret .ptnaam{display:none}
   /* de tekstballon hangt in het portret, niet over de naam en de levens heen */
-  body.venster.verhaal #ptbel{top:12px; bottom:auto; left:10px; right:10px}
+  body.venster.verhaal #ptbel{top:auto; bottom:calc(100% - 30px); left:6px; right:6px}
   body.venster.verhaal.vbaan .pside .pinfo > .pname,
   body.venster.verhaal.vbaan .pside .pinfo > .plife,
   body.venster.verhaal.vbaan .pside .pinfo > .triorij{display:none}
@@ -3217,16 +3220,19 @@ body.venster .mpnote{font-family:"VT323",ui-monospace,monospace; font-size:1.05r
 .mpprofpt svg{height:100%; width:auto}
 .mpproftxt{padding-bottom:12px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.6rem; color:var(--vng,#e8c67a); text-shadow:2px 2px 0 var(--vnd,#0b0d22)}
 .mpproftxt small{display:block; margin-top:8px; font-family:"VT323",ui-monospace,monospace; font-size:1.05rem; color:var(--vsub,#c9d0ff); text-shadow:none}
-body.venster .chbox{width:min(900px,96vw); max-width:none !important; padding:22px 18px 18px; text-align:left}
-.chgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:10px}
-.chtegel{position:relative; cursor:pointer; border-radius:6px; overflow:hidden;
-  background:linear-gradient(180deg,rgba(8,10,30,.1),rgba(8,10,30,.55)); box-shadow:inset 0 0 0 2px rgba(230,233,255,.22)}
-.chtegel:hover{box-shadow:inset 0 0 0 2px var(--vnl,#e6e9ff)}
-.chtegel.kies{box-shadow:inset 0 0 0 3px var(--vng,#e8c67a), 0 0 12px rgba(232,198,122,.4)}
+body.venster .chbox{width:min(900px,96vw); max-width:none !important; max-height:94vh; padding:22px 18px 18px; text-align:left; display:flex; flex-direction:column}
+body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; padding:2px}
+.chgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); grid-auto-rows:max-content; gap:10px}
+/* Een echte rand: de tekening blijft erbinnen en houdt er net voor op. */
+.chtegel{position:relative; cursor:pointer; border-radius:6px; overflow:hidden; border:2px solid rgba(230,233,255,.22);
+  background:linear-gradient(180deg,rgba(8,10,30,.1),rgba(8,10,30,.55))}
+.chtegel:hover{border-color:var(--vnl,#e6e9ff)}
+.chtegel.kies{border-color:var(--vng,#e8c67a); box-shadow:0 0 12px rgba(232,198,122,.4)}
 .chtegel.dicht{cursor:default; opacity:.45}
-.chpt{height:104px; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; padding-top:6px;
+.chpt{height:96px; margin:8px 7px 0; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; padding:0; box-sizing:border-box;
   font-family:"Press Start 2P",monospace; font-size:1.4rem; color:var(--vgrijs,#6f78b0)}
 .chtegel.dicht .chpt{align-items:center}
+.chpt .chsnij{display:block; flex:0 0 auto; width:100%; height:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated}
 .chpt .sprwrap{height:100%; width:auto; --sprgroei:1}
 .chpt .sprwrap .sprbeeld{height:100%; width:auto}
 .chpt svg{height:100%; width:auto}
@@ -3299,10 +3305,11 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
 #mpvak .hpb{flex:1 1 auto; width:auto}
 #mpvak .mphp{flex:0 0 auto; gap:6px}
 #mpvak .mphp[data-side] .vbnaam{font-size:.56rem}
-.mppt{position:relative; flex:1 1 0; min-height:0; overflow:hidden; isolation:isolate; border-radius:6px; image-rendering:pixelated;
+.mpptvak{position:relative; flex:1 1 0; min-height:0; display:flex; flex-direction:column}
+.mpptvak + .mphp{margin-top:6px}
+.mppt{position:relative; flex:1 1 auto; min-height:0; overflow:hidden; isolation:isolate; border-radius:6px; image-rendering:pixelated;
   background:linear-gradient(180deg, var(--ptl1,#1b2633) 0%, var(--ptl2,#0b1018) 100%);
   box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 0 0 4px rgba(230,233,255,.4), 0 0 14px var(--ptgloed,transparent)}
-.mppt + .mphp{margin-top:6px}
 .mppt.eigen{cursor:pointer}
 .mppt.eigen:hover{box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 0 0 4px var(--vng,#e8c67a), 0 0 14px var(--ptgloed,transparent)}
 .mppt .ptbg{position:absolute; inset:0; z-index:0}
@@ -3322,15 +3329,24 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
 .mppt.pt-geraakt::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
   background:rgba(213,80,60,.35); animation:ptflits .6s steps(4) 1 forwards}
 .mppt.pt-raak .ptfig{animation:ptsprong .5s steps(5) 1}
-.mpbel{position:absolute; left:8px; right:8px; top:8px; z-index:5; pointer-events:none;
-  background:#0d1119; border:3px solid var(--vnl,#e6e9ff); border-radius:4px; padding:7px 10px;
-  color:#fff; font-family:"VT323",ui-monospace,monospace; font-size:1.1rem; line-height:1.12;
-  box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 4px 0 rgba(0,0,0,.5); animation:pbpuls .5s steps(3,end) 1}
-.mpbel .pbnaam{display:block; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.1em;
+/* Net als in het verhaal: de ballon hangt half boven het portret, met een pijltje naar wie
+   er praat. De rand heeft de kleur van het level van dat personage. */
+.mpbel{position:absolute; left:6px; right:6px; bottom:calc(100% - 64px); z-index:8; pointer-events:none;
+  background:var(--bbg, var(--vin,#0d1119)); border:3px solid var(--bk, var(--vk3,#6b77c9)); border-radius:4px; padding:8px 11px;
+  color:#fff; font-family:"VT323",ui-monospace,monospace; font-size:1.15rem; line-height:1.14;
+  box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 4px 0 2px rgba(0,0,0,.45); animation:pbpuls .5s steps(3,end) 1}
+.mpbel::after{content:""; position:absolute; left:50%; bottom:-13px; transform:translateX(-50%);
+  border:7px solid transparent; border-top-color:var(--bk, var(--vk3,#6b77c9))}
+.mpbel .pbnaam{display:block; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem; letter-spacing:.1em;
   color:var(--vng,#e8c67a); margin-bottom:5px}
 .mphint{position:absolute; left:0; right:0; bottom:6px; z-index:4; text-align:center; pointer-events:none; opacity:0; transition:opacity .2s;
   font-family:"Press Start 2P",ui-monospace,monospace; font-size:.36rem; color:var(--vng,#e8c67a); text-shadow:1px 1px 0 #000}
 .mppt.eigen:hover .mphint{opacity:1}
+.mpttabs{display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px}
+.mpttab{flex:1 1 auto; cursor:pointer; border:0; border-radius:3px; padding:5px 4px; background:rgba(8,10,30,.85); color:var(--vdim,#aab3ea);
+  box-shadow:inset 0 0 0 2px rgba(230,233,255,.22); font-family:"Press Start 2P",ui-monospace,monospace; font-size:.36rem; letter-spacing:.04em}
+.mpttab:hover{color:#fff}
+.mpttab.aan{background:linear-gradient(180deg,#e8c67a,#b8924a); color:var(--vnd,#0b0d22); box-shadow:none}
 .mptlijst{position:absolute; inset:6px; z-index:6; display:flex; flex-direction:column; gap:4px; justify-content:center;
   background:rgba(8,10,30,.72); border-radius:4px; padding:6px}
 .mptzin{display:block; width:100%; text-align:left; cursor:pointer; background:rgba(8,10,30,.8); color:#fff;
@@ -3338,6 +3354,50 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
   font-family:"VT323",ui-monospace,monospace; font-size:1rem; line-height:1.05;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .mptzin:hover{box-shadow:inset 0 0 0 2px var(--vng,#e8c67a); color:var(--vng,#e8c67a)}
+/* 🪑 de stoel, rechts in het laatste potje van De Eerste */
+.stoelknop{display:block; width:100%; margin:0 0 12px; padding:9px 6px 8px; cursor:pointer; border-radius:6px;
+  font-family:"Press Start 2P",ui-monospace,monospace; font-size:.56rem; letter-spacing:.08em; color:#1a1408;
+  background:linear-gradient(180deg,#f6e9b0,#c9a85a); border:2px solid #fffdf2; box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 0 14px rgba(246,233,176,.45);
+  animation:stoelgloed 2.4s ease-in-out infinite}
+.stoelknop small{display:block; margin-top:6px; font-family:"VT323",ui-monospace,monospace; font-size:1rem; letter-spacing:0; color:#4a3a12}
+.stoelknop:hover{filter:brightness(1.08)}
+.stoelknop.wacht{opacity:.55; animation:none}
+@keyframes stoelgloed{50%{box-shadow:0 0 0 2px var(--vnd,#0b0d22), 0 0 22px rgba(246,233,176,.8)}}
+/* ================= de uitleg: tekststrook links, groot beeld rechts ================= */
+body.venster .ovbox.tutbox{width:min(1080px,96vw); max-width:none !important; height:min(600px,88vh); padding:0 !important;
+  display:flex; text-align:left; overflow:hidden !important}
+.tutlinks{flex:0 0 min(330px,34%); display:flex; flex-direction:column; padding:26px 22px 20px; min-height:0}
+.tutnr{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem; letter-spacing:.14em; color:var(--vdim,#aab3ea); margin-bottom:12px}
+body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
+.tutkop{font-family:"VT323",ui-monospace,monospace; font-size:1.1rem; color:var(--vng,#e8c67a); margin:-8px 0 12px}
+.tuttekst{flex:1 1 auto; min-height:0; overflow-y:auto; font-family:"VT323",ui-monospace,monospace; font-size:1.28rem; line-height:1.22; color:var(--vsub,#c9d0ff)}
+.tuttekst b{color:#fff}
+.tutnav{display:flex; flex-direction:column; gap:14px; padding-top:14px}
+.tutnav .tdots{justify-content:flex-start}
+.tutknop{display:flex; gap:10px}
+.tutknop .obtn{padding:9px 16px}
+.tutknop .obtn[disabled]{opacity:.35; pointer-events:none}
+.tutbeeld{position:relative; flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  background:#05070b; border-left:3px solid var(--vnl,#e6e9ff); box-shadow:inset 2px 0 0 var(--vnd,#0b0d22)}
+.tutimg{display:block; width:100%; height:100%; object-fit:contain; image-rendering:auto}
+.tutterug{display:none; padding:20px; width:100%}
+.tutbeeld.geenbeeld .tutimg{display:none}
+.tutbeeld.geenbeeld .tutterug, .tutterug.toon{display:block}
+.tgcirkel{height:88%; aspect-ratio:240/300}
+.tgcirkel svg{width:100%; height:100%}
+.tgrij{display:flex; gap:44px; align-items:flex-end; justify-content:center; padding:20px}
+.tgrij.vier{gap:22px}
+.tgkol{display:flex; flex-direction:column; align-items:center; text-align:center}
+.tgkaart{position:relative; width:150px; height:210px}
+.tgrij.vier .tgkaart{width:128px; height:179px}
+.tgkaart.spell{transform:rotate(-7deg)}
+.tglab{margin-top:14px; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; color:var(--vng,#e8c67a)}
+.tgsub{margin-top:6px; font-family:"VT323",ui-monospace,monospace; font-size:1.1rem; color:var(--vdim,#aab3ea); max-width:190px}
+@media (max-width:760px){
+  body.venster .ovbox.tutbox{flex-direction:column-reverse; height:auto; max-height:92vh}
+  .tutlinks{flex:1 1 auto}
+  .tutbeeld{flex:0 0 38vh; border-left:0; border-bottom:3px solid var(--vnl,#e6e9ff)}
+  .tgkaart{width:96px; height:134px} .tgrij.vier .tgkaart{width:64px; height:90px} .tgrij{gap:16px} }
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -10708,36 +10768,30 @@ function overlayHTML(){
   }
   return "";
 }
+/* De uitleg: een paar pagina's met links een strook korte tekst en rechts een groot beeld.
+   `img` is een screenshot uit het spel (art/tut-*.jpg); ontbreekt die, dan tekent het spel
+   zelf een plaatje (`v`). `live` is een plaatje dat het spel altijd zelf tekent. */
 const TUT_ALL = [
-  {t:"Waar het om draait", ic:"⚜️",
-   b:`Twee spelers, elk <b>5 levens</b>. Je wint door je tegenstander op 0 te zetten, of als die moet trekken uit een leeg deck.<br><br>Het veld heeft <b>5 kolommen</b>, recht tegenover die van je tegenstander. Elke kolom heeft een plek voor een <b>creature</b> en een plek voor een <b>spell</b>. Aanvallen gaan altijd recht vooruit.`,
-   v:"board"},
-  {t:"De elementcirkel", ic:"🔥",
-   b:`Vier elementen: 💧 Water, 🔥 Vuur, 🌿 Gras en 🪨 Steen.<br><br>Ze vormen een cirkel: 💧 → 🔥 → 🌿 → 🪨 → 💧. Sterk tegen zwak is een <span class="kw" data-kw="instakill">instakill</span>. Zwak tegen sterk is <span class="kw" data-kw="immuun">immuun</span>.`,
-   v:"circle"},
-  {t:"Speel-effect en veld-effect", ic:"🃏",
-   b:`Een kaart speel je als <b>creature</b> of als <b>spell</b>.<br><br>▶ Als creature doet de kaart het <span class="kw" data-kw="speel">speel-effect</span>: één keer, bij het op het veld komen.<br>◆ Wat een kaart doet zolang die er ligt, is het <span class="kw" data-kw="veld">veld-effect</span>.<br><br>Een <span class="kw" data-kw="spell">spell</span> doet zijn speel-effect bij het neerleggen, en opnieuw bij elke creature die jij in die kolom speelt.<br><br>Je mag <b>altijd</b> spelen: in je eigen beurt, maar ook als reactie in de beurt van de ander. Als creature en als spell.`,
-   v:"twoways"},
-  {t:"Wat de elementen doen", ic:"✦",
-   b:`<b>🔥 Vuur</b> — ▶ ${EL.vuur.tekst.speel}<br><br><b>💧 Waterplons</b> — ▶ ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> (3 levens) — ▶ ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> — ▶ ${EL.gras.tekst.speel}<br><br>Onderstreepte woorden leggen zichzelf uit: hover erover of tik erop.`,
-   v:"cards"},
-  {t:"Het gevecht", ic:"⚔️",
-   b:`In je beurt klik je je eigen creatures aan om aan te vallen — voor, na of tussen het spelen van kaarten door, zoals je wilt. Een creature raakt wat er <b>recht tegenover</b> staat. Is die plek leeg, dan wordt de speler geraakt.<br><br>De schade is de <b>helft van de eigen levens</b> (⚔ op de kaart), behalve als de cirkel een instakill geeft of immuun maakt.`,
-   v:"combat"},
-  {t:"De chain: targeten en ontwijken", ic:"⛓️",
-   b:`Een kaart die je speelt, <b>staat er meteen</b>. Het effect gaat als link op de chain, met het doelwit dat je meteen kiest.<br><br>Allebei de spelers mogen daarop reageren met een kaart uit hun hand.<br><br>Is het doelwit bij het resolven weg of verhuisd, dan <span class="kw" data-kw="fizzelt">fizzelt</span> het effect. Mikt iemand 🔥 op je creature, dan <span class="kw" data-kw="herspeel">herspeel</span> je hem met 💧 Water en het vuur mist.`,
-   v:"chain"},
-  {t:"Commander", ic:"🟣",
-   b:`<b>Best of 3.</b> Voor elk potje kies je:<br><br>• een <span class="kw" data-kw="aether">🟣 aether</span>, een blijvende kracht. Ze stapelen: in potje 3 heb je er drie;<br>• een <span class="kw" data-kw="licht">✦ lichtkaart</span>, waarvan er 3 door je deck gaan;<br>• je <b>bans</b>: kaarten die de hele match weg zijn.<br><br>De beginner kiest eerst. Na elk potje kiest de <b>verliezer</b> eerst en mag ook beginnen. Alles rustig doorlezen kan in de <b>📚 Library</b>.`,
-   v:"stack"},
-  {t:"Zo bedien je het", ic:"🖱️",
-   b:`Klik een kaart in je hand en dan een plek: een plek in de creature-rij maakt er een creature van, een plek in de spell-rij een spell. Klik een eigen creature om aan te vallen. Geldige plekken lichten goud op. Hover over een kaart (of houd die ingedrukt) voor de uitleg.<br><br>Je hand mag hooguit <b>${HANDMAX}</b> kaarten hebben.<br><br><b>Spatie</b> of <b>dubbeltik</b> op een leeg stuk veld = doorlaten, overslaan of bevestigen. <b>Esc</b> of ☰ = menu. Geen zin in reactievensters? Zet <b>⚡ autopass</b> aan, rechtsonder.`,
-   v:"ui"}
+  {t:"Het doel", ic:"⚜️", img:"art/tut-bord.jpg", fit:"cover", v:"board",
+   b:`Breng je tegenstander naar <b>0 levens</b>.<br><br>Het veld heeft <b>vijf kolommen</b>, recht tegenover elkaar. In elke kolom past één <b>creature</b> en één <b>spell</b>.`},
+  {t:"De cirkel", ic:"🔥", live:"circle",
+   b:`💧 Water › 🔥 Vuur › 🌿 Gras › 🪨 Steen › 💧 Water<br><br>Sterk tegen zwak: <span class="kw" data-kw="instakill">instakill</span>.<br>Zwak tegen sterk: <span class="kw" data-kw="immuun">immuun</span>.<br>Verder gewone schade.`},
+  {t:"Creature of spell", ic:"🃏", live:"twoways",
+   b:`Elke kaart kan allebei.<br><br><b>Creature:</b> doet één keer zijn <span class="kw" data-kw="speel">speel-effect</span>.<br><br><b>Spell:</b> doet het nu, en opnieuw bij elke creature die jij in die kolom speelt.`},
+  {t:"De vier kaarten", ic:"✦", live:"vier",
+   b:`<b>🔥 Vuur</b> ${EL.vuur.tekst.speel}<br><br><b>💧 Water</b> ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> ${EL.gras.tekst.speel}`},
+  {t:"Aanvallen", ic:"⚔️", img:"art/tut-aanval.jpg", v:"combat",
+   b:`Een groene rand: die kan aanvallen. Klik erop.<br><br>Hij slaat recht vooruit. Staat daar niks, dan raakt hij de speler.<br><br>Schade is de helft van zijn levens (⚔).`},
+  {t:"Reageren", ic:"⛓️", img:"art/tut-reageren.jpg", v:"chain",
+   b:`Je mag ook in de beurt van de ander spelen, als reactie.<br><br>Wat het laatst gespeeld is, gebeurt eerst. Is het doelwit dan weg, dan <span class="kw" data-kw="fizzelt">mist</span> het.`},
+  {t:"Commander", ic:"🟣", img:"art/tut-draft.jpg", v:"stack",
+   b:`Best of 3. Elk potje kies je een <span class="kw" data-kw="aether">🟣 aether</span> (die blijft), een <span class="kw" data-kw="licht">✦ lichtkaart</span> en wat je <b>bant</b>.<br><br>Na een potje kiest de verliezer eerst.`},
+  {t:"Bediening", ic:"🖱️", img:"art/tut-spelen.jpg", v:"ui",
+   b:`Klik een kaart, dan een plek die oplicht.<br><br><b>Spatie</b> doorlaten<br><b>Esc</b> menu<br><b>Muis erop</b> uitleg`}
 ];
 const TUTS = {classic: TUT_ALL, commander: TUT_ALL,
   /* Vóór Rocky: dezelfde uitleg, zonder de pagina over Commander — die komt pas veel later. */
-  story: TUT_ALL.filter(t => t.t !== "Commander")
-    .map(t => t.v === "board" ? Object.assign({}, t, {b: t.b.replace("elk <b>5 levens</b>", "allebei een paar <b>levens</b> (jij en Rocky elk vier)")}) : t)};
+  story: TUT_ALL.filter(t => t.t !== "Commander")};
 /* Een level kan eisen dat je eerst de uitleg doorloopt (1-1: vóór Rocky). Alleen zolang
    je dat level nog niet gehaald hebt; daarna ga je meteen door naar het gevecht. */
 function tutVoorGevecht(id){
@@ -10873,26 +10927,43 @@ function tutVisual(v){
     </div>`;
   return "";
 }
+/* De grote plaatjes die het spel zelf tekent. */
+function tutGroot(v){
+  const kaart = (el, spell, stijl) => `<div class="tgkaart${spell ? " spell" : ""}"${stijl ? ` style="${stijl}"` : ""}>${cardFaceHTML(el, !!spell)}</div>`;
+  if(v === "circle") return `<div class="tgcirkel">${cirkelBeeldSVG()}</div>`;
+  if(v === "twoways") return `<div class="tgrij">
+      <div class="tgkol">${kaart("vuur")}<div class="tglab">creature</div><div class="tgsub">▶ één keer</div></div>
+      <div class="tgkol">${kaart("vuur", true)}<div class="tglab">spell</div><div class="tgsub">▶ bij elke creature in die kolom</div></div></div>`;
+  if(v === "vier") return `<div class="tgrij vier">${["vuur","water","steen","gras"].map(el => `<div class="tgkol">${kaart(el)}<div class="tglab">${EL[el].name}</div></div>`).join("")}</div>`;
+  return "";
+}
 function tutorialHTML(){
   const deck = TUTS[M.deck] || TUT_ALL;
   const i = M.step, st = deck[i], last = i === deck.length - 1;
   const dots = deck.map((_,k)=>`<span class="tdot${k===i?" on":""}" data-act="btn" data-btn="tutgo" data-step="${k}"></span>`).join("");
-  return `<div class="ovbox" style="max-width:min(700px,94vw);text-align:left">
-    <div style="text-align:center"><div style="font-size:2rem">${st.ic}</div>
-      <h2 style="margin-bottom:4px">${st.t}</h2>
-      <div class="sub" style="font-size:.5rem;letter-spacing:.14em;color:var(--dim);margin:0 0 12px">TUTORIAL ${i+1} / ${deck.length}</div>
-      ${M.kop && i === 0 ? `<div class="sub" style="margin:-4px 0 12px;color:var(--gold)">${M.kop}</div>` : ""}</div>
-    <div class="helptxt" style="font-size:.86rem"><p>${st.b}</p></div>
-    ${tutVisual(st.v)}
-    <div class="tnav">
-      <button class="abtn ghost" style="width:auto;padding:9px 18px" data-act="btn" data-btn="tutprev" ${i===0?"disabled style='opacity:.35;width:auto;padding:9px 18px'":""}>◀ Terug</button>
-      <div class="tdots">${dots}</div>
-      ${last && M.daarna
-        ? `<button class="obtn" style="padding:9px 22px" data-act="btn" data-btn="tutvecht">⚔ Vechten <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>`
-        : last
-        ? `<button class="obtn" style="padding:9px 22px" data-act="btn" data-btn="closemodal">Sluiten</button>`
-        : `<button class="obtn" style="padding:9px 22px" data-act="btn" data-btn="tutnext">Verder ▶ <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>`}
-    </div></div>`;
+  const beeld = st.live ? tutGroot(st.live)
+    : st.img ? `<img class="tutimg" src="${st.img}" alt=""${st.fit ? ` style="object-fit:${st.fit}"` : ""} onerror="this.parentNode.classList.add('geenbeeld')"><div class="tutterug">${tutVisual(st.v)}</div>`
+    : `<div class="tutterug toon">${tutVisual(st.v)}</div>`;
+  return `<div class="ovbox tutbox">
+    <div class="tutlinks">
+      <div class="tutnr">UITLEG ${i+1} / ${deck.length}</div>
+      <h2>${st.t}</h2>
+      ${M.kop && i === 0 ? `<div class="tutkop">${M.kop}</div>` : ""}
+      <div class="tuttekst">${st.b}</div>
+      <div class="tutnav">
+        <div class="tdots">${dots}</div>
+        <div class="tutknop">
+          <button class="obtn" data-act="btn" data-btn="tutprev"${i===0 ? " disabled" : ""}>◀</button>
+          ${last && M.daarna
+            ? `<button class="obtn" data-act="btn" data-btn="tutvecht">Vechten</button>`
+            : last
+            ? `<button class="obtn" data-act="btn" data-btn="closemodal">Sluiten</button>`
+            : `<button class="obtn" data-act="btn" data-btn="tutnext">Verder ▶</button>`}
+        </div>
+      </div>
+    </div>
+    <div class="tutbeeld">${beeld}</div>
+  </div>`;
 }
 function joinHTML(){
   return `<div class="ovbox" style="max-width:min(460px,92vw)"><h2>🔗 Meedoen</h2>
@@ -13130,11 +13201,11 @@ const SPRITE_BEELD = {
   /* --- wereld 5 · Hemelrand. Ontbreekt een bestand, dan leent hij een verwante tekening. --- */
   nimbus_trap:        "art/nimbus-trap.png",          // op een tree van de trap, kroontje scheef
   nimbus_recht:       "art/nimbus-recht.png",         // goede einde: het kroontje blijft recht
-  verzamelaar:        "art/verzamelaar.png",          // 5-2 · witte handschoenen, loep aan een koordje
-  verzamelaar_poets:  "art/verzamelaar-poets.png",    // poetst een glas dat al schoon is
-  verzamelaar_loep:   "art/verzamelaar-loep.png",     // loep voor één oog, buigt naar je toe
+  verzamelaar:        "art/verzamelaar.png",          // 5-2 · een zwart ding vol gouden sterogen, groter dan de zaal
+  verzamelaar_poets:  "art/verzamelaar-poets.png",    // één lange arm poetst een glas dat al schoon is
+  verzamelaar_loep:   "art/verzamelaar-loep.png",     // alle ogen open, buigt naar je toe
   verzamelaar_kaartje:"art/verzamelaar-kaartje.png",  // houdt een klein kaartje omhoog
-  verzamelaar_stuk:   "art/verzamelaar-stuk.png",     // tussen de scherven, lepel en halve hoepel
+  verzamelaar_stuk:   "art/verzamelaar-stuk.png",     // ingezakt tussen de scherven, ogen gaan uit
   verzamelaar_taunt:  "art/verzamelaar-taunt.png",    // de balk links
   vitrine_elementaal: "art/vitrine-elementaal.png",   // de oude vitrine achterin
   vitrine_elementaal_stuk:"art/vitrine-elementaal-stuk.png", // dezelfde, gebarsten
@@ -13155,6 +13226,13 @@ const SPRITE_BEELD = {
   eerste_opzij:       "art/eerste-opzij.png",         // doet een stap opzij bij de stoel
   eerste_grond:       "art/eerste-grond.png",         // zit op de grond tegen de stapels
   eerste_taunt:       "art/eerste-taunt.png",         // de balk links
+  eerste_boos:        "art/eerste-boos.png",          // geraakt, potje 1
+  eerste_f2:          "art/eerste-f2.png",            // potje 2 · sterker, enger
+  eerste_f2_taunt:    "art/eerste-f2-taunt.png",
+  eerste_f2_boos:     "art/eerste-f2-boos.png",
+  eerste_f3:          "art/eerste-f3.png",            // potje 3 · op zijn dodelijkst
+  eerste_f3_taunt:    "art/eerste-f3-taunt.png",
+  eerste_f3_boos:     "art/eerste-f3-boos.png",
   stoel:              "art/stoel.png",                // de ene stoel achter het bureau
   /* --- wereld 4, opnieuw opgebouwd. Zet het bestand in art/ en het staat er meteen. --- */
   /* --- 🏪 Knorst, de winkelier (wereld 2, achter de herberg) --- */
@@ -13397,6 +13475,8 @@ const SPRITE_TERUG = {
   seraf_kapot:"engel_stuk", seraf_magnus:"seraf_kapot", seraf_moeder:"seraf_kapot", seraf_flint:"seraf_kapot",
   seraf_oceaan:"seraf_kapot", seraf_zit:"engel_stuk",
   eerste_schrijft:"eerste", eerste_op:"eerste", eerste_opzij:"eerste", eerste_grond:"eerste", eerste_taunt:"eerste",
+  eerste_boos:"eerste", eerste_f2:"eerste_op", eerste_f2_taunt:"eerste_taunt", eerste_f2_boos:"eerste_f2",
+  eerste_f3:"eerste_f2", eerste_f3_taunt:"eerste_f2_taunt", eerste_f3_boos:"eerste_f3",
   rock1_zit:"rock1", rock1_papier:"rock1", kees:"rock1",
   rocky_til:"rocky", rocky_boekje:"rocky",
   engel_rug:"engel", kaelid_ogen:"shelob",
@@ -14774,7 +14854,7 @@ const STORY = {
         "Ja. Ja! Blijf zo liggen, ik wil kijken."
       ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{plasma:3, steen:5, vuur:5, gras:5, water:5, siphon:6},
+    deckVij:{plasma:5, vuur:3, rots:3, steen:2, gras:5, water:5, siphon:6},
     ltVij:["siphon"], handVij:["siphon"],
     aeVij:["fu_fire","ae_fire6"],
     levensVij:5,
@@ -14946,7 +15026,7 @@ const STORY = {
     /* Het Rookgordijn zegt niets: geen taunts, geen pop-ups, niets. */
     zeg:{ beurt:[], popup:[], laag:[], jij:[] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{steen:7, vuur:7, gras:7, water:7, greed:6},
+    deckVij:{steen:7, vuur:7, roos:5, gras:2, ijs:3, water:4, greed:6},
     ltVij:["greed"],
     aeVij:["ae_draw3"],
     levensVij:7,
@@ -15046,7 +15126,7 @@ const STORY = {
       ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Geen water: elke vonk is een van hun drie elementen. */
-    deckVij:{vuur:7, gras:7, steen:7, gamble:6},
+    deckVij:{plasma:5, vuur:2, roos:3, gras:4, steen:7, gamble:6},
     ltVij:["gamble"],
     levensVij:6,
     trio:[{naam:"Knetter", hp:2, kol:0, kracht:"vuur",  uitleg:"🔥 Vuur: +3 levens en het speel-effect twee keer"},
@@ -15161,7 +15241,7 @@ const STORY = {
         "VERBRANDEN. Dank je."
       ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{plasma:3, rots:3, steen:5, vuur:5, gras:5, water:5, negate:6},
+    deckVij:{rots:5, steen:3, vuur:8, gras:5, ijs:3, water:2, negate:6},
     ltVij:["negate"],
     aeVij:["ae_offer","ae_fire6","ae_hp3"], keuzeVij:"steen",
     levensVij:7,
@@ -15246,7 +15326,7 @@ const STORY = {
         {s:null, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>De vuurzee komt nu elke tweede ronde.</b> En de lava blijft."},
         {s:"fireguy_wit", reus:true, naam:"Flint", kleur:"#ffd45e", t:"Je bord is weg, ja. Het mijne ook. Pak er twee bij, dan sta je tenminste niet met lege handen te kijken. Ik ben niet oneerlijk, ik ben alleen groot."}
       ],
-      deck:{plasma:8, steen:5, gras:5, water:5, darkhole:6},
+      deck:{plasma:8, rots:3, steen:2, gras:5, water:5, darkhole:6},
       lt:["darkhole"],
       ae:["fu_fire","ae_fire6","ae_draw3"],
       zeg:{ beurt:[
@@ -15307,7 +15387,7 @@ const STORY = {
       laag:["…Hm. Oké. Oké dan."],
       jij:["Blijf liggen. Het is warm. Ik heb het je gegund, dat weet je toch."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{plasma:8, steen:5, gras:5, water:5, darkhole:6},
+    deckVij:{plasma:8, rots:3, steen:2, gras:5, water:5, darkhole:6},
     ltVij:["darkhole"],
     aeVij:["fu_fire","ae_fire6","ae_draw3"],
     levensVij:8, levensJij:8,
@@ -15577,7 +15657,7 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Zelfde regels als jij: 6 van elk element, een paar geüpgraded (ze verzamelt het mooiste),
        6 lichtkaarten, 3 aethers. Haar vuur doet onder water niets, net als dat van jou. */
-    deckVij:{steen:4, rots:2, vuur:6, gras:4, roos:2, water:4, ijs:2, kloon:3, vital:2, siphon:1},
+    deckVij:{steen:4, rots:2, vuur:6, roos:5, gras:1, ijs:3, water:3, kloon:3, vital:2, siphon:1},
     ltVij:["kloon","siphon","vital"],
     /* Acht armen die vastgrijpen, en haar stenen knijpen met alles wat ze hebben. */
     aeVij:["fu_grass","ae_grassx2","ae_stonefull"],
@@ -15683,7 +15763,7 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Zelfde regels als jij: 6 van elk element, al haar water is ijs, 6 lichtkaarten, 3 aethers.
        Onder haar ligt de Lichtbrenger al heel lang; die speelt ze zelf ook. */
-    deckVij:{steen:6, vuur:6, gras:6, ijs:6, negate:3, brenger:3},
+    deckVij:{rots:3, steen:3, plasma:2, vuur:4, gras:6, ijs:6, negate:3, brenger:3},
     ltVij:["negate","brenger"],
     /* "Ik vries altijd weer dicht": wat van haar is komt terug. */
     aeVij:["ae_graf","ae_offer","ae_draw3"], terugVij:"ijs",
@@ -15903,7 +15983,7 @@ const STORY = {
       jij:["Blijf liggen. Het water draagt je wel.", "Zo ja."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Zelfde regels als jij: 6 van elk element, een deel geüpgraded, 6 lichtkaarten, 3 aethers. */
-    deckVij:{steen:4, rots:2, vuur:6, gras:6, water:2, ijs:4, dfusion:2, negate:2, vital:2},
+    deckVij:{steen:6, plasma:3, vuur:3, roos:2, gras:4, ijs:5, water:1, dfusion:2, negate:2, vital:2},
     ltVij:["dfusion","negate","vital"],
     aeVij:["fu_water","ae_watercycle","ae_hemel"],
     levensVij:10,
@@ -16023,13 +16103,13 @@ const STORY = {
       {s:null, groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Een halve struik. <i>Onbekend. Zegt niks.</i>"},
       {s:"suiker", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Een zak suiker. Dicht."},
       {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Eén vitrine is leeg. Op het kaartje staat: <i>Kees. Gereserveerd.</i>"},
-      {s:"verzamelaar_poets", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Tussen de vitrines staat iemand met witte handschoenen aan, een glas te poetsen dat al schoon is."},
+      {s:"verzamelaar_poets", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Tussen de vitrines staat iets. Het is groter dan de vitrines en je ziet niet waar het ophoudt. Een lange zwarte arm poetst een glas dat al schoon is."},
       {s:"verzamelaar_poets", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Sst."},
       {s:"verzamelaar_poets", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar kijkt niet op."},
       {s:"verzamelaar_poets", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Achter de lijn blijven, graag."},
-      {s:"verzamelaar", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er is geen lijn. De Verzamelaar trekt er een met de punt van een schoen."},
+      {s:"verzamelaar", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er is geen lijn. De Verzamelaar trekt er een, met iets wat geen vinger is."},
       {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Zo."},
-      {s:"verzamelaar_loep", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Nu pas kijkt de Verzamelaar op. De loep zakt voor één oog."},
+      {s:"verzamelaar_loep", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Nu pas kijkt de Verzamelaar op. Er gaan ogen open, één voor één. Goud, met een ster erin. Die ogen ken je."},
       {s:"verzamelaar_loep", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"O."},
       {s:"verzamelaar_loep", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"O, kijk nou toch."},
       {s:"verzamelaar_loep", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar komt heel langzaam dichterbij, zoals je loopt naar iets wat van een tafel kan vallen."},
@@ -16038,7 +16118,7 @@ const STORY = {
       {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar wijst naar achteren. Daar staat een vitrine die ouder is dan de rest."},
       {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er staat iets in. Het is verschrompeld en grijs, maar je ziet nog vier kleuren, heel vaag. Op het kaartje staat alleen: <i>Elementaal.</i>"},
       {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Die heb ik al heel lang. Ik dacht dat het de laatste was. Daar had ik al een kaartje voor geschreven."},
-      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar haalt dat kaartje uit een borstzak en houdt het omhoog. <i>Elementaal. Laatste.</i>"},
+      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar haalt dat kaartje ergens uit zichzelf vandaan en houdt het omhoog. <i>Elementaal. Laatste.</i>"},
       {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Nu weet ik waar het heen moet."},
       {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil blijven staan, dan is het zo gebeurd."},
       {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Alle vitrines gaan tegelijk open, met een zacht klikje."},
@@ -16055,8 +16135,8 @@ const STORY = {
       vijand:"De Verzamelaar", sprite:"verzamelaar", tauntSpr:"verzamelaar_taunt", levens:8,
       wit:true, jijTrekt:3, hand:4, muziek:"w5_achterkamer", hz:"achter",
       praat:[
-        {s:"verzamelaar_loep", groot:true, naam:"…", kleur:"#e8d6a8", mu:"w5_achterkamer", t:"De Verzamelaar zet de loep af en veegt hem schoon."},
-        {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar staat op. Er zit stof op de handschoenen. Het gaat er niet af."},
+        {s:"verzamelaar_loep", groot:true, naam:"…", kleur:"#e8d6a8", mu:"w5_achterkamer", t:"De ogen van de Verzamelaar gaan dicht. Allemaal, behalve één."},
+        {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar komt overeind en wordt nog groter. Er zit stof op. Het gaat er niet af."},
         {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Dat was de voorkant."},
         {s:null, naam:"…", kleur:"#e8d6a8", t:"Alles wat op de tafel van de Verzamelaar lag, gaat terug in de vitrines. De hand, het bord, het graf. Klik, klik, klik."},
         {s:"golem", groot:true, naam:"…", kleur:"#ff8a4a", t:"Achterin staat iets groots met een doek eroverheen. Ernaast staat Maatje."},
@@ -16082,10 +16162,10 @@ const STORY = {
     }],
     win:[
       {s:null, naam:"…", kleur:"#e8d6a8", mu:"w5_zaal", t:"De vitrines springen. Het begint vooraan en het gaat door tot je het niet meer ziet."},
-      {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar rent erlangs en probeert te redden wat er valt. Het lukt twee keer."},
+      {s:"verzamelaar", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar schiet erlangs, overal tegelijk, en probeert te redden wat er valt. Het lukt twee keer."},
       {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil."},
       {s:"verzamelaar", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil nou."},
-      {s:"verzamelaar_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar staat midden in de scherven, met een lepel in de ene hand en een halve hoepel in de andere."},
+      {s:"verzamelaar_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar zakt in elkaar tussen de scherven. In één arm een lepel, in een andere een halve hoepel. De ogen gaan uit, een voor een."},
       {s:"verzamelaar_kaartje", groot:true, naam:"…", kleur:"#e8d6a8", t:"Dan komt er een pen tevoorschijn, en het kaartje met jouw naam, en er wordt iets doorgestreept."},
       {s:"verzamelaar_kaartje", groot:true, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Niet te bewaren."},
       {s:"verzamelaar_stuk", groot:true, naam:"…", kleur:"#e8d6a8", t:"Het wordt hardop voorgelezen. Het klinkt niet boos. Het klinkt als een beschrijving."},
@@ -16196,7 +16276,7 @@ const STORY = {
       jij:["Blijf aan je kant.", "Daar hoor je."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Stevige blokkers voor iemand die je maar vier keer mag raken: 🟣 Oerkracht op steen. */
-    deckVij:{steen:4, rots:4, water:6, vuur:6, gras:6, negate:3, kuriboh:3},
+    deckVij:{rots:5, steen:3, water:6, plasma:3, vuur:3, roos:2, gras:4, negate:3, kuriboh:3},
     ltVij:["negate","kuriboh"],
     aeVij:["ae_alziend","ae_hp3"], keuzeVij:"steen",
     naad:true,
@@ -16222,7 +16302,7 @@ const STORY = {
       {s:"seraf_kapot", groot:true, bg:5, naam:"Seraf", kleur:"#f6f7fb", t:"Maar ik heb ze allemaal gezien. Ik stond erbij toen jij ze versloeg. Ik weet precies hoe ze vochten."},
       {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ <b>Vier gezichten.</b> Seraf vecht als de vier bazen die je versloeg, één voor één, en zwaarder dan toen. Jij hebt <b>10</b> levens voor alles bij elkaar."},
       {s:null, bg:5, naam:"…", kleur:"#f6f7fb", t:"✦ Bij elke wissel wordt het hele veld leeggeveegd. Jij houdt je hand, trekt <b>2</b> en krijgt een ✦ Vitaliteit (heel 2, trek 1); het nieuwe gezicht begint met een verse hand."},
-      {s:"seraf_magnus", groot:true, bg:5, naam:"…", kleur:"#cfa06a", mu:"w1_baasgevecht", t:"Serafs gezicht verschuift. Er groeit steen overheen."},
+      {s:"seraf_magnus", groot:true, bg:5, naam:"…", kleur:"#cfa06a", mu:"w1_baasgevecht", t:"Seraf valt uit elkaar in stenen, en de stenen gaan staan. Het is Magnus. Bijna. Waar het gezicht hoort, is het zwart, met twee gouden sterren erin."},
       {s:"seraf_magnus", groot:true, bg:5, naam:"Seraf", kleur:"#cfa06a", t:"Magnus hoorde je aankomen."},
       {s:"seraf_magnus", groot:true, bg:5, naam:"…", kleur:"#cfa06a", t:"De stem is die van Magnus. Bijna."},
       {s:"seraf_magnus", groot:true, bg:5, naam:"Seraf", kleur:"#cfa06a", t:"Magnus was bang voor je. Terecht."},
@@ -16232,17 +16312,17 @@ const STORY = {
       { vijand:"Seraf · Moeder Natuur", sprite:"seraf_moeder", tauntSpr:"seraf_moeder", levens:4, hand:5, jijTrekt:2,
         bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", jijKrijgt:["vital"], weerUit:true, regenAltijd:true, muziek:"w2_baasgevecht", hz:"moeder",
         praat:[
-          {s:"seraf_magnus", groot:true, naam:"…", kleur:"#cfa06a", t:"Het stenen gezicht barst en valt in brokken van Seraf af."},
+          {s:"seraf_magnus", groot:true, naam:"…", kleur:"#cfa06a", t:"De berg barst open. Er valt licht uit, en dan Seraf."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Past niet."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
-          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", mu:"w2_baasgevecht", t:"Er groeien takken over het gezicht. Het begint te regenen."},
+          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", mu:"w2_baasgevecht", t:"Er groeien takken uit Seraf, en bloemen, veel te veel. Moeder Natuur staat op, met een zwart gat in de borst waar sterren in draaien. Het begint te regenen."},
           {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Kind."},
           {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Wij zijn niet boos. Wij…"},
           {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", t:"Het gezicht trekt."},
           {s:"seraf_moeder", groot:true, naam:"Seraf", kleur:"#e08fb0", t:"Ik ben geen wij. Ik ben alleen."},
           {s:null, naam:"…", kleur:"#e08fb0", t:"🌧 <b>Het regent, en het houdt niet op.</b> 🔥 Vuur doet niets tegen de tegenstander, alleen tegen je eigen creatures. En er zitten 🌹 rozen in dit deck. <b>4</b> levens."}
         ],
-        deck:{roos:8, vuur:5, water:5, steen:5, siphon:3}, lt:["siphon"],
+        deck:{roos:8, vuur:5, ijs:2, water:3, rots:3, steen:2, siphon:3}, lt:["siphon"],
         ae:["fu_grass","ae_grassx2","ae_hp3"], keuze:["gras"],
         zeg:{ beurt:["Kind.", "Wij zijn langzaam. Ik niet.", "Voel je de regen? Dat ben ik.",
             "Het gras is zacht hier. Dat is met opzet.", "Moeder Natuur heeft je laten gaan. Ik niet."],
@@ -16253,16 +16333,16 @@ const STORY = {
       { vijand:"Seraf · Flint", sprite:"seraf_flint", tauntSpr:"seraf_flint", levens:4, hand:5, jijTrekt:2,
         bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", jijKrijgt:["vital"], weerUit:true, vuurzee:true, vuurzeeSnel:true, lava:true, muziek:"w3_flintgevecht", hz:"flint",
         praat:[
-          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", t:"De takken knappen. De bladeren vallen van Serafs gezicht."},
+          {s:"seraf_moeder", groot:true, naam:"…", kleur:"#e08fb0", t:"De takken knappen. De bloemen vallen, en wat eronder staat is Seraf."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Te veel stemmen."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
-          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", mu:"w3_flintgevecht", t:"Er staat ineens een zonnebril op die net niet past. Alles eromheen gloeit."},
+          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", mu:"w3_flintgevecht", t:"Alles vat vlam. In het vuur staat Flint, met een zonnebril die net niet past. Achter de glazen is het zwart, met goud erin."},
           {s:"seraf_flint", groot:true, naam:"Seraf", kleur:"#ff8a4a", t:"Yo."},
           {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", t:"Het is bijna goed. Net niet."},
           {s:"seraf_flint", groot:true, naam:"Seraf", kleur:"#ff8a4a", t:"Hij vond je aardig. Dat heb ik nooit begrepen."},
           {s:null, naam:"…", kleur:"#ff8a4a", t:"🔥 <b>Alles brandt elke tweede ronde</b>: dan gaan alle creatures op het veld eraan, van allebei. 🌋 En de grond is lava: eind van elke tweede beurt verbrandt 🌿, voelt 💧 niets en verliest de rest 1 leven. <b>4</b> levens."}
         ],
-        deck:{plasma:8, steen:5, gras:5, water:5, darkhole:3}, lt:["darkhole"],
+        deck:{plasma:8, rots:2, steen:3, roos:3, gras:2, water:5, darkhole:3}, lt:["darkhole"],
         ae:["fu_fire","ae_fire6","ae_draw3"],
         zeg:{ beurt:["Yo.", "Nice. Serieus.", "Ga naar huis.", "Dat heeft hij nooit gezegd. Ik wel.", "Hij meende alles. Dat kan ik niet nadoen."],
           popup:["Weet je wat er gebeurt als ze naar elkaar toe gaan? Ik wel.",
@@ -16271,17 +16351,17 @@ const STORY = {
       { vijand:"Seraf · de Oceaan", sprite:"seraf_oceaan", tauntSpr:"seraf_oceaan", levens:5, hand:5, jijTrekt:2,
         bordLeeg:true, bordLeegTekst:"✦ <em>Seraf veegt het veld leeg.</em> {n} kaarten van jou gaan eraf.", jijKrijgt:["vital"], weerUit:true, getij:true, getijLijst:["vloed","springtij","eb","springtij"], muziek:"w4_baas", hz:"oceaan",
         praat:[
-          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", t:"De zonnebril breekt doormidden. Het gloeien dooft."},
+          {s:"seraf_flint", groot:true, naam:"…", kleur:"#ff8a4a", t:"De zonnebril breekt doormidden. Het vuur dooft, en Seraf blijft over."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Die was het moeilijkst."},
           {s:"seraf_kapot", groot:true, naam:"Seraf", kleur:"#f6f7fb", t:"Volgende."},
-          {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", mu:"w4_baas", t:"Er is geen vast gezicht meer. Er loopt water overheen, alle kanten op."},
+          {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", mu:"w4_baas", t:"Seraf loopt uit in water, en het water staat op als de Oceaan. Er is geen vast gezicht. Alleen gouden ogen die meedrijven."},
           {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"Heen."},
           {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"En weer."},
           {s:"seraf_oceaan", groot:true, naam:"…", kleur:"#a9e2ff", t:"Het water loopt over het gezicht en het blijft niet liggen."},
           {s:"seraf_oceaan", groot:true, naam:"Seraf", kleur:"#a9e2ff", t:"De Oceaan heeft één keer zelf iets besloten. Ik nog nooit."},
           {s:null, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Het getij, en het water keert twee keer zo vaak.</b> Elke ronde schuift het door: vloed, springtij, eb, springtij. Bij vloed valt niemand aan; bij springtij spoelt alles naar de overkant; bij eb slaat 💧 +3 en dooft 🔥. <b>5</b> levens."}
         ],
-        deck:{steen:4, rots:2, vuur:6, gras:6, water:2, ijs:4, dfusion:2, negate:2, vital:2}, lt:["dfusion","negate","vital"],
+        deck:{steen:6, plasma:3, vuur:3, roos:2, gras:4, ijs:5, water:1, dfusion:2, negate:2, vital:2}, lt:["dfusion","negate","vital"],
         ae:["fu_water","ae_watercycle","ae_hemel"],
         zeg:{ beurt:["Heen.", "En weer.", "Ik ben overal waar je heen gaat.", "Niemand heeft haar ooit iets gevraagd. Mij altijd.", "Ik word niet moe. Ik word niet…"],
           popup:["Ik stond bij de steen. In het woud. In de as. Ik heb ze allemaal zien vallen.",
@@ -16330,7 +16410,7 @@ const STORY = {
         "Elk gezicht is zwaarder dan het vorige."],
       laag:["Past niet."], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
-    deckVij:{rots:6, steen:3, vuur:5, gras:5, water:5},
+    deckVij:{rots:6, steen:3, plasma:2, vuur:3, gras:5, ijs:3, water:2},
     aeVij:["ae_stonefull","fu_stone","ae_hp3"], keuzeVij:"steen",
     rotsval:true, rotsDubbel:true,
     levensVij:4, levensJij:10,
@@ -16366,17 +16446,17 @@ const STORY = {
       {s:null, bg:5, naam:"…", kleur:"#f6e9b0", t:"✦ Verlies je in potje 2 of 3, dan begin je opnieuw bij dat potje. De Eerste heeft <b>8</b> levens, jij <b>10</b>."}
     ],
     fases:[
-      { volReset:true, vijand:"De Eerste", sprite:"eerste_op", levens:9, levensJij:10, muziek:"w5_eerste",
+      { volReset:true, vijand:"De Eerste", sprite:"eerste_f2", tauntSpr:"eerste_f2_taunt", levens:9, levensJij:10, muziek:"w5_eerste",
         praat:[
-          {s:"eerste_op", groot:true, naam:"…", kleur:"#f6e9b0", t:"Alles gaat terug naar hoe het was. Het stof hangt weer stil."},
-          {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Nog een keer."},
-          {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb geen haast."},
-          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Weet je wie Magnus vertelde hoe het hoort? Weet je wie die afspraak heeft opgeschreven? Vier rijken. Ieder voor zich."},
-          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ze zeiden allemaal dat het hun zo verteld was."},
-          {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben degene die het verteld heeft."},
+          {s:"eerste_f2", groot:true, naam:"…", kleur:"#f6e9b0", t:"Alles gaat terug naar hoe het was. Het stof hangt weer stil."},
+          {s:"eerste_f2", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Nog een keer."},
+          {s:"eerste_f2", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik heb geen haast."},
+          {s:"eerste_f2", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Weet je wie Magnus vertelde hoe het hoort? Weet je wie die afspraak heeft opgeschreven? Vier rijken. Ieder voor zich."},
+          {s:"eerste_f2", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ze zeiden allemaal dat het hun zo verteld was."},
+          {s:"eerste_f2", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Ik ben degene die het verteld heeft."},
           {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Potje 2.</b> De Eerste heeft er de vier element-aethers bij: Getijdenstroom, Verzengende Woede, Onwrikbaar en Woekergroei. <b>9</b> levens tegen jouw <b>10</b>."}
         ],
-        deck:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3}, lt:["negate","echo"],
+        deck:{rots:7, ijs:7, plasma:7, roos:7, negate:3, echo:3}, lt:["negate","echo"],
         ae:["fu_water","fu_fire","fu_stone","fu_grass","ae_watercycle","ae_fire6","ae_stonefull","ae_grassx2"],
         zeg:{ beurt:["Jij hebt ze verslagen. Ik heb ze daar neergezet.", "Steen onthoudt alles. Dat zei Magnus. Dat heeft hij van mij.",
             "Je bent goed. Dat verandert niks.", "Alles wat jij hebt opengebroken, heb ik ooit dichtgedaan.", "Ik heb geen hekel aan je. Ik ken je gewoon."],
@@ -16386,30 +16466,34 @@ const STORY = {
             "Hoeveel er voor mij zaten, weet ik niet. Het staat nergens. Dat is met opzet.",
             "Je lijkt op mij. Dat is geen toeval."],
           laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } },
-      { volReset:true, vijand:"De Eerste", sprite:"eerste_op", levens:10, levensJij:10, muziek:"w5_staan",
+      { volReset:true, vijand:"De Eerste", sprite:"eerste_f3", tauntSpr:"eerste_f3_taunt", levens:10, levensJij:10, muziek:"w5_staan",
         keuzeNaam:"stoel", keuzeStandaard:"staan",
         praat:[
-          {s:"eerste_op", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_stoel", t:"Alles gaat weer terug. Maar deze keer gaat De Eerste niet meteen verder."},
+          {s:"eerste_f3", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_stoel", t:"Alles gaat weer terug. Maar deze keer gaat De Eerste niet meteen verder."},
           {s:"eerste_opzij", groot:true, naam:"…", kleur:"#f6e9b0", t:"De Eerste staat op, en doet een stap opzij."},
           {s:"stoel", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Hier."},
           {s:"stoel", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Neem maar."}
         ],
-        keuzePraat:[
-          {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", t:"🪑 <b>Ga je zitten</b>, dan krijg jij de vier algemene 🟣 aethers van De Eerste (Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade), die De Eerste dan kwijt is, en je begint met <b>4</b> levens extra. Win je zo, dan ben jij de nieuwe Eerste."},
-          {s:"eerste_opzij", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Je hoeft niet. Zo werd het mij ook gevraagd.",
-            keuze:[{label:"🪑 Ga zitten", ga:"zit"}, {label:"🚶 Blijf staan", ga:"staan"}]}
+        /* 🪑 De stoel is geen keuze aan het begin: hij blijft het hele potje staan, en op je
+           eigen beurt kun je er op elk moment in gaan zitten (de knop rechts). */
+        stoelLos:true,
+        stoelUitleg:[
+          {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", t:"De stoel blijft staan. Leeg. Zolang dit potje duurt."},
+          {s:"eerste_opzij", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Je hoeft niet. En je hoeft niet nu."},
+          {s:null, naam:"…", kleur:"#f6e9b0", t:"✦ <b>Potje 3.</b> De Eerste heeft nu alle twaalf 🟣 aethers. <b>10</b> levens tegen jouw <b>10</b>. Rechts staat <b>de stoel</b>: op je eigen beurt kun je er op elk moment in gaan zitten."},
+          {s:"eerste_f3", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Goed. Dan laat ik je zien wat die stoel van iemand maakt."}
+        ],
+        stoelVraag:[
+          {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", t:"De stoel staat er nog. Hij is warm."},
+          {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", t:"🪑 <b>Neem je de macht van de stoel?</b> De vier algemene 🟣 aethers van De Eerste worden van jou: Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade. De Eerste is ze kwijt. En er komen <b>4</b> levens bij."},
+          {s:"eerste_opzij", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"En wat het kost, staat nergens. Zo werd het mij ook gevraagd.",
+            keuze:[{label:"🪑 Ga zitten", ga:"zit"}, {label:"Nog niet", ga:"nee"}]}
         ],
         takken:{
           zit:[
             {s:null, groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_zit", t:"Je gaat zitten. De stoel past meteen."},
-            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zie je."},
-            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan maken we het af. Het maakt niet meer uit wie er wint. Er zit al iemand."}
-          ],
-          staan:[
-            {s:"stoel", groot:true, naam:"…", kleur:"#f6e9b0", mu:"w5_staan", t:"De stoel blijft leeg. De Eerste kijkt ernaar, en dan naar jou."},
-            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zo."},
-            {s:"eerste", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dat heb ik toen niet gedaan. Dan weet ik niet hoe dit afloopt. Dat is lang geleden."},
-            {s:"eerste_op", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Goed. Dan laat ik je zien wat die stoel van iemand maakt."}
+            {s:"eerste_f3", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Zie je."},
+            {s:"eerste_f3", groot:true, naam:"De Eerste", kleur:"#f6e9b0", t:"Dan maken we het af. Het maakt niet meer uit wie er wint. Er zit al iemand."}
           ]
         },
         keuzes:{
@@ -16417,11 +16501,11 @@ const STORY = {
             zeg:{ beurt:["Voel je het? Hij is warm. Dat blijft hij.", "Zo zat ik ook.", "Je wint dit. Dat wist ik ook.", "Het went."],
               popup:[], laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } },
           staan:{ variant:"staan", muziek:"w5_staan",
-            zeg:{ beurt:["Je had kunnen zitten.", "Je staat. Dat is moedig. Het verandert niks.", "Dit is alles wat ik heb. Kijk goed.",
+            zeg:{ beurt:["Hij staat er nog, hoor.", "Je staat. Dat is moedig. Het verandert niks.", "Dit is alles wat ik heb. Kijk goed.",
                 "Denk je dat ze het samen doen, als niemand zit?", "Ik hoop dat je gelijk hebt. Ik geloof het niet."],
               popup:[], laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] } }
         },
-        deck:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3}, lt:["negate","echo"],
+        deck:{rots:7, ijs:7, plasma:7, roos:7, negate:3, echo:3}, lt:["negate","echo"],
         ae:["fu_water","fu_fire","fu_stone","fu_grass","ae_watercycle","ae_fire6","ae_stonefull","ae_grassx2","ae_draw3","ae_hp3","ae_graf","ae_genade"],
         keuze:"steen", terug:"rots" }
     ],
@@ -16506,7 +16590,7 @@ const STORY = {
       laag:["Hm.", "Zo ver is niemand gekomen."], jij:["Blijf liggen.", "Dan hoef je het niet te worden."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Hetzelfde soort deck als jij: zeven van elk element, waarvan de helft gesmeed, en zes lichtkaarten. */
-    deckVij:{steen:4, rots:3, water:4, ijs:3, vuur:4, plasma:3, gras:4, roos:3, negate:3, echo:3},
+    deckVij:{rots:7, ijs:7, plasma:7, roos:7, negate:3, echo:3},
     ltVij:["negate","echo"],
     aeVij:["fu_water","fu_fire","fu_stone","fu_grass"],
     levensVij:8, levensJij:10,
@@ -16843,11 +16927,19 @@ function lvKleurZet(){
   if(b.dataset.lvk === sleutel) return;
   const VARS = ["--rk1","--rk2","--vn1","--vn2","--vn3","--vnm","--vk1","--vk2","--vk3","--vk4","--vsub","--vdim","--vgrijs","--vbalk","--vin","--vglans"];
   if(!id){ VARS.forEach(v => b.style.removeProperty(v)); b.dataset.lvk = ""; return; }
+  const pal = lvPalet(id);
+  if(pal === null){ clearTimeout(lvKleurZet.t); lvKleurZet.t = setTimeout(lvKleurZet, 400); return; }   // nog niet binnen
+  if(pal === "geen"){ VARS.forEach(v => b.style.removeProperty(v)); b.dataset.lvk = sleutel; return; }
+  Object.entries(pal).forEach(([k, v]) => b.style.setProperty(k, v));
+  b.dataset.lvk = sleutel;
+}
+/* Het kleurpalet van één level: null = de tekeningen zijn er nog niet, "geen" = niks te meten. */
+function lvPalet(id){
+  const sleutel = id + ":" + (hzSleutel(id) || "");
   let pal = LV_KLEUR[sleutel];
   if(!pal){
     const c = lvKleurMeet(id);
-    if(c === null){ clearTimeout(lvKleurZet.t); lvKleurZet.t = setTimeout(lvKleurZet, 400); return; }   // nog niet binnen
-    if(c === "geen"){ VARS.forEach(v => b.style.removeProperty(v)); b.dataset.lvk = sleutel; return; }
+    if(c === null || c === "geen") return c;
     const wr = WERELD_RGB[(STORY[id] && STORY[id].wereld) || 0] || WERELD_RGB[0];
     const mix = c.map((v, i) => v * .85 + wr[i] * .15);
     const [h, s0] = rgbHsl(...mix);
@@ -16860,8 +16952,7 @@ function lvKleurZet(){
       /* de kaartrug krijgt ook de kleur van deze tegenstander */
       "--rk1":hsl(h, Math.min(.6, s * 1.15), .40), "--rk2":hsl(h, s, .26)};
   }
-  Object.entries(pal).forEach(([k, v]) => b.style.setProperty(k, v));
-  b.dataset.lvk = sleutel;
+  return pal;
 }
 function storySkin(w){
   const app = document.getElementById("app");
@@ -17056,13 +17147,14 @@ const VELD = {
            ["🌊 <b>Het gezicht van de Oceaan.</b> Het getij keert elke ronde: vloed, springtij, eb, springtij. <b>5</b> levens."],
            ["✦ <b>Seraf.</b> Eén leven. Niets in de hand, niets op het veld. Seraf verdedigt zich niet."]] },
 
-  "5-5": { regels:["✦ <b>Potje 1 van 3.</b> De Eerste speelt met een deck als het jouwe en de vier fusies: Dieptestroom, Assekern, Bergrug en Wurgranken.",
+  "5-5": { regels:["✦ <b>Potje 1 van 3.</b> De Eerste speelt met een deck waarin alles gesmeed is (⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs) en de vier fusies: Dieptestroom, Assekern, Bergrug en Wurgranken.",
                    "Na elk potje gaat alles terug naar het begin. Verlies je in potje 2 of 3, dan begin je opnieuw bij dat potje.",
                    "De Eerste <b>8</b> levens, jij <b>10</b>."],
     fasen:[["✦ <b>Potje 2 van 3.</b> Erbij: Getijdenstroom, Verzengende Woede, Onwrikbaar en Woekergroei. De Eerste <b>9</b> levens, jij <b>10</b>."],
            {zit:["🪑 <b>Je zit.</b> Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade zijn nu van jou, en je hebt 4 levens extra. De Eerste houdt de andere acht.",
                  "Win je, dan ben jij de nieuwe Eerste."],
-            staan:["🚶 <b>Je staat.</b> De Eerste speelt met alle twaalf: de fusies, de vier elementen, en Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade. <b>10</b> levens tegen jouw <b>10</b>."],
+            staan:["🚶 <b>Je staat.</b> De Eerste speelt met alle twaalf: de fusies, de vier elementen, en Bron van Overvloed, Oerkracht, Eeuwige Terugkeer en Genade. <b>10</b> levens tegen jouw <b>10</b>.",
+                   "🪑 De stoel staat rechts, het hele potje. Op je eigen beurt kun je er op elk moment in gaan zitten."],
             standaard:["✦ <b>Potje 3 van 3.</b>"]}] }
 };
 
@@ -17661,7 +17753,8 @@ async function startStoryGevecht(id, variant, opts){
     const F = L.fases[opts.vanafFase - 1];
     S.story.faseI = opts.vanafFase; S.story.fase2Gedaan = true;
     addLog(`🔁 <em>Je begint opnieuw bij fase ${opts.vanafFase + 1}.</em>`, true);
-    if(F.keuzePraat){
+    if(F.stoelLos){ faseKeuze(F, F.keuzeStandaard || "staan"); S.story.stoelF = F; S.story.stoelOpen = true; }
+    else if(F.keuzePraat){
       const ga = await praatKeuzeAwait(F.keuzePraat, F.keuzeStandaard);
       await praatLosAwait((F.takken && F.takken[ga]) || []);
       faseKeuze(F, ga);
@@ -17967,6 +18060,48 @@ function praatKeuzeAwait(regels, standaard){
     else res(stand);
   });
 }
+/* 🪑 5-5, potje 3: de stoel. Zitten kan op je eigen beurt, als er niets meer afgewikkeld wordt. */
+function stoelKan(){
+  return !!(S && S.story && S.story.stoelOpen && !S.over && S.tp === 0 && S.ui
+    && (S.ui.mode === "main" || S.ui.mode === "battle") && !pending && !busyFlag && !(S.stack && S.stack.length) && !M);
+}
+async function stoelVraag(){
+  const st = S && S.story, F = st && st.stoelF;
+  if(!F || !st.stoelOpen) return;
+  if(!stoelKan()){ addLog("🪑 De stoel kan op je eigen beurt, als er niets meer gebeurt.", true); render(); return; }
+  const ga = await praatKeuzeAwait(F.stoelVraag || [], "nee");
+  if(ga !== "zit" || !S.story || S.over || !S.story.stoelOpen){ render(); return; }
+  await stoelZit(F);
+}
+async function stoelZit(F){
+  const st = S.story;
+  st.stoelOpen = false;
+  faseKeuze(F, "zit");
+  const k = st.keuzeNu || {};
+  (k.jijAe || []).forEach(x => { if(S.ae[0].indexOf(x) < 0) S.ae[0].push(x); });
+  if(k.vijWeg) S.ae[1] = (S.ae[1] || []).filter(x => k.vijWeg.indexOf(x) < 0);
+  P(0).life += k.levensJij || 0;
+  if(st.startLevens) st.startLevens[0] = Math.max(st.startLevens[0], P(0).life);
+  /* Wat normaal aan het begin gekozen wordt, kiest de stoel nu voor je: het element en de
+     kaartsoort waar je het meest van hebt. */
+  const tel = {}; P(0).deck.concat(P(0).hand).forEach(c => { if(ORDER.indexOf(c.el) >= 0) tel[c.el] = (tel[c.el] || 0) + 1; });
+  if(!S.aeKeuze) S.aeKeuze = [null, null];
+  if(!S.terug) S.terug = [null, null];
+  if(hasAe(0, "ae_hp3") && !S.aeKeuze[0]){
+    S.aeKeuze[0] = ORDER.slice().sort((a, b) => (tel[b] || 0) - (tel[a] || 0))[0];
+    addLog(`🟣 ${AETHERS.ae_hp3.name}: ${icon(S.aeKeuze[0])} <em>${EL[S.aeKeuze[0]].name}</em>.`, true);
+  }
+  if(hasAe(0, "ae_graf") && !S.terug[0]){
+    const ts = terugSoorten(0), best = Object.keys(ts).sort((a, b) => ts[b] - ts[a])[0] || "steen";
+    S.terug[0] = best;
+    addLog(`🟣 ${AETHERS.ae_graf.name}: ${soortIc(best)} <em>${soortNaam(best)}</em>.`, true);
+  }
+  addLog(`🪑 <em>Je gaat zitten.</em> ${(k.jijAe || []).map(x => AETHERS[x].name).join(", ")} zijn nu van jou, en je hebt ${P(0).life} levens.`, true);
+  if(st.muziek && !FAST) AU.zet(st.muziek, {hard:true});
+  render();
+  await praatLosAwait((F.takken && F.takken.zit) || []);
+  render();
+}
 /* Wat een keuze in een omslag verandert. */
 function faseKeuze(F, ga){
   const st = S.story; if(!st) return;
@@ -18033,7 +18168,11 @@ async function storyFase2(F){
   clearTimeout(botT);
   await praatLosAwait(F.praat || []);
   /* 🪑 Een omslag mag een keuze bevatten (5-5: de stoel). Die tak loopt dan nog even door. */
-  if(F.keuzePraat && !S.over){
+  if(F.stoelLos && !S.over){
+    await praatLosAwait(F.stoelUitleg || []);
+    faseKeuze(F, F.keuzeStandaard || "staan");
+    st.stoelF = F; st.stoelOpen = true;
+  } else if(F.keuzePraat && !S.over){
     const ga = await praatKeuzeAwait(F.keuzePraat, F.keuzeStandaard);
     await praatLosAwait((F.takken && F.takken[ga]) || []);
     faseKeuze(F, ga);
@@ -19756,7 +19895,9 @@ function render(){
         ? `<div class="hittemeter${(S.story.hitte||0) >= 4 ? " warm" : ""}" id="hittebalk">🔥 hitte <b>${S.story.hitte||0}/${HITTE_MAX}</b>${
              S.story.hitteAan ? `<br>zijn aanval +${hitteBonus(1)}` : ""}</div>`
         : "");
-  $("#turnbadge").innerHTML = (matchBo3() ? `${S.mode === "basis" ? "⚜️" : "🟣"} Potje ${S.match.game} · ${S.match.wins[0]}–${S.match.wins[1]}<br>` : "") + `Beurt ${S.turnNo[S.tp]}<b>${pName(S.tp)}</b>`
+  const stoelKnop = S.story && S.story.stoelOpen && !S.over
+    ? `<button class="stoelknop${stoelKan() ? "" : " wacht"}" data-act="btn" data-btn="stoel" title="${stoelKan() ? "" : "kan op je eigen beurt"}">DE STOEL<small>wat kost het?</small></button>` : "";
+  $("#turnbadge").innerHTML = stoelKnop + (matchBo3() ? `${S.mode === "basis" ? "⚜️" : "🟣"} Potje ${S.match.game} · ${S.match.wins[0]}–${S.match.wins[1]}<br>` : "") + `Beurt ${S.turnNo[S.tp]}<b>${pName(S.tp)}</b>`
     + (S.story ? `<div class="tijdmeter${(S.story.mijnTijd || 0) >= STER_SNEL ? " traag" : ""}" id="tijdbalk" title="je eigen gevechtstijd · onder 3 minuten = ★">⏱ ${tijdTekst(S.story.mijnTijd || 0)}</div>` : "")
     + badgeExtra;
   if(typeof tutBalk === "function") tutBalk();
@@ -19953,7 +20094,8 @@ document.addEventListener("click", e => {
   if(act === "btn") return onBtn(t.dataset.btn, t);
   if(mpKlik(act, t)) return;
   if(act === "mptaunt"){ mpTauntMenu(); return; }
-  if(act === "mpzeg"){ mpTauntKies(+t.dataset.i); return; }
+  if(act === "mpzeg"){ mpTauntKies(t.dataset.k, +t.dataset.i); return; }
+  if(act === "mpsoort"){ mpSoortKies(t.dataset.k); mpBalkPaint(); return; }
   if(S.over) return;
   if(act === "aepick"){
     if(S.ui.mode === "aetherpick" && !isBot(S.ui.p)) doAct({t:"f", v:+t.dataset.i});
@@ -20333,7 +20475,7 @@ async function applyRemote(acts){
 async function onLiveData(m){
   if(!m || !m.t) return;
   if(!(NET.on && NET.chan === "live")) return;      // al weg uit het online potje: niets meer toepassen
-  if(m.t === "taunt"){ if((m.p === 0 || m.p === 1) && m.p !== NET.seat) mpZeg(m.p, Math.floor(+m.i) || 0, true); return; }
+  if(m.t === "taunt"){ if((m.p === 0 || m.p === 1) && m.p !== NET.seat && MP_SOORT.some(x => x.k === m.k)) mpZeg(m.p, m.k, Math.floor(+m.i) || 0, true); return; }
   if(m.t === "hello"){
     /* Zelfde potje? Dan moeten seed én lengte kloppen. Anders wint de langste zettenlijst,
        en bij gelijke lengte de host. Zo spelen de twee nooit langs elkaar heen. */
@@ -20809,27 +20951,6 @@ function mpCharsVan(st){
   return MP_CHARS.filter(c => c.id === "1-1" || alles || k.indexOf(c.id) >= 0 || (c.ook && k.indexOf(c.ook) >= 0)).map(c => c.id);
 }
 const mpCharsVrij = () => mpCharsVan(mpVerste());
-/* Wat een karakter in een gevecht zegt: de zinnen uit zijn eigen gevecht. Heeft hij daar
-   (bijna) niets, dan wat hij in de gesprekken zegt. Kort genoeg om in het portret te passen. */
-const MP_TAUNT = {};
-function mpTaunts(id){
-  if(MP_TAUNT[id]) return MP_TAUNT[id];
-  const c = mpChar(id), L = STORY[c.id] || {}, z = L.zeg || {};
-  const schoon = t => String(t || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-  let r = [].concat(z.beurt || [], z.jij || [], z.laag || [], z.bijna || [], z.popupSpreker ? [] : (z.popup || []));
-  if(typeof z.sterf === "string") r.push(z.sterf);
-  r = r.filter(t => typeof t === "string").map(schoon);
-  if(r.length < 6){
-    const basis = String(c.spr || "").split("_")[0];
-    Object.keys(L).forEach(k => { const v = L[k]; if(!Array.isArray(v)) return;
-      v.forEach(x => { if(x && typeof x === "object" && typeof x.t === "string" && x.s
-        && String(x.s).split("_")[0] === basis && x.naam !== "…") r.push(schoon(x.t)); }); });
-  }
-  r = [...new Set(r.filter(t => t.length >= 2 && t.length <= 96))];
-  if(!r.length) r = ["…"];
-  return MP_TAUNT[id] = r;
-}
-
 /* ---------- ⚜️ decks ----------
    24 elementkaarten: zes van elk, en per element mag je er drie bij of drie af (samen blijft
    het 24). De getallen 5, 3 en 2 geef je elk aan één element: zoveel van dat element worden
@@ -21012,13 +21133,56 @@ function mpHTML(){
     <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") : live}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
 }
+/* In de karakterkeuze staat iedereen even groot: van elke tekening snijden we de lege
+   (doorzichtige) rand eraf. Het resultaat onthouden we, klein genoeg voor een tegel. */
+const SNIJ = {};
+function snijBeeld(pad){
+  if(SNIJ[pad]) return;
+  SNIJ[pad] = "bezig";
+  const im = new Image();
+  im.onload = () => {
+    try{
+      const W = im.naturalWidth, H = im.naturalHeight, k = Math.min(1, 256 / Math.max(W, H));
+      const w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const cx = c.getContext("2d", {willReadFrequently:true}); cx.drawImage(im, 0, 0, w, h);
+      const d = cx.getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(d[(y * w + x) * 4 + 3] > 24){
+        if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+      if(x1 < 0){ SNIJ[pad] = "fout"; return; }
+      const sx = x0 / k, sy = y0 / k, sw = (x1 - x0 + 1) / k, sh = (y1 - y0 + 1) / k;
+      const m = Math.min(1, 300 / Math.max(sw, sh));
+      const o = document.createElement("canvas"); o.width = Math.round(sw * m); o.height = Math.round(sh * m);
+      const ox = o.getContext("2d"); ox.imageSmoothingEnabled = false;
+      ox.drawImage(im, sx, sy, sw, sh, 0, 0, o.width, o.height);
+      SNIJ[pad] = {u:o.toDataURL("image/png"), r:o.width / o.height};
+    }catch(e){ SNIJ[pad] = "fout"; }
+    clearTimeout(snijBeeld.t);
+    snijBeeld.t = setTimeout(() => { if(M && M.type === "mp" && M.stap === "char") render(); }, 60);
+  };
+  im.onerror = () => { SNIJ[pad] = "fout"; };
+  im.src = pad;
+}
+function charPortret(key){
+  const pad = SPRITE_BEELD[key];
+  if(pad && BEELD_KLAAR[pad] !== "fout"){
+    const u = SNIJ[pad];
+    /* Heel brede figuren (een berg, drie vlammen) mogen iets breder dan de tegel, zodat ze
+       niet piepklein worden; wat erbuiten valt, valt binnen de rand weg. */
+    if(u && u.u) return `<img class="chsnij" src="${u.u}" alt="" style="width:${Math.round(Math.min(130, Math.max(100, u.r / .92 * 100)))}%">`;
+    if(!u) snijBeeld(pad);
+    if(u !== "fout") return "";
+  }
+  return spriteSVG(key);
+}
 function charKiesHTML(kop){
   const vrij = mpCharsVrij(), k = mpKeus();
   const tegel = c => {
     const open = vrij.indexOf(c.id) >= 0, ch = mpChar(c.id);
     if(!open) return `<div class="chtegel dicht"><div class="chpt">?</div><div class="chnaam">${c.id}</div></div>`;
     return `<div class="chtegel${k.char === c.id ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
-      <div class="chpt">${spriteSVG(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`;
+      <div class="chpt">${charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`;
   };
   return `<div class="ovbox chbox"><h2>KIES JE KARAKTER</h2>${kop}
     <div class="sub mpnote">${vrij.length} van de ${MP_CHARS.length} vrijgespeeld (op je verste verhaalplek).</div>
@@ -21149,6 +21313,7 @@ function mpKnop(btn, el){
   const i = el && el.dataset ? el.dataset.i : null;
   switch(btn){
     case "story": M = {type:"slots"}; render(); return true;
+    case "stoel": stoelVraag(); return true;
     case "slotkies": if(M && M.type === "slots" && M.wis == null){ slotKies(+i); M = {type:"story"}; storySkin(0); render(); } return true;
     case "slotwis": if(M && M.type === "slots"){ M.wis = +i; render(); } return true;
     case "slotwisja": if(M && M.type === "slots"){ slotWis(+i); M.wis = null; render(); } return true;
@@ -21205,12 +21370,53 @@ function mpKnop(btn, el){
   return false;
 }
 
+/* Wat een karakter zegt, in vier soorten: uitdagen, bijna gewonnen, verliezen en begroeten.
+   Alles komt uit het eigen gevecht van dat personage: de zinnen uit de balk (zeg) en wat het
+   in de gesprekken ervoor en erna zegt. Elke zin heeft het plaatje dat erbij hoort. */
+const MP_SOORT = [
+  {k:"uit",   naam:"Uitdagen"},
+  {k:"bijna", naam:"Bijna winst"},
+  {k:"au",    naam:"Verlies"},
+  {k:"hoi",   naam:"Begroeten"}
+];
+const MP_UIT = {};
+function mpUitingen(id){
+  if(MP_UIT[id]) return MP_UIT[id];
+  const c = mpChar(id), L = STORY[c.id] || {}, z = L.zeg || {};
+  const basis = String(c.spr || "").split("_")[0];
+  const schoon = t => String(t || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  const past = t => t.length >= 2 && t.length <= 96 && !/[✦🟣]/.test(t);
+  const eigenSpr = s => s && String(s).split("_")[0] === basis;
+  const kies = (...ks) => ks.find(k => k && ptSprIs(k)) || c.spr;
+  const sprUit = kies(c.taunt), sprBijna = kies(c.spr + "_wijd", c.taunt), sprAu = kies(c.spr + "_boos", c.spr + "_stuk");
+  const uit = {uit:[], bijna:[], au:[], hoi:[]};
+  const zet = (soort, t, spr) => { t = schoon(t); if(past(t) && !uit[soort].some(r => r.t === t)) uit[soort].push({t, spr}); };
+  /* de zinnen uit de balk */
+  (z.beurt || []).forEach(t => zet("uit", t, sprUit));
+  if(!z.popupSpreker) (z.popup || []).forEach(t => zet("uit", t, c.spr));
+  (z.jij || []).concat(z.bijna || []).forEach(t => zet("bijna", t, sprBijna));
+  (z.laag || []).forEach(t => zet("au", t, sprAu));
+  if(typeof z.sterf === "string") zet("au", z.sterf, sprAu);
+  /* wat het in de gesprekken zegt, met het plaatje van dat moment */
+  const bron = (lijst, soort) => (Array.isArray(lijst) ? lijst : []).forEach(x => {
+    if(x && typeof x === "object" && typeof x.t === "string" && eigenSpr(x.s) && x.naam !== "…")
+      zet(soort, x.t, ptSprIs(x.s) ? x.s : c.spr); });
+  const vr = L.varianten ? Object.values(L.varianten)[0] || {} : {};
+  bron(L.verlies || vr.verlies, "bijna");      // jij verliest: zij winnen
+  bron(L.win || vr.win, "au");                 // jij wint: zij verliezen
+  bron(L.intro, "hoi");
+  /* Heeft iemand (bijna) geen uitdaging, dan tellen de andere gesprekken daar mee. */
+  if(uit.uit.length < 3) Object.keys(L).forEach(k => { if(["intro","win","verlies"].indexOf(k) < 0) bron(L[k], "uit"); });
+  uit.hoi = uit.hoi.slice(0, 10);
+  return MP_UIT[id] = uit;
+}
 /* ---------- 🎭 de zijbalk in een partij ----------
    Van boven naar onder: de levens van je tegenstander, zijn portret, jouw levens, jouw
    portret. Het portret staat voor het vergezicht van het level waar dat personage uit komt.
    Neemt iemand schade (of verliest hij een creature), dan schrikt hij; de ander lacht.
-   Klik je op je eigen portret, dan kies je daar een zin uit wat jouw personage echt zegt. */
-const MPPT = {g:-1, leven:[0, 0], cre:[0, 0], em:[null, null], zin:[null, null], menu:false, lijst:[], laatst:0, bg:{}, laag:[false, false], t:null};
+   Klik je op je eigen portret, dan kies je een soort (uitdagen, bijna winst, verlies,
+   begroeten) en daarbinnen een zin: het portret krijgt dan het gezicht dat erbij hoort. */
+const MPPT = {g:-1, leven:[0, 0], cre:[0, 0], em:[null, null], zin:[null, null], menu:false, soort:"uit", lijst:[], laatst:0, bg:{}, laag:[false, false], t:null};
 function mpBalkAan(){
   return !!(S && !S.story && S.char && S.char[0] && S.char[1] && S.ui && S.ui.mode !== "start"
     && !liveLobby() && !netLobby() && window.matchMedia && window.matchMedia("(min-width:1081px)").matches);
@@ -21231,24 +21437,27 @@ function mpEmote(p, soort){
   MPPT.em[p] = {soort, tot:Date.now() + 1300, n:(MPPT.em[p] ? MPPT.em[p].n : 0) + 1};
   clearTimeout(MPPT.t); MPPT.t = setTimeout(mpBalkPaint, 1340);
 }
-/* Iets zeggen. Over het net gaat alleen het nummer van de zin: de tekst staat aan beide kanten al. */
-function mpZeg(p, i, vanNet){
+/* Iets zeggen. Over het net gaan alleen de soort en het nummer: de tekst staat aan beide kanten al. */
+function mpZeg(p, soort, i, vanNet){
   if(!S || !S.char || !S.char[p]) return;
-  const lijst = mpTaunts(S.char[p]), t = lijst[i];
-  if(!t) return;
-  MPPT.zin[p] = {t, tot:Date.now() + 4200, n:(MPPT.zin[p] ? MPPT.zin[p].n : 0) + 1};
-  if(!vanNet && NET.on && NET.chan === "live") liveSend({t:"taunt", p, i});
+  const lijst = mpUitingen(S.char[p])[soort] || [], r = lijst[i];
+  if(!r) return;
+  MPPT.zin[p] = {t:r.t, spr:r.spr, tot:Date.now() + 4200, n:(MPPT.zin[p] ? MPPT.zin[p].n : 0) + 1};
+  if(!vanNet && NET.on && NET.chan === "live") liveSend({t:"taunt", p, k:soort, i});
   mpBalkPaint();
   setTimeout(mpBalkPaint, 4260);
 }
 /* De bot praat uit zichzelf: bij zijn beurt, als hij raak slaat, en als hij bijna om is. */
 function mpZegAuto(p, soort){
   if(FAST || !S || !S.char || !isBot(p)) return;
-  const L = STORY[mpChar(S.char[p]).id] || {}, z = L.zeg || {}, lijst = mpTaunts(S.char[p]);
-  const schoon = t => String(t || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-  const bron = (z[soort] || []).map(schoon).map(t => lijst.indexOf(t)).filter(i => i >= 0);
-  const i = bron.length ? bron[Math.floor(Math.random() * bron.length)] : Math.floor(Math.random() * lijst.length);
-  mpZeg(p, i, true);
+  const k = ({beurt:"uit", jij:"bijna", laag:"au"})[soort] || "uit";
+  const lijst = mpUitingen(S.char[p])[k] || [];
+  if(lijst.length) mpZeg(p, k, Math.floor(Math.random() * lijst.length), true);
+}
+/* De rand van een tekstballon heeft de kleur van het level waar dat personage vandaan komt. */
+function mpBelKleur(id){
+  const pal = typeof lvPalet === "function" ? lvPalet(id) : null;
+  return pal && typeof pal === "object" ? `--bk:${pal["--vk3"]};--bbg:${pal["--vin"]}` : "";
 }
 function mpPtHTML(p, eigen){
   const c = mpChar(S.char[p]), nu = Date.now();
@@ -21258,15 +21467,25 @@ function mpPtHTML(p, eigen){
   if(em && em.soort === "geraakt"){ cls.push("pt-geraakt"); if(ptSprIs(c.spr + "_boos")) key = c.spr + "_boos"; }
   else if(em && em.soort === "raak"){ cls.push("pt-raak");
     if(c.taunt && ptSprIs(c.taunt)){ key = c.taunt; cls.push("pt-taunt"); } else if(ptSprIs(c.spr + "_wijd")) key = c.spr + "_wijd"; }
-  else if(zin && c.taunt && ptSprIs(c.taunt)){ key = c.taunt; cls.push("pt-taunt"); }
+  else if(zin && zin.spr && ptSprIs(zin.spr)){ key = zin.spr; if(zin.spr === c.taunt) cls.push("pt-taunt"); }
   if(eigen) cls.push("eigen");
   const [l1, l2] = PT_WERELD[c.wereld] || PT_WERELD[1];
   const rand = c.kleur || l1;
-  const menu = eigen && MPPT.menu ? `<div class="mptlijst">${MPPT.lijst.map(i => `<button class="mptzin" data-act="mpzeg" data-i="${i}">${mpTaunts(S.char[p])[i]}</button>`).join("")}</div>` : "";
-  return `<div class="${cls.join(" ")}"${eigen ? ` data-act="mptaunt"` : ""} style="--ptl1:${l1};--ptl2:${l2};--ptgloed:${/^#[0-9a-f]{6}$/i.test(rand) ? rand + "66" : "transparent"}">`
+  let menu = "";
+  if(eigen && MPPT.menu){
+    const alle = mpUitingen(S.char[p]);
+    const tabs = MP_SOORT.filter(s => (alle[s.k] || []).length).map(s =>
+      `<button class="mpttab${MPPT.soort === s.k ? " aan" : ""}" data-act="mpsoort" data-k="${s.k}">${s.naam}</button>`).join("");
+    menu = `<div class="mptlijst"><div class="mpttabs">${tabs}</div>`
+      + MPPT.lijst.map(i => `<button class="mptzin" data-act="mpzeg" data-k="${MPPT.soort}" data-i="${i}">${(alle[MPPT.soort] || [])[i].t}</button>`).join("")
+      + `</div>`;
+  }
+  return `<div class="mpptvak">`
+    + `<div class="${cls.join(" ")}"${eigen ? ` data-act="mptaunt"` : ""} style="--ptl1:${l1};--ptl2:${l2};--ptgloed:${/^#[0-9a-f]{6}$/i.test(rand) ? rand + "66" : "transparent"}">`
     + `<div class="ptbg">${mpBg(c.id)}</div><div class="ptfig">${spriteSVG(key)}</div>`
-    + (zin && !menu ? `<div class="mpbel"><span class="pbnaam">${c.naam}</span>${zin.t}</div>` : "")
-    + (eigen && !menu ? `<div class="mphint">klik om iets te zeggen</div>` : "") + menu + `</div>`;
+    + (eigen && !menu ? `<div class="mphint">klik om iets te zeggen</div>` : "") + menu + `</div>`
+    + (zin && !menu ? `<div class="mpbel" style="${mpBelKleur(c.id)}"><span class="pbnaam">${c.naam}</span>${zin.t}</div>` : "")
+    + `</div>`;
 }
 function mpBalkPaint(){
   const vak = document.getElementById("mpvak"); if(!vak) return;
@@ -21290,7 +21509,7 @@ function mpBalkPaint(){
   MPPT.leven = nu; MPPT.cre = cr;
   const me = (NET.on && NET.seat === 1) ? 1 : 0, top = 1 - me;
   const nuT = Date.now(), actief = x => x && x.tot > nuT ? x.n : 0;
-  const sig = [top, S.char.join(), nu.join(), S.tp, MPPT.menu ? MPPT.lijst.join() : "-",
+  const sig = [top, S.char.join(), nu.join(), S.tp, MPPT.menu ? MPPT.soort + MPPT.lijst.join() : "-",
     actief(MPPT.em[0]), actief(MPPT.em[1]), actief(MPPT.zin[0]), actief(MPPT.zin[1]),
     (MPPT.em[0] || {}).soort, (MPPT.em[1] || {}).soort].join("|");
   if(vak.dataset.sig === sig) return;
@@ -21298,23 +21517,29 @@ function mpBalkPaint(){
   const hp = p => { const c = mpChar(S.char[p]);
     return `<div class="vbrij mphp${S.tp === p ? " aan" : ""}" data-side="${p}"><div class="vbnaam">${c.naam}</div>`
       + `<div class="plife hpbalk">${levensBalk(P(p).life, Math.max(5, P(p).life))}</div></div>`; };
-  vak.innerHTML = hp(top) + mpPtHTML(top, false) + hp(me) + mpPtHTML(me, me === (NET.on ? NET.seat : 0) || !NET.on);
+  vak.innerHTML = hp(top) + mpPtHTML(top, false) + hp(me) + mpPtHTML(me, !NET.on || NET.seat === me);
+}
+/* Een soort kiezen: vijf zinnen daaruit, willekeurig als er meer zijn. */
+function mpSoortKies(k){
+  const me = (NET.on && NET.seat === 1) ? 1 : 0;
+  const alle = mpUitingen(S.char[me]);
+  if(!(alle[k] || []).length) k = (MP_SOORT.find(s => (alle[s.k] || []).length) || MP_SOORT[0]).k;
+  const n = (alle[k] || []).length, idx = Array.from({length:n}, (_, i) => i);
+  MPPT.soort = k;
+  MPPT.lijst = n > 5 ? idx.sort(() => Math.random() - .5).slice(0, 5).sort((a, b) => a - b) : idx;
 }
 function mpTauntMenu(){
-  const me = (NET.on && NET.seat === 1) ? 1 : 0;
   if(NET.on && NET.seat < 0) return;
   if(MPPT.menu){ MPPT.menu = false; mpBalkPaint(); return; }
-  const n = mpTaunts(S.char[me]).length;
-  const alle = Array.from({length:n}, (_, i) => i);
-  MPPT.lijst = n > 6 ? alle.sort(() => Math.random() - .5).slice(0, 6).sort((a, b) => a - b) : alle;
+  mpSoortKies(MPPT.soort || "uit");
   MPPT.menu = true; mpBalkPaint();
 }
-function mpTauntKies(i){
+function mpTauntKies(k, i){
   const me = (NET.on && NET.seat === 1) ? 1 : 0;
   MPPT.menu = false;
   if(Date.now() - MPPT.laatst < 2500){ mpBalkPaint(); return; }
   MPPT.laatst = Date.now();
-  mpZeg(me, i, false);
+  mpZeg(me, k, i, false);
 }
 
 /* ================= ACTIES (deterministische zettenlijst) ================= */
