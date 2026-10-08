@@ -168,11 +168,21 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
   50%{box-shadow:0 0 0 5px #ffe08a, 0 0 28px rgba(255,224,140,.95)}}
 /* Het doelwit van een 🔥 of 🌿 in de chain: een gekleurde gloed over de kaart heen die pulst. */
 .slot.cr.mikvuur::before, .slot.cr.mikgras::before{content:""; position:absolute; inset:0; border-radius:inherit;
-  pointer-events:none; z-index:7; animation:mikfade 1s ease-in-out infinite}
+  pointer-events:none; z-index:3; animation:mikfade 1s ease-in-out infinite}
+/* Levens en aanval blijven vóór de gloed staan. */
+.slot.cr.mikvuur .hpgem, .slot.cr.mikvuur .atkgem, .slot.cr.mikgras .hpgem, .slot.cr.mikgras .atkgem,
+.slot.cr.mikvuur .stat, .slot.cr.mikgras .stat{z-index:6}
+/* De kant die aan zet is: een heel zachte gloed die langzaam op en neer gaat. */
+.frow.aanzet{isolation:isolate}
+.frow.aanzet::after{content:""; position:absolute; inset:-6px -10px; border-radius:14px; pointer-events:none; z-index:-1;
+  animation:aanzetpuls 3.4s ease-in-out infinite}
+.frow.rowbot.aanzet::after{background:radial-gradient(ellipse at 50% 60%, rgba(240,210,140,.13), rgba(240,210,140,0) 70%)}
+.frow.rowtop.aanzet::after{background:radial-gradient(ellipse at 50% 40%, rgba(130,180,230,.13), rgba(130,180,230,0) 70%)}
+@keyframes aanzetpuls{0%,100%{opacity:.25}50%{opacity:1}}
 .slot.cr.mikvuur::before{background:linear-gradient(0deg, rgba(255,70,20,.75), rgba(255,150,40,.35) 55%, rgba(255,120,30,.08))}
 .slot.cr.mikgras::before{background:linear-gradient(0deg, rgba(40,200,70,.72), rgba(120,230,110,.32) 55%, rgba(80,200,90,.06))}
 @keyframes mikfade{0%,100%{opacity:.3}50%{opacity:1}}
-.slot.cr.mikgras{box-shadow:0 0 0 2px #5fe07a, 0 0 18px rgba(95,224,122,.6) !important}
+.slot.cr.mik.mikgras{box-shadow:0 0 0 2px #5fe07a, 0 0 18px rgba(95,224,122,.6) !important}
 @keyframes atkpulse{0%,100%{box-shadow:0 0 0 3px #3fbf5a, 0 0 8px rgba(78,224,106,.45)}50%{box-shadow:0 0 0 3px #9dffb0, 0 0 24px rgba(120,255,150,.9)}}
 .slot.atk::after{content:""; position:absolute; left:50%; top:-15px; transform:translateX(-50%); z-index:7; pointer-events:none;
   width:16px; height:16px; line-height:1; padding:2px 7px; border-radius:10px; color:#eaffe8;
@@ -570,7 +580,7 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
 #turncry{position:fixed; inset:0; z-index:84; pointer-events:none; display:flex; align-items:center; justify-content:center;
   overflow:hidden; animation:tcdim 1.7s ease-out forwards}
 @keyframes tcdim{0%{background:rgba(4,6,14,0)}14%{background:rgba(4,6,14,.5)}74%{background:rgba(4,6,14,.42)}100%{background:rgba(4,6,14,0)}}
-#turncry .tcband{position:absolute; left:-10%; right:-10%; top:50%; height:128px; margin-top:-64px; transform:skewY(-3deg);
+#turncry .tcband{position:absolute; left:-10%; right:-10%; top:50%; height:176px; margin-top:-88px; transform:skewY(-3deg);
   display:flex; align-items:center; justify-content:center; border-top:3px solid; border-bottom:3px solid;
   animation:tcband 1.7s cubic-bezier(.2,.75,.25,1) forwards}
 #turncry.theirs .tcband{animation-name:tcbandR}
@@ -582,7 +592,7 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); animation:tcglans 1.7s ease-in-out forwards}
 @keyframes tcglans{0%,20%{left:-25%}60%,100%{left:110%}}
 #turncry .tcband .tc{position:relative; transform:skewY(3deg); white-space:nowrap; text-align:center; line-height:1.2 !important;
-  font-size:clamp(1.5rem, 3.4vw, 2.6rem) !important; letter-spacing:.16em; padding:0 !important;
+  font-size:clamp(1.7rem, 3.8vw, 2.9rem) !important; letter-spacing:.16em; padding:0 !important;
   background:none !important; border:0 !important; box-shadow:none !important}
 #turncry .tcband .tc .sm{display:block; font-family:"VT323",ui-monospace,monospace; font-size:clamp(1rem,1.6vw,1.35rem) !important;
   letter-spacing:.3em; opacity:.85; margin-top:12px}
@@ -9316,6 +9326,11 @@ async function advancePhase(kind){
 async function botMove(){
   if(!S || S.over || !isBot(S.tp)) return;
   const m = S.ui.mode, p = S.tp;
+  /* 🔥 cheaton: de tegenstander doet niets meer. Geen kaarten, geen aanvallen. */
+  if(S.story && p === 1 && cheatAan()){
+    if(m === "main"){ advancePhase("endturn"); return; }
+    if(m === "battle"){ advancePhase("endbattle"); return; }
+  }
   if(tutAan() && m === "main"){
     if(S.story.tutBezig) return;
     S.story.tutBezig = true;
@@ -10199,6 +10214,7 @@ function shelobWeb(p){
   return cd;
 }
 function botPriority(p){
+  if(S.story && p === 1 && cheatAan()) return null;          // 🔥 cheaton: hij reageert ook nergens op
   const web = shelobWeb(p);
   if(web) return {cardId: web.id};
   if(!P(p).hand.some(cd => magSpelen(p, cd.id))) return null;
@@ -14300,13 +14316,15 @@ SPR_ART.rotsbaas_taunt = SPR_ART.rotsbaas_woede;
    in plaats van het plaatje opnieuw te maken. 1 is normaal, 0.7 is dertig procent kleiner.
    Dit werkt overal waar het personage verschijnt: in gesprekken én in de praatbalk links. */
 const SPRITE_MAAT = {
-  rocky:        0.7,   // Brokko is in verhouding wat groot getekend
+  rocky:        0.75,  // Brokko, op zijn lijf gemeten (zie hieronder)
   /* Zijn andere tekeningen hebben een ander formaat en een grotere figuur erin. Deze maten
      zijn uitgerekend op de hoogte van de figuur zelf, zodat hij overal even groot staat. */
-  rocky_boos:   0.62,
-  rocky_stuk:   0.68,
-  rocky_til:    0.51,
-  rocky_boekje: 0.53,
+  /* Gemeten op zijn lijf (schouders en romp), niet op de hele hoogte: bij het tillen en het
+     opgeheven vuistje telde het steenblok of de arm mee, en dan werd hij zelf te klein. */
+  rocky_boos:   0.69,
+  rocky_stuk:   0.7,
+  rocky_til:    0.68,
+  rocky_boekje: 0.62,
   rocky_taunt:  0.7,
   waardin:      0.7,   // de Waardin ook: ze stond een kop boven iedereen uit
   waardin_zacht:0.7,
@@ -14678,6 +14696,11 @@ function onderMeet(img){
 }
 /* Niemand steekt in een gesprek boven het scherm uit: is een tekening te hoog voor dit
    scherm, dan krimpt hij precies zo veel dat zijn bovenkant net binnen beeld valt. */
+/* Die krimp onthouden we per tekening en schermmaat. Elke regel bouwt de sprite opnieuw op,
+   en zonder dit stond hij het eerste beeldje op volle grootte en kromp dan pas: dat gaf de
+   flitsjes waarin iemand ineens groter was. */
+const PRAAT_PAS = {};
+const praatPasSleutel = src => `${src}|${window.innerWidth}x${window.innerHeight}`;
 function praatPas(){
   if(FAST) return;
   document.querySelectorAll(".praatscherm:not(.reus) .praatsprite .sprwrap").forEach(w => {
@@ -14685,7 +14708,9 @@ function praatPas(){
     w.style.setProperty("--sprpas", "1");
     const r = img.getBoundingClientRect(); if(!r.height) return;
     const rand = 12, f = Math.min(1, (r.bottom - rand) / r.height);
-    if(f < 1) w.style.setProperty("--sprpas", Math.max(0.3, f).toFixed(3));
+    const v = f < 1 ? Math.max(0.3, f).toFixed(3) : "1";
+    w.style.setProperty("--sprpas", v);
+    PRAAT_PAS[praatPasSleutel(img.getAttribute("src"))] = v;
   });
 }
 window.addEventListener("resize", () => praatPas());
@@ -14706,7 +14731,8 @@ function spriteSVG(key){
      pas in beeld als hij helemaal geladen is — nooit half. */
   const maat = SPRITE_MAAT[beeldKey] || SPRITE_MAAT[key];
   const pbm = SPRITE_PB[beeldKey] || SPRITE_PB[key];
-  const stl = (maat ? `--sprmaat:${maat};` : "") + (pbm ? `--pbmaat:${pbm};` : "");
+  const pas = beeld ? PRAAT_PAS[praatPasSleutel(beeld)] : null;
+  const stl = (maat ? `--sprmaat:${maat};` : "") + (pbm ? `--pbmaat:${pbm};` : "") + (pas ? `--sprpas:${pas};` : "");
   /* Is de tekening er niet (of nog niet), dan staat de pixelvorm eronder klaar. Dat mocht
      eerst niet — twee lagen konden door elkaar heen flitsen — maar met `klaar` op de img
      en de pixels eronder verborgen zodra hij binnen is, kan dat niet meer. */
@@ -21137,6 +21163,9 @@ function render(){
   }
   klokPaint();
   zegPaint();
+  /* Heel licht pulst de kant van het bord die aan zet is: zo zie je ook zonder melding wiens beurt het is. */
+  for(const q of [0, 1]){ const rij = document.getElementById("row" + q);
+    if(rij) rij.classList.toggle("aanzet", !!(S && !S.over && S.ui && S.ui.mode !== "start" && S.tp === q && (S.pl || S.p))); }
   const fab = document.getElementById("menufab");
   if(fab) fab.classList.toggle("show", S.ui.mode !== "start");
   /* Op een breed scherm zit de ☰ tijdens een gevecht rechtsonder bij de andere knoppen;
@@ -23497,13 +23526,19 @@ function beeldAf(pad, gelukt){
   if(LAAD_NODIG.has(pad)) laadTik("beeld");
   beeldVolgende();
 }
+let SPRITE_PADEN_SET = null;
+const SPRITE_PADEN = {has: pad => { if(!SPRITE_PADEN_SET) SPRITE_PADEN_SET = new Set(Object.values(SPRITE_BEELD)); return SPRITE_PADEN_SET.has(pad); }};
 function beeldHaal(pad){
   const im = new Image();
   BEELD_CACHE[pad] = im;
   im.decoding = "async";
   im.addEventListener("load", () => {
     /* pas klaar als hij ook gedecodeerd is, anders zie je hem alsnog opbouwen */
-    const af = () => { beeldMaatZet(pad, im); if(KAART_PADEN.has(pad)) kaartTrim(pad, im); beeldAf(pad, true); };
+    const af = () => { beeldMaatZet(pad, im); if(KAART_PADEN.has(pad)) kaartTrim(pad, im);
+      /* Van een sprite meten we meteen hoeveel lege rand er onderaan zit, zodat hij de eerste
+         keer al op de goede hoogte staat en niet na het laden nog verspringt. */
+      if(SPRITE_PADEN.has(pad)) onderMeet(im);
+      beeldAf(pad, true); };
     if(im.decode) im.decode().then(af, af); else af();
   });
   im.addEventListener("error", () => {
