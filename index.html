@@ -1,4 +1,4 @@
-<meta charset="utf-8">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Elementaal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
@@ -3467,9 +3467,12 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
   .tutbeeld{flex:0 0 38vh; border-left:0; border-bottom:3px solid var(--vnl,#e6e9ff)}
   .tgkaart{width:96px; height:134px} .tgrij.vier .tgkaart{width:64px; height:90px} .tgrij{gap:16px} }
 /* ================= filmpjes ================= */
-#filmlaag{position:fixed; inset:0; z-index:9000; background:#000; display:none; align-items:center; justify-content:center}
+/* De film speelt in een venster met dezelfde rand als het menu, niet schermvullend. */
+#filmlaag{position:fixed; inset:0; z-index:9000; background:rgba(4,5,12,.86); display:none; align-items:center; justify-content:center}
 #filmlaag.aan{display:flex}
-#filmlaag canvas{width:min(100vw, 177.78vh); height:min(56.25vw, 100vh); image-rendering:auto; display:block}
+#filmlaag canvas{width:min(calc(100vw - 64px), calc((100vh - 72px) * 16 / 9)); aspect-ratio:16 / 9; height:auto;
+  image-rendering:auto; display:block; background:#000; border:2px solid var(--vnd,#0b0d22); border-radius:8px;
+  box-shadow:var(--vnrand, 0 0 0 2px #6a6f82, 0 0 0 5px #e6e9ff, 0 0 0 8px #0b0d22, 0 12px 0 6px rgba(0,0,0,.4))}
 #filmlaag .filmskip{position:absolute; right:18px; top:16px; background:rgba(0,0,0,.55); color:#cfcbc2; border:1px solid #444;
   border-radius:4px; padding:6px 12px; font:18px "VT323", ui-monospace, monospace; cursor:pointer; opacity:.55}
 #filmlaag .filmskip:hover{opacity:1}
@@ -3608,7 +3611,7 @@ EL.troon = {name:"Troon", icon:"👑", strong:null, flash:false, hp:6, token:tru
 EL.skelet = {name:"Skelet", icon:"💀", strong:null, flash:false, hp:1, token:true, overheen:true};
 EL.wolk  = {name:"Wolk", icon:"☁️", strong:null, flash:false, hp:1, token:true, overheen:true};   // ☁️ één leven
 /* 🐺 De schaduwwolven van Max. Typeloos, 3 levens, en elke nieuwe wolf maakt de roedel dikker. */
-EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true, speciaal:true};
+EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true, speciaal:true, volAtk:true};
 /* 🐟 De vliegende vis van de Zee (4-1). Geen element, slaat met alles wat hij heeft, en hij
    slaat altijd jou: wat er tegenover hem staat, springt hij overheen. */
 EL.vis = {name:"Vliegende vis", icon:"🐟", strong:null, flash:false, hp:3, kaart:true, speciaal:true,
@@ -3748,7 +3751,7 @@ const KAART_TEKST = {
   troon:   {kw:["kleurloos","muur"], veld:"Het weer van deze troon draait door, en de eigenaar trekt elke beurt <b>1</b>. Vernietig de troon en dat weer stopt."},
   skelet:  {kw:["kleurloos","wijkt"]},
   wolk:    {kw:["kleurloos","wijkt"]},
-  wolf:    {kw:["kleurloos"], speel:"Alle wolven van de eigenaar <b>+1</b> leven."},
+  wolf:    {kw:["kleurloos","volleslag"], speel:"Alle wolven van de eigenaar <b>+1</b> leven."},
   vis:     {kw:["kleurloos","direct","wijkt"]},
   clown:   {kw:["kleurloos","wijkt"], speel:"Alle eigen vissen <b>+2</b> levens, ook deze.", veld:"Alle eigen vissen hebben {Volle slag}."},
   kogel:   {kw:["kleurloos","wijkt"], speel:"<b>3</b> schade aan een vijandelijk wezen.", eig:"Valt een wezen deze kaart aan, dan krijgt die zelf <b>3</b> schade."},
@@ -3777,7 +3780,7 @@ const VAR_TEKST = {
 };
 const LICHT_TEKST = {
   greed:   "{Betaal} <b>2</b> en {offer} een eigen wezen: trek <b>2</b>.",
-  darkhole:"{Betaal} <b>1</b>: vernietig al je eigen wezens. Trek <b>1</b>.",
+  darkhole:"{Betaal} <b>1</b>: vernietig al je eigen wezens. Trek <b>1</b>. Waren het er <b>3</b> of meer, trek <b>2</b>.",
   kuriboh: "Zet op elke vrije eigen plek een ☁️ Wolk: <b>1</b> leven, {Kleurloos}, {Wijkt}.",
   reborn:  "Kies: pak een ✦ lichtkaart uit je graf terug in je hand, óf {roep|roepop} er een wezen uit meteen {op|roepop} het veld, met <b>+3</b> levens.",
   master:  "Kies ☄️ Plasma, 🧊 IJs, 🌹 Roos of ⛰️ Rots: de sterke versie van een element. Deze kaart wordt dat tot het eind van het potje en gaat terug naar je hand.",
@@ -4707,7 +4710,7 @@ async function baasSlag(laadKey, slagKey, snel, extra){
     if(SPRITE_BEELD["seraf_" + slagKey]) slagKey = "seraf_" + slagKey;
   }
   /* Een berg haalt traag uit; een zwaardhaal is één beweging. Vandaar twee tempo's. */
-  const T = snel ? [520, 420, 420] : [1200, 900, 900];
+  const T = snel ? [520, 420, 420] : [700, 500, 500];
   let el = document.getElementById("baasslag");
   if(!el){ el = document.createElement("div"); el.id = "baasslag"; document.body.appendChild(el); }
   /* Beide standen worden vooraf neergezet. Bij de klap wisselt alleen welke zichtbaar is —
@@ -5072,7 +5075,7 @@ const MUZIEK = {
   titel:          "audio/w1-05-gevecht.mp3", // titelscherm: hetzelfde nummer als het gevecht met Rocky (1-1)
   winkel:         "audio/winkel.mp3",                     // de kraam van Knort
   smidse:         "audio/smidse.mp3",                     // de smidse van Tang
-  kaart:          "audio/w1-05-gevecht.mp3",   // wereldkaart: hetzelfde nummer als het homescreen, dus het loopt gewoon door
+  kaart:          "audio/w1-00-titel.mp3",     // wereldkaart: altijd dit nummer
   gevecht:        "audio/gevecht-vrij.mp3",   // vrij spel en online potjes
   /* --- wereld 1 · Steenrijk --- */
   w1_rustig:      "audio/w1-02-rustig.mp3",                     // gewone dialoog: Rocky, Brokko die opschept
@@ -7894,8 +7897,8 @@ async function resolveLight(it){
     render(); await sleep(FAST ? 0 : 220);
     /* Vijf wezens wegvegen en er vijf voor terugtrekken was te veel: dan is opruimen
        gratis. Drie is het plafond. */
-    const trek = n ? 1 : 0;
-    addLog(`✦ Zwart Gat vernietigt ${n} eigen wezen${n===1?"":"s"}${trek ? `; ${pName(p)} trekt een kaart` : ""}.`, true);
+    const trek = n >= 3 ? 2 : n ? 1 : 0;
+    addLog(`✦ Zwart Gat vernietigt ${n} eigen wezen${n===1?"":"s"}${trek ? `; ${pName(p)} trekt ${trek === 2 ? "twee kaarten" : "een kaart"}` : ""}.`, true);
     if(trek) await drawN(p, trek, "✦ Zwart Gat");
     return;
   }
@@ -8300,9 +8303,9 @@ async function resolveEffect(it){
     /* 🔥 cheaton: het vuur springt ook over op de tegenstander zelf. Zo is een gevecht
        in een paar kaarten voorbij — dat is het hele punt van de code. */
     if(it.cheat && !S.over){
-      P(opp(p)).life -= 2;
-      addLog(`🔥 <em>cheaton</em>: het vuur slaat door tot ${pName(opp(p))} zelf — <b>2 schade</b>.`, true);
-      pop(rectOf(`.pside[data-side="${opp(p)}"] .plife`), "-2", "dmg");
+      P(opp(p)).life -= 4;
+      addLog(`🔥 <em>cheaton</em>: het vuur slaat door tot ${pName(opp(p))} zelf: <b>4 schade</b>.`, true);
+      pop(rectOf(`.pside[data-side="${opp(p)}"] .plife`), "-4", "dmg");
       render();
       if(P(opp(p)).life <= 0) return gameOver(p, pName(opp(p)) + " is verbrand.");
     }
@@ -9645,6 +9648,14 @@ function botChoosePlayV2(p){
     }
     if(wolf && n === 3 && S.story.wolfKolom != null && !P(1).cols[S.story.wolfKolom].cre)
       return {cardId: wolf.id, mode:"cre", col: S.story.wolfKolom};
+  }
+  /* 🪨 Brokko (1-2) begint altijd hetzelfde: in zijn eerste beurt een steen in het midden. */
+  if(p === 1 && S.story && S.story.id === "1-2" && !S.story.brokkoSteen && (S.turnNo[1] || 0) <= 1){
+    S.story.brokkoSteen = true;
+    let st = P(1).hand.find(cd => cd.el === "steen");
+    if(!st){ const i = P(1).deck.findIndex(cd => cd.el === "steen");
+      if(i >= 0){ st = P(1).deck.splice(i, 1)[0]; P(1).hand.push(st); } }
+    if(st && openCols(1).includes(2) && magSpelen(1, st.id)) return {cardId: st.id, mode:"cre", col: 2};
   }
   const gewoon = hand.filter(cd => cd.el !== "licht");
   const open = openCols(p);
@@ -12003,7 +12014,7 @@ const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => (w === 2 || w === 3 ? [1,2
    Waardin (2-3) is de weg verder, dan het web van Kaelid (2-4), dan Max (2-5). */
 /* Wereld 3: na 3-1 splitst het. Tang (3-2) is een doodlopend zijpad met de smidse,
    het Rookgordijn (3-3) is de weg verder. */
-const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-1"], "2-4":["2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-1"]};
+const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-1"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -15412,7 +15423,7 @@ const STORY = {
     ban:10, begint:1
   },
   "2-3":{
-    wereld:2, naam:"Het wiegelied", vijand:"De Waardin", sprite:"waardin", zegKleur:"#a8c46b", muziek:"w2_wiegelied",
+    wereld:2, tak:true, naam:"Het wiegelied", vijand:"De Waardin", sprite:"waardin", zegKleur:"#a8c46b", muziek:"w2_wiegelied",
     hzruim:true,
     intro:[
       {s:null, bg:2, naam:"…", mu:"w2_woud", t:"Achter de bomen wordt het licht anders. Warmer. Alsof iemand het heeft bijgesteld voor jou."},
@@ -16314,7 +16325,7 @@ const STORY = {
       {s:"fireguy_zwaai", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Ga zitten. Er is genoeg krat."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Hij houdt een sigaret omhoog. Onaangestoken. Bij hém. Dat kan niet en het is toch zo."},
       {s:"fireguy", bg:3, naam:"Flint", kleur:"#ff8a4a", t:"Ik krijg hem niet aan. Al tweehonderd jaar niet. Grappig hè.",
-        keuze:[{label:"🚬 Ik geef hem een vuurtje", ga:"vuurtje"},
+        vast:"flint", keuze:[{label:"🚬 Ik geef hem een vuurtje", ga:"vuurtje"},
                {label:"🪑 Ik ga naast hem zitten", ga:"zitten"},
                {label:"⚔ Ik sla meteen toe", ga:"meteen"}]}
     ],
@@ -17790,10 +17801,54 @@ function heeftKeuze(id){
   const L = STORY[id]; if(!L) return false;
   return Object.keys(L).some(k => Array.isArray(L[k]) && L[k].some(r => r && r.keuze));
 }
+/* 🔒 Vaste keuzes. Een keuzeregel met `vast:"naam"` wordt onthouden. Speel je het level
+   opnieuw, dan komt de vraag niet meer: het verhaal loopt gewoon zoals jij toen koos. */
+const keuzeSleutel = (id, r) => id + ":" + r.vast;
+function vasteKeuze(id, r){
+  if(!r || !r.keuze || !r.vast || !id) return null;
+  const k = (SET.story.keuzes || {})[keuzeSleutel(id, r)];
+  return k && r.keuze.some(o => o.ga === k) ? k : null;
+}
+const openKeuze = (id, r) => !!(r && r.keuze) && !vasteKeuze(id, r);
+function keuzeOnthoud(id, r, ga){
+  if(!r || !r.vast || !id) return;
+  SET.story.keuzes = Object.assign({}, SET.story.keuzes, {[keuzeSleutel(id, r)]: ga});
+  saveSet();
+}
+/* Moet je bij het opnieuw spelen van dit level nog iets kiezen? Dan kan het niet zonder scène. */
+/* Een level dat je al gehaald hebt: eerst vragen of je de scène nog wilt zien. */
+async function levelOpnieuw(id){
+  const L = STORY[id];
+  if(!storyKlaar(id) || FAST || !(L.intro || []).length){ praatStart(id, "intro"); return; }
+  /* Valt er nog iets te kiezen, dan moet je de scène wel zien. */
+  if(heeftOpenKeuze(id)){ praatStart(id, "intro"); return; }
+  const ga = await praatKeuzeAwait([{s:null, naam:"…", bg:L.wereld,
+    t:"Hier ben je al eens geweest. Wil je het nog eens zien?",
+    keuze:[{label:"Bekijken", ga:"zien"}, {label:"Meteen vechten", ga:"vecht"}]}], "zien");
+  if(ga === "vecht"){ M = null; startStoryGevecht(id, vasteVariant(id)); return; }
+  praatStart(id, "intro");
+}
+function heeftOpenKeuze(id){
+  const L = STORY[id]; if(!L) return false;
+  return Object.keys(L).some(k => Array.isArray(L[k]) && L[k].some(r => openKeuze(id, r)));
+}
+/* Welke gevechtsvariant hoort bij de vaste keuzes van dit level? */
+function vasteVariant(id){
+  const L = STORY[id]; if(!L || !L.gevechtNa) return undefined;
+  let v;
+  Object.keys(L).forEach(k => Array.isArray(L[k]) && L[k].forEach(r => {
+    const ga = vasteKeuze(id, r);
+    if(ga && L.gevechtNa[ga] !== undefined) v = L.gevechtNa[ga];
+  }));
+  return v;
+}
 const storyKlaar = id => SET.story.klaar.indexOf(id) >= 0;
+/* Na 2-1 moet je eerst bij Knort langs geweest zijn voordat de wegen naar Kaelid opengaan. */
+const NA_KNORT = ["2-2", "2-3"];
 function storyVrij(id){
   if(SET.story.vrij) return true;
   if(storyKlaar(id)) return true;
+  if(NA_KNORT.includes(id) && !SET.story.knortGezien) return false;
   if(STORY_VEREIST[id]) return STORY_VEREIST[id].some(storyKlaar);
   let i = STORY_ORDER.indexOf(id);
   if(i <= 0) return true;
@@ -18279,7 +18334,7 @@ const praatAwait = (id, fase) => new Promise(res => praatStart(id, fase, res));
 /* Een los praatje dat niet in STORY staat — voor tussendoortjes midden in een potje. */
 function praatLos(regels, klaar){
   if(!regels || !regels.length || FAST){ if(klaar) klaar(); return; }
-  M = {type:"praat", id:(S.story && S.story.id) || null, fase:"los", i:0, klaar, regels};
+  M = {type:"praat", id:(S && S.story && S.story.id) || null, fase:"los", i:0, klaar, regels};
   const Ll = STORY[M.id] || {};
   praatVoorladen(regels, Ll);
   praatScene();
@@ -18429,8 +18484,13 @@ function praatVerder(){
   if(M.laadt) return true;                       // de volgende tekening komt nog binnen
   if(M.typt){ praatAf(); return true; }
   const R = praatRegels();
-  /* Staat er een keuze onder de tekst, dan wacht het praatje op een knop. */
-  if(R[M.i] && R[M.i].keuze) return true;
+  /* Staat er een keuze onder de tekst, dan wacht het praatje op een knop. Een keuze die
+     al vaststaat loopt gewoon door, de kant op die je toen koos. */
+  if(R[M.i] && R[M.i].keuze){
+    const vk = vasteKeuze(M.id, R[M.i]);
+    if(vk){ praatGa(vk); return true; }
+    return true;
+  }
   if(M.i < R.length - 1){
     /* De huidige regel blijft staan tot de tekening van de volgende er is. */
     const Mnu = M;
@@ -18454,7 +18514,7 @@ function praatSkip(){
   if(M.laadt){ M.laadt = false; M.laadTok = (M.laadTok || 0) + 1; M.getoond = true; }
   if(M.typt) praatAf();
   const nu = praatRegels()[M.i];
-  if(nu && nu.keuze) return;
+  if(openKeuze(M.id, nu)) return;
   M.spoed = true;
   let veilig = 0;
   while(M && M.type === "praat" && veilig++ < 600){
@@ -18463,13 +18523,13 @@ function praatSkip(){
     M.i++;
     praatScene();
     const volgend = praatRegels()[M.i];
-    if(volgend && volgend.keuze) break;
+    if(volgend && volgend.keuze) break;   // een vaste keuze ook: praatVerder hieronder volgt hem
   }
   if(!M || M.type !== "praat") return;
   M.spoed = false;
   clearInterval(PRAAT); PRAAT = null;
   const R = praatRegels();
-  if(R[M.i] && R[M.i].keuze){
+  if(openKeuze(M.id, R[M.i])){
     /* op een keuze blijven staan: scherm netjes opbouwen, tekst meteen compleet */
     praatScene(); render(); praatTyp(); praatAf(); return;
   }
@@ -18568,11 +18628,11 @@ function praatHTML(){
       <div class="praattxt" id="praattxt"></div>
       <div class="praatpijl" id="praatpijl">▼</div>
     </div>
-    ${r.keuze
+    ${openKeuze(M && M.id, r)
       ? `<div class="praatkeus">${r.keuze.map((k,i) =>
           `<button class="pkbtn" data-act="btn" data-btn="praatkeus" data-ga="${k.ga}"${k.tel ? ` data-tel="${k.tel}"` : ""}>${k.label}</button>`).join("")}</div>`
       : ""}
-    ${r.keuze ? "" : `<button class="praatskip" data-act="btn" data-btn="praatskip" title="Het gesprek overslaan (E)">⏭ Overslaan</button>`}
+    ${openKeuze(M && M.id, r) ? "" : `<button class="praatskip" data-act="btn" data-btn="praatskip" title="Het gesprek overslaan (E)">⏭ Overslaan</button>`}
   </div>`;
 }
 /* ---- het gevecht ---- */
@@ -20043,7 +20103,7 @@ const OVERWORLD_BEELD = "art/overworld.png";
 const OVERWORLD = {
   "1-1":{x:48,y:81}, "1-2":{x:32,y:78}, "1-3":{x:46,y:70}, "1-4":{x:33,y:67}, "1-5":{x:42,y:57},
   /* Eén bolletje op het pad is 2,1 procent. */
-  "2-1":{x:39,y:47}, "2-2":{x:24.9,y:50.1}, "2-3":{x:20.1,y:43.9}, "2-4":{x:25.05,y:35.15}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
+  "2-1":{x:39,y:47}, "2-2":{x:30,y:41}, "2-3":{x:20.1,y:43.9}, "2-4":{x:25.05,y:35.15}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
   "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:74.6,y:31.95}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
   "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
@@ -20060,7 +20120,8 @@ const HEMEL_RANDEN = [["hemel","5-1"], ["5-1","5-2"], ["5-2","5-3"], ["5-3","5-4
    eerste level van de vorige, niet uit de zaal van de baas — die is een doodlopend eind. */
 const OVERWORLD_RANDEN = [
   ["1-1","1-2"], ["1-2","1-3"], ["1-3","1-4"], ["1-4","1-5"], ["1-5","2-1"],
-  ["2-1","2-2"], ["2-1","2-3"], ["2-3","2-4"], ["2-4","2-5"], ["2-5","2-6"],
+  /* Na 2-1 eerst naar Knort; pas daarna gaan de twee wegen naar Kaelid open. */
+  ["2-1","2-2","knort"], ["2-1","2-3","knort"], ["2-2","2-4"], ["2-3","2-4"], ["2-4","2-5"], ["2-5","2-6"],
   ["2-1","3-1","2-6"],
   ["3-1","3-2"], ["3-1","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
   ["3-1","4-1","3-6"],
@@ -20071,7 +20132,9 @@ const OVERWORLD_RANDEN = [
 const OVERWORLD_PAD = {
   "1-4>1-5":[[38,62]],
   "1-5>2-1":[[41.5,52],[40,49.5]],
-  "2-1>2-2":[[32,50]],
+  "2-1>2-3":[[32,50],[25,49]],
+  "2-2>2-4":[[27.5,37.5]],
+  "2-3>2-4":[[21.5,39]],
   "2-1>3-1":[[47,45],[55,41.5]],
   /* Naar Tang: zie OVERWORLD_SAMEN, dat pad begint op dat naar het Rookgordijn. */
   "3-1>4-1":[[63,47],[64,52]],
@@ -20079,9 +20142,7 @@ const OVERWORLD_PAD = {
 };
 /* Paden die een stuk samen oplopen: 3-1 → 3-2 (Tang) volgt de eerste 2,5 bolletjes van het
    pad naar 3-3 (het Rookgordijn) en buigt daarna af. */
-const OVERWORLD_SAMEN = {"3-1>3-2":{langs:"3-3", stippen:2.5},
-  /* Naar de herberg: eerst een stuk over het pad naar de Struik, dan rechtsaf het bos in. */
-  "2-1>2-3":{langs:"2-2", stippen:3}};
+const OVERWORLD_SAMEN = {"3-1>3-2":{langs:"3-3", stippen:2.5}};
 /* De trap de wolken in: daar zit wereld 5, die (nog) niet op het eiland ligt. */
 const OVERWORLD_HEMEL = {x:51, y:17};
 /* 🏪 De winkel in het Rankenwoud. Gaat open zodra 2-1 gehaald is, en ligt er pal ten
@@ -20261,7 +20322,41 @@ function winkelTik(){
   if(Math.random() < 0.5){ clearTimeout(WINKELT); WINKELT = setTimeout(winkelTik, 7000 + Math.random() * 4000); return; }
   winkelZeg(knortZin(K.kijk()), K.spr + "_taunt");
 }
+/* 🐷 De eerste keer bij Knort: een deur waarvan je niet weet wat erachter zit. */
+const KNORT_OPENING = [
+  {s:null, naam:"…", bg:2, t:"Aan de rand van het woud staat een huis dat er gisteren nog niet stond. Dat weet je zeker."},
+  {s:null, naam:"…", bg:2, t:"Geen bord. Geen licht achter de ramen. Alleen een deur, en die staat op een kier."},
+  {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Psst. Hier. Achter de struik."},
+  {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Nee, ik bén de struik. Maakt niet uit. Kom hier."},
+  {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Je gaat daar toch niet naar binnen?"},
+  {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Dat huis stond er gisteren niet. Het staat er nooit. Het staat er alleen als iemand iets nodig heeft."},
+  {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Wie daar zit, verkoopt alles. Aan iedereen. Ook aan dat ding van vanochtend."},
+  {s:"rank1_bang", naam:"Loof", bg:2, kleur:"#7fd18c", t:"Wat je ook doet: beloof niks. Wat je daar belooft, wordt onthouden."},
+  {s:"rank1", naam:"Loof", bg:2, kleur:"#7fd18c", t:"…Ik heb niks gezegd. Ik hark bladeren."},
+  {s:null, naam:"…", bg:2, t:"Loof is weg. Het blad waar Loof stond, ritselt nog even na."},
+  {s:null, naam:"…", bg:2, t:"Binnen schuift iets zwaars over de vloer. Dan is het stil. Heel stil."},
+  {s:null, naam:"…", bg:0, t:"Je duwt. De deur klemt, en schiet dan ineens open."},
+  {s:null, naam:"…", bg:0, t:"Het is donker. Het ruikt naar varken en wierook."},
+  {s:null, naam:"…", bg:0, t:"Ergens in het donker gaat een lampje aan. Er zit iemand. Die zat daar al die tijd."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", mu:"winkel", t:"Hé. Jij."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Nee, blijf. Iedereen schrikt en loopt weg, en dan komen ze terug en dan is het op."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Knort. Ik verkoop. Aan iedereen. Dat zeg ik er meteen bij, dan hoeven we het er later niet over te hebben."},
+  {s:"knorst", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij bekijkt je van boven tot onder. Langzaam. Alsof hij je al verkocht heeft."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Jij loopt rond met plek voor één kracht. Dat is pijnlijk om naar te kijken."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Ik heb een aanbieding. Eenmalig. Echt eenmalig. Dat zeg ik niet tegen iedereen. Tegen bijna iedereen."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Een tweede plek. Nu meteen. Voor niks."},
+  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"…Nou ja. Bijna voor niks. Je belooft me dat je nog iets koopt."},
+  {s:"knorst", naam:"…", bg:0, kleur:"#e8a0a8", t:"Je knikte. Dat telt hier als een handtekening."},
+  {s:null, naam:"…", bg:0, kleur:"#c9a4ff", t:"<b>Je hebt nu plek voor twee aethers.</b> En de wegen door het woud liggen open."}
+];
 function winkelOpenen(kraam){
+  /* Bij Knort, de eerste keer: eerst de deur, dan pas de winkel. */
+  if((kraam || "knort") === "knort" && !SET.story.knortGezien && !FAST && !SET.story.vrij){
+    SET.story.knortGezien = true; saveSet();
+    AU.zet(null);
+    praatLos(KNORT_OPENING, () => { winkelSlotGeef(); winkelOpenen("knort"); });
+    return;
+  }
   /* De eerste keer stelt de verkoper zich voor, zin voor zin. Daarna een begroeting. */
   kraam = KRAMEN[kraam] ? kraam : "knort";
   const K = KRAMEN[kraam], eerste = !SET.story[K.gezien];
@@ -20649,7 +20744,7 @@ function kaartHTML(){
   (hemelAan ? HEMEL_RANDEN : OVERWORLD_RANDEN).forEach(([id, volgende, na]) => {
     const trigger = na || id;
     if(!owPos(id) || !owPos(volgende)) return;
-    if(!(id === "hemel" ? storyVrij("5-1") : (storyKlaar(trigger) || SET.story.vrij))) return;   // codewoord unlock: alle paden   // codewoord unlock: alle paden
+    if(!(id === "hemel" ? storyVrij("5-1") : (trigger === "knort" ? (SET.story.knortGezien && storyKlaar(id)) : storyKlaar(trigger)) || SET.story.vrij)) return;   // codewoord unlock: alle paden   // codewoord unlock: alle paden
     if(volgende === "hemel" ? !STORY["5-1"] : !STORY[volgende]) return;
     const pts = kaartRoute(id, volgende);
     padMask += `<polyline points="${pts.map(q => q.join(",")).join(" ")}"/>`;
@@ -22511,7 +22606,7 @@ function mpKnop(btn, el){
       if(!(SET.story.films || {}).opening && !(SET.story.klaar || []).length){
         SET.story.films = Object.assign({}, SET.story.films, {opening: true}); saveSet();
         M = null; render();
-        FILM.speel("opening", () => { M = {type:"story"}; storySkin(0); render(); });
+        FILM.speel(OPENING_FILM, () => { M = {type:"story"}; storySkin(0); render(); });
         return true;
       }
       M = {type:"story"}; storySkin(0); render(); } return true;
@@ -23008,12 +23103,13 @@ function onBtn(btn, el, fromAction){
       if(ga && M && M.type === "praat" && M.opKeuze){
         const cb = M.opKeuze; clearInterval(PRAAT); PRAAT = null; M = null; render(); cb(ga); break;
       }
+      if(ga && M && M.type === "praat") keuzeOnthoud(M.id, praatRegels()[M.i], ga);
       if(ga) praatGa(ga, el.dataset.tel || null);
       break;
     }
     case "storylevel": {
       const id = el && el.dataset.id;
-      if(id && STORY[id] && storyVrij(id)){ storySkin(STORY[id].wereld); praatStart(id, "intro"); }
+      if(id && STORY[id] && storyVrij(id)){ storySkin(STORY[id].wereld); levelOpnieuw(id); }
       break;
     }
     case "storycode": {
@@ -23887,6 +23983,19 @@ const FILM_TEKST = {
     eieren:  ["Er lag meer dan één.", "Bijna geen enkele haalde de ochtend."],
     ei:      ["Tweehonderd jaar lang gebeurde er niets.", "Tot nu."]
   },
+  /* De opening, versie 2 (deze speelt in het spel). */
+  opening2: {
+    w1:   ["Eén wereld."],
+    w2:   ["Verdeeld. In vier."],
+    w3:   ["De gouden knoop, die haar verscheurt."],
+    w4:   ["En zij die de knoop bewaken."],
+    b1:   ["Magnus, de onwrikbare."],
+    b2:   ["Ostara, de gever."],
+    b3:   ["Flint, de meedogenloze."],
+    b4:   ["Sedna, de wijze."],
+    vijf: ["En zij die de knoop zullen breken…"],
+    ei:   ["De elementen…", "Horen bij elkaar."]
+  },
   /* Na elke wereldbaas: de baas laat de ketting los. [zin bij de baas, zin bij het rijk] */
   "los-magnus": ["Niemand had gezegd dat hij mocht loslaten. Hij deed het toch.", "Nog drie."],
   "los-moeder": ["De takken gaan open. Het woud houdt niemand meer vast.", "Nog twee."],
@@ -23917,7 +24026,7 @@ const FILM_TEKST = {
     boven:    ["Boven is het stil."],
     dichtbij: ["Er wordt al op je gewacht."]
   },
-  /* Filmpje 9 · Wat het water onthoudt: 4-5, vlak voor het gevecht met de Oceaan. */
+  /* Filmpje 9 · Wat het water onthoudt: na de winst op de Weerspiegeling (4-4). */
   water: {
     water:  ["Diepstroom vergeet niets. Ook jou niet."],
     wereld: ["Ooit was er geen ketting."],
@@ -23932,6 +24041,7 @@ const FILM_TEKST = {
    Het nummer mag langer zijn dan het filmpje: aan het eind fadet het weg. */
 const FILM_MUZIEK = {
   "opening":    "audio/film-opening.mp3",
+  "opening2":   "audio/film-opening.mp3",
   "los-magnus": "audio/film-los.mp3", "los-moeder": "audio/film-los.mp3",
   "los-flint":  "audio/film-los.mp3", "los-oceaan": "audio/film-los.mp3",
   "ovens":      "audio/film-ovens.mp3",
@@ -23939,10 +24049,12 @@ const FILM_MUZIEK = {
   "boven":      "audio/film-boven.mp3",
   "water":      "audio/film-water.mp3"
 };
+/* Welke opening er speelt bij een nieuw verhaal: "opening2" (nieuw) of "opening" (de eerste versie). */
+const OPENING_FILM = "opening2";
 /* Welk filmpje na welk gevecht, de eerste keer dat je het wint. */
-const FILM_NA_WINST = {"1-5": "los-magnus", "2-6": "los-moeder", "3-6": "los-flint", "4-5": "los-oceaan"};
+const FILM_NA_WINST = {"1-5": "los-magnus", "2-6": "los-moeder", "3-6": "los-flint", "4-4": "water", "4-5": "los-oceaan"};
 /* Welk filmpje vóór welk gevecht (de eerste keer), en welk filmpje vóór welke fase. */
-const FILM_VOOR_GEVECHT = {"3-6": "ovens", "4-5": "water"};
+const FILM_VOOR_GEVECHT = {"3-6": "ovens"};
 const FILM_VOOR_FASE = {"5-5": {3: "eerste"}};   // vóór potje 3
 
 const FILM = (() => {
@@ -24117,6 +24229,21 @@ const FILM = (() => {
     const r = regels.find(([a, b]) => t >= a - .3 && t <= b + .3);
     if (!r || !r[2]) return;
     const a = Math.min(seg(t, r[0] - .3, r[0] + .1), 1 - seg(t, r[1] - .1, r[1] + .3));
+    /* Schudtekst: groter, en elke letter wipt los op en neer. */
+    if (r[3] && r[3].schud) {
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.font = '56px "VT323", ui-monospace, monospace'; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+      const hb = 96, tot = ctx.measureText(r[2]).width; let x = W / 2 - tot / 2;
+      ctx.fillStyle = "#000"; ctx.fillRect(0, H - hb, W, hb);
+      const tik = Math.floor(t * 16);
+      [...r[2]].forEach((ch, i) => {
+        const dy = Math.sin(t * 13 + i * 1.7) * 4 + (rnd(tik, i) - .5) * 4, dx = (rnd(tik, i + 50) - .5) * 2;
+        ctx.fillStyle = "#3a2208"; ctx.fillText(ch, x + dx + 3, H - hb / 2 + dy + 3);
+        ctx.fillStyle = "#ffe08a"; ctx.fillText(ch, x + dx, H - hb / 2 + dy);
+        x += ctx.measureText(ch).width;
+      });
+      ctx.restore(); return;
+    }
     ctx.save(); ctx.globalAlpha = a;
     ctx.font = '34px "VT323", ui-monospace, monospace'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     let rg = [r[2]];
@@ -24140,7 +24267,7 @@ const FILM = (() => {
     let t = 0;
     const S = scenes.map(s => { const r = Object.assign({van: t}, s); t += s.duur; return r; });
     const tekst = [], geluid = [];
-    S.forEach(s => (s.tekst || []).forEach(([a, b, z]) => tekst.push([s.van + a, s.van + b, z])));
+    S.forEach(s => (s.tekst || []).forEach(([a, b, z, o]) => tekst.push([s.van + a, s.van + b, z, o])));
     S.forEach(s => (s.geluid || []).forEach(([a, ...r]) => geluid.push([s.van + a, ...r])));
     return {duur: t, beelden, tekst, geluid, scenes: S.map(s => ({naam: s.naam, van: s.van})),
       teken: tt => { const s = S.find(x => tt >= x.van && tt < x.van + x.duur) || S[S.length - 1]; s.teken(tt - s.van, s.duur); }};
@@ -24325,6 +24452,126 @@ const FILM = (() => {
         const [x, y] = ib.p(.55, .05);
         gloed(x, y, 200 + 900 * l, "rgba(255,240,205,A)", .3 + .7 * l);
         vlak("#000", 1 - seg(t, 0, .6));
+        vlak("#fffaf0", ease(seg(t, 3.4, 5)));
+      }}
+    ]);
+  }
+
+  /* ---------- de opening, versie 2 ----------
+     Eerst de vier rijken, dan de vier bazen met naam, de engelen, de vijf, de eieren,
+     en dan het ei dat barst, steeds afgewisseld met je eigen hart dat aangaat. */
+  const zin2 = (s, k = 0) => ((FILM_TEKST.opening2 || {})[s] || [])[k] || "";
+  /* Je hart in de borstkas, met n van de vier lichten aan en `licht` (0 tot 1) hoe fel. */
+  function hartShot(t, n, licht) {
+    vlak("#000", 1);
+    const c = cam(IM["borst-schim"], 1.08 + .06 * licht, .5, .445, "contain"), [x, y] = c.p(.5, .445);
+    teken(IM["borst-schim"], c, 1, `brightness(${.55 + .6 * licht})`);
+    const fase = t % .8, slag = Math.exp(-((fase - .08) ** 2) / .003) + .7 * Math.exp(-((fase - .26) ** 2) / .003);
+    for (let k = 0; k < n; k++) { const hk = t * 1.6 + k * Math.PI / 2, rr = 18 + 14 * licht;
+      gloed(x + Math.cos(hk) * rr, y + Math.sin(hk) * rr * .8, 40 + 50 * licht, glo(KL[k]), .55 + .35 * slag); }
+    gloed(x, y, 60 + 60 * slag + 260 * licht, "rgba(255,245,220,A)", .25 + .35 * licht + .25 * slag);
+    const s = 1 + Math.round(slag * 2 + licht * 4); px.fillStyle = "#fffbea"; px.fillRect(Math.round(x / 2 - s / 2), Math.round(y / 2 - s / 2), s, s);
+    vignet(.6);
+  }
+  function opening2() {
+    const WERELD = 4.3, BAAS = 4.2;
+    /* De rijken: harde knippen, alleen de eerste komt uit het zwart op. */
+    const wereld = (naam, sleutel, beeld, f, d, eerste) => ({naam, duur: WERELD, tekst: [[.3, WERELD - .2, zin2(sleutel)]], teken: t => {
+      vlak("#000", 1);
+      teken(IM[beeld], cam(IM[beeld], 1 + .08 * ease(t / WERELD), f[0], f[1], "cover"));
+      deeltjes(d, t, 1); vignet(.6);
+      if (eerste) vlak("#000", 1 - seg(t, 0, .5));
+    }});
+    /* De bazen: ze beginnen al half zichtbaar en lopen dan vol. */
+    const baas = (naam, beeld, f, d, tekst) => ({naam, duur: BAAS, tekst, teken: t => {
+      vlak("#000", 1);
+      const c = cam(IM[beeld], 1 + .08 * ease(t / BAAS), f[0], f[1], "cover"), p = ease(seg(t, .1, 2.8));
+      teken(IM[beeld], c, 1 - p, "brightness(.5) contrast(.85)");
+      opdoemen(IM[beeld], c, p); deeltjes(d, t, .4 + .6 * p); vignet(.6);
+      vlak("#000", 1 - seg(t, 0, .25)); vlak("#000", seg(t, BAAS - .4, BAAS));
+    }});
+    const SCHUD = {schud: true};
+    /* Het ei, met de barsten op een vaste tijdlijn: tussendoor knip je naar je hart. */
+    const EIT = 16, KNIP = [[0, 2.6, "ei"], [2.6, 4.0, 1], [4.0, 6.0, "ei"], [6.0, 7.4, 2], [7.4, 9.4, "ei"], [9.4, 10.8, 3], [10.8, 13, "ei"], [13, 16, 4]];
+    const B1 = 4.3, B2 = 7.7, B3 = 11.1;
+    return reeks(["rijk-steen", "rijk-woud", "rijk-as", "rijk-water", "schim-magnus", "schim-moeder", "schim-flint", "schim-oceaan",
+      "engelen-ver", "engelen-dicht", "de-vijf", "eieren", "ei", "ei-barst-1", "ei-barst-2", "ei-barst-3", "ei-binnen", "borst-schim"], [
+      wereld("Steenrijk", "w1", "rijk-steen", [.55, .3], "stof", true),
+      wereld("Rankenwoud", "w2", "rijk-woud", [.55, .25], "vlieg"),
+      wereld("Asgronden", "w3", "rijk-as", [.6, .45], "as"),
+      wereld("Diepstroom", "w4", "rijk-water", [.58, .3], "bel"),
+      baas("Magnus", "schim-magnus", [.4, .45], "stof", [[.2, BAAS - .1, zin2("b1"), SCHUD]]),
+      baas("Moeder Natuur", "schim-moeder", [.5, .3], "bloem", [[.2, BAAS - .1, zin2("b2"), SCHUD]]),
+      baas("Flint", "schim-flint", [.5, .3], "vonk", [[.2, BAAS - .1, zin2("b3"), SCHUD]]),
+      baas("De Oceaan", "schim-oceaan", [.43, .35], "bel", [[.2, BAAS - .1, zin2("b4"), SCHUD]]),
+      {naam: "De engelen", duur: 9.5, teken: t => {
+        vlak("#fff", 1);
+        const c1 = cam(IM["engelen-ver"], 1 + .1 * ease(t / 5.3), .5, .2, "cover");
+        opdoemen(IM["engelen-ver"], c1, ease(seg(t, .4, 3.6)), true);
+        const over = ease(seg(t, 4.8, 5.6));
+        if (over > 0) { const c2 = cam(IM["engelen-dicht"], 1.12 - .08 * ease(seg(t, 4.8, 9.5)), .5, .45, "cover"); teken(IM["engelen-dicht"], c2, over); }
+        vlak("#fff", Math.exp(-((t - 5.2) ** 2) / .03) * .8);
+        vlak("#fff", seg(t, 8.2, 8.9)); vlak("#000", seg(t, 8.9, 9.5));
+      }},
+      {naam: "De vijf", duur: 7.5, tekst: [[.8, 7.1, zin2("vijf")]], teken: t => {
+        vlak("#000", 1);
+        const c = cam(IM["de-vijf"], 1 + .08 * ease(t / 7.5), .5, .68, "cover"), [x, y] = c.p(.5, .73);
+        gloed(x, y, 40 + 60 * seg(t, .3, 2), "rgba(255,200,110,A)", .7 * seg(t, .3, 1.4) * (1 - seg(t, 2.5, 4)));
+        opdoemen(IM["de-vijf"], c, ease(seg(t, 1.3, 5))); vignet(.6);
+        vlak("#000", seg(t, 6.8, 7.5));
+      }},
+      {naam: "De eieren", duur: 7, teken: t => {
+        vlak("#000", 1);
+        const c = cam(IM.eieren, 1.18, lerp(.32, .68, ease(t / 7)), .42, "cover");
+        teken(IM.eieren, c);
+        const [x, y] = c.p(.52, .38);
+        gloed(x, y, 60, "rgba(255,190,110,A)", .3 + .22 * Math.sin(t * 2.4));
+        deeltjes("mist", t, 1); vignet(.65);
+        vlak("#000", 1 - seg(t, 0, .8)); vlak("#000", seg(t, 6.3, 7));
+      }},
+      {naam: "Het ei en je hart", duur: EIT, tekst: [[5.8, 9.2, zin2("ei", 0)], [12.9, 15.8, zin2("ei", 1)]],
+       geluid: [[B1, "barst", .6], [B2, "barst", .85], [B3, "barst", 1],
+                [2.65, "hart", .5], [6.05, "hart", .7], [6.85, "hart", .7], [9.45, "hart", .85], [10.25, "hart", .85],
+                [13.05, "hart", 1], [13.85, "hart", 1], [14.65, "hart", 1], [15.45, "hart", 1]],
+       teken: t => {
+        const k = KNIP.find(([a, b]) => t >= a && t < b) || KNIP[KNIP.length - 1];
+        if (k[2] !== "ei") {
+          const n = k[2], licht = (n - 1) / 3 * .7 + (n === 4 ? .3 * ease(seg(t, 13, 16)) : 0);
+          hartShot(t, n, licht);
+          if (n === 4) vlak("#fffaf0", ease(seg(t, 15.2, 16)));
+        } else {
+          vlak("#000", 1);
+          const tril = t > B3 ? (rnd(Math.floor(t * 30), 3) - .5) * 4 * (1 + seg(t, B3, 13) * 2) : 0;
+          const c0 = cam(IM.ei, 1 + .14 * ease(t / 13), .5, .45, "contain");
+          const c = Object.assign({}, c0, {x: c0.x + tril, p: (u, v) => [c0.x + tril + u * c0.w, c0.y + v * c0.h]});
+          /* De barsten zijn getekend: per barst een eigen plaatje. Bij elke barst springt
+             het nieuwe plaatje erin, met een korte lichtflits en een zachte nagloed. */
+          const stap = t >= B3 ? 3 : t >= B2 ? 2 : t >= B1 ? 1 : 0, sinds = t - [0, B1, B2, B3][stap];
+          const beeld = n => n ? IM["ei-barst-" + n] : IM.ei;
+          teken(beeld(stap), c, t < 2.6 ? ease(seg(t, 0, 1.6)) : 1);
+          if (stap) {
+            const flits = Math.max(0, 1 - sinds / .45);
+            ctx.save(); ctx.globalCompositeOperation = "lighter";
+            teken(beeld(stap), c, .7 * flits + .12 * stap / 3 * (.5 + .5 * Math.sin(t * 6.3)), "brightness(1.4)");
+            ctx.restore();
+            const [x, y] = c.p(.55, .4); gloed(x, y, 120 + 70 * stap, glo(KL[Math.floor(t * 2) % 4]), .1 * stap + .3 * flits);
+          }
+          schud = Math.exp(-((t - B2 - .1) ** 2) / .03) * 10 + Math.exp(-((t - B3 - .1) ** 2) / .05) * 14;
+          vignet(.5);
+        }
+        /* bij elke knip een korte witte flits */
+        const sinds = t - k[0];
+        if (k[0] > 0 && sinds < .15) vlak("#fff", .6 * (1 - sinds / .15));
+      }},
+      {naam: "Licht", duur: 6, teken: t => {
+        vlak("#fffaf0", 1);
+        const ib = cam(IM["ei-binnen"], 1 + .06 * ease(t / 6), .5, .25, "cover");
+        const l = ease(seg(t, .8, 4.2));
+        teken(IM["ei-binnen"], ib, ease(seg(t, 0, .8)), `brightness(${1 + 1.2 * l})`);
+        const puls = .5 + .5 * Math.sin(t * 5);
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; teken(IM["ei-binnen"], ib, (.2 + .3 * puls) * seg(t, .5, 3)); ctx.restore();
+        const [x, y] = ib.p(.55, .05);
+        gloed(x, y, 200 + 900 * l, "rgba(255,240,205,A)", .3 + .7 * l);
         vlak("#fffaf0", ease(seg(t, 3.4, 5)));
       }}
     ]);
@@ -24742,7 +24989,8 @@ const FILM = (() => {
   }
 
   const FILMS = {
-    "opening": {naam: "Opening", maak: opening},
+    "opening2": {naam: "Opening (v2)", maak: opening2},
+    "opening": {naam: "Opening (v1)", maak: opening},
     "los-magnus": {naam: "Loslaten · Magnus", maak: () => losFilm("magnus")},
     "los-moeder": {naam: "Loslaten · Moeder Natuur", maak: () => losFilm("moeder")},
     "los-flint": {naam: "Loslaten · Flint", maak: () => losFilm("flint")},
@@ -24750,7 +24998,7 @@ const FILM = (() => {
     "ovens": {naam: "De ovens (3-6)", maak: ovens},
     "eerste": {naam: "Honderd jaar eerder (5-5)", maak: eerste},
     "boven": {naam: "Naar boven (na de Oceaan)", maak: boven},
-    "water": {naam: "Wat het water onthoudt (4-5)", maak: water}
+    "water": {naam: "Wat het water onthoudt (na 4-4)", maak: water}
   };
 
   /* ---------- tekenen ---------- */
@@ -24865,3 +25113,4 @@ const FILM = (() => {
   return {speel, bezig: () => !!film, paneel};
 })();
 </script>
+</body></html>
