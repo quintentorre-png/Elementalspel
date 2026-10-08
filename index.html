@@ -158,8 +158,21 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
 .slot.atk .card{box-shadow:0 0 0 3px #4ee06a, 0 0 18px rgba(78,224,106,.7) !important; animation:atkpulse 1.1s ease-in-out infinite}
 /* Het wezen dat aanvalt, zolang de aanval in de chain staat: rood, zodat je ziet waarop je reageert. */
 .slot.cr.valtaan{z-index:6}
-.slot.cr.valtaan .card{box-shadow:0 0 0 3px #ff4a3c, 0 0 22px rgba(255,74,60,.8) !important; animation:valpuls .9s ease-in-out infinite}
-@keyframes valpuls{0%,100%{filter:brightness(1)} 50%{filter:brightness(1.18)}}
+.slot.cr.valtaan .card{animation:valpuls .85s ease-in-out infinite !important}
+@keyframes valpuls{0%,100%{box-shadow:0 0 0 3px #c42a1e, 0 0 8px rgba(255,60,40,.45); filter:brightness(1)}
+  50%{box-shadow:0 0 0 5px #ff6a4a, 0 0 30px rgba(255,70,40,.95); filter:brightness(1.18)}}
+/* De kaart die net gespeeld is en als link in de chain staat: daar wordt op gereageerd. */
+.slot.gespeeld{z-index:6}
+.slot.gespeeld .card{animation:speelpuls .9s ease-in-out infinite !important}
+@keyframes speelpuls{0%,100%{box-shadow:0 0 0 3px #b8932e, 0 0 8px rgba(255,214,110,.4)}
+  50%{box-shadow:0 0 0 5px #ffe08a, 0 0 28px rgba(255,224,140,.95)}}
+/* Het doelwit van een 🔥 of 🌿 in de chain: een gekleurde gloed over de kaart heen die pulst. */
+.slot.cr.mikvuur::before, .slot.cr.mikgras::before{content:""; position:absolute; inset:0; border-radius:inherit;
+  pointer-events:none; z-index:7; animation:mikfade 1s ease-in-out infinite}
+.slot.cr.mikvuur::before{background:linear-gradient(0deg, rgba(255,70,20,.75), rgba(255,150,40,.35) 55%, rgba(255,120,30,.08))}
+.slot.cr.mikgras::before{background:linear-gradient(0deg, rgba(40,200,70,.72), rgba(120,230,110,.32) 55%, rgba(80,200,90,.06))}
+@keyframes mikfade{0%,100%{opacity:.3}50%{opacity:1}}
+.slot.cr.mikgras{box-shadow:0 0 0 2px #5fe07a, 0 0 18px rgba(95,224,122,.6) !important}
 @keyframes atkpulse{0%,100%{box-shadow:0 0 0 3px #3fbf5a, 0 0 8px rgba(78,224,106,.45)}50%{box-shadow:0 0 0 3px #9dffb0, 0 0 24px rgba(120,255,150,.9)}}
 .slot.atk::after{content:""; position:absolute; left:50%; top:-15px; transform:translateX(-50%); z-index:7; pointer-events:none;
   width:16px; height:16px; line-height:1; padding:2px 7px; border-radius:10px; color:#eaffe8;
@@ -552,29 +565,33 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
   background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.95),rgba(255,255,255,0));
   animation:lray .6s ease-out forwards}
 @keyframes lray{0%{opacity:0; transform:rotate(var(--a)) scaleY(.2)}30%{opacity:1}100%{opacity:0; transform:rotate(var(--a)) scaleY(1.8)}}
-/* beurtwissel-melding */
+/* beurtwissel-melding: het scherm zakt even weg en er schuift een brede band door het
+   beeld, van links voor jou (goud) en van rechts voor de tegenstander (staalblauw). */
 #turncry{position:fixed; inset:0; z-index:84; pointer-events:none; display:flex; align-items:center; justify-content:center;
-  opacity:0; animation:tcry 1.35s cubic-bezier(.2,.7,.3,1) forwards}
-#turncry .tc{position:relative; font-family:"VT323",ui-monospace,monospace; font-weight:700; font-size:1.9rem; letter-spacing:.3em;
-  white-space:nowrap; text-align:center; padding:15px 34px; border-radius:3px; border:1px solid}
-#turncry .tc .sm{display:block; font-family:"VT323",ui-monospace,monospace; font-weight:500; font-size:.72rem;
-  letter-spacing:.24em; opacity:.72; margin-top:7px}
-#turncry .tc::before,#turncry .tc::after{content:""; position:absolute; left:12%; right:12%; height:1px; opacity:.85}
-#turncry .tc::before{top:-1px} #turncry .tc::after{bottom:-1px}
-#turncry.mine .tc{color:#f0e3bc; border-color:rgba(201,168,106,.8); background:linear-gradient(180deg,rgba(62,50,24,.5),rgba(24,20,12,.5));
-  text-shadow:0 0 20px rgba(212,178,110,.8), 0 3px 14px #000}
-#turncry.mine .tc::before,#turncry.mine .tc::after{background:linear-gradient(90deg,transparent,#e3c684,transparent)}
-#turncry.mine::before{content:""; position:absolute; inset:0;
-  background:radial-gradient(ellipse at center, rgba(201,168,106,.20) 0%, rgba(120,92,30,.09) 46%, rgba(0,0,0,0) 72%)}
-#turncry.theirs .tc{color:#c6dcee; border-color:rgba(96,146,190,.75); background:linear-gradient(180deg,rgba(20,40,60,.55),rgba(10,16,24,.5));
-  text-shadow:0 0 20px rgba(104,164,214,.75), 0 3px 14px #000}
-#turncry.theirs .tc::before,#turncry.theirs .tc::after{background:linear-gradient(90deg,transparent,#7fb6e2,transparent)}
-#turncry.theirs::before{content:""; position:absolute; inset:0;
-  background:radial-gradient(ellipse at center, rgba(72,132,192,.20) 0%, rgba(28,58,92,.09) 46%, rgba(0,0,0,0) 72%)}
-@keyframes tcry{0%{opacity:0; transform:translateY(-22px) scale(.96)}
-  15%{opacity:1; transform:translateY(0) scale(1)}
-  72%{opacity:1; transform:translateY(0) scale(1)}
-  100%{opacity:0; transform:translateY(12px) scale(1.03)}}
+  overflow:hidden; animation:tcdim 1.7s ease-out forwards}
+@keyframes tcdim{0%{background:rgba(4,6,14,0)}14%{background:rgba(4,6,14,.5)}74%{background:rgba(4,6,14,.42)}100%{background:rgba(4,6,14,0)}}
+#turncry .tcband{position:absolute; left:-10%; right:-10%; top:50%; height:128px; margin-top:-64px; transform:skewY(-3deg);
+  display:flex; align-items:center; justify-content:center; border-top:3px solid; border-bottom:3px solid;
+  animation:tcband 1.7s cubic-bezier(.2,.75,.25,1) forwards}
+#turncry.theirs .tcband{animation-name:tcbandR}
+@keyframes tcband{0%{transform:skewY(-3deg) translateX(-110%)}18%{transform:skewY(-3deg) translateX(0)}
+  76%{transform:skewY(-3deg) translateX(0)}100%{transform:skewY(-3deg) translateX(110%)}}
+@keyframes tcbandR{0%{transform:skewY(-3deg) translateX(110%)}18%{transform:skewY(-3deg) translateX(0)}
+  76%{transform:skewY(-3deg) translateX(0)}100%{transform:skewY(-3deg) translateX(-110%)}}
+#turncry .tcband::after{content:""; position:absolute; top:0; bottom:0; width:22%; left:-25%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); animation:tcglans 1.7s ease-in-out forwards}
+@keyframes tcglans{0%,20%{left:-25%}60%,100%{left:110%}}
+#turncry .tcband .tc{position:relative; transform:skewY(3deg); white-space:nowrap; text-align:center; line-height:1.2 !important;
+  font-size:clamp(1.5rem, 3.4vw, 2.6rem) !important; letter-spacing:.16em; padding:0 !important;
+  background:none !important; border:0 !important; box-shadow:none !important}
+#turncry .tcband .tc .sm{display:block; font-family:"VT323",ui-monospace,monospace; font-size:clamp(1rem,1.6vw,1.35rem) !important;
+  letter-spacing:.3em; opacity:.85; margin-top:12px}
+#turncry.mine .tcband{background:linear-gradient(180deg,rgba(70,54,20,.94),rgba(30,24,10,.94)); border-color:#e3c684;
+  box-shadow:0 0 40px rgba(227,198,132,.45)}
+#turncry.mine .tc{color:#fff1c8; text-shadow:0 0 24px rgba(240,200,110,.9), 0 4px 0 #3a2a08}
+#turncry.theirs .tcband{background:linear-gradient(180deg,rgba(18,38,62,.94),rgba(8,16,28,.94)); border-color:#7fb6e2;
+  box-shadow:0 0 40px rgba(127,182,226,.45)}
+#turncry.theirs .tc{color:#d8ecff; text-shadow:0 0 24px rgba(104,164,214,.9), 0 4px 0 #0a1a2c}
 .pside.turnnow{animation:sideglow 1.2s ease-out}
 @keyframes sideglow{0%,100%{filter:none}35%{filter:drop-shadow(0 0 12px rgba(201,168,106,.7))}}
 .ph-step.on.battle{color:#ff8f7d; border-color:var(--danger)}
@@ -2652,6 +2669,31 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
 .slot.cr.mikflits{animation:mikflits .5s ease-out 3}
 @keyframes mikflits{0%,100%{box-shadow:0 0 0 2px #ff6a5c, 0 0 16px rgba(255,106,92,.5)}
   50%{box-shadow:0 0 0 4px #fff0d8, 0 0 34px rgba(255,180,120,.95)}}
+/* 🎒 De inventaris */
+.invknop{display:inline-flex !important; align-items:center; gap:6px; white-space:nowrap}
+.invknop .pixic{width:1.1em; height:1.1em; flex:0 0 auto}
+.invbox{width:min(860px,94vw) !important; max-width:none !important; text-align:left}
+.invkop{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.invkop h2{margin:0; display:flex; align-items:center; gap:8px}
+.invkop .obtn{margin-left:auto}
+.invbox h2 .pixic{width:1.1em; height:1.1em}
+.invinfo, .invinfo p, .invinfo h3{text-align:left}
+.invrij{display:flex; gap:22px; margin-top:16px; flex-wrap:wrap}
+.invraster{display:grid; grid-template-columns:repeat(4, 76px); gap:10px; flex:0 0 auto}
+.invvak{width:76px; height:76px; padding:10px; display:grid; place-items:center; cursor:pointer;
+  background:rgba(0,0,0,.35); border:2px solid var(--vnd,#0b0d22); border-radius:4px;
+  box-shadow:inset 0 0 0 2px rgba(230,233,255,.18); color:#e8dcc0}
+.invvak.leeg{cursor:default; opacity:.45}
+.invvak:hover{box-shadow:inset 0 0 0 2px rgba(232,198,122,.6)}
+.invvak.aan{box-shadow:inset 0 0 0 2px #e8c67a, 0 0 12px rgba(232,198,122,.45)}
+.invvak .pixic, .invvak img{width:100%; height:100%; image-rendering:pixelated; object-fit:contain}
+.invinfo{flex:1 1 260px; min-width:0}
+.invgroot{width:110px; height:110px; padding:14px; margin-bottom:10px; color:#e8dcc0;
+  background:rgba(0,0,0,.35); border:2px solid var(--vnd,#0b0d22); border-radius:4px}
+.invgroot .pixic, .invgroot img{width:100%; height:100%; image-rendering:pixelated; object-fit:contain}
+.invinfo h3{margin:0 0 8px; color:var(--vng,#e8c67a)}
+.invtekst{font-style:italic; line-height:1.5; margin:0 0 10px; color:#e6e2d6}
+.inveffect{margin:0; padding-top:8px; border-top:1px solid rgba(230,233,255,.2); color:var(--vsub,#c9d0ff)}
 /* De zet van je tegenstander, groot genoeg om te zien wat het is en waar het heen gaat. */
 /* De melding staat in de rechterzijbalk, niet midden op het bord. */
 #zetmelding{position:fixed; right:10px; left:auto; top:150px; width:172px; transform:none; z-index:455; pointer-events:none;
@@ -3963,7 +4005,7 @@ const sleep = ms => {
 };
 const pName = p => (S && S.story && p === 1 && S.story.vijandNaam) ? S.story.vijandNaam
   : (S && S.story && STORY[S.story.id] && p === 1) ? STORY[S.story.id].vijand
-  : (S && S.story && p === 0) ? "de Elementaal"
+  : (S && S.story && p === 0) ? "de onverdeelde"
   : (S && S.vsBot && p === 1) ? "de Bot 🤖"
   : (NET.on && p === NET.seat ? "jij (Speler " + (p+1) + ")" : "Speler " + (p + 1));
 let BOTSEATS = null;                      // testhaak: welke stoelen worden door de bot gespeeld
@@ -4935,10 +4977,9 @@ function zwaardSlag(){
 /* Wat de tegenstander speelt én waar hij op mikt — even groot in beeld, want anders
    zie je alleen dát er iets gebeurt. */
 /* Waar iets op mikt, gezien vanuit wie er kijkt: "jouw kolom 3" of "zijn kolom 2". */
+/* Simpel houden: alleen wát er geraakt wordt. Het bord laat zelf zien waar. */
 function plekTekst(f){
-  const ik = kijkerStoel();
-  const kant = ik < 0 ? pName(f.p) : (f.p === ik ? "jouw" : "zijn");
-  return `${kIcon(f.card)} ${kNaam(f.card)}${f.kind === "spell" ? " (spell)" : ""} · ${kant} k${f.c+1}`;
+  return `mikt op <b>${kNaam(f.card)}</b>`;
 }
 const EFF_WOORD = {vuur:"🔥", gras:"🌿", steen:"🪨", water:"💧", ws:"💧"};
 function doelTekst(plan){
@@ -4946,7 +4987,7 @@ function doelTekst(plan){
   planPlat(plan).forEach(e => {
     if(e.tid == null) return;
     const f = findKaart(e.tid); if(!f) return;
-    stuks.push(`${e.el && EFF_WOORD[e.el] ? EFF_WOORD[e.el] + " " : ""}${plekTekst(f)}`);
+    stuks.push(plekTekst(f));
   });
   return stuks;
 }
@@ -4972,7 +5013,7 @@ async function toonZet(p, faceHTML, kop, plan, wacht){
   if(!el){ el = document.createElement("div"); el.id = "zetmelding"; document.body.appendChild(el); }
   el.innerHTML = `<div class="zmkaart">${faceHTML}</div>
     <div class="zmtxt"><span class="zmwie">${pName(p)} speelt</span>${kop}
-    ${doelen.length ? `<span class="zmdoel">🎯 ${doelen.join("<br>🎯 ")}</span>` : ""}</div>`;
+    ${doelen.length ? `<span class="zmdoel">${doelen.join("<br>")}</span>` : ""}</div>`;
   el.classList.remove("aan"); void el.offsetWidth; el.classList.add("aan");
   if(!mist) doelFlits(plan);
   clearTimeout(toonZet._t);
@@ -4988,7 +5029,7 @@ function toonDoel(p, id){
   if(typeof inMist === "function" && inMist()) return;
   let el = document.getElementById("zetmelding");
   if(!el){ el = document.createElement("div"); el.id = "zetmelding"; document.body.appendChild(el); }
-  el.innerHTML = `<div class="zmtxt"><span class="zmwie">${pName(p)} kiest</span><span class="zmdoel" style="margin-top:0">🎯 ${plekTekst(f)}</span></div>`;
+  el.innerHTML = `<div class="zmtxt"><span class="zmwie">${pName(p)} kiest</span><span class="zmdoel" style="margin-top:0">${plekTekst(f)}</span></div>`;
   el.classList.remove("aan"); void el.offsetWidth; el.classList.add("aan");
   doelFlits([{tid:id}]);
   clearTimeout(toonZet._t);
@@ -5642,9 +5683,9 @@ function turnCry(p){
   d.id = "turncry"; d.className = mine ? "mine" : "theirs";
   const kop = solo ? (mine ? "JOUW BEURT" : "TEGENSTANDER") : `SPELER ${p+1}`;
   const sub = solo && !mine ? `${pName(p)} is aan zet · beurt ${S.turnNo[p]}` : `aan zet · beurt ${S.turnNo[p]}`;
-  d.innerHTML = `<div class="tc">${kop}<span class="sm">${sub}</span></div>`;
+  d.innerHTML = `<div class="tcband"><div class="tc">${kop}<span class="sm">${sub}</span></div></div>`;
   document.body.appendChild(d);
-  setTimeout(() => d.remove(), 1450);
+  setTimeout(() => d.remove(), 1750);
   const side = document.querySelector(`.pside[data-side="${p}"]`);
   if(side){ side.classList.remove("turnnow"); void side.offsetWidth; side.classList.add("turnnow");
     setTimeout(() => side.classList.remove("turnnow"), 1400); }
@@ -6604,7 +6645,7 @@ function plannedEffects(p, card, asSpell, col, opts){
 function targetsForEff(p, e, selfId, cardEl, exclIds){
   const skip = id => exclIds && exclIds.includes(id);
   if(e.el === "vuur")  return fireTargets(p).filter(id => !skip(id) && !(e.origin === "creature" && id === selfId));
-  if(e.el === "gras")  return allCreIds(cr => !skip(cr.card.id) && entBaar(cr));
+  if(e.el === "gras")  return allCreIds(cr => !skip(cr.card.id) && cr.card.id !== selfId);   // alles, behalve het gras zelf
   if(e.el === "steen") return allCreIds(cr => !skip(cr.card.id));
   if(e.el === "water") return waterTargets(p).filter(id => id !== selfId && !skip(id));
   if(e.el === "ws")    return wsTargets(p, e.srcCard, e.keten).filter(id => !skip(id));
@@ -6636,7 +6677,7 @@ async function rotsKiezelsVoor(p, card, asSpell, col, o){
 /* De vraag bij een effect, met de echte getallen erin. */
 function effPromptTxt(p, el){
   return (effPrompt[el] || el).replace("%D%", String((hasAe(p, "ae_fire6") ? 4 : 2) + (hasAe(p, "ae_offer") ? 1 : 0) + trioBonus(p)))
-    .replace("%O%", hasAe(p, "ae_offer") ? "; een eigen wezen offer je: instakill + trek een kaart (eigen 🔥 Vuur en eigen kolommen met een 🔥-ritueel kun je niet aanwijzen)" : "");
+    .replace("%O%", hasAe(p, "ae_offer") ? "; een eigen wezen offer je: instakill + trek een kaart (een eigen 🔥, of iets in een kolom met een eigen 🔥-ritueel, krijgt gewoon schade)" : "");
 }
 /* 💧 Waterspiegel: kies je welke kaart nog een keer gaat, dan kies je meteen ook waar dát
    speel-effect op mikt. Alles staat dan vast op de chain, net als bij een gewone kaart. */
@@ -7082,7 +7123,7 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
   }
   const plan = await declarePlan(p, card, asSpell, col, {onField:true});
   pushPlay(p, card, asSpell, col, flash, plan === "cancel" ? [] : plan);
-  await toonZet(p, cardFaceHTML(card, asSpell), `${kIcon(card)} <b>${kNaam(card)}</b> · ${asSpell ? "ritueel" : "wezen"} k${col+1}`,
+  await toonZet(p, cardFaceHTML(card, asSpell), `${kIcon(card)} <b>${kNaam(card)}</b>`,
     plan === "cancel" ? [] : plan);
   /* 🔥 Sommigen leven van jouw vuur. Ze vertellen dat alleen niet vooraf. */
   await storyBrandstof(p, card, asSpell);
@@ -7149,7 +7190,7 @@ async function waterVerdringt(p, card, col, cre, flash){
   const rplan = await declarePlan(p, dc, false, c2, {onField:true, dubbel: hasAe(p, "ae_watercycle")});
   if(hasAe(p, "ae_watercycle")) addLog(`🟣 Getijdenstroom: ${kIcon(dc)} ${kNaam(dc)} doet het effect <b>twee keer</b>.`, true);
   pushPlay(p, dc, false, c2, false, rplan === "cancel" ? [] : rplan);
-  await toonZet(p, cardFaceHTML(card, false), `${kIcon(card)} <b>${kNaam(card)}</b> · k${col+1}, ${kIcon(dc)} schuift naar k${c2+1}`, []);
+  await toonZet(p, cardFaceHTML(card, false), `${kIcon(card)} <b>${kNaam(card)}</b>`, []);
   render();
 }
 /* ⛰️ Rots: eerst een kiezel op een vrije eigen plek. De kiezel hoort bij steen, dus 🟣 Oerkracht
@@ -7204,7 +7245,7 @@ async function ijsNeemtOver(p, card, asSpell, col){
     render();
     const plan = await declarePlan(p, doel.card, false, col, {onField:true, geenSpell:true});
     pushPlay(p, doel.card, false, col, false, plan === "cancel" ? [] : plan, {geenSpell:true});
-    await toonZet(p, cardFaceHTML(doel.card, false), `🧊 IJs: pakt ${kIcon(doel.card)} <b>${kNaam(doel.card)}</b> · k${col+1}`, plan === "cancel" ? [] : plan);
+    await toonZet(p, cardFaceHTML(doel.card, false), `IJs pakt <b>${kNaam(doel.card)}</b>`, plan === "cancel" ? [] : plan);
     return;
   }
   const sp = P(vij).cols[col].spell;
@@ -7745,7 +7786,7 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
   const plan = await declarePlan(p, card, false, col, fo);
   S.stack.push({type:"play", ctrl:p, card, asFuse:true, fuseKey, col,
                 fuseEff: fuseKey !== "fu_stone", plan: plan === "cancel" ? [] : plan});
-  await toonZet(p, cardFaceHTML(card.el), `🟣 <b>Fusie-summon: ${AETHERS[fuseKey].name}</b><span style="display:block;opacity:.8">${kIcon(card)} k${col+1}</span>`,
+  await toonZet(p, cardFaceHTML(card.el), `<b>${AETHERS[fuseKey].name}</b>`,
     plan === "cancel" ? [] : plan);
   return true;
 }
@@ -7981,7 +8022,7 @@ async function resolveLight(it){
       if(!nog || nog.card.id !== cr.card.id) break;      // hij is intussen weg
       const plan = await declarePlan(p, cr.card, false, c, {onField:true, geenSpell:true});
       pushPlay(p, cr.card, false, c, false, plan === "cancel" ? [] : plan, {geenSpell:true});
-      await toonZet(p, cardFaceHTML(cr.card, false), `✦ Echo: ${kIcon(cr.card)} <b>${kNaam(cr.card)}</b> · k${c+1}`, plan === "cancel" ? [] : plan);
+      await toonZet(p, cardFaceHTML(cr.card, false), `Echo: <b>${kNaam(cr.card)}</b>`, plan === "cancel" ? [] : plan);
       await chainLoop();
     }
     render(); return;
@@ -8018,7 +8059,7 @@ async function resolveLight(it){
     render();
     const plan = await declarePlan(p, kopie, false, sl.c, {onField:true, geenSpell:true});
     pushPlay(p, kopie, false, sl.c, false, plan === "cancel" ? [] : plan, {geenSpell:true});
-    await toonZet(p, cardFaceHTML(kopie, false), `✦ Kloon: ${kIcon(kopie)} <b>${kNaam(kopie)}</b> · k${sl.c+1}`, plan === "cancel" ? [] : plan);
+    await toonZet(p, cardFaceHTML(kopie, false), `Kloon: <b>${kNaam(kopie)}</b>`, plan === "cancel" ? [] : plan);
     return;
   }
   if(k === "doortast"){
@@ -8208,11 +8249,14 @@ function entangleDrain(targetId, srcId, p, tokens){
 /* 🔥 Wie je met vuur mag aanwijzen. Normaal alleen de overkant. Met 🟣 Brandoffer mag je ook
    je eigen kant aansteken — behalve een eigen 🔥 Vuur en alles in een eigen kolom met een
    🔥-ritueel, want daar loopt het effect in zichzelf rond. */
-function fireTargets(p){
-  if(!hasAe(p, "ae_offer")) return allCreIds((cr, pp) => pp !== p);
-  return allCreIds((cr, pp, cc) => pp !== p
-    || (cr.card.el !== "vuur" && magOfferen(cr)
-        && !(P(pp).cols[cc].spell && P(pp).cols[cc].spell.card.el === "vuur")));
+/* 🔥 Vuur mag alles op het veld aanwijzen, ook je eigen wezens (alleen niet de kaart die
+   het speelt; dat regelt excl). Zonder 🟣 Brandoffer krijgt een eigen wezen gewoon schade. */
+function fireTargets(p){ return allCreIds(); }
+/* Met 🟣 Brandoffer wordt een eigen wezen geofferd (instakill + trek 1). Niet: een eigen 🔥,
+   of iets in een kolom met een eigen 🔥-ritueel. Die krijgen gewoon schade. */
+function vuurOffert(p, f){
+  return !!(f && f.p === p && hasAe(p, "ae_offer") && f.cr.card.el !== "vuur" && magOfferen(f.cr)
+    && !(P(f.p).cols[f.c].spell && P(f.p).cols[f.c].spell.card.el === "vuur"));
 }
 /* 💧 herspeelt alleen je eigen wezens — maar wél allemaal, 💧 Water inbegrepen. */
 function waterTargets(p){
@@ -8327,7 +8371,7 @@ async function resolveEffect(it){
       if(P(opp(p)).life <= 0) return gameOver(p, pName(opp(p)) + " is verbrand.");
     }
     const ids = fireTargets(p).filter(id => !(it.excl || []).includes(id));
-    if(!ids.length){ addLog(offerAe ? "🔥 Geen doelwit: aan je eigen kant tellen 🔥 Vuur en kolommen met een 🔥-ritueel niet mee." : "🔥 Geen doelwit: er staat niets bij je tegenstander."); return; }
+    if(!ids.length){ addLog("🔥 Geen doelwit: er staat niets op het veld."); return; }
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🔥 Vuur: kies een wezen (${dmg} schade${offerAe ? "; een eigen wezen offer je: instakill + trek een kaart" : ""})`, !isBot(p), {eigenEffect:true, k:"vuur"});
     if(id === "fizzle") return;
     if(id === null){ addLog("🔥 Effect overgeslagen."); return; }
@@ -8336,7 +8380,7 @@ async function resolveEffect(it){
     const fSrc = it.srcId != null && findCre(it.srcId) ? creSel(findCre(it.srcId).p, findCre(it.srcId).c) : null;
     if(it.protect === id){
       applyDamage(id, "vuur", dmg, {protect:true, ignoreImmune:heet, srcSel:fSrc, ctrl:p});
-    } else if(f.p === p && offerAe){
+    } else if(vuurOffert(p, f)){
       addLog(`🟣 <em>Brandoffer</em> — 🔥 offert de eigen ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}: <em>instakill</em>!`, true);
       fxFire(fSrc, creSel(f.p, f.c));
       destroyCre(f.p, f.c, "🔥 offer");
@@ -8353,12 +8397,18 @@ async function resolveEffect(it){
   }
 
   if(it.el === "gras"){
-    const ids = allCreIds(entBaar);                        // 🔥 (en de Balrog) is immuun voor entangle
-    if(!ids.length){ addLog("🌿 Geen geldig doelwit (🔥 Vuur kan niet verstrikt worden)."); return; }
+    /* 🌿 Gras mag alles aanwijzen; op 🔥 Vuur (en de Balrog) gebeurt er alleen niets. */
+    const ids = allCreIds(cr => cr.card.id !== it.srcId);
+    if(!ids.length){ addLog("🌿 Geen doelwit."); return; }
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🌿 Gras: kies een wezen om te verstrikken (−1 leven daar, +1 hier · op 🪨 Steen −2/+2)`, !isBot(p), {eigenEffect:true, k:"gras"});
     if(id === "fizzle") return;
     if(id === null){ addLog("🌿 Entangle overgeslagen."); return; }
     const f = findCre(id);
+    if(!entBaar(f.cr, f.p)){
+      pop(creSel(f.p, f.c), "immuun", "imm");
+      addLog(`🌿 ${icon(f.cr.card.el)} ${kNaam(f.cr.card)} laat zich niet verstrikken. Er gebeurt niets.`, true);
+      render(); return;
+    }
     const n = hasAe(p, "ae_grassx2") ? 2 : 1;               // 🟣 Woekergroei
     const src = it.srcId != null ? findCre(it.srcId) : null;
     const gSrcSel = src ? creSel(src.p, src.c) : null;
@@ -8753,7 +8803,7 @@ async function startTurnSequence(){
   if(S.over) return;
   S.phase = "upkeep"; render();
   turnCry(S.tp);
-  await sleep(FAST ? 0 : 900);
+  await sleep(FAST ? 0 : 1250);
   await upkeepEntangle(S.tp);
   if(S.over) return;
   /* 🌹 Roos groeit niet meer: hij geeft alleen Volle slag. */
@@ -9471,7 +9521,7 @@ function vuurWaarde(p){
   for(const id of fireTargets(p)){
     const f = findCre(id); if(!f) continue;
     if(f.p !== opp(p)){                                 // eigen wezen: offeren = instakill + trek 1
-      best = Math.max(best, offerVuurWaarde(p, f));
+      if(vuurOffert(p, f)) best = Math.max(best, offerVuurWaarde(p, f));
       continue;
     }
     const o = dmgOutcome("vuur", f.cr.card.el, dmg);
@@ -9911,6 +9961,7 @@ function botChoosePlayV2(p){
       return {cardId: cd.id, mode:"fuse", tributeId: vkOff.id, fuseKey: vkFk};
     }
   }
+  if(best) best.sc = bs;
   return best;
 }
 /* Aanvallen kost niets terug: doe ze allemaal, in de beste volgorde. */
@@ -9952,6 +10003,17 @@ function botChoosePlay(p){
   const niet = id => S.botNiet && S.botNiet[id] === S.gTurn;
   let r = botChoosePlay0(p);
   if(r && niet(r.cardId)) r = null;
+  /* Reactief spelen: kaarten in de hand zijn blokkers voor de beurt van de ander. Is deze
+     zet niet echt sterk, dan houdt hij er genoeg achter (twee als de ander iets heeft staan
+     dat kan slaan, anders één) en past hij liever. Dreigt er gevaar, dan geldt dit niet. */
+  if(r && r.sc != null && r.sc < 7 && !inNood(p) && !botInGevaar(p)){
+    const vij = opp(p);
+    const dreigers = P(vij).cols.filter(x => x.cre && !EL[x.cre.card.el].stil).length;
+    const reserve = dreigers ? 2 : 1;
+    const flashNa = P(p).hand.filter(cd => cd.id !== r.cardId && cd.el !== "licht" && EL[cd.el].flash).length;
+    const eigen = P(p).cols.filter(x => x.cre).length;
+    if(flashNa < reserve && eigen > 0) r = null;
+  }
   if(r && r.mode === "spell"){
     const cd = P(p).hand.find(c => c.id === r.cardId);
     if(cd && (!spellZinvol(cd) || !freeSpellCols(p).includes(r.col))){
@@ -10187,19 +10249,32 @@ function botPriority(p){
         nog += atkOf(cr, opp(p));
       }
       const dood = kracht >= P(p).life || nog >= P(p).life || inNood(p);      // dit mag niet doorkomen
-      /* 📖 Een verhaal-tegenstander laat een klap van 1 soms gewoon toe. */
-      if(S.story && p === 1 && kracht <= 1 && !dood && P(p).life > 2 && rnd() < 0.6) return null;
+      /* Blokken of niet? Een klap van 3 of meer houd je altijd tegen, 2 meestal, en 1 vaak,
+         maar die mag je doorlaten als je weinig kaarten hebt: dan zijn je kaarten meer waard
+         dan dat ene leven. Dreigt het dodelijk te worden, dan altijd. */
+      const fl = P(p).hand.filter(cd => cd.el !== "licht" && EL[cd.el].flash && magSpelen(p, cd.id)).length;
+      const wilBlok = dood || kracht >= 3
+        || (kracht === 2 && (fl >= 2 || P(p).life <= 4 || rnd() < 0.5))
+        || (kracht <= 1 && ((fl >= 3 && rnd() < 0.9) || (fl === 2 && rnd() < 0.6) || P(p).life <= 2));
+      if(!wilBlok) return null;
       if(vrij.includes(top.col)){
-        // 1) blocker die immuun is voor de aanvaller
-        const imm = flashKaart(cd => dmgOutcome(att.card.el, cd.el, 1) === "immuun");
-        if(imm) return {cardId: imm.id, col: top.col};
-        // 2) blocker die de aanvaller juist instakillt
-        const kill = flashKaart(cd => EL[cd.el].strong === att.card.el);
-        if(kill) return {cardId: kill.id, col: top.col};
-        // 3) bij levensgevaar: gewoon iets neerzetten, wat dan ook
+        /* De beste blokker: een die de klap overleeft (immuun, of meer levens dan de klap),
+           liefst een die de aanvaller meteen omlegt, en anders de goedkoopste kaart. */
+        let beste = null, bsc = -1e9;
+        for(const cd of P(p).hand){
+          if(cd.el === "licht" || !EL[cd.el].flash || !magSpelen(p, cd.id)) continue;
+          const uit = dmgOutcome(att.card.el, cd.el, kracht);
+          const hp = EL[cd.el].hp || 2;
+          let sc = 0;
+          if(uit === "immuun") sc += 7;
+          else if(typeof uit === "number" && uit < hp) sc += 3;      // hij blijft staan
+          else sc -= 1;                                              // hij gaat eraan, maar de klap is weg
+          if(EL[cd.el].strong === att.card.el) sc += 5;              // en hij legt de aanvaller om
+          sc -= effWaarde(p, cd.el) * 0.35;                          // liever een kaart die je weinig kost
+          if(sc > bsc){ bsc = sc; beste = cd; }
+        }
+        if(beste) return {cardId: beste.id, col: top.col};
         if(dood){
-          const wat = flashKaart(() => true);
-          if(wat) return {cardId: wat.id, col: top.col};
           /* geen snel wezen? dan een lichtkaart die er een neerzet */
           const lk = P(p).hand.find(cd => cd.el === "licht" && (cd.lk === "kuriboh" || cd.lk === "brenger") && lightPlayable(p, cd));
           if(lk) return {cardId: lk.id, col: top.col};
@@ -10345,7 +10420,7 @@ function botChoice(){
       const rest = typeof o === "number" ? f.cr.hp - o * al : (al ? 0 : f.cr.hp);
       if(f.p === vij) sc = al && rest <= 0 ? -30
         : ((o === "kill" || (typeof o === "number" && rest <= o)) ? 6 + f.cr.hp : (o === "immuun" ? -5 : 1 + f.cr.hp * 0.2));
-      else sc = al ? -30 : offerVuurWaarde(p, f);          // 🟣 Brandoffer: instakill + trek een kaart
+      else sc = al ? -30 : (vuurOffert(p, f) ? offerVuurWaarde(p, f) : -20);   // 🟣 Brandoffer: instakill + trek een kaart; anders eigen schade
       if(sc > bs){ bs = sc; best = id; }
     }
     if(u.optional && bs < 0) return null;
@@ -10358,6 +10433,7 @@ function botChoice(){
       if(id === self) continue;                             // jezelf entanglen blokkeert je eigen aanval
       const f = F(id); if(!f) continue;
       let sc = f.p === vij ? 3 + f.cr.hp * 0.3 : -3;
+      if(!entBaar(f.cr, f.p)) sc = -6;                      // 🔥 laat zich niet verstrikken
       if(f.p === vij && f.cr.card.el === "steen") sc += 5;   // dubbele drain
       if((m.eerder || []).includes(id)) sc -= 3.5;           // liever twee verschillende vastzetten
       if(sc > bs){ bs = sc; best = id; }
@@ -10471,7 +10547,7 @@ function vijandBalkPaint(){
       return `<div class="vbrij${S.tp === p ? " aan" : ""}" data-side="${p}"><div class="vbnaam">${naam}</div>`
         + (trio ? trioRij : `<div class="plife hpbalk">${levensBalk(pl.life, Math.max(start, pl.life))}</div>`) + `</div>`;
     };
-    h = rij(1, S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1)) + rij(0, pName(0));
+    h = rij(1, S.story.vijandNaam || L.vechtNaam || L.vijand || pName(1)) + rij(0, "De onverdeelde");
   }
   if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
   document.body.classList.toggle("vbaan", !!h);
@@ -10640,7 +10716,7 @@ function chainDoelen(){
       if(!f || (e.tp != null && (f.p !== e.tp || f.c !== e.tc))) return;
       const nm = it.type === "light" ? "✦ " + LIGHTS[it.lk].name
                : (EL[e.el] ? icon(e.el) + " " + EL[e.el].name : "effect");
-      if(!uit[e.tid]) uit[e.tid] = {door: it.ctrl, wat: nm};
+      if(!uit[e.tid]) uit[e.tid] = {door: it.ctrl, wat: nm, el: it.type === "light" ? null : e.el};
     });
   });
   return uit;
@@ -10745,7 +10821,8 @@ function slotHTML(p, c, hl){
        geen hover-tekst — en dat geldt ook voor je eigen rituelen. */
     sp = `<div class="slot sp mist" data-act="spell" data-p="${p}" data-col="${c}">${MIST_KAART}</div>`;
   } else if(col.spell){
-    sp = `<div class="slot sp${spHl}${dood ? " dood" : ""}${!inMist() && hl.tgts.includes(col.spell.card.id) ? " tgt" : ""}${aeBoosts(p, col.spell.card.el) ? " aeup" : ""}" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${col.spell.card.el}"${col.spell.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(col.spell.card) ? ` data-pvvar="${toonVarKey(col.spell.card)}"` : ""}>${cardFaceHTML(col.spell.card.el, true, col.spell.card)}</div>`;
+    const spGesp = (S.stack || []).some(it => it.type === "play" && it.card && it.card.id === col.spell.card.id) ? " gespeeld" : "";
+    sp = `<div class="slot sp${spHl}${spGesp}${dood ? " dood" : ""}${!inMist() && hl.tgts.includes(col.spell.card.id) ? " tgt" : ""}${aeBoosts(p, col.spell.card.el) ? " aeup" : ""}" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${col.spell.card.el}"${col.spell.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(col.spell.card) ? ` data-pvvar="${toonVarKey(col.spell.card)}"` : ""}>${cardFaceHTML(col.spell.card.el, true, col.spell.card)}</div>`;
   } else {
     sp = `<div class="slot sp${spHl}" data-act="spell" data-p="${p}" data-col="${c}"><div class="ph"></div></div>`;
   }
@@ -10762,8 +10839,9 @@ function slotHTML(p, c, hl){
     const tgt = (zicht && hl.tgts.includes(u.card.id)) ? " tgt" : "";
     const atk = (zicht && hl.atks.includes(u.card.id)) ? " atk" : "";
     const mk = zicht ? (hl.mik || {})[u.card.id] : null;
-    const mik = mk ? " mik" : "";
-    const mikm = mk ? `<div class="mikmerk">🎯 ${mk.wat}</div>` : "";
+    const mik = mk ? " mik" + (mk.el === "vuur" ? " mikvuur" : mk.el === "gras" ? " mikgras" : "") : "";
+    /* 🔥 en 🌿 hebben hun eigen gekleurde gloed; de rest krijgt een klein labeltje. */
+    const mikm = mk && mk.el !== "vuur" && mk.el !== "gras" ? `<div class="mikmerk">${mk.wat}</div>` : "";
     const spent = ((S.phase==="beurt" || S.phase==="battle") && p===S.tp && u.attackedT===S.gTurn) ? " spent" : "";
     const sick = u.played === S.gTurn && S.gTurn === 1, ent = u.ent > 0;
     const stat = (sick||ent||u.web) ? `<div class="stat">${sick?"<span>⏳</span>":""}${ent?`<span>🌿${u.ent>1?u.ent:""}</span>`:""}${u.web?"<span>🕸</span>":""}</div>` : "";
@@ -10783,7 +10861,8 @@ function slotHTML(p, c, hl){
       const poort0 = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
       return `<div class="col${poort0 ? " dicht" : ""}">${vonkMerk}${sp}${cr}${kruis}${rots}${poort0}${bandMerk}</div>`;
     }
-    const valt = (S.stack || []).some(it => it.type === "attack" && it.creId === u.card.id) ? " valtaan" : "";
+    const valt = (S.stack || []).some(it => it.type === "attack" && it.creId === u.card.id) ? " valtaan"
+      : (S.stack || []).some(it => it.type === "play" && it.card && it.card.id === u.card.id) ? " gespeeld" : "";
     cr = `<div class="slot cr${creHl}${tgt}${atk}${mik}${spent}${valt}${aeBoosts(p, u.card.el) ? " aeup" : ""}${trioKracht(p, u.card.el) ? " vonkup" : ""}" data-act="cre" data-p="${p}" data-col="${c}"
       data-pv="${u.card.el}"${u.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(u.card) ? ` data-pvvar="${toonVarKey(u.card)}"` : ""} data-pvhp="${u.hp}" data-pvent="${u.ent}" data-pvatk="${atkOf(u, p)}" data-pvst="${(sick?"s":"")+(ent?"e":"")+(u.attackedT===S.gTurn?"a":"")}">
       ${gloed}${cardFaceHTML(u.card)}${EL[u.card.el].sprite ? `<div class="cresprite${EL[u.card.el].spriteKlein ? " klein" : ""}">${spriteSVG(EL[u.card.el].sprite)}</div>` : ""}${stat}
@@ -14779,11 +14858,11 @@ const STORY = {
       {s:"rocky", groot:true, naam:"…", t:"Hij ziet je."},
       {s:"rocky", groot:true, t:"…Ah."},
       {s:"rocky_boekje", groot:true, naam:"…", t:"Hij haalt een opschrijfboekje tevoorschijn. Het is hetzelfde handschrift als op Rocky's papiertje. Dit is het origineel."},
-      {s:"rocky_boekje", groot:true, t:"Even kijken. Tussen “Zandstorm — schuilen” en “Vreemde vogel — negeren”. Hier. “Elementaal — niet doorlaten.”"},
+      {s:"rocky_boekje", groot:true, t:"Even kijken. Tussen “Zandstorm — schuilen” en “Vreemde vogel — negeren”. Hier. “Onverdeelde — niet doorlaten.”"},
       {s:"rocky_boekje", groot:true, t:"Dat ben jij dan."},
       {s:"rocky", groot:true, naam:"…", t:"Hij klapt het dicht."},
-      {s:"rocky", groot:true, t:"Wat een elementaal precies ís, staat er niet bij. Dat heb ik ook nooit gevraagd. Er staat wat ik moet doen, dat is genoeg."},
-      {s:"rocky", groot:true, t:"Mijn broertje heeft dit van mij. Hij heeft er alleen één blaadje van. Ik daag u uit, waarde elementaal, tot een steenharde strijd."},
+      {s:"rocky", groot:true, t:"Wat een onverdeelde precies ís, staat er niet bij. Dat heb ik ook nooit gevraagd. Er staat wat ik moet doen, dat is genoeg."},
+      {s:"rocky", groot:true, t:"Mijn broertje heeft dit van mij. Hij heeft er alleen één blaadje van. Ik daag u uit, waarde onverdeelde, tot een steenharde strijd."},
       {s:"rocky_boos", groot:true, mu:"w1_gespannen", t:"Maar verwacht niet dat ik zo makkelijk om te praten ben als hij."},
       {s:"rocky_boos", groot:true, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant slaat voortaan met zijn volle gewicht."},
       {s:"rocky_boos", groot:true, t:"🟣 <b>ONWRIKBAARHEID.</b>"},
@@ -14800,7 +14879,7 @@ const STORY = {
       {s:"rocky_stuk", groot:true, mu:"w1_rustig", t:"Verliezen blijkt een familiekwaal."},
       {s:"rocky_stuk", groot:true, naam:"…", t:"Hij kijkt beteuterd naar zijn eigen vuisten."},
       {s:"rocky_stuk", groot:true, t:"Ga maar. Ik moet even zitten. …En die aether. Neem maar mee."},
-      {s:"rocky_stuk", groot:true, t:"Zo'n elementaal staat niet in mijn boekje. Die kreeg ik erbij. Waar hij vandaan komt weet ik niet. Die vraag stond er ook niet in."}
+      {s:"rocky_stuk", groot:true, t:"Zo'n onverdeelde staat niet in mijn boekje. Die kreeg ik erbij. Waar hij vandaan komt weet ik niet. Die vraag stond er ook niet in."}
     ],
     verlies:[
       {s:"rocky", groot:true, mu:"w1_rustig", t:"Ziezo. Dat was set één."},
@@ -14856,11 +14935,11 @@ const STORY = {
         keuze:[{label:"🤝 Afgesproken", ga:"ja"}, {label:"🚪 Nee, bedankt", ga:"nee1"}]}
     ],
     ja:[
-      {s:"nimbus", kleur:"#dfe8f2", t:"Ha! Goed. Zeg dat je een elementaal bent, maar heb dan ook het lef van eentje."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Ha! Goed. Zeg dat je een onverdeelde bent, maar heb dan ook het lef van eentje."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Ik leg er alvast eentje neer in het midden. Niet als voorsprong. Als handtekening."}
     ],
     nee1:[
-      {s:"nimbus_boos", kleur:"#dfe8f2", t:"…Nee? Nee. Nee, zegt de elementaal."},
+      {s:"nimbus_boos", kleur:"#dfe8f2", t:"…Nee? Nee. Nee, zegt de onverdeelde."},
       {s:"nimbus_kip", kleur:"#dfe8f2", t:"TOK. TOK TOK TOK. KIP! Een kip! Vier elementen op zak en niet durven zonder!"},
       {s:"nimbus_boos", kleur:"#dfe8f2", t:"Ik vraag het nog één keer en dan hou ik erover op. Veertig steen tegen veertig steen. Durf je?",
         keuze:[{label:"…vooruit dan", ga:"ja"}, {label:"Nee. Echt niet.", ga:"nee2"}]}
@@ -14983,12 +15062,12 @@ const STORY = {
       {s:"rock1b", naam:"Rocky", t:"Ik dacht dat dit beter zou voelen. Kom nog maar een keer. Ik trek hem wel weer aan."}
     ],
     na:[
-      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", mu:"w1_steenbaas", t:"Baas. Baas, ik moet u iets vertellen. Die elementaal. Is langs mij heen gekomen. Twee keer. En langs Brokko."},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", mu:"w1_steenbaas", t:"Baas. Baas, ik moet u iets vertellen. Die onverdeelde. Is langs mij heen gekomen. Twee keer. En langs Brokko."},
       {s:"rotsbaas", zwart:true, naam:"…", bg:0, t:"Uit het donker rijst iets op dat tot aan het plafond doorloopt. Twee gloeiende ogen draaien traag omlaag."},
       {s:"rotsbaas", zwart:true, reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Zeg dat nog eens."},
       {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"Is langs—"},
       {s:"rotsbaas", zwart:true, reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Niet dát. Het woord."},
-      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"…Elementaal?"},
+      {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"…Onverdeelde?"},
       {s:"rotsbaas", zwart:true, reus:true, naam:"…", bg:0, t:"Het is even heel stil."},
       {s:"rotsbaas", zwart:true, reus:true, naam:"Magnus", bg:0, kleur:"#ff5a3c", t:"Dat heeft niemand hier ooit hardop gezegd. Ga weg, Rocky. Ga naar je broer."},
       {s:"rock1b_zwart", naam:"Rocky", sil:0.5, bg:0, kleur:"#8b96a0", t:"Krijg ik geen—"},
@@ -15120,7 +15199,7 @@ const STORY = {
         "Je gaat dit niet winnen met kracht. Dat weet je zelf ook, anders was je hier niet."
       ],
       laag:["…Hm. Dat had Magnus niet verwacht. Goed. Dan doen we het echt."],
-      jij:["Ga zitten, elementaal. Je hoeft dit niet uit te vechten."] },
+      jij:["Ga zitten, onverdeelde. Je hoeft dit niet uit te vechten."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:6, steen:3, vuur:5, gras:5, water:5},
     aeVij:["ae_stonefull","fu_stone","ae_hp3"], keuzeVij:"steen",
@@ -15989,7 +16068,7 @@ const STORY = {
     intro:[
       {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je loopt op de muziek af. Het is een trompet, en een trommel, en iets dat klapt. Om een rots heen staat een tent. Rood en geel gestreept, met vlaggetjes."},
       {s:null, bg:3, naam:"…", t:"Er staat een bord bij. Er staat CIRCUS op. Verder staat er niks op, want meer hoeft er niet op te staan."},
-      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Iedereen weet dat een elementaal onmogelijk een circus kan weerstaan. Dat is geen zwakte. Dat is gewoon een feit over elementalen, zoals water nat is."},
+      {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Iedereen weet dat een onverdeelde onmogelijk een circus kan weerstaan. Dat is geen zwakte. Dat is gewoon een feit over onverdeelden, zoals water nat is."},
       {s:null, bg:3, naam:"…", kleur:"#ffd45e", t:"Ga je naar binnen, tegen beter weten in?", keuze:[{"label": "🎪 Ja", "ga": "show"}, {"label": "🎪 Ja.", "ga": "show"}]}
     ],
     show:[
@@ -16675,7 +16754,7 @@ const STORY = {
       {s:"spiegelbeeld", groot:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"Er is niks."},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…ga naar huis."},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"Het is jouw stem niet. Het is een stem die je eerder gehoord hebt en je weet even niet waar."},
-      {s:"spiegelbeeld_draai", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…sta op, elementaal. …nog een keer."},
+      {s:"spiegelbeeld_draai", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…sta op, onverdeelde. …nog een keer."},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"De vlakken staan stil en de woorden komen van overal."},
       {s:null, bg:4, naam:"…", kleur:"#c684ff", paars:true, t:"🪞 <b>Ze speelt met jouw krachten.</b> Elke 🟣 aether die jij hebt meegenomen staat vanaf nu ook aan de overkant."},
       {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"🪞 <b>Haar deck is één kaart.</b> Veertig keer ✦ Kloon. Alles wat jij neerzet kan zij ook neerzetten. Staat er niks op het veld, dan kan zij niks."},
@@ -16970,7 +17049,7 @@ const STORY = {
       {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar wijst naar achteren. Daar staat een vitrine die ouder is dan de rest."},
       {s:"vitrine_elementaal", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"Er staat iets in. Het is verschrompeld en grijs, maar je ziet nog vier kleuren, heel vaag. Op het kaartje staat alleen: <i>Elementaal.</i>"},
       {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Die heb ik al heel lang. Ik dacht dat het de laatste was. Daar had ik al een kaartje voor geschreven."},
-      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar haalt dat kaartje ergens uit zichzelf vandaan en houdt het omhoog. <i>Elementaal. Laatste.</i>"},
+      {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"…", kleur:"#e8d6a8", t:"De Verzamelaar haalt dat kaartje ergens uit zichzelf vandaan en houdt het omhoog. <i>Onverdeelde. Laatste.</i>"},
       {s:"verzamelaar_kaartje", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Nu weet ik waar het heen moet."},
       {s:"verzamelaar", groot:true, bg:5, naam:"De Verzamelaar", kleur:"#e8d6a8", t:"Stil blijven staan, dan is het zo gebeurd."},
       {s:null, bg:5, naam:"…", kleur:"#e8d6a8", t:"Alle vitrines gaan tegelijk open, met een zacht klikje."},
@@ -17845,7 +17924,9 @@ function storySkin(w){
   /* Staat er een horizon, dan wordt de achtergrond van het veld doorzichtig zodat je hem
      ziet. Alleen levels met `hzruim` schuiven het veld ook nog kleiner en naar beneden. */
   app.classList.toggle("hzdoor", hzAan);
-  const ruim = hzAan && !!(Lz && Lz.hzruim) && !vrijId;
+  /* Vrij spel krijgt dezelfde opbouw als het verhaal: anders klopt de schaal van het
+     vergezicht niet (te groot, met een zwarte waas onderin). */
+  const ruim = hzAan && !!(Lz && Lz.hzruim);
   app.classList.toggle("hzruim", ruim);
   /* #horizon hangt aan de body en niet in #app, dus die heeft de klasse zelf nodig. */
   document.body.classList.toggle("hzruim", ruim);
@@ -20581,6 +20662,7 @@ function kaartHTML(){
     <div class="kaartkop"><h2>📖 Verhaal</h2>
       <span class="sub" style="color:var(--gold)">${n} van de ${STORY_ORDER.length}${alles ? " · 🔓" : ""}</span>
       <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
+      <button class="obtn b-dim invknop" data-act="btn" data-btn="inventaris" title="Wat je bij je draagt">${pixIcoon("tas")} Inventaris</button>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
     <div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}${hemelAan ? " inhemel" : ""}" id="kaartvlak">
@@ -20674,7 +20756,60 @@ function kaartSleep(){
   box.addEventListener("pointerup", los); box.addEventListener("pointercancel", los); box.addEventListener("pointerleave", los);
   box.addEventListener("click", e => { if(bewogen){ e.stopPropagation(); e.preventDefault(); bewogen = false; } }, true);
 }
+/* 🎒 De inventaris: wat je onderweg hebt meegenomen. Elk voorwerp heeft een korte, wat
+   raadselachtige beschrijving en daaronder in één regel wat het doet. Welke voorwerpen je
+   hebt, hangt af van je keuzes (F); de tekst verandert soms mee met hoe ver je bent.
+   Een eigen tekening per voorwerp komt nog (art/inv-<id>.png); tot dan een pixelicoontje. */
+const keuzeIs = (sleutel, waarde) => (SET.story.keuzes || {})[sleutel] === waarde;
+const INVENTARIS = [
+  {id:"schaal", naam:"Stuk eierschaal", heeft:() => true,
+   tekst:() => "Ooit was dit heel. Aan de binnenkant is het nog warm.", effect:"Geen."},
+  {id:"kees", naam:"Kees", heeft:() => keuzeIs("1-1:kees", "mee") && !storyKlaar("5-2"),
+   tekst:() => "Een steen met een gezichtje. Het gezichtje is niet van jou getekend." + (storyKlaar("1-5") ? " Het lacht nog steeds." : ""),
+   effect:"Je begint elk gevecht in het Steenrijk met 1 leven extra."},
+  {id:"bel", naam:"Belletjes van de Waardin", heeft:() => keuzeIs("2-3:waardin", "door"),
+   tekst:() => storyKlaar("3-6") ? "Ze klinken niet meer." : "Ze klinken nog als je loopt. Niet als je stilstaat.",
+   effect:"Je begint elk gevecht in het Rankenwoud met 1 kaart extra."},
+  {id:"max", naam:"Max", heeft:() => keuzeIs("2-5:max", "tem"),
+   tekst:() => "Hij volgt je. Of hij wil, is nooit gevraagd." + (storyKlaar("3-6") ? " Zijn ogen zijn bijna niet meer paars." : ""),
+   effect:"Een lichtkaart in je deck: al je wezens +1, of als wezen 5 levens en Volle slag."},
+  {id:"kern", naam:"Kern van Maatje", heeft:() => keuzeIs("3-1:maatje", "kern"),
+   tekst:() => storyKlaar("4-5") ? "Koud." : storyKlaar("3-6") ? "Lauw." : "Heet. Klopte nog, twee keer.",
+   effect:"De aether Maatje."},
+  {id:"papier", naam:"Het document", heeft:() => storyKlaar("3-5"),
+   tekst:() => "Papier dat de oven niet haalde. Er staat een tekening op van iemand met vier kleuren in de borst.",
+   effect:"Geen."},
+  {id:"wit", naam:"Het witte ding", heeft:() => keuzeIs("4-2:inkt", "pak"),
+   tekst:() => "Het past precies in de holte van je borst. Je weet niet waarom je dat weet." + (storyKlaar("4-5") ? " Het past steeds beter. Dat is niet goed." : ""),
+   effect:"De eerste klap per gevecht doet hooguit 2."},
+  {id:"zaad", naam:"Het grijze zaadje", heeft:() => keuzeIs("5-2:zaadje", "drink"),
+   tekst:() => "Het was warm. Nu niet meer.", effect:"Een aether-plek extra."}
+];
+const INV_PLEKKEN = 12;
+function invHTML(){
+  const heb = INVENTARIS.filter(v => { try{ return v.heeft(); }catch(e){ return false; } });
+  const sel = heb[Math.min(M.sel || 0, heb.length - 1)] || null;
+  const beeld = v => beeldKlaar("art/inv-" + v.id + ".png")
+    ? `<img src="art/inv-${v.id}.png" alt="" draggable="false">` : pixIcoon("inv_" + v.id);
+  const vakjes = [];
+  for(let i = 0; i < INV_PLEKKEN; i++){
+    const v = heb[i];
+    vakjes.push(v ? `<button class="invvak${v === sel ? " aan" : ""}" data-act="btn" data-btn="invsel" data-i="${i}" title="${v.naam}">${beeld(v)}</button>`
+                  : `<div class="invvak leeg"></div>`);
+  }
+  return `<div class="ovbox invbox">
+    <div class="invkop"><h2>${pixIcoon("tas")} Inventaris</h2>
+      <span class="sub">${heb.length} ${heb.length === 1 ? "voorwerp" : "voorwerpen"}</span>
+      <button class="obtn b-dim" data-act="btn" data-btn="invterug">Terug naar de kaart</button></div>
+    <div class="invrij">
+      <div class="invraster">${vakjes.join("")}</div>
+      <div class="invinfo">${sel ? `<div class="invgroot">${beeld(sel)}</div>
+        <h3>${sel.naam}</h3><p class="invtekst">${sel.tekst()}</p><p class="inveffect">${sel.effect}</p>`
+        : `<p class="invtekst">Je hebt niets bij je.</p>`}</div>
+    </div></div>`;
+}
 function storyHTML(){
+  if(M.inv) return invHTML();
   if(!M.lijst) return kaartHTML();
   /* Stijl C: links de werelden, rechts de levels van die wereld, en daaronder wie je daar
      tegenkomt. Wijs je een level aan, dan verandert het onderste venster mee. */
@@ -22848,6 +22983,9 @@ function onBtn(btn, el, fromAction){
       break;
     case "story": M = kaartM(); storySkin(0); render(); break;
     case "storylijst": M = {type:"story", lijst:true}; render(); break;
+    case "inventaris": M = {type:"story", inv:true, sel:0, hemel:M && M.hemel}; render(); break;
+    case "invsel": if(M && M.inv){ M.sel = +(el.dataset.i || 0); render(); } break;
+    case "invterug": M = kaartM(); render(); break;
     /* 🌥 De trap: de eerste keer eerst Nimbus, daarna meteen omhoog. */
     case "hemelop":
       if(!SET.story.trapGezien && STORY["5-1"] && STORY["5-1"].trap){ storySkin(5); praatStart("5-1", "trap"); }
@@ -23560,7 +23698,17 @@ const PIXIC = {
   rol:[".#########.","#.#.......#",".#.#####.#.",".#.......#.",".#.#####.#.",".#.......#.",".#.####..#.",".#.......#.","#.#.......#",".#########."],
   hart:[".##.##.","#######","#######",".#####.","..###..","...#..."],
   ster:["....#....","...###...","#########",".#######.","..#####..","..##.##..",".##...##."],
-  slot:["..###..",".#...#.",".#...#.","#######","###.###","###.###","#######"]
+  slot:["..###..",".#...#.",".#...#.","#######","###.###","###.###","#######"],
+  tas:["...###...","..#...#..","..#...#..",".#######.","#########","#...#...#","#..###..#","#...#...#","#.......#",".#######."],
+  /* De voorwerpen in de inventaris, tot er echte tekeningen zijn. */
+  inv_schaal:["....##...","...####..","..##..##.",".##....#.",".#......#","#.......#","#....#.##","##..###..",".####...."],
+  inv_kees:["..#####..",".#######.","##.###.##","#########","##.###.##","###...###",".#######.","..#####.."],
+  inv_bel:["...#.....","..###..#.",".#####.#.",".#####..#","#######.#","#######..","...#..###","......###","......###"],
+  inv_max:["#.......#","##.....##","###...###","#########","#.##.##.#","#########",".#######.","..#####..","...###..."],
+  inv_kern:["...###...",".#######.",".##.#.##.","###...###","##..#..##","###...###",".##.#.##.",".#######.","...###..."],
+  inv_papier:["#######..","#.....##.","#.###..##","#.......#","#.#####.#","#.......#","#.####..#","#.......#","#########"],
+  inv_wit:["....#....","...###...","..#####..",".###.###.","#########",".###.###.","..#####..","...###...","....#...."],
+  inv_zaad:["...##....","..####...",".######..",".#######.","########.","########.",".######..","..####...","...##...."]
 };
 /* Sterren als pixeltjes: het ★-teken bestaat niet in het pixelfont. */
 function sterPix(n, max){
