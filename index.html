@@ -2114,6 +2114,12 @@ body.pvuitleg #ptbel{display:none !important}
 .vkol.opdracht .gc{box-shadow:0 0 0 2px #e8c67a, 0 0 12px rgba(232,198,122,.5); border-radius:4px}
 .vopd{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; color:#8a7a4a; text-align:center; margin-bottom:4px}
 .vopd.aan{color:#ffd447; text-shadow:0 0 6px rgba(255,212,71,.6)}
+.vopd{font-size:.62rem; color:#e8c67a}
+/* Het aantal dat de opdracht vraagt: dat balkje en het getal pulseren goud. */
+.vnotch.opdoel{animation:opdoel 1.1s ease-in-out infinite; position:relative; z-index:1}
+.vgetal.opdoel{animation:opdoelg 1.1s ease-in-out infinite}
+@keyframes opdoel{0%,100%{box-shadow:0 0 0 1px #e8c67a, 0 0 4px rgba(255,212,71,.4)}50%{box-shadow:0 0 0 2px #ffd447, 0 0 14px rgba(255,212,71,.95); background:#ffd447}}
+@keyframes opdoelg{0%,100%{color:inherit; text-shadow:none}50%{color:#ffd447; text-shadow:0 0 10px rgba(255,212,71,.9)}}
 .vkol{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px}
 .vkol .vnaam{font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--dim)}
 
@@ -3130,6 +3136,7 @@ body.venster .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospa
   letter-spacing:.08em; line-height:1.1;
   background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(4px 4px 0 var(--vnd)) drop-shadow(0 0 18px var(--vglans))}
+.vversie{font-family:"VT323",ui-monospace,monospace; font-size:.9rem; letter-spacing:.12em; opacity:.45; margin-top:6px}
 body.venster .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.42rem,1.2vw,.62rem); letter-spacing:.3em;
   color:var(--vsub); margin-top:14px; text-shadow:2px 2px 0 var(--vnd)}
 body.venster .vhome .vn, body.venster .vlevels .vn, body.venster .vmenu .vn{text-align:left}
@@ -9220,8 +9227,11 @@ function opdrachtOk(st){
   const mix = mixOpdrachtOk(o, st.mix);
   return {ae, lt, mix, ok:ae && lt && mix};
 }
-const mixOpdrachtOk = (o, mix) => !o || !o.mix || !mix || (mix[o.mix.plus] >= o.mix.doelPlus && mix[o.mix.min] <= o.mix.doelMin);
-const mixOpdrachtTekst = m => `${icon(m.plus)} +${m.n} en ${icon(m.min)} −${m.n}`;
+/* ★ De deckmix van de opdracht: twee elementen met elk een eigen aantal (−3 tot +3 van de
+   basis, ook 0 kan). Precies dat aantal moet in je deck. */
+const mixDoelen = m => (m && Array.isArray(m.doelen)) ? m.doelen : [];
+const mixOpdrachtOk = (o, mix) => !o || !o.mix || !mix || mixDoelen(o.mix).every(x => mix[x.el] === x.doel);
+const mixOpdrachtTekst = m => mixDoelen(m).map(x => `${x.doel}× ${icon(x.el)}`).join(" en ");
 function opdrachtTekst(o){
   if(!o || (!o.ae && !o.lt && !o.mix)) return "verslagen";
   const d = [];
@@ -11653,14 +11663,15 @@ function overlayHTML(){
           const g = upg[el], echt = upgEcht(upg, mix, el);
           const nep = {id:-1, el, owner:0}; if(echt > 0) nep.var = UPG_VAN[el];
           const notches = [];
+          const opDoel = u0.opdracht && u0.opdracht.mix ? (mixDoelen(u0.opdracht.mix).find(x => x.el === el) || {}).doel : undefined;
           for(let v = hoog; v >= laag; v--){
             const kl = v === n ? "hier" : (v > b && v <= n ? "erbij" : (v < b && v >= n ? "eraf" : (v === b ? "basis" : "")));
-            notches.push(`<div class="vnotch ${kl}" data-act="voormix" data-el="${el}" data-v="${v}" title="${v}×"></div>`);
+            notches.push(`<div class="vnotch ${kl}${v === opDoel ? " opdoel" : ""}" data-act="voormix" data-el="${el}" data-v="${v}" title="${v}×${v === opDoel ? " · ster 1" : ""}"></div>`);
           }
           const d = u0.vrij ? 0 : n - b;
-          const om = u0.opdracht && u0.opdracht.mix, isOp = om && (om.plus === el || om.min === el);
-          const opOk = isOp && (om.plus === el ? n >= om.doelPlus : n <= om.doelMin);
-          const opLabel = isOp ? `<div class="vopd${opOk ? " aan" : ""}">★ ${om.plus === el ? "+" : "−"}${om.n}</div>` : "";
+          const opx = u0.opdracht && u0.opdracht.mix ? mixDoelen(u0.opdracht.mix).find(x => x.el === el) : null, isOp = !!opx;
+          const opOk = isOp && n === opx.doel;
+          const opLabel = isOp ? `<div class="vopd${opOk ? " aan" : ""}">★ ${opx.doel}×</div>` : "";
           return `<div class="vkol${isOp ? " opdracht" : ""}">${opLabel}
             <div class="vupg ${g != null ? "gezet" : ""} ${open ? "" : "dicht"}"
                  ${open ? `data-act="voorupg" data-el="${el}"` : ""}
@@ -11669,7 +11680,7 @@ function overlayHTML(){
             <div class="gc">${cardFaceHTML(nep)}</div>
             <div class="vteller">
               <button class="vknop" data-act="voormix" data-el="${el}" data-v="${n-1}" ${n-1 < laag ? "disabled" : ""}>&minus;</button>
-              <div class="vgetal">${n}${d ? `<span class="vdelta ${d>0?"op":"neer"}">${d>0?"+":""}${d}</span>` : ""}</div>
+              <div class="vgetal${isOp ? " opdoel" : ""}">${n}${d ? `<span class="vdelta ${d>0?"op":"neer"}">${d>0?"+":""}${d}</span>` : ""}</div>
               <button class="vknop" data-act="voormix" data-el="${el}" data-v="${n+1}" ${n+1 > hoog ? "disabled" : ""}>+</button>
             </div>
             <div class="vslider">${notches.join("")}</div>
@@ -12186,6 +12197,8 @@ function shareHTML(){
 /* ⌂ Het homescreen: de titel, twee grote knoppen en vier kleine. Multiplayer en Bots klappen
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
+/* Zo zie je in het startscherm meteen welke versie er online staat. */
+const ELEMENTAAL_VERSIE = "9 okt · e";
 function startHTML(){
   const open = HOME.open;
   const opPlek = SET.slot != null;
@@ -12209,7 +12222,7 @@ function startHTML(){
     </div>` : "";
   const nPlek = SET.slots.filter(Boolean).length;
   return `<div class="vhome">
-    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
+    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div></div>
     <div class="vhrij">
       <div class="vn vhlijst vlijst">
         ${LIVE.resume ? vr("resumelive", `Terug naar room ${LIVE.resume.code}`, "", "") : ""}
@@ -15385,6 +15398,8 @@ const STORY = {
     varianten:{
       kees:{
         grensVij:null, grensKees:false,
+        /* Hij heeft niks meer te verliezen: al zijn steen is rots geworden. */
+        deckVij:{rots:10, vuur:5, gras:5, water:4},
         intro:[
           {s:null, naam:"…", bg:0, kleur:"#6f83a6", mu:"w1_terugkeer", t:"Zwart. Voetstappen. Stap. Stap."},
           {s:"rock1b", sil:0, loop:true, naam:"…", bg:0, t:"Een pikzwart silhouet schuift door het beeld. Het lacht niet."},
@@ -20350,26 +20365,50 @@ async function storyVoorbereiding(L, id){
   const lvId = id || (S.story && S.story.id);
   if(!SET.story.opdrachten || typeof SET.story.opdrachten !== "object") SET.story.opdrachten = {};
   const oudO = SET.story.opdrachten[lvId];
-  const geldig = oudO && (!oudO.ae || keus.indexOf(oudO.ae) >= 0) && (!oudO.lt || lkeus.indexOf(oudO.lt) >= 0);
+  /* De opdracht van de levels ervoor en erna (ook als die al gewonnen zijn): daar mag deze
+     niet op lijken. Zelfde aether, zelfde lichtkaart of zelfde deckmix telt als hetzelfde. */
+  if(!SET.story.opdrachtLog || typeof SET.story.opdrachtLog !== "object") SET.story.opdrachtLog = {};
+  const oi = STORY_ORDER.indexOf(lvId);
+  const buren = [-1, 1].map(d => { let j = oi + d; while(j >= 0 && j < STORY_ORDER.length && !STORY[STORY_ORDER[j]]) j += d;
+    const bid = STORY_ORDER[j]; return bid ? (SET.story.opdrachten[bid] || SET.story.opdrachtLog[bid]) : null; }).filter(Boolean);
+  const mixSleutel = m => mixDoelen(m).map(x => x.el + (x.d >= 0 ? "+" : "") + x.d).sort().join(",");
+  const zelfdeMix = (a, b) => !!(a && b && mixDoelen(a).length && mixSleutel(a) === mixSleutel(b));
+  const botst = o => buren.some(b => (o.ae && o.ae === b.ae) || (o.lt && o.lt === b.lt) || zelfdeMix(o.mix, b.mix));
+  const zonder = (lijst, weg) => { const r = lijst.filter(x => !weg.includes(x)); return r.length ? r : lijst; };
+  const geldig = oudO && (!oudO.ae || keus.indexOf(oudO.ae) >= 0) && (!oudO.lt || lkeus.indexOf(oudO.lt) >= 0) && !botst(oudO);
   S.story.opdracht = geldig ? {ae:oudO.ae || null, lt:oudO.lt || null, mix:oudO.mix || null}
-    : {ae:keus.length >= 2 ? trek(keus) : null,
-       lt:(lkeus.length >= 2 && ltMax >= 3) ? trek(lkeus) : null, mix:null};
-  /* ★ En een deckmix: bij één element +1 tot +3, bij een ander evenveel eraf. De min komt
-     nooit op het element van de aether die bij de opdracht hoort. */
-  const mixGeldig = m => m && basis && !vrijD && ORDER.includes(m.plus) && ORDER.includes(m.min) && m.plus !== m.min
-    && m.n >= 1 && m.n <= MIX_SPEEL && basis[m.min] - m.n >= 0;
+    : {ae:keus.length >= 2 ? trek(zonder(keus, buren.map(b => b.ae))) : null,
+       lt:(lkeus.length >= 2 && ltMax >= 3) ? trek(zonder(lkeus, buren.map(b => b.lt))) : null, mix:null};
+  /* ★ En een deckmix: twee elementen, elk met een eigen willekeurig aantal (van −3 tot +3
+     ten opzichte van de basis; 0 mag ook, maar niet allebei). Onder de basis komt nooit het
+     element van de aether die bij de opdracht hoort. */
+  const aeEl = S.story.opdracht.ae && AETHERS[S.story.opdracht.ae] ? AETHERS[S.story.opdracht.ae].el : null;
+  const mixGeldig = m => m && basis && !vrijD && mixDoelen(m).length === 2
+    && mixDoelen(m).every(x => ORDER.includes(x.el) && x.doel === basis[x.el] + x.d && Math.abs(x.d) <= MIX_SPEEL && x.doel >= 0 && !(x.el === aeEl && x.d < 0))
+    && mixDoelen(m)[0].el !== mixDoelen(m)[1].el;
   if(!mixGeldig(S.story.opdracht.mix)){
     S.story.opdracht.mix = null;
     if(basis && !vrijD){
-      const n = 1 + Math.floor(Math.random() * MIX_SPEEL);
-      const aeEl = S.story.opdracht.ae && AETHERS[S.story.opdracht.ae] ? AETHERS[S.story.opdracht.ae].el : null;
-      const plus = trek(ORDER.slice());
-      const minnen = ORDER.filter(e => e !== plus && e !== aeEl && basis[e] - n >= 0);
-      if(minnen.length){ const min = trek(minnen);
-        S.story.opdracht.mix = {plus, min, n, doelPlus:basis[plus] + n, doelMin:basis[min] - n}; }
+      const maak = () => {
+        const els = ORDER.slice().sort(() => Math.random() - .5).slice(0, 2);
+        const doelen = els.map(el => {
+          const laag = el === aeEl ? 0 : -Math.min(MIX_SPEEL, basis[el]);
+          const d = laag + Math.floor(Math.random() * (MIX_SPEEL - laag + 1));
+          return {el, d, doel:basis[el] + d};
+        });
+        return {doelen};
+      };
+      let m = null;
+      for(let i = 0; i < 40; i++){
+        const k = maak();
+        if(mixDoelen(k).every(x => x.d === 0)) continue;
+        m = k; if(!buren.some(b => zelfdeMix(k, b.mix))) break;
+      }
+      S.story.opdracht.mix = m;
     }
   }
   SET.story.opdrachten[lvId] = Object.assign({}, S.story.opdracht);
+  SET.story.opdrachtLog[lvId] = Object.assign({}, S.story.opdracht);
   saveSet();
   if(!keus.length && !lkeus.length && !basis) return;
   S.story.mixBasis = basis ? Object.assign({}, basis) : null;
@@ -20395,8 +20434,18 @@ async function storyVoorbereiding(L, id){
      De rest vul je aan met wat je vorige keer koos. */
   const opd = S.story.opdracht || {};
   if(basis && !vrijD && opd.mix){
+    /* De twee elementen van de opdracht op hun aantal; wat er dan te veel of te weinig is,
+       gaat gelijk verdeeld over de andere twee. */
     ORDER.forEach(el => mix[el] = basis[el]);
-    mix[opd.mix.plus] = opd.mix.doelPlus; mix[opd.mix.min] = opd.mix.doelMin;
+    let saldo = 0;
+    mixDoelen(opd.mix).forEach(x => { mix[x.el] = x.doel; saldo += x.d; });
+    const rest = ORDER.filter(el => !mixDoelen(opd.mix).some(x => x.el === el));
+    let i = 0, veilig = 0;
+    while(saldo !== 0 && veilig++ < 20){
+      const el = rest[i++ % rest.length], stap = saldo > 0 ? -1 : 1;
+      if(Math.abs(mix[el] + stap - basis[el]) > MIX_SPEEL) continue;
+      mix[el] += stap; saldo += stap;
+    }
   }
   const ltN = {};
   const oudL = (SET.story && SET.story.ltN) || {};
