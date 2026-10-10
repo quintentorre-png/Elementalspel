@@ -76,6 +76,7 @@ body.logopen #log{display:block; flex:1 1 0; min-height:0; overflow-y:auto; font
   transition:filter .15s, transform .1s;
 }
 .abtn:hover{filter:brightness(1.25)} .abtn:active{transform:translateY(1px)}
+.abtn.keteneind{border-color:#b08cff !important; color:#efe4ff !important; background:linear-gradient(180deg,#4a2f74,#2a1a44) !important}
 .abtn.primary{border-color:var(--gold); color:#f4e8c8;
   background:linear-gradient(180deg,#59491f,#33290f);
   box-shadow:0 0 18px rgba(201,168,106,.28), inset 0 1px 0 rgba(255,255,255,.1); animation:btnpulse 1.6s ease-in-out infinite}
@@ -265,6 +266,89 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
 @keyframes tutnee{0%,100%{transform:translateX(0)}
   25%{transform:translateX(-9px)}60%{transform:translateX(8px)}}
 @media (max-width:900px), (pointer:coarse){ #tutpop .tuttxt{font-size:.95rem} }
+/* ===== 🎓 De tutorial in 1-1: schermen, pop-ups en highlights ===== */
+/* Scherm: vult het beeld en zet het spel stil. */
+#tutscherm{position:fixed; inset:0; z-index:460; display:none; align-items:center; justify-content:center;
+  padding:16px; background:rgba(5,8,12,.86)}
+#tutscherm.aan{display:flex; animation:tsIn .25s ease-out}
+@keyframes tsIn{from{opacity:0}to{opacity:1}}
+#tutscherm .tsdoos{width:min(640px,100%); max-height:calc(100vh - 32px); overflow:auto; border:3px solid var(--gold);
+  border-radius:6px; background:#141a20; color:var(--ink); padding:22px 24px 18px; text-align:center;
+  box-shadow:0 12px 50px rgba(0,0,0,.75)}
+#tutscherm .tskop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.8rem; color:var(--gold);
+  letter-spacing:.08em; margin-bottom:16px; line-height:1.5}
+#tutscherm p{font-size:1.02rem; line-height:1.5; margin:8px 0}
+#tutscherm .tskaarten{display:flex; gap:10px; justify-content:center; margin:6px 0 14px; flex-wrap:wrap}
+#tutscherm .tskaart{width:86px; height:120px; position:relative; flex:0 0 auto}
+#tutscherm .tsbord{display:flex; flex-direction:column; gap:6px; align-items:center; margin:4px 0 14px}
+#tutscherm .tsrij{display:flex; gap:6px; align-items:center}
+#tutscherm .tslab{width:78px; text-align:right; font-size:.72rem; color:var(--muted); margin-right:6px}
+#tutscherm .tsvak{width:44px; height:58px; border:2px dashed #3d4a58; border-radius:4px; display:flex;
+  align-items:center; justify-content:center; font-size:.7rem; color:#5d6b7a}
+#tutscherm .tsrij.onder .tsvak{border-color:#8a7440; color:#c9a86a}
+#tutscherm .tsleven{display:flex; gap:8px; align-items:center; font-size:.72rem; color:var(--muted)}
+#tutscherm .tsleven i{display:block; width:150px; height:10px; border:2px solid #2c3640; background:linear-gradient(90deg,#3f9b52,#56c06a)}
+#tutscherm .tscirkel{width:min(230px,60vw); margin:0 auto 10px}
+#tutscherm .tscirkel img, #tutscherm .tscirkel svg{width:100%; height:auto; display:block}
+#tutscherm .tswaarom{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; text-align:left; margin:6px 0 12px}
+#tutscherm .tswr{display:flex; gap:10px; align-items:center; font-size:.9rem; line-height:1.35}
+#tutscherm .tsregels{display:flex; flex-direction:column; gap:4px; font-size:.95rem; border-top:2px solid #26303a; padding-top:10px}
+#tutscherm .tsknoppen{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+.tsok, .tpok{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.52rem; padding:12px 18px;
+  border:3px solid var(--gold); border-radius:4px; background:linear-gradient(180deg,#59491f,#33290f);
+  color:#f4e8c8; cursor:pointer}
+.tsok:hover, .tpok:hover{filter:brightness(1.2)}
+.tutweg{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem; padding:10px 12px;
+  border:2px solid var(--line); border-radius:4px; background:#1c242c; color:var(--muted); cursor:pointer}
+.tutweg:hover{color:var(--ink); border-color:var(--gold-soft)}
+#tutwegknop{position:fixed; left:318px; bottom:12px; z-index:300; opacity:.75}
+@media (max-width:900px){ #tutwegknop{left:12px} }
+#tutwegknop:hover{opacity:1}
+/* Een plaatje dat er (nog) niet is: dan de twee symbolen. */
+.tbeeld{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto}
+.tbeeld img{max-width:100%; display:block; image-rendering:pixelated}
+.tbeeld .tterug{display:none}
+.tbeeld.leeg .tterug{display:inline-flex; align-items:center; gap:3px}
+.tbeeld.waarom{width:64px; height:64px; border:2px solid #2c3640; border-radius:4px; background:#0e1318; overflow:hidden}
+.tbeeld.waarom img{width:100%; height:100%; object-fit:cover}
+.tbeeld.waarom .tterug{font-size:1.15rem}
+.tbeeld.waarom .tterug b{color:var(--gold); font-size:.9rem}
+.tbeeld.cirkel{width:100%}
+/* Pop-up: vast aan iets op het bord. Het bord erachter doet niets tot je OK zegt. */
+#tutvang{position:fixed; inset:0; z-index:440; display:none; background:rgba(4,7,10,.32)}
+#tutvang.aan{display:block}
+#tutpop2{position:fixed; z-index:450; width:min(320px,86vw); display:none; border:3px solid var(--gold);
+  border-radius:6px; background:#141a20; color:var(--ink); padding:14px 16px 12px; box-shadow:0 8px 30px rgba(0,0,0,.7)}
+#tutpop2.aan{display:block; animation:tsIn .2s ease-out}
+#tutpop2 .tptxt{font-size:.98rem; line-height:1.45}
+#tutpop2 .tpbeeld{display:flex; justify-content:center; margin-bottom:10px}
+#tutpop2 .tpbeeld .tbeeld.waarom{width:120px; height:120px}
+#tutpop2 .tpbeeld .tbeeld.waarom .tterug{font-size:2.2rem}
+#tutpop2 .tpbeeld .tbeeld.waarom .tterug b{font-size:1.6rem}
+#tutpop2 .tpok{display:block; margin:12px 0 0 auto; padding:9px 16px}
+.tutwijs{position:relative; z-index:445 !important; outline:3px solid var(--gold); outline-offset:3px;
+  animation:tutPuls 1.1s ease-in-out infinite}
+.tutwijs.rood{outline-color:#ff5a3c}
+/* Highlight: alleen wat je nu moet doen licht op, de rest is donker en doet niets. */
+body.tutdim .hcard:not(.tuthl), body.tutdim .slot:not(.tuthl), body.tutdim #actions .abtn:not(.tuthl){
+  filter:brightness(.42) saturate(.55); transition:filter .2s}
+body.tutdim .hcard:not(.tuthl), body.tutdim #actions .abtn:not(.tuthl){pointer-events:none}
+.tuthl{position:relative; z-index:30; outline:3px solid #ffd76a; outline-offset:3px; animation:tutPuls 1s ease-in-out infinite}
+@keyframes tutPuls{0%,100%{box-shadow:0 0 0 0 rgba(255,215,106,.0)} 50%{box-shadow:0 0 18px 4px rgba(255,215,106,.55)}}
+#tutlabel{position:fixed; z-index:320; display:none; pointer-events:none; font-family:"Press Start 2P",ui-monospace,monospace;
+  font-size:.5rem; padding:7px 9px; border:2px solid #ffd76a; border-radius:4px; background:#2a2108; color:#ffe9a8;
+  white-space:nowrap; box-shadow:0 4px 14px rgba(0,0,0,.6)}
+#tutlabel.aan{display:block}
+#tutlabel.nee{animation:tutnee .4s ease-out 1}
+/* De lichtbalk: een aanval gaat recht vooruit, door zijn eigen kolom. */
+#tutbaan{position:fixed; z-index:25; display:none; pointer-events:none; border-radius:6px;
+  background:linear-gradient(0deg, rgba(255,215,106,.32), rgba(255,215,106,.06)); box-shadow:0 0 22px rgba(255,215,106,.35)}
+#tutbaan.aan{display:block; animation:tutBaan 1.4s ease-in-out infinite}
+#tutbaan.knip{animation:tutKnip .5s ease-out 2}
+@keyframes tutBaan{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes tutKnip{0%,100%{opacity:1}50%{opacity:.1}}
+@media (max-width:900px), (pointer:coarse){
+  #tutscherm .tswaarom{grid-template-columns:1fr} #tutscherm .tskaart{width:64px; height:90px} }
 /* Seraf: wit licht, en een beeld dat niet helemaal stil blijft liggen. */
 #praatbel.hard .pbbel{border-width:4px; border-color:#ffe08a; color:#fffdf2; background:#1a1408;
   font-size:1.5rem; letter-spacing:.14em; text-align:center; line-height:1.5;
@@ -3662,7 +3746,14 @@ const AETHERS = {
   ae_fire6:  {el:"vuur", name:"Verzengende Woede", kind:"passief"},
   ae_stonefull:{el:"steen", name:"Onwrikbaar", kind:"passief"},
   ae_grassx2:{el:"gras", name:"Woekergroei", kind:"passief"},
-  ae_hp3:    {el:null, name:"Oerkracht", kind:"passief"},
+  /* 🟣 Oerkracht zoals De Eerste hem heeft: je kiest het element zelf. Niet meer te koop;
+     wie hem vroeger kocht, houdt hem. */
+  ae_hp3:    {el:null, name:"Oerkracht", kind:"passief", verhaal:true},
+  /* 🟣 De vier stukken van de Oerkracht. Elke baas laat die van zijn element achter. */
+  ae_oer_vuur: {el:"vuur",  name:"Oervuur",  kind:"passief"},
+  ae_oer_water:{el:"water", name:"Oerwater", kind:"passief"},
+  ae_oer_gras: {el:"gras",  name:"Oergras",  kind:"passief"},
+  ae_oer_steen:{el:"steen", name:"Oersteen", kind:"passief"},
   ae_graf:   {el:null, name:"Eeuwige Terugkeer", kind:"passief"},
   fu_water:  {el:"water", name:"Dieptestroom", kind:"fusie", fuse:{speed:"flash"}},
   fu_fire:   {el:"vuur", name:"Assekern", kind:"fusie", fuse:{speed:"flash"}},
@@ -3915,6 +4006,10 @@ const AETHER_TEKST = {
   ae_stonefull: "Je 🪨 hebben {Volle slag}.",
   ae_grassx2:   "Je 🌿 {verstrikt} met <b>2</b> tokens in plaats van 1.",
   ae_hp3:       "Kies bij de start een element. Je wezens van dat element komen binnen met <b>+4</b> levens.",
+  ae_oer_vuur:  "Je 🔥 wezens komen binnen met <b>+4</b> levens.",
+  ae_oer_water: "Je 💧 wezens komen binnen met <b>+4</b> levens.",
+  ae_oer_gras:  "Je 🌿 wezens komen binnen met <b>+4</b> levens.",
+  ae_oer_steen: "Je 🪨 wezens komen binnen met <b>+4</b> levens.",
   ae_graf:      "Kies bij de start een kaart uit je deck (geen ✦). Einde van je beurt: {roep|roepop} er één van die soort {op|roepop} uit je graf.",
   fu_water:     "{Fusie} 💧: trek <b>1</b>, en speel deze kaart daarna gewoon.",
   fu_fire:      "{Fusie} 🔥: <b>2</b> schade aan elk vijandelijk wezen. Met Verzengende Woede krijgt één ervan naar keuze <b>5</b>.",
@@ -4783,7 +4878,8 @@ function rotsMerkBij(){
   const merken = [0, 1].map(p => ({p, c: Math.floor(rnd() * 5)}));
   /* 5-4: het gezicht van Magnus laat het aan jouw kant twee keer zo vaak vallen. Zijn eigen
      kant krijgt gewoon één plek. */
-  if(S.story.rotsDubbel) [0].forEach(p => {
+  /* 1-5, fase 2: twee per kant. */
+  if(S.story.rotsDubbel || S.story.rotsTwee) (S.story.rotsTwee ? [0, 1] : [0]).forEach(p => {
     const al = merken.find(m => m.p === p).c;
     const rest = [0,1,2,3,4].filter(c => c !== al);
     merken.push({p, c: rest[Math.floor(rnd() * rest.length)]});
@@ -6365,6 +6461,7 @@ const AETHER_BEELD = {
   ae_watercycle:"art/aether-getijdenstroom.png", ae_offer:"art/aether-brandoffer.png",
   ae_fire6:"art/aether-woede.png", ae_stonefull:"art/aether-onwrikbaar.png",
   ae_grassx2:"art/aether-woekergroei.png", ae_hp3:"art/aether-oerkracht.png",
+  ae_oer_vuur:"art/aether-oervuur.png", ae_oer_water:"art/aether-oerwater.png", ae_oer_gras:"art/aether-oergras.png", ae_oer_steen:"art/aether-oersteen.png",
   ae_graf:"art/aether-terugkeer.png", fu_water:"art/aether-dieptestroom.png",
   fu_fire:"art/aether-assekern.png", fu_stone:"art/aether-bergrug.png",
   fu_grass:"art/aether-wurgranken.png", ae_hemel:"art/aether-hemelschoon.png", ae_lichtval:"art/aether-lichtval.png",
@@ -6636,17 +6733,11 @@ async function chooseCre(p, ids, prompt, optional, meta){
   if(!ids.length) return null;
   /* In de tutorial wijzen we de speler naar de overkant: zichzelf entanglen is een
      leerzame fout die de les blokkeert. */
-  if(p === 0){
-    const tst = tutStap();
-    if(tst && tst.doel === "vij"){
-      let vij = ids.filter(id => { const f = findCre(id); return f && f.p === 1; });
-      /* Staat er meer dan één, dan wijst de les de goede aan. */
-      if(tst.doelCol != null){
-        const hier = vij.filter(id => findCre(id).c === tst.doelCol);
-        if(hier.length) vij = hier;
-      }
-      if(vij.length){ ids = vij; optional = false; }
-    }
+  let tutDoel = false;
+  if(p === 0 && tutAan()){
+    await tutPunt("doel:" + ((meta && meta.k) || ""));
+    const goed = tutDoelFilter(ids);
+    if(goed){ ids = goed; optional = false; tutDoel = true; }
   }
   const selfId = meta && meta.selfId != null ? meta.selfId : null;
   // Principe: gedwongen je eigen bord targeten hoeft nooit — dan wordt de keuze optioneel.
@@ -6657,6 +6748,7 @@ async function chooseCre(p, ids, prompt, optional, meta){
   await ensureHolder(p);
   const gekozen = await waitUI("choice", {p, kind:"cre", valid:ids, prompt, optional, meta});
   if(gekozen != null && gekozen !== "cancel" && ids.includes(gekozen)) toonDoel(p, gekozen);
+  if(tutDoel && ids.includes(gekozen)) tutKlaarStap("doel", gekozen);
   return gekozen;
 }
 /* ✦ Kloon mag elke kaart op het veld kopiëren: creatures en rituelen, van allebei. */
@@ -6693,8 +6785,16 @@ async function chooseOpt(p, prompt, opts){
 }
 async function chooseSlot(p, slots, prompt, cancellable, meta){
   if(!slots || !slots.length){ addLog("Geen geldige plek — die stap vervalt."); return null; }
+  let tutPlek = false;
+  if(p === 0 && tutAan()){
+    await tutPunt("plek");
+    const st = tutStap();
+    if(st && st.plek != null && slots.some(x => x.c === st.plek)){ slots = slots.filter(x => x.c === st.plek); tutPlek = true; }
+  }
   await ensureHolder(p);
-  return await waitUI("slot", {p, valid:slots, prompt, cancellable, meta});
+  const v = await waitUI("slot", {p, valid:slots, prompt, cancellable, meta});
+  if(tutPlek && v && v !== "cancel") tutKlaarStap("plek", v.c);
+  return v;
 }
 
 /* ================= CHAIN / STACK ================= */
@@ -7011,6 +7111,20 @@ async function grensNa(){
   if(L.grensPraat) await praatLosAwait(L.grensPraat);
   if(S.over) return;
   if(L.grensKees){ await keesKaart(); if(!S.over){ S.ui = {mode:"busy"}; render(); } return; }
+  /* 🪨 1-5: allebei de handen aanvullen tot een vast aantal, en daarna valt de rots harder. */
+  if(L.grensAanvul){
+    if(L.grensRotsTwee) st.rotsTwee = true;
+    for(const p of [0, 1]){
+      if(S.over) break;
+      const n = Math.max(0, L.grensAanvul - P(p).hand.length);
+      addLog(n ? `🪨 ${pName(p)} vult aan tot ${L.grensAanvul}: <b>${n}</b> kaart${n === 1 ? "" : "en"}.`
+               : `🪨 ${pName(p)} heeft al ${P(p).hand.length} kaarten en trekt er geen.`, true);
+      if(n) await drawN(p, n, "de grens");
+    }
+    if(L.grensRotsTwee) addLog(`🪨 <em>Het plafond scheurt verder.</em> Vanaf nu vallen er per beurt twee stenen aan elke kant.`, true);
+    if(!S.over){ S.ui = {mode:"busy"}; render(); }
+    return;
+  }
   if(L.grensSteenHand){
     /* 🪨 1-5: Magnus pakt alle steen en rots die hij nog heeft, uit zijn stapel en zijn graf. */
     const isSteen = c => c.el === "steen" && !c.lk;
@@ -7035,6 +7149,11 @@ async function chainLoop(){
      op dat moment al onder lag, resolvet zonder nieuw reactiemoment. Alleen wat er tijdens
      het afbouwen nieuw bijkomt, krijgt weer een venster. */
   let afbouw = 0;
+  /* ⛓ De keten. Speel je iets, dan mag alleen de ander reageren. Laat die door, dan gebeurt
+     het gewoon. Reageert die wél, dan loopt er een keten: vanaf dan mogen jullie om de beurt
+     iets toevoegen, ook op je eigen kaarten, tot jullie allebei na elkaar doorlaten. Dan
+     eindigt de keten en bouwt hij in één keer af. */
+  let keten = false;
   while(S.stack.length && !S.over){
     const top = S.stack[S.stack.length-1];
     if(S.stack.length - 1 < afbouw){ await resolveTop(); continue; }
@@ -7047,15 +7166,19 @@ async function chainLoop(){
     if(top.type === "eff"){ await resolveTop(); continue; }
     /* En zelfs dan niet iedereen: alleen wie er écht iets mee kan. Zie magReageren. */
     const tstap0 = tutStap();
+    /* 🎓 In de tutorial reageer je alleen als de les erom vraagt. */
+    const tutDicht = wie => wie === 0 && tstap0 && !(tstap0.flash || tstap0.op === "reactie");
+    /* Nog geen keten: alleen de ander, en alleen als die er echt iets mee kan (magReageren).
+       Wel een keten: eerst de ander, dan wie het net toevoegde. Allebei mogen alles. */
     const beurten = (S.story && S.story.geenChain) ? []
-      : [top.ctrl, opp(top.ctrl)].filter(wie => (PRIOALL || magReageren(wie, top))
-          && !(wie === 0 && tstap0 && !tstap0.flash));
+      : keten ? [opp(top.ctrl), top.ctrl].filter(wie => !tutDicht(wie))
+      : [opp(top.ctrl)].filter(wie => (PRIOALL || magReageren(wie, top)) && !tutDicht(wie));
     let toegevoegd = false;
     for(const wie of beurten){
       if(S.over) return;
       if(S.stack[S.stack.length-1] !== top) break;      // er is intussen iets bijgekomen
       if(!hasLegalFlash(wie)) continue;
-      const r = await askPriority(wie);
+      const r = await askPriority(wie, keten);
       if(S.over) return;
       if(r !== "pass"){
         const card = takeFromHand(wie, r.cardId);
@@ -7065,23 +7188,30 @@ async function chainLoop(){
           await announceFusion(wie, card, r.tributeId, r.fuseKey);
         }
         else await announcePlay(wie, card, !!r.spell, r.col, true);
+        if(!keten) addLog(`⛓ <em>De keten begint.</em> Jullie mogen nu om de beurt iets toevoegen, tot jullie allebei doorlaten.`, true);
+        keten = true;
         toegevoegd = true;
         break;
       }
-      addLog(`${pName(wie)} reageert niet.`);
+      addLog(keten ? `${pName(wie)} laat door.` : `${pName(wie)} reageert niet.`);
     }
     if(toegevoegd) continue;
+    if(keten) addLog(`⛓ <em>De keten eindigt.</em> Alles gaat af, van boven naar beneden.`, true);
+    keten = false;                       // wat er tijdens het afbouwen bijkomt, begint opnieuw
     afbouw = S.stack.length - 1;
     await resolveTop();
   }
   if(S.story && S.story.grensWacht) await grensNa();
   if(S.story && S.story.naadWacht) await naadNa();
+  /* 🎓 Wat er in de tutorial na deze zet gezegd moet worden, komt nu: alles staat stil. */
+  if(!S.over && S.story && S.story.tutNa){ const n = S.story.tutNa; S.story.tutNa = null; if(tutAan()) await tutPunt(n); }
   if(!S.over) backToPhase();
 }
-async function askPriority(p){
+async function askPriority(p, keten){
   while(true){
     await ensureHolder(p);
-    const r = await waitUI("priority", {p});
+    if(p === 0 && typeof tutPunt === "function") await tutPunt("reactie");
+    const r = await waitUI("priority", {p, keten:!!keten});
     if(r === "pass" || r == null) return "pass";
     const card = P(p).hand.find(cd => cd.id === r);
     if(!card) return "pass";                       // onbekende kaart: gewoon doorlaten
@@ -7089,7 +7219,6 @@ async function askPriority(p){
     if(p === 0 && tutAan()){
       const tst = tutStap();
       if(!tst || tst.flash !== card.el){ tutNudge("Nu nog niet reageren."); continue; }
-      tutKlaarStap("flash", card.el);
     }
     if(card.el === "licht"){
       if(!lightPlayable(p, card)) continue;
@@ -7105,6 +7234,7 @@ async function askPriority(p){
     if(!isBot(p)){
       const plek = await kiesPlek(p, card, {creOk:canCre, spOk:canSp, fuseOk:canFuse});
       if(plek === "cancel") continue;
+      if(p === 0 && tutAan()) tutKlaarStap("flash", card.el);
       if(plek.mode !== "fuse") return {cardId:r, col:plek.col, spell:plek.mode === "spell"};
       mode = "fuse";
     } else if(opties > 1){
@@ -7427,7 +7557,7 @@ async function ijsSmelt(p, card, col, alTerug){
   const cr = P(p).cols[col].cre;
   if(cr && cr.card.id === card.id){
     delete card.var;
-    const bonus = (oerkrachtOp(p, "water") && hasAe(p, "ae_hp3")) ? 4 : 0;
+    const bonus = oerkrachtOp(p, "water") ? 4 : 0;
     cr.hp = (EL.water.hp || 2) + bonus;
     addLog(`🧊 Het ijs smelt: in kolom ${col+1} staat nu gewoon 💧 <em>Water</em>${bonus ? " (🟣 Oerkracht)" : ""}. Er gaat niets af, ook het ritueel eronder niet.`, true);
     if(!FAST){ fxSplash(creSel(p, col)); AU.play("water"); await sleep(220); }
@@ -8374,8 +8504,12 @@ async function resolvePlay(it){
   const selfId = it.asSpell ? null : it.card.id;
   for(let i = (it.plan||[]).length - 1; i >= 0; i--) S.stack.push(effItem(p, it.plan[i], selfId));
 }
-/* 🟣 Oerkracht: de keuze is normaal één element; een baas mag er twee hebben. */
+/* 🟣 Oerkracht: Oervuur, Oerwater, Oergras of Oersteen hangt vast aan zijn element. De oude
+   Oerkracht (De Eerste, of wie hem ooit kocht) hangt aan wat je bij de start kiest; een baas
+   mag er dan twee hebben. */
 function oerkrachtOp(p, el){
+  if(hasAe(p, "ae_oer_" + el)) return true;
+  if(!hasAe(p, "ae_hp3")) return false;
   const k = S && S.aeKeuze && S.aeKeuze[p];
   return Array.isArray(k) ? k.includes(el) : k === el;
 }
@@ -8389,7 +8523,7 @@ function kernBonus(p){
 }
 function placeCre(p, col, card){
   /* 🟣 Oerkracht: creatures van het gekozen element komen met +4 levens binnen. */
-  const bonus = ((oerkrachtOp(p, card.el) && hasAe(p, "ae_hp3")) ? 4 : 0)
+  const bonus = (oerkrachtOp(p, card.el) ? 4 : 0)
     + (trioKracht(p, card.el) ? 3 : 0)           // 🎪 de vonk van dit element: +3 levens
     + (hasAe(p, "ae_alziend") ? 1 : 0)           // 👁 Alziend: +1 leven
     + kernBonus(p);                              // 🌋 Kern van Maatje: het eerste wezen +3
@@ -8756,7 +8890,8 @@ async function resolveAttack(it){
     P(opp(p)).life -= power;
     const af = levVoor - P(opp(p)).life;          // ⛓ de Naad laat er maar één af gaan
     if(af !== power && af >= 0) addLog(`⛓ <em>${power} schade, en er gaat er ${af} af.</em> Meer dan één per klap laat de Naad niet los.`, true);
-    if(power > 0 && opp(p) === 0 && S.story) S.story.schadeJij = (S.story.schadeJij || 0) + power;   // ★ telt voor de sterren
+    /* ★ telt voor de sterren. De klap die Rocky in de tutorial uitdeelt, hoort bij de les: die telt niet. */
+    if(power > 0 && opp(p) === 0 && S.story && !tutAan()) S.story.schadeJij = (S.story.schadeJij || 0) + power;
     if(power > 0) raakAanval(p);
     /* 🟣 Lichtval: neem je schade, trek een kaart. */
     if(power > 0 && hasAe(opp(p), "ae_lichtval") && P(opp(p)).life > 0){
@@ -8986,6 +9121,7 @@ async function startTurnSequence(){
   if(!S.story && S.char && isBot(S.tp) && S.gTurn > 1 && Math.random() < .35) mpZegAuto(S.tp, "beurt");
   if(S.gTurn === 1) await mulliganFase();
   if(S.gTurn === 1) await aetherKeuzes();
+  if(S.gTurn === 1 && tutAan()) await tutPunt("start");
   if(S.over) return;
   S.phase = "upkeep"; render();
   turnCry(S.tp);
@@ -9061,6 +9197,8 @@ async function startTurnSequence(){
   if(!S.over && hasAe(S.tp, "ae_roedel")) await roedelWolf(S.tp);
   if(!S.over && hasAe(S.tp, "ae_vitrine")) await vitrineOproep(S.tp);
   if(!S.over && S.story && S.story.paniek) await vonkPaniek();
+  if(S.over) return;
+  if(S.tp === 0 && tutAan()) await tutPunt("beurt");
   if(S.over) return;
   backToPhase();
 }
@@ -9204,7 +9342,7 @@ let TIJDLAST = 0;
 function storyTijdTick(){
   const nu = Date.now(), dt = TIJDLAST ? (nu - TIJDLAST) / 1000 : 0;
   TIJDLAST = nu;
-  if(!S || !S.story || S.over || M || !dt) return;
+  if(!S || !S.story || S.over || M || !dt || tutAan()) return;   // de tutorial telt niet mee voor de tijd
   const u = S.ui || {};
   const wie = (pending && u.p != null) ? u.p : ((u.mode === "main" || u.mode === "battle") ? S.tp : -1);
   if(wie !== 0) return;
@@ -9476,8 +9614,8 @@ async function playFromHand(cardId){
     const asSpell = mode === "spell";
     if(plek && plek.col != null){
       takeFromHand(p, cardId);
+      if(p === 0 && tutAan()){ tutKlaarStap("kaart", {el:card.el, mode}); S.story.tutNa = "gespeeld:" + card.el; }
       await announcePlay(p, card, asSpell, plek.col, false);
-      if(p === 0) tutKlaarStap("kaart", {el:card.el, mode});
       await chainLoop();
       return;
     }
@@ -9489,8 +9627,8 @@ async function playFromHand(cardId){
       prompt:`Kies een ${asSpell?"ritueelplek":"wezenplek"} voor ${kIcon(card)} ${kNaam(card)}${(!asSpell && card.var === "ijs") ? " — tegenover een vijandelijk wezen om die over te nemen, of ergens anders: dan wordt het 💧 Water" : ""}${(!asSpell && card.el === "water" && !card.var) ? " — op een lege plek, of bovenop een eigen wezen dat dan verhuist" : ""}`});
     if(s === "cancel" || !s){ backToPhase(); return; }   // ook een lege/afgebroken keuze laat de kaart in je hand
     takeFromHand(p, cardId);
+    if(p === 0 && tutAan()){ tutKlaarStap("kaart", {el:card.el, mode}); S.story.tutNa = "gespeeld:" + card.el; }
     await announcePlay(p, card, asSpell, s.c, false);
-    if(p === 0) tutKlaarStap("kaart", {el:card.el, mode});
     await chainLoop();
   } finally { busyFlag = false; }
 }
@@ -9510,6 +9648,7 @@ async function declareAttack(col){
       S.stack = S.stack.filter(x => !(x.type === "eff" && x.srcId === cr.card.id)).concat(eff);
     }
     addLog(`${pName(p)} valt aan met ${icon(cr.card.el)} <em>${EL[cr.card.el].name}</em> in kolom ${col+1}${def?"":" → rechtstreeks op "+pName(opp(p))}.`, true);
+    if(tutAan()) S.story.tutNa = p === 0 ? "aanval" : "rockyaanval";
     await chainLoop();
   } finally { busyFlag = false; }
 }
@@ -9528,6 +9667,8 @@ async function advancePhase(kind){
 /* ================= BOT ================= */
 async function botMove(){
   if(!S || S.over || !isBot(S.tp)) return;
+  /* 🎓 Staat er een uitleg open, dan wacht Rocky tot je OK hebt gezegd. */
+  if(TUTWACHT){ clearTimeout(botT); botT = setTimeout(botMove, 300); return; }
   const m = S.ui.mode, p = S.tp;
   /* 🔥 cheaton: de tegenstander doet niets meer. Geen kaarten, geen aanvallen. */
   if(S.story && p === 1 && cheatAan()){
@@ -9544,7 +9685,13 @@ async function botMove(){
     if(deed){ backToPhase(); return; }
     /* Het scriptje laat de tegenstander eerst spelen, dan aanvallen, dan stoppen. */
     if((S.botStap || 0) === 0){ S.botStap = 1; backToPhase(); return; }
-    if(S.botStap === 1){ const col = botChooseAttack(p); if(col !== null){ declareAttack(col); return; } S.botStap = 2; }
+    if(S.botStap === 1){
+      /* Ook zijn aanvallen staan in het script: alleen de kolommen die de les nodig heeft. */
+      const lijst = (S.story.vijAanval || {})[S.turnNo[1]] || [];
+      const col = lijst.find(c => P(p).cols[c].cre && canAttack(P(p).cols[c].cre, p));
+      if(col != null){ declareAttack(col); return; }
+      S.botStap = 2;
+    }
     advancePhase("endturn"); return;
   }
   if(m === "main"){
@@ -10346,6 +10493,8 @@ function botDecide(mode){
     feed(k != null ? k : vs[0]); return;
   }
   if(mode === "choice"){
+    { const t = typeof tutVijandDoel === "function" ? tutVijandDoel(S.ui.valid || []) : undefined;
+      if(t !== undefined){ feed(t); return; } }
     if(botPlan && botPlan.doelId != null && (S.ui.valid || []).includes(botPlan.doelId)){
       const d = botPlan.doelId; botPlan.doelId = null; feed(d); return;
     }
@@ -10358,7 +10507,7 @@ function botDecide(mode){
    lichtkaart opgelegd kreeg: het percentage potjes dat met die kaart gewonnen werd. */
 /* Gemeten in de arena: 4 onafhankelijke reeksen van ~250 potjes per optie (±1.6). */
 const AE_KRACHT = {ae_draw3:68, fu_stone:61, ae_graf:60, ae_grassx2:56, fu_water:54, ae_genade:52, ae_fire6:46,
-                   ae_hp3:46, ae_watercycle:43, ae_alziend:41, ae_offer:40, ae_stonefull:39, fu_fire:39, fu_grass:38};
+                   ae_hp3:46, ae_oer_vuur:44, ae_oer_water:44, ae_oer_gras:44, ae_oer_steen:44, ae_watercycle:43, ae_alziend:41, ae_offer:40, ae_stonefull:39, fu_fire:39, fu_grass:38};
 const LT_KRACHT = {master:61, greed:59, doortast:58, kloon:57, echo:54, brenger:51, vital:52, siphon:53, gamble:50, reborn:49, kuriboh:46, sterregen:48,
                    dfusion:45, darkhole:42, negate:0};
 function botDraft(u){
@@ -10418,6 +10567,7 @@ function shelobWeb(p){
 }
 function botPriority(p){
   if(S.story && p === 1 && cheatAan()) return null;          // 🔥 cheaton: hij reageert ook nergens op
+  if(p === 1 && typeof tutAan === "function" && tutAan()) return null;   // 🎓 Rocky volgt in de tutorial zijn script
   const web = shelobWeb(p);
   if(web) return {cardId: web.id};
   if(!P(p).hand.some(cd => magSpelen(p, cd.id))) return null;
@@ -11328,7 +11478,8 @@ function actionsHTML(){
   if(u.mode==="battle") return `<button class="abtn primary" data-act="btn" data-btn="endbattle">✔️ Klaar met vechten</button>`;
   if(u.mode==="priority"){
     if(isBot(u.p)) return `<div style="color:var(--dim);font-size:.8rem">🤖 denkt na…</div>`;
-    return `<button class="abtn primary" data-act="btn" data-btn="pass">Doorlaten ▶</button>`;
+    return u.keten ? `<button class="abtn primary keteneind" data-act="btn" data-btn="pass">⛓ Keten eindigen ▶</button>`
+                   : `<button class="abtn primary" data-act="btn" data-btn="pass">Doorlaten ▶</button>`;
   }
   if(u.mode==="mulligan"){
     if(!iControl(u.p)) return `<div style="color:var(--dim);font-size:.8rem">⏳ ${pName(u.p)} bekijkt de starthand…</div>`;
@@ -11371,6 +11522,17 @@ function bannerHTML(){
       } else {
         what = `<b>${foe}</b> laat <b>${effNaam(top.el)}</b> resolven`;
       }
+    }
+    if(u.keten){
+      const n = S.stack.filter(x => x.type !== "eff").length;
+      /* Staat je eigen kaart bovenaan, dan heeft de ander net doorgelaten. */
+      if(top && top.ctrl === u.p && !isBot(u.p)){
+        const nm = top.type === "light" ? "✦ " + (LIGHTS[top.lk] ? LIGHTS[top.lk].name : "lichtkaart")
+                 : top.card ? kIcon(top.card) + " " + kNaam(top.card) : "jouw zet";
+        what = `${pName(opp(u.p))} laat door. Bovenaan staat jouw <b>${nm}</b>`;
+      }
+      if(isBot(u.p)) return `⛓ <b>De keten loopt</b> (${n}) · ${what} · 🤖 voegt misschien nog iets toe…`;
+      return `⛓ <b>De keten loopt</b> (${n} kaarten) · ${what}<br><span style="font-size:.86em">voeg iets toe met een kaart uit je hand, of <b>spatie</b> om de keten te eindigen</span>`;
     }
     if(isBot(u.p)) return `${what} — 🤖 overweegt een reactie…`;
     return `${what}<br><span style="font-size:.86em">reageren met een kaart uit je hand, of <b>spatie</b> om door te laten</span>`;
@@ -12198,7 +12360,7 @@ function shareHTML(){
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
-const ELEMENTAAL_VERSIE = "9 okt · e";
+const ELEMENTAAL_VERSIE = "9 okt · f";
 function startHTML(){
   const open = HOME.open;
   const opPlek = SET.slot != null;
@@ -12283,7 +12445,6 @@ function menuHTML(){
       <div class="vscheid"></div>
 
       ${NET.on && NET.chan === "live" ? `<button class="mbtn" data-act="btn" data-btn="copyroom">Roomlink kopiëren <span class="mk">${LIVE.code}</span></button>` : ""}
-      <button class="mbtn" data-act="btn" data-btn="share">Link delen</button>
       <button class="mbtn" data-act="btn" data-btn="audio">Geluid & effecten</button>
       <button class="mbtn" data-act="btn" data-btn="help">Spelregels</button>
       <button class="mbtn" data-act="btn" data-btn="tutorial">Tutorial</button>
@@ -15084,31 +15245,79 @@ const STORY = {
       ],
       laag:["Wacht. Wacht even. Dit ging heel anders in mijn hoofd."],
       jij:["ZIE JE WEL. Dat zei ik toch. Dat zei ik!"] },
-    /* Wat Rocky zegt terwijl jij de tutorial doet: per gehaalde stap, op volgorde. */
-    tutVooraf:"Eerst de regels. Rocky wacht wel — hij heeft toch niks anders te doen.",
-    tutZeg:["Hé. Hé! Wat doe je nou.", "Mag dat wel? Ik dénk dat dat niet mag.", null, "Ik schrijf het op. Voor straks."],
+    /* 🎓 De tutorial zit in dit gevecht. Rocky speelt een vast script, en jij krijgt per stap
+       een highlight (wat je doet), een pop-up (waarom het zo werkt) of een scherm (hoe de
+       wereld in elkaar zit). Zie tutPunt en tutHlPaint. */
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:9, vuur:5, gras:5, water:5},
-    levensVij:4,
-    handVijMinder:1,            // Rocky begint met één kaart minder dan normaal
-    /* Een vaste openingshand, zodat de tutorial altijd hetzelfde loopt. */
-    handJijVast:["gras","water","vuur","steen"],
-    bovenop:["steen"],
-    /* Rocky denkt hier niet na: hij legt precies neer wat de les nodig heeft. Hij opent met
-       twee 🪨 Stenen uit zijn hand — één in het midden en één helemaal rechts. Je ziet ze
-       allebei neerkomen; ze staan er niet al. */
-    handVij:["steen","steen"],
-    vijZetten:{1:[{el:"steen", mode:"cre", col:2}, {el:"steen", mode:"cre", col:4}],
-               2:[{el:"vuur", mode:"cre", col:2, doelJij:true}, {el:"gras", mode:"cre", col:0}]},
+    /* Acht levens: in beurt 8 kun je hem met alles wat je hebt precies afmaken. */
+    levensVij:8,
+    /* Een vaste hand van vier, en vaste kaarten om te trekken, zodat het altijd hetzelfde loopt. */
+    handJijVast:["steen","vuur","water","gras"], handJijAlleen:true,
+    trekJij:["gras","steen","water","vuur","steen"],
+    vijZetten:{
+      1:[{el:"steen", col:2, doelen:["zelf","zelf"]}],
+      2:[{el:"gras",  col:0, doelen:[{p:0, el:"steen"}]}],
+      3:[{el:"vuur",  col:1, doelen:[{p:0, el:"vuur"}]}],
+      4:[{el:"water", col:4, doelen:[]}]},
+    vijAanval:{2:[2]},
+    tutRechtdoor:"Ho. Recht vooruit. Dat weet zelfs ik.",
     tut:[
-      {t:"Klik je 🌿 <b>Gras</b> aan en zet die op de middelste <b>wezenplek</b> — recht tegenover zijn middelste 🪨 Steen. Die steen is meteen je doelwit.",
-       kaart:"gras", mode:"cre", col:2, doel:"vij", doelCol:2},
-      {t:"Klik nu je 🌿 Gras aan om aan te vallen. 🌿 is sterk tegen 🪨: dat is geen schade maar meteen dood.",
-       aanval:2},
-      {t:"Rond je beurt af met <b>einde beurt</b>.",
-       beurtAf:true},
-      {t:"Hij mikt 🔥 Vuur op je 🌿 Gras. Speel nu je 💧 <b>Water</b> als reactie en zet je Gras in een <b>andere</b> kolom. Zijn doelwit is dan weg en zijn vuur <b>fizzelt</b>.",
-       flash:"water"}
+      /* voor het eerste kaartje */
+      {op:"start", scherm:"welkom"},
+      {op:"start", scherm:"zowin"},
+      /* beurt 1 · Rocky: het speel-effect */
+      {op:"rocky:steen", bij:"cre:1:2", pop:"Elke kaart doet iets op het moment dat hij neerkomt: zijn <b>speel-effect</b>. Eén keer. Bij 🪨 Steen is dat twee keer <b>+1 leven</b>."},
+      {op:"rocky:steen", zeg:"Kijk. Hij wordt groter. Dat doet Steen."},
+      /* beurt 2 · jij: neerzetten, het speel-effect, aanvallen */
+      {kaart:"steen", col:0, mode:"cre", hl:"Speel Steen"},
+      {doel:{p:0, el:"steen"}, hl:"+1 voor je Steen"},
+      {doel:{p:0, el:"steen"}, hl:"Nog een keer"},
+      {op:"gespeeld:steen", zeg:"Hé. Dat is míjn truc."},
+      {aanval:0, hl:"Val aan"},
+      {op:"aanval", bij:"leven:1", pop:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. Een aanval doet de <b>helft van zijn levens</b>, naar beneden afgerond: 5 wordt 2."},
+      {op:"aanval", zeg:"AU. Daar stond niemand. Dat was mijn fout."},
+      {beurtAf:true, hl:"Einde beurt"},
+      /* beurt 3 · Rocky: verstrikken, en hij slaat terug */
+      {op:"rocky:gras", bij:"cre:0:0", pop:"<b>Verstrikt.</b> Zijn 🌿 Gras haalt levens uit je Steen en legt er een blaadje op. Met een blaadje kan je Steen niet aanvallen. Elke beurt van jou valt er één af."},
+      {op:"rockyaanval", bij:"leven:0", pop:"Hij doet wat jij net deed. Er staat niets tegenover zijn Steen, dus hij raakt jou."},
+      {op:"rockyaanval", zeg:"Zie je. Iets voor je neus zetten. Dat staat nergens, maar het lijkt me logisch."},
+      /* beurt 4 · jij: de cirkel, en een effect tegenover een aanval */
+      {op:"beurt", bij:"cre:1:0", rood:["cre:0:0"], pop:"Het blaadje is eraf. Maar pas op: zijn 🌿 Gras staat tegenover je 🪨 Steen, en <b>Gras is sterk tegen Steen</b>. Valt hij aan, dan is je Steen meteen kapot."},
+      {op:"beurt", scherm:"cirkel"},
+      {kaart:"vuur", col:1, mode:"cre", hl:"Speel Vuur"},
+      {op:"doel:vuur", bij:"cre:1:0", pop:"Een speel-effect mag <b>elk</b> wezen raken, in elke kolom. 🔥 Vuur doet 2 schade, en op Gras dubbel: 4."},
+      {doel:{p:1, el:"gras"}, hl:"Verbrand zijn Gras"},
+      {op:"gespeeld:vuur", bij:"cre:1:0", waarom:"vuur-gras", pop:"Vuur verbrandt gras."},
+      {op:"gespeeld:vuur", zeg:"Nee! Dat was nieuw gras."},
+      {op:"gespeeld:vuur", bij:"cre:0:1", pop:"Je speel-effect mocht overal heen. Een <b>aanval</b> niet: die gaat altijd recht vooruit."},
+      {aanval:1, hl:"Val aan"},
+      {beurtAf:true, hl:"Einde beurt"},
+      /* beurt 5 · Rocky: reageren, en het speel-effect gaat nog een keer */
+      {op:"reactie", bij:"cre:0:1", pop:"Zijn 🔥 Vuur mikt op jouw Vuur. Je mag <b>reageren</b>, ook in zijn beurt. Zet je 💧 Water bovenop je Vuur."},
+      {op:"reactie", zeg:"Hé. Dit is mijn beurt."},
+      {flash:"water", col:1, hl:"Speel Water", hlPlek:"Bovenop je Vuur"},
+      {op:"plek", bij:"cre:0:1", pop:"💧 Water duwt je Vuur weg. Kies een nieuwe plek."},
+      {plek:4, hl:"Hierheen"},
+      {op:"doel:vuur", bij:"cre:0:4", pop:"Je Vuur komt <b>opnieuw neer</b>, dus zijn speel-effect gaat <b>nog een keer</b> af. Een speel-effect gaat alleen af als een kaart neerkomt. Daarna vecht hij alleen nog."},
+      {doel:{p:1, el:"vuur"}, hl:"Raak zijn Vuur"},
+      {op:"rocky:vuur", bij:"cre:0:1", pop:"Wat het laatst gespeeld is, gaat eerst. Zijn vuur mikte op de plek waar je Vuur stond. Daar staat nu Water: het <b>mist</b>."},
+      {op:"rocky:vuur", zeg:"Mag dat? Ik denk niet dat dat mag."},
+      /* beurt 6 · jij: sterk tegen in een aanval */
+      {kaart:"gras", col:2, mode:"cre", hl:"Speel Gras"},
+      {doel:{p:1, el:"steen"}, hl:"Verstrik zijn Steen"},
+      {aanval:2, hl:"Val aan"},
+      {op:"aanval", bij:"cre:1:2", waarom:"gras-steen", pop:"Wortels groeien door steen. <b>Sterk tegen</b> in een aanval: meteen kapot."},
+      {op:"aanval", zeg:"KEES. Kees, niet kijken."},
+      {aanval:0, hl:"Val aan"},
+      {beurtAf:true, hl:"Einde beurt"},
+      /* beurt 7 · Rocky */
+      {op:"rocky:water", zeg:"Hier. Water. Ik ben niet dom."},
+      /* beurt 8 · jij: zwak tegen, en dan zelf */
+      {aanval:4, hl:"Probeer maar"},
+      {op:"aanval", bij:"cre:1:4", waarom:"water-vuur", pop:"Water dooft vuur. <b>Zwak tegen</b>: er gebeurt niets."},
+      {op:"aanval", zeg:"HA. Dat wist ik."},
+      {op:"aanval", bij:"cirkel", pop:"Vanaf hier speel je zelf. De cirkel staat hier linksboven, als je hem nog eens wilt zien. Hij staat nu op <b>4</b>: maak het af."}
     ],
     /* Rituelen leer je pas bij Brokko (1-2). Hier speelt niemand iets als ritueel. */
     geenRitueel:true,
@@ -15535,18 +15744,19 @@ const STORY = {
       jij:["Ga zitten, onverdeelde. Je hoeft dit niet uit te vechten."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:6, steen:3, vuur:5, gras:5, water:5},
-    aeVij:["ae_stonefull","fu_stone","ae_hp3"], keuzeVij:"steen",
+    aeVij:["ae_stonefull","fu_stone","ae_oer_steen"],
     rotsval:true,
     levensVij:6,
-    /* Eén keer zakt Magnus niet onder de 3. Daarna trekken jullie allebei 3 kaarten. */
-    grensVij:3, grensSteenHand:true,
+    /* Eén keer zakt Magnus niet onder de 3. Dan vullen jullie allebei je hand aan tot 5, en
+       vanaf dan valt de rots op twee plekken per kant. */
+    grensVij:3, grensAanvul:5, grensRotsTwee:true,
     grensPraat:[
       {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Nee. Steen breekt niet in één keer. Steen barst, en dan staat het er nog steeds."},
       {s:"rotsbaas_woede", reus:true, naam:"Magnus", bg:1, kleur:"#ff5a3c", t:"Pak je kaarten. Magnus pakt de zijne. Nu begint het pas."},
-      {s:null, naam:"…", bg:1, kleur:"#e6c88a", t:"🪨 Magnus blijft op <b>3</b> levens staan. Jullie trekken allebei <b>3</b> kaarten."}
+      {s:null, naam:"…", bg:1, kleur:"#e6c88a", t:"🪨 Magnus blijft op <b>3</b> levens staan. Jullie vullen allebei je hand aan tot <b>5</b> kaarten. En het plafond komt nu op <b>twee</b> plekken per kant naar beneden."}
     ],
     bord:[{p:1, c:2, spell:"steen"}],
-    geeft:"ae_fire6",
+    geeft:["ae_fire6", "ae_oer_steen"],     // en Oersteen: elke baas laat zijn stuk Oerkracht achter
     ban:10, begint:1
   },
   /* ---------- Wereld 2 · Rankenwoud ---------- */
@@ -15727,7 +15937,7 @@ const STORY = {
       {s:"shelob", reus:true, bg:2, kleur:"#c9b6ff", t:"Ik weet nog hoe dat ging."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"🥚 <b>Eieren.</b> Er hangt er al één, midden voor je neus. Aan het begin van élke beurt van haar legt Kaelid er een bij: 4 levens, valt niet aan. Na <b>twee beurten</b> van haar komt er een uit — en dan staat er een spin van <b>7 om 7</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"✦ <b>Web.</b> Haar lichtkaart: ze betaalt 2 levens, trekt een kaart, en al jouw wezens zitten een beurt lang vast. Ze heeft er één in haar hand — en de éérste keer dat je uithaalt, gooit ze hem."},
-      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", paars:true, t:"Wat bij haar in het web sterft, blijft er hangen. 🟣 <b>Het web</b>: sterft er iets van haar, dan hangt er een ei voor in de plaats. En 🟣 <b>Oerkracht</b> op 🌿."},
+      {s:"shelob", reus:true, bg:2, naam:"…", kleur:"#c9b6ff", paars:true, t:"Wat bij haar in het web sterft, blijft er hangen. 🟣 <b>Het web</b>: sterft er iets van haar, dan hangt er een ei voor in de plaats. En 🟣 <b>Oergras</b>: haar 🌿 komen met <b>+4 levens</b>."},
       {s:null, bg:2, naam:"…", kleur:"#c9b6ff", t:"En zij begint."}
     ],
     midden:[
@@ -15773,7 +15983,7 @@ const STORY = {
     bord:[{p:1, c:2, el:"ei", hp:4}],
     deckVij:{steen:5, vuur:5, gras:5, water:5, roos:4, web:6},
     ltVij:["web"], handVij:["web"],
-    aeVij:["ae_kweb","ae_hp3"], keuzeVij:"gras",   // 🟣 Het web (wat van haar sterft wordt een ei) en Oerkracht op gras
+    aeVij:["ae_kweb","ae_oer_gras"],   // 🟣 Het web (wat van haar sterft wordt een ei) en Oergras
      geeftLicht:"web",
     ban:10, begint:1
   },
@@ -16037,6 +16247,7 @@ const STORY = {
     ban:10, begint:1
   },
   "2-6":{
+    geeft:"ae_oer_gras",            // 🟣 Oergras: elke baas laat zijn stuk Oerkracht achter
     wereld:2, bosslag:true, naam:"Moeder Natuur", vijand:"Moeder Natuur", sprite:"moeder", zegKleur:"#e08fb0", muziek:"w2_baasgevecht",
     hzruim:true,
     intro:[
@@ -16055,7 +16266,7 @@ const STORY = {
       {s:"moeder", reus:true, bg:2, kleur:"#e08fb0", t:"Wij hebben er sindsdien over nagedacht. Wij denken lang."},
       {s:"moeder_boos", reus:true, bg:2, kleur:"#e08fb0", t:"En nu sta je hier en zeg je dat het anders kan. Dan willen wij het zien. Niet horen. Zien."},
       {s:null, bg:2, naam:"…", kleur:"#a9e2ff", t:"🌧 <b>Regen.</b> Er trekt een wolk over de open plek. Om de andere ronde regent het — en in de regen doet 🔥 Vuur niks meer, behalve tegen je eigen wezens."},
-      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", paars:true, t:"Alles om haar heen groeit dubbel en grijpt vast: 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>. En 🟣 <b>Oerkracht</b> op 🌿 Gras: alles wat zij plant komt met <b>+4 levens</b> uit de grond."},
+      {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", paars:true, t:"Alles om haar heen groeit dubbel en grijpt vast: 🟣 <b>Woekergroei</b> en 🟣 <b>Wurgranken</b>. En 🟣 <b>Oergras</b>: alles wat zij plant komt met <b>+4 levens</b> uit de grond."},
       {s:"moeder", reus:true, bg:2, naam:"…", kleur:"#e08fb0", t:"Overal, tussen de wortels: rozen."}
     ],
     midden:[
@@ -16129,8 +16340,7 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{roos:8, vuur:5, water:5, steen:5, siphon:6},
     ltVij:["siphon"],
-    aeVij:["fu_grass","ae_grassx2","ae_hp3"],
-    keuzeVij:["gras"],
+    aeVij:["fu_grass","ae_grassx2","ae_oer_gras"],
     levensVij:5,
     regen:true,
     bord:[{p:1, c:2, spell:"gras"}],
@@ -16655,6 +16865,7 @@ const STORY = {
     ban:10, begint:1
   },
   "3-6":{
+    geeft:"ae_oer_vuur",            // 🟣 Oervuur: elke baas laat zijn stuk Oerkracht achter
     wereld:3, naam:"De schoorsteen", vijand:"Flint", sprite:"fireguy", zegKleur:"#ff8a4a", muziek:"w3_flintgevecht",
     hzruim:true,
     intro:[
@@ -17290,6 +17501,7 @@ const STORY = {
      zich toch niet laat opdelen. Ze heeft vier werelden naar je gekeken en een conclusie
      getrokken, en die is fout. Drie getijden; springtij draait het hele bord om. */
   "4-5":{
+    geeft:"ae_oer_water",            // 🟣 Oerwater: elke baas laat zijn stuk Oerkracht achter
     wereld:4, naam:"De oceaan", vijand:"De Oceaan", sprite:"oceaan", zegKleur:"#a9e2ff", muziek:"w4_baas",
     hzruim:true, getij:true,
     intro:[
@@ -17721,7 +17933,7 @@ const STORY = {
           {s:null, naam:"…", kleur:"#e08fb0", t:"🌧 <b>Het regent, en het houdt niet op.</b> 🔥 Vuur doet niets tegen de tegenstander, alleen tegen je eigen wezens. En er zitten 🌹 rozen in dit deck. <b>4</b> levens."}
         ],
         deck:{roos:8, vuur:5, ijs:2, water:3, rots:3, steen:2, siphon:3}, lt:["siphon"],
-        ae:["fu_grass","ae_grassx2","ae_hp3"], keuze:["gras"],
+        ae:["fu_grass","ae_grassx2","ae_oer_gras"],
         zeg:{ beurt:["Kind.", "Wij zijn langzaam. Ik niet.", "Voel je de regen? Dat ben ik.",
             "Het gras is zacht hier. Dat is met opzet.", "Moeder Natuur heeft je laten gaan. Ik niet."],
           popup:["Ik stond bij de steen. In het woud. In de as. Ik heb ze allemaal zien vallen.",
@@ -17820,7 +18032,7 @@ const STORY = {
       laag:["Past niet."], jij:["Blijf liggen.", "Dan heb ik het toch nog goed gedaan."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{rots:6, steen:3, plasma:2, vuur:3, gras:5, ijs:3, water:2},
-    aeVij:["ae_stonefull","fu_stone","ae_hp3"], keuzeVij:"steen",
+    aeVij:["ae_stonefull","fu_stone","ae_oer_steen"],
     rotsval:true, rotsDubbel:true, faseSchud:true,
     levensVij:4, levensJij:10,
     geeft:"ae_pijn",
@@ -17999,79 +18211,79 @@ const STORY = {
     ban:10, begint:1
   }
 };
-/* ================= TUTORIAL =================
-   1-1 leert je drie dingen en verder niets: de elementcirkel, het dodgen van een effect,
-   en dat een ritueel zijn ding meteen doet. Zolang een stap loopt kun je alleen díe zet
-   doen; er is altijd een knop om de hele boel over te slaan. */
+/* ================= TUTORIAL · 1-1, verweven met het gevecht tegen Rocky =================
+   Vier manieren om iets te zeggen, en elk heeft zijn eigen taak:
+     scherm     vult het beeld en zet het spel stil (hooguit drie keer): de wereld, het bord, de cirkel
+     pop-up     een klein kaartje vast aan iets op het bord, één zin en OK: waarom het zo werkt
+     highlight  wat je nu moet aanklikken pulseert, de rest is donker en doet niets: wat je doet
+     Rocky      zijn praatballon: sfeer, nooit een regel die je nodig hebt
+   De stappen staan in L.tut, op volgorde. Een stap met `kaart`, `doel`, `aanval`, `beurtAf`,
+   `flash` of `plek` is een handeling: die wacht tot je hem doet. De rest (scherm, pop, zeg)
+   wacht op een moment in het spel (`op`), en gaat dan meteen. Rocky speelt een vast script. */
+let TUTWACHT = null;                 // staat er een scherm of pop-up open, dan wacht het spel hierop
 function tutAan(){ return !!(S && S.story && S.story.tut && !S.story.tut.klaar); }
 function tutStap(){
   if(!tutAan()) return null;
   const t = S.story.tut;
   return t.stappen[t.i] || null;
 }
-function tutOpen(){ return !!(tutAan() && S.story.tut.open); }
-function tutBalk(){
-  let el = document.getElementById("tutpop");
-  const st = tutStap();
-  if(!st || !S.story.tut.open){ if(el) el.classList.remove("aan"); return; }
-  /* Een instructie en een taunt nooit tegelijk: wat Rocky zei is weg zodra de balk er is. */
-  if(S.story.zin){ S.story.zin = null; clearTimeout(ZEGT); ZEGT = null; }
-  const pb = document.getElementById("praatbel"); if(pb) pb.classList.remove("show");
-  if(!el){ el = document.createElement("div"); el.id = "tutpop"; document.body.appendChild(el); }
-  el.innerHTML = `<div class="tutdoos">
-    <div class="tutnr">Stap ${S.story.tut.i + 1} van ${S.story.tut.stappen.length}</div>
-    <div class="tuttxt">${st.t}</div>
-    <div class="tutknoppen">
-      <button class="tutok" data-act="btn" data-btn="tutok">Begrepen</button>
-      <button class="tutweg" data-act="btn" data-btn="tutweg">⏭ tutorial overslaan</button>
-    </div></div>`;
-  el.classList.add("aan");
+const tutActie = st => !!st && !!(st.kaart || st.doel || st.aanval != null || st.beurtAf || st.flash || st.plek != null);
+/* Staat er een pop-up of scherm open? Dan praat Rocky er niet doorheen. */
+function tutOpen(){ return !!TUTWACHT; }
+/* Een moment in het spel. Alles wat op dit moment wacht, komt nu, in volgorde. */
+async function tutPunt(naam){
+  if(!tutAan() || FAST) return;
+  while(tutAan()){
+    const st = tutStap();
+    if(!st || tutActie(st) || st.op !== naam) break;
+    if(st.zeg){
+      S.story.tut.i++;
+      zegLos(st.zeg);
+      await sleep(st.na || 900);
+      continue;
+    }
+    if(st.scherm) await tutScherm(st.scherm);
+    else if(st.pop) await tutPop(st);
+    S.story.tut.i++;
+  }
+  if(tutAan() && !tutStap()) tutStop(true);
+  render();
 }
-/* Doe je iets anders dan de opdracht, dan komt de pop-up meteen terug met dezelfde stap. */
+/* Mag deze zet nu? Zo niet: een duwtje terug en verder niets. */
 function tutNudge(txt){
   if(FAST) return;
   if(txt) addLog("🎓 " + txt);
   AU.play("blip");
-  if(!S || !S.story || !S.story.tut) return;
-  S.story.tut.open = true;
-  tutBalk();
-  const el = document.getElementById("tutpop");
+  const el = document.getElementById("tutlabel");
   if(el){ el.classList.remove("nee"); void el.offsetWidth; el.classList.add("nee"); }
 }
-/* Mag deze zet nu? Zo niet: een duwtje terug en verder niets. */
 function tutMag(soort, data){
   const st = tutStap();
   if(!st) return true;
+  const actie = tutActie(st);
   if(soort === "kaart"){
-    if(st.kaart && data.el !== st.kaart){
-      tutNudge(`Nu even alleen ${icon(st.kaart)} ${EL[st.kaart].name}.`); return false; }
-    if(!st.kaart && !st.flash){ tutNudge("Nu even geen kaart."); return false; }
+    if(st.kaart && data.el === st.kaart) return true;
+    if(st.flash && data.el === st.flash) return true;
+    tutNudge(st.kaart ? `Nu even alleen ${icon(st.kaart)} ${EL[st.kaart].name}.` : "Nu even geen kaart.");
+    return false;
   }
   if(soort === "mode"){
-    if(st.mode && data !== st.mode){
-      tutNudge(st.mode === "spell" ? "Speel die als <b>ritueel</b>." : "Zet die neer als <b>wezen</b>."); return false; }
+    if(data !== (st.mode || "cre")){ tutNudge("Zet die neer als <b>wezen</b>."); return false; }
+    return true;
   }
   if(soort === "aanval"){
-    if(st.aanval == null){ tutNudge("Nog niet aanvallen."); return false; }
+    if(st.aanval == null){ tutNudge(actie ? "Nog niet aanvallen." : ""); return false; }
     if(st.aanval !== data){ tutNudge(`Val aan met het wezen in kolom ${st.aanval + 1}.`); return false; }
+    return true;
   }
-  if(soort === "beurt"){
-    if(!st.beurtAf){ tutNudge("Je bent nog niet klaar."); return false; }
-  }
-  /* De knoppen rechtsonder: alleen die de opdracht nodig heeft doen het. */
   if(soort === "fase"){
-    const mag = data === "tobattle"  ? st.aanval != null
-              : data === "endbattle" ? !!st.beurtAf
-              : data === "endturn"   ? !!st.beurtAf : false;
-    if(!mag){
-      tutNudge(st.aanval != null && data !== "tobattle" ? "Eerst aanvallen."
-             : st.beurtAf ? "Lees de stap even." : "Je bent nog niet klaar met deze stap.");
-      return false;
-    }
+    if(data === "endturn" && st.beurtAf) return true;
+    tutNudge(st.aanval != null ? "Eerst aanvallen." : "Je bent nog niet klaar.");
+    return false;
   }
   if(soort === "pass"){
-    if(st.flash){ tutNudge("Niet doorlaten — speel nu je kaart als reactie."); return false; }
-    tutNudge("Nog even niet."); return false;
+    tutNudge(st.flash ? "Niet doorlaten. Speel je kaart als reactie." : "Kies er een.");
+    return false;
   }
   return true;
 }
@@ -18079,37 +18291,214 @@ function tutKlaarStap(soort, data){
   const st = tutStap();
   if(!st) return;
   let raak = false;
-  if(soort === "kaart" && st.kaart && data && data.el === st.kaart
-     && (!st.mode || data.mode === st.mode)) raak = true;
+  if(soort === "kaart" && st.kaart && data && data.el === st.kaart) raak = true;
   if(soort === "flash" && st.flash && data === st.flash) raak = true;
   if(soort === "aanval" && st.aanval != null && data === st.aanval) raak = true;
   if(soort === "beurt" && st.beurtAf) raak = true;
+  if(soort === "doel" && st.doel) raak = true;
+  if(soort === "plek" && st.plek != null) raak = true;
   if(!raak) return;
   S.story.tut.i++;
-  const tz = (levelVan(S.story) || {}).tutZeg, zin = tz && tz[S.story.tut.i - 1];
-  if(S.story.tut.i >= S.story.tut.stappen.length){ tutStop(true); if(zin) zegLos(zin); render(); return; }
-  /* Zegt Rocky iets, dan eerst dat, en pas als hij klaar is de volgende instructie. */
-  if(zin && !FAST){
-    S.story.tut.open = false;
-    zegLos(zin);
-    const tut = S.story.tut, stap = tut.i;
-    setTimeout(() => {
-      if(!S || !S.story || S.story.tut !== tut || tut.klaar || tut.i !== stap) return;
-      S.story.zin = null; zegPaint();
-      tut.open = true; AU.play("light"); render();
-    }, 2300);
-  } else { S.story.tut.open = true; if(!FAST) AU.play("light"); }
+  if(!FAST) AU.play("light");
+  if(!tutStap()) tutStop(true);
   render();
+}
+/* Een doel-stap: welke van de aangeboden wezens mogen nu? */
+function tutDoelFilter(ids){
+  const st = tutStap();
+  if(!st || !st.doel) return null;
+  const d = st.doel;
+  const goed = ids.filter(id => { const f = findCre(id); return f && f.p === d.p && (!d.el || f.cr.card.el === d.el); });
+  return goed.length ? goed : null;
 }
 function tutStop(gehaald){
   if(!S || !S.story || !S.story.tut) return;
   S.story.tut.klaar = true;
-  S.story.tut.open = false;
-  const el = document.getElementById("tutpop"); if(el) el.remove();
-  addLog(gehaald ? "🎓 Dat waren de basics. Vanaf hier speel je zelf." : "🎓 Tutorial overgeslagen.", true);
+  if(TUTWACHT){ const k = TUTWACHT; TUTWACHT = null; k(); }
+  ["tutpop2", "tutscherm", "tutvang", "tutlabel", "tutbaan"].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
+  document.body.classList.remove("tutdim");
+  addLog(gehaald ? "🎓 Vanaf hier speel je zelf." : "🎓 Tutorial overgeslagen.", true);
   render();
+  /* Stond Rocky op zijn script te wachten, dan denkt hij vanaf nu zelf weer na. */
+  if(S.tp === 1 && !S.over){ clearTimeout(botT); botT = setTimeout(botMove, 400); }
 }
-/* De tegenstander denkt in de tutorial niet na: hij speelt een vast scriptje. */
+
+/* ---- de schermen ---- */
+const TUT_WAAROM = [
+  {a:"water", b:"vuur",  t:"Water dooft vuur."},
+  {a:"vuur",  b:"gras",  t:"Vuur verbrandt gras."},
+  {a:"gras",  b:"steen", t:"Wortels groeien door steen en splijten hem."},
+  {a:"steen", b:"water", t:"Steen houdt water tegen, zoals een dam."}
+];
+/* Een plaatje dat er misschien nog niet is: dan staat er wat eronder lag. */
+const tutBeeld = (src, terug, kl) => `<span class="tbeeld ${kl || ""}"><img src="${src}" alt="" onerror="this.parentNode.classList.add('leeg');this.remove()"><span class="tterug">${terug}</span></span>`;
+const tutWaaromBeeld = w => tutBeeld(`art/waarom-${w.a}-${w.b}.png`, `${icon(w.a)}<b>›</b>${icon(w.b)}`, "waarom");
+function tutSchermHTML(k){
+  if(k === "welkom") return `<div class="tskop">Welkom bij Elementaal</div>
+    <div class="tskaarten">${["vuur", "water", "gras", "steen"].map(el => `<div class="tskaart">${cardFaceHTML(el)}</div>`).join("")}</div>
+    <p>Vuur. Water. Gras. Steen. Iedereen in deze wereld heeft er één.</p>
+    <p><b>Jij hebt ze alle vier.</b></p>`;
+  if(k === "zowin"){
+    const rij = (wie, kl) => `<div class="tsrij ${kl}"><span class="tslab">${wie}</span>${[1,2,3,4,5].map(n => `<span class="tsvak">${n}</span>`).join("")}</div>`;
+    return `<div class="tskop">Zo win je</div>
+      <div class="tsbord">
+        <div class="tsleven boven"><span>zijn levens</span><i></i></div>
+        ${rij("zijn kant", "boven")}
+        ${rij("jouw kant", "onder")}
+        <div class="tsleven onder"><span>jouw levens</span><i></i></div>
+      </div>
+      <p>Je zet kaarten neer in <b>vijf kolommen</b>. Ze vechten voor je.</p>
+      <p><b>Haal zijn levens naar nul.</b></p>`;
+  }
+  if(k === "cirkel") return `<div class="tskop">De cirkel</div>
+      <div class="tscirkel">${tutBeeld("art/elementcirkel.png", cirkelBeeldSVG(), "cirkel")}</div>
+      <div class="tswaarom">${TUT_WAAROM.map(w => `<div class="tswr">${tutWaaromBeeld(w)}<span>${w.t}</span></div>`).join("")}</div>
+      <div class="tsregels"><div><b>Sterk tegen:</b> in een aanval meteen kapot.</div>
+        <div><b>Zwak tegen:</b> er gebeurt niets.</div>
+        <div><b>Verder:</b> gewone schade.</div></div>`;
+  return "";
+}
+function tutScherm(k){
+  return new Promise(klaar => {
+    let el = document.getElementById("tutscherm");
+    if(!el){ el = document.createElement("div"); el.id = "tutscherm"; document.body.appendChild(el); }
+    const eerste = k === "welkom";
+    el.innerHTML = `<div class="tsdoos ts-${k}">${tutSchermHTML(k)}
+      <div class="tsknoppen"><button class="tsok" data-act="btn" data-btn="tutverder">Verder</button>
+      ${eerste ? `<button class="tutweg" data-act="btn" data-btn="tutweg">tutorial overslaan</button>` : ""}</div></div>`;
+    el.classList.add("aan");
+    if(!FAST) AU.play("light");
+    TUTWACHT = () => { el.classList.remove("aan"); setTimeout(() => { if(!el.classList.contains("aan")) el.innerHTML = ""; }, 260); klaar(); };
+  });
+}
+/* ---- de pop-ups ---- */
+function tutAnker(spec){
+  if(!spec) return null;
+  const [soort, a, b] = String(spec).split(":");
+  let sel = null;
+  if(soort === "cre") sel = creSel(+a, +b);
+  else if(soort === "leven") sel = `.vbrij[data-side="${a}"] .plife`;
+  else if(soort === "cirkel") sel = ".cstrip";
+  else if(soort === "hand") sel = `.hcard[data-p="0"]`;
+  const lijst = sel ? [...document.querySelectorAll(sel)] : [];
+  const zicht = lijst.find(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
+  if(zicht) return zicht;
+  if(soort === "leven"){ const e = document.querySelector(`.pside[data-side="${a}"] .plife`); if(e && e.getBoundingClientRect().width) return e; }
+  return null;
+}
+function tutPop(st){
+  return new Promise(klaar => {
+    render();
+    let vang = document.getElementById("tutvang");
+    if(!vang){ vang = document.createElement("div"); vang.id = "tutvang"; document.body.appendChild(vang); }
+    let el = document.getElementById("tutpop2");
+    if(!el){ el = document.createElement("div"); el.id = "tutpop2"; document.body.appendChild(el); }
+    const w = st.waarom ? TUT_WAAROM.find(x => x.a + "-" + x.b === st.waarom) : null;
+    el.className = w ? "metbeeld" : "";
+    el.innerHTML = `${w ? `<div class="tpbeeld">${tutWaaromBeeld(w)}</div>` : ""}<div class="tptxt">${st.pop}</div>
+      <button class="tpok" data-act="btn" data-btn="tutverder">OK</button>`;
+    const anker = tutAnker(st.bij);
+    document.querySelectorAll(".tutwijs").forEach(x => x.classList.remove("tutwijs"));
+    if(anker) anker.classList.add("tutwijs");
+    if(st.rood) (st.rood || []).forEach(s => { const x = tutAnker(s); if(x) x.classList.add("tutwijs", "rood"); });
+    vang.classList.add("aan");
+    el.classList.add("aan");
+    /* Naast het ding waar het over gaat; past dat niet, dan eronder of erboven. */
+    const zet = () => {
+      const r = anker ? anker.getBoundingClientRect() : null;
+      const pw = el.offsetWidth, ph = el.offsetHeight, W = innerWidth, H = innerHeight, m = 12;
+      let x, y;
+      if(!r){ x = (W - pw) / 2; y = (H - ph) / 2; }
+      else if(r.right + m + pw < W - 8){ x = r.right + m; y = r.top + r.height / 2 - ph / 2; }
+      else if(r.left - m - pw > 8){ x = r.left - m - pw; y = r.top + r.height / 2 - ph / 2; }
+      else { x = r.left + r.width / 2 - pw / 2; y = r.bottom + m + ph < H - 8 ? r.bottom + m : r.top - m - ph; }
+      el.style.left = Math.max(8, Math.min(W - pw - 8, x)) + "px";
+      el.style.top = Math.max(8, Math.min(H - ph - 8, y)) + "px";
+    };
+    zet(); requestAnimationFrame(zet);
+    if(!FAST) AU.play("blip");
+    TUTWACHT = () => {
+      el.classList.remove("aan"); vang.classList.remove("aan");
+      document.querySelectorAll(".tutwijs").forEach(x => x.classList.remove("tutwijs", "rood"));
+      klaar();
+    };
+  });
+}
+function tutVerder(){
+  if(!TUTWACHT) return;
+  const k = TUTWACHT; TUTWACHT = null; k();
+}
+/* ---- de highlight: wat moet je nu aanklikken? ---- */
+function tutHlDoelen(){
+  const st = tutStap(), u = S && S.ui;
+  if(!st || !u || !tutActie(st) || TUTWACHT || S.over) return null;
+  const mijn = u.p === 0 && pending;
+  const hand = el => { const c = P(0).hand.find(cd => cd.el === el && !cd.lk); return c ? [`.hcard[data-p="0"][data-id="${c.id}"]`] : []; };
+  if(st.kaart){
+    if(u.mode === "main" && S.tp === 0) return {sel:hand(st.kaart), lab:st.hl || `Speel ${EL[st.kaart].name}`};
+    if(u.mode === "slot" && mijn) return {sel:[creSel(0, st.col)], lab:"Hier"};
+  }
+  if(st.flash){
+    if(u.mode === "priority" && mijn) return {sel:hand(st.flash), lab:st.hl || `Speel ${EL[st.flash].name}`};
+    if(u.mode === "slot" && mijn) return {sel:[creSel(0, st.col)], lab:st.hlPlek || "Hier"};
+  }
+  if(st.plek != null && u.mode === "slot" && mijn) return {sel:[creSel(0, st.plek)], lab:st.hl || "Hier"};
+  if(st.doel && u.mode === "choice" && u.kind === "cre" && mijn){
+    const sel = (u.valid || []).map(id => { const f = findCre(id); return f ? creSel(f.p, f.c) : null; }).filter(Boolean);
+    return {sel, lab:st.hl || "Kies"};
+  }
+  if(st.aanval != null && u.mode === "main" && S.tp === 0) return {sel:[creSel(0, st.aanval)], lab:st.hl || "Val aan", baan:st.aanval};
+  if(st.beurtAf && u.mode === "main" && S.tp === 0) return {sel:['#actions [data-btn="endturn"]'], lab:st.hl || "Einde beurt"};
+  return null;
+}
+function tutHlPaint(){
+  document.querySelectorAll(".tuthl").forEach(x => x.classList.remove("tuthl"));
+  const d = tutAan() && !FAST ? tutHlDoelen() : null;
+  const els = d ? d.sel.map(s => [...document.querySelectorAll(s)].find(e => e.getBoundingClientRect().width > 0)).filter(Boolean) : [];
+  document.body.classList.toggle("tutdim", els.length > 0);
+  els.forEach(e => e.classList.add("tuthl"));
+  let lab = document.getElementById("tutlabel"), baan = document.getElementById("tutbaan");
+  if(!els.length){ if(lab) lab.classList.remove("aan"); if(baan) baan.classList.remove("aan"); }
+  else {
+    if(!lab){ lab = document.createElement("div"); lab.id = "tutlabel"; document.body.appendChild(lab); }
+    lab.textContent = d.lab;
+    const r = els[0].getBoundingClientRect();
+    lab.classList.add("aan");
+    const lw = lab.offsetWidth, lh = lab.offsetHeight;
+    lab.style.left = Math.max(6, Math.min(innerWidth - lw - 6, r.left + r.width / 2 - lw / 2)) + "px";
+    lab.style.top = Math.max(6, r.top - lh - 10) + "px";
+    /* De lichtbalk: recht omhoog door de kolom, tot aan de overkant. */
+    if(d.baan != null){
+      if(!baan){ baan = document.createElement("div"); baan.id = "tutbaan"; document.body.appendChild(baan); }
+      const tegen = document.querySelector(creSel(1, d.baan));
+      const rt = tegen ? tegen.getBoundingClientRect() : {top: r.top - 260};
+      baan.style.left = (r.left + r.width * 0.2) + "px";
+      baan.style.width = (r.width * 0.6) + "px";
+      baan.style.top = rt.top + "px";
+      baan.style.height = Math.max(40, r.top - rt.top) + "px";
+      baan.classList.add("aan");
+    } else if(baan) baan.classList.remove("aan");
+  }
+  let weg = document.getElementById("tutwegknop");
+  if(tutAan() && !FAST && !TUTWACHT){
+    if(!weg){ weg = document.createElement("button"); weg.id = "tutwegknop"; weg.className = "tutweg";
+      weg.dataset.act = "btn"; weg.dataset.btn = "tutweg"; weg.textContent = "tutorial overslaan"; document.body.appendChild(weg); }
+  } else if(weg) weg.remove();
+}
+function tutBalk(){}        // de oude instructiebalk is er niet meer: tutHlPaint doet het werk
+/* Klik je in de aanvalsstap op een wezen aan de overkant, dan zegt Rocky er iets van. */
+function tutMisKlik(){
+  const st = tutStap();
+  if(!st || st.aanval == null) return;
+  const lv = levelVan(S.story) || {};
+  zegLos(lv.tutRechtdoor || "Ho. Recht vooruit.");
+  const b = document.getElementById("tutbaan");
+  if(b){ b.classList.remove("knip"); void b.offsetWidth; b.classList.add("knip"); }
+  AU.play("blip");
+}
+/* ---- Rocky's script ----
+   vijZetten[beurt] = lijst zetten; elke zet: {el, col, doelen:[...]} waarbij een doel "zelf"
+   (zijn net gespeelde kaart) of {p, el} is. vijAanval[beurt] = de kolommen waarmee hij aanvalt. */
 async function tutVijandZet(){
   const st = S && S.story;
   if(!st || !st.tut || st.tut.klaar || !st.vijZetten) return false;
@@ -18117,25 +18506,33 @@ async function tutVijandZet(){
   if(!zetten || !zetten.length) return false;
   st.vijZetten[S.turnNo[1]] = null;
   for(const z of zetten){
-    if(S.over) return true;
-    let i = P(1).hand.findIndex(c => c.el === z.el && !c.lk);
+    if(S.over || !tutAan()) return true;
+    let i = P(1).hand.findIndex(c => c.el === z.el && !c.lk && !c.var);
     if(i < 0){
-      const d = P(1).deck.findIndex(c => c.el === z.el && !c.lk);
+      const d = P(1).deck.findIndex(c => c.el === z.el && !c.lk && !c.var);
       if(d < 0) continue;
       P(1).hand.push(P(1).deck.splice(d, 1)[0]);
       i = P(1).hand.length - 1;
     }
     const kaart = P(1).hand.splice(i, 1)[0];
     botPlan = {mode: z.mode || "cre", col: z.col, doelId: null};
-    if(z.doelJij){
-      const f = allCreIds((cr, pp) => pp === 0)[0];
-      botPlan.doelId = f != null ? f : null;
-    }
+    st.tutDoelen = (z.doelen || []).map(x => x === "zelf" ? {zelf:kaart.id} : x);
+    st.tutNa = "rocky:" + z.el;
     await announcePlay(1, kaart, z.mode === "spell", z.col, false);
     await chainLoop();
+    st.tutDoelen = null;
     if(S.over) return true;
   }
   return true;
+}
+/* Welk doelwit kiest Rocky nu? Uit zijn script, in volgorde. */
+function tutVijandDoel(valid){
+  const st = S && S.story;
+  if(!tutAan() || !st.tutDoelen || !st.tutDoelen.length) return undefined;
+  const d = st.tutDoelen.shift();
+  if(d && d.zelf != null) return valid.includes(d.zelf) ? d.zelf : null;
+  const id = (valid || []).find(x => { const f = findCre(x); return f && f.p === d.p && (!d.el || f.cr.card.el === d.el); });
+  return id != null ? id : null;
 }
 /* Heeft dit level ergens in zijn praatje een keuze? Dan is de cutscene deel van het level. */
 function heeftKeuze(id){
@@ -18506,7 +18903,8 @@ const VELD = {
 
   "1-5": { regels:["🧱 <b>Rotsval.</b> Elke beurt komt er aan allebei de kanten een ✕ boven een willekeurige plek.",
                    "Staat daar aan het eind van die beurt iets, dan wordt het verpletterd. 🪨 Steen (ook ⛰️ Rots en kiezels) overleeft het.",
-                   "Magnus begint met een 🪨 Steen-ritueel in zijn middelste kolom."] },
+                   "Magnus begint met een 🪨 Steen-ritueel in zijn middelste kolom.",
+                   "Op <b>3</b> levens blijft hij één keer staan. Dan vullen jullie allebei aan tot <b>5</b> kaarten, en valt de rots op <b>twee</b> plekken per kant."] },
 
   "2-1": { regels:["✦ <b>Overleef 5 rondes.</b> Een ronde is één beurt van Seraf en één van jou. Hou je het zo lang uit, dan win je.",
                    "Seraf verslaan mag ook."] },
@@ -19302,8 +19700,12 @@ async function startStoryGevecht(id, variant, opts){
   if(L.fase2Hand != null) S.story.fase2Hand = L.fase2Hand;
   if(L.fase2Zacht) S.story.fase2Zacht = true;
   if(L.glitch){ S.story.glitchAan = true; if(!FAST) glitchAan(true); }
-  if(L.tut && L.tut.length){ S.story.tut = {i:0, stappen:L.tut.slice(), klaar:false, open:true};
-                             S.story.vijZetten = JSON.parse(JSON.stringify(L.vijZetten || {})); }
+  /* 🎓 De tutorial: alleen als jij zelf speelt (niet in de bot-tests). */
+  if(L.tut && L.tut.length && !isBot(0)){
+    S.story.tut = {i:0, stappen:L.tut.slice(), klaar:false};
+    S.story.vijZetten = JSON.parse(JSON.stringify(L.vijZetten || {}));
+    S.story.vijAanval = JSON.parse(JSON.stringify(L.vijAanval || {}));
+  }
   kzGevechtStart(id, L);
   S.story.startLevens = [P(0).life, P(1).life];
   addLog(`📖 <em>${L.naam}</em> — ${L.vijand} daagt je uit.`, true);
@@ -19420,6 +19822,18 @@ function storyDeel(L){
   dealHands(1);
   handGarantie(0, L.handJij); handGarantie(1, L.handVij);
   if(L.handJijVast) handVast(0, L.handJijVast);
+  /* Alleen de vaste kaarten, niets erbij: de rest gaat terug in je deck. */
+  if(L.handJijVast && L.handJijAlleen){
+    const hou = [];
+    L.handJijVast.forEach(el => { const i = P(0).hand.findIndex(c => c.el === el && !hou.includes(c)); if(i >= 0) hou.push(P(0).hand[i]); });
+    P(0).hand.filter(c => !hou.includes(c)).forEach(c => P(0).deck.unshift(c));
+    P(0).hand = hou;
+  }
+  /* Wat je trekt, in deze volgorde: de eerste komt bovenop. */
+  if(L.trekJij) L.trekJij.slice().reverse().forEach(el => {
+    const i = P(0).deck.findIndex(c => c.el === el && !c.lk && !c.var);
+    if(i >= 0) P(0).deck.push(P(0).deck.splice(i, 1)[0]);
+  });
   if(L.handVijVast) handVast(1, L.handVijVast);
   /* Eén kaart die onderin blijft liggen tot iemand hem er stiekem uit vist. */
   (L.onderop || []).forEach(k => {
@@ -19618,7 +20032,7 @@ function zegLos(zin){
 }
 function zegNu(soort){
   const st = S && S.story, cfg = st && st.zeg;
-  if(!cfg || tutOpen()) return;          // niet door een instructie van de tutorial heen praten
+  if(!cfg || tutOpen() || tutAan()) return;   // in de tutorial praat Rocky alleen uit zijn script
   /* ✦ 2-1: Seraf telt de rondes af. Eén, twee, drie… en in de laatste: bijna. */
   if(soort === "beurt" && st.overleef){
     const ronde = Math.ceil(S.gTurn / 2), tel = (levelVan(st) || {}).tellen || [];
@@ -20156,7 +20570,14 @@ function deckMetUpgrades(deck, vars){
   }
   return deck;
 }
-const aeBezit = () => (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k]);
+/* De vier stukken Oerkracht kwamen later bij de bazen. Wie die baas al versloeg, heeft zijn
+   stuk dus ook: dat lezen we uit de gehaalde levels. */
+const aeBezit = () => {
+  const uit = (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k]);
+  (SET.story.klaar || []).forEach(id => [].concat((STORY[id] || {}).geeft || [])
+    .forEach(k => { if(/^ae_oer_/.test(k) && !uit.includes(k)) uit.push(k); }));
+  return uit;
+};
 /* De knoptekst vat samen wat je gekozen hebt. */
 function ltGekozen(u){
   const l = u.lichten || [], sel = Array.isArray(u.ltSel) ? u.ltSel : (u.ltSel == null ? [] : [u.ltSel]);
@@ -20666,7 +21087,7 @@ const OVERWORLD_SMID = {na:"3-2"};   // de smidse zit op de plek van het level z
    nog niet; de rest staat als lege plank in beeld. Zet er een sleutel neer zodra de kaart
    bestaat en hij ligt meteen in de winkel. */
 const KOOPWAAR = {
-  ae: ["ae_draw3", "ae_offer", "ae_graf", "ae_hp3", "fu_grass"],
+  ae: ["ae_draw3", "ae_offer", "ae_graf", "fu_grass"],
   lt: ["greed", "vital", "darkhole", "master", "sterregen"]
 };
 /* Wat het kost, in sterren. Over alle 26 levels perfect gespeeld liggen er 78 sterren,
@@ -20676,7 +21097,7 @@ const KOOPWAAR = {
    Oerkracht (weg bij Magnus), Vitaliteit en Elementaal Meester. Het totaal blijft gelijk. */
 /* Alle aethers en lichtkaarten één ster goedkoper dan eerst. */
 const KOOP_PRIJS = {
-  ae_draw3:7, ae_offer:5, ae_graf:4, ae_hp3:5, fu_grass:3,
+  ae_draw3:7, ae_offer:5, ae_graf:4, fu_grass:3,
   greed:3, vital:2, darkhole:1, master:2, sterregen:2
 };
 const HART_PRIJS = [4, 5, 6];            // elk volgend hartje kost er één meer
@@ -21958,6 +22379,7 @@ function render(){
   });
   if(typeof aePijlen === "function") aePijlen();
   if(typeof kaartScrol === "function") kaartScrol();
+  if(typeof tutHlPaint === "function") tutHlPaint();
   setPreview(null);
 }
 
@@ -21988,7 +22410,7 @@ let LAATSTE_TIK = 0;
 function snelActie(){
   if(!S) return false;
   /* Staat de tutorial-pop-up open, dan is dit gewoon "Begrepen" — niks anders. */
-  if(typeof tutOpen === "function" && tutOpen()){ S.story.tut.open = false; render(); return true; }
+  if(typeof tutOpen === "function" && tutOpen()){ tutVerder(); return true; }
   if(M && (M.type === "info" || M.type === "deck" || M.type === "grave")){ M = null; render(); return true; }
   if(S.over) return false;
   const u = S.ui;
@@ -22180,6 +22602,7 @@ document.addEventListener("click", e => {
       if(cr && canAttack(cr, p)) doAct({t:"atk", c});
       return;
     }
+    if(u.mode === "main" && act === "cre" && p !== S.tp && S.tp === 0 && tutAan() && P(p).cols[c].cre) tutMisKlik();
   }
 });
 /* ================= NETWERK / REPLAY ================= */
@@ -23807,7 +24230,7 @@ function onBtn(btn, el, fromAction){
     case "storyverder": { const id = S.story && S.story.id; AU.zet("kaart"); decorWeg();
       if(id) praatStart(id, "win"); break; }
     case "tutweg": if(tutAan()) tutStop(false); break;
-    case "tutok": if(tutAan()){ S.story.tut.open = false; render(); } break;
+    case "tutverder": tutVerder(); break;
     case "storynog": {
       const id = S.story && S.story.id;
       if(!id) break;
@@ -24051,6 +24474,11 @@ function sneltoets(e){
 }
 document.addEventListener("keydown", e => {
   if(!S) return;
+  /* 🎓 Staat er een uitleg open, dan is Enter of spatie: OK. Verder doet het toetsenbord niets. */
+  if(TUTWACHT && e.key !== "Escape"){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); tutVerder(); }
+    return;
+  }
   const tg = e.target;
   if(tg && (tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")){
     if(e.key === "Enter"){
@@ -24077,7 +24505,7 @@ document.addEventListener("keydown", e => {
      keuze mee over terwijl je nog aan het lezen was. */
   if((e.key === "e" || e.key === "E") && (M && M.type === "praat")){ e.preventDefault(); praatSkip(); return; }
   if((e.key === "e" || e.key === "E") && tutOpen()){ e.preventDefault(); return; }
-  if(tutOpen() && (e.code === "Space" || e.key === "Enter")){ e.preventDefault(); S.story.tut.open = false; render(); return; }
+  if(tutOpen() && (e.code === "Space" || e.key === "Enter")){ e.preventDefault(); tutVerder(); return; }
   /* Cijfers en E: kaart kiezen, creature/spell, kolom — en een stap terug. */
   if(!M && !S.over && !e.ctrlKey && !e.metaKey && !e.altKey && sneltoets(e)){ e.preventDefault(); return; }
   if(e.key === "Escape"){
