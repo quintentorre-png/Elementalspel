@@ -3360,6 +3360,11 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
 .cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
 .cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:var(--vdim); text-shadow:1px 1px 0 #0b0d22}
 .cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
+.cstrip.ckring{padding:0}
+.cstrip.ckring .tbeeld.cirkel{width:auto; height:min(190px, 24dvh); aspect-ratio:240/300; display:block; margin:0 auto}
+.cstrip.ckring .tbeeld.cirkel img, .cstrip.ckring .tbeeld.cirkel svg{width:100%; height:100%; object-fit:contain; display:block}
+.cstrip.ckring:hover .tbeeld{filter:brightness(1.15)}
+.cstrip.ckring .tbeeld.cirkel.leeg .tterug{display:block; width:100%; height:100%}
 .vbrij{display:flex; flex-direction:column; gap:8px}
 .vbrij.aan .vbnaam::after{content:""; display:inline-block; margin-left:10px; vertical-align:1px;
   border:5px solid transparent; border-right:7px solid #fff; border-left:0; filter:drop-shadow(1px 1px 0 #0b0d22)}
@@ -4265,6 +4270,7 @@ function dealHands(starter){
   addLog(`<em>${pName(starter)}</em> begint: ${nStart} kaarten, eerste draw overgeslagen. ${pName(opp(starter))} start met ${nAnder} kaarten en trekt er meteen ${perBeurt} bij.`, true);
 }
 function newGame(keepSeed){
+  if(typeof ZOEK_AUTO !== "undefined" && ZOEK_AUTO) ZOEK[1] = 0;   // 🔮 alleen het verhaal kijkt vooruit
   GEN++;
   cid = 0; pending = null; busyFlag = false; botPlan = null; clearTimeout(botT);
   partijWeg();
@@ -6498,7 +6504,12 @@ function waitUI(mode, data){
   return new Promise(res => {
     S.ui = Object.assign({mode}, data); pending = {res}; render();
     const g = GEN;
-    if(data && isBot(data.p) && mode !== "handoff")
+    /* 🔮 In een proefspel meteen beslissen, zonder te wachten op een timer (die kost elke keer
+       een paar milliseconden). Na een flink aantal keer toch even een timer, zodat er niets
+       kan vastlopen. */
+    if(data && isBot(data.p) && mode !== "handoff" && (SIM || FAST) && (MICRO_N = (MICRO_N + 1) % 50))
+      Promise.resolve().then(() => { if(GEN === g) botDecide(mode); });
+    else if(data && isBot(data.p) && mode !== "handoff")
       setTimeout(() => { if(GEN === g) botDecide(mode); }, FAST ? 0 : 550 + Math.random()*450);
     /* 🎭 Je profiel (karakter en deck) vult zichzelf in: je koos het al in het menu. Online
        alleen voor je eigen stoel, en pas als er niets meer van de ander binnenkomt. */
@@ -9208,6 +9219,13 @@ function backToPhase(){
   if(!S.set.handoff && !S.vsBot) S.holder = S.tp;
   S.ui = {mode: S.phase === "battle" ? "battle" : "main"};
   render();
+  /* 🔮 In een proefspel: alleen de ander speelt vanzelf door. Is de zoeker weer aan de
+     beurt, dan is het proefspel klaar. */
+  if(SIM){
+    if(S.tp === SIM.p || S.over){ SIM.klaar(); return; }
+    clearTimeout(botT); botT = setTimeout(() => { if(SIM) botMove(); }, 0);
+    return;
+  }
   if(isBot(S.tp) && !S.over){
     clearTimeout(botT);
     botT = setTimeout(botMove, FAST ? 0 : 750 + Math.random()*400);
@@ -9408,6 +9426,8 @@ const sterVrij = () => Math.max(0, sterVerdiend() - sterUit() - sterBijInkt());
 function sterUitgeven(n){ SET.story.sterUit = sterUit() + n; saveSet(); }
 function gameOver(winner, reason){
   if(S.over) return;
+  /* 🔮 In een proefspel telt alleen wie er wint: geen fases, geen opslaan, geen praatje. */
+  if(SIM){ S.over = {winner, reason}; SIM.klaar(); return; }
   /* Sommige tegenstanders zijn nog niet klaar als hun levens op zijn. */
   /* Zolang de omslag naar een tweede fase nog bezig is, telt een tweede "hij is op nul" niet:
      anders eindigde het gevecht alsnog in de halve seconde voordat hij weer opstond. */
@@ -9703,7 +9723,15 @@ async function botMove(){
       if(col !== null){ declareAttack(col); return; }
       S.botStap = 2; backToPhase(); return;
     }
-    const play = botChoosePlay(p);
+    let play = botChoosePlay(p);
+    /* 🔮 Vooruitkijken: probeer de zetten eerst uit. Een vast script (Max, Brokko, de
+       fusievoorkeur) gaat altijd voor. */
+    const script = S.story && p === 1 && ((S.story.wolfScript && (S.story.maxPlays || 0) < 4) || (S.story.id === "1-2" && !S.story.brokkoSteen) || S.story.fuseVoorkeur);
+    if(ZOEK[p] && !SIM && !script && !(typeof tutAan === "function" && tutAan()) && (S.botPlays || 0) < 5){
+      const k = await zoekZet(p);
+      if(!S || S.over || S.tp !== p) return;
+      play = k && !k.stop ? k : null;
+    }
     if(play){
       S.botPlays++; if(play.mode === "spell") S.botSpells++; botPlan = play;
       await playFromHand(play.cardId);
@@ -9723,6 +9751,239 @@ async function botMove(){
     if(col !== null){ declareAttack(col); return; }
     advancePhase("endbattle"); return;
   }
+}
+/* ================= 🔮 VOORUITKIJKEN =================
+   De bot probeert zijn zetten eerst uit op een kopie van het spel: hij speelt de kaart, laat
+   de rest van zijn beurt gaan zoals hij normaal zou spelen, en (op diepte 2) ook de beurt
+   van de ander. Dan kijkt hij hoe het bord erbij ligt en kiest de zet die het best uitpakt.
+   Alles gebeurt op een kopie: het echte spel staat zolang stil. */
+let SIM = null;
+let MICRO_N = 0;
+/* 🔮 Timers en proefspellen mogen elkaar niet raken. Een timer van het echte spel (een fase
+   die omslaat, een zet van de bot) die afgaat terwijl er een proefspel loopt, wacht even tot
+   het proefspel klaar is; anders zou hij op de kopie werken in plaats van op het echte spel.
+   Een timer uit een proefspel die pas afgaat als dat proefspel al voorbij is, vervalt. */
+(() => {
+  if(typeof window === "undefined" || window.__simTimers) return;
+  window.__simTimers = true;
+  const echtZet = window.setTimeout.bind(window), echtWis = window.clearTimeout.bind(window);
+  const ids = new Map(); const BASIS = 1e12; let teller = BASIS;   // eigen nummers, die nooit op die van de browser lijken
+  window.setTimeout = function(fn, ms, ...a){
+    if(typeof fn !== "function") return echtZet(fn, ms, ...a);
+    /* Code die door een klik of toets loopt (window.event) hoort altijd bij het echte spel. */
+    const tag = (SIM && !window.event && !window.__buitenTimer) ? SIM.id : 0, mijn = teller++;
+    const w = () => {
+      if(tag === 0){
+        if(SIM){ ids.set(mijn, echtZet(w, 2)); return; }
+        ids.delete(mijn); return fn(...a);
+      }
+      ids.delete(mijn);
+      if(SIM && SIM.id === tag) return fn(...a);
+    };
+    ids.set(mijn, echtZet(w, ms));
+    return mijn;
+  };
+  /* Een timer die zeker bij het echte spel hoort, ook als er net een proefspel loopt. */
+  window.echteTimer = function(fn, ms){ window.__buitenTimer = true; try{ return window.setTimeout(fn, ms); } finally{ window.__buitenTimer = false; } };
+  window.clearTimeout = function(id){
+    if(ids.has(id)){ echtWis(ids.get(id)); ids.delete(id); return; }
+    if(typeof id === "number" && id >= BASIS) return;              // al afgegaan of vervallen
+    return echtWis(id);
+  };
+})();
+let SIMID = 0;
+let ZOEK = [0, 0];
+let ZOEK_BREED = 4;
+let ZOEK_AUTO = true;             // het verhaal zet de diepte van de tegenstander zelf
+let ZOEK_REACTIE = [0, 0];        // ook bij het reageren vooruitkijken (nog niet beter dan de vuistregels)
+/* 📖 Per level kan de tegenstander anders tegen het bord aankijken (zie zoekStand). */
+const ZOEKW_LEVEL = {"2-1": {"bord": 1.1}, "2-2": {"breed": 7, "leven": 0.47, "open": 0.35, "ritueel": 1.64}, "2-5": {"leven": 2, "reactie": 1}, "2-6": {"bord": 0.9, "breed": 2, "ei": 4.79, "hand": 1.8, "leven": 2.6, "open": 0.53}, "3-3": {"leven": 2, "reactie": 1}, "3-6": {"ei": 7.65, "hand": 1.71, "ritueel": 0.03}, "4-4": {"leven": 2, "reactie": 1}, "5-3": {"hand": 1.73}, "5-5": {"ei": 6.18}};
+const ZOEKW0 = {leven:1, bord:1, hand:1.8, ei:5, ritueel:1.2, open:0.7, dreig:1};
+let ZOEKW = [ZOEKW0, ZOEKW0];
+/* Hoe goed staat speler p ervoor? Levens tellen zwaarder naarmate ze opraken. */
+function zoekStand(p){
+  if(S.over) return S.over.winner === p ? 1000 : -1000;
+  const q = opp(p), W = ZOEKW[p] || ZOEKW0;
+  const lv = l => l <= 0 ? -60 : (l <= 2 ? l * 7 : (l <= 5 ? 14 + (l - 2) * 4.5 : 27.5 + (l - 5) * 2));
+  let v = (lv(P(p).life) - lv(P(q).life)) * W.leven;
+  const kant = (a, b) => {
+    let s = 0;
+    for(let c = 0; c < 5; c++){
+      const cr = P(a).cols[c].cre;
+      if(cr){
+        const k = atkOf(cr, a);
+        s += (cr.hp * 0.8 + k * 1.2 - cr.ent * 0.8) * W.bord;
+        if(!P(b).cols[c].cre && cr.ent === 0 && !EL[cr.card.el].stil) s += k * W.open;
+        if(cr.card.el === "ei") s += W.ei;
+      }
+      if(P(a).cols[c].spell) s += W.ritueel;
+    }
+    return s;
+  };
+  v += kant(p, q) - kant(q, p);
+  v += (Math.min(7, P(p).hand.length) - Math.min(7, P(q).hand.length)) * W.hand;
+  /* Wat er volgende beurt op mij afkomt: open lanen kosten levens, en wie tegenover een
+     sterkere staat, is zijn wezen waarschijnlijk kwijt. */
+  if(S.tp === p){
+    let dreig = 0, verlies = 0;
+    for(let c = 0; c < 5; c++){
+      const a = P(q).cols[c].cre; if(!a || a.ent > 1 || EL[a.card.el].stil) continue;
+      const k = atkOf(a, q), d = P(p).cols[c].cre;
+      if(!d || EL[a.card.el].direct) dreig += k;
+      else {
+        const o = dmgOutcome(a.card.el, d.card.el, k);
+        if(o === "kill" || (typeof o === "number" && o >= d.hp)) verlies += d.hp * 0.8 + atkOf(d, p) * 1.2;
+      }
+    }
+    v -= ((lv(P(p).life) - lv(P(p).life - dreig)) * W.leven + verlies * 0.6) * (W.dreig != null ? W.dreig : 1);
+  }
+  return v;
+}
+function simRace(prom, ms){
+  let t = null;
+  const klok = new Promise(r => { t = setTimeout(() => r("tijd"), ms); });
+  return Promise.race([prom, klok]).finally(() => clearTimeout(t));
+}
+async function simRestBeurt(p, geenSpel){
+  let n = 0;
+  while(!geenSpel && !S.over && S.tp === p && n++ < 6){
+    const r = botChoosePlay(p);
+    if(!r) break;
+    S.botPlays++; if(r.mode === "spell") S.botSpells++; botPlan = r;
+    await playFromHand(r.cardId);
+    if(P(p).hand.some(c => c.id === r.cardId)) break;
+  }
+  let m = 0;
+  while(!S.over && S.tp === p && m++ < 6){
+    const c = botChooseAttack(p);
+    if(c == null) break;
+    await declareAttack(c);
+  }
+}
+async function simZet(p, zet, diepte){
+  const bewaar = {S, pending, cid, busyFlag, botPlan, FAST, BOTSEATS, RNG, MUT, M, GEN, botT};
+  S = structuredClone(bewaar.S); pending = null; busyFlag = false; FAST = true; BOTSEATS = [0, 1];
+  const mijnId = ++SIMID;
+  /* Een eigen generatie: wat er van dit proefspel nog op een timer staat, valt straks dood. */
+  GEN = 1e9 + mijnId;
+  SIM = {p, id:mijnId, klaar:() => {}};
+  let waarde = 0;
+  try{
+    let r = await simRace(zet(), 1500);
+    if(r !== "tijd" && diepte >= 1 && !S.over && S.tp === p) r = await simRace(simRestBeurt(p, zet.stop), 1500);
+    if(r !== "tijd" && diepte >= 2 && !S.over){
+      busyFlag = false;
+      const rond = new Promise(res => { SIM.klaar = res; });
+      if(S.tp === p) advancePhase("endturn");
+      else if(!pending){ clearTimeout(botT); botT = setTimeout(() => { if(SIM && SIM.id === mijnId) botMove(); }, 0); }
+      r = await simRace(rond, 800);
+    }
+    waarde = zoekStand(p);
+  } catch(e){ waarde = zoekStand(p) - 5; }
+  finally{
+    /* Eerst laten uitlopen wat er van het proefspel nog onderweg is (de functies die net
+       klaar zijn, ronden hun laatste regels af), en pas dan het echte spel terugzetten. */
+    try{ await new Promise(r => setTimeout(r, 0)); }catch(e){}
+    if(botT !== bewaar.botT) clearTimeout(botT);
+    S = bewaar.S; pending = bewaar.pending; cid = bewaar.cid; busyFlag = bewaar.busyFlag; botPlan = bewaar.botPlan;
+    FAST = bewaar.FAST; BOTSEATS = bewaar.BOTSEATS; RNG = bewaar.RNG; MUT = bewaar.MUT; M = bewaar.M;
+    GEN = bewaar.GEN; botT = bewaar.botT;
+    SIM = null;
+  }
+  return waarde;
+}
+/* 🔮 Reageren met vooruitkijken: doorlaten, of een van de kaarten die kunnen. Op een kopie
+   speelt hij de reactie, de chain bouwt af, de beurt loopt door tot hij zelf weer aan zet is. */
+async function zoekReactie(p){
+  const top = S.stack[S.stack.length - 1];
+  if(!top) return null;
+  const heur = botPriority(p);
+  const kand = [{pass:true}];
+  if(heur) kand.push(Object.assign({heur:true}, heur));
+  const vrij = openCols(p), gezien = new Set();
+  for(const cd of P(p).hand){
+    if(cd.el === "licht" || !EL[cd.el].flash || !magSpelen(p, cd.id)) continue;
+    const key = cd.el + "|" + (cd.var || "");
+    if(gezien.has(key)) continue; gezien.add(key);
+    const cols = [];
+    if(top.type === "attack" && vrij.includes(top.col)) cols.push(top.col);
+    const beste = vrij.map(c => ({c, s:plekWaarde(p, cd.el, c)})).sort((a, b) => b.s - a.s)[0];
+    if(beste && !cols.includes(beste.c)) cols.push(beste.c);
+    for(const c of cols){
+      if(heur && heur.cardId === cd.id && heur.col === c) continue;
+      kand.push({cardId:cd.id, col:c, mode:"cre"});
+    }
+  }
+  if(kand.length <= 1) return null;
+  let best = null, bs = -1e9;
+  for(const k of kand){
+    const zet = async () => {
+      if(k.pass){ S.simPas = {p, n:S.stack.length}; }
+      else {
+        botPlan = {mode:k.mode || "cre", col:k.col, water:k.water, gras:k.gras, dodgeFrom:k.dodgeFrom, tributeId:k.tributeId, doelId:k.doelId};
+        const card = takeFromHand(p, k.cardId); if(!card) return;
+        if(card.el === "licht") await announceLight(p, card, true);
+        else if(k.mode === "fuse") await announceFusion(p, card, k.tributeId, aeFuseKey(p, card.el));
+        else await announcePlay(p, card, false, k.col, true);
+      }
+      await chainLoop();
+    };
+    const w = await simZet(p, zet, 2) + (k.pass ? 0.4 : 0) + (k.heur ? 0.2 : 0) + rnd() * 0.05;
+    if(w > bs){ bs = w; best = k; }
+  }
+  return best && !best.pass ? best : null;
+}
+/* Welke zetten zijn het proberen waard? Per kaart de beste plek als wezen, de beste plek als
+   ritueel, een fusie en een lichtkaart. En niets meer spelen. */
+function zoekKandidaten(p){
+  const uit = [], gezien = new Set();
+  const niet = id => S.botNiet && S.botNiet[id] === S.gTurn;
+  const hand = P(p).hand.filter(cd => magSpelen(p, cd.id) && !niet(cd.id));
+  const open = openCols(p);
+  for(const cd of hand){
+    const sleutel = cd.el + "|" + (cd.var || "") + "|" + (cd.lk || "");
+    if(gezien.has(sleutel)) continue; gezien.add(sleutel);
+    if(cd.el === "licht"){ if(lightPlayable(p, cd)) uit.push({cardId:cd.id, mode:"licht"}); continue; }
+    if(open.length && canPlayCreature(p)){
+      const cols = open.map(c => ({c, s:plekWaarde(p, cd.el, c)})).sort((a, b) => b.s - a.s).slice(0, 2);
+      cols.forEach(x => uit.push({cardId:cd.id, mode:"cre", col:x.c}));
+    }
+    const sp = freeSpellCols(p).filter(c => !P(p).cols[c].spell);
+    if(sp.length && spellZinvol(cd) && !(S.story && (levelVan(S.story) || {}).geenRitueel)){
+      const c = sp.map(c => ({c, s:(P(p).cols[c].cre ? -1 : 0) + (open.includes(c) ? 0.5 : 0)})).sort((a, b) => b.s - a.s)[0].c;
+      uit.push({cardId:cd.id, mode:"spell", col:c});
+    }
+    if(fuseOk(p, cd.el)){
+      const off = goedkoopsteOffer(p, fuseTributes(p, cd.el));
+      if(off) uit.push({cardId:cd.id, mode:"fuse", tributeId:off.id, fuseKey:aeFuseKey(p, cd.el)});
+    }
+  }
+  uit.push({stop:true});
+  return uit;
+}
+async function zoekZet(p){
+  const diepte = ZOEK[p];
+  let kand = zoekKandidaten(p);
+  if(kand.length <= 1) return {stop:true};
+  const maak = k => { const zet = k.stop ? async () => {} : async () => { S.botPlays++; if(k.mode === "spell") S.botSpells++; botPlan = Object.assign({}, k); await playFromHand(k.cardId); };
+    zet.stop = !!k.stop; return zet; };
+  /* Diepte 2 is duur: eerst alles snel op diepte 1, dan alleen de beste paar écht doorrekenen. */
+  const breed = (ZOEKW[p] && ZOEKW[p].breed) || ZOEK_BREED;
+  if(diepte >= 2 && kand.length > breed + 1){
+    const snel = [];
+    for(const k of kand) snel.push({k, w: await simZet(p, maak(k), 1)});
+    snel.sort((a, b) => b.w - a.w);
+    kand = snel.slice(0, breed).map(x => x.k);
+    if(!kand.some(k => k.stop)) kand.push({stop:true});
+  }
+  let best = null, bs = -1e9;
+  for(const k of kand){
+    const zet = k.stop ? async () => {} : async () => { S.botPlays++; if(k.mode === "spell") S.botSpells++; botPlan = Object.assign({}, k); await playFromHand(k.cardId); };
+    zet.stop = !!k.stop;
+    const w = await simZet(p, zet, diepte) + (k.stop ? 0.3 : 0) + rnd() * 0.05;
+    if(w > bs){ bs = w; best = k; }
+  }
+  return best;
 }
 /* 🐕 Waakhond voor de bot. Blijft de bot ergens hangen (een zet die niets deed, een
    keuze waarvan de timer wegviel, een fout midden in een beslissing), dan zou het potje
@@ -9858,17 +10119,32 @@ const BOTW0 = {blok:1.1, vrij:2.2, kill:6, imm:4.5, sterf:6, spellslot:4.5,
             eff:1.2, spell:0.9, spellbasis:2.0, drempel:2.2, limiet:1, fus:1, licht:1, spelltrig:1, slotspell:0, race:0, reserve:0, extraSpell:0, spellhand:4, spellvroeg:0, spellnu:0, cyclespell:4, aetherspell:2.5, levenprijs:2.4, offerprijs:0.9, offermax:4.5, extraLicht:1, extraMaster:1, handmax:6,
             offerdraw:1.6, doemkorting:4, fusdodge:1, doemaanval:6, waterheal:0.9,
             greedbasis:3.2, greedhand:1.6, lichtleven:3,
-            atk:2, spelUit:0, eerste:1, blokEerst:0};
+            atk:2, spelUit:0, eerste:1, blokEerst:0,
+            blokAltijd:3, blokMid:0.5, blokKlein:0.9, blokSterfMax:2, zetDrempel:7, reserveDreig:2, reserveLeeg:1,
+            dreigVuur:1, dreigGras:1, lokaas:1, ei:0};
 /* 📖 Verhaal-tegenstanders spelen hun rituelen wél: ze mogen naast hun wezen nog één
    spell neerleggen, en een ritueel die nú al iets doet telt zwaarder mee. Anders zie je
    het halve spel nooit terug bij de bazen. */
 const BOTW_STORY = Object.assign({}, BOTW0,
   {extraSpell:1, spellhand:4, spellnu:0.5, extraMaster:1});   // dat extra ritueel alleen met een volle hand
 let BOTW = [BOTW0, BOTW0];               // per stoel, zodat varianten tegen elkaar kunnen
-const wOf = p => (BOTW[p] === BOTW0 && S && S.story && p === 1) ? BOTW_STORY : (BOTW[p] || BOTW0);
+/* 📖 Per level kan de tegenstander anders spelen: wat hier staat gaat over BOTW_STORY heen.
+   Gevonden met veel testpotjes per level (zie de arena). */
+const BOTW_LEVEL = {"2-1": {"extraSpell": 0, "spell": 2.14}, "2-2": {"aetherspell": 3.46, "blok": 1.01, "dreigGras": 0.84, "imm": 2.22, "levenprijs": 4.1, "licht": 1.97, "reserveLeeg": 1, "spellbasis": 2.06, "spelltrig": 1.27}, "2-6": {"dreigVuur": 1.06, "fus": 0.76}, "3-6": {"blokAltijd": 2, "ei": 7.3, "fus": 0.72, "kill": 4.58, "spell": 0.87, "spellbasis": 0.98}, "5-3": {"dreigVuur": 1.8, "extraSpell": 0, "fus": 1.19}, "5-4": {"spellslot": 3.07, "vrij": 2.15}, "5-5": {"blokKlein": 1, "dreigVuur": 1.16, "fus": 0.71, "limiet": 1}};
+const BOTW_LV_CACHE = {};
+function wOf(p){
+  if(BOTW[p] === BOTW0 && S && S.story && p === 1){
+    const id = S.story.id, x = BOTW_LEVEL[id];
+    if(!x) return BOTW_STORY;
+    return BOTW_LV_CACHE[id] || (BOTW_LV_CACHE[id] = Object.assign({}, BOTW_STORY, x));
+  }
+  return BOTW[p] || BOTW0;
+}
 function creWaarde(cr, p){
   if(!cr) return 0;
-  return cr.hp * 1.1 + atkOf(cr, p) * 0.9 - cr.ent * 1.2;
+  /* 🥚 Een ei slaat niet, maar wordt een spin van 7: dat is wat het waard is. */
+  const ei = cr.card.el === "ei" ? wOf(opp(p)).ei : 0;
+  return cr.hp * 1.1 + atkOf(cr, p) * 0.9 - cr.ent * 1.2 + ei;
 }
 /* Hoeveel schade komt er volgende beurt ongehinderd door bij speler p? */
 function laneDreiging(p){
@@ -10343,7 +10619,9 @@ function botChooseAttackV2(p){
     const def = P(vij).cols[c].cre, kracht = atkOf(cr, p);
     let sc;
     if(!def || EL[cr.card.el].direct){
-      sc = 40 + kracht * 3;
+      /* Heeft de ander nog kaarten om mee te blokken, dan eerst de kleine klappen: die
+         trekken zijn hand leeg, en de grote komt daarna. Anders de grootste eerst. */
+      sc = 40 + (BOTSLIM[p] && wOf(p).lokaas && P(vij).hand.length ? (12 - kracht) * 0.5 : kracht * 3);
       if(kracht >= P(vij).life) sc = 1000;                   // dit wint het potje
     } else {
       const o = dmgOutcome(cr.card.el, def.card.el, kracht);
@@ -10361,6 +10639,9 @@ function botChooseAttackV2(p){
 }
 /* keuzeschakelaar: 1 = de oude bot (referentie voor tests), 2 = de slimme bot */
 let BOTLVL = [2, 2];
+/* De slimmere bot (kaarten bewaren voor de grote klap, de gevaarlijkste eerst raken, eerst
+   met de kleintjes slaan). Per stoel, zodat je oud en nieuw tegen elkaar kunt testen. */
+let BOTSLIM = [true, true];
 const botChoosePlay0  = p => (BOTLVL[p] === 1 ? botChoosePlayV1(p)   : botChoosePlayV2(p));
 /* Speelt een kaart als ritueel iets? Een vis of een token-beest doet als ritueel niets. */
 const spellZinvol = cd => !!cd && (effsOf(cd.el, "spell", cd).length > 0 || !!cd.var);
@@ -10371,10 +10652,11 @@ function botChoosePlay(p){
   /* Reactief spelen: kaarten in de hand zijn blokkers voor de beurt van de ander. Is deze
      zet niet echt sterk, dan houdt hij er genoeg achter (twee als de ander iets heeft staan
      dat kan slaan, anders één) en past hij liever. Dreigt er gevaar, dan geldt dit niet. */
-  if(r && r.sc != null && r.sc < 7 && !inNood(p) && !botInGevaar(p)){
+  const Wz = wOf(p);
+  if(r && r.sc != null && r.sc < Wz.zetDrempel && !inNood(p) && !botInGevaar(p)){
     const vij = opp(p);
     const dreigers = P(vij).cols.filter(x => x.cre && !EL[x.cre.card.el].stil).length;
-    const reserve = dreigers ? 2 : 1;
+    const reserve = dreigers ? Wz.reserveDreig : Wz.reserveLeeg;
     const flashNa = P(p).hand.filter(cd => cd.id !== r.cardId && cd.el !== "licht" && EL[cd.el].flash).length;
     const eigen = P(p).cols.filter(x => x.cre).length;
     if(flashNa < reserve && eigen > 0) r = null;
@@ -10479,6 +10761,16 @@ function botDecide(mode){
     if(!pick) pick = botSlotKeuze(S.ui.p, valid, S.ui.meta && S.ui.meta.el);
     feed({p: pick.p, c: pick.c}); return;
   }
+  if(mode === "priority" && ZOEK_REACTIE[S.ui.p] && ZOEK[S.ui.p] && !SIM && !(typeof tutAan === "function" && tutAan())){
+    const g = GEN, pp = S.ui.p;
+    zoekReactie(pp).then(r => {
+      if(GEN !== g || !pending || S.ui.mode !== "priority" || S.ui.p !== pp) return;
+      if(r){ botPlan = {mode: r.mode || "cre", col: r.col, water: r.water, gras: r.gras,
+                        dodgeFrom: r.dodgeFrom, tributeId: r.tributeId, doelId: r.doelId}; feed(r.cardId); }
+      else feed("pass");
+    });
+    return;
+  }
   if(mode === "priority"){
     const r = botPriority(S.ui.p);
     if(r){ botPlan = {mode: r.mode || "cre", col: r.col, water: r.water, gras: r.gras,
@@ -10566,6 +10858,7 @@ function shelobWeb(p){
   return cd;
 }
 function botPriority(p){
+  if(S.simPas && S.simPas.p === p && S.stack.length === S.simPas.n) return null;   // 🔮 proefspel: hier liet hij door
   if(S.story && p === 1 && cheatAan()) return null;          // 🔥 cheaton: hij reageert ook nergens op
   if(p === 1 && typeof tutAan === "function" && tutAan()) return null;   // 🎓 Rocky volgt in de tutorial zijn script
   const web = shelobWeb(p);
@@ -10622,9 +10915,26 @@ function botPriority(p){
          maar die mag je doorlaten als je weinig kaarten hebt: dan zijn je kaarten meer waard
          dan dat ene leven. Dreigt het dodelijk te worden, dan altijd. */
       const fl = P(p).hand.filter(cd => cd.el !== "licht" && EL[cd.el].flash && magSpelen(p, cd.id)).length;
-      const wilBlok = dood || kracht >= 3
-        || (kracht === 2 && (fl >= 2 || P(p).life <= 4 || rnd() < 0.5))
-        || (kracht <= 1 && ((fl >= 3 && rnd() < 0.9) || (fl === 2 && rnd() < 0.6) || P(p).life <= 2));
+      /* 🧠 Kaarten tellen, maar dan andersom: komen er deze beurt nog grotere klappen door een
+         open laan, dan houdt hij zijn blokkers daarvoor. Wie eerst met de kleintjes slaat om
+         zijn hand leeg te trekken, krijgt de grote klap niet meer gratis door. */
+      const groter = [];
+      for(let c=0;c<5;c++){
+        if(c === top.col) continue;
+        const cr = P(opp(p)).cols[c].cre;
+        if(!cr || !canAttack(cr, opp(p))) continue;
+        if(P(p).cols[c].cre && !EL[cr.card.el].direct) continue;
+        if(atkOf(cr, opp(p)) > kracht) groter.push(atkOf(cr, opp(p)));
+      }
+      if(BOTSLIM[p] && groter.length && fl - 1 < groter.length){
+        /* Haal ik het als ik de grote blok en deze doorlaat? Dan deze laten gaan. */
+        const naGroot = nog - groter.sort((a, b) => b - a).slice(0, fl).reduce((a, b) => a + b, 0);
+        if(naGroot < P(p).life) return null;
+      }
+      const Wb = wOf(p);
+      const wilBlok = dood || kracht >= Wb.blokAltijd
+        || (kracht === 2 && (fl >= 2 || P(p).life <= 4 || rnd() < Wb.blokMid))
+        || (kracht <= 1 && ((fl >= 3 && rnd() < Wb.blokKlein) || (fl === 2 && rnd() < Wb.blokKlein * 0.66) || P(p).life <= 2));
       if(!wilBlok) return null;
       if(vrij.includes(top.col)){
         /* De beste blokker: een die de klap overleeft (immuun, of meer levens dan de klap),
@@ -10642,6 +10952,8 @@ function botPriority(p){
           sc -= effWaarde(p, cd.el) * 0.35;                          // liever een kaart die je weinig kost
           if(sc > bsc){ bsc = sc; beste = cd; }
         }
+        /* Een blokker die er meteen aan gaat voor een klap van 1 of 2: dan liever de kaart houden. */
+        if(beste && !dood && bsc < 0 && kracht <= Wb.blokSterfMax) beste = null;
         if(beste) return {cardId: beste.id, col: top.col};
         if(dood){
           /* geen snel wezen? dan een lichtkaart die er een neerzet */
@@ -10787,8 +11099,11 @@ function botChoice(){
       /* al eerder in dit plan geraakt: hoeveel leven blijft er dan nog over? */
       const al = (m.eerder || []).filter(x => x === id).length;
       const rest = typeof o === "number" ? f.cr.hp - o * al : (al ? 0 : f.cr.hp);
+      /* Hoe gevaarlijk is hij? Wat hij slaat telt, en dubbel als zijn laan bij mij open ligt. */
+      const dreig = f.p === vij && BOTSLIM[p] ? wOf(p).dreigVuur * atkOf(f.cr, vij) * (P(p).cols[f.c].cre ? 0.6 : 1.1) : 0;
       if(f.p === vij) sc = al && rest <= 0 ? -30
-        : ((o === "kill" || (typeof o === "number" && rest <= o)) ? 6 + f.cr.hp : (o === "immuun" ? -5 : 1 + f.cr.hp * 0.2));
+        : ((o === "kill" || (typeof o === "number" && rest <= o)) ? 6 + f.cr.hp + dreig + (f.cr.card.el === "ei" ? wOf(p).ei : 0)
+           : (o === "immuun" ? -5 : 1 + f.cr.hp * 0.2 + dreig * 0.5 + (f.cr.card.el === "ei" ? wOf(p).ei * 0.4 : 0)));
       else sc = al ? -30 : (vuurOffert(p, f) ? offerVuurWaarde(p, f) : -20);   // 🟣 Brandoffer: instakill + trek een kaart; anders eigen schade
       if(sc > bs){ bs = sc; best = id; }
     }
@@ -10801,7 +11116,9 @@ function botChoice(){
     for(const id of ids){
       if(id === self) continue;                             // jezelf entanglen blokkeert je eigen aanval
       const f = F(id); if(!f) continue;
-      let sc = f.p === vij ? 3 + f.cr.hp * 0.3 : -3;
+      let sc = f.p === vij ? 3 + f.cr.hp * 0.3 : -8;           // een eigen wezen vastzetten: liever iets waar het niets doet
+      /* Wie hard slaat en vrij staat, zet hij het liefst vast: een blaadje houdt die klap thuis. */
+      if(BOTSLIM[p] && f.p === vij && f.cr.ent === 0) sc += wOf(p).dreigGras * atkOf(f.cr, vij) * (P(p).cols[f.c].cre ? 0.5 : 1.0);
       if(!entBaar(f.cr, f.p)) sc = -6;                      // 🔥 laat zich niet verstrikken
       if(f.p === vij && f.cr.card.el === "steen") sc += 5;   // dubbele drain
       if((m.eerder || []).includes(id)) sc -= 3.5;           // liever twee verschillende vastzetten
@@ -10881,9 +11198,9 @@ function cstripHTML(){
   const ring = [ORDER[0]];
   while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
   const tegel = el => `<span class="cst" style="background-image:url('${kaartSrc(KAART_BEELD[el])}')" title="${EL[el].name}"></span>`;
-  return `<button class="cstrip" data-act="btn" data-btn="cirkeltoggle" title="De elementcirkel: klik voor de grote versie">
-    <span class="cstrij">${ring.map(tegel).join('<span class="cspijl">&#9656;</span>')}<span class="cspijl">&#9656;</span></span>
-    <span class="cstxt">&#9656; STERK TEGEN &middot; KLIK VOOR MEER</span></button>`;
+  /* De cirkel staat er meteen helemaal, zoals in de tutorial. Klik erop voor de uitleg erbij. */
+  return `<button class="cstrip ckring" data-act="btn" data-btn="cirkeltoggle" title="De elementcirkel: klik voor de uitleg">
+    ${tutBeeld("art/elementcirkel.png", cirkelBeeldSVG(), "cirkel")}</button>`;
 }
 function cstripPaint(){
   const el = document.getElementById("cstrip"); if(!el) return;
@@ -12360,7 +12677,7 @@ function shareHTML(){
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
-const ELEMENTAAL_VERSIE = "9 okt · f";
+const ELEMENTAAL_VERSIE = "11 okt · a";
 function startHTML(){
   const open = HOME.open;
   const opPlek = SET.slot != null;
@@ -15104,12 +15421,29 @@ function praatPas(){
     w.style.setProperty("--sprpas", "1");
     const r = img.getBoundingClientRect(); if(!r.height) return;
     const rand = 12, f = Math.min(1, (r.bottom - rand) / r.height);
-    const v = f < 1 ? Math.max(0.3, f).toFixed(3) : "1";
-    w.style.setProperty("--sprpas", v);
-    PRAAT_PAS[praatPasSleutel(img.getAttribute("src"))] = v;
+    /* Nooit weer groter worden zolang het scherm even groot blijft: de tekstballon groeit en
+       krimpt met de tekst mee, en dan sprong de tekening tussen twee regels van formaat. */
+    /* Per personage, niet per tekening: elke tekening heeft een ander vel (vierkant, breed,
+       met veel of weinig lucht erboven). Paste één stand niet, dan krimpt het hele personage
+       mee, anders was hij in de ene regel groter dan in de volgende. */
+    const sl = praatPasSleutel(praatFamilie(w)), oud = PRAAT_PAS[sl];
+    const v = Math.min(f < 1 ? Math.max(0.3, f) : 1, oud != null ? +oud : 1).toFixed(3);
+    PRAAT_PAS[sl] = v;
+  });
+  /* En dan iedereen van die familie op dezelfde maat. */
+  document.querySelectorAll(".praatscherm:not(.reus) .praatsprite .sprwrap").forEach(w => {
+    const v = PRAAT_PAS[praatPasSleutel(praatFamilie(w))];
+    if(v != null) w.style.setProperty("--sprpas", v);
   });
 }
-window.addEventListener("resize", () => praatPas());
+/* Welk personage is dit? De naam van de tekening tot het eerste streepje of de eerste
+   liggende streep: art/rocky-til.png en art/rocky.png zijn allebei "rocky". */
+function praatFamilie(w){
+  const img = w.querySelector("img.sprbeeld");
+  const src = img ? (img.getAttribute("src") || "") : "";
+  return (src.split("/").pop() || "").replace(/\.[a-z]+$/, "").split(/[-_]/)[0];
+}
+window.addEventListener("resize", () => { for(const k in PRAAT_PAS) delete PRAAT_PAS[k]; praatPas(); });
 function spriteSVG(key){
   if(SPRITE_TERUG[key] && (!SPRITE_BEELD[key] || BEELD_KLAAR[SPRITE_BEELD[key]] === "fout")) return spriteSVG(SPRITE_TERUG[key]);
   /* De PNG hoort bij de échte naam; de pixelvorm mag geleend zijn zolang die er nog niet is.
@@ -15128,7 +15462,7 @@ function spriteSVG(key){
   const maat = SPRITE_MAAT[beeldKey] || SPRITE_MAAT[key];
   const pbm = SPRITE_PB[beeldKey] || SPRITE_PB[key];
   const ptm = SPRITE_PT[beeldKey] || SPRITE_PT[key];
-  const pas = beeld ? PRAAT_PAS[praatPasSleutel(beeld)] : null;
+  const pas = beeld ? PRAAT_PAS[praatPasSleutel((beeld.split("/").pop() || "").replace(/\.[a-z]+$/, "").split(/[-_]/)[0])] : null;
   const stl = (maat ? `--sprmaat:${maat};` : "") + (pbm ? `--pbmaat:${pbm};` : "") + (pas ? `--sprpas:${pas};` : "")
     + (ptm ? `--ptmaat:${ptm.m};--ptoorsprong:${ptm.o}%;` : "");
   /* Is de tekening er niet (of nog niet), dan staat de pixelvorm eronder klaar. Dat mocht
@@ -16236,7 +16570,7 @@ const STORY = {
     /* 🟣 Lichtval (elke klap op hem: hij trekt een kaart) en Roedel (elke beurt een gratis wolf). */
     aeVij:["ae_lichtval","ae_roedel"],
     levensVij:6,
-    wolfScript:true,
+    /* wolfScript (zijn vaste begin) staat uit: zonder script kijkt Max vooruit en wint hij vaker. */
     /* Lichtval krijgt Max halverwege van Seraf, en jij na de winst. Wurgranken ligt bij Knort. */
     geeft:"ae_lichtval",
     varianten:{
@@ -19101,6 +19435,7 @@ function praatNaLaden(r, L, verder){
   setTimeout(kijk, 40);
 }
 function praatStart(id, fase, klaar){
+  if(SIM){ if(klaar) klaar(); return; }
   if(fase === "intro") PRAAT_TEL = {};
   const L = STORY[id]; if(!L) return;
   HEMEL_TERUG = L.wereld === 5;
@@ -19123,7 +19458,7 @@ function praatLos(regels, klaar){
   praatScene();
   praatNaLaden(regels[0], Ll, () => { render(); praatTyp(); });
 }
-const praatLosAwait = regels => new Promise(res => praatLos(regels, res));
+const praatLosAwait = regels => SIM ? Promise.resolve() : new Promise(res => praatLos(regels, res));
 /* De regels van het huidige praatje: uit STORY, of los meegegeven. */
 function praatRegels(){
   if(!M || M.type !== "praat") return [];
@@ -19591,6 +19926,10 @@ async function startStoryGevecht(id, variant, opts){
   newGame();
   S.vsBot = true; S.set.handoff = false;
   S.mode = "classic"; S.story = {id, wereld:L.wereld, variant, schadeJij:0, mijnTijd:0};
+  /* 🔮 Vanaf wereld 2 kijkt de tegenstander vooruit. Wereld 1 is om te leren: daar niet. */
+  if(ZOEK_AUTO){ ZOEK[1] = L.zoek != null ? L.zoek : (L.wereld >= 2 ? 2 : 0);
+                 ZOEKW[1] = Object.assign({}, ZOEKW0, ZOEKW_LEVEL[id] || {});
+                 ZOEK_REACTIE[1] = ZOEKW[1].reactie ? 1 : 0; }
   clearTimeout(ZEGT); ZEGT = null;
   if(L.zeg){
     S.story.zeg = L.zeg;
@@ -24197,7 +24536,7 @@ function onBtn(btn, el, fromAction){
       else { M = {type:"story", hemel:true}; render(); }
       break;
     case "hemelaf": M = {type:"story"}; render(); break;
-    case "cirkeltoggle": document.body.classList.toggle("cirkelopen"); cstripPaint(); break;
+    case "cirkeltoggle": if(!TUTWACHT) tutScherm("cirkel"); break;
     case "lvwereld": if(M && M.lijst){ M.wereld = +(el && el.dataset.w) || 1; M.lvInfo = null; render(); } break;
     case "storykaart": M = {type:"story"}; render(); break;
     case "praatkeus": {
