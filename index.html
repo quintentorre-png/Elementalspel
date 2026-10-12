@@ -3935,7 +3935,7 @@ const BEGRIPPEN = {
   vast:      {naam:"Vast", uitleg:"🕸 Kan niet aanvallen tot de volgende eigen upkeep."},
   herspeel:  {naam:"Herspeel", uitleg:"Pak een eigen wezen op en zet die opnieuw neer, op dezelfde of een andere vrije plek. De levens blijven, de 🌿 vallen weg, en het speel-effect gaat opnieuw af (net als het ritueel in die kolom)."},
   plons:     {naam:"💧 Plons", uitleg:"Het speel-effect van een Waterplons: herspeel een eigen wezen. Daarna is de plons voorbij en heet de kaart gewoon 💧 Water."},
-  spiegel:   {naam:"💧 Water", uitleg:"Een Waterplons die al geplonsd heeft. Triggert Water opnieuw, dan herspeelt het niets meer: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. Kies je ander Water, dan geeft dat het weer door."},
+  spiegel:   {naam:"💧 Water", uitleg:"Een Waterplons die al geplonsd heeft. Triggert Water opnieuw, dan herspeelt het niets meer: het speel-effect van een andere eigen kaart naar keuze gaat nog een keer af. Kies je ander Water, dan geeft dat het weer door. Als ritueel kiest Water niet: het laat het speel-effect van het eigen wezen in zijn eigen kolom nog een keer gaan."},
   roepop:    {naam:"Roep op", uitleg:"Zet een kaart uit je graf op het veld. Het speel-effect gaat af."},
   offer:     {naam:"Offer", uitleg:"Vernietig een eigen wezen als prijs."},
   betaal:    {naam:"Betaal", uitleg:"Verlies levens als prijs. Dat telt niet als schade."},
@@ -4323,7 +4323,7 @@ function smeedToepas(){
   }
 }
 function newGame(keepSeed){
-  if(typeof ZOEK_AUTO !== "undefined" && ZOEK_AUTO) ZOEK[1] = 0;   // 🔮 alleen het verhaal kijkt vooruit
+  if(typeof ZOEK_AUTO !== "undefined" && ZOEK_AUTO) ZOEK[1] = 2;   // 🔮 ook buiten het verhaal kijkt de bot vooruit
   GEN++;
   cid = 0; pending = null; busyFlag = false; botPlan = null; clearTimeout(botT);
   partijWeg();
@@ -4478,6 +4478,14 @@ function wsTargets(p, bron, keten){
     if(sp && weg.indexOf(sp.card.id) < 0 && effsOf(sp.card.el, "spell", sp.card).length) uit.push(sp.card.id);
   }
   return uit;
+}
+/* 💧 Water als ritueel kiest niet vrij: het laat alleen het speel-effect gaan van het eigen
+   wezen in zijn eigen kolom. (Een Waterplons als ritueel kiest wel vrij; daarna is hij Water.) */
+function wsDoelen(p, e){
+  const alle = wsTargets(p, e.srcCard, e.keten);
+  if(e.origin !== "spell" || e.col == null) return alle;
+  const cr = P(p).cols[e.col] && P(p).cols[e.col].cre;
+  return cr && alle.includes(cr.card.id) ? [cr.card.id] : [];
 }
 /* ⛓ 5-3 · De Naad: een kolom die dicht is, is voor iedereen weg. Daar komt niets meer. */
 const kolDicht = c => !!(S && S.story && S.story.dicht && S.story.dicht.includes(c));
@@ -6919,7 +6927,7 @@ function effsOf(el, origin, card){
 /* De effecten die deze zet triggert, in de volgorde waarin ze straks resolven. */
 function plannedEffects(p, card, asSpell, col, opts){
   const trioDubbel = (el, lijst) => trioKracht(p, el) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
-  if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card));
+  if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card)).map(e => Object.assign(e, {col}));
   const o = opts || {};
   let own = o.forceEffs ? o.forceEffs.slice() : (o.skipOwn ? [] : effsOf(card.el, "creature", card));
   if(o.dubbel) own = own.concat(own.map(e => Object.assign({}, e)));   // 🟣 Getijdenstroom
@@ -6943,7 +6951,7 @@ function targetsForEff(p, e, selfId, cardEl, exclIds){
   if(e.el === "gras")  return allCreIds(cr => !skip(cr.card.id) && cr.card.id !== selfId);   // alles, behalve het gras zelf
   if(e.el === "steen") return allCreIds(cr => !skip(cr.card.id));
   if(e.el === "water") return waterTargets(p).filter(id => id !== selfId && !skip(id));
-  if(e.el === "ws")    return wsTargets(p, e.srcCard, e.keten).filter(id => !skip(id));
+  if(e.el === "ws")    return wsDoelen(p, e).filter(id => !skip(id));
   if(e.el === "kogel") return allCreIds((cr, pp) => pp !== p && !skip(cr.card.id));
   return [];
 }
@@ -7577,16 +7585,26 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
   await vuurVerzuipt(p, card, asSpell, col);
   await tweedeExemplaar(p, card, asSpell, col);
   /* 💧 Water gaat meteen af: oppakken en opnieuw neerzetten gebeurt nu, niet pas als de
-     keten afbouwt. Het herspeelde wezen komt daarna als nieuwe link op de keten. */
-  if(!asSpell && card.el === "water" && !card.var && !S.over){
-    const top = S.stack[S.stack.length - 1];
-    if(top && top.type === "play" && top.card === card){
-      S.stack.pop();
-      addLog(`💧 Water gaat meteen af.`);
-      await resolvePlay(top);
-    }
-  }
+     keten afbouwt. Dat geldt voor elk 💧-effect in deze zet: van de Waterplons zelf, maar ook
+     van een 💧-ritueel in de kolom. Het herspeelde wezen komt daarna als nieuwe link op de
+     keten, met zijn eigen speel-effect. */
+  await waterMeteen(p, card);
   return true;
+}
+/* 💧 Haal de 💧-effecten uit de zet die net op de keten ligt en doe ze nu. De rest van de zet
+   (een vuurtje, een ritueel dat iets anders doet) blijft gewoon op de keten liggen. */
+async function waterMeteen(p, card){
+  if(S.over) return;
+  const top = S.stack[S.stack.length - 1];
+  if(!top || top.type !== "play" || top.card !== card || !Array.isArray(top.plan)) return;
+  const nu = top.plan.filter(e => e && e.el === "water");
+  if(!nu.length) return;
+  top.plan = top.plan.filter(e => nu.indexOf(e) < 0);
+  const selfId = top.asSpell ? null : card.id;
+  addLog(`💧 Water gaat meteen af.`);
+  for(const e of nu){ if(S.over) break; await resolveEffect(effItem(p, e, selfId)); render(); }
+  /* Was dat alles wat de Waterplons deed, dan hoeft hij niet meer op de keten te wachten. */
+  if(!top.plan.length && card.el === "water" && S.stack.indexOf(top) >= 0) S.stack.splice(S.stack.indexOf(top), 1);
 }
 /* 🟣 Tweede exemplaar (5-2): van het eerste wezen dat de Verzamelaar elke beurt neerzet,
    heeft hij er nog een. Die komt er meteen bij: zelfde kaart, zelfde levens, geen effect. */
@@ -7635,6 +7653,8 @@ async function waterVerdringt(p, card, col, cre, flash){
   /* Eerst het water zelf als link: alleen wat het ritueel in zijn kolom doet. */
   const wplan = await declarePlan(p, card, false, col, {onField:true, skipOwn:true});
   pushPlay(p, card, false, col, flash, wplan === "cancel" ? [] : wplan);
+  await waterMeteen(p, card);           // ligt er een 💧-ritueel in de kolom: ook dat gaat meteen
+  if(S.over) return;
   const vrij = openCols(p);
   if(!vrij.length){ P(p).hand.push(dc); addLog(`💧 Geen vrije plek voor ${kIcon(dc)} ${kNaam(dc)}: terug naar de hand.`, true); render(); return; }
   const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})),
@@ -9032,8 +9052,8 @@ async function resolveEffect(it){
      Is dát ook een spiegel, dan spiegelt die door — maar nooit terug naar wie al geweest is. */
   if(it.el === "ws"){
     const bron = it.srcCard, keten = (it.keten || []).concat(bron ? [bron.id] : []);
-    const ids = wsTargets(p, bron, it.keten);
-    if(!ids.length){ addLog("💧 Water: geen andere eigen kaart om nog eens te laten gaan."); return; }
+    const ids = wsDoelen(p, it);
+    if(!ids.length){ addLog(it.origin === "spell" ? "💧 Water: er staat geen eigen wezen met een speel-effect in deze kolom." : "💧 Water: geen andere eigen kaart om nog eens te laten gaan."); return; }
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — ${effPrompt.ws}`, true, {k:"ws"});
     if(id === "fizzle" || id === null){ if(id === null) addLog("💧 Water: overgeslagen."); return; }
     const f = findKaart(id); if(!f) return;
@@ -9397,6 +9417,8 @@ async function grafOproep(p, soort, aeK){
 }
 async function startTurnSequence(){
   S.ui = {mode:"busy"}; S.botPlays = 0; S.botSpells = 0;
+  /* 🧠 Oefenpotjes voor het netwerk: leg de stand vast aan het begin van elke beurt. */
+  if(typeof window !== "undefined" && window.KM_LOG && !SIM) try{ window.KM_LOG.push([kenmerken(0), kenmerken(1)]); }catch(e){}
   /* Een tegenstander met `altijd` heeft altijd wat te zeggen — maar niet de hele partij
      dezelfde zin op het scherm. Zijn praatbel hoort bij zíjn beurt; komt hij van jouw beurt
      nog te staan, dan haal je hem weg voor die vastgeroest lijkt. */
@@ -9506,7 +9528,16 @@ function backToPhase(){
   /* 🔮 In een proefspel: alleen de ander speelt vanzelf door. Is de zoeker weer aan de
      beurt, dan is het proefspel klaar. */
   if(SIM){
-    if(S.tp === SIM.p || S.over){ SIM.klaar(); return; }
+    if(S.tp === SIM.p || S.over){
+      /* 🎲 Kijkt de zoeker verder dan één ronde (SIM.door), dan speelt hij zijn volgende eigen
+         beurt ook gewoon als bot uit, en pas daarna is het proefspel klaar. */
+      if(!S.over && SIM.door > 0 && S.gTurn !== SIM.eigenBeurt && S.gTurn !== SIM.doorBeurt){ SIM.door--; SIM.doorBeurt = S.gTurn; }
+      if(!S.over && SIM.doorBeurt != null && SIM.doorBeurt === S.gTurn){
+        clearTimeout(botT); botT = setTimeout(() => { if(SIM) botMove(); }, 0);
+        return;
+      }
+      SIM.klaar(); return;
+    }
     clearTimeout(botT); botT = setTimeout(() => { if(SIM) botMove(); }, 0);
     return;
   }
@@ -10016,8 +10047,11 @@ async function botMove(){
     /* 🔮 Vooruitkijken: probeer de zetten eerst uit. Een vast script (Max, Brokko, de
        fusievoorkeur) gaat altijd voor. */
     const script = S.story && p === 1 && ((S.story.wolfScript && (S.story.maxPlays || 0) < 4) || (S.story.id === "1-2" && !S.story.brokkoSteen) || S.story.fuseVoorkeur);
-    if(ZOEK[p] && !SIM && !script && !(typeof tutAan === "function" && tutAan()) && (S.botPlays || 0) < 5){
-      const k = await zoekZet(p);
+    /* 🔮 In een proefspel denkt de tegenstander ook een stap vooruit (ZOEK_TEGEN): dan zie je
+       of hij jouw zet afstraft, in plaats van dat hij gewoon zijn vuistregels volgt. */
+    const tegenZoek = !!(SIM && ZOEK_TEGEN[SIM.p] && S.tp !== SIM.p && !SIM.binnen);
+    if(((ZOEK[p] && !SIM) || tegenZoek) && !script && !(typeof tutAan === "function" && tutAan()) && (S.botPlays || 0) < 5){
+      const k = tegenZoek ? await zoekZet(p, 1) : (ZOEK[p] >= 3 ? await zoekZetMC(p) : await zoekZet(p));
       if(!S || S.over || S.tp !== p) return;
       play = k && !k.stop ? k : null;
     }
@@ -10047,6 +10081,9 @@ async function botMove(){
    van de ander. Dan kijkt hij hoe het bord erbij ligt en kiest de zet die het best uitpakt.
    Alles gebeurt op een kopie: het echte spel staat zolang stil. */
 let SIM = null;
+/* De proefspellen die nu lopen, van buiten naar binnen. Een proefspel kan er een ander in
+   starten (de tegenstander denkt in de simulatie zelf ook vooruit). */
+const SIMSTAPEL = (typeof window !== "undefined") ? (window.__SIMSTAPEL = window.__SIMSTAPEL || []) : [];
 let MICRO_N = 0;
 /* 🔮 Timers en proefspellen mogen elkaar niet raken. Een timer van het echte spel (een fase
    die omslaat, een zet van de bot) die afgaat terwijl er een proefspel loopt, wacht even tot
@@ -10057,25 +10094,46 @@ let MICRO_N = 0;
   window.__simTimers = true;
   const echtZet = window.setTimeout.bind(window), echtWis = window.clearTimeout.bind(window);
   const ids = new Map(); const BASIS = 1e12; let teller = BASIS;   // eigen nummers, die nooit op die van de browser lijken
+  /* ⏩ Proefspellen lopen op een eigen klok: hun timers wachten niet echt, ze gaan in volgorde
+     van hun tijd af, zo snel als het kan (een bericht naar onszelf in plaats van een echte
+     timer, die de browser na een paar keer op minstens 4 ms zet). */
+  const vq = []; let vnu = 0, vseq = 0, vpomp = false;
+  const mc = (typeof MessageChannel !== "undefined") ? new MessageChannel() : null;
+  const vplan = () => { if(!vpomp && vq.length){ vpomp = true; mc.port2.postMessage(0); } };
+  if(mc) mc.port1.onmessage = () => {
+    vpomp = false;
+    if(!vq.length) return;
+    let k = 0; for(let i = 1; i < vq.length; i++) if(vq[i].t < vq[k].t || (vq[i].t === vq[k].t && vq[i].s < vq[k].s)) k = i;
+    const x = vq.splice(k, 1)[0]; vnu = Math.max(vnu, x.t);
+    try{ x.fn(); } finally{ vplan(); }
+  };
   window.setTimeout = function(fn, ms, ...a){
     if(typeof fn !== "function") return echtZet(fn, ms, ...a);
     /* Code die door een klik of toets loopt (window.event) hoort altijd bij het echte spel. */
-    const tag = (SIM && !window.event && !window.__buitenTimer) ? SIM.id : 0, mijn = teller++;
+    const ev = window.event, klik = !!ev && !(mc && ev.target === mc.port1);   // ons eigen pompbericht telt niet als klik
+    const tag = (SIM && !klik && !window.__buitenTimer) ? SIM.id : 0, mijn = teller++;
+    /* ⏩ VIRTUEEL (testen, oefenpotjes van de bot): dan loopt ook het echte spel op de eigen klok. */
+    const virt = mc && (tag !== 0 || (window.VIRTUEEL && !klik && !window.__buitenTimer));
+    const zetV = (f, d) => { const x = {t:vnu + Math.max(0, +d || 0), s:vseq++, fn:f}; vq.push(x); ids.set(mijn, {v:x}); vplan(); };
     const w = () => {
       if(tag === 0){
-        if(SIM){ ids.set(mijn, echtZet(w, 2)); return; }
+        if(SIM){ if(virt) zetV(w, 2); else ids.set(mijn, echtZet(w, 2)); return; }
         ids.delete(mijn); return fn(...a);
       }
+      if(SIM && SIM.id !== tag && virt && (window.__SIMSTAPEL || []).includes(tag)){ zetV(w, 2); return; }   // van een proefspel daarbuiten: wacht
       ids.delete(mijn);
       if(SIM && SIM.id === tag) return fn(...a);
     };
+    if(virt){ zetV(w, ms); return mijn; }
     ids.set(mijn, echtZet(w, ms));
     return mijn;
   };
   /* Een timer die zeker bij het echte spel hoort, ook als er net een proefspel loopt. */
   window.echteTimer = function(fn, ms){ window.__buitenTimer = true; try{ return window.setTimeout(fn, ms); } finally{ window.__buitenTimer = false; } };
   window.clearTimeout = function(id){
-    if(ids.has(id)){ echtWis(ids.get(id)); ids.delete(id); return; }
+    if(ids.has(id)){ const h = ids.get(id); ids.delete(id);
+      if(h && h.v){ const i = vq.indexOf(h.v); if(i >= 0) vq.splice(i, 1); return; }
+      echtWis(h); return; }
     if(typeof id === "number" && id >= BASIS) return;              // al afgegaan of vervallen
     return echtWis(id);
   };
@@ -10090,7 +10148,42 @@ const ZOEKW_LEVEL = {"2-1": {"bord": 1.1}, "2-2": {"breed": 7, "leven": 0.47, "o
 const ZOEKW0 = {leven:1, bord:1, hand:1.8, ei:5, ritueel:1.2, open:0.7, dreig:1};
 let ZOEKW = [ZOEKW0, ZOEKW0];
 /* Hoe goed staat speler p ervoor? Levens tellen zwaarder naarmate ze opraken. */
+/* 🧠 Het geleerde netwerk: geeft de kans (0 tot 1) dat speler p wint vanuit deze stand.
+   BREIN = {lagen:[{w, b}, ...]}, getraind op oefenpotjes (leren/train.py). BREIN_AAN zegt per
+   stoel of de bot het gebruikt in plaats van de handgeschreven formule hieronder. */
+let BREIN = null, BREIN_AAN = [false, false], BREIN_STOEL = [null, null];   // BREIN_STOEL: per stoel een eigen netwerk (om er twee te vergelijken)
+const breinVan = p => BREIN_STOEL[p] || ((BREIN && BREIN_AAN[p]) ? BREIN : null);
+/* Ligt er een brein.json naast het spel (uit de training), dan gebruikt de bot dat, maar
+   alleen als het bij deze versie van het spel past (evenveel getallen per stand). */
+function breinLaad(){
+  try{
+    if(typeof fetch !== "function" || (typeof location !== "undefined" && location.protocol === "file:")) return;
+    fetch("brein.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : null).then(j => {
+      if(!j || !j.lagen) return;
+      BREIN = j; BREIN_AAN = [true, true];      // past hij niet bij deze versie, dan valt zoekStand terug op de formule
+    }).catch(() => {});
+  }catch(e){}
+}
+function breinKans(p, br){
+  let h = kenmerken(p);
+  const L = (br || BREIN).lagen;
+  for(let i = 0; i < L.length; i++){
+    const W = L[i].w, B = L[i].b, n = B.length, uit = new Array(n);
+    for(let j = 0; j < n; j++){
+      let s = B[j];
+      for(let k = 0; k < h.length; k++){ const x = h[k]; if(x) s += x * W[k][j]; }
+      uit[j] = i < L.length - 1 ? (s > 0 ? s : 0) : 1 / (1 + Math.exp(-s));
+    }
+    h = uit;
+  }
+  return h[0];
+}
 function zoekStand(p){
+  const br = breinVan(p);
+  if(br && (br.ok != null ? br.ok : (br.ok = br.breed === kenmerken(p).length))){
+    if(S.over) return S.over.winner === p ? 100 : 0;
+    return 100 * breinKans(p, br);
+  }
   if(S.over) return S.over.winner === p ? 1000 : -1000;
   const q = opp(p), W = ZOEKW[p] || ZOEKW0;
   const lv = l => l <= 0 ? -60 : (l <= 2 ? l * 7 : (l <= 5 ? 14 + (l - 2) * 4.5 : 27.5 + (l - 5) * 2));
@@ -10150,12 +10243,13 @@ async function simRestBeurt(p, geenSpel){
   }
 }
 async function simZet(p, zet, diepte){
-  const bewaar = {S, pending, cid, busyFlag, botPlan, FAST, BOTSEATS, RNG, MUT, M, GEN, botT};
+  const bewaar = {S, pending, cid, busyFlag, botPlan, FAST, BOTSEATS, RNG, MUT, M, GEN, botT, SIM};
   S = structuredClone(bewaar.S); pending = null; busyFlag = false; FAST = true; BOTSEATS = [0, 1];
   const mijnId = ++SIMID;
   /* Een eigen generatie: wat er van dit proefspel nog op een timer staat, valt straks dood. */
   GEN = 1e9 + mijnId;
-  SIM = {p, id:mijnId, klaar:() => {}};
+  SIM = {p, id:mijnId, klaar:() => {}, binnen:!!bewaar.SIM};
+  SIMSTAPEL.push(mijnId);
   let waarde = 0;
   try{
     let r = await simRace(zet(), 1500);
@@ -10177,9 +10271,74 @@ async function simZet(p, zet, diepte){
     S = bewaar.S; pending = bewaar.pending; cid = bewaar.cid; busyFlag = bewaar.busyFlag; botPlan = bewaar.botPlan;
     FAST = bewaar.FAST; BOTSEATS = bewaar.BOTSEATS; RNG = bewaar.RNG; MUT = bewaar.MUT; M = bewaar.M;
     GEN = bewaar.GEN; botT = bewaar.botT;
-    SIM = null;
+    SIMSTAPEL.splice(SIMSTAPEL.lastIndexOf(mijnId), 1);
+    SIM = bewaar.SIM;
   }
   return waarde;
+}
+/* 🎲 Zoeken met gokken (ZOEK 3). De bot weet niet wat jij in je hand hebt en in welke
+   volgorde jouw stapel ligt. Dus speelt hij elke mogelijke zet een paar keer uit, telkens met
+   een andere gok voor jouw hand (uit alle kaarten die hij niet kan zien), en kijkt hij een
+   ronde verder dan alleen jouw antwoord. Zo ziet hij zelf dat alles neerleggen jou alleen
+   doelwitten geeft: in de meeste gokken heb jij het tegenelement en ruim je alles op. */
+let ZOEK_MC = {gokken:6, door:1};
+function simGok(p){
+  const q = opp(p);
+  const meng = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  /* Wat hij niet ziet: de hand en de stapel van de ander (met Alziend ziet hij die hand wel),
+     en de volgorde van zijn eigen stapel. */
+  if(hasAe(p, "ae_alziend")) meng(P(q).deck);
+  else {
+    const n = P(q).hand.length, pool = meng(P(q).hand.concat(P(q).deck));
+    P(q).hand = pool.slice(0, n); P(q).deck = pool.slice(n);
+  }
+  meng(P(p).deck);
+}
+async function simZetMC(p, zet){
+  const bewaar = {S, pending, cid, busyFlag, botPlan, FAST, BOTSEATS, RNG, MUT, M, GEN, botT, SIM};
+  S = structuredClone(bewaar.S); pending = null; busyFlag = false; FAST = true; BOTSEATS = [0, 1];
+  const mijnId = ++SIMID;
+  GEN = 1e9 + mijnId;
+  SIM = {p, id:mijnId, klaar:() => {}, door:ZOEK_MC.door, eigenBeurt:S.gTurn, binnen:!!bewaar.SIM};
+  SIMSTAPEL.push(mijnId);
+  let waarde = 0;
+  try{
+    simGok(p);
+    let r = await simRace(zet(), 1500);
+    if(r !== "tijd" && !S.over && S.tp === p) r = await simRace(simRestBeurt(p, zet.stop), 1500);
+    if(r !== "tijd" && !S.over){
+      busyFlag = false;
+      const rond = new Promise(res => { SIM.klaar = res; });
+      if(S.tp === p) advancePhase("endturn");
+      else if(!pending){ clearTimeout(botT); botT = setTimeout(() => { if(SIM && SIM.id === mijnId) botMove(); }, 0); }
+      r = await simRace(rond, 3000);
+    }
+    waarde = zoekStand(p);
+  } catch(e){ waarde = zoekStand(p) - 5; }
+  finally{
+    try{ await new Promise(r => setTimeout(r, 0)); }catch(e){}
+    if(botT !== bewaar.botT) clearTimeout(botT);
+    S = bewaar.S; pending = bewaar.pending; cid = bewaar.cid; busyFlag = bewaar.busyFlag; botPlan = bewaar.botPlan;
+    FAST = bewaar.FAST; BOTSEATS = bewaar.BOTSEATS; RNG = bewaar.RNG; MUT = bewaar.MUT; M = bewaar.M;
+    GEN = bewaar.GEN; botT = bewaar.botT;
+    SIMSTAPEL.splice(SIMSTAPEL.lastIndexOf(mijnId), 1);
+    SIM = bewaar.SIM;
+  }
+  return waarde;
+}
+async function zoekZetMC(p){
+  const kand = zoekKandidaten(p);
+  if(kand.length <= 1) return {stop:true};
+  const maak = k => { const zet = k.stop ? async () => {} : async () => { S.botPlays++; if(k.mode === "spell") S.botSpells++; botPlan = Object.assign({}, k); await playFromHand(k.cardId); };
+    zet.stop = !!k.stop; return zet; };
+  const n = ZOEK_MC.gokken;
+  const som = kand.map(() => 0);
+  for(let g = 0; g < n; g++){
+    for(let i = 0; i < kand.length; i++) som[i] += await simZetMC(p, maak(kand[i]));
+  }
+  let best = null, bs = -1e9;
+  kand.forEach((k, i) => { const w = som[i] / n + (k.stop ? 0.3 : 0) + rnd() * 0.05; if(w > bs){ bs = w; best = k; } });
+  return best;
 }
 /* 🔮 Reageren met vooruitkijken: doorlaten, of een van de kaarten die kunnen. Op een kopie
    speelt hij de reactie, de chain bouwt af, de beurt loopt door tot hij zelf weer aan zet is. */
@@ -10266,6 +10425,38 @@ function lichtZinvolBot(p, cd){
 }
 /* 🧊 IJs als wezen alleen waar het iets kan overnemen. */
 const ijsCreOk = (p, cd, col) => !(cd && cd.var === "ijs") || ijsOverCre(p).includes(col);
+/* 🧠 De stand als getallen, vanuit speler p bekeken (eerst p zelf, dan de ander). Daar leert
+   het netwerk van: wie wint er vanuit zo'n stand. Elke kolom houdt zijn plek, zodat het
+   netwerk ziet wat er tegenover elkaar staat. */
+let AE_LIJST = null;
+const KM_VARS = ["rots", "plasma", "roos", "ijs", "kiezel"];
+function kenmerken(p){
+  if(!AE_LIJST) AE_LIJST = Object.keys(AETHERS).sort();
+  const uit = [];
+  const elVec = el => { const i = ORDER.indexOf(el); return [0, 1, 2, 3].map(k => k === i ? 1 : 0).concat([i < 0 ? 1 : 0]); };
+  for(const z of [p, opp(p)]){
+    const pl = P(z);
+    uit.push(Math.max(0, pl.life) / 10, pl.hand.length / 10);
+    const tel = [0, 0, 0, 0, 0, 0];
+    pl.hand.forEach(cd => { if(cd.lk || cd.el === "licht") tel[5]++; else { const i = ORDER.indexOf(cd.el); tel[i < 0 ? 4 : i]++; } });
+    tel.forEach(n => uit.push(n / 5));
+    uit.push(pl.deck.length / 30, pl.grave.length / 30);
+    for(let c = 0; c < 5; c++){
+      const cr = pl.cols[c].cre, sp = pl.cols[c].spell;
+      if(cr){
+        uit.push(1, ...elVec(cr.card.el), Math.min(cr.hp, 30) / 10, Math.min(atkOf(cr, z), 30) / 10, Math.min(cr.ent || 0, 6) / 3,
+          (S.tp === z && canAttack(cr, z)) ? 1 : 0);
+        KM_VARS.forEach(v => uit.push(cr.card.var === v ? 1 : 0));
+        uit.push(cr.card.fusie ? 1 : 0);
+      } else { for(let k = 0; k < 16; k++) uit.push(0); }
+      if(sp) uit.push(1, ...elVec(sp.card.el)); else uit.push(0, 0, 0, 0, 0, 0);
+    }
+    const ae = aeList(z);
+    AE_LIJST.forEach(k => uit.push(ae.includes(k) ? 1 : 0));
+  }
+  uit.push(S.tp === p ? 1 : 0, Math.min(S.gTurn || 0, 40) / 40);
+  return uit;
+}
 function zoekKandidaten(p){
   const uit = [], gezien = new Set();
   const niet = id => S.botNiet && S.botNiet[id] === S.gTurn;
@@ -10292,8 +10483,9 @@ function zoekKandidaten(p){
   uit.push({stop:true});
   return uit;
 }
-async function zoekZet(p){
-  const diepte = ZOEK[p];
+let ZOEK_TEGEN = [true, true];       // in zijn gedachten denkt de tegenstander ook een stap vooruit (57% tegen zonder)
+async function zoekZet(p, diepteVast){
+  const diepte = diepteVast || ZOEK[p];
   let kand = zoekKandidaten(p);
   if(kand.length <= 1) return {stop:true};
   const maak = k => { const zet = k.stop ? async () => {} : async () => { S.botPlays++; if(k.mode === "spell") S.botSpells++; botPlan = Object.assign({}, k); await playFromHand(k.cardId); };
@@ -10450,7 +10642,7 @@ const BOTW0 = {blok:1.1, vrij:2.2, kill:6, imm:4.5, sterf:6, spellslot:4.5,
             eff:1.2, spell:0.9, spellbasis:2.0, drempel:2.2, limiet:1, fus:1, licht:1, spelltrig:1, slotspell:0, race:0, reserve:0, extraSpell:0, spellhand:4, spellvroeg:0, spellnu:0, cyclespell:4, aetherspell:2.5, levenprijs:2.4, offerprijs:0.9, offermax:4.5, extraLicht:1, extraMaster:1, handmax:6,
             offerdraw:1.6, doemkorting:4, fusdodge:1, doemaanval:6, waterheal:0.9,
             greedbasis:3.2, greedhand:1.6, lichtleven:3,
-            atk:2, spelUit:0, eerste:0, blokEerst:0,   // eerste:0 = wie begint speelt gewoon (15.000 commander-potjes: zo wint de beginner vaker)
+            atk:2, spelUit:0, eerste:1, blokEerst:0,   // eerste:1 = wie begint legt één ritueel en houdt de rest achter (alles neerleggen = de ander doelwitten geven)
             blokAltijd:3, blokMid:0.5, blokKlein:0.9, blokSterfMax:2, zetDrempel:7, reserveDreig:2, reserveLeeg:1,
             dreigVuur:1, dreigGras:1, lokaas:1, ei:0};
 /* 📖 Verhaal-tegenstanders spelen hun rituelen wél: ze mogen naast hun wezen nog één
@@ -13055,7 +13247,7 @@ function shareHTML(){
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
-const ELEMENTAAL_VERSIE = "12 okt · c";
+const ELEMENTAAL_VERSIE = "13 okt · f";
 function startHTML(){
   const open = HOME.open;
   const opPlek = SET.slot != null;
@@ -13202,9 +13394,9 @@ const WERELDEN = {
 const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => (w === 2 || w === 3 ? [1,2,3,4,5,6] : [1,2,3,4,5]).map(n => w + "-" + n)));
 /* Wereld 2: na 2-1 splitst het. De Struik (2-2) is een doodlopend zijpad; de herberg van de
    Waardin (2-3) is de weg verder, dan het web van Kaelid (2-4), dan Max (2-5). */
-/* Wereld 3: na 3-1 splitst het. Tang (3-2) is een doodlopend zijpad met de smidse,
-   het Rookgordijn (3-3) is de weg verder. */
-const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-1"]};
+/* Wereld 3: 3-1 leidt naar Tang (3-2). Daarna splitst het: het Rookgordijn (3-3) en het
+   circus (3-4) leiden allebei naar Klinknagel (3-5). Eén van de twee is genoeg. */
+const STORY_VEREIST = {"2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-2"], "3-4":["3-2"], "3-5":["3-3","3-4"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -16255,7 +16447,7 @@ const STORY = {
             {s:"nimbus_kip", kleur:"#dfe8f2", mu:"w1_rustig", t:"TOK! Ik zei het toch. Nog een keer? Ik heb alle tijd, ik ben lucht."}
           ] }
     },
-    geeft:"ae_watercycle",     // 💧 Getijdenstroom; zo heb je in wereld 1 van elk element al een aether
+    geeft:["ae_watercycle", "ae_grassx2"],     // 💧 Getijdenstroom en 🌿 Woekergroei
     begint:1
   },
   "1-4":{
@@ -16348,7 +16540,14 @@ const STORY = {
     kzVarianten:[{kz:"kees=kees_mee", v:"kees"}],
     varianten:{
       kees:{
-        grensVij:null, grensKees:false,
+        /* Het schild rond de helft van zijn levens blijft. Alleen Kees komt er niet: die zit bij jou. */
+        grensKees:false,
+        grensPraat:[
+          {s:"rock1b_stuk", naam:"Rocky", t:"Nee. Nee nee. Wacht."},
+          {s:"rock1b", naam:"…", t:"Hij grabbelt in zijn cape. Er zit een binnenzak in, met de hand genaaid. Hij is leeg."},
+          {s:"rock1b_boos", naam:"Rocky", t:"Daar zat hij altijd. Altijd."},
+          {s:"rock1b_boos", naam:"Rocky", t:"Dan doe ik het zonder hem."}
+        ],
         /* Hij heeft niks meer te verliezen: al zijn steen is rots geworden. */
         deckVij:{rots:10, vuur:5, gras:5, water:4},
         intro:[
@@ -17245,7 +17444,7 @@ const STORY = {
      niet voor iemand die ze niet heeft zien slaan. Haar stapel is alleen gesmeed spul, en
      met Bron van Overvloed werkt ze zich letterlijk kapot. Win je, dan gaat de smidse open. */
   "3-2":{
-    wereld:3, tak:true, naam:"Het aambeeld", vijand:"Tang", sprite:"smid", zegKleur:"#ff9a5a", muziek:"w3_gevecht",
+    wereld:3, naam:"Het aambeeld", vijand:"Tang", sprite:"smid", zegKleur:"#ff9a5a", muziek:"w3_gevecht",
     hzruim:true,
     intro:[
       {s:null, bg:3, naam:"…", mu:"smidse", t:"Achter de berg, waar de as dunner wordt, klinkt iets dat niet rookt en niet sist. Het klinkt als tellen."},
@@ -17306,7 +17505,7 @@ const STORY = {
      Door de rook loopt een weg met keuzes, en wie precies ⬆⬆⬇⬇⬅➡⬅➡ B A START kiest,
      komt er zonder gevecht langs. Elke andere keuze loopt de rook in, en dan wordt er gevochten. */
   "3-3":{
-    wereld:3, naam:"Rookgordijn", vijand:"Het Rookgordijn", sprite:"rookman", zegKleur:"#b9c6d4", muziek:"w3_rook",
+    wereld:3, tak:true, naam:"Rookgordijn", vijand:"Het Rookgordijn", sprite:"rookman", zegKleur:"#b9c6d4", muziek:"w3_rook",
     hzruim:true,
     intro:[
       {s:null, bg:3, naam:"…", mu:"w3_as", t:"Achter de berg wordt de lucht dikker. Niet warmer: dikker. Je merkt dat je ondieper bent gaan ademen zonder dat je dat besloten hebt."},
@@ -17411,7 +17610,7 @@ const STORY = {
     ban:10, begint:1
   },
   "3-4":{
-    wereld:3, naam:"Het circus", vijand:"Het vlammende trio", sprite:"trio", zegKleur:"#ffa53c", muziek:"w3_circus",
+    wereld:3, tak:true, naam:"Het circus", vijand:"Het vlammende trio", sprite:"trio", zegKleur:"#ffa53c", muziek:"w3_circus",
     hzruim:true,
     intro:[
       {s:null, bg:3, naam:"…", mu:"w3_as", t:"Je loopt op de muziek af. Het is een trompet, en een trommel, en iets dat klapt. Om een rots heen staat een tent. Rood en geel gestreept, met vlaggetjes."},
@@ -20357,7 +20556,8 @@ async function startStoryGevecht(id, variant, opts){
   S.vsBot = true; S.set.handoff = false;
   S.mode = "classic"; S.story = {id, wereld:L.wereld, variant, schadeJij:0, mijnTijd:0};
   /* 🔮 Vanaf wereld 2 kijkt de tegenstander vooruit. Wereld 1 is om te leren: daar niet. */
-  if(ZOEK_AUTO){ ZOEK[1] = L.zoek != null ? L.zoek : (L.wereld >= 2 ? 2 : 0);
+  /* Elke tegenstander in het verhaal denkt vooruit, ook in wereld 1: zo sterk als het kan. */
+  if(ZOEK_AUTO){ ZOEK[1] = L.zoek != null ? L.zoek : 2;
                  ZOEKW[1] = Object.assign({}, ZOEKW0, ZOEKW_LEVEL[id] || {});
                  ZOEK_REACTIE[1] = ZOEKW[1].reactie ? 1 : 0; }
   clearTimeout(ZEGT); ZEGT = null;
@@ -21825,7 +22025,7 @@ const OVERWORLD = {
   "1-1":{x:48,y:81}, "1-2":{x:32,y:78}, "1-3":{x:46,y:70}, "1-4":{x:33,y:67}, "1-5":{x:42,y:57},
   /* Eén bolletje op het pad is 2,1 procent. */
   "2-1":{x:39,y:47}, "2-2":{x:30,y:41}, "2-3":{x:20.1,y:43.9}, "2-4":{x:25.05,y:35.15}, "2-5":{x:35.8,y:28.9}, "2-6":{x:28,y:23},
-  "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:74.6,y:31.95}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
+  "3-1":{x:61.7,y:38}, "3-2":{x:80.2,y:36.8}, "3-3":{x:88.5,y:30.5}, "3-4":{x:68.3,y:27.9}, "3-5":{x:78.3,y:22}, "3-6":{x:81,y:11},
   "4-1":{x:65,y:58}, "4-2":{x:80,y:54}, "4-3":{x:70,y:67}, "4-4":{x:86,y:76}, "4-5":{x:87,y:64}
 };
 /* 🌥 De Hemelrand is een laag over de bovenkant van de kaart (art/overworld-hemel.png). Die
@@ -21844,7 +22044,7 @@ const OVERWORLD_RANDEN = [
   /* Na 2-1 eerst naar Knort; pas daarna gaan de twee wegen naar Kaelid open. */
   ["2-1","2-2","knort"], ["2-1","2-3","knort"], ["2-2","2-4"], ["2-3","2-4"], ["2-4","2-5"], ["2-5","2-6"],
   ["2-1","3-1","2-6"],
-  ["3-1","3-2"], ["3-1","3-3"], ["3-3","3-4"], ["3-4","3-5"], ["3-5","3-6"],
+  ["3-1","3-2"], ["3-2","3-3"], ["3-2","3-4"], ["3-3","3-5"], ["3-4","3-5"], ["3-5","3-6"],
   ["3-1","4-1","3-6"],
   ["4-1","4-2"], ["4-2","4-3"], ["4-3","4-4"], ["4-4","4-5"],
   ["3-1","hemel","4-5"]
@@ -21857,13 +22057,14 @@ const OVERWORLD_PAD = {
   "2-2>2-4":[[27.5,37.5]],
   "2-3>2-4":[[21.5,39]],
   "2-1>3-1":[[47,45],[55,41.5]],
-  /* Naar Tang: zie OVERWORLD_SAMEN, dat pad begint op dat naar het Rookgordijn. */
+  /* Wereld 3: de smidse in het midden, links de tent (3-4), rechts bij de dode bomen aan de
+     klif het Rookgordijn (3-3), en allebei omhoog naar 3-5. */
   "3-1>4-1":[[63,47],[64,52]],
   "3-1>hemel":[[58,33],[55,24]]
 };
 /* Paden die een stuk samen oplopen: 3-1 → 3-2 (Tang) volgt de eerste 2,5 bolletjes van het
    pad naar 3-3 (het Rookgordijn) en buigt daarna af. */
-const OVERWORLD_SAMEN = {"3-1>3-2":{langs:"3-3", stippen:2.5}};
+const OVERWORLD_SAMEN = {};
 /* De trap de wolken in: daar zit wereld 5, die (nog) niet op het eiland ligt. */
 const OVERWORLD_HEMEL = {x:51, y:17};
 /* 🏪 De winkel in het Rankenwoud. Gaat open zodra 2-1 gehaald is, en ligt er pal ten
@@ -25674,6 +25875,7 @@ function laadPaint(){
 function laadKlaar(){
   if(LAAD.klaar) return;
   LAAD.klaar = true;
+  breinLaad();
   clearTimeout(LAAD.tijd); clearTimeout(LAAD.na);
   const vul = document.getElementById("ldvul"), txt = document.getElementById("ldtekst");
   if(vul) vul.style.width = "100%";
