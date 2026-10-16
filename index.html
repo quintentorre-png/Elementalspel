@@ -3490,6 +3490,22 @@ body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; paddin
 .chnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; line-height:1.5; color:#fff; text-align:center;
   padding:6px 4px 7px; text-shadow:1px 1px 0 var(--vnd,#0b0d22); background:rgba(8,10,30,.55)}
 .chtegel.kies .chnaam{color:var(--vng,#e8c67a)}
+/* ⚔ de ladder: kies je tegenstander */
+body.venster .ladbox .ladscroll{flex:1 1 auto; min-height:0; overflow-y:auto; padding:2px}
+body.venster .ladbox .ladscroll .chgrid{overflow:visible}
+.ladkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; letter-spacing:.08em; color:var(--vng,#e8c67a); margin:14px 2px 8px}
+.ladkop:first-child{margin-top:4px}
+.ladtegel .ladsub{font-size:.62rem; line-height:1.3; color:#c9cdf0; text-align:center; padding:0 4px 6px; background:rgba(8,10,30,.55)}
+.ladtegel .ladgeeft{color:#d7b8ff}
+.ladtegel.dicht .ladsub{color:var(--vgrijs,#8a91c2)}
+.ladslot{font-size:1.6rem}
+.ladtegel.verslagen{border-color:#e8c67a; background:linear-gradient(180deg,rgba(232,198,122,.18),rgba(8,10,30,.55))}
+.ladkroon{position:absolute; top:5px; right:6px; z-index:2; width:28px; line-height:0; filter:drop-shadow(0 0 4px rgba(255,214,90,.8))}
+.ladkroon.groot{position:static; width:64px; margin:0 auto}
+.kroonsvg{width:100%; height:auto; display:block}
+.mpnote .kroonsvg, .mpproftxt .kroonsvg{display:inline-block; width:16px; vertical-align:-2px}
+.ladwin{margin:10px 0 6px}
+.ladbox .obtn.uit{opacity:.45; pointer-events:none}
 
 /* ================= ⚜️ de deckbouwer ================= */
 body.venster .dbbox{width:min(1080px,97vw); max-width:none !important; max-height:94vh; padding:18px 18px 16px; text-align:left; display:flex; flex-direction:column}
@@ -5583,7 +5599,7 @@ function volResetK(G, K, F){
   st.fase2Klaar = true;
   G.vh.beginNodig = true;
 }
-const OMSLAG_AE_POOL = ['ae_draw3', 'ae_watercycle', 'ae_offer', 'ae_fire6', 'ae_stonefull', 'ae_grassx2', 'ae_oer_vuur', 'ae_oer_water',
+const OMSLAG_AE_POOL = ['ae_draw3', 'ae_watercycle', 'ae_fire6', 'ae_stonefull', 'ae_grassx2', 'ae_oer_vuur', 'ae_oer_water',   // Brandoffer niet meer (okt 2026)
   'ae_oer_gras', 'ae_oer_steen', 'ae_graf', 'fu_water', 'fu_fire', 'fu_stone', 'ae_alziend', 'fu_grass'];
 const OMSLAG_AE_KRACHT = {ae_draw3:68, fu_stone:61, ae_graf:60, ae_grassx2:56, fu_water:54, ae_genade:52, ae_fire6:46, ae_hp3:46, ae_oer_vuur:44,
   ae_oer_water:44, ae_oer_gras:44, ae_oer_steen:44, ae_watercycle:43, ae_alziend:41, ae_offer:40, ae_stonefull:39, fu_fire:39, fu_grass:38};
@@ -6532,7 +6548,7 @@ const EL = {
 const AETHERS = {
   ae_draw3:  {el:null, name:"Bron van Overvloed", kind:"passief"},
   ae_watercycle:{el:"water", name:"Getijdenstroom", kind:"passief"},
-  ae_offer:  {el:"vuur", name:"Brandoffer", kind:"passief"},
+  ae_offer:  {el:"vuur", name:"Brandoffer", kind:"passief", uit:true},   // okt 2026: nergens meer te krijgen of te kiezen
   ae_fire6:  {el:"vuur", name:"Verzengende Woede", kind:"passief"},
   ae_stonefull:{el:"steen", name:"Onwrikbaar", kind:"passief"},
   ae_grassx2:{el:"gras", name:"Woekergroei", kind:"passief"},
@@ -6552,7 +6568,7 @@ const AETHERS = {
   ae_lichtval:{el:null, name:"Lichtval", kind:"passief", verhaal:true},
   ae_deken:   {el:null, name:"Warme Deken", kind:"passief", verhaal:true},   // de Waardin, 2-3
   ae_smeed:   {el:null, name:"Gesmeed", kind:"passief", verhaal:true},       // Tang, 3-2: alles gesmeed, één kaart minder
-  ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true},
+  ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true, uit:true},   // okt 2026: idem
   ae_alziend:{el:null, name:"Alziend", kind:"passief", ic:"👁"},   // ook in commander en te krijgen
   ae_genade: {el:null, name:"Genade", kind:"passief", verhaal:true, ic:"🕊"},
   ae_leven:  {el:null, name:"Levenskracht", kind:"passief", pvp:true, ic:"💚"},   // alleen PvP (okt 2026)
@@ -10594,7 +10610,7 @@ async function loofGeeft(B){
   busyFlag = false;
   /* Drie krachten die je nog niet hebt (en die niet van haar zijn). */
   const heb = (S.ae[0] || []).concat(S.ae[1] || []);
-  const pool = Object.keys(AETHERS).filter(k => !heb.includes(k) && !AETHERS[k].verhaal && !AETHERS[k].pvp);
+  const pool = Object.keys(AETHERS).filter(k => !heb.includes(k) && !AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].uit);
   const aanbod = shuffle(pool.slice()).slice(0, 3);
   if(!aanbod.length){ addLog(`🌿 Loof heeft niets meer wat je nog niet hebt.`); return; }
   const i = await waitUI("aetherpick", {p:0, cards:aanbod, order:0,
@@ -12643,9 +12659,11 @@ function gameOver(winner, reason){
   if(matchVan() && S.match.bo === 1){
     S.match.wins[winner]++; S.over.matchDone = true;
     addLog(`<em>${pName(winner)} wint!</em> ${reason}`, true);
+    if(S.ladder && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
   } else if(matchVan()){
     S.match.wins[winner]++;
     S.over.matchDone = S.match.wins[winner] >= 2;
+    if(S.over.matchDone && S.ladder && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
     addLog(`<em>${pName(winner)} wint potje ${S.match.game}!</em> Stand: ${S.match.wins[0]}–${S.match.wins[1]}. ${reason}`, true);
     if(S.over.matchDone) addLog(`🏆 <em>${pName(winner)} wint de match ${S.match.wins[winner]}–${S.match.wins[opp(winner)]}!</em>`, true);
   } else {
@@ -15541,15 +15559,15 @@ function overlayHTML(){
     if(matchVan() && S.match.bo === 1){
       const w = S.over.winner;
       return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint</h1>
-        <div class="sub">${S.over.reason}</div>
-        <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button></div>`;
+        <div class="sub">${S.over.reason}</div>${ladderWinHTML()}
+        <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button>${S.ladder ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
     }
     if(matchVan()){
       const m = S.match, w = S.over.winner;
       if(S.over.matchDone)
         return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint de match</h1>
-          <div class="sub"><b>${m.wins[0]}–${m.wins[1]}</b> na ${m.game} potje${m.game>1?"s":""}.<br>${S.over.reason}</div>
-          <button class="obtn" data-act="btn" data-btn="newgame">Nieuwe match</button></div>`;
+          <div class="sub"><b>${m.wins[0]}–${m.wins[1]}</b> na ${m.game} potje${m.game>1?"s":""}.<br>${S.over.reason}</div>${ladderWinHTML()}
+          <button class="obtn" data-act="btn" data-btn="newgame">Nieuwe match</button>${S.ladder ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
       const rd = readyState();
       const me = NET.on ? NET.seat : -1;
       const chip = i => `<div class="rchip ${rd[i] ? "on" : ""}">${rd[i] ? "✓" : "○"} ${pName(i)}${rd[i] ? " is klaar" : " nog niet klaar"}</div>`;
@@ -16309,7 +16327,7 @@ function shareHTML(){
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
-const ELEMENTAAL_VERSIE = "13 okt · f";
+const ELEMENTAAL_VERSIE = "16 okt · voorbeelddecks";
 function startHTML(){
   const open = HOME.open;
   const opPlek = SET.slot != null;
@@ -20862,7 +20880,7 @@ const STORY = {
     deckVij:{rots:5, steen:3, vuur:8, gras:5, ijs:3, water:2, negate:6},
     ltVij:["negate"],
     /* 🟣 Lichtval: elke klap op hem levert hem een kaart op. Staal: zijn steen is van staal. */
-    aeVij:["ae_lichtval","ae_staal","ae_offer","ae_fire6"],
+    aeVij:["ae_lichtval","ae_staal","fu_fire","ae_fire6"],   // Assekern in plaats van Brandoffer (okt 2026)
     levensVij:7,
     band:true,
     geeftLicht:"negate",
@@ -21405,7 +21423,7 @@ const STORY = {
     deckVij:{rots:3, steen:3, plasma:2, vuur:4, gras:6, ijs:6, negate:3, brenger:3},
     ltVij:["negate","brenger"],
     /* "Ik vries altijd weer dicht": wat van haar is komt terug. */
-    aeVij:["ae_graf","ae_offer","ae_draw3"], terugVij:"ijs",
+    aeVij:["ae_graf","ae_watercycle","ae_draw3"], terugVij:"ijs",   // Getijdenstroom in plaats van Brandoffer (okt 2026)
     levensVij:7,
     ijsvlakte:true, biome:"ijs",
     geeftLicht:"brenger",
@@ -22051,7 +22069,7 @@ const STORY = {
     aeVij:["ae_stonefull","fu_stone","ae_oer_steen"],
     rotsval:true, rotsDubbel:true, faseSchud:true,
     levensVij:4, levensJij:10,
-    geeft:"ae_pijn",
+    geeft:"ae_deken",          // 🟣 Warme Deken (was Loutering, okt 2026)
     ban:10, begint:1
   },
   "5-5":{
@@ -24643,7 +24661,7 @@ function deckMetUpgrades(deck, vars){
 /* De vier stukken Oerkracht kwamen later bij de bazen. Wie die baas al versloeg, heeft zijn
    stuk dus ook: dat lezen we uit de gehaalde levels. */
 const aeBezit = () => {
-  const uit = (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k]);
+  const uit = (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k] && !AETHERS[k].uit);   // Brandoffer en Loutering niet meer
   (SET.story.klaar || []).forEach(id => [].concat((STORY[id] || {}).geeft || [])
     .forEach(k => { if(/^ae_oer_/.test(k) && !uit.includes(k)) uit.push(k); }));
   return uit;
@@ -24779,8 +24797,12 @@ function toegang(k, licht){
 }
 function toegangHTML(k, licht, slot){
   const t = toegang(k, licht);
+  /* ⚔ ladder-aethers: tegen de bot, als je de baas (of Seraf) hebt verslagen */
+  const lad = !licht && typeof LADDER_AE !== "undefined" && LADDER_AE.includes(k)
+    ? LADDER.bazen.concat([LADDER.seraf]).find(x => x.geeft === k) : null;
+  const ladTag = lad ? `<span class="${ladderVerslagen(lad.id) ? "" : "nee"}" style="text-decoration:none">${ladderVerslagen(lad.id) ? "Tegen de bot ✓" : "Tegen de bot: versla " + mpChar(lad.id).naam}</span>` : "";
   return `<div class="libwaar" title="Waar je deze kaart kunt gebruiken">${[["verhaal", slot ? "Verhaal: nog niet" : "Verhaal"], ["cmd", "Commander"], ["bas", "Basis"]]
-    .map(([x, n]) => `<span class="${t[x] ? "" : "nee"}">${n}</span>`).join("")}</div>`;
+    .map(([x, n]) => `<span class="${t[x] ? "" : "nee"}">${n}</span>`).join("")}${ladTag}</div>`;
 }
 const inPvp = (k, licht) => { const t = toegang(k, licht); return t.cmd || t.bas; };
 function libHTML(){
@@ -24790,7 +24812,7 @@ function libHTML(){
   let kop = "📚 Library", sub = "Alle kaarten. Onder elke kaart staat waar je hem kunt gebruiken: in het verhaal, in de commander-draft en in je Basis-decks (doorgestreept = daar niet). <i>Verhaal: nog niet</i> = in het verhaal nog niet gevonden; in PvP kun je hem wel al gebruiken.";
   let items = "";
   if(tab === "ae"){
-    const keys = Object.keys(AETHERS).filter(k => (!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || (!u && inPvp(k, false)) || (u && (u.aethers || []).indexOf(k) >= 0));
+    const keys = Object.keys(AETHERS).filter(k => !AETHERS[k].uit && ((!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || (!u && inPvp(k, false)) || (u && (u.aethers || []).indexOf(k) >= 0)));
     const sel = u ? (Array.isArray(u.aeSel) ? u.aeSel : []) : [];
     if(u){ kop = "🟣 Kies je aethers"; sub = `${sel.length} van ${u.aeMax || 1} gekozen. Klik een kaart om hem te kiezen of weer weg te doen.`; }
     items = keys.map(k => {
@@ -25177,7 +25199,7 @@ const OVERWORLD_SMID = {na:"3-2"};   // de smidse zit op de plek van het level z
    nog niet; de rest staat als lege plank in beeld. Zet er een sleutel neer zodra de kaart
    bestaat en hij ligt meteen in de winkel. */
 const KOOPWAAR = {
-  ae: ["ae_draw3", "ae_offer", "ae_graf", "fu_grass"],
+  ae: ["ae_draw3", "ae_graf", "fu_grass"],   // Brandoffer eruit (okt 2026): die plank is nu leeg
   lt: ["greed", "vital", "darkhole", "master", "sterregen"]
 };
 /* ⚔ Welke aethers er in PvP (commander, basis) meedoen: alles wat je in het verhaal kunt
@@ -25206,7 +25228,7 @@ function pvpAePool(){
    Oerkracht (weg bij Magnus), Vitaliteit en Elementaal Meester. Het totaal blijft gelijk. */
 /* Alle aethers en lichtkaarten nog een ster goedkoper (oktober), met 1 als bodem. */
 const KOOP_PRIJS = {
-  ae_draw3:6, ae_offer:4, ae_graf:3, fu_grass:2,
+  ae_draw3:6, ae_graf:3, fu_grass:2,
   greed:2, vital:1, darkhole:1, master:1, sterregen:1
 };
 const HART_PRIJS = [3, 4, 5];            // elk volgend hartje kost er één meer
@@ -27438,7 +27460,7 @@ const MP_CHARS = [
   {id:"5-5"}
 ];
 function mpChar(id){
-  const c = MP_CHARS.find(x => x.id === id) || MP_CHARS[0];
+  const c = MP_CHARS.find(x => x.id === id) || (typeof LADDER_EXTRA !== "undefined" && LADDER_EXTRA.find(x => x.id === id)) || MP_CHARS[0];
   const lv = c.lv || c.id, L = STORY[lv] || {};
   const spr = c.spr || L.sprite;
   return {id:c.id, lv, hz:c.hz || null, def:c, naam:c.naam || L.vechtNaam || L.vijand || "?", spr,
@@ -27482,11 +27504,11 @@ function basStandaard(){
 }
 /* Alles wat er binnenkomt (uit het geheugen of over het net) gaat hierdoorheen: wat niet
    mag, valt eruit. */
-function basDeckSchoon(d){
+function basDeckSchoon(d, extra){
   d = d && typeof d === "object" ? d : {};
   const uit = {naam:String(d.naam || "").replace(/[<>&"'`]/g, "").slice(0, 22).trim() || "Deck",
     mix:{}, upg:{}, ae:[], ltN:{}, zijAe:[], zijLt:{}};
-  const aeP = basAePool(), ltP = basLtPool();
+  const aeP = basAePool().concat(extra || []), ltP = basLtPool();   // extra: wat je op de ladder verdiende (alleen tegen de bot)
   /* Een aether die niet meer in PvP mag (de Oerkrachten, okt 2026) wordt de gewone aether van zijn element. */
   const VERV = {ae_oer_steen:"ae_stonefull", ae_oer_vuur:"ae_fire6", ae_oer_gras:"ae_grassx2", ae_oer_water:"ae_watercycle", ae_offer:"ae_fire6"};
   (Array.isArray(d.ae) ? d.ae : []).forEach(k => {
@@ -27508,9 +27530,33 @@ function basDeckSchoon(d){
   lt(d.ltN, uit.ltN, ltMaxVan(uit.ae)); lt(d.zijLt, uit.zijLt, BAS.ZIJ_LT);
   return uit;
 }
+/* ⚜️ Voorbeelddecks (okt 2026): wie het spel voor het eerst opent, heeft er meteen vijf. Samen
+   gebruiken ze elke aether uit Basis precies één keer (alleen Levenskracht niet). Gebouwd op de
+   sterkste decks van de decktester en hier tegen elkaar getest (ze winnen 42 tot 61% van elkaar):
+     Vloedgolf     water: Dieptestroom haalt je wezens terug, Getijdenstroom maakt ze groot, Gesmeed geeft ijs;
+     Woekertuin    gras: Woekergroei en Wurgranken verstrikken alles, Bron van Overvloed voor kaarten;
+     Bergwacht     steen: Onwrikbaar en Bergrug slaan vol, Genade houdt je laatste muur overeind;
+     Bliksemzwerm  vuur: Verzengende Woede, Assekern-bliksem en Lichtzwerm (10 licht, 20 elementkaarten);
+     Alziend Oog   controle: je ziet zijn hand, Eeuwige Terugkeer haalt steeds iets terug, Lichtval trekt bij.
+   Je kunt ze gewoon aanpassen of weggooien; ze komen niet terug. */
+const VOORBEELD_DECKS = [{"naam": "Vloedgolf", "mix": {"water": 9, "steen": 3, "vuur": 5, "gras": 7}, "upg": {"steen": 3, "vuur": 5, "gras": 2}, "ae": ["fu_water", "ae_watercycle", "ae_smeed"], "ltN": {"dfusion": 2, "vital": 2, "greed": 1, "kloon": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Woekertuin", "mix": {"water": 9, "steen": 3, "vuur": 3, "gras": 9}, "upg": {"water": 2, "steen": 3, "vuur": 5}, "ae": ["ae_grassx2", "fu_grass", "ae_draw3"], "ltN": {"sterregen": 3, "vital": 1, "reborn": 1, "darkhole": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Bergwacht", "mix": {"water": 7, "steen": 9, "vuur": 4, "gras": 4}, "upg": {"water": 5, "vuur": 2, "gras": 3}, "ae": ["ae_genade", "fu_stone", "ae_stonefull"], "ltN": {"sterregen": 3, "negate": 2, "vital": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Bliksemzwerm", "mix": {"water": 3, "steen": 6, "vuur": 7, "gras": 4}, "upg": {"water": 3, "steen": 5, "gras": 2}, "ae": ["ae_zwerm", "fu_fire", "ae_fire6"], "ltN": {"greed": 3, "kuriboh": 2, "struik": 2, "negate": 2, "vital": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Alziend Oog", "mix": {"water": 8, "steen": 4, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_alziend", "ae_graf", "ae_lichtval"], "ltN": {"vital": 2, "siphon": 1, "greed": 1, "darkhole": 1, "kloon": 1}, "zijAe": [], "zijLt": {}}];
+/* de eerste versie (16 okt): wie die nog onaangeroerd heeft, krijgt de nieuwe */
+const VOORBEELD_OUD = [{"naam": "Vloedgolf", "mix": {"water": 9, "steen": 6, "vuur": 5, "gras": 4}, "upg": {"steen": 5, "vuur": 2, "gras": 3}, "ae": ["fu_water", "ae_watercycle", "ae_leven"], "ltN": {"greed": 1, "kloon": 1, "doortast": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Woekertuin", "mix": {"water": 9, "steen": 3, "vuur": 3, "gras": 9}, "upg": {"water": 2, "steen": 3, "vuur": 5}, "ae": ["ae_draw3", "fu_water", "ae_grassx2"], "ltN": {"sterregen": 3, "vital": 1, "reborn": 1, "darkhole": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Bergwacht", "mix": {"water": 8, "steen": 8, "vuur": 5, "gras": 3}, "upg": {"water": 5, "steen": 2, "vuur": 3}, "ae": ["ae_lichtval", "fu_stone", "ae_stonefull"], "ltN": {"sterregen": 2, "vital": 3, "doortast": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Bliksemzwerm", "mix": {"water": 3, "steen": 6, "vuur": 7, "gras": 4}, "upg": {"water": 3, "steen": 5, "gras": 2}, "ae": ["ae_zwerm", "fu_fire", "ae_leven"], "ltN": {"greed": 3, "kuriboh": 2, "struik": 1, "vital": 1}, "zijAe": [], "zijLt": {}}, {"naam": "Alziend Oog", "mix": {"water": 8, "steen": 4, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_alziend", "ae_graf", "ae_lichtval"], "ltN": {"vital": 2, "siphon": 1, "greed": 1, "darkhole": 1, "kloon": 1}, "zijAe": [], "zijLt": {}}];
 function basDecks(){
   if(!Array.isArray(SET.decks)) SET.decks = [];
-  SET.decks = SET.decks.slice(0, BAS.DECKS).map(basDeckSchoon);
+  /* eenmalig: lege plekken (tot 5) vullen met de voorbeelddecks; je eigen decks blijven staan */
+  if(SET.voorbeeldDecks && !SET.voorbeeldDecks2){
+    /* wie de eerste vijf al had: alleen een onaangeroerd voorbeelddeck wordt vervangen */
+    const gelijk = (x, y) => JSON.stringify(basDeckSchoon(x)) === JSON.stringify(basDeckSchoon(y));
+    SET.decks = SET.decks.map(d => { if(!d) return d;
+      const o = VOORBEELD_OUD.find(v => v.naam === d.naam), n = VOORBEELD_DECKS.find(v => v.naam === d.naam);
+      return (o && n && gelijk(o, d)) ? JSON.parse(JSON.stringify(n)) : d; });
+    SET.voorbeeldDecks2 = true; try { saveSet(); } catch(e) {} }
+  if(!SET.voorbeeldDecks){ SET.voorbeeldDecks = true; SET.voorbeeldDecks2 = true;
+    VOORBEELD_DECKS.forEach(v => { if(SET.decks.length < BAS.DECKS && !SET.decks.some(d => d && d.naam === v.naam)) SET.decks.push(JSON.parse(JSON.stringify(v))); });
+    try { saveSet(); } catch(e) {} }
+  const extra = ladderAeVrij();   // je bewaarde decks mogen je ladder-aethers houden
+  SET.decks = SET.decks.slice(0, BAS.DECKS).map(d => basDeckSchoon(d, extra));
   return SET.decks;
 }
 function mpKeus(){
@@ -27524,9 +27570,14 @@ function mijnProfiel(){
   const k = mpKeus(), vrij = mpCharsVrij(), decks = basDecks();
   return {char:vrij.indexOf(k.char) >= 0 ? k.char : "1-1", deck:decks[k.deck] || decks[0] || basStandaard()};
 }
-function profielSchoon(v){
+function profielSchoon(v, p){
   v = v && typeof v === "object" ? v : {};
-  return {char:MP_CHARS.some(c => c.id === v.char) ? v.char : "1-1", deck:basDeckSchoon(v.deck)};
+  /* ⚔ de gekozen tegenstander tegen de bot: zijn eigen deck (dat mag regels breken) */
+  if(v.ladder && S.ladder && p != null && isBot(p) && !NET.on && ladderZoek(v.char))
+    return {char:v.char, deck:ladderDeckSchoon(v.deck)};
+  /* tegen de bot mag je eigen deck de aethers bevatten die je op de ladder verdiende; online niet */
+  const extra = (p != null && S.vsBot && !NET.on && !isBot(p)) ? ladderAeVrij() : [];
+  return {char:MP_CHARS.some(c => c.id === v.char) ? v.char : "1-1", deck:basDeckSchoon(v.deck, extra)};
 }
 /* 🤖 De decks van de bot in Basis: gevonden door duizenden potjes in Colab (decklab). Staat er
    een botdecks.json naast index.html, dan gebruikt hij die; anders deze lijst. */
@@ -27541,8 +27592,140 @@ function botDecksLaad(){
     }).catch(() => {});
   }catch(e){}
 }
-/* De bot: een willekeurig ander personage en een deck dat klopt. */
+/* ---------- ⚔ Tegen de bot: kies je tegenstander (okt 2026) ----------
+   Drie groepen. Zestien tegenstanders met elk een vast deck uit de decktester (die decks komen
+   nog: tot dan staat er "deck komt nog"). De vier bazen en Seraf. En De Eerste: die gaat pas open
+   als je de vier bazen én Seraf hebt verslagen. Wie iedereen heeft verslagen, ziet nog een
+   geheime tegenstander. Verslagen = een gouden kroontje op de tegel, bewaard voor altijd (los
+   van je verhaalplekken).
+   De bazen spelen elk met Eeuwige Terugkeer op hun eigen element, 8-6-6-8 (eigen element en
+   zijn beschermer 8: het element dat verslaat wat jou verslaat), opwaarderingen 5 (eigen), 3
+   (beschermer) en 2 (wat hij zelf verslaat), en de drie aethers van hun element met de Oerkracht.
+   Die Oerkracht heeft verder niemand: versla de baas en hij is van jou, in je decks tegen de bot.
+   Seraf breekt een regel: drie keer Lichtzwerm, plus Hemelschoon. Versla Seraf en Hemelschoon
+   is van jou. Niet online en niet in commander. */
+const LADDER_KNORT = {id:"knort", naam:"Knort", spr:"knorst", alleenBot:true,
+  uit:["Ik verkoop alles. Ook een pak slaag. Voor jou: gratis. Eenmalig.", "De eerste klap is van het huis.",
+       "Je sterren of je leven. Grapje. Je sterren.", "Ik ken jouw soort. Kijkt alleen maar. Koopt nooit wat."],
+  bijna:["Zie je wel. Had je maar iets gekocht.", "Dit gaat de goede kant op. Mijn kant."],
+  au:["Au. Dat zet ik op de rekening.", "Oké. Oké. Korting. Twintig procent. Hou op.", "Niet op de koopwaar slaan!"],
+  hoi:["Welkom, welkom. Niks aanraken.", "Ah, een klant. Of een tegenstander. Zelfde prijs."]};
+const LADDER_EXTRA = [LADDER_KNORT, {id:"geheim", naam:"???", spr:null, alleenBot:true}];
+const EL_BESCHERM = {steen:"vuur", water:"gras", vuur:"steen", gras:"water"};   // verslaat wat jou verslaat
+const EL_PROOI = {steen:"water", water:"vuur", vuur:"gras", gras:"steen"};      // wat jij verslaat
+const BAAS_AE = {steen:["ae_stonefull", "fu_stone", "ae_oer_steen"], water:["ae_watercycle", "fu_water", "ae_oer_water"],
+  vuur:["ae_fire6", "fu_fire", "ae_oer_vuur"], gras:["ae_grassx2", "fu_grass", "ae_oer_gras"]};
+function baasDeck(el, naam, ltN){
+  const mix = {}; ORDER.forEach(e => mix[e] = 6); mix[el] = 8; mix[EL_BESCHERM[el]] = 8;
+  const upg = {}; upg[el] = 5; upg[EL_BESCHERM[el]] = 3; upg[EL_PROOI[el]] = 2;
+  return {naam, mix, upg, ae:["ae_graf"].concat(BAAS_AE[el]), ltN, terug:el, zijAe:[], zijLt:{}};
+}
+const LADDER = {
+  /* de zestien: wie welk deck krijgt, komt nog (LADDER_DECKS) */
+  tegen:["1-1", "1-2", "1-3", "2-2", "2-3", "2-4", "2-5", "3-1", "3-2", "3-3", "3-5", "4-1", "4-2", "4-4", "5-2", "knort"].map(id => ({id})),
+  bazen:[
+    {id:"1-5", deck:baasDeck("steen", "Magnus", {negate:3, vital:3}), geeft:"ae_oer_steen"},
+    {id:"2-6", deck:baasDeck("gras", "Moeder Natuur", {reborn:3, vital:3}), geeft:"ae_oer_gras"},
+    {id:"3-6", deck:baasDeck("vuur", "Flint", {sterregen:3, greed:3}), geeft:"ae_oer_vuur"},
+    {id:"4-5", deck:baasDeck("water", "De Oceaan", {negate:3, kloon:3}), geeft:"ae_oer_water"}],
+  seraf:{id:"2-1", geeft:"ae_hemel", deck:{naam:"Seraf", mix:{water:3, steen:3, vuur:3, gras:3}, upg:{},
+    ae:["ae_zwerm", "ae_zwerm", "ae_zwerm", "ae_hemel"],
+    ltN:{sterregen:3, negate:3, vital:3, brenger:3, kuriboh:3, siphon:3}, zijAe:[], zijLt:{}}},
+  /* voorlopig: alles opgewaardeerd en de vier Oerkrachten, tot er een echt deck voor is */
+  eerste:{id:"5-5", voorlopig:true, deck:{naam:"De Eerste", mix:{water:7, steen:7, vuur:7, gras:7}, upg:{water:7, steen:7, vuur:7, gras:7},
+    ae:["ae_oer_water", "ae_oer_steen", "ae_oer_vuur", "ae_oer_gras"], ltN:{master:3, negate:3}, zijAe:[], zijLt:{}}},
+  geheim:{id:"geheim"}
+};
+/* De decks van de zestien, per karakter: {"1-1": {naam, mix, upg, ae, ltN}, …}. Komt nog. */
+const LADDER_DECKS = {};
+const LADDER_AE = LADDER.bazen.concat([LADDER.seraf]).map(t => t.geeft);
+const ladderAlle = () => LADDER.tegen.concat(LADDER.bazen, [LADDER.seraf, LADDER.eerste, LADDER.geheim]);
+const ladderZoek = id => ladderAlle().find(t => t.id === id) || null;
+function ladderStaat(){
+  if(!SET.ladder || typeof SET.ladder !== "object") SET.ladder = {};
+  if(!SET.ladder.v || typeof SET.ladder.v !== "object") SET.ladder.v = {};
+  return SET.ladder;
+}
+const ladderVerslagen = id => !!ladderStaat().v[id];
+const ladderDeckVan = t => (t && (t.deck || LADDER_DECKS[t.id])) || null;
+function ladderOpen(t){
+  if(t === LADDER.eerste) return LADDER.bazen.concat([LADDER.seraf]).every(x => ladderVerslagen(x.id));
+  if(t === LADDER.geheim) return ladderAlle().filter(x => x !== LADDER.geheim).every(x => ladderVerslagen(x.id));
+  return true;
+}
+const ladderSpeelbaar = t => !!t && ladderOpen(t) && !!ladderDeckVan(t);
+/* De aethers die je zo hebt verdiend (voor je decks tegen de bot). */
+const ladderAeVrij = () => LADDER.bazen.concat([LADDER.seraf]).filter(t => ladderVerslagen(t.id)).map(t => t.geeft);
+const deckAlleenBot = d => !!d && (d.ae || []).concat(d.zijAe || []).some(k => LADDER_AE.includes(k));
+let LADDER_KEUS = null;
+/* Het kroontje voor wie je versloeg: pixels, zodat het in elk lettertype werkt. */
+const KROON = `<svg class="kroonsvg" viewBox="-1 -1 11 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#3a2a00" d="M-1 -1h3v2h1v-1h3v1h1v-2h3v8h-11z"/><path fill="#ffd65a" d="M0 0h1v1h-1zM4 0h1v1h-1zM8 0h1v1h-1zM0 1h2v1h-2zM3 1h3v1h-3zM7 1h2v1h-2zM0 2h9v3h-9z"/><path fill="#fff3b0" d="M0 5h9v1h-9z"/><path fill="#e0503a" d="M2 3h1v1h-1zM6 3h1v1h-1z"/><path fill="#6fc3ff" d="M4 3h1v1h-1z"/></svg>`;          // de gekozen tegenstander voor de volgende partij tegen de bot
+/* Een deck van de ladder: we vertrouwen het (het mag regels breken), maar maken er wel een schone kopie van. */
+function ladderDeckSchoon(d){
+  const k = JSON.parse(JSON.stringify(d || {}));
+  const uit = {naam:String(k.naam || "Deck").slice(0, 22), mix:{}, upg:{}, ae:(k.ae || []).filter(x => AETHERS[x]),
+    ltN:{}, zijAe:[], zijLt:{}, terug:k.terug || null};
+  ORDER.forEach(el => { uit.mix[el] = Math.max(0, Math.round(+((k.mix || {})[el]) || 0)); const g = +((k.upg || {})[el]) || 0; if(g > 0) uit.upg[el] = g; });
+  Object.keys(k.ltN || {}).forEach(x => { if(LIGHTS[x] && !LIGHTS[x].weg && +k.ltN[x] > 0) uit.ltN[x] = Math.round(+k.ltN[x]); });
+  return uit;
+}
+/* Na de match: verslagen? Dan het kroontje, en wat dat oplevert. */
+function ladderUitslag(gewonnen){
+  const t = S.ladder ? ladderZoek(S.ladder.id) : null;
+  if(!t || !gewonnen) return null;
+  const was = ladderVerslagen(t.id), eersteWas = ladderOpen(LADDER.eerste), geheimWas = ladderOpen(LADDER.geheim);
+  ladderStaat().v[t.id] = Date.now(); saveSet();
+  const uit = {naam:mpChar(t.id).naam, nieuw:!was, regels:[]};
+  if(!was && t.geeft) uit.regels.push(`🟣 <b>${AETHERS[t.geeft].name}</b> is van jou: je kunt hem nu in je decks gebruiken als je tegen de bot speelt.`);
+  if(!eersteWas && ladderOpen(LADDER.eerste)) uit.regels.push(`Alle bazen en Seraf verslagen. <b>De Eerste</b> wacht op je.`);
+  if(!geheimWas && ladderOpen(LADDER.geheim)) uit.regels.push(`Je hebt iedereen verslagen. Er is nog iemand…`);
+  return uit;
+}
+function ladderWinHTML(){
+  const l = S.over && S.over.ladder;
+  if(!l) return "";
+  return `<div class="ladwin"><div class="ladkroon groot">${KROON}</div><div class="sub">${l.nieuw ? `<b>${l.naam}</b> verslagen!` : `<b>${l.naam}</b> weer verslagen.`}</div>
+    ${l.regels.map(x => `<div class="sub">${x}</div>`).join("")}</div>`;
+}
+/* Een rijtje aethers, kort: "3× Lichtzwerm · Hemelschoon". */
+function aeKortLijst(ae){
+  const n = {}; (ae || []).forEach(k => n[k] = (n[k] || 0) + 1);
+  return Object.keys(n).map(k => (n[k] > 1 ? n[k] + "× " : "") + (AETHERS[k] ? AETHERS[k].name : k)).join(" · ");
+}
+/* Het scherm: kies je tegenstander (of willekeurig). */
+function ladderHTML(kop){
+  const tegel = t => {
+    const ch = t === LADDER.geheim ? {naam:"???", spr:null, kleur:null} : mpChar(t.id);
+    const open = ladderOpen(t), deck = ladderDeckVan(t), versl = ladderVerslagen(t.id);
+    if(!open) return `<div class="chtegel dicht ladtegel"><div class="chpt ladslot">🔒</div><div class="chnaam">${t === LADDER.geheim ? "???" : ch.naam}</div>
+      <div class="ladsub">${t === LADDER.eerste ? "versla eerst de vier bazen en Seraf" : "versla eerst iedereen"}</div></div>`;
+    if(!deck) return `<div class="chtegel dicht ladtegel">${ch.spr ? `<div class="chpt">${charPortret(ch.spr)}</div>` : `<div class="chpt ladslot">?</div>`}<div class="chnaam">${ch.naam}</div>
+      <div class="ladsub">deck komt nog</div></div>`;
+    return `<div class="chtegel ladtegel${M.tegen === t.id ? " kies" : ""}${versl ? " verslagen" : ""}" data-act="btn" data-btn="ladkies" data-i="${t.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${charPortret(ch.spr)}</div>${versl ? `<div class="ladkroon" title="verslagen">${KROON}</div>` : ""}
+      <div class="chnaam">${ch.naam}</div><div class="ladsub">${aeKortLijst(deck.ae)}</div>
+      ${t.geeft ? `<div class="ladsub ladgeeft">${versl ? "✓ " : "geeft "}${AETHERS[t.geeft].name}</div>` : ""}${t.voorlopig ? `<div class="ladsub">voorlopig deck</div>` : ""}</div>`;
+  };
+  const alle = ladderAlle().filter(t => t !== LADDER.geheim || ladderOpen(LADDER.geheim));
+  const nV = alle.filter(t => ladderVerslagen(t.id)).length;
+  const kies = M.tegen ? ladderZoek(M.tegen) : null;
+  return `<div class="ovbox chbox ladbox"><h2>KIES JE TEGENSTANDER</h2>${kop}
+    <div class="sub mpnote">${nV} van de ${alle.length} verslagen (${KROON}). De bazen en Seraf geven een aether die je alleen zo krijgt, voor je decks tegen de bot.</div>
+    <div class="ladscroll">
+      <div class="ladkop">TEGENSTANDERS</div><div class="chgrid">${LADDER.tegen.map(tegel).join("")}</div>
+      <div class="ladkop">DE BAZEN EN SERAF</div><div class="chgrid">${LADDER.bazen.concat([LADDER.seraf]).map(tegel).join("")}</div>
+      <div class="ladkop">DE EERSTE</div><div class="chgrid">${tegel(LADDER.eerste)}${tegel(LADDER.geheim)}</div>
+    </div>
+    <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button>
+      <button class="obtn" data-act="btn" data-btn="ladwillekeurig">🎲 Willekeurig</button>
+      <button class="obtn${kies ? "" : " uit"}" data-act="btn" data-btn="ladok">${kies ? `Tegen ${mpChar(kies.id).naam}` : "Kies eerst iemand"}</button></div></div>`;
+}
+/* De bot: een willekeurig ander personage en een deck dat klopt. Tegen de bot in Basis met een
+   gekozen tegenstander: dat karakter en zijn deck. */
 function botProfiel(){
+  const lad = S.mode === "basis" && LADDER_KEUS ? ladderZoek(LADDER_KEUS) : null;
+  if(lad && ladderSpeelbaar(lad)){ S.ladder = {id:lad.id}; return {char:lad.id, deck:ladderDeckVan(lad), ladder:true}; }
+  S.ladder = null;
   const bezet = S.char ? S.char[0] : null;
   const kan = MP_CHARS.map(c => c.id).filter(id => id !== bezet);
   const char = kan[Math.floor(rndVrij() * kan.length)];
@@ -27566,7 +27749,7 @@ async function profielFase(){
   S.prof = [null, null]; S.char = [null, null];
   for(const p of [0, 1]){
     const v = await waitUI("profiel", {p});
-    const pr = profielSchoon(v);
+    const pr = profielSchoon(v, p);
     S.prof[p] = pr; S.char[p] = pr.char;
     addLog(`${pName(p)} speelt als <em>${mpChar(pr.char).naam}</em>${S.mode === "basis" ? ` met het deck <em>${pr.deck.naam}</em>` : ""}.`, true);
   }
@@ -27577,6 +27760,8 @@ async function commanderStart(){
 }
 async function basisStart(){
   await profielFase();
+  /* ⚔ een baas van de ladder kiest zijn eigen element voor Eeuwige Terugkeer */
+  [0, 1].forEach(p => { const t = S.prof[p].deck.terug; if(t){ if(!S.terug) S.terug = [null, null]; S.terug[p] = t; } });
   S.basKeus = [0, 1].map(p => ({ae:S.prof[p].deck.ae.slice(), ltN:Object.assign({}, S.prof[p].deck.ltN)}));
   await basisPotje();
 }
@@ -27657,18 +27842,23 @@ function mpHTML(){
           <button class="mpbewerk" data-act="btn" data-btn="deckbewerk" data-i="${i}">bewerk</button></div>`).join("")}
         ${decks.length < BAS.DECKS ? vr("decknieuw", "+ Nieuw deck", `${decks.length} van de ${BAS.DECKS}`, decks.length ? "" : " aan") : ""}</div>
       ${!decks.length ? `<div class="sub mpnote">Je hebt nog geen deck. Bouw er eerst een.</div>` : ""}
+      ${M.melding ? `<div class="vmelding mis">${M.melding}</div>` : ""}
       <div class="mponder"><button class="obtn" data-act="btn" data-btn="closemodal">Terug</button></div></div>`;
   }
   if(M.stap === "char") return charKiesHTML(kop);
+  if(M.stap === "tegen") return ladderHTML(kop);
   /* hoe: room openen, meedoen, of een willekeurige tegenstander */
   const c = mpChar(mijnProfiel().char), d = md.kind === "commander" ? null : mijnProfiel().deck;
   const live = HOSTED
     ? vr("mphost", "Room openen", "je krijgt een code voor je vriend", " aan") + vr("mpjoin", "Meedoen", "met een roomcode", "")
       + vr("mprandom", "Willekeurige tegenstander", M.zoek ? "nog niet beschikbaar · komt later" : "online, met wie er ook zoekt", "")
     : `<div class="vmelding">Live spelen werkt niet binnen Claude. Zet het spel op een gewone webpagina (bijv. GitHub Pages), dan werkt de roomcode wel.</div>`;
+  const tg = M.bot && M.modus !== "cmd" && M.tegen ? ladderZoek(M.tegen) : null, tc = tg ? mpChar(tg.id) : null;
   return `<div class="ovbox mpbox"><h2>${M.bot ? "KLAAR?" : "HOE WIL JE SPELEN?"}</h2>${kop}
     <div class="mpprof"><div class="mpprofpt">${spriteSVG(c.spr)}</div>
       <div class="mpproftxt"><b>${c.naam}</b>${d ? `<small>${d.naam} · ${basKort(d)}</small>` : ""}</div></div>
+    ${tg ? `<div class="sub mpnote">tegen</div><div class="mpprof"><div class="mpprofpt">${spriteSVG(tc.spr)}</div>
+      <div class="mpproftxt"><b>${tc.naam}</b>${ladderVerslagen(tg.id) ? " " + KROON : ""}<small>${aeKortLijst(ladderDeckVan(tg).ae)}</small></div></div>` : ""}
     <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") : live}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
 }
@@ -27763,7 +27953,7 @@ function deckbouwHTML(){
     const aan = zij ? inZ : inD, ander = zij ? inD : inZ;
     return `<div class="aecard klein${aan ? " chosen" : ""}${ander ? " elders" : ""}" data-act="dbae" data-k="${k}">
       <div class="aet">${AETHERS[k].name}</div>${aeVak(k)}<div class="aex">${AETHERS[k].txt}</div>
-      ${ander ? `<div class="dbtag">${zij ? "IN DECK" : "SIDEBOARD"}</div>` : ""}</div>`; };
+      ${ander ? `<div class="dbtag">${zij ? "IN DECK" : "SIDEBOARD"}</div>` : ""}${LADDER_AE.includes(k) ? `<div class="dbtag">ALLEEN TEGEN DE BOT</div>` : ""}</div>`; };
   const ltK = k => { const n = ltIn[k] || 0, ander = (zij ? d.ltN[k] : d.zijLt[k]) || 0;
     const kan = BAS.LT_PER - ander;
     return `<div class="aecard klein licht${n ? " chosen" : ""}"><div class="aet">${LIGHTS[k].name}</div>${aeVak(k, true)}
@@ -27789,7 +27979,7 @@ function deckbouwHTML(){
           <span class="dbzij"><span class="seg${zij ? "" : " on"}" data-act="dbzij" data-z="0">Deck</span><span class="seg${zij ? " on" : ""}" data-act="dbzij" data-z="1">Sideboard</span></span></div>
         <div class="dbuitleg">${zij ? `Het sideboard: ${BAS.ZIJ_AE} aethers en ${BAS.ZIJ_LT} lichtkopieën die je tussen de potjes van een best of 3 mag inruilen.`
           : `In je deck: ${BAS.AE} aethers en ${ltMaxVan(d.ae)} lichtkopieën, hooguit ${BAS.LT_PER} van dezelfde.${heeftAeIn(d.ae, "ae_zwerm") ? " ✨ Lichtzwerm: 4 extra." : ""}${heeftAeIn(d.ae, "ae_leven") ? " 💚 Levenskracht: 3 minder." : ""}`}</div>
-        <div class="dbgrid">${tab === "ae" ? basAePool().map(aeK).join("") : basLtPool().map(ltK).join("")}</div>
+        <div class="dbgrid">${tab === "ae" ? basAePool().concat(ladderAeVrij()).map(aeK).join("") : basLtPool().map(ltK).join("")}</div>
       </div>
     </div>
     <div class="dbonder">
@@ -27882,7 +28072,7 @@ function mpKnop(btn, el){
       if(!M || M.type !== "deckbouw") return true;
       const naam = document.getElementById("decknaam"); if(naam) M.d.naam = naam.value;
       if(mixTotaal(M.d.mix) !== elBasisVan(M.d.ae) * 4) return true;
-      const decks = basDecks(), d = basDeckSchoon(M.d);
+      const decks = basDecks(), d = basDeckSchoon(M.d, ladderAeVrij());
       let plek = M.i;
       if(plek >= 0 && decks[plek]) decks[plek] = d;
       else if(decks.length < BAS.DECKS){ decks.push(d); plek = decks.length - 1; }
@@ -27901,15 +28091,33 @@ function mpKnop(btn, el){
       const md = el ? el.dataset.m : "cmd", bot = !!(el && el.dataset.bot === "1");
       M = {type:"mp", modus:md, bot, stap:md === "cmd" ? "char" : "deck"}; render(); return true;
     }
-    case "mpdeck": if(M && M.type === "mp"){ mpKeus().deck = +i; saveSet(); M.stap = "char"; render(); } return true;
+    case "mpdeck": if(M && M.type === "mp"){
+      if(!M.bot && deckAlleenBot(basDecks()[+i])){ M.melding = "Dit deck gebruikt een aether die je op de ladder verdiende. Die mag alleen tegen de bot."; render(); return true; }
+      M.melding = ""; mpKeus().deck = +i; saveSet(); M.stap = "char"; render(); } return true;
     case "mpchar": if(M && M.type === "mp" && mpCharsVrij().indexOf(i) >= 0){ mpKeus().char = i; saveSet(); render(); } return true;
-    case "mpcharok": if(M && M.type === "mp"){ M.stap = "hoe"; render(); } return true;
+    case "mpcharok": if(M && M.type === "mp"){
+      if(!M.bot && M.modus !== "cmd" && deckAlleenBot(mijnProfiel().deck)){ M.stap = "deck"; M.melding = "Dit deck gebruikt een aether die je op de ladder verdiende. Die mag alleen tegen de bot."; render(); return true; }
+      M.stap = (M.bot && M.modus !== "cmd") ? "tegen" : "hoe"; render(); } return true;
     case "mpterug":
-      if(M && M.type === "mp"){ if(M.stap === "hoe") M.stap = "char"; else if(M.stap === "char" && M.modus !== "cmd") M.stap = "deck"; else M = null; render(); }
+      if(M && M.type === "mp"){ if(M.stap === "hoe") M.stap = (M.bot && M.modus !== "cmd") ? "tegen" : "char"; else if(M.stap === "tegen") M.stap = "char";
+        else if(M.stap === "char" && M.modus !== "cmd") M.stap = "deck"; else M = null; render(); }
       return true;
+    /* ⚔ de tegenstander kiezen (tegen de bot, Basis) */
+    case "ladkies": if(M && M.type === "mp" && ladderSpeelbaar(ladderZoek(i))){ M.tegen = i; render(); } return true;
+    case "ladwillekeurig": if(M && M.type === "mp"){
+      const kan = ladderAlle().filter(ladderSpeelbaar);
+      if(kan.length){ M.tegen = kan[Math.floor(Math.random() * kan.length)].id; M.stap = "hoe"; }
+      render(); } return true;
+    case "ladok": if(M && M.type === "mp" && M.tegen){ M.stap = "hoe"; render(); } return true;
+    case "ladmenu": {      // na een partij: terug naar de tegenstanders
+      const bo3 = matchVan() && S.match.bo !== 1;
+      M = {type:"mp", modus:bo3 ? "bas3" : "bas1", bot:true, stap:"tegen", tegen:LADDER_KEUS};
+      render(); return true;
+    }
     case "mpstart": case "mphost": {
       if(!M || M.type !== "mp") return true;
       const md = MP_MODUS[M.modus] || MP_MODUS.cmd, bot = btn === "mpstart";
+      LADDER_KEUS = (bot && M.modus !== "cmd" && M.tegen) ? M.tegen : null;   // ⚔ tegen wie (Basis tegen de bot)
       M = null; HOME.open = null;
       if(S.ui.mode !== "start") newGame();
       if(bot) onBtn(md.bot); else liveHost(md.kind);
@@ -27964,6 +28172,7 @@ function mpUitingen(id){
   /* in een fase (5-4) staat het gesprek binnen die fase */
   if(d.fase != null){ const F = (L.fases || [])[d.fase] || {}; Object.keys(F).forEach(k => { if(Array.isArray(F[k])) bron(F[k], "uit"); }); }
   (d.au || []).forEach(t => zet("au", t, sprAu));
+  (d.uit || []).forEach(t => zet("uit", t, sprUit)); (d.bijna || []).forEach(t => zet("bijna", t, sprBijna)); (d.hoi || []).forEach(t => zet("hoi", t, c.spr));
   const vr = L.varianten ? Object.values(L.varianten)[0] || {} : {};
   bron(L.verlies || vr.verlies, "bijna");      // jij verliest: zij winnen
   bron(L.win || vr.win, "au");                 // jij wint: zij verliezen
