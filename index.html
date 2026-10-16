@@ -3847,7 +3847,7 @@ const LK = ["", "greed", "darkhole", "kuriboh", "reborn", "master", "negate", "d
 const LKI = {}; LK.forEach((k, i) => { if (k) LKI[k] = i; });
 const L_GREED = 1, L_DARKHOLE = 2, L_KURIBOH = 3, L_REBORN = 4, L_MASTER = 5, L_NEGATE = 6, L_DFUSION = 7, L_GAMBLE = 8, L_BRENGER = 9,
   L_ECHO = 10, L_KLOON = 11, L_DOORTAST = 12, L_VITAL = 13, L_SIPHON = 14, L_STERREGEN = 15, L_WEB = 16, L_STRUIK = 17, L_MAX = 18;
-const LK_KOST = [0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0];
+const LK_KOST = [0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0];   // Web gratis sinds 17 okt 2026
 // aethers: bits
 const AE_BITS = {ae_draw3:1, ae_watercycle:2, ae_offer:4, ae_fire6:8, ae_stonefull:16, ae_grassx2:32, ae_graf:64, ae_hemel:128,
   ae_lichtval:256, ae_smeed:512, ae_pijn:1024, ae_alziend:2048, ae_genade:4096, fu_water:8192, fu_fire:16384, fu_stone:32768, fu_grass:65536, ae_leven:131072, ae_zwerm:262144};
@@ -4158,7 +4158,8 @@ function rotsKiezelsVoor(G, K, p, id, asSpell, col, o){
 const PLEK_ID = (p, c) => -(100 + p * 10 + c);
 const isPlekId = id => typeof id === 'number' && id <= -100;
 const plekVanId = id => { const n = -id - 100; return {p:Math.floor(n / 10), c:n % 10}; };
-function legePlekIds(G, el, p){
+function legePlekIds(G, el, p, e){
+  if (el === E_WS){ if (e && e.origin === 1 && e.col != null) return []; return legeKol(G, p).map(c => PLEK_ID(p, c)); }   // 🪞 eigen plek
   const kant = el === E_WATER ? [p] : el === E_KOGEL ? [1 - p] : (el === E_VUUR || el === E_GRAS || el === E_STEEN || el === 'siphon') ? [0, 1] : [];
   const uit = []; for (const q of kant) for (const c of legeKol(G, q)) uit.push(PLEK_ID(q, c));
   return uit;
@@ -4170,14 +4171,15 @@ function legPlan(G, K, p, id, asSpell, col, o){
   rotsKiezelsVoor(G, K, p, id, asSpell, col, o);
   for (let i = 0; i < plan.length; i++){
     const e = plan[i];
-    const ids = doelenVoor(G, p, e, selfId).concat(isMens(G, p) ? legePlekIds(G, e.el, p) : []);
+    const ids = doelenVoor(G, p, e, selfId).concat(isMens(G, p) ? legePlekIds(G, e.el, p, e) : []);
     if (!ids.length){ e.tid = null; continue; }
     const eerder = plan.slice(0, i).filter(x => x.tid != null && x.el === e.el).map(x => x.tid);
-    const t = kiesWezen(G, K, p, ids, e.el === E_STEEN || (isMens(G, p) && (e.el === E_VUUR || e.el === E_GRAS)), {k:ENAAM[e.el], selfId, eigenEffect:true, eerder});
+    const voor = e.el === E_WATER && o.waterVoor && !o.waterVoor.op ? (o.waterVoor.op = true, o.waterVoor) : null;
+    const t = voor ? (voor.id != null && ids.includes(voor.id) ? voor.id : null) : kiesWezen(G, K, p, ids, e.el === E_STEEN || (isMens(G, p) && (e.el === E_VUUR || e.el === E_GRAS)), {k:ENAAM[e.el], selfId, eigenEffect:true, eerder});
     if (t === 'cancel') return 'cancel';
     e.tid = t;
-    if (isPlekId(t)){ const pl = plekVanId(t); e.tp = pl.p; e.tc = pl.c; }
-    else if (t != null){ const w = e.el === E_WS ? vindKaart(G, t) : vindWezen(G, t); if (w >= 0){ e.tp = wP(w); e.tc = wC(w); } }
+    if (isPlekId(t)){ const pl = plekVanId(t); e.tp = pl.p; e.tc = pl.c; e.tk = 0; }
+    else if (t != null){ const w = e.el === E_WS ? vindKaart(G, t) : vindWezen(G, t); if (w >= 0){ e.tp = wP(w); e.tc = wC(w); e.tk = w >= 16 ? 1 : 0; } }
     if (e.el === E_WS && t != null){
       const sub = wsSubPlan(G, K, p, t, (e.keten || []).concat(e.src ? [e.src] : []));
       if (sub === 'cancel') return 'cancel';
@@ -4192,13 +4194,13 @@ function wsSubPlan(G, K, p, id, keten){
   const effs = effsVan(G, id, isSpell ? 1 : 0).map(e => Object.assign({}, e, {keten}));
   const selfId = isSpell ? null : id;
   for (const e of effs){
-    const ids = doelenVoor(G, p, e, selfId).concat(isMens(G, p) ? legePlekIds(G, e.el, p) : []);
+    const ids = doelenVoor(G, p, e, selfId).concat(isMens(G, p) ? legePlekIds(G, e.el, p, e) : []);
     if (!ids.length){ e.tid = null; continue; }
     const t = kiesWezen(G, K, p, ids, e.el === E_STEEN || (isMens(G, p) && (e.el === E_VUUR || e.el === E_GRAS)), {k:ENAAM[e.el], selfId, eigenEffect:true});
     if (t === 'cancel') return 'cancel';
     e.tid = t;
-    if (isPlekId(t)){ const pl = plekVanId(t); e.tp = pl.p; e.tc = pl.c; }
-    else if (t != null){ const v = e.el === E_WS ? vindKaart(G, t) : vindWezen(G, t); if (v >= 0){ e.tp = wP(v); e.tc = wC(v); } }
+    if (isPlekId(t)){ const pl = plekVanId(t); e.tp = pl.p; e.tc = pl.c; e.tk = 0; }
+    else if (t != null){ const v = e.el === E_WS ? vindKaart(G, t) : vindWezen(G, t); if (v >= 0){ e.tp = wP(v); e.tc = wC(v); e.tk = v >= 16 ? 1 : 0; } }
     if (e.el === E_WS && t != null){ const sub = wsSubPlan(G, K, p, t, keten.concat([id])); if (sub === 'cancel') return 'cancel'; e.sub = sub; }
   }
   return effs;
@@ -4208,7 +4210,7 @@ function effItem(p, e, selfId){
   if (e.el === E_VUUR){ it.excl = (e.origin === 0 && selfId != null) ? selfId : 0; it.srcId = e.origin === 0 ? selfId : null; it.protect = e.origin === 1 ? selfId : null; }
   if (e.el === E_GRAS) it.srcId = selfId;
   if (e.el === E_WATER) it.exclId = selfId;
-  if (e.el === E_WS){ it.keten = e.keten || []; if (e.sub) it.sub = e.sub; }
+  if (e.el === E_WS){ it.keten = e.keten || []; it.tk = e.tk; if (e.sub) it.sub = e.sub; }
   if (e.el === E_IJS) it.spell = !!e.spell;
   return it;
 }
@@ -4221,10 +4223,18 @@ function kondigAan(G, K, p, id, asSpell, col){
 }
 /* announcePlay0 */
 function kondigAan0(G, K, p, id, asSpell, col){
+  let waterVoor = null;   // 🧊→💧: het doel van de plons is al aangeklikt
   if (G.kVar[id] === IJS){
     const kanOver = asSpell ? ijsOverSpell(G, p).includes(col) : (ijsOverCre(G, p).includes(col) && !G.pl[p].cre[col]);
     let neem = kanOver;
-    if (kanOver && isMens(G, p)) neem = kiesOpt(G, K, p, ['neem', 'water']) !== 'water';
+    /* geen menu: tegenover klikken = overnemen, een eigen wezen/plek = 💧 Water met dat doel */
+    if (kanOver && isMens(G, p)){
+      const doel0 = asSpell ? G.pl[1 - p].spell[col] : G.pl[1 - p].cre[col];
+      const ids = [doel0].concat(alleWezens(G, (x, pp) => pp === p), legePlekIds(G, E_WATER, p).filter(x => asSpell || plekVanId(x).c !== col));
+      const v = kiesWezen(G, K, p, ids, true, {k:'ijs', eigenEffect:true});
+      neem = v === doel0;
+      if (!neem) waterVoor = {id: v === 'cancel' ? null : v};
+    }
     if (neem){
       /* 🧊 IJs mikt op wat er tegenover ligt en gaat op de keten: de ander mag reageren (en met 💧 ontwijken). */
       const vij = 1 - p, doel = asSpell ? G.pl[vij].spell[col] : G.pl[vij].cre[col];
@@ -4241,7 +4251,7 @@ function kondigAan0(G, K, p, id, asSpell, col){
   }
   if (!plaatsNu(G, p, id, asSpell, col)){ if (verdrongen){ G.pl[p].cre[col] = verdrongen; G.pl[p].hp[col] = vHp; } return false; }
   if (verdrongen){ waterVerdringt(G, K, p, id, col, verdrongen, vHp); return true; }
-  const plan = legPlan(G, K, p, id, asSpell, col, {});
+  const plan = legPlan(G, K, p, id, asSpell, col, {waterVoor});
   const top = {t:1, ctrl:p, card:id, asSpell, col, plan:plan === 'cancel' ? [] : plan};
   G.stack.push(top);
   /* 🫧 4-2: vuur verzuipt bij het neerzetten */
@@ -4417,9 +4427,7 @@ function losOp(G, K, it){
     case E_STAB: {
       const c0 = it.col != null ? it.col : (it.src ? G.pl[p].spell.indexOf(it.src) : -1);
       const kol = c0 >= 0 ? c0 : 2, q = 1 - p, doel = G.pl[q].cre[kol];
-      if (doel) doeSchade(G, doel, STAB, 6, {});
-      G.pl[q].life -= 1;
-      if (G.pl[q].life <= 0) eindeSpel(G, p);
+      if (doel) doeSchade(G, doel, STAB, 6, {});   // geen klap meer op de speler (17 okt 2026)
       return;
     }
     case E_SCHILD: {
@@ -4525,8 +4533,16 @@ function losOp(G, K, it){
       const bron = it.src, keten = (it.keten || []).concat(bron ? [bron] : []);
       const ids = wsDoelen(G, p, it);
       if (!ids.length) return;
-      const id = effDoel(G, K, it, p, ids, true, {k:'ws'});
-      if (id === 'fizzle' || id === null) return;
+      /* 🎯 op een plek gemikt: wat daar nu ligt gaat nog een keer; een andere kaart kiest opnieuw */
+      let id, zelfde = true;
+      if (it.dec && it.tid != null && it.tp != null && it.tc != null && !(G.vh && G.vh.st.band)){
+        const nid = it.tk === 1 ? G.pl[it.tp].spell[it.tc] : G.pl[it.tp].cre[it.tc];
+        if (!nid || !ids.includes(nid)) return;
+        id = nid; zelfde = nid === it.tid;
+      } else {
+        id = effDoel(G, K, it, p, ids, true, {k:'ws'});
+        if (id === 'fizzle' || id === null) return;
+      }
       const w = vindKaart(G, id); if (w < 0) return;
       const isSpell = w >= 16;
       const effs = effsVan(G, id, isSpell ? 1 : 0);
@@ -4534,7 +4550,7 @@ function losOp(G, K, it){
       if (!isSpell && heeft(G, p, 'ae_watercycle')) G.pl[wP(w)].hp[wC(w)] += 3;   // 🟣 Getijdenstroom: ook de Waterspiegel
       if (G.kVar[id] === ROTS) rotsKiezel(G, K, p, id, wC(w));
       const selfId = isSpell ? null : id;
-      if (Array.isArray(it.sub)){
+      if (zelfde && Array.isArray(it.sub)){
         for (let i = it.sub.length - 1; i >= 0; i--) G.stack.push(effItem(p, Object.assign({}, it.sub[i], {keten}), selfId));
         return;
       }
@@ -4774,7 +4790,7 @@ function losLichtOp(G, K, it){
     case L_GREED: trek(G, K, p, 2); return;
     case L_DARKHOLE: {
       let n = 0;
-      for (let c = 0; c < 5; c++) if (s.cre[c]){ vernietig(G, p, c); n++; }
+      for (let c = 0; c < 5; c++){ const voor = s.cre[c]; if (voor){ vernietig(G, p, c); if (s.cre[c] !== voor) n++; } }   // Laatste Adem-overlever telt niet
       const t = n >= 3 ? 2 : n ? 1 : 0;
       if (t) trek(G, K, p, t);
       return;
@@ -6687,7 +6703,7 @@ const LIGHTS = {
   kloon:   {name:"Kloon", n:3},
   doortast:{cost:1, name:"Doortastend", n:3},
   vital:   {name:"Vitaliteit", n:3},
-  web:     {cost:1, name:"Web", n:3, verhaal:true, pvp:true},   // okt 2026: ook in PvP
+  web:     {name:"Web", n:3, verhaal:true, pvp:true},   // okt 2026: ook in PvP; kost sinds 17 okt geen leven meer
   siphon:  {name:"Levensroof", n:3},
   sterregen:{name:"Sterrenregen", n:3},
   struik:  {name:"Roversbuit", n:3, verhaal:true, pvp:true},  // okt 2026: ook in PvP · ✦ van de Struik (2-2): zijn drie rituelen, elk één keer
@@ -6802,7 +6818,7 @@ const KAART_TEKST = {
   ei:      {kw:["kleurloos","muur"], veld:"Na <b>2</b> beurten van de eigenaar komt er een 🕷 Spin uit."},
   spin:    {kw:["kleurloos"], eig:"Slaat altijd <b>7</b>."},
   swipe:   {spell:"<b>1</b> schade aan elk vijandelijk wezen."},
-  stab:    {spell:"<b>6</b> {kleurloze|kleurloos} schade aan het wezen hier tegenover, en <b>1</b> aan de tegenstander."},
+  stab:    {spell:"<b>6</b> {kleurloze|kleurloos} schade aan het wezen hier tegenover."},
   schild:  {spell:"Zet twee 🛡 Schildjes neer: <b>0</b> aanval, <b>3</b> levens. Ze vallen nooit aan."},
   schildje:{kw:["muur","wijkt"]},
   knoop:   {veld:"Speel je hier een wezen, dan gaat het speel-effect daarvan nog <b>twee keer</b> af. Het wezen hier {wijkt}."},
@@ -6830,7 +6846,7 @@ const VAR_TEKST = {
 };
 const LICHT_TEKST = {
   greed:   "{Betaal} <b>2</b> en {offer} een eigen wezen: trek <b>2</b>.",
-  darkhole:"Vernietig al je eigen wezens. Trek <b>1</b>. Waren het er <b>3</b> of meer, trek <b>2</b>.",
+  darkhole:"Vernietig al je eigen wezens. Trek <b>1</b>. Zijn er <b>3</b> of meer echt vernietigd, trek <b>2</b>.",
   kuriboh: "Zet op elke vrije eigen plek een ☁️ Wolk: <b>1</b> leven, {Kleurloos}, {Wijkt}.",
   reborn:  "Kies: pak een ✦ lichtkaart uit je graf terug in je hand, óf {roep|roepop} er een wezen uit meteen {op|roepop} het veld, met <b>+3</b> levens.",
   master:  "Kies ☄️ Plasma, 🧊 IJs, 🌹 Roos of ⛰️ Rots: de sterke versie van een element. Deze kaart wordt dat tot het eind van het potje en gaat terug naar je hand.",
@@ -6842,7 +6858,7 @@ const LICHT_TEKST = {
   kloon:   "Kies een kaart op het veld: wezen of ritueel, van wie ook. Leg er een kopie van neer waar je wilt aan jouw kant, met dezelfde levens. Als wezen of als ritueel (dan zonder levens). Het speel-effect gaat af.",
   doortast:"{Betaal} <b>1</b>: kies een kaart uit je deck en neem die in je hand.",
   vital:   "{Heel} <b>2</b>. Trek <b>1</b>.",
-  web:     "{Betaal} <b>1</b>: trek <b>1</b>. Alle vijandelijke wezens zitten {Vast}.",
+  web:     "Trek <b>1</b>. Alle vijandelijke wezens zitten {Vast}.",
   siphon:  "Een wezen verliest alle levens. Jij krijgt de helft daarvan als {+levens|pluslevens}.",
   sterregen:"<b>1</b> {kleurloze|kleurloos} schade aan elk vijandelijk wezen. Trek <b>1</b>.",
   max:     "Zet 🐺 Max op een vrije eigen plek: <b>5</b> levens, {Kleurloos}, {Volle slag}. Al je andere wezens <b>+1</b> leven.",
@@ -6875,7 +6891,7 @@ const AETHER_TEKST = {
   ae_genade:    "Eén keer per beurt: je eerste wezen dat vernietigd zou worden, blijft staan op <b>1</b>.",
   ae_leven:     "Al je wezens komen binnen met <b>+2</b> levens. Alleen PvP. In Basis heeft je deck <b>3</b> lichtkaarten minder (3 in plaats van 6). In commander krijg je in de draft waarin je hem kiest geen lichtkaart.",
   ae_zwerm:     "Alleen in Basis. Je deck heeft <b>4</b> lichtkaarten meer (10 in plaats van 6) en van elk element <b>1</b> kaart minder (20 in plaats van 24). Niet in je sideboard, en je wisselt hem niet tussen potjes.",
-  ae_arsenaal:  "Onder zijn kolom 2, 3 en 4 liggen 🗡 Swipe, 🔪 Stab en 🛡 Schild. Ze gaan af bij elk wezen dat hij daar speelt, en ze blijven liggen. Swipe: <b>1</b> schade aan al jouw wezens. Stab: <b>6</b> recht tegenover en <b>1</b> aan jou. Schild: twee schildjes van 0/3 die nooit aanvallen.",
+  ae_arsenaal:  "Onder zijn kolom 2, 3 en 4 liggen 🗡 Swipe, 🔪 Stab en 🛡 Schild. Ze gaan af bij elk wezen dat hij daar speelt, en ze blijven liggen. Swipe: <b>1</b> schade aan al jouw wezens. Stab: <b>6</b> recht tegenover. Schild: twee schildjes van 0/3 die nooit aanvallen.",
   ae_kweb:      "Sterft er een wezen van de eigenaar (geen 🕷 spin of 🥚 ei), dan wordt het meteen een 🥚 ei in die kolom: <b>4</b> levens, {Muur}. Na <b>twee</b> beurten van de eigenaar komt het uit als 🕷 spin van <b>7</b>.",
   ae_doorslaan: "Vernietigt een wezen van haar met een aanval wat er tegenover staat, dan mag die nog een keer aanvallen. Eén keer per beurt.",
   ae_maatje:    "Maatje, haar lavagolem: <b>20</b> levens, {Kleurloos}. {Volle slag}. Gaat niet dood (hooguit naar 0) en krijgt elke beurt van haar <b>4</b> levens terug. 🌿 Tokens houden de golem niet thuis.",
@@ -7371,6 +7387,11 @@ function ijsOverCre(p){
 }
 function ijsOverSpell(p){
   return freeSpellCols(p).filter(c => { const sp = P(opp(p)).cols[c].spell; return sp && !kolDicht(c) && sp.card.el !== "knoop"; });
+}
+/* 🧊 Waar het smeltende ijs als 💧 Water op kan mikken, nog vóór het ligt: eigen wezens en lege
+   eigen plekken (niet de plek waar het zelf komt). Zelfde volgorde als het water straks vraagt. */
+function ijsWaterIds(p, asSpell, col){
+  return waterTargets(p).concat(legePlekIds("water", p).filter(id => asSpell || plekVanId(id).c !== col));
 }
 function ijsCreCols(p){
   const vrij = openCols(p);
@@ -9714,7 +9735,9 @@ function moveCre(p, from, to){
 const PLEK_ID = (p, c) => -(100 + p * 10 + c);
 const isPlekId = id => typeof id === "number" && id <= -100;
 const plekVanId = id => { const n = -id - 100; return {p:Math.floor(n / 10), c:n % 10}; };
-function legePlekIds(el, p){
+function legePlekIds(el, p, e){
+  /* 🪞 de Waterspiegel mikt op een eigen plek; Water als ritueel kiest niet (zijn eigen kolom) */
+  if(el === "ws") return e && e.origin === "spell" && e.col != null ? [] : emptyCols(p).map(c => PLEK_ID(p, c));
   const kant = el === "water" ? [p] : el === "kogel" ? [opp(p)]
     : (el === "vuur" || el === "gras" || el === "steen" || el === "siphon") ? [0, 1] : [];
   return kant.flatMap(q => emptyCols(q).map(c => PLEK_ID(q, c)));
@@ -9886,15 +9909,15 @@ async function wsSubPlan(p, id, keten){
   const effs = effsOf(f.card.el, origin, f.card).map(e => Object.assign({}, e, {keten}));
   const selfId = f.kind === "cre" ? f.card.id : null;
   for(const e of effs){
-    const ids = targetsForEff(p, e, selfId, f.card.el).concat(isBot(p) ? [] : legePlekIds(e.el, p));
+    const ids = targetsForEff(p, e, selfId, f.card.el).concat(isBot(p) ? [] : legePlekIds(e.el, p, e));
     if(!ids.length){ e.tid = null; continue; }
     const tid = await chooseCre(p, ids,
       `<b>${pName(p)}</b> · 💧 ${kIcon(f.card)} ${kNaam(f.card)} gaat nog een keer: ${effPromptTxt(p, e.el)}`,
       e.el === "steen" || (!isBot(p) && (e.el === "vuur" || e.el === "gras")), {k:e.el, selfId, eigenEffect:true});
     if(tid === "cancel") return "cancel";
     e.tid = tid;
-    if(isPlekId(tid)){ const pl = plekVanId(tid); e.tp = pl.p; e.tc = pl.c; }
-    else if(tid != null){ const g = e.el === "ws" ? findKaart(tid) : findCre(tid); if(g){ e.tp = g.p; e.tc = g.c; } }
+    if(isPlekId(tid)){ const pl = plekVanId(tid); e.tp = pl.p; e.tc = pl.c; e.tk = "cre"; }
+    else if(tid != null){ const g = e.el === "ws" ? findKaart(tid) : findCre(tid); if(g){ e.tp = g.p; e.tc = g.c; e.tk = g.kind === "spell" ? "spell" : "cre"; } }
     if(e.el === "ws" && tid != null){
       const sub = await wsSubPlan(p, tid, keten.concat([f.card.id]));
       if(sub === "cancel") return "cancel";
@@ -9926,7 +9949,7 @@ async function declarePlan0(p, card, asSpell, col, opts){
   await rotsKiezelsVoor(p, card, asSpell, col, o);
   for(let i=0;i<plan.length;i++){
     const e = plan[i];
-    const ids = targetsForEff(p, e, selfId, card.el, o.excl).concat(isBot(p) ? [] : legePlekIds(e.el, p));
+    const ids = targetsForEff(p, e, selfId, card.el, o.excl).concat(isBot(p) ? [] : legePlekIds(e.el, p, e));
     if(!ids.length){ e.tid = null; continue; }
     const bron = e.origin === "spell" ? " <span style='opacity:.7'>(ritueel-trigger)</span>" : "";
     const nr = plan.filter(x => x.el === e.el && x.origin === e.origin).length > 1
@@ -9934,13 +9957,15 @@ async function declarePlan0(p, card, asSpell, col, opts){
     /* Wat er in dit plan al op een doelwit mikt: dan kiest de bot bij een dubbel effect
        (het trio, Getijdenstroom, Echo) niet twee keer hetzelfde als één keer al genoeg is. */
     const eerder = plan.slice(0, i).filter(x => x.tid != null && x.el === e.el).map(x => x.tid);
-    const id = await chooseCre(p, ids,
+    /* 🧊→💧 het eerste water-doel is al gekozen toen je het ijs neerlegde */
+    const voor = e.el === "water" && o.waterVoor && !o.waterVoor.op ? (o.waterVoor.op = true, o.waterVoor) : null;
+    const id = voor ? (voor.id != null && ids.includes(voor.id) ? voor.id : null) : await chooseCre(p, ids,
       `<b>${pName(p)}</b>: ${effPromptTxt(p, e.el)}${nr}${bron}`,
       e.el === "steen" || (!isBot(p) && (e.el === "vuur" || e.el === "gras")), {k:e.el, selfId, eigenEffect:true, eerder});
     if(id === "cancel") return "cancel";
     e.tid = id;
-    if(isPlekId(id)){ const pl = plekVanId(id); e.tp = pl.p; e.tc = pl.c; }
-    else if(id != null){ const f = e.el === "ws" ? findKaart(id) : findCre(id); if(f){ e.tp = f.p; e.tc = f.c; } }
+    if(isPlekId(id)){ const pl = plekVanId(id); e.tp = pl.p; e.tc = pl.c; e.tk = "cre"; }
+    else if(id != null){ const f = e.el === "ws" ? findKaart(id) : findCre(id); if(f){ e.tp = f.p; e.tc = f.c; e.tk = f.kind === "spell" ? "spell" : "cre"; } }
     if(e.el === "ws" && id != null){
       const sub = await wsSubPlan(p, id, (e.keten || []).concat(e.srcCard ? [e.srcCard.id] : []));
       if(sub === "cancel") return "cancel";
@@ -9960,7 +9985,7 @@ function effItem(p, e, selfId){
   }
   if(e.el === "gras")  it.srcId = selfId;
   if(e.el === "water") it.exclId = selfId;
-  if(e.el === "ws"){ it.keten = e.keten || []; if(e.sub) it.sub = e.sub; }
+  if(e.el === "ws"){ it.keten = e.keten || []; it.tk = e.tk; if(e.sub) it.sub = e.sub; }
   return it;
 }
 /* Krijgt deze speler een reactievenster op deze link? Alleen als er iets te doen valt:
@@ -10457,15 +10482,21 @@ function waterVerdringbaar(p){
   return uit;
 }
 async function announcePlay0(p, card, asSpell, col, flash, opts){
+  let waterVoor = null;   // 🧊→💧: het doel van de plons is al aangeklikt
   /* 🧊 IJs: smelt meteen en neemt over wat er recht tegenover ligt. */
   if(card.var === "ijs"){
     const kanOver = asSpell ? ijsOverSpell(p).includes(col) : (ijsOverCre(p).includes(col) && !P(p).cols[col].cre);
     let neem = kanOver;
+    /* Geen menu (okt 2026): je klikt. Wat er recht tegenover ligt = 🧊 overnemen; een eigen wezen
+       (of een lege eigen plek) = het smelt tot 💧 Water en dát is meteen het doel van de plons. */
     if(kanOver && !isBot(p)){
-      const wat = asSpell ? kNaam(P(opp(p)).cols[col].spell.card) : kNaam(P(opp(p)).cols[col].cre.card);
-      const v = await chooseOpt(p, `<b>${pName(p)}</b> · 🧊 IJs in kolom ${col+1}: wat doet het?`,
-        [{v:"neem", label:`Overnemen: ${wat}`, ic:"🧊"}, {v:"water", label:"Smelten tot 💧 Water", ic:"💧"}]);
-      neem = v !== "water";
+      const vij0 = opp(p), doel0 = asSpell ? P(vij0).cols[col].spell : P(vij0).cols[col].cre;
+      const ids = [doel0.card.id].concat(ijsWaterIds(p, asSpell, col));
+      const v = await chooseCre(p, ids,
+        `<b>${pName(p)}</b> · 🧊 IJs in kolom ${col+1}: klik <b>${kNaam(doel0.card)}</b> recht tegenover om het over te nemen, of een eigen wezen: dan smelt het tot 💧 Water en speel je dat wezen opnieuw`,
+        true, {k:"ijs", eigenEffect:true});
+      neem = v === doel0.card.id;
+      if(!neem) waterVoor = {id: v === "cancel" ? null : v};
     }
     if(neem){
       /* 🧊 IJs mikt op wat er tegenover ligt en gaat op de keten (okt 2026): de ander mag reageren,
@@ -10504,7 +10535,7 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
     render();
     return true;
   }
-  const plan = await declarePlan(p, card, asSpell, col, {onField:true});
+  const plan = await declarePlan(p, card, asSpell, col, {onField:true, waterVoor});
   pushPlay(p, card, asSpell, col, flash, plan === "cancel" ? [] : plan);
   await toonZet(p, cardFaceHTML(card, asSpell), `${kIcon(card)} <b>${kNaam(card)}</b>`,
     plan === "cancel" ? [] : plan);
@@ -11392,7 +11423,7 @@ async function resolveLight(it){
     if(!S.roversbuit) S.roversbuit = [[], []];
     const al = S.roversbuit[p];
     const opts = [{v:"swipe", label:"Swipe · 1 schade aan al zijn wezens", ic:"🗡"},
-                  {v:"stab", label:"Stab · 6 recht tegenover, en 1 aan hem", ic:"🔪"},
+                  {v:"stab", label:"Stab · 6 recht tegenover", ic:"🔪"},
                   {v:"schild", label:"Schild · twee schildjes van 0/3", ic:"🛡"}].filter(o => al.indexOf(o.v) < 0);
     if(!opts.length){ addLog(`✦ Roversbuit: het arsenaal is leeg. Er gebeurt niets.`, true); return; }
     const keus = opts.length === 1 ? opts[0].v
@@ -11416,7 +11447,8 @@ async function resolveLight(it){
   }
   if(k === "darkhole"){
     let n = 0;
-    for(let c=0;c<5;c++) if(P(p).cols[c].cre){ destroyCre(p, c, "✦ Zwart Gat"); n++; }
+    /* alleen wat echt verdwijnt telt mee: een wezen dat door 🕊 Laatste Adem blijft staan niet */
+    for(let c=0;c<5;c++){ const voor = P(p).cols[c].cre; if(voor){ destroyCre(p, c, "✦ Zwart Gat"); if(P(p).cols[c].cre !== voor) n++; } }
     render(); await sleep(FAST ? 0 : 220);
     /* Vijf wezens wegvegen en er vijf voor terugtrekken was te veel: dan is opruimen
        gratis. Drie is het plafond. */
@@ -11898,12 +11930,9 @@ async function resolveEffect(it){
       : (sp ? P(p).cols.findIndex(x => x.spell && x.spell.card.id === sp.id) : -1);
     const kol = c >= 0 ? c : 2;
     const doel = P(opp(p)).cols[kol].cre;
-    addLog(`🔪 <em>Stab</em>: 6 kleurloze schade recht tegenover kolom ${kol+1}, en 1 schade aan ${pName(opp(p))}.`, true);
+    addLog(`🔪 <em>Stab</em>: 6 kleurloze schade recht tegenover kolom ${kol+1}${doel ? "" : ": daar staat niets"}.`, true);
     if(doel){ fxLight(creSel(opp(p), kol)); applyDamage(doel.card.id, "stab", 6, {noFx:true}); }
-    /* De klap op de speler zelf gaat altijd door, ook als er niets tegenover stond. */
-    P(opp(p)).life -= 1;
-    if(opp(p) === 0 && S.story) S.story.schadeJij = (S.story.schadeJij || 0) + 1;
-    pop(rectOf(`.pside[data-side="${opp(p)}"] .plife`), "-1", "dmg");
+    /* Sinds 17 okt 2026 geen klap meer op de speler zelf. */
     if(!FAST){ AU.play("attack"); const app = document.getElementById("app");
       if(app){ app.classList.remove("beeft"); void app.offsetWidth; app.classList.add("beeft"); setTimeout(() => app.classList.remove("beeft"), 600); } }
     render(); await sleep(FAST ? 0 : 300);
@@ -12023,8 +12052,22 @@ async function resolveEffect(it){
     const bron = it.srcCard, keten = (it.keten || []).concat(bron ? [bron.id] : []);
     const ids = wsDoelen(p, it);
     if(!ids.length){ addLog(it.origin === "spell" ? "💧 Water: er staat geen eigen wezen met een speel-effect in deze kolom." : "💧 Water: geen andere eigen kaart om nog eens te laten gaan."); return; }
-    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — ${effPrompt.ws}`, true, {k:"ws"});
-    if(id === "fizzle" || id === null){ if(id === null) addLog("💧 Water: overgeslagen."); return; }
+    /* 🎯 De Waterspiegel mikt op een plek: wat daar nu ligt (wezen of ritueel, net als bij het
+       mikken) gaat nog een keer. Is dat een andere kaart dan toen, dan kies je haar doelen opnieuw. */
+    let id, zelfde = true;
+    if(it.dec && it.tid != null && it.tp != null && it.tc != null && !(S.story && S.story.band)){
+      const slot = P(it.tp).cols[it.tc], nu = slot ? (it.tk === "spell" ? slot.spell : slot.cre) : null, nid = nu ? nu.card.id : null;
+      if(nid == null || !ids.includes(nid)){
+        addLog(nid == null ? "💧 Water raakt een lege plek: er gebeurt niets." : "💧 Water: wat er nu ligt kan niet nog een keer gaan. Er gebeurt niets.", true);
+        pop(it.tk === "spell" ? `.pside[data-side="${it.tp}"] .col:nth-child(${it.tc+1}) .slot.sp` : creSel(it.tp, it.tc), "MIS", "imm");
+        AU.play("place");
+        return;
+      }
+      id = nid; zelfde = nid === it.tid;
+    } else {
+      id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — ${effPrompt.ws}`, true, {k:"ws"});
+      if(id === "fizzle" || id === null){ if(id === null) addLog("💧 Water: overgeslagen."); return; }
+    }
     const f = findKaart(id); if(!f) return;
     const origin = f.kind === "spell" ? "spell" : "creature";
     const effs = effsOf(f.card.el, origin, f.card);
@@ -12035,7 +12078,7 @@ async function resolveEffect(it){
     if(f.card.var === "rots") await rotsKiezel(p, f.card, f.c);
     const selfId = f.kind === "cre" ? f.card.id : null;
     /* Al bij het aankondigen gekozen: die doelwitten staan vast (en fizzelen als ze weg zijn). */
-    if(Array.isArray(it.sub)){
+    if(zelfde && Array.isArray(it.sub)){
       for(let i = it.sub.length - 1; i >= 0; i--) S.stack.push(effItem(p, Object.assign({}, it.sub[i], {keten}), selfId));
       return;
     }
@@ -12877,7 +12920,7 @@ async function kiesPlek(p, card, o){
     fuseNaam: fu ? (AETHERS[aeFuse(p, card.el).key] || {}).name : "",
     meta:{el:card.el},
     prompt:`${kIcon(card)} ${kNaam(card)} — kies ${valid.length ? soort : "de fusie"}${fu ? ", of 🟣 fusie" : ""}`
-      + `${card.var === "ijs" ? " · 🧊 IJs neemt over wat er recht tegenover ligt, of smelt tot 💧 Water" : ""}`
+      + `${card.var === "ijs" ? " · 🧊 IJs: daarna klik je wat er tegenover ligt (overnemen) of een eigen wezen (💧 Water)" : ""}`
       + `${(cre.length && card.el === "water" && !card.var) ? " · Water mag ook bovenop een eigen wezen, dat verhuist dan" : ""}`});
   if(s === "fuse") return {mode:"fuse"};
   if(s === "cancel" || !s) return "cancel";
@@ -19882,7 +19925,7 @@ const STORY = {
          slag:["struikrover","struikrover_slag"],
          t:"Het zwaard gaat in één haal door de lucht, vlak langs je. Je hoort het pas nadat het al voorbij is."},
         {s:null, naam:"…", kleur:"#57d7ff", t:"🗡 <b>De Struikrover legt drie dingen neer.</b> Het zijn rituelen, en ze gaan af zoals rituelen afgaan: zodra er iets bovenop gezet wordt. Niet eerder. Ze liggen dus te wachten tot ze nodig zijn."},
-        {s:null, naam:"…", kleur:"#57d7ff", t:"<b>Swipe</b> doet 1 aan alles wat jij hebt staan. <b>Stab</b> doet 6 aan wat er recht tegenover ligt, en 1 aan jou. <b>Schild</b> zet twee schildjes neer: 0 aanval, 3 levens."}
+        {s:null, naam:"…", kleur:"#57d7ff", t:"<b>Swipe</b> doet 1 aan alles wat jij hebt staan. <b>Stab</b> doet 6 aan wat er recht tegenover ligt. <b>Schild</b> zet twee schildjes neer: 0 aanval, 3 levens."}
       ],
       deck:{steen:5, vuur:5, gras:5, water:5, roos:4, siphon:6},   // dezelfde verdeling als Kaelid (6 licht, zoals iedereen)
       lt:["siphon"],
@@ -23508,7 +23551,7 @@ async function vonkPaniek(){
     P(1).hand.splice(j, 1); P(1).grave.push(c0);
     if(P(1).life > 1){ P(1).life -= 1; pop(rectOf(`.pside[data-side="1"] .plife`), "-1", "dmg"); }
     let n = 0;
-    for(let cc=0; cc<5; cc++) if(P(1).cols[cc].cre){ destroyCre(1, cc, "✦ Zwart Gat"); n++; }
+    for(let cc=0; cc<5; cc++){ const voor = P(1).cols[cc].cre; if(voor){ destroyCre(1, cc, "✦ Zwart Gat"); if(P(1).cols[cc].cre !== voor) n++; } }
     render(); if(!FAST) await sleep(240);
     addLog(`✦ Zwart Gat vernietigt ${n} eigen wezen${n===1?"":"s"} — ${pName(1)} trekt er ${n}.`, true);
     if(n) await drawN(1, n, "✦ Zwart Gat");
@@ -24756,8 +24799,8 @@ function toegangHTML(k, licht, slot){
   const lad = !licht && typeof LADDER_AE !== "undefined" && LADDER_AE.includes(k)
     ? LADDER.bazen.concat([LADDER.seraf]).find(x => x.geeft === k) : null;
   const vbot = !licht && typeof VERHAAL_BOT_AE !== "undefined" && VERHAAL_BOT_AE.includes(k);
-  const vbotTag = vbot ? `<span class="${ladderAeVrij().includes(k) ? "" : "nee"}" style="text-decoration:none">${ladderAeVrij().includes(k) ? "Tegen de bot ✓" : "Tegen de bot: eerst vinden in het verhaal"}</span>` : "";
-  const ladTag = vbotTag || lad ? vbotTag + (lad ? `<span class="${ladderVerslagen(lad.id) ? "" : "nee"}" style="text-decoration:none">${ladderVerslagen(lad.id) ? "Tegen de bot ✓" : "Tegen de bot: versla " + mpChar(lad.id).naam}</span>` : "") : "";
+  /* Hoe je hem krijgt, verklappen we niet (okt 2026): alleen óf je hem tegen de bot hebt. */
+  const ladTag = (vbot || lad) ? `<span class="${ladderAeVrij().includes(k) ? "" : "nee"}">Tegen de bot${ladderAeVrij().includes(k) ? " ✓" : ""}</span>` : "";
   return `<div class="libwaar" title="Waar je deze kaart kunt gebruiken">${[["verhaal", slot ? "Verhaal: nog niet" : "Verhaal"], ["cmd", "Commander"], ["bas", "Basis"]]
     .map(([x, n]) => `<span class="${t[x] ? "" : "nee"}">${n}</span>`).join("")}${ladTag}</div>`;
 }
@@ -24781,12 +24824,12 @@ function libHTML(){
   let kop = "📚 Library", sub = "Alle kaarten. Onder elke kaart staat waar je hem kunt gebruiken: in het verhaal, in de commander-draft en in je Basis-decks (doorgestreept = daar niet). <i>Verhaal: nog niet</i> = in het verhaal nog niet gevonden; in PvP kun je hem wel al gebruiken.";
   let items = "";
   if(tab === "ae"){
-    const keys = Object.keys(AETHERS).filter(k => !AETHERS[k].uit && ((!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || (!u && inPvp(k, false)) || (u && (u.aethers || []).indexOf(k) >= 0)));
+    const keys = Object.keys(AETHERS).filter(k => !AETHERS[k].uit && ((!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || (!u && (inPvp(k, false) || BOT_AE.includes(k))) || (u && (u.aethers || []).indexOf(k) >= 0)));
     const sel = u ? (Array.isArray(u.aeSel) ? u.aeSel : []) : [];
     if(u){ kop = "🟣 Kies je aethers"; sub = `${sel.length} van ${u.aeMax || 1} gekozen. Klik een kaart om hem te kiezen of weer weg te doen.`; }
     items = keys.map(k => {
       const i = u ? (u.aethers || []).indexOf(k) : -1;
-      const vrij = u ? i >= 0 : (alles || bz.ae.has(k) || inPvp(k, false));   // wat in PvP mag, heb je daar altijd
+      const vrij = u ? i >= 0 : (alles || bz.ae.has(k) || inPvp(k, false) || ladderAeVrij().includes(k));   // wat in PvP mag, heb je daar altijd
       const slot = !u && !alles && !bz.ae.has(k);
       const gek = u && i >= 0 && sel.indexOf(i) >= 0;
       const attr = u && vrij ? `data-act="voorae" data-i="${i}"` : (vrij ? `data-act="aeinfo" data-k="${k}"` : "");
@@ -26207,8 +26250,6 @@ function deckVijInfo(p){
     r.sterk ? "waarvan " + Object.keys(r.varen).map(v => `${r.varen[v]} ${VAR[v] ? VAR[v].icon + " " + VAR[v].name : v}`).join(", ") + " opgewaardeerd" : "")).join("");
   if(lts.length) h += `<p style="margin:12px 0 6px;color:var(--gold)">LICHTKAARTEN</p>` + lts.map(r => rij("✦", r.naam, r.n, "")).join("");
   if(rest.length) h += `<p style="margin:12px 0 6px;color:var(--gold)">ANDERE KAARTEN</p>` + rest.map(r => rij(r.ic, r.naam, r.n, "")).join("");
-  const v = typeof veldInfo === "function" ? veldInfo() : null;
-  if(v && v.regels && v.regels.length) h += `<p style="margin:12px 0 6px;color:var(--gold)">VELDCONDITIES</p>` + v.regels.map(r => `<p style="margin:0 0 6px">${r}</p>`).join("");
   return {type:"info", titel:`Deck van ${pName(p)}`, ic:"🂠", kleur:"#c9d6ea",
     sub:`${tot} kaarten bij de start · wat al getrokken is, zie je hier niet`, tekst:h || "<p>Geen kaarten.</p>"};
 }
@@ -27886,13 +27927,13 @@ function ladderHTML(kop){
     return `<div class="chtegel ladtegel${M.tegen === t.id ? " kies" : ""}${versl ? " verslagen" : ""}" data-act="btn" data-btn="ladkies" data-i="${t.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt">${charPortret(ch.spr)}</div>${versl ? `<div class="ladkroon" title="verslagen">${KROON}</div>` : ""}
       <div class="chnaam">${ch.naam}</div><div class="ladsub">${aeKortLijst(deck.ae)}</div>
-      ${t.geeft ? `<div class="ladsub ladgeeft">${versl ? "✓ " : "geeft "}${AETHERS[t.geeft].name}</div>` : ""}${t.voorlopig ? `<div class="ladsub">voorlopig deck</div>` : ""}</div>`;
+      ${t.voorlopig ? `<div class="ladsub">voorlopig deck</div>` : ""}</div>`;
   };
   const alle = ladderAlle().filter(t => t !== LADDER.geheim || ladderOpen(LADDER.geheim));
   const nV = alle.filter(t => ladderVerslagen(t.id)).length;
   const kies = M.tegen ? ladderZoek(M.tegen) : null;
   return `<div class="ovbox chbox ladbox"><h2>KIES JE TEGENSTANDER</h2>${kop}
-    <div class="sub mpnote">${nV} van de ${alle.length} verslagen (${KROON}). De bazen en Seraf geven een aether die je alleen zo krijgt, voor je decks tegen de bot.</div>
+    <div class="sub mpnote">${nV} van de ${alle.length} verslagen (${KROON}).</div>
     <div class="ladscroll">
       <div class="ladkop">TEGENSTANDERS</div><div class="chgrid"><div class="chtegel ladtegel ladvraag" data-act="btn" data-btn="ladwillekeurig" title="Een willekeurige tegenstander">
         <div class="chpt ladslot">?</div><div class="chnaam">Willekeurig</div><div class="ladsub">laat het lot kiezen</div></div>${LADDER.tegen.map(tegel).join("")}</div>
