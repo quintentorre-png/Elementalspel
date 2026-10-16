@@ -506,7 +506,10 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
 .duitk .aei .aebeeld, .tgchip .aei .aebeeld{width:100%; height:100%; object-fit:cover; object-position:center 40%; display:block}
 .duitk .aei{width:44px; height:44px; flex:0 0 44px}
 /* 🟣 het zegel op elk vierkant aethervak: één keer getekend, niet in de prent zelf */
-.aei.vakz{position:relative}
+.aei.vakz, .lkbeeld.vakz{position:relative}
+.lkbeeld.vakz::after{content:""; position:absolute; right:6%; bottom:5%; width:11%; aspect-ratio:1; min-width:6px;
+  background:#7b3df0; border:1px solid #e9dcff; box-shadow:0 0 0 1px #2a1250, 0 0 6px rgba(170,110,255,.9), inset 0 0 0 2px #a970ff;
+  image-rendering:pixelated; pointer-events:none; z-index:2}
 .aei.vakz::after{content:""; position:absolute; right:7%; bottom:7%; width:15%; height:15%; min-width:5px; min-height:5px;
   background:#7b3df0; border:1px solid #e9dcff; box-shadow:0 0 0 1px #2a1250, 0 0 6px rgba(170,110,255,.9), inset 0 0 0 2px #a970ff;
   image-rendering:pixelated; pointer-events:none; z-index:2}
@@ -9372,49 +9375,52 @@ const AETHER_KAART = "art/aether-kaart.png";   // liggende banner, 512×288
    — rechtop, op kaartformaat. De banner hierboven is liggend en past daar niet in, dus die
    ene plek heeft zijn eigen staande prent. */
 const AETHER_KAARTVORM = "art/kaart-aether.png";   // staand full art, 480×672
-/* 🟣 Elke aether zijn eigen prent: dezelfde paarse schemerlucht als de algemene aetherkaart,
-   met per kracht één onderwerp in het midden. Het midden is wat je in het spel ziet: daar wordt
-   de ruit naast je levens uit gesneden. In de winkel en bij het kiezen zie je meer. */
-const AETHER_BEELD = {
-  ae_draw3:"art/aether-overvloed.png",
-  ae_watercycle:"art/aether-getijdenstroom.png", ae_offer:"art/aether-brandoffer.png",
-  ae_fire6:"art/aether-woede.png", ae_stonefull:"art/aether-onwrikbaar.png",
-  ae_grassx2:"art/aether-woekergroei.png", ae_hp3:"art/aether-oerkracht.png",
-  ae_oer_vuur:"art/aether-oervuur.png", ae_oer_water:"art/aether-oerwater.png", ae_oer_gras:"art/aether-oergras.png", ae_oer_steen:"art/aether-oersteen.png",
-  ae_graf:"art/aether-terugkeer.png", fu_water:"art/aether-dieptestroom.png",
-  fu_fire:"art/aether-assekern.png", fu_stone:"art/aether-bergrug.png",
-  fu_grass:"art/aether-wurgranken.png", ae_hemel:"art/aether-hemelschoon.png", ae_lichtval:"art/aether-lichtval.png", ae_deken:"art/aether-deken.png", ae_smeed:"art/aether-gesmeed.png",
-  ae_pijn:"art/aether-loutering.png", ae_alziend:"art/aether-alziend.png",
-  ae_genade:"art/aether-genade.png", ae_leven:"art/aether-levenskracht.png", ae_zwerm:"art/aether-lichtzwerm.png",
-  /* 🟣 de eigen aethers van tegenstanders (zie prompts-aethers-vijanden.md) */
-  ae_arsenaal:"art/aether-arsenaal.png", ae_kweb:"art/aether-web.png", ae_doorslaan:"art/aether-doorslaan.png",
-  ae_maatje:"art/aether-maatje.png", ae_lavameer:"art/aether-lavameer.png",
-  ae_knetter:"art/aether-knetter.png", ae_spetter:"art/aether-spetter.png", ae_fikkie:"art/aether-fikkie.png",
-  ae_school:"art/aether-school.png", ae_armen:"art/aether-armen.png", ae_veertig:"art/aether-veertig.png",
-  ae_spiegel:"art/aether-weerspiegeling.png", ae_tothier:"art/aether-tothier.png",
-  ae_staal:"art/aether-staal.png", ae_knoop:"art/aether-knoop.png", ae_roedel:"art/aether-roedel.png",
-  ae_dubbel:"art/aether-tweede.png", ae_vitrine:"art/aether-vitrine.png"
+/* 🟣 Elke aether zijn eigen vierkante vak (okt 2026, stijl B "embleem"): full art, eigen kleur per
+   aether, het onderwerp in het midden. Die ene prent is overal dé tekening van de aether: het vak op
+   het veld, de draft, de library, het infoscherm, de winkel. De oude staande prenten (aether-*.png)
+   worden niet meer gebruikt, behalve tijdelijk voor aethers die nog geen vak hebben. Het paarse
+   zegel in de hoek tekent het spel er zelf op (.vakz), het zit niet in de tekening.
+   Per aether een lijstje: de eerste die online staat wint. */
+const AETHER_VAKKEN = {
+  ae_draw3:["art/vak-overvloed.png"], ae_watercycle:["art/vak-getijdenstroom.png"],
+  ae_fire6:["art/vak-explosiegevaar.png", "art/vak-woede.png"], ae_stonefull:["art/vak-onwrikbaar.png"],
+  ae_grassx2:["art/vak-woekergroei.png"], ae_graf:["art/vak-terugkeer.png"],
+  fu_water:["art/vak-dieptestroom.png"], fu_fire:["art/vak-assekern.png"], fu_stone:["art/vak-bergrug.png"],
+  fu_grass:["art/vak-wurgranken.png"], ae_lichtval:["art/vak-wraakzucht.png", "art/vak-lichtval.png"],
+  ae_smeed:["art/vak-gesmeed.png"], ae_alziend:["art/vak-alziend.png"], ae_genade:["art/vak-genade.png"],
+  ae_leven:["art/vak-levenskracht.png"], ae_zwerm:["art/vak-lichtzwerm.png"],
+  /* nog te maken (zie prompts-vakken-2.md); tot dan de oude prent */
+  ae_hp3:["art/vak-oerkracht.png", "art/aether-oerkracht.png"],
+  ae_oer_vuur:["art/vak-oervuur.png", "art/aether-oervuur.png"], ae_oer_water:["art/vak-oerwater.png", "art/aether-oerwater.png"],
+  ae_oer_gras:["art/vak-oergras.png", "art/aether-oergras.png"], ae_oer_steen:["art/vak-oersteen.png", "art/aether-oersteen.png"],
+  ae_hemel:["art/vak-hemelschoon.png", "art/aether-hemelschoon.png"], ae_deken:["art/vak-deken.png", "art/aether-deken.png"],
+  ae_kern:["art/vak-kern.png"],
+  ae_arsenaal:["art/vak-arsenaal.png", "art/aether-arsenaal.png"], ae_kweb:["art/vak-web.png", "art/aether-web.png"],
+  ae_doorslaan:["art/vak-doorslaan.png", "art/aether-doorslaan.png"], ae_maatje:["art/vak-maatje.png", "art/aether-maatje.png"],
+  ae_lavameer:["art/vak-lavameer.png", "art/aether-lavameer.png"], ae_knetter:["art/vak-knetter.png", "art/aether-knetter.png"],
+  ae_spetter:["art/vak-spetter.png", "art/aether-spetter.png"], ae_fikkie:["art/vak-fikkie.png", "art/aether-fikkie.png"],
+  ae_school:["art/vak-school.png", "art/aether-school.png"], ae_armen:["art/vak-armen.png", "art/aether-armen.png"],
+  ae_veertig:["art/vak-veertig.png", "art/aether-veertig.png"], ae_spiegel:["art/vak-weerspiegeling.png", "art/aether-weerspiegeling.png"],
+  ae_tothier:["art/vak-tothier.png", "art/aether-tothier.png"], ae_staal:["art/vak-staal.png", "art/aether-staal.png"],
+  ae_knoop:["art/vak-knoop.png", "art/aether-knoop.png"], ae_roedel:["art/vak-roedel.png", "art/aether-roedel.png"],
+  ae_dubbel:["art/vak-tweede.png", "art/aether-tweede.png"], ae_vitrine:["art/vak-vitrine.png", "art/aether-vitrine.png"]
 };
-/* 🟣 Vierkante vakken (okt 2026): de nieuwe full art per aether. Staat zo'n vak online, dan wordt
-   hij overal dé tekening van die aether: in het vak op de kaart, de draft, de library, de ruit en
-   het infoscherm. Staat hij er (nog) niet, dan blijft de oude staande prent. Het paarse zegel in
-   de hoek tekent het spel er zelf op (.vakz), het zit dus niet in de tekening. */
-const AETHER_VAK = {
-  ae_draw3:"art/vak-overvloed.png", ae_watercycle:"art/vak-getijdenstroom.png", ae_fire6:"art/vak-woede.png",
-  ae_stonefull:"art/vak-onwrikbaar.png", ae_grassx2:"art/vak-woekergroei.png", ae_graf:"art/vak-terugkeer.png",
-  fu_water:"art/vak-dieptestroom.png", fu_fire:"art/vak-assekern.png", fu_stone:"art/vak-bergrug.png",
-  fu_grass:"art/vak-wurgranken.png", ae_lichtval:"art/vak-lichtval.png", ae_smeed:"art/vak-gesmeed.png",
-  ae_alziend:"art/vak-alziend.png", ae_genade:"art/vak-genade.png", ae_leven:"art/vak-levenskracht.png",
-  ae_zwerm:"art/vak-lichtzwerm.png"};
-const VAK_VAN = {}; Object.keys(AETHER_VAK).forEach(k => { VAK_VAN[AETHER_VAK[k]] = k; });
-const isVak = pad => !!(pad && VAK_VAN[pad]);
+/* Wat het spel nu voor elke aether laat zien: de eerste uit het lijstje, tot blijkt dat die er niet is. */
+const AETHER_BEELD = {};
+Object.keys(AETHER_VAKKEN).forEach(k => { AETHER_BEELD[k] = AETHER_VAKKEN[k][0]; });
+const isVak = pad => typeof pad === "string" && pad.indexOf("art/vak-") === 0;
 let vakT = null;
-/* Een vak is binnen: vanaf nu is hij de tekening van die aether, overal. */
-function vakBinnen(pad){
-  const k = VAK_VAN[pad]; if(!k) return;
-  AETHER_BEELD[k] = pad;
-  clearTimeout(vakT);
-  vakT = setTimeout(() => { try { if(typeof render === "function" && S) render(); } catch(e) {} }, 250);
+/* Een prent uit het lijstje is niet te vinden: dan de volgende proberen. */
+function vakMis(pad){
+  Object.keys(AETHER_BEELD).forEach(k => {
+    if(AETHER_BEELD[k] !== pad) return;
+    const l = AETHER_VAKKEN[k] || [], volg = l[l.indexOf(pad) + 1];
+    if(!volg) return;
+    AETHER_BEELD[k] = volg;
+    if(BEELD_KLAAR[volg] === undefined){ BEELD_KLAAR[volg] = false; BEELD_RIJ.push(volg); }
+    clearTimeout(vakT);
+    vakT = setTimeout(() => { try { if(typeof render === "function" && S) render(); } catch(e) {} }, 300);
+  });
 }
 /* De twee vaste ruiten aan het eind van de rij van je tegenstander. */
 const RUIT_VELD  = "art/ruit-veld.png";    // veldcondities van dit gevecht
@@ -12716,11 +12722,11 @@ function gameOver(winner, reason){
   if(matchVan() && S.match.bo === 1){
     S.match.wins[winner]++; S.over.matchDone = true;
     addLog(`<em>${pName(winner)} wint!</em> ${reason}`, true);
-    if(S.ladder && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
+    if(S.ladder && !S.ladder.stil && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
   } else if(matchVan()){
     S.match.wins[winner]++;
     S.over.matchDone = S.match.wins[winner] >= 2;
-    if(S.over.matchDone && S.ladder && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
+    if(S.over.matchDone && S.ladder && !S.ladder.stil && S.vsBot && !NET.on) S.over.ladder = ladderUitslag(winner === 0);
     addLog(`<em>${pName(winner)} wint potje ${S.match.game}!</em> Stand: ${S.match.wins[0]}–${S.match.wins[1]}. ${reason}`, true);
     if(S.over.matchDone) addLog(`🏆 <em>${pName(winner)} wint de match ${S.match.wins[winner]}–${S.match.wins[opp(winner)]}!</em>`, true);
   } else {
@@ -15617,14 +15623,14 @@ function overlayHTML(){
       const w = S.over.winner;
       return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint</h1>
         <div class="sub">${S.over.reason}</div>${ladderWinHTML()}
-        <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button>${S.ladder ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
+        <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button>${S.ladder && !S.ladder.stil ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
     }
     if(matchVan()){
       const m = S.match, w = S.over.winner;
       if(S.over.matchDone)
         return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint de match</h1>
           <div class="sub"><b>${m.wins[0]}–${m.wins[1]}</b> na ${m.game} potje${m.game>1?"s":""}.<br>${S.over.reason}</div>${ladderWinHTML()}
-          <button class="obtn" data-act="btn" data-btn="newgame">Nieuwe match</button>${S.ladder ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
+          <button class="obtn" data-act="btn" data-btn="newgame">Nieuwe match</button>${S.ladder && !S.ladder.stil ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
       const rd = readyState();
       const me = NET.on ? NET.seat : -1;
       const chip = i => `<div class="rchip ${rd[i] ? "on" : ""}">${rd[i] ? "✓" : "○"} ${pName(i)}${rd[i] ? " is klaar" : " nog niet klaar"}</div>`;
@@ -16392,7 +16398,9 @@ function startHTML(){
   /* Stijl C: een logo, een keuzelijst in een venster en een venster met je voortgang. */
   const vr = (btn, lab, sub, extra, data) => `<button class="vr${extra || ""}" data-act="btn" data-btn="${btn}"${data || ""}><span>${lab}${sub ? `<small>${sub}</small>` : ""}</span></button>`;
   /* Samen spelen en Tegen de bot klappen dezelfde drie spelvormen open. */
-  const modi = bot => ["cmd", "bas1", "bas3"].map(m => vr("mpmodus", MP_MODUS[m].naam, MP_MODUS[m].sub, " in", ` data-m="${m}" data-bot="${bot ? 1 : 0}"`)).join("");
+  /* okt 2026: samen spelen = Commander of Basis (één potje); tegen de bot = Commander, Willekeurig
+     (Basis tegen een onbekende tegenstander) of Challenges (zelf kiezen, verslaan, kroontjes). */
+  const modi = bot => (bot ? ["cmd", "wil", "chal"] : ["cmd", "bas1"]).map(m => vr("mpmodus", MP_MODUS[m].naam, MP_MODUS[m].sub, " in", ` data-m="${m}" data-bot="${bot ? 1 : 0}"`)).join("");
   const mp = open === "mp" ? modi(false) : "";
   const bots = open === "bots" ? modi(true) : "";
   const volgend = opPlek ? STORY_ORDER.find(id => STORY[id] && storyVrij(id) && !storyKlaar(id)) : null;
@@ -18799,10 +18807,18 @@ const SPRITE_BEELD = {
   stoel:              "art/stoel.png",                // de ene stoel achter het bureau
   /* --- wereld 4, opnieuw opgebouwd. Zet het bestand in art/ en het staat er meteen. --- */
   /* --- 🏪 Knorst, de winkelier (wereld 2, achter de herberg) --- */
-  knorst:            "art/knorst.png",               // achter zijn kraam
-  knorst_blij:       "art/knorst-blij.png",          // als je iets koopt
-  knorst_zuur:       "art/knorst-zuur.png",          // als je te weinig sterren hebt
-  knorst_taunt:      "art/knorst-taunt.png",         // zijn praatbalkje
+  /* 🐦 Knort is sinds okt 2026 een ekster met een jas vol buit (knort-*.png); de oude varken-
+     tekeningen (knorst-*.png) worden niet meer gebruikt. De sleutels heten nog knorst. */
+  knorst:            "art/knort.png",                // achter zijn kraam
+  knorst_blij:       "art/knort-lach.png",           // als je iets koopt
+  knorst_zuur:       "art/knort-boos.png",           // als je te weinig sterren hebt
+  knorst_taunt:      "art/knort-taunt.png",          // zijn praatbalkje
+  knorst_boos:       "art/knort-boos.png",           // als je hem raakt (tegen de bot)
+  knorst_stuk:       "art/knort-stuk.png",           // verloren
+  knorst_wijd:       "art/knort-geheim.png",         // jas open: kijk wat ik heb
+  knorst_geheim:     "art/knort-geheim.png",
+  knorst_dichtbij:   "art/knort-dichtbij.png",       // hij bekijkt je van heel dichtbij
+  knorst_tel:        "art/knort-tel.png",            // hij telt je sterren
   /* ⚒ Tang, de smid in de Asgronden (na 3-1) */
   smid:              "art/smid.png",                 // achter de werkbank
   smid_blij:         "art/smid-blij.png",            // als je iets laat smeden
@@ -19035,6 +19051,7 @@ const SPRITE_BEELD = {
 const SPR_LEEN = {
   verzamelaar:"koor", naad:"poortwachter",
   knorst:"bosbos", knorst_blij:"bosbos", knorst_zuur:"bosbos_boos", knorst_taunt:"bosbos",
+  knorst_boos:"bosbos_boos", knorst_stuk:"bosbos_boos", knorst_wijd:"bosbos", knorst_geheim:"bosbos", knorst_dichtbij:"bosbos", knorst_tel:"bosbos",
   smid:"cultist", smid_blij:"cultist", smid_zuur:"cultist", smid_taunt:"cultist", smid_boos:"cultist", smid_stuk:"cultist",
   sluiswachter_poort:"sluiswachter", sluiswachter_taunt:"sluiswachter",
   inkt:"bosbos", inkt_wijd:"bosbos_boos", inkt_stuk:"bosbos_stuk", inkt_taunt:"bosbos",
@@ -24781,7 +24798,7 @@ function lkHTML(k, licht, o){
   const img = pad && BEELD_KLAAR[pad] !== "fout"
     ? `<img src="${pad}" alt="" decoding="async" onerror="this.remove()">` : "";
   return `<div class="lk ${licht ? "licht" : "ae"}${o.kl ? " " + o.kl : ""}" ${o.attr || ""}>
-    <div class="lkbeeld"><span class="lkic">${licht ? "✦" : aeIcon(k)}</span>${img}</div>
+    <div class="lkbeeld${!licht && img && isVak(pad) ? " vakz" : ""}"><span class="lkic">${licht ? "✦" : aeIcon(k)}</span>${img}</div>
     <div class="lknaam">${naam}</div>
     ${o.badge ? `<div class="lkbadge">${o.badge}</div>` : ""}
     ${o.op ? KETEN_SVG : ""}</div>`;
@@ -25479,9 +25496,9 @@ const KNORT_OPENING = [
   {s:null, naam:"…", bg:0, t:"Ergens in het donker gaat een lampje aan. Er zit iemand. Die zat daar al die tijd."},
   {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", mu:"winkel", t:"Hé. Jij. Nee, blijf. Iedereen schrikt en loopt weg, en dan komen ze terug en dan is het op."},
   {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Knort. Ik verkoop. Aan iedereen. Dat zeg ik er meteen bij, dan hoeven we het er later niet over te hebben."},
-  {s:"knorst", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij bekijkt je van boven tot onder. Langzaam. Alsof hij je al verkocht heeft."},
+  {s:"knorst_dichtbij", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij bekijkt je van boven tot onder. Langzaam. Alsof hij je al verkocht heeft."},
   {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Jij loopt rond met plek voor één kracht. Dat is pijnlijk om naar te kijken."},
-  {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Ik heb een aanbieding. Eenmalig. Echt eenmalig. Dat zeg ik niet tegen iedereen. Tegen bijna iedereen. Een tweede plek. Nu meteen."}
+  {s:"knorst_geheim", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"Ik heb een aanbieding. Eenmalig. Echt eenmalig. Dat zeg ik niet tegen iedereen. Tegen bijna iedereen. Een tweede plek. Nu meteen."}
 ];
 /* 🐷 De deal: drie sterren voor het tweede aether-slot. Nee zeggen kan niet. */
 const KNORT_DEAL = [
@@ -25492,8 +25509,8 @@ const KNORT_DEAL = [
 const knortDealNa = (genoeg) => [
   {s:"knorst", naam:"Knort", bg:0, kleur:"#e8a0a8", t:"…Dat dacht ik al. Dat zeggen ze allemaal."},
   genoeg
-    ? {s:"knorst", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij pakt drie sterren van je af voor je het doorhebt. Hij houdt ze even tegen het licht."}
-    : {s:"knorst", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij telt je sterren. Hij telt ze nog een keer. \"Dan schrijf ik het op.\" Hij schrijft het op."},
+    ? {s:"knorst_tel", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij pakt drie sterren van je af voor je het doorhebt. Hij houdt ze even tegen het licht."}
+    : {s:"knorst_tel", naam:"…", bg:0, kleur:"#e8a0a8", t:"Hij telt je sterren. Hij telt ze nog een keer. \"Dan schrijf ik het op.\" Hij schrijft het op."},
   {s:null, naam:"…", bg:0, kleur:"#c9a4ff", t:"<b>Je hebt nu plek voor twee aethers.</b> En de wegen door het woud liggen open."}
 ];
 const KNORT_SLOT_PRIJS = 3;
@@ -26582,6 +26599,16 @@ function render(){
      naar de bovenkant gegooid. We onthouden dus waar alles stond en zetten het terug.
      Ook de horizontale stroken met aether- en lichtkaarten, want die schuiven net zo goed. */
   const bewaar = [];
+  /* Okt 2026: niet alleen die vaste stroken, maar alles in de overlay dat geschoven staat. We
+     onthouden de plek in de boom (kind-nummers vanaf de overlay) en de klasse; staat er na het
+     opnieuw tekenen op die plek een element met dezelfde klasse, dan krijgt het zijn scroll terug. */
+  const plekVan = el => { const pl = []; while(el && el !== ovEl && el.parentNode){ pl.unshift(Array.prototype.indexOf.call(el.parentNode.children, el)); el = el.parentNode; } return pl; };
+  const elOp = pl => pl.reduce((e, i) => e && e.children ? e.children[i] : null, ovEl);
+  const bewaarAl = [];
+  if(ovEl.firstElementChild) ovEl.querySelectorAll("*").forEach(el => {
+    if(el.scrollTop > 0 || el.scrollLeft > 0) bewaarAl.push({pl:plekVan(el), cls:el.className, top:el.scrollTop, links:el.scrollLeft});
+  });
+  const ovTop = ovEl.scrollTop, docTop = document.scrollingElement ? document.scrollingElement.scrollTop : 0;
   ovEl.querySelectorAll(".draftbox,.voorbox,.aerow,.kaartscroll,.libgrid").forEach(el => {
     if(el.scrollTop || el.scrollLeft)
       bewaar.push([el.id || el.className, el.scrollTop, el.scrollLeft]);
@@ -26593,6 +26620,9 @@ function render(){
   ovEl.classList.toggle("show", !!ov);
   if(M && M.type === "tutorial") tutMedia();
   banenPaint();
+  bewaarAl.forEach(x => { const nw = elOp(x.pl); if(nw && nw.className === x.cls){ if(x.top) nw.scrollTop = x.top; if(x.links) nw.scrollLeft = x.links; } });
+  if(ovTop && !zelfde && ovEl.scrollTop !== ovTop) ovEl.scrollTop = ovTop;
+  if(docTop && document.scrollingElement && document.scrollingElement.scrollTop !== docTop) document.scrollingElement.scrollTop = docTop;
   bewaar.forEach(([sleutel, top, links]) => {
     const nw = sleutel && sleutel.indexOf(" ") < 0 && document.getElementById(sleutel)
              ? document.getElementById(sleutel)
@@ -27749,7 +27779,7 @@ const BOT_AE = LADDER_AE.concat(VERHAAL_BOT_AE);
 const ladderAeVrij = () => LADDER.bazen.concat([LADDER.seraf]).filter(t => ladderVerslagen(t.id)).map(t => t.geeft)
   .concat(VERHAAL_BOT_AE.filter(k => { try { return aeBezit().includes(k) || !!(SET.story && SET.story.vrij); } catch(e) { return false; } }));
 const deckAlleenBot = d => !!d && (d.ae || []).concat(d.zijAe || []).some(k => BOT_AE.includes(k));
-let LADDER_KEUS = null;
+let LADDER_KEUS = null, LADDER_STIL = false;
 /* Het kroontje voor wie je versloeg: pixels, zodat het in elk lettertype werkt. */
 const KROON = `<svg class="kroonsvg" viewBox="-1 -1 11 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#3a2a00" d="M-1 -1h3v2h1v-1h3v1h1v-2h3v8h-11z"/><path fill="#ffd65a" d="M0 0h1v1h-1zM4 0h1v1h-1zM8 0h1v1h-1zM0 1h2v1h-2zM3 1h3v1h-3zM7 1h2v1h-2zM0 2h9v3h-9z"/><path fill="#fff3b0" d="M0 5h9v1h-9z"/><path fill="#e0503a" d="M2 3h1v1h-1zM6 3h1v1h-1z"/><path fill="#6fc3ff" d="M4 3h1v1h-1z"/></svg>`;          // de gekozen tegenstander voor de volgende partij tegen de bot
 /* Een deck van de ladder: we vertrouwen het (het mag regels breken), maar maken er wel een schone kopie van. */
@@ -27804,12 +27834,12 @@ function ladderHTML(kop){
   return `<div class="ovbox chbox ladbox"><h2>KIES JE TEGENSTANDER</h2>${kop}
     <div class="sub mpnote">${nV} van de ${alle.length} verslagen (${KROON}). De bazen en Seraf geven een aether die je alleen zo krijgt, voor je decks tegen de bot.</div>
     <div class="ladscroll">
-      <div class="ladkop">TEGENSTANDERS</div><div class="chgrid">${LADDER.tegen.map(tegel).join("")}</div>
+      <div class="ladkop">TEGENSTANDERS</div><div class="chgrid"><div class="chtegel ladtegel ladvraag" data-act="btn" data-btn="ladwillekeurig" title="Een willekeurige tegenstander">
+        <div class="chpt ladslot">?</div><div class="chnaam">Willekeurig</div><div class="ladsub">laat het lot kiezen</div></div>${LADDER.tegen.map(tegel).join("")}</div>
       <div class="ladkop">DE BAZEN EN SERAF</div><div class="chgrid">${LADDER.bazen.concat([LADDER.seraf]).map(tegel).join("")}</div>
       <div class="ladkop">DE EERSTE</div><div class="chgrid">${tegel(LADDER.eerste)}${tegel(LADDER.geheim)}</div>
     </div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button>
-      <button class="obtn" data-act="btn" data-btn="ladwillekeurig">🎲 Willekeurig</button>
       <button class="obtn${kies ? "" : " uit"}" data-act="btn" data-btn="ladok">${kies ? `Tegen ${mpChar(kies.id).naam}` : "Kies eerst iemand"}</button></div></div>`;
 }
 /* De bot: een willekeurig ander personage en een deck dat klopt. Tegen de bot in Basis met een
@@ -27817,6 +27847,13 @@ function ladderHTML(kop){
 function botProfiel(){
   const lad = S.mode === "basis" && LADDER_KEUS ? ladderZoek(LADDER_KEUS) : null;
   if(lad && ladderSpeelbaar(lad)){ S.ladder = {id:lad.id}; return {char:lad.id, deck:ladderDeckVan(lad), ladder:true}; }
+  /* 🎲 Willekeurig: elk potje stiekem een van de challenge-tegenstanders die al speelbaar zijn.
+     Telt niet mee voor de kroontjes en er staat niets over op het scherm. */
+  if(S.mode === "basis" && LADDER_STIL){
+    const kan = ladderAlle().filter(ladderSpeelbaar);
+    if(kan.length){ const t = kan[Math.floor(Math.random() * kan.length)];
+      S.ladder = {id:t.id, stil:true}; return {char:t.id, deck:ladderDeckVan(t), ladder:true}; }
+  }
   S.ladder = null;
   const bezet = S.char ? S.char[0] : null;
   const kan = MP_CHARS.map(c => c.id).filter(id => id !== bezet);
@@ -27920,7 +27957,9 @@ function sideboardHTML(u){
 /* ---------- de menu's: modus, deck, karakter, en hoe je speelt ---------- */
 const MP_MODUS = {
   cmd:{naam:"Commander", sub:"best of 3 · draft · aethers en licht", kind:"commander", bot:"cmdbot"},
-  bas1:{naam:"Basis · best of 1", sub:"één potje met je eigen deck", kind:"basis1", bot:"bas1bot"},
+  bas1:{naam:"Basis", sub:"één potje met je eigen deck", kind:"basis1", bot:"bas1bot"},
+  wil:{naam:"Willekeurig", sub:"één potje met je eigen deck tegen een onbekende tegenstander", kind:"basis1", bot:"bas1bot"},
+  chal:{naam:"Challenges", sub:"kies je tegenstander en versla ze allemaal", kind:"basis1", bot:"bas1bot"},
   bas3:{naam:"Basis · best of 3", sub:"drie potjes, met sideboard", kind:"basis3", bot:"bas3bot"}
 };
 function mpHTML(){
@@ -27945,7 +27984,7 @@ function mpHTML(){
     ? vr("mphost", "Room openen", "je krijgt een code voor je vriend", " aan") + vr("mpjoin", "Meedoen", "met een roomcode", "")
       + vr("mprandom", "Willekeurige tegenstander", M.zoek ? "nog niet beschikbaar · komt later" : "online, met wie er ook zoekt", "")
     : `<div class="vmelding">Live spelen werkt niet binnen Claude. Zet het spel op een gewone webpagina (bijv. GitHub Pages), dan werkt de roomcode wel.</div>`;
-  const tg = M.bot && M.modus !== "cmd" && M.tegen ? ladderZoek(M.tegen) : null, tc = tg ? mpChar(tg.id) : null;
+  const tg = M.bot && M.modus === "chal" && M.tegen ? ladderZoek(M.tegen) : null, tc = tg ? mpChar(tg.id) : null;
   return `<div class="ovbox mpbox"><h2>${M.bot ? "KLAAR?" : "HOE WIL JE SPELEN?"}</h2>${kop}
     <div class="mpprof"><div class="mpprofpt">${spriteSVG(c.spr)}</div>
       <div class="mpproftxt"><b>${c.naam}</b>${d ? `<small>${d.naam} · ${basKort(d)}</small>` : ""}</div></div>
@@ -28189,9 +28228,9 @@ function mpKnop(btn, el){
     case "mpchar": if(M && M.type === "mp" && mpCharsVrij().indexOf(i) >= 0){ mpKeus().char = i; saveSet(); render(); } return true;
     case "mpcharok": if(M && M.type === "mp"){
       if(!M.bot && M.modus !== "cmd" && deckAlleenBot(mijnProfiel().deck)){ M.stap = "deck"; M.melding = "Dit deck gebruikt een aether die alleen tegen de bot mag (van de ladder of uit het verhaal)."; render(); return true; }
-      M.stap = (M.bot && M.modus !== "cmd") ? "tegen" : "hoe"; render(); } return true;
+      M.stap = (M.bot && M.modus === "chal") ? "tegen" : "hoe"; render(); } return true;
     case "mpterug":
-      if(M && M.type === "mp"){ if(M.stap === "hoe") M.stap = (M.bot && M.modus !== "cmd") ? "tegen" : "char"; else if(M.stap === "tegen") M.stap = "char";
+      if(M && M.type === "mp"){ if(M.stap === "hoe") M.stap = (M.bot && M.modus === "chal") ? "tegen" : "char"; else if(M.stap === "tegen") M.stap = "char";
         else if(M.stap === "char" && M.modus !== "cmd") M.stap = "deck"; else M = null; render(); }
       return true;
     /* ⚔ de tegenstander kiezen (tegen de bot, Basis) */
@@ -28202,14 +28241,14 @@ function mpKnop(btn, el){
       render(); } return true;
     case "ladok": if(M && M.type === "mp" && M.tegen){ M.stap = "hoe"; render(); } return true;
     case "ladmenu": {      // na een partij: terug naar de tegenstanders
-      const bo3 = matchVan() && S.match.bo !== 1;
-      M = {type:"mp", modus:bo3 ? "bas3" : "bas1", bot:true, stap:"tegen", tegen:LADDER_KEUS};
+      M = {type:"mp", modus:"chal", bot:true, stap:"tegen", tegen:LADDER_KEUS};
       render(); return true;
     }
     case "mpstart": case "mphost": {
       if(!M || M.type !== "mp") return true;
       const md = MP_MODUS[M.modus] || MP_MODUS.cmd, bot = btn === "mpstart";
-      LADDER_KEUS = (bot && M.modus !== "cmd" && M.tegen) ? M.tegen : null;   // ⚔ tegen wie (Basis tegen de bot)
+      LADDER_KEUS = (bot && M.modus === "chal" && M.tegen) ? M.tegen : null;   // ⚔ tegen wie (Challenges)
+      LADDER_STIL = bot && M.modus === "wil";   // 🎲 Willekeurig: stiekem een van de challenge-decks
       M = null; HOME.open = null;
       if(S.ui.mode !== "start") newGame();
       if(bot) onBtn(md.bot); else liveHost(md.kind);
@@ -29181,7 +29220,7 @@ function beeldVolgende(){
 }
 function beeldAf(pad, gelukt){
   BEELD_KLAAR[pad] = gelukt ? true : "fout";
-  if(gelukt && isVak(pad)) vakBinnen(pad);
+  if(!gelukt && typeof vakMis === "function") vakMis(pad);
   BEELD_BEZIG--;
   /* Alleen wat het laadscherm echt nodig heeft telt mee voor de balk; de rest komt daarna. */
   if(LAAD_NODIG.has(pad)) laadTik("beeld");
@@ -29240,7 +29279,6 @@ function beeldenWarm(){
   if(typeof KAART_BEELD === "object") paden.push(...Object.values(KAART_BEELD));
   if(typeof LICHT_BEELD === "object") paden.push(...Object.values(LICHT_BEELD));
   if(typeof AETHER_BEELD === "object") paden.push(...Object.values(AETHER_BEELD));
-  if(typeof AETHER_VAK === "object") paden.push(...Object.values(AETHER_VAK));
   paden.push(RUIT_VELD, RUIT_LICHT);
   paden.push("art/vonk-knetter.png", "art/vonk-spetter.png", "art/vonk-fikkie.png");   // 🎪 de losse vonken op het veld
   if(typeof HORIZON_BEELD === "object") paden.push(...Object.values(HORIZON_BEELD));
@@ -29254,7 +29292,7 @@ function beeldenWarm(){
   const winkels = typeof WINKEL_DECOR === "object" ? Object.values(WINKEL_DECOR).map(d => d.beeld) : [];
   const sprites = typeof SPRITE_BEELD === "object" ? new Set(Object.values(SPRITE_BEELD)) : new Set();
   const rang = pad => KAART_PADEN.has(pad) || pad === OVERWORLD_BEELD ? 0
-    : (winkels.indexOf(pad) >= 0 || sprites.has(pad) || isVak(pad)) ? 1 : 2;
+    : (winkels.indexOf(pad) >= 0 || sprites.has(pad)) ? 1 : 2;
   nieuw.sort((a, b) => rang(a) - rang(b));
   nieuw.forEach(pad => { if(rang(pad) === 0) LAAD_NODIG.add(pad); });
   LAAD.tot += LAAD_NODIG.size; LAAD.beeldTot += LAAD_NODIG.size;
