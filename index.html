@@ -150,6 +150,7 @@ body.verhaal #klokbtn, body.verhaal #rtools [data-btn="help"]{display:none}
 .slot.sp.hl .ph::after{content:"✦"; opacity:1; color:#cfe8ff}
 @keyframes slotpulse{0%,100%{box-shadow:0 0 0 2px var(--gold),0 0 10px rgba(201,168,106,.4)}50%{box-shadow:0 0 0 2px #ecd9ac,0 0 22px rgba(201,168,106,.85)}}
 .slot.tgt{cursor:pointer}
+.slot.ijsghost .card{opacity:.85; filter:drop-shadow(0 0 8px rgba(160,220,255,.9))}
 .slot.tgt .card{box-shadow:0 0 0 2px #ff9d4d, 0 0 20px rgba(255,140,60,.7); animation:tgtpulse 1s ease-in-out infinite}
 @keyframes tgtpulse{0%,100%{box-shadow:0 0 0 2px #ff9d4d,0 0 12px rgba(255,140,60,.5)}50%{box-shadow:0 0 0 2px #ffc78f,0 0 24px rgba(255,160,80,.9)}}
 .slot.atk{cursor:pointer}
@@ -2700,7 +2701,6 @@ body.pvuitleg #ptbel{display:none !important}
 #horizon .hz.weer{left:0; top:0; width:100%; height:100%; transform:none; animation:none; --ho:1; filter:none}
 #horizon .hz.weer canvas{display:block; width:100%; height:100%; image-rendering:pixelated}
 /* Valt de regen in het vergezicht, dan geen strepen meer over het hele scherm erbovenop. */
-body.hzregen #regenlaag{display:none !important}
 #horizon .hz img{width:100%; height:auto; display:block}
 @keyframes hzsway{
   from{transform:translate3d(calc(-50% - var(--hsw,6px)),0,0)}
@@ -4285,7 +4285,7 @@ function ijsNeemtOver(G, K, p, id, asSpell, col){
   if (!asSpell){
     const sv = G.pl[vij], sp = G.pl[p];
     const doel = sv.cre[col];
-    sp.cre[col] = doel; sp.hp[col] = sv.hp[col]; sp.ent[col] = sv.ent[col]; sp.att[col] = sv.att[col]; sp.pld[col] = G.gTurn;
+    sp.cre[col] = doel; sp.hp[col] = sv.hp[col]; sp.ent[col] = sv.ent[col] + 1; sp.att[col] = sv.att[col]; sp.pld[col] = G.gTurn;
     sp.minAtk[col] = sv.minAtk[col]; sp.web[col] = sv.web[col]; sp.eiB[col] = sv.eiB[col];
     sv.cre[col] = 0;
     G.kOwn[doel] = p;
@@ -5005,7 +5005,7 @@ function smeedToepas(G){
     G.smeedGedaan[p] = true;
     const s = G.pl[p];
     s.deck.concat(s.hand).forEach(id => { const e = G.kEl[id]; if (IS_ELEMENT(e) && !G.kVar[id] && !G.kLk[id] && !isVlag(G, id, F_TOKEN)) G.kVar[id] = STERKE_VAR[e]; });
-    if (s.hand.length){ const weg = s.hand.pop(); s.deck.unshift(weg); }
+    /* (okt 2026: geen kaart minder meer in je starthand) */
   }
 }
 function terugKiezen(G, p, K){
@@ -6597,7 +6597,7 @@ const AETHERS = {
   ae_hemel:  {el:null, name:"Hemelschoon", kind:"passief", verhaal:true},
   ae_lichtval:{el:null, name:"Wraakzucht", kind:"passief", verhaal:true},
   ae_deken:   {el:null, name:"Warme Deken", kind:"passief", verhaal:true},   // de Waardin, 2-3
-  ae_smeed:   {el:null, name:"Aambeeld", kind:"passief", verhaal:true},       // Tang, 3-2: alles gesmeed, één kaart minder
+  ae_smeed:   {el:null, name:"Aambeeld", kind:"passief", verhaal:true},       // Tang, 3-2: alles gesmeed
   ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true, uit:true},   // okt 2026: idem
   ae_alziend:{el:null, name:"Alziend", kind:"passief", ic:"👁"},   // ook in commander en te krijgen
   ae_genade: {el:null, name:"Laatste Adem", kind:"passief", verhaal:true, ic:"🕊"},
@@ -6681,7 +6681,7 @@ const LIGHTS = {
   master:  {name:"Elementaal Meester", n:3},
   negate:  {name:"Volledige Negatie", n:3},
   dfusion: {name:"Directe Fusie", n:3},
-  gamble:  {cost:1, name:"Gokkersbrouwsel", n:3},
+  gamble:  {cost:1, name:"Gokkersbrouwsel", n:3, verhaal:true, weg:true},   // okt 2026: uit het spel
   brenger: {name:"Lichtbrenger", n:3},
   echo:    {name:"Echo", n:3, verhaal:true, weg:true},   // okt 2026: uit het spel
   kloon:   {name:"Kloon", n:3},
@@ -6819,7 +6819,7 @@ const VAR_TEKST = {
   plasma: {eig:"Doet het schade of valt het aan, dan springt het vuur over: <b>2</b> schade aan de wezens in de kolommen naast het doelwit."},
   roos:   {kw:["volleslag"], speel:"{Verstrik} een wezen.",
            spell:"Het wezen op deze plek krijgt {Volle slag}."},
-  ijs:    {speel:"Mik op het vijandelijke wezen in deze kolom: neem het over, met zijn levens, en doe zijn speel-effect. Het ijs smelt en is weg. Is die plek leeg als het afgaat, dan smelt het ijs voor niets; staat er intussen iets anders, dan neemt het dat over. Of laat het smelten: dan is het gewoon 💧 Water, met de plons.",
+  ijs:    {speel:"Mik op het vijandelijke wezen in deze kolom: neem het over, met zijn levens, en doe zijn speel-effect. Het krijgt een 🧊 ijs-token: net als een verstrik-token valt het zolang niet aan. Het ijs smelt en is weg. Is die plek leeg als het afgaat, dan smelt het ijs voor niets; staat er intussen iets anders, dan neemt het dat over. Of laat het smelten: dan is het gewoon 💧 Water, met de plons.",
            spell:"Mik op het vijandelijke ritueel in deze kolom: neem het over en doe zijn speel-effect. Het ijs smelt en is weg. Is die plek leeg als het afgaat, dan smelt het ijs voor niets. Of laat het smelten: dan is het gewoon 💧 Water."},
   kiezel: {kw:["wijkt"], eig:"Telt als 🪨 Steen."},
   kees:   {eig:"<b>5</b> levens. Een steen met een gezichtje."},
@@ -6869,7 +6869,7 @@ const AETHER_TEKST = {
   ae_hemel:     "Je eerste ✦ van elke beurt: <b>+1</b> {leven|pluslevens} en trek <b>1</b>.",
   ae_lichtval:  "Doet je tegenstander je schade: trek <b>1</b>.",
   ae_deken:     "De eerste klap per beurt op de levens van de eigenaar doet <b>0</b> schade. Op wezens werkt hij niet.",
-  ae_smeed:     "Al je kaarten zijn gesmeed: ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs. Je begint met <b>1</b> kaart minder in je hand.",
+  ae_smeed:     "Al je kaarten zijn gesmeed: ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs.",
   ae_pijn:      "Begin van je beurt, na het trekken: je mag een kaart uit je hand wegleggen. Doe je dat, trek er <b>2</b>.",
   ae_alziend:   "Je ziet de hand van de tegenstander. Trek je in je beurt een kaart, trek er dan nog <b>1</b> bij en leg er daarna <b>1</b> uit je hand weg.",
   ae_genade:    "Eén keer per beurt: je eerste wezen dat vernietigd zou worden, blijft staan op <b>1</b>.",
@@ -7144,8 +7144,8 @@ function smeedToepas(){
     let n = 0;
     P(p).deck.concat(P(p).hand).forEach(c => {
       if(c && ORDER.includes(c.el) && !c.var && !c.lk && !c.token && sterk(c.el)){ c.var = sterk(c.el); n++; } });
-    if(P(p).hand.length){ const weg = P(p).hand.pop(); P(p).deck.unshift(weg); }
-    addLog(`⚒ <em>Aambeeld</em>: ${n} kaart${n === 1 ? "" : "en"} van ${pName(p)} ${n === 1 ? "is" : "zijn"} nu de sterke versie, en ${pName(p)} begint met één kaart minder.`, true);
+    /* (okt 2026: je begint niet meer met een kaart minder) */
+    addLog(`⚒ <em>Aambeeld</em>: ${n} kaart${n === 1 ? "" : "en"} van ${pName(p)} ${n === 1 ? "is" : "zijn"} nu de sterke versie.`, true);
   }
 }
 function newGame(keepSeed){
@@ -7290,6 +7290,10 @@ function nextGame(){
   SET.autopass = [false, false]; saveSet();      // autopass begint elk potje uit
   const loser = opp(S.over.winner);
   S.match.game++; S.match.firstPicker = loser; S.ready = [false, false];
+  /* 🌐 Online begint elk potje met een vaste schudvolgorde (uit de seed en het potjenummer).
+     Gaf iemand op midden in een keten, dan had de ene kant nog meer geschud dan de andere;
+     zo lopen ze in het volgende potje toch weer precies gelijk. */
+  if(NET.on) srand(((NET.seed >>> 0) + S.match.game * 7919) >>> 0);
   S.smeedGedaan = null;                          // ⚒ Aambeeld werkt elk potje opnieuw (okt 2026)
   S.roversbuit = null;                           // ✦ Roversbuit: elk ritueel één keer per pótje
   S.mulliganGedaan = false; S.aeKeuzeGedaan = false;   // elk potje weer een mulligan, en keuzes voor nieuwe aethers
@@ -7843,7 +7847,6 @@ async function baasSlag(laadKey, slagKey, snel, extra){
   void el.offsetWidth;
   el.classList.add("slag");
   if(app) app.classList.add("beefthard");
-  if(/moeder/.test(slagKey)) weerPuls("regen", 2.2, 2400);                // 🌧 haar uithaal: een plens
   await sleep(T[1]);                       // hij blijft staan terwijl de zaal natrilt
   if(app) app.classList.remove("beefthard");
   el.className = "aan slag weg";
@@ -8283,6 +8286,9 @@ if(!(SET.slot >= 0 && SET.slot < 3 && SET.slots[SET.slot])) SET.slot = null;
 /* Schifting is opgegaan in Alziend: oude saves krijgen Alziend ervoor terug. */
 SET.slots.forEach(x => { if(x && Array.isArray(x.aethers) && x.aethers.includes("ae_schift"))
   x.aethers = [...new Set(x.aethers.map(k => k === "ae_schift" ? "ae_alziend" : k))]; });
+/* Gokkersbrouwsel is uit het spel: wie het al had (3-3 gewonnen) krijgt Zwart Gat ervoor. */
+SET.slots.forEach(x => { if(x && Array.isArray(x.lichten) && x.lichten.includes("gamble"))
+  x.lichten = [...new Set(x.lichten.map(k => k === "gamble" ? "darkhole" : k))]; });
 SET.story = SET.slot != null ? SET.slots[SET.slot] : verseStory();
 if(!Array.isArray(SET.story.klaar)) SET.story.klaar = [];
 if(!Array.isArray(SET.story.aethers)) SET.story.aethers = [];   // verdiende 🟣 krachten
@@ -9495,9 +9501,12 @@ async function ensureHolder(p){
 const mayAct = p => NET.on ? p === NET.seat : (S.holder === p || !S.set.handoff);
 /* Mag dit scherm de kaarten van speler p zien? Geldt voor de hand én voor de trek-animatie. */
 const alziend = p => !!(S && S.ae && hasAe(p, "ae_alziend"));
-const handVisible = p => NET.on ? p === NET.seat
+/* 👁 Alziend (okt 2026): wie hem heeft, ziet de hand van de ander. Ook online en in hotseat:
+   dan telt wie er op dit scherm kijkt. */
+const handVisible = p => NET.on ? (p === NET.seat || (NET.seat >= 0 && NET.seat === opp(p) && alziend(NET.seat)))
   : ((!isBot(p) && (S.holder === p || !S.set.handoff || (S.vsBot && p === 0)))
-     || (p === 1 && alziend(0)));
+     || (p === 1 && alziend(0))
+     || (!S.vsBot && alziend(opp(p)) && (S.holder === opp(p) || !S.set.handoff)));
 
 /* ================= CORE FLOWS ================= */
 async function drawN(p, n, why, geenLimiet){
@@ -9604,7 +9613,6 @@ function destroyCre(p, c, cause){
 }
 function applyDamage(id, srcEl, base, o){
   const f = findCre(id); if(!f) return {done:false};
-  if(f.cr.card.el === "balrog" && !FAST) weerPuls("sintel", 3, 1800);     // 🌋 Maatje geraakt: een golf sintels
   if(inRook() && f.cr.dicht) rookOnthul(f, "er komt iets doorheen");
   let out = dmgOutcome(srcEl, f.cr.card.el, base);
   if(o && o.vlak) out = base;      // ⚡ Bliksem: overal precies even hard, wat het ook is
@@ -10644,8 +10652,11 @@ async function ijsNeemtOver(p, card, asSpell, col){
     P(vij).cols[col].cre = null;
     doel.card.owner = p;
     doel.played = S.gTurn;
+    /* 🧊 Een ijs-token (okt 2026): werkt als een verstrik-token. Zolang hij er is, valt het wezen
+       niet aan; bij de upkeep van de eigenaar valt hij eraf. */
+    doel.ent = (doel.ent || 0) + 1; doel.ijsT = (doel.ijsT || 0) + 1;
     P(p).cols[col].cre = doel;
-    addLog(`🧊 <em>IJs</em> smelt en is weg. ${pName(p)} neemt ${kIcon(doel.card)} <em>${kNaam(doel.card)}</em> (${doel.hp} levens) over uit kolom ${col+1}.`, true);
+    addLog(`🧊 <em>IJs</em> smelt en is weg. ${pName(p)} neemt ${kIcon(doel.card)} <em>${kNaam(doel.card)}</em> (${doel.hp} levens) over uit kolom ${col+1}. Hij krijgt een 🧊 ijs-token.`, true);
     if(!FAST){ pop(creSel(p, col), "🧊 VAN JOU", "heal"); render(); await sleep(260); }
     render();
     const plan = await declarePlan(p, doel.card, false, col, {onField:true, geenSpell:true});
@@ -11076,7 +11087,6 @@ async function inktGrijpt(){
   if(!doelen.length) return;
   const raak = doelen.filter(c => P(0).cols[c].cre);
   if(!raak.length){ addLog(`🐙 <em>De armen grijpen in het niets.</em> Ze trekt ze langzaam terug.`, true); render(); return; }
-  if(!FAST) weerPuls("bel", 3, 2600);                                       // 🫧 de armen woelen het water om
   for(const c of raak){
     if(S.over) break;
     const cr = P(0).cols[c].cre;
@@ -12232,8 +12242,10 @@ async function upkeepEntangle(p){
     }
     if(cr && cr.ent > 0){
       cr.ent -= 1;
-      pop(creSel(p,c), "🌿 −1 token", "imm");
-      addLog(`${icon(cr.card.el)} ${EL[cr.card.el].name} (kolom ${c+1}, ${pName(p)}) verliest een 🌿 (nog ${cr.ent}).`);
+      const ijs = (cr.ijsT || 0) > 0;            // 🧊 het ijs smelt als eerste
+      if(ijs) cr.ijsT -= 1;
+      pop(creSel(p,c), ijs ? "🧊 −1 token" : "🌿 −1 token", "imm");
+      addLog(`${icon(cr.card.el)} ${EL[cr.card.el].name} (kolom ${c+1}, ${pName(p)}) verliest een ${ijs ? "🧊" : "🌿"} (nog ${cr.ent}).`);
       render(); await sleep(200);
     }
   }
@@ -15259,7 +15271,9 @@ function slotHTML(p, c, hl){
     const spGesp = (S.stack || []).some(it => it.type === "play" && it.card && it.card.id === col.spell.card.id) ? " gespeeld" : "";
     sp = `<div class="slot sp${spHl}${spGesp}${dood ? " dood" : ""}${!inMist() && hl.tgts.includes(col.spell.card.id) ? " tgt" : ""}${aeBoosts(p, col.spell.card.el) ? " aeup" : ""}" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${col.spell.card.el}"${col.spell.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(col.spell.card) ? ` data-pvvar="${toonVarKey(col.spell.card)}"` : ""}>${cardFaceHTML(col.spell.card.el, true, col.spell.card)}</div>`;
   } else {
-    sp = `<div class="slot sp${spHl}" data-act="spell" data-p="${p}" data-col="${c}"><div class="ph"></div></div>`;
+    const ijsSp = (S.stack || []).find(it => it.type === "play" && it.asSpell && it.ctrl === p && it.col === c && it.card && it.card.var === "ijs");
+    sp = ijsSp ? `<div class="slot sp${spHl} gespeeld ijsghost" data-act="spell" data-p="${p}" data-col="${c}" data-pv="${ijsSp.card.el}">${cardFaceHTML(ijsSp.card)}</div>`
+               : `<div class="slot sp${spHl}" data-act="spell" data-p="${p}" data-col="${c}"><div class="ph"></div></div>`;
   }
   // het ritueel onder deze plek kleurt de wezenplek: zo zie je wat er straks afgaat
   const gloed = (col.spell && !inMist()) ? `<div class="spelgloed" data-spel="${col.spell.card.el}"></div>` : "";
@@ -15279,7 +15293,8 @@ function slotHTML(p, c, hl){
     const mikm = mk && mk.el !== "vuur" && mk.el !== "gras" ? `<div class="mikmerk">${mk.wat}</div>` : "";
     const spent = ((S.phase==="beurt" || S.phase==="battle") && p===S.tp && u.attackedT===S.gTurn) ? " spent" : "";
     const sick = u.played === S.gTurn && S.gTurn === 1, ent = u.ent > 0;
-    const stat = (sick||ent||u.web) ? `<div class="stat">${sick?"<span>⏳</span>":""}${ent?`<span>🌿${u.ent>1?u.ent:""}</span>`:""}${u.web?"<span>🕸</span>":""}</div>` : "";
+    const nIjs = Math.min(u.ijsT || 0, u.ent || 0), nGras = (u.ent || 0) - nIjs;
+    const stat = (sick||ent||u.web) ? `<div class="stat">${sick?"<span>⏳</span>":""}${nIjs?`<span>🧊${nIjs>1?nIjs:""}</span>`:""}${nGras?`<span>🌿${nGras>1?nGras:""}</span>`:""}${u.web?"<span>🕸</span>":""}</div>` : "";
     const gemCls = u.hp>2 ? " buff" : (u.hp<2 ? " hurt" : "");
     if(inMist()){
       /* Levens en aanval blijven zichtbaar — anders valt er niet te vechten, alleen te gokken.
@@ -15309,6 +15324,11 @@ function slotHTML(p, c, hl){
     const mik0 = mk0 ? " mik" + (mk0.el === "vuur" ? " mikvuur" : mk0.el === "gras" ? " mikgras" : "") : "";
     const mikm0 = mk0 && mk0.el !== "vuur" && mk0.el !== "gras" ? `<div class="mikmerk">${mk0.wat}</div>` : "";
     const tgt0 = hl.tgts.includes(PLEK_ID(p, c)) ? " tgt leegdoel" : "";
+    /* 🧊 IJs dat op de keten ligt, staat zichtbaar op zijn plek tot het afgaat (okt 2026). */
+    const ijsIt = (S.stack || []).find(it => it.type === "play" && !it.asSpell && it.ctrl === p && it.col === c && it.card && it.card.var === "ijs");
+    if(ijsIt){
+      cr = `<div class="slot cr gespeeld ijsghost${tgt0}" data-act="cre" data-p="${p}" data-col="${c}" data-pv="${ijsIt.card.el}" data-pvvar="ijs">${gloed}${cardFaceHTML(ijsIt.card)}</div>`;
+    } else
     cr = `<div class="slot cr${creHl}${mik0}${tgt0}" data-act="cre" data-p="${p}" data-col="${c}">${gloed}<div class="ph"></div>${mikm0}</div>`;
   }
   const poort = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
@@ -18222,13 +18242,9 @@ const HORIZON = {
   /* 3-1 is het proefkonijn. Hier is het vergezicht geen strook bovenin maar de hele
      achtergrond: de grotwand vult het scherm van boven tot onder, de kloof gloeit halverwege
      én laag achter het veld, de pilaren hangen uit het gewelf en de rotsrand ligt bovenin. */
-  /* fx: een laag die het spel zelf tekent (as, regen, bellen, veren). Zie WEER. */
   "3-1":[{b:"h31_wand",    y:0,  h:100, w:112, d:.05, op:1},
-         {fx:"as-ver",     d:.15},
-         {fx:"sintel",     d:.20},
          {b:"h31_kloof",   bot:0,       w:126, d:.28, op:.95},
          {b:"h31_pilaren", y:0,         w:124, d:.62, op:.9},
-         {fx:"as-dicht",   d:.80},
          {b:"h31_rand",    y:0,         w:136, d:.95, op:1}],
   /* Zelfde opzet als 3-1: de lucht is het achtergrondvlak over de volle hoogte, de
      herkenningspunten staan op ooghoogte, en de dichtstbijzijnde laag hangt bovenin.
@@ -18312,11 +18328,8 @@ const HORIZON = {
          {b:"h41_boot",    y:26,        w:118, d:.30, op:.95},
          {b:"h41_strand",  bot:0,       w:130, d:.66, op:1}],
   "4-2":[{b:"h42_kuil",    y:0,  h:100, w:110, d:.04, op:1},
-         {fx:"bel-stip",   d:.15},
          {b:"h42_wand",    y:18,        w:120, d:.30, op:.9},
-         {fx:"bel-klein",  d:.50},
          {b:"h42_hoop",    bot:0,       w:132, d:.66, op:.9},
-         {fx:"bel-groot",  d:.80},
          {b:"h42_armen",   y:-10,       w:138, d:.95, op:1}],
   /* 4-4: het spiegelpaleis. Eén volle zaal die zichzelf herhaalt, en twee lijsten vlak voor je. */
   "4-4":[{b:"hsp_paleis",  y:0,  h:100, w:110, d:.04, op:1},
@@ -18334,12 +18347,8 @@ const HORIZON = {
   /* ---------- wereld 5 · Hemelrand ---------- */
   /* De losse donsveertjes (hz-51-dons) zijn vervangen door veren die echt vallen. */
   "5-1":[{b:"h51_lucht",   y:0,  h:100, w:110, d:.03, op:1},
-         {fx:"stof-ver",   d:.15},
          {b:"h51_ring",    y:18,        w:118, d:.26, op:.9},
-         {fx:"veer-ver",   d:.45},
-         {b:"h51_veren",   bot:0,       w:132, d:.66, op:.95},
-         {fx:"veer-dicht", d:.80},
-         {fx:"stof-voor",  d:.90}],
+         {b:"h51_veren",   bot:0,       w:132, d:.66, op:.95},],
   "5-2":[{b:"h52_zaal",    y:0,  h:100, w:110, d:.04, op:1},
          {b:"h52_vitrines",y:22,        w:120, d:.32, op:.95},
          {b:"h52_touw",    bot:0,       w:132, d:.68, op:.95},
@@ -18369,14 +18378,10 @@ const HORIZON = {
          {b:"h55_bureau",  bot:0,       w:134, d:.72, op:1},
          {b:"h55_stof",    y:-4,        w:138, d:.95, op:.7}],
   "2-6":[{b:"h25_kathed",  y:0,  h:100, w:110, d:.04, op:1},
-         {fx:"regen-ver",  d:.15},
          {b:"h25_zuilen",  y:12,        w:120, d:.26, op:.9},
          {b:"h25_scherm",  y:40,        w:126, d:.50, op:.9},
-         {fx:"regen-dicht",d:.60},
          {b:"h25_doornen", bot:0,       w:134, d:.70, op:.95},
-         {fx:"spat",       d:.80},
-         {b:"h25_gewelf",  y:-14,       w:140, d:.96, op:1},
-         {fx:"regen-voor", d:1}]
+         {b:"h25_gewelf",  y:-14,       w:140, d:.96, op:1}]
 };
 /* Een level met takken (2-4: links het web, rechts het pad) mag per tak een eigen
    vergezicht hebben. De sleutel is dan "2-4:shelob"; is die er niet, dan pakt hij gewoon
@@ -18407,9 +18412,7 @@ function horizonVerf(id, variant){
      gelijke stap minder, bovenin bijna stil. Gelijke hoogtes delen dezelfde trede. */
   const treden = [...new Set(hoogtes)].sort((a, b) => a - b);
   const breedte = laag.clientWidth || window.innerWidth || 900;
-  weerStop();
   rij.forEach((h, i) => {
-    if(h.fx){ weerLaag(laag, h, i); return; }
     const pad = HORIZON_BEELD[h.b];
     if(!pad) return;
     const d = Math.max(0, Math.min(1, h.d != null ? h.d : .5));
@@ -18453,178 +18456,12 @@ function horizonVerf(id, variant){
     setTimeout(() => el.classList.add("aan"), 40 + i * 90);
   });
   laagPassen();
-  weerStart();
 }
-function horizonWeg(){ const l = document.getElementById("horizon"); if(l) l.innerHTML = ""; weerStop(); }
+function horizonWeg(){ const l = document.getElementById("horizon"); if(l) l.innerHTML = ""; }
 
-/* ================= WEER IN HET VERGEZICHT =================
-   Lagen die het spel zelf tekent, tussen de tekeningen van het vergezicht in: regen, as,
-   sintels, bellen, veren, stof. Geen gif maar een klein pixelvlak waarop het spel twaalf
-   keer per seconde elk deeltje een stukje verschuift. Daardoor kan het weer meedoen met
-   het gevecht: harder gaan regenen, een golf sintels, een wolk bellen.
-   Elke laag staat in HORIZON als {fx:"regen-ver", d:.15}; WEER_DOEL zegt per level hoe
-   dicht elke soort nu hoort te zijn. */
-const WEER_PX = 3;                       // één deeltjespixel = 3 schermpixels
-const BEL_VORM = {
-  3:["010", "1.1", "010"],
-  5:[".111.", "1.2.1", "1...1", "1...1", ".111."],
-  7:["..111..", ".1...1.", "1.2...1", "1.....1", "1.....1", ".1...1.", "..111.."]
-};
-const VEER_VORM = [
-  ["....11", "..111.", ".111..", "11....", "1....."],
-  ["......", "111111", ".1111.", "......", "......"],
-  ["11....", ".111..", "..111.", "....11", ".....1"]
-];
-const wKies = a => a[Math.floor(Math.random() * a.length)];
-const wTussen = (a, b) => a + Math.random() * (b - a);
-/* Per soort: welke groep (voor de dichtheid), hoeveel, en hoe een deeltje eruitziet. */
-const WEER_SOORT = {
-  "regen-ver":  {groep:"regen", n:90,  maak:() => ({vy:wTussen(18, 24), l:wKies([3, 4]), kl:wKies(["rgba(150,175,200,.45)", "rgba(170,190,210,.36)"]), sch:.3})},
-  "regen-dicht":{groep:"regen", n:90,  maak:() => ({vy:wTussen(30, 36), l:wKies([5, 6, 7]), kl:wKies(["rgba(190,215,240,.78)", "rgba(215,230,248,.86)"]), sch:.3})},
-  "regen-voor": {groep:"regen", n:18,  maak:() => ({vy:wTussen(46, 52), l:wKies([9, 11]), kl:"rgba(225,238,250,.78)", sch:.35})},
-  "spat":       {groep:"regen", n:40,  maak:(w, h) => ({x:wTussen(0, w), y:wTussen(h * .82, h - 2), t:Math.floor(Math.random() * 8), kl:"rgba(220,235,250,.82)"})},
-  "as-ver":     {groep:"as",    n:110, maak:() => ({vy:wTussen(2.5, 6), a:wTussen(2, 7), f:wTussen(.03, .09), kl:wKies(["rgba(150,140,135,.63)", "rgba(120,112,110,.55)"]), s:[1, 1]})},
-  "as-dicht":   {groep:"as",    n:34,  maak:() => ({vy:wTussen(5, 9), a:wTussen(2, 7), f:wTussen(.03, .09), kl:wKies(["rgba(215,205,195,.92)", "rgba(180,170,165,.88)"]), s:wKies([[2, 2], [2, 1], [3, 2]])})},
-  "sintel":     {groep:"sintel",n:26,  maak:() => ({vy:-wTussen(3, 6), a:wTussen(2, 6), f:wTussen(.04, .1), kl:wKies(["#ff9628", "#ffd25a", "rgba(230,90,30,.9)"]), s:[1, 1]})},
-  "bel-stip":   {groep:"bel",   n:60,  maak:() => ({vy:-wTussen(2.5, 3.5), a:wTussen(1, 3), f:wTussen(.04, .08), kl:"rgba(160,220,210,.35)", s:[1, 1]})},
-  "bel-klein":  {groep:"bel",   n:40,  maak:() => ({vy:-wTussen(3, 6), a:wTussen(1, 4), f:wTussen(.06, .12), vorm:wKies([3, 5, 5]), kl:"rgba(175,235,230,.82)", gl:"#fff"})},
-  "bel-groot":  {groep:"bel",   n:12,  maak:() => ({vy:-wTussen(6, 9), a:wTussen(1, 4), f:wTussen(.06, .12), vorm:wKies([7, 7, 5]), kl:"rgba(210,250,245,.94)", gl:"#fff"})},
-  "veer-ver":   {groep:"veer",  n:12,  maak:() => ({vy:wTussen(2.6, 3.4), a:wTussen(6, 14), f:wTussen(.05, .08), kl:"rgba(235,238,248,.86)", sch:"rgba(120,130,160,.55)", z:1})},
-  "veer-dicht": {groep:"veer",  n:6,   maak:() => ({vy:wTussen(3, 6), a:wTussen(6, 14), f:wTussen(.05, .08), kl:"#ffffff", sch:"rgba(110,120,150,.67)", z:2})},
-  "stof-ver":   {groep:"stof",  n:60,  maak:(w) => ({x:wTussen(w * .2, w * .8), a:wTussen(3, 10), b:wTussen(2, 6), m:wKies([1, 2]), kl:[230, 175, 70, .9]}), stil:true},
-  "stof-voor":  {groep:"stof",  n:25,  maak:(w) => ({x:wTussen(w * .2, w * .8), a:wTussen(3, 10), b:wTussen(2, 6), m:wKies([1, 2]), kl:[255, 205, 90, 1]}), stil:true}
-};
-/* Hoe dicht hoort elke groep nu te zijn? 1 = gewoon, 0 = weg, 2 = dubbel zoveel. */
-const WEER_DOEL = {
-  /* 2-6: alleen als het regent; in de bloei (fase 2) gutst het. */
-  "2-6": st => ({regen: st && st.regen ? (st.bloeiGedaan ? 1.9 : 1) : (st ? 0 : .6)}),
-  /* 3-1: hoe langer het duurt, hoe dichter de as. */
-  "3-1": () => ({as: Math.min(1.9, .7 + ((S && S.gTurn) || 1) * .06), sintel: 1}),
-  "4-2": () => ({bel: 1}),
-  /* 5-1: elke ronde meer veren, en ze vallen steeds trager. In de laatste ronde hangen
-     ze bijna stil. */
-  "5-1": st => {
-    const tot = (st && st.overleef) || 5, r = Math.ceil(((S && S.gTurn) || 1) / 2);
-    const f = st ? Math.max(0, Math.min(1, (r - 1) / Math.max(1, tot - 1))) : 0;
-    return {veer: .6 + f * 1.4, veerTempo: 1 - f * .65, stof: 1};
-  }
-};
-const WEER = {lagen:[], t:null, puls:{}, dicht:{}, tik:0, id:null};
-function weerLaag(houder, h){
-  const el = document.createElement("div");
-  el.className = "hz weer";
-  el.style.zIndex = Math.round(Math.max(0, Math.min(1, h.d != null ? h.d : .5)) * 20);
-  const cv = document.createElement("canvas");
-  el.appendChild(cv); houder.appendChild(el);
-  setTimeout(() => el.classList.add("aan"), 60);
-  WEER.lagen.push({soort:h.fx, el, cv, ps:null, w:0, h:0});
-}
-/* Een plotselinge golf: een groep is even veel dichter, en zakt dan terug. */
-function weerPuls(groep, extra, ms){
-  if(!WEER.lagen.length) return;
-  WEER.puls[groep] = {extra, t0:Date.now(), ms};
-}
-function weerStop(){ clearInterval(WEER.t); WEER.t = null; WEER.lagen = []; WEER.puls = {}; WEER.dicht = {};
-  document.body.classList.remove("hzregen"); }
-function weerStart(){
-  clearInterval(WEER.t); WEER.t = null;
-  if(!WEER.lagen.length) return;
-  const id = hzSleutel((S && S.story && S.story.id) || (M && M.id)) || "";
-  WEER.id = id.split(":")[0];
-  document.body.classList.toggle("hzregen", WEER.lagen.some(l => (WEER_SOORT[l.soort] || {}).groep === "regen"));
-  const stil = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(stil) return;
-  WEER.t = setInterval(weerTik, 1000 / 12);
-}
-function weerNieuw(def, w, h, overal){
-  const p = Object.assign({x:Math.random() * w, y:overal ? Math.random() * h : 0, ph:Math.random() * 6.28}, def.maak(w, h));
-  return p;
-}
-function weerTik(){
-  if(document.hidden || SET.horizon === false || !WEER.lagen.length) return;
-  if(!WEER.lagen[0].el.isConnected){ weerStop(); return; }
-  WEER.tik++;
-  const st = S && S.story;
-  const doel = (WEER_DOEL[WEER.id] || (() => ({})))(st && st.id === WEER.id ? st : null);
-  const nu = Date.now();
-  for(const l of WEER.lagen){
-    const def = WEER_SOORT[l.soort]; if(!def) continue;
-    const g = def.groep;
-    /* Dichtheid schuift rustig naar het doel; een golf komt er even bovenop. */
-    const want = doel[g] != null ? doel[g] : 1;
-    const was = WEER.dicht[g] != null ? WEER.dicht[g] : want;
-    const pu = WEER.puls[g];
-    const extra = pu && nu - pu.t0 < pu.ms ? pu.extra * (1 - (nu - pu.t0) / pu.ms) : 0;
-    if(l === WEER.lagen.find(x => (WEER_SOORT[x.soort] || {}).groep === g))
-      WEER.dicht[g] = was + Math.max(-.05, Math.min(.05, want - was));
-    const dicht = Math.max(0, (WEER.dicht[g] != null ? WEER.dicht[g] : want) + extra);
-    const tempo = g === "veer" && doel.veerTempo != null ? doel.veerTempo : 1;
-    /* Het vlak volgt de grootte van het vergezicht; verandert die, dan opnieuw zaaien. */
-    const w = Math.max(40, Math.round(l.el.clientWidth / WEER_PX)), h = Math.max(40, Math.round(l.el.clientHeight / WEER_PX));
-    if(w !== l.w || h !== l.h || !l.ps){
-      l.w = w; l.h = h; l.cv.width = w; l.cv.height = h;
-      const max = Math.ceil(def.n * 3.2 * (w * h) / (300 * 286));
-      l.ps = Array.from({length:max}, () => weerNieuw(def, w, h, true));
-    }
-    const ctx = l.cv.getContext("2d");
-    ctx.clearRect(0, 0, w, h);
-    const aantal = Math.min(l.ps.length, Math.round(def.n * (w * h) / (300 * 286) * dicht));
-    for(let i = 0; i < l.ps.length; i++){
-      const p = l.ps[i];
-      const zichtbaar = i < aantal;
-      weerStap(l.soort, p, w, h, tempo, def);
-      if(zichtbaar) weerTeken(ctx, l.soort, p, w, h);
-    }
-  }
-}
-function weerStap(soort, p, w, h, tempo, def){
-  const g = def.groep;
-  if(g === "regen" && soort !== "spat"){
-    p.y += p.vy; p.x -= p.vy * p.sch;
-    if(p.y > h + p.l){ p.y = -p.l - Math.random() * 20; p.x = Math.random() * (w + h * p.sch); }
-  } else if(soort === "spat"){
-    p.t = (p.t + 1) % 8;
-    if(p.t === 0){ p.x = Math.random() * w; p.y = wTussen(h * .82, h - 2); }
-  } else if(def.stil){
-    p.ph += .05;
-  } else {
-    p.y += p.vy * tempo; p.ph += p.f * tempo;
-    if(p.vy > 0 && p.y > h + 4){ p.y = -6; p.x = Math.random() * w; }
-    if(p.vy < 0 && p.y < -8){ p.y = h + 6; p.x = Math.random() * w; }
-  }
-}
-function weerTeken(ctx, soort, p, w, h){
-  const def = WEER_SOORT[soort], g = def.groep;
-  const px = (x, y, kl) => { ctx.fillStyle = kl; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); };
-  if(g === "regen" && soort !== "spat"){
-    ctx.fillStyle = p.kl;
-    for(let i = 0; i < p.l; i++) ctx.fillRect(Math.round(((p.x - i * p.sch) % w + w) % w), Math.round(p.y + i), 1, 1);
-  } else if(soort === "spat"){
-    if(p.t === 0) px(p.x, p.y, p.kl);
-    else if(p.t === 1){ px(p.x - 1, p.y - 1, p.kl); px(p.x + 1, p.y - 1, p.kl); }
-    else if(p.t === 2){ ctx.globalAlpha = .5; px(p.x - 2, p.y, p.kl); px(p.x + 2, p.y, p.kl); ctx.globalAlpha = 1; }
-  } else if(g === "bel" && p.vorm){
-    const x0 = p.x + p.a * Math.sin(p.ph);
-    BEL_VORM[p.vorm].forEach((rij, j) => { for(let i = 0; i < rij.length; i++){
-      if(rij[i] === "1") px(x0 + i, p.y + j, p.kl); else if(rij[i] === "2") px(x0 + i, p.y + j, p.gl); } });
-  } else if(g === "veer"){
-    const x0 = p.x + p.a * Math.sin(p.ph), c = Math.cos(p.ph);
-    const vorm = VEER_VORM[c > .45 ? 0 : (c < -.45 ? 2 : 1)], z = p.z || 1;
-    ctx.fillStyle = p.sch;
-    vorm.forEach((rij, j) => { for(let i = 0; i < rij.length; i++) if(rij[i] === "1") ctx.fillRect(Math.round(x0 + i * z), Math.round(p.y + j * z + z), z, z); });
-    ctx.fillStyle = p.kl;
-    vorm.forEach((rij, j) => { for(let i = 0; i < rij.length; i++) if(rij[i] === "1") ctx.fillRect(Math.round(x0 + i * z), Math.round(p.y + j * z), z, z); });
-  } else if(g === "stof"){
-    const t = p.ph;
-    const x = p.x + p.a * Math.sin(p.m * t * .2), y = (p.y || 0) + p.b * Math.sin(t * .2 + p.m);
-    const glim = (Math.sin(t * .4) + 1) / 2;
-    if(glim > .25) px(x, y, `rgba(${p.kl[0]},${p.kl[1]},${p.kl[2]},${(p.kl[3] * glim).toFixed(2)})`);
-  } else {
-    const x0 = p.x + p.a * Math.sin(p.ph);
-    ctx.fillStyle = p.kl;
-    ctx.fillRect(Math.round(x0), Math.round(p.y), p.s[0], p.s[1]);
-  }
-}
+/* (okt 2026: het getekende weer in het vergezicht, regen, as, sintels, bellen, veren, stof, is
+   eruit: het kostte te veel rekenkracht.) */
+
 /* In de ruimte-modus horen het vergezicht en het decor bij het speelveld, niet bij het hele
    scherm: ze worden precies zo breed als de middenkolom. Zo kruipt er nooit iets achter de
    balken links en rechts langs — daar staan je kaarten, je levens en zijn naam. */
@@ -20778,7 +20615,7 @@ const STORY = {
       {s:null, bg:3, naam:"…", kleur:"#b9c6d4", t:"💨 <b>En aan het eind van elke beurt van het Rookgordijn draait de rook.</b> Links wordt rechts, rechts wordt links. Alleen het midden ligt waar het lag. Aan allebei de kanten."}
     ],
     gevechtNa:{mist:"verdwaald"},
-    klaarNa:{konami:{}},   // geen gevecht; de gewone buit (Gokkersbrouwsel) krijg je toch
+    klaarNa:{konami:{}},   // geen gevecht; de gewone buit (Zwart Gat) krijg je toch
     varianten:{verdwaald:{}},
     win:[
       {s:"rookman_uit", groot:true, naam:"…", kleur:"#b9c6d4", t:"De rook wordt dun. Wat eronder zat is kleiner dan je dacht, en het kijkt naar de grond."},
@@ -20803,7 +20640,7 @@ const STORY = {
     levensVij:8, handVijMinder:2,   // het Rookgordijn begint met twee kaarten minder (en heeft er daarom een leven bij)
     bord:[{p:1, c:0, el:"steen"},{p:1, c:2, el:"vuur"},{p:1, c:4, el:"gras"}],
     mist:true, mistZicht:true, spiegel:true,
-    geeftLicht:"gamble",
+    geeftLicht:"darkhole",    // was Gokkersbrouwsel (uit het spel, okt 2026)
     ban:10, begint:1
   },
   "3-4":{
@@ -20894,8 +20731,8 @@ const STORY = {
       ] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Geen water: elke vonk is een van hun drie elementen. */
-    deckVij:{plasma:5, vuur:2, roos:3, gras:4, steen:7, gamble:6},
-    ltVij:["gamble"],
+    deckVij:{plasma:5, vuur:2, roos:3, gras:4, steen:7, sterregen:6},   // was Gokkersbrouwsel: nu vuurwerk
+    ltVij:["sterregen"],
     levensVij:6,
     trio:[{naam:"Knetter", hp:2, kol:0, kracht:"vuur",  ae:"ae_knetter", uitleg:"🔥 Vuur: +3 levens en het speel-effect twee keer"},
           {naam:"Spetter", hp:2, kol:2, kracht:"gras",  ae:"ae_spetter", uitleg:"🌿 Gras: +3 levens en het speel-effect twee keer"},
@@ -23092,7 +22929,7 @@ const VELD = {
 
      "3-1": { regels:[] },   /* alles staat nu in haar 🟣 aethers */
 
-  "3-2": { regels:["⚒ <b>Alles in haar stapel is gesmeed</b>: alleen ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs. Ze begint met één kaart minder.",
+  "3-2": { regels:["⚒ <b>Alles in haar stapel is gesmeed</b>: alleen ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs. ",
                    "🟣 <b>Warme Deken</b>: de eerste klap per beurt op haar levens doet <b>0</b>."] },
 
   "3-3": { regels:["💨 <b>Alles ligt dicht</b>, ook jouw kaarten. Je ziet levens, aanval en wie op wie mikt; wát er ligt moet je onthouden.",
@@ -25347,7 +25184,7 @@ const OVERWORLD_SMID = {na:"3-2"};   // de smidse zit op de plek van het level z
    bestaat en hij ligt meteen in de winkel. */
 const KOOPWAAR = {
   ae: ["ae_draw3", "ae_graf", "fu_grass"],   // Brandoffer eruit (okt 2026): die plank is nu leeg
-  lt: ["greed", "vital", "darkhole", "master", "sterregen"]
+  lt: ["greed", "vital", "master", "sterregen"]   // Zwart Gat eruit (okt 2026): die krijg je nu bij 3-3
 };
 /* ⚔ Welke aethers er in PvP (commander, basis) meedoen: alles wat je in het verhaal kunt
    krijgen of kopen, plus wat er altijd al was. Niet de vier Oerkrachten (en de oude Oerkracht)
@@ -25372,7 +25209,7 @@ function pvpAePool(){
 /* Wat het kost, in sterren. Over alle 26 levels perfect gespeeld liggen er 78 sterren,
    en alles bij Knort kopen kost er precies 78. Alles krijgen kan dus — maar alleen als je
    nergens een ster laat liggen. Eén misser en je moet kiezen. */
-/* Getijdenstroom zit nu in 1-3 (Springvloed in 4-1) en Gokkersbrouwsel in het Rookgordijn; daarvoor liggen hier
+/* Getijdenstroom zit nu in 1-3 (Springvloed in 4-1) en Zwart Gat in het Rookgordijn; daarvoor liggen hier
    Oerkracht (weg bij Magnus), Vitaliteit en Elementaal Meester. Het totaal blijft gelijk. */
 /* Alle aethers en lichtkaarten nog een ster goedkoper (oktober), met 1 als bodem. */
 const KOOP_PRIJS = {
@@ -26968,11 +26805,13 @@ function normURL(str){
 function detectShareURL(){
   let saved = null;
   try{ saved = localStorage.getItem("elementaal_url"); }catch(e){}
-  if(saved){ SHARE.url = saved; SHARE.guess = false; return; }
+  if(saved && !(HOSTED && /claude\.ai/.test(saved))){ SHARE.url = saved; SHARE.guess = false; return; }
   if(NET.shareUrl){ SHARE.url = NET.shareUrl; SHARE.guess = false; return; }
   let g = normURL(document.referrer);
   if(!g){ try{ if(document.location.ancestorOrigins) for(const o of document.location.ancestorOrigins){ g = g || normURL(o); } }catch(e){} }
   if(!g) g = normURL(location.href);
+  /* Op een gewone webpagina (GitHub Pages) is de pagina zelf de link. */
+  if(!g && HOSTED && /^https?:/.test(location.protocol || "")) g = location.origin + location.pathname;
   if(g){ SHARE.url = g; SHARE.guess = true; }
 }
 function setShareURL(v){
@@ -27004,7 +26843,7 @@ function myId(){
 }
 /* ================= LIVE (P2P via WebRTC) ================= */
 const LIVE = {peer:null, conn:null, code:"", role:"", joined:false, status:"", chat:[], err:"", retry:null,
-              ready:[false,false], bi:0, tries:0, watchdog:null, announced:false, started:false};
+              ready:[false,false], bi:0, tries:0, watchdog:null, announced:false, started:false, rdyG:[0, 0]};
 const PEER_PREFIX = "elementaal-v1-";
 const HOSTED = !/(^|\.)claude\.ai$|claudeusercontent/i.test(location.hostname || "");
 function roomCode(){
@@ -27015,7 +26854,12 @@ function roomCode(){
 /* Meerdere gratis brokers: als de eerste plat ligt of geblokkeerd wordt, schuiven we door.
    De broker doet alleen het "elkaar vinden"; het spel loopt daarna rechtstreeks tussen de browsers. */
 const ICE = [{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302"]},
-             {urls:"stun:global.stun.twilio.com:3478"}];
+             {urls:"stun:global.stun.twilio.com:3478"},
+             /* Een doorgeefluik (TURN) voor als de twee browsers elkaar niet rechtstreeks kunnen
+                bereiken (strenge routers, mobiel netwerk). De openbare gratis server van het
+                Open Relay Project; is hij er niet, dan slaat de browser hem gewoon over. */
+             {urls:["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443", "turn:openrelay.metered.ca:443?transport=tcp"],
+              username:"openrelayproject", credential:"openrelayproject"}];
 const BROKERS = [
   {name:"PeerJS-cloud", opts:{}},
   {name:"peerjs.92k.de", opts:{host:"peerjs.92k.de", port:443, path:"/", secure:true}},
@@ -27110,12 +26954,30 @@ function bindConn(c){
     clearTimeout(LIVE.retry); clearTimeout(LIVE.watchdog); LIVE.watchdog = null; LIVE.tries = 0;
     liveMsg("verbonden met je tegenstander", true);
     liveNotify("🤝 Verbonden met je tegenstander");
-    liveSend({t:"hello", len:NET.log.length, seed:NET.seed, kind:NET.kind});
+    liveSend({t:"hello", len:NET.log.length, seed:NET.seed, kind:NET.kind, hash:logHash(NET.log), rdyG:LIVE.rdyG});
     liveSend({t:"lready", p:NET.seat, v:LIVE.ready[NET.seat]});
+    /* 💓 Hartslag: elke 4 seconden een seintje. Horen we 15 seconden niets, dan is de
+       verbinding stilletjes doodgegaan (laptop dicht, wifi weg) en verbinden we opnieuw,
+       in plaats van eindeloos te wachten op een zet die nooit komt. */
+    LIVE.laatst = Date.now();
+    clearInterval(LIVE.hart);
+    LIVE.hart = setInterval(() => {
+      if(LIVE.conn !== c){ clearInterval(LIVE.hart); return; }
+      liveCheck();
+      if(LIVE.joined && Date.now() - (LIVE.laatst || 0) > 15000){
+        clearInterval(LIVE.hart);
+        try{ c.close(); }catch(e){}
+        if(LIVE.joined){ LIVE.joined = false; LIVE.status = "verbinding weg, opnieuw verbinden…";
+          liveNotify("⚠ Verbinding weg, opnieuw verbinden…", true); render();
+          if(LIVE.role === "guest"){ if(!LIVE.peer || LIVE.peer.destroyed || LIVE.peer.disconnected) openPeer(); else liveRetry(); } }
+      }
+    }, 4000);
     render();
   });
-  c.on("data", m => onLiveData(m));
+  c.on("data", m => { LIVE.laatst = Date.now(); onLiveData(m); });
   c.on("close", () => {
+    if(LIVE.conn !== c) return;       // een oude verbinding die nu pas dichtgaat
+    clearInterval(LIVE.hart);
     LIVE.joined = false; LIVE.status = "verbinding verbroken";
     LIVE.ready = [false, false];
     liveMsg("verbinding verbroken — opnieuw verbinden…", true);
@@ -27157,7 +27019,35 @@ function liveMaybeStart(){
 function liveBothReady(){ return LIVE.ready[0] && LIVE.ready[1]; }
 const startBtnFor = k => k === "commander" ? "cmdpvp" : (k === "basis1" ? "bas1pvp" : (k === "basis3" ? "bas3pvp" : "startpvp"));
 const kindLabel = k => k === "commander" ? "🟣 Commander · best of 3" : (k === "basis1" ? "⚜️ Basis · best of 1" : (k === "basis3" ? "⚜️ Basis · best of 3" : "⚜️ Basis · één potje"));
-function liveSync(){ liveSend({t:"sync", seed:NET.seed, kind:NET.kind, log:NET.log, chat:LIVE.chat}); }
+/* Een korte vingerafdruk van de zettenlijst: bij het opnieuw verbinden zien we zo ook of twee
+   even lange lijsten echt hetzelfde zijn. */
+function logHash(log){ const t = JSON.stringify(log || []); let h = 0; for(let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return h; }
+/* 🩺 Vangnet (okt 2026): bij elke hartslag sturen we mee hoe lang onze zettenlijst is, een
+   vingerafdruk ervan, en (als alles stilstaat) een vingerafdruk van de stand. Zijn de lijsten even
+   lang maar toch anders, of de stand anders terwijl de lijsten gelijk zijn, dan herstelt de host
+   het meteen met een sync. Zo raakt een partij nooit blijvend uit de pas. */
+function liveRust(){ return !!S && !busyFlag && !applyingRemote && !REPLAY_LOOPT && !NET.buf.length; }
+function standHash(){
+  try{
+    return logHash([S.match && S.match.game, S.match && S.match.wins, S.over && S.over.winner, S.tp,
+      [0, 1].map(q => [P(q).life, P(q).deck.length, P(q).hand.map(c => c.id), P(q).cols.map(k => [k.cre ? k.cre.card.id + ":" + k.cre.hp + ":" + k.cre.ent : 0, k.spell ? k.spell.card.id : 0])])]);
+  }catch(e){ return 0; }
+}
+function liveCheck(){
+  if(!(NET.on && NET.chan === "live") || !LIVE.joined) return;
+  liveSend({t:"ping", len:NET.log.length, hash:logHash(NET.log), stand:liveRust() ? standHash() : null, seed:NET.seed});
+}
+function liveCheckIn(m){
+  if(m.len == null || m.seed !== NET.seed || m.len !== NET.log.length) return;
+  const anders = m.hash !== logHash(NET.log) || (m.stand != null && liveRust() && m.stand !== standHash());
+  if(!anders){ LIVE.checkMis = 0; return; }
+  /* Pas bij twee keer achter elkaar ingrijpen: een zet kan net onderweg zijn. */
+  LIVE.checkMis = (LIVE.checkMis || 0) + 1;
+  if(LIVE.checkMis < 2 || Date.now() - (LIVE.checkT || 0) < 8000) return;
+  LIVE.checkMis = 0; LIVE.checkT = Date.now();
+  if(LIVE.role === "host") liveSync(); else liveSend({t:"need"});
+}
+function liveSync(){ liveSend({t:"sync", seed:NET.seed, kind:NET.kind, log:NET.log, chat:LIVE.chat, rdyG:LIVE.rdyG}); }
 let applyingRemote = false;
 /* Elke volledige herbouw (sync) krijgt een nieuw nummer. Een toepas-lus of replay die nog van
    vóór die herbouw liep, merkt dat en stopt, in plaats van oude zetten op het nieuwe potje te
@@ -27171,39 +27061,99 @@ async function applyRemote(acts){
   applyingRemote = true;
   try{
     for(const a of acts){
-      const w = await waitFor(needsPending(a) ? "input" : "idle");
+      /* Is het potje hier al afgelopen en waren we allebei klaar, dan eerst het volgende potje
+         openen: de ander kan er al eerder zijn dan onze eigen timer. */
+      if(await netVolgendPotje(g)) { if(g !== NETGEN) return; }
+      const w = (netDirect(a) || netNaRust(a)) ? "nu" : await waitFor(needsPending(a) ? "input" : "idle");
       if(g !== NETGEN) return;
-      if(w === "timeout"){ liveSend({t:"need"}); break; }
+      if(w === "timeout"){ if(window.NETDEBUG) console.log("APPLY TIMEOUT", JSON.stringify(a), S.ui && S.ui.mode, !!pending, !!S.over); liveSend({t:"need"}); break; }
       NET.log.push(a);
       runAction(a);
     }
     await settleAll();
+    liveReadyFlush();
   } finally { if(g === NETGEN){ applyingRemote = false; render(); } }
+}
+/* 🤝 Klaar voor het volgende potje (okt 2026). Dat staat NIET in de zettenlijst: allebei kunnen
+   tegelijk op "klaar" drukken, en dan stonden de twee meldingen bij de twee spelers in een andere
+   volgorde (of raakte er een kwijt). Nu onthoudt elke kant per speler voor welk potje die klaar
+   is, en het volgende potje gaat open zodra allebei klaar zijn. */
+/* Zetten die op elk moment mogen (ook midden in een vraag): opgeven en de klok. Daar wachten
+   we niet op een rustig moment, die voeren we meteen uit. */
+const netDirect = a => !!a && a.t === "b" && a.b === "klokstart";
+/* Opgeven en de tijd laten verlopen beëindigen het potje. Die gaan pas af als alles wat er nog
+   loopt is afgewikkeld: anders kon het potje bij de een al door een klap zijn afgelopen en bij
+   de ander door het opgeven, met een andere winnaar. */
+const netNaRust = a => !!a && (a.t === "sur" || a.t === "klokuit");
+const potjeNr = () => (S && S.match && S.match.game) || 1;
+function liveReady(p){
+  if(!S || !S.over || S.over.matchDone) return;
+  LIVE.rdyG[p] = potjeNr();
+  doReady(p);
+  liveSend({t:"ready", p, g:potjeNr()});
+}
+function liveReadyFlush(){
+  if(!(NET.on && NET.chan === "live") || !S || !S.over || S.over.matchDone) return;
+  for(const p of [0, 1]) if(LIVE.rdyG[p] === potjeNr() && !(S.ready && S.ready[p])) doReady(p);
+}
+/* Potje voorbij, allebei klaar, maar het volgende staat hier nog niet open? Dan nu. */
+async function netVolgendPotje(g){
+  await settleAll();                 // de vorige zet kan het potje net hebben laten eindigen
+  if(!S || !S.over || S.over.matchDone || !matchVan() || S.match.bo === 1) return false;
+  const rd = readyState();
+  if(!(rd[0] && rd[1])) return false;
+  nextGame();
+  await settleAll();
+  return true;
 }
 async function onLiveData(m){
   if(!m || !m.t) return;
   if(!(NET.on && NET.chan === "live")) return;      // al weg uit het online potje: niets meer toepassen
   if(m.t === "taunt"){ if((m.p === 0 || m.p === 1) && m.p !== NET.seat && MP_SOORT.some(x => x.k === m.k)) mpZeg(m.p, m.k, Math.floor(+m.i) || 0, true); return; }
   if(m.t === "hello"){
-    /* Zelfde potje? Dan moeten seed én lengte kloppen. Anders wint de langste zettenlijst,
-       en bij gelijke lengte de host. Zo spelen de twee nooit langs elkaar heen. */
-    if(m.seed !== NET.seed || m.len !== NET.log.length){
+    /* Zelfde potje? Dan moeten seed, lengte én inhoud kloppen. Anders wint de langste
+       zettenlijst, en bij gelijke lengte de host. Zo spelen de twee nooit langs elkaar heen.
+       Wie klaar was voor het volgende potje, nemen we ook over (dat kan onderweg zoek zijn). */
+    if(Array.isArray(m.rdyG) && m.seed === NET.seed) [0, 1].forEach(p => { if((+m.rdyG[p] || 0) > (LIVE.rdyG[p] || 0)) LIVE.rdyG[p] = +m.rdyG[p]; });
+    const gelijk = m.seed === NET.seed && m.len === NET.log.length && (m.hash == null || m.hash === logHash(NET.log));
+    if(!gelijk){
       const ikWin = NET.log.length > m.len || (NET.log.length === m.len && LIVE.role === "host");
       if(ikWin) liveSync(); else liveSend({t:"need"});
+    } else {
+      LIVE_Q = LIVE_Q.then(() => { liveReadyFlush(); render(); }).catch(() => {});
+      liveSend({t:"rdyinfo", rdyG:LIVE.rdyG});
     }
     return;
   }
+  if(m.t === "rdyinfo"){
+    if(Array.isArray(m.rdyG)) [0, 1].forEach(p => { if((+m.rdyG[p] || 0) > (LIVE.rdyG[p] || 0)) LIVE.rdyG[p] = +m.rdyG[p]; });
+    LIVE_Q = LIVE_Q.then(() => { liveReadyFlush(); render(); }).catch(() => {});
+    return;
+  }
+  if(m.t === "ping"){ liveCheckIn(m); return; }
   if(m.t === "need"){ liveSync(); return; }
   if(m.t === "sync"){
+    if(m.seed !== NET.seed) LIVE.rdyG = [0, 0];      // een nieuwe partij: niemand is nog klaar
     NET.seed = m.seed; NET.kind = m.kind || NET.kind; NET.log = m.log || [];
     if(NET.log.length > 1) LIVE.started = true;
     if(m.chat && m.chat.length > LIVE.chat.length) LIVE.chat = m.chat;
     NET.buf = [];
+    if(Array.isArray(m.rdyG)) [0, 1].forEach(p => { if((+m.rdyG[p] || 0) > (LIVE.rdyG[p] || 0)) LIVE.rdyG[p] = +m.rdyG[p]; });
     await replay(NET.seed, NET.log);
+    liveReadyFlush();
     render(); return;
   }
-  if(m.t === "ready"){ NET.log.push({t:"rdy", p:m.p}); doReady(m.p); return; }
-  if(m.t === "surrender"){
+  if(m.t === "ready"){
+    /* Achter de zetten aan die er nog liggen: eerst moet het potje hier ook echt voorbij zijn. */
+    const g = NETGEN;
+    LIVE_Q = LIVE_Q.then(() => {
+      if(g !== NETGEN || !(NET.on && NET.chan === "live")) return;
+      if((m.p === 0 || m.p === 1) && (+m.g || 1) > (LIVE.rdyG[m.p] || 0)) LIVE.rdyG[m.p] = +m.g || 1;
+      liveReadyFlush(); render();
+    }).catch(() => {});
+    return;
+  }
+  if(m.t === "surrender"){        // oude versie van het spel aan de andere kant
     if(!S.over){ NET.log.push({t:"sur", p:m.p}); doSurrender(m.p); render(); }
     return;
   }
@@ -27214,13 +27164,29 @@ async function onLiveData(m){
     const g = NETGEN;
     LIVE_Q = LIVE_Q.then(async () => {
       if(g !== NETGEN || !(NET.on && NET.chan === "live")) return;
-      if(m.from === NET.log.length) await applyRemote(m.acts || []);
+      const acts = m.acts || [];
+      if(m.from === NET.log.length) await applyRemote(acts);
       else if(m.from > NET.log.length) liveSend({t:"need"});
-      else if(m.from + (m.acts || []).length > NET.log.length){
-        /* Half dubbel: het begin hebben we al, alleen de rest afspelen. */
-        await applyRemote((m.acts || []).slice(NET.log.length - m.from));
+      else {
+        /* We hebben op die plek al zetten staan. Zijn het dezelfde, dan spelen we alleen af wat
+           nieuw is. Zijn ze anders, dan deden we allebei tegelijk iets (bv. de klok of opgeven):
+           de host beslist en stuurt zijn lijst; de gast neemt die over. */
+        const al = NET.log.slice(m.from, m.from + acts.length);
+        const zelfde = al.every((x, i) => JSON.stringify(x) === JSON.stringify(acts[i]));
+        if(!zelfde){
+          if(LIVE.role === "host"){
+            /* Gaf de gast precies op dat moment op, dan telt dat opgeven: de host neemt het over. */
+            const zijnSur = acts.some(a => a && a.t === "sur"), mijnSur = al.some(a => a && a.t === "sur");
+            if(zijnSur && !mijnSur){
+              NET.log = NET.log.slice(0, m.from).concat(acts); NET.buf = [];
+              await replay(NET.seed, NET.log);
+            }
+            liveSync();
+          }
+          return;
+        }
+        if(m.from + acts.length > NET.log.length) await applyRemote(acts.slice(NET.log.length - m.from));
       }
-      else if(m.from + (m.acts || []).length < NET.log.length) liveSync();   // de ander liep achter
     }).catch(() => {});
     return;
   }
@@ -27237,7 +27203,7 @@ async function liveHost(kind){
   NET.seed = (Date.now() ^ Math.floor(Math.random()*1e9)) >>> 0;
   NET.log = [{t:"b", b: startBtnFor(kind)}]; NET.buf = [];
   LIVE.role = "host"; LIVE.code = roomCode(); LIVE.joined = false; LIVE.chat = []; LIVE.err = "";
-  LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0;
+  LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0; LIVE.rdyG = [0, 0];
   NET.seats = ["host", "guest"];
   S.vsBot = false; S.set.handoff = false;
   await replay(NET.seed, NET.log);
@@ -27249,7 +27215,7 @@ async function liveJoin(code){
   NET.on = true; NET.chan = "live"; NET.me = myId(); NET.seat = 1;
   NET.log = []; NET.buf = []; NET.seed = 0;
   LIVE.role = "guest"; LIVE.code = c; LIVE.joined = false; LIVE.chat = []; LIVE.err = "";
-  LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0;
+  LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0; LIVE.rdyG = [0, 0];
   NET.seats = ["host", "guest"];
   S.vsBot = false; S.set.handoff = false;
   liveSave(); openPeer(); render();
@@ -27361,7 +27327,7 @@ async function netRestart(){
   if(NET.chan === "live"){
     /* Live: één kant kiest de nieuwe seed en stuurt hem mee; allebei spelen dan exact
        hetzelfde nieuwe potje. (Vroeger koos elke kant zijn eigen seed: twee andere potjes.) */
-    NET.buf = []; M = null;
+    NET.buf = []; M = null; LIVE.rdyG = [0, 0];
     liveMsg("nieuwe partij gestart", true);
     liveSync();
     await replay(NET.seed, NET.log);
@@ -27396,15 +27362,13 @@ function netAfterAction(){
   render();
   if(NET.chan === "live"){
     if(NET.buf.length){
-      const acts = NET.buf.splice(0);
-      const sur = acts.filter(a => a.t === "sur" || a.t === "rdy");
-      const rest = acts.filter(a => a.t !== "sur" && a.t !== "rdy");
+      /* Alles, ook opgeven, gaat op volgorde mee met zijn plek in de zettenlijst. */
+      const rest = NET.buf.splice(0).filter(a => a.t !== "rdy");
       if(rest.length){
         const from = NET.log.length;
         NET.log.push(...rest);
         liveSend({t:"act", from, acts:rest});
       }
-      for(const a of sur){ NET.log.push(a); liveSend(a.t === "sur" ? {t:"surrender", p:a.p} : {t:"ready", p:a.p}); }
     }
     return;
   }
@@ -27460,9 +27424,14 @@ async function replay(seed, log){
     srand(seed); newGame(true);
     S.set.handoff = false; S.vsBot = false;   // online/replay kent geen scherm-doorgeven
     for(const a of log){
-      const w = await waitFor(needsPending(a) ? "input" : "idle");
+      if(a && a.t === "rdy") continue;  // oude lijsten: klaar-meldingen staan er niet meer in
+      /* Gaat de lijst na een afgelopen potje verder, dan waren allebei klaar. */
+      /* (eerst laten uitlopen: het potje kan net door de vorige zet afgelopen zijn) */
+      if(!netDirect(a)){ await settleAll(); if(g !== NETGEN) return; }
+      if(S.over && !S.over.matchDone && matchVan() && S.match.bo !== 1){ S.ready = [true, true]; nextGame(); await settleAll(); if(g !== NETGEN) return; }
+      const w = (netDirect(a) || netNaRust(a)) ? "nu" : await waitFor(needsPending(a) ? "input" : "idle");
       if(g !== NETGEN) return;          // er is intussen een nieuwere herbouw begonnen
-      if(w === "timeout") break;
+      if(w === "timeout"){ if(window.NETDEBUG) console.log("REPLAY TIMEOUT bij", log.indexOf(a), JSON.stringify(a), S.ui && S.ui.mode, !!pending, !!S.over); break; }
       runAction(a);
     }
     await settleAll();
@@ -27649,16 +27618,8 @@ const MP_CHARS = [
   {id:"1-1"}, {id:"1-2"}, {id:"1-3"}, {id:"1-4"}, {id:"1-5"},
   {id:"2-1", ook:"5-1"}, {id:"2-2"}, {id:"2-3"}, {id:"2-4"}, {id:"2-5"}, {id:"2-6"},
   {id:"3-1"}, {id:"3-2"}, {id:"3-3"},
-  /* 🎪 het trio: elke vonk apart, met wat die zelf zegt in het circus */
-  {id:"3-4:knetter", lv:"3-4", naam:"Knetter", spr:"vonk_knetter", spreker:"Knetter", balk:true,
-    au:["Applaus. Nee. Geen applaus. Niet nu.", "Het is stil in de tent. Ik heb dat nog nooit gehoord.",
-        "Ik heet Knetter. Dat weet je al. Ik zeg het nog een keer, zodat iemand het gehoord heeft."]},
-  {id:"3-4:spetter", lv:"3-4", naam:"Spetter", spr:"vonk_spetter", spreker:"Spetter",
-    au:["Ik kan niet jongleren zonder Fikkie. Ik kan het wel. Maar ik wil niet.", "Er is niemand meer om tegen te praten. Ik praat toch.",
-        "Ik heet Spetter. Dat weet je al. Ik zeg het nog een keer, zodat iemand het gehoord heeft."]},
-  {id:"3-4:fikkie", lv:"3-4", naam:"Fikkie", spr:"vonk_fikkie", spreker:"Fikkie",
-    au:["Ik was de kleinste. Ik zou als eerste gaan, zeiden ze. Grapje, zeiden ze.",
-        "Er ligt nog suiker. Ik hoef het niet. Er is niemand om het mee te delen.", "…Kom maar."]},
+  /* 🎪 het trio speel je alleen als drietal (okt 2026): geen losse vonken meer */
+  {id:"3-4", naam:"Het vlammende trio", spr:"trio"},
   {id:"3-5"}, {id:"3-6"},
   {id:"4-1", naam:"De Veerman", spr:"veerman"}, {id:"4-2"}, {id:"4-3"}, {id:"4-4"}, {id:"4-5"},
   {id:"5-2"}, {id:"5-3"},
@@ -27688,7 +27649,7 @@ function mpVerste(){
 function mpCharsVan(st){
   const k = (st && st.klaar) || [], alles = !!(st && st.vrij);
   return MP_CHARS.filter(c => c.id === "1-1" || alles || k.indexOf(c.lv || c.id) >= 0 || (c.ook && k.indexOf(c.ook) >= 0)
-    || (c.id === "knort" && !!(st && st.knortGezien))).map(c => c.id);
+    || c.id === "knort").map(c => c.id);   // 🐦 Knort mag altijd (okt 2026)
 }
 const mpCharsVrij = () => mpCharsVan(mpVerste());
 /* ---------- ⚜️ decks ----------
@@ -27822,7 +27783,7 @@ const LADDER_KNORT = {id:"knort", naam:"Knort", spr:"knorst", alleenBot:true,
   au:["Au. Dat zet ik op de rekening.", "Oké. Oké. Korting. Twintig procent. Hou op.", "Niet op de koopwaar slaan!"],
   hoi:["Welkom, welkom. Niks aanraken.", "Ah, een klant. Of een tegenstander. Zelfde prijs."]};
 const LADDER_EXTRA = [LADDER_KNORT, {id:"geheim", naam:"???", spr:null, alleenBot:true}];
-/* 🐦 Knort is ook zelf te kiezen als karakter (okt 2026): vrij zodra je hem in het verhaal hebt ontmoet. */
+/* 🐦 Knort is ook zelf te kiezen als karakter (okt 2026), altijd, ook online en in commander. */
 LADDER_KNORT.alleenBot = false;
 MP_CHARS.push(LADDER_KNORT);
 const EL_BESCHERM = {steen:"vuur", water:"gras", vuur:"steen", gras:"water"};   // verslaat wat jou verslaat
@@ -27850,8 +27811,10 @@ const LADDER = {
     ae:["ae_oer_water", "ae_oer_steen", "ae_oer_vuur", "ae_oer_gras"], ltN:{master:3, negate:3}, zijAe:[], zijLt:{}}},
   geheim:{id:"geheim"}
 };
-/* De decks van de zestien, per karakter: {"1-1": {naam, mix, upg, ae, ltN}, …}. Komt nog. */
-const LADDER_DECKS = {};
+/* De decks van de zestien (okt 2026): de zestien sterkste decks uit de ankerrun van 16 okt (één per
+   aether), willekeurig verdeeld en daarna vast. Elke challenge tegen iemand is dus elke keer
+   hetzelfde deck. */
+const LADDER_DECKS = {"1-1": {"mix": {"water": 7, "steen": 6, "vuur": 3, "gras": 4}, "upg": {"water": 5, "steen": 2, "gras": 3}, "ae": ["fu_fire", "ae_lichtval", "ae_zwerm"], "ltN": {"kloon": 3, "struik": 1, "sterregen": 3, "doortast": 2, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-1"}, "1-2": {"mix": {"water": 6, "steen": 2, "vuur": 5, "gras": 7}, "upg": {"water": 2, "steen": 3, "vuur": 5}, "ae": ["ae_leven", "ae_grassx2", "ae_zwerm"], "ltN": {"kuriboh": 2, "vital": 1, "sterregen": 3, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-2"}, "1-3": {"mix": {"water": 8, "steen": 9, "vuur": 4, "gras": 3}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_stonefull", "fu_stone", "fu_grass"], "ltN": {"web": 1, "master": 2, "sterregen": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-3"}, "2-2": {"mix": {"water": 8, "steen": 4, "vuur": 9, "gras": 3}, "upg": {"steen": 5, "vuur": 2, "gras": 3}, "ae": ["ae_lichtval", "fu_stone", "ae_leven"], "ltN": {"kuriboh": 1, "struik": 1, "master": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-2"}, "2-3": {"mix": {"water": 9, "steen": 4, "vuur": 4, "gras": 7}, "upg": {"water": 2, "vuur": 3, "gras": 5}, "ae": ["fu_water", "ae_lichtval", "ae_graf"], "ltN": {"vital": 2, "greed": 1, "reborn": 2, "kloon": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-3"}, "2-4": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_leven", "ae_stonefull", "ae_lichtval"], "ltN": {"sterregen": 1, "vital": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-4"}, "2-5": {"mix": {"water": 9, "steen": 3, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 2, "vuur": 3}, "ae": ["ae_alziend", "ae_graf", "ae_lichtval"], "ltN": {"vital": 2, "negate": 2, "greed": 1, "struik": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-5"}, "3-1": {"mix": {"water": 7, "steen": 5, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_lichtval", "ae_genade", "ae_fire6"], "ltN": {"sterregen": 3, "reborn": 2, "dfusion": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-1"}, "3-2": {"mix": {"water": 7, "steen": 8, "vuur": 6, "gras": 3}, "upg": {"water": 5, "steen": 3, "vuur": 2}, "ae": ["ae_lichtval", "ae_stonefull", "fu_stone"], "ltN": {"vital": 2, "kuriboh": 1, "sterregen": 1, "master": 1, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-2"}, "3-3": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"steen": 5, "vuur": 3, "gras": 2}, "ae": ["ae_leven", "ae_genade", "fu_water"], "ltN": {"dfusion": 1, "kloon": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-3"}, "3-5": {"mix": {"water": 3, "steen": 7, "vuur": 9, "gras": 5}, "upg": {"water": 3, "steen": 5, "gras": 2}, "ae": ["ae_leven", "fu_fire", "ae_draw3"], "ltN": {"kuriboh": 1, "master": 1, "negate": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-5"}, "4-1": {"mix": {"water": 2, "steen": 5, "vuur": 8, "gras": 5}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_zwerm", "fu_fire", "ae_leven"], "ltN": {"greed": 2, "kuriboh": 2, "darkhole": 1, "web": 1, "reborn": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-1"}, "4-2": {"mix": {"water": 7, "steen": 3, "vuur": 8, "gras": 6}, "upg": {"steen": 2, "vuur": 5, "gras": 3}, "ae": ["fu_water", "ae_watercycle", "ae_leven"], "ltN": {"dfusion": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-2"}, "4-4": {"mix": {"water": 9, "steen": 4, "vuur": 5, "gras": 6}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_smeed", "ae_leven", "ae_lichtval"], "ltN": {"kloon": 1, "kuriboh": 1, "vital": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-4"}, "5-2": {"mix": {"water": 6, "steen": 9, "vuur": 3, "gras": 6}, "upg": {"water": 5, "vuur": 2, "gras": 3}, "ae": ["fu_stone", "ae_genade", "ae_lichtval"], "ltN": {"sterregen": 3, "negate": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 5-2"}, "knort": {"mix": {"water": 9, "steen": 3, "vuur": 3, "gras": 9}, "upg": {"steen": 3, "vuur": 2, "gras": 5}, "ae": ["ae_grassx2", "fu_grass", "fu_water"], "ltN": {"negate": 2, "web": 1, "reborn": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge knort"}};
 const LADDER_AE = LADDER.bazen.concat([LADDER.seraf]).map(t => t.geeft);
 const ladderAlle = () => LADDER.tegen.concat(LADDER.bazen, [LADDER.seraf, LADDER.eerste, LADDER.geheim]);
 const ladderZoek = id => ladderAlle().find(t => t.id === id) || null;
@@ -28600,6 +28563,18 @@ function runAction(a){
   if(a.t === "b") return onBtn(a.b, null, true);
 }
 function act(a){
+  if(NET.on && NET.chan === "live" && a && a.t === "rdy"){ if(netMayAct(a)) liveReady(a.p); return; }
+  /* Opgeven of de tijd voorbij: eerst alles laten uitlopen, net als bij de ander (zie netNaRust). */
+  if(NET.on && NET.chan === "live" && netNaRust(a) && !a.rust){
+    const b = Object.assign({}, a);
+    (async () => {
+      await settleAll();
+      for(let i = 0; i < 300 && !netMayAct(b); i++) await new Promise(r => setTimeout(r, 50));
+      if(S && !S.over) act(Object.assign(b, {rust:true}));
+    })();
+    return;
+  }
+  if(a && a.rust){ a = Object.assign({}, a); delete a.rust; }
   if(NET.on){
     if(!netMayAct(a)) return;
     NET.buf.push(a);
