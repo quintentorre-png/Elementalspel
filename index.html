@@ -4103,7 +4103,6 @@ const handLicht = (G, p) => G.pl[p].hand.some(id => G.kEl[id] === LICHT && licht
 const magFlash = (G, p) => handFlash(G, p) || flashFuseOk(G, p) || handLicht(G, p);   // freeSpellCols is altijd vol
 function ijsOverCre(G, p){ const o = openKol(G, p); return o.filter(c => { const id = G.pl[1 - p].cre[c]; return !!id && !EL_STIL[G.kEl[id]] && !EL_ONST[G.kEl[id]]; }); }
 function ijsOverSpell(G, p){ return vrijeRituelen(G, p).filter(c => { const sp = G.pl[1 - p].spell[c]; return !!sp && G.kEl[sp] !== KNOOP; }); }
-function roosKracht(G, p, c){ const id = G.pl[p].cre[c]; if (G.kVar[id] === ROOS) return true; const sp = G.pl[p].spell[c]; return !!sp && G.kVar[sp] === ROOS; }
 /* 🌊 4-5: bij eb slaat water +3, bovenop alles */
 function kracht(G, p, c){
   const st = G.vh && G.vh.st;
@@ -4119,7 +4118,6 @@ function kracht0(G, p, c){
   if (VAR_VOL[vr]) return Math.max(bodem, hp);
   if (EL_VOL[e]) return Math.max(bodem, hp);
   if (EL_VIS[e] && s.cre.some(x => x && G.kEl[x] === CLOWN)) return Math.max(bodem, hp);
-  if (roosKracht(G, p, c)) return Math.max(bodem, hp);
   if (e === STEEN && heeft(G, p, 'ae_stonefull')) return Math.max(bodem, hp);
   return Math.max(bodem, Math.floor(hp / 2));
 }
@@ -4220,6 +4218,7 @@ function effsVan0(G, id, origin){
   if (vr === OCEAAN) return [{el:E_OCEAAN, origin, src:id}];
   if (vr === OCEAANRUST) return [];
   if (vr === FWOUD) return [0, 1, 2].map(() => ({el:E_GRAS, origin, vr:FWOUD}));
+  if (vr === ROOS) return [0, 1].map(() => ({el:E_GRAS, origin, vr}));   // 🌹 Roos: twee keer het gras-effect
   if (vr === KEES || IS_MONSTER(vr)) return [];
   if (e === WOLF) return [{el:E_WOLF, origin}];
   if (e === CLOWN) return [{el:E_CLOWN, origin}];
@@ -6984,8 +6983,7 @@ const VAR_TEKST = {
   oceaanrust:{eig:"Rust. Begin van je beurt wordt dit weer de 🌊 Oceaan."},
   fwoud:     {speel:"Drie keer het 🌿 Gras-effect: {verstrik} een wezen."},
   plasma: {eig:"Doet het schade of valt het aan, dan springt het vuur over: <b>2</b> schade aan de wezens in de kolommen naast het doelwit."},
-  roos:   {kw:["volleslag"], speel:"{Verstrik} een wezen.",
-           spell:"Het wezen op deze plek krijgt {Volle slag}."},
+  roos:   {speel:"Twee keer het 🌿 Gras-effect: {verstrik} een wezen."},
   ijs:    {speel:"Mik op het vijandelijke wezen in deze kolom: neem het over, met zijn levens, en doe zijn speel-effect. Het krijgt een 🧊 ijs-token: net als een verstrik-token valt het zolang niet aan. Het ijs smelt en is weg. Is die plek leeg als het afgaat, dan smelt het ijs voor niets; staat er intussen iets anders, dan neemt het dat over. Of laat het smelten: dan is het gewoon 💧 Water, met de plons.",
            spell:"Mik op het vijandelijke ritueel in deze kolom: neem het over en doe zijn speel-effect. Het ijs smelt en is weg. Is die plek leeg als het afgaat, dan smelt het ijs voor niets. Of laat het smelten: dan is het gewoon 💧 Water."},
   kiezel: {kw:["wijkt"], eig:"Telt als 🪨 Steen."},
@@ -7238,18 +7236,9 @@ const atkOf = (cr, p) => {            // aanvalskracht: helft van de levens, min
   if(EL[cr.card.el].volAtk) return Math.max(bodem, cr.hp) + hb;    // 🕯 slaat met alles wat hij heeft
   if(EL[cr.card.el].vis && p != null && P(p) && P(p).cols.some(k => k.cre && k.cre.card.el === "clown"))
     return Math.max(bodem, cr.hp) + hb;                            // 🐠 zolang de clownsvis er is: volle slag
-  if(roosKracht(cr)) return Math.max(bodem, cr.hp) + hb;           // 🌹 Roos: volle levens
   if(aeVolleSlag(p, cr.card.el)) return Math.max(bodem, cr.hp) + hb;
   return Math.max(bodem, Math.floor(cr.hp / 2)) + hb;
 };
-/* 🌹 Is dit wezen een Roos, of staat hij op een Roos-ritueel? Dan slaat hij met volle levens
-   en groeit hij elke beurt. */
-function roosKracht(cr){
-  if(!cr) return false;
-  if(cr.card.var === "roos") return true;
-  const f = findCre(cr.card.id);
-  return !!(f && P(f.p).cols[f.c].spell && P(f.p).cols[f.c].spell.card.var === "roos");
-}
 let botPlan = null, botT = null;
 
 /* ⬆ De sterke versie van elk element (de opwaardering in commander). */
@@ -10009,6 +9998,7 @@ function effsOf0(el, origin, card){
   if(vr === "oceaan")     return [{el:"oceaan", origin, srcCard:card}];
   if(vr === "oceaanrust") return [];
   if(vr === "fwoud")      return [0, 1, 2].map(() => ({el:"gras", origin, var:"fwoud"}));
+  if(vr === "roos")       return [0, 1].map(() => ({el:"gras", origin, var:vr, cheat:!!(card && card.cheat)}));   // 🌹 twee keer het gras-effect
   if(el === "wolf") return [{el, origin}];                     // 🐺 de roedel groeit — geen doelwit nodig
   if(el === "clown") return [{el, origin}];                    // 🐠 alle vissen +2
   if(el === "kogel") return [{el, origin}];                    // 🐡 3 schade aan een vijandelijk wezen
@@ -12643,7 +12633,7 @@ async function startTurnSequence(){
   await sleep(FAST ? 0 : 1250);
   await upkeepEntangle(S.tp);
   if(S.over) return;
-  /* 🌹 Roos groeit niet meer: hij geeft alleen Volle slag. */
+  /* 🌹 Roos groeit niet meer: hij doet twee keer het 🌿 Gras-effect. */
   if(S.over) return;
   if(S.tp === 1 && S.story && S.story.eieren) await shelobEieren();
   if(S.over) return;
@@ -13775,7 +13765,7 @@ function ritueelNuttig(p, cd, col){
   const eigenN = P(p).cols.filter(x => x.cre).length;
   const vijCre = P(vij).cols.filter(x => x.cre).map(x => x.cre);
   if(cd.var === "ijs") return col != null ? ijsOverSpell(p).includes(col) : ijsOverSpell(p).length > 0;
-  if(cd.el === "steen" || cd.var === "roos" || cd.var === "rots") return true;
+  if(cd.el === "steen" || cd.var === "rots") return true;
   if(cd.el === "vuur") return vijCre.length > 0;
   if(cd.el === "gras") return vijCre.some(cr => cr.card.el !== "vuur" || oerkrachtOp(p, "gras") || hasAe(p, "ae_grassx2"));
   if(cd.el === "water") return eigenN >= 1;
@@ -13788,7 +13778,7 @@ function ritueelWaarde(p, card){
   const el = card.el;
   if(el === "steen") return 1.2;
   if(el === "vuur") return card.var === "plasma" ? 1.2 : 1;
-  if(el === "gras") return card.var === "roos" ? 0.9 : 0.8;
+  if(el === "gras") return card.var === "roos" ? 1.4 : 0.8;          // 🌹 twee keer verstrikken
   if(el === "water") return P(p).cols.filter(x => x.cre).length >= 2 ? 0.7 : 0.25;
   if(el === "wolf") return 0.1;
   if(EL[el] && EL[el].alleenSpell) return 1;
@@ -14208,6 +14198,8 @@ function spellTriggerWaarde(p, el){
   }
   return effWaarde(p, el);
 }
+/* 🌹 Roos doet het 🌿 Gras-effect twee keer. */
+const roosMaal = cd => cd && cd.var === "roos" ? 2 : 1;
 const effWaarde = (p, el) => el === "vuur" ? vuurWaarde(p)
   : el === "gras" ? grasWaarde(p)
   : el === "water" ? waterWaarde(p)
@@ -14244,7 +14236,7 @@ function plekWaarde(p, el, c){
     s += W.vrij;                                               // vrije laan: wij mogen aanvallen
   }
   const sp = P(p).cols[c].spell;
-  if(sp) s += W.spellslot + spellTriggerWaarde(p, sp.card.el) * W.spelltrig;   // ons ritueel gaat opnieuw af
+  if(sp) s += W.spellslot + spellTriggerWaarde(p, sp.card.el) * roosMaal(sp.card) * W.spelltrig;   // ons ritueel gaat opnieuw af
   /* Sta ik achter in de race, dan is dichtzetten meer waard dan een vrije laan — en andersom. */
   if(W.race){
     const r = raceVoordeel(p);
@@ -14365,7 +14357,7 @@ function botChoosePlayV2(p){
   for(const cd of gewoon){
     if(reserveren && EL[cd.el].flash && flashInHand.length === 1) continue;   // deze bewaren we
     for(const c of open){
-      let sc = plekWaarde(p, cd.el, c) + effWaarde(p, cd.el) * W.eff + rnd() * 0.5;
+      let sc = plekWaarde(p, cd.el, c) + effWaarde(p, cd.el) * roosMaal(cd) * W.eff + rnd() * 0.5;
       /* Iets eigens wegduwen kost wat het waard is: een token weinig, een levende vis veel. */
       const onder = P(p).cols[c].cre;
       if(onder && overheenOk(onder) && !opKnoop(onder)) sc -= (onder.card.token ? 1 : 1.5 + Math.min(onder.hp || 0, 8) * 0.6);
@@ -14376,8 +14368,8 @@ function botChoosePlayV2(p){
   if(!W.spelUit) for(const cd of gewoon){
     for(let c=0;c<5;c++){
       if(P(p).cols[c].spell) continue;
-      let sc = W.spellbasis + spellVal0[cd.el] * W.spell + effWaarde(p, cd.el) * 0.7 + (wilSpell ? 4 : 0);
-      sc += spellTriggerWaarde(p, cd.el) * W.spellnu;        // wat levert één trigger nú op?
+      let sc = W.spellbasis + spellVal0[cd.el] * W.spell + effWaarde(p, cd.el) * roosMaal(cd) * 0.7 + (wilSpell ? 4 : 0);
+      sc += spellTriggerWaarde(p, cd.el) * roosMaal(cd) * W.spellnu;        // wat levert één trigger nú op?
       // 🟣 aethers maken sommige rituelen veel sterker
       if(cd.el === "water" && hasAe(p, "ae_watercycle")) sc += W.cyclespell;
       if(cd.el === "vuur"  && hasAe(p, "ae_fire6"))      sc += W.aetherspell;
@@ -14960,7 +14952,7 @@ function botSlotKeuze(p, valid, el){
     else {
       sc = 2.5;
       const sp = P(s.p).cols[s.c].spell;
-      if(sp) sc += W.spellslot + spellTriggerWaarde(s.p, sp.card.el) * W.spelltrig;
+      if(sp) sc += W.spellslot + spellTriggerWaarde(s.p, sp.card.el) * roosMaal(sp.card) * W.spelltrig;
       const tegen = P(opp(s.p)).cols[s.c].cre;
       if(tegen && tegen.ent === 0) sc += atkOf(tegen, opp(s.p)) * W.blok;
       else if(!tegen) sc += W.vrij;
@@ -23171,7 +23163,7 @@ const VELD = {
                     "Gevallen én geraakt: je begint met <b>5</b> levens minder (je houdt er minstens 1)."] } },
 
   "2-6": { regels:["🌧 <b>Om de andere ronde regent het</b>, vanaf ronde 1. Dan doet 🔥 Vuur niets meer, behalve tegen je eigen wezens.",
-                   "Haar 🌿 Gras is allemaal 🌹 Roos: {Volle slag}.",
+                   "Haar 🌿 Gras is allemaal 🌹 Roos: twee keer het 🌿 Gras-effect.",
                    "Ze begint met een 🌿 Gras-ritueel in haar middelste kolom."],
     fase2:["🌹 <b>Bloei.</b> Op nul staat ze weer op, met <b>5</b> levens.",
            "Op al haar ritueelplekken komt een 🌹 Roos te liggen; wat er lag is weg. Jullie vullen allebei aan tot <b>5</b> kaarten.",
@@ -25755,7 +25747,7 @@ function slotVak(){
 const UPG_KORT = {
   steen:"zet eerst een kiezel neer, daarna het gewone steen-effect",
   vuur:"de schade en de aanval raken ook water",
-  gras:"volle slag, en groeit elke beurt",
+  gras:"twee keer het gras-effect: verstrikt twee keer",
   water:"stuurt een eigen wezen terug naar je hand"
 };
 /* ⚒ Eén element laten smeden: 🪨 → ⛰️ Rots, 🔥 → ☄️ Plasma, 🌿 → 🌹 Roos, 💧 → ❄️ IJs. */
