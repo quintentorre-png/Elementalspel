@@ -2022,6 +2022,16 @@ body.pvuitleg #ptbel{display:none !important}
   background:#140d08 center/100% 100% no-repeat; box-shadow:inset 0 0 0 2px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.5);
   image-rendering:pixelated}
 .wkscene.voorbaas .wkitem{z-index:2}
+/* Lagen vóór de winkel (okt 2026): ze schuiven tegen de muis in, dichterbij = meer; wat hangt wiegt. */
+.wklaag{position:absolute; z-index:4; pointer-events:none;
+  transform:translate(calc(var(--wkpx,0) * var(--d,1) * -1%), calc(var(--wkpy,0) * var(--d,1) * -.6%)); transition:transform .35s ease-out}
+.wklaag img{display:block; width:100%; height:auto; image-rendering:pixelated; filter:drop-shadow(0 6px 6px rgba(0,0,0,.45))}
+.wklaag img.zwaai{transform-origin:50% 0; animation:wkzwaai 5.5s ease-in-out infinite; animation-delay:calc(var(--i,0) * -1.3s)}
+.wklaag img.zwaai.zacht{animation-duration:8s; animation-name:wkzwaai2}
+@keyframes wkzwaai{0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)}}
+@keyframes wkzwaai2{0%,100%{transform:translateY(0) rotate(-.4deg)} 50%{transform:translateY(.6%) rotate(.4deg)}}
+.wkvol.bev .wklaag{filter:brightness(.45)}
+@media (prefers-reduced-motion:reduce){ .wklaag{transition:none; transform:none} .wklaag img.zwaai{animation:none} }
 .wkitem{position:absolute; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;
   background:none; border:0; padding:0; cursor:pointer; font:inherit; color:inherit}
 .wkitem img{width:100%; display:block; image-rendering:pixelated; border:2px solid #2a1a0c; border-radius:3px;
@@ -26452,12 +26462,27 @@ const WINKEL_DECOR = {
     /* Knort staat achter de toonbank, in het midden. Zijn onderrand (zijn middel) ligt precies
        op de achterrand van de toonbank: y 815 van 1024. Zijn hoofd blijft onder de prijskaartjes
        van de middelste plank. */
-    baas:{x:50, y:79.6, h:34.5}},   // Knort 1,5× zo groot; de onderrand blijft op de toonbank
+    baas:{x:50, y:79.6, h:34.5},   // Knort 1,5× zo groot; de onderrand blijft op de toonbank
+    /* 🐦 Lagen ervóór (okt 2026): losse dingen van Knort zelf, aan de randen, zodat de winkel
+       diepte krijgt. Elk is een los plaatje met een doorzichtige achtergrond; ontbreekt het,
+       dan is er gewoon niets. l/r/t/b in procenten van de tekening, w de breedte, d hoe sterk
+       hij meebeweegt met de muis (hoe groter, hoe dichterbij), zwaai: hangt en wiegt. */
+    lagen:[
+      {beeld:"art/winkel-knort-slinger.png", l:-2, t:-3, w:104, d:0.8, zwaai:"zacht"},
+      {beeld:"art/winkel-knort-kooi.png", r:5, t:-2, w:12, d:1.6, zwaai:true},
+      {beeld:"art/winkel-knort-schat.png", r:-2, b:0, w:14, d:2.4},
+      {beeld:"art/winkel-knort-spiegel.png", l:-2, b:0, w:10, d:2.4}
+    ]},
   smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
     /* Gemeten op winkel-smidse.png (1536×1024): de houders staan op x 383, 639, 885 en 1130,
        de gleuf zit op y ≈ 570 en de achterrand van het werkblad op y ≈ 581. */
     upg:{steen:{x:24.9,y:56.5}, vuur:{x:41.6,y:56.5}, gras:{x:57.6,y:56.5}, water:{x:73.6,y:56.5}}, w:7.3,
-    baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true}   // de kaarten staan op de werkbank, dus vóór Tang
+    baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true,   // de kaarten staan op de werkbank, dus vóór Tang
+    lagen:[
+      {beeld:"art/winkel-smidse-ketting.png", r:3, t:-4, w:12, d:1.6, zwaai:true},
+      {beeld:"art/winkel-smidse-aambeeld.png", l:-3, b:0, w:21, d:2.4},
+      {beeld:"art/winkel-smidse-ton.png", r:-2, b:0, w:14, d:2.4}
+    ]}
 };
 /* De winkel is altijd de tekening. Is hij nog niet binnen, dan komt hij binnen terwijl je
    er staat (de achtergrond laadt zichzelf); alleen als het bestand echt niet bestaat valt
@@ -26500,7 +26525,29 @@ function winkelScene(kraam){
     binnen += wkItem(hartVak(), d.hart, d.hart.w || d.wPlek, null);
     binnen += wkItem(slotVak(), d.slot, d.slot.w || d.wPlek, null);
   }
-  return `<div class="wkscene${d.voorBaas ? " voorbaas" : ""}" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas) : ""}${binnen}</div>`;
+  return `<div class="wkscene${d.voorBaas ? " voorbaas" : ""}" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas) : ""}${binnen}${winkelLagen(d)}</div>`;
+}
+/* De lagen vóór de winkel: wat ervoor hangt of staat. Ze schuiven iets mee met de muis
+   (--wkpx/--wkpy op :root, zie wkMuis), dichterbij = meer. Klikken gaat er dwars doorheen. */
+function winkelLagen(d){
+  return (d.lagen || []).filter(l => BEELD_KLAAR[l.beeld] !== "fout").map((l, i) => {
+    const pos = [l.l != null ? `left:${l.l}%` : `right:${l.r}%`, l.t != null ? `top:${l.t}%` : `bottom:${l.b}%`, `width:${l.w}%`, `--d:${l.d || 1}`].join(";");
+    const zw = l.zwaai ? ` zwaai${l.zwaai === "zacht" ? " zacht" : ""}` : "";
+    return `<div class="wklaag${l.t != null ? " boven" : ""}" style="${pos};--i:${i}"><img class="${zw.trim()}" src="${l.beeld}" alt="" draggable="false" onerror="this.parentNode.remove()"></div>`;
+  }).join("");
+}
+let WK_MUIS = false;
+function wkMuis(){
+  if(WK_MUIS || typeof document === "undefined") return; WK_MUIS = true;
+  let raf = 0, x = 0, y = 0;
+  document.addEventListener("mousemove", e => {
+    if(!M || M.type !== "winkel") return;
+    x = (e.clientX / innerWidth) * 2 - 1; y = (e.clientY / innerHeight) * 2 - 1;
+    if(raf) return;
+    raf = requestAnimationFrame(() => { raf = 0;
+      document.documentElement.style.setProperty("--wkpx", x.toFixed(3));
+      document.documentElement.style.setProperty("--wkpy", y.toFixed(3)); });
+  }, {passive:true});
 }
 /* De tekening die er voor een stand is, of anders de stand waar hij op terugvalt. */
 function sprBeeldPad(key){
@@ -26554,6 +26601,7 @@ function winkelVolHTML(kop){
   const K = kraamVan();
   const belMob = (WINKEL_DECOR[kraam] || {}).baas && M.zin
     ? `<div class="wkbelmob" style="--wkk:${K.kleur}"><span class="pbnaam">${K.naam}</span>${M.zin}</div>` : "";
+  wkMuis();
   return `<div class="wkvol${b ? " bev" : ""}">${winkelScene(kraam)}
     ${hoek}<div class="wkhint">${hint}</div>${belMob}${bev}</div>`;
 }
@@ -29370,7 +29418,8 @@ function mpBg(id, hz){
   const sl = id + ":" + (hz || "");
   if(MPPT.bg[sl] != null) return MPPT.bg[sl];
   /* 🐦 Knort heeft geen level: hij staat in zijn eigen winkel */
-  if(id === "knort") return MPPT.bg[sl] = `<div class="pthz vul" style="top:0;width:100%;height:100%;opacity:.7;z-index:1"><img src="art/winkel-knort.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
+  if(id === "knort") return MPPT.bg[sl] = `<div class="pthz vul" style="top:0;width:100%;height:100%;opacity:.7;z-index:1"><img src="art/winkel-knort.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`
+    + `<div class="pthz vul ptvast" style="top:0;width:100%;height:100%;opacity:.85;z-index:40"><img src="art/pt-knort.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
   const gezien = new Set();
   const rij = (HORIZON[hzSleutel(id, hz || null)] || []).filter(h => !gezien.has(h.b) && gezien.add(h.b));
   return MPPT.bg[sl] = ptPlaatje(hzSleutel(id, hz || null)) + rij.map(h => {
