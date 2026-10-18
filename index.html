@@ -2023,6 +2023,12 @@ body.pvuitleg #ptbel{display:none !important}
   background:#140d08 center/100% 100% no-repeat; box-shadow:inset 0 0 0 2px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.5);
   image-rendering:pixelated}
 .wkscene.voorbaas .wkitem{z-index:2}
+/* 🫧 De toonbank ligt over de verkoper heen; de koopwaar ligt daar weer bovenop. */
+.wkvoor{position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; image-rendering:pixelated}
+.wkscene.metvoor .wkitem{z-index:3}
+.wkbaas.achter .wkbaasfig{overflow:visible; animation:wkdein 5.5s ease-in-out infinite}
+@keyframes wkdein{0%,100%{transform:translateY(0)} 50%{transform:translateY(-2.2%)}}
+@media (prefers-reduced-motion:reduce){ .wkbaas.achter .wkbaasfig{animation:none} }
 /* Lagen vóór de winkel (okt 2026): ze schuiven tegen de muis in, dichterbij = meer; wat hangt wiegt. */
 .wklaag{position:absolute; z-index:4; pointer-events:none;
   transform:translate(calc(var(--wkpx,0) * var(--d,1) * -1%), calc(var(--wkpy,0) * var(--d,1) * -.6%)); transition:transform .35s ease-out}
@@ -4089,7 +4095,7 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
 
 </script>
 <script id="nbkern">
-/* ⚡ De strakke kern en de nieuwe bot (gebundeld uit motor/strak.js, beleid2.js, zoeker2.js, kenmerk.js, brein.js, draft.js, nbdenk.js). Niet met de hand aanpassen. */
+/* ⚡ De strakke kern en de nieuwe bot (gebundeld uit motor/strak.js, beleid2.js, zoeker2.js, kenmerk.js, brein.js, net3.js, draft.js, nbdenk.js). Niet met de hand aanpassen. */
 /* ---- strak.js ---- */
 (function(){
 /* ================= ⚡ STRAKKE KERN · alle regels van commander =================
@@ -6544,9 +6550,37 @@ function stand(G, p){
   const x = (a.life - b.life) * 1.5 + w * 0.3 + (a.hand.length - b.hand.length) * 0.3;
   return 1 / (1 + Math.exp(-x / 3));
 }
+/* Het voorbeeld-beleid als index in de lijst: wat zouden de vuistregels hier kiezen? */
+function zelfde(G, m, a, b){
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a === 'object' && typeof b === 'object'){
+    if (m === 'main') return a.k === b.k && (a.k !== 'play' || (soort(G, a.id) === soort(G, b.id) && (!a.m || !b.m || a.m === b.m))) && (a.k !== 'atk' || a.c === b.c);
+    return a.c === b.c && a.kind === b.kind && a.p === b.p;
+  }
+  if (typeof a === 'number' && typeof b === 'number' && (m === 'priority' || m === 'choice')) return a === b;
+  return false;
+}
+function voorbeeldVuistregel(rand){
+  return (G, m, d, lijst) => {
+    let a;
+    try { a = BEL.maakBeleid(rand).kies(T.kopie(G), m, d); } catch (e) { return -1; }
+    if (m === 'main' && a && a.k === 'play'){
+      /* de vuistregel zegt niet hoe; neem de wijze die hij in zijn plan had, of anders de eerste */
+      const i = lijst.findIndex(x => x.k === 'play' && soort(G, x.id) === soort(G, a.id) && (x.m === 'cre' || !x.m));
+      if (i >= 0) return i;
+    }
+    return lijst.findIndex(x => zelfde(G, m, x, a));
+  };
+}
 function maakZoeker(opts){
   const o = Object.assign({budget:600, maxZetten:300, seed:1}, opts || {});
   const rand = maakRand(o.seed);
+  /* 🧠 net3 (okt 2026): één netwerk voor de winkans én de zetten. Het geeft dan ook het voorbeeld
+     (wat het netwerk zelf zou kiezen) en mag de zoektocht laten focussen op de kansrijke zetten. */
+  if (o.net && !o.brein) o.brein = o.net;
+  if (o.net && o.net.ronde > 0 && !o.voorbeeld && o.net.topzet >= (o.netVoorbeeldMin == null ? 0.55 : o.netVoorbeeldMin)) o.voorbeeld = (G, m, d, lijst, ctx) => { const pr = o.net.prior(G, m, d, lijst, ctx); let b = 0; for (let j = 1; j < pr.length; j++) if (pr[j] > pr[b]) b = j; return b; };
+  if (o.zeker > 0 && !o.voorbeeld) o.voorbeeld = voorbeeldVuistregel(maakRand((o.seed * 7 + 3) >>> 0));
   return {
     kies(G, m, d, ctx){
       /* Koos hij net "speel X als ritueel", dan is de vraag wezen/ritueel al beantwoord. */
@@ -6563,9 +6597,17 @@ function maakZoeker(opts){
       }
       if (lijst.length === 1){ if (o.actief && m === 'main' && lijst[0].k === 'play') o._iets = true; return lijst[0]; }
       const isMain = m === 'main';
-      const som = new Float64Array(lijst.length), n = new Int32Array(lijst.length);
+      const som = new Float64Array(lijst.length), n = new Int32Array(lijst.length), kw = new Float64Array(lijst.length);
       let actief = lijst.map((_, i) => i);
-      const rondes = Math.max(1, Math.ceil(Math.log2(lijst.length)));
+      /* focussen: zetten die het netwerk vrijwel uitsluit, krijgen geen proefpotjes (wel altijd de beste twee) */
+      let pr = null;
+      if (o.net && o.net.ronde > 0 && (o.snoei > 0 || o.verzamel)) pr = o.net.prior(G, m, d, lijst, ctx);
+      if (pr && o.snoei > 0 && lijst.length > 2){
+        let mx = 0; for (const v of pr) if (v > mx) mx = v;
+        const volg = actief.slice().sort((a, b) => pr[b] - pr[a]);
+        actief = volg.filter((i, k) => k < 2 || pr[i] >= o.snoei * mx).slice(0, o.snoeiMax || 99);
+      }
+      const rondes = Math.max(1, Math.ceil(Math.log2(actief.length)));
       const perRonde = o.budget / rondes;
       /* o.ms: nooit langer nadenken dan zoveel milliseconden (op een trage telefoon dus minder toekomsten) */
       const eind = o.ms ? Date.now() + o.ms : Infinity;
@@ -6575,7 +6617,7 @@ function maakZoeker(opts){
         for (let k = 0; k < per && !op; k++){
           for (const i of actief){
             const v = speelUit(ctx, d.p, lijst[i], isMain, rand, o.maxZetten, o);
-            if (v >= 0){ som[i] += v; n[i]++; }
+            if (v >= 0){ som[i] += v; kw[i] += v * v; n[i]++; }
           }
           if (Date.now() > eind) op = true;
         }
@@ -6584,6 +6626,19 @@ function maakZoeker(opts){
         actief = actief.slice(0, Math.max(1, Math.ceil(actief.length / 2)));
       }
       if (o.uitleg) o.uitleg(m, lijst.map((x, i) => ({x, w:n[i] ? som[i] / n[i] : null, n:n[i]})));
+      /* 🎯 Zekerheid (okt 2026): wijkt de zoektocht af van wat het voorbeeld-beleid zou doen (de
+         vuistregels, of straks het geleerde zet-brein), dan alleen als hij dat echt beter vindt: meer dan
+         o.zeker keer de meetonzekerheid. Anders beslist ruis, en dan doet hij rare dingen (zichzelf raken). */
+      if (o.zeker > 0 && actief.length && (m !== 'main' || o.zekerMain)){
+        const vb = o.voorbeeld ? o.voorbeeld(G, m, d, lijst, ctx) : -1;
+        const b = actief[0];
+        if (vb >= 0 && vb !== b && n[vb] > 1 && n[b] > 1){
+          const mb = som[b] / n[b], mv = som[vb] / n[vb];
+          const vB = Math.max(1e-4, kw[b] / n[b] - mb * mb) / n[b], vV = Math.max(1e-4, kw[vb] / n[vb] - mv * mv) / n[vb];
+          if (mb - mv < o.zeker * Math.sqrt(vB + vV)) actief[0] = vb;
+        } else if (vb >= 0 && vb !== b && n[vb] <= 1) actief[0] = vb;   // te weinig gemeten: dan het voorbeeld
+      }
+      if (o.verzamel) o.verzamel(G, m, d, lijst, ctx, som, n, actief[0], pr);
       if (o.actief && m === 'main' && lijst[actief[0]].k === 'play') o._iets = true;
       /* Liever een ritueel leggen dan straks een kaart weggooien (getest: 63% tegen de bot die weggooit). */
       if (o.ritueelVoorWeg !== false && m === 'main' && lijst[actief[0]].k === 'fase' && G.pl[d.p].hand.length >= (o.ritueelHand || 7)){
@@ -6615,7 +6670,7 @@ function speelPotje(G, bots, max){
   }
   return G;
 }
-const ZOEKER2 = {maakZoeker, stand, speelPotje, opties, doe, maakRand, gok};
+const ZOEKER2 = {maakZoeker, stand, speelPotje, opties, doe, maakRand, gok, voorbeeldVuistregel, zelfde};
 if (typeof module !== 'undefined') module.exports = ZOEKER2; else globalThis.ZOEKER2 = ZOEKER2;
 
 })();
@@ -6771,6 +6826,115 @@ const BREIN = {laadBrein};
 if (typeof module !== 'undefined') module.exports = BREIN; else globalThis.BREIN = BREIN;
 
 })();
+/* ---- net3.js ---- */
+(function(){
+/* ================= 🧠 NET3 · één netwerk met twee uitgangen (okt 2026) =================
+   Winkans van een stand (zoals brein.js) én een score per mogelijke zet (het "zet-brein").
+   Zo leert de bot niet alleen hoe het ervoor staat, maar ook wat je in een stand doet.
+   - stam:   kenmerken (KM.N) → H1 → H2 (ReLU), dezelfde vorm als brein2.json (128 → 64)
+   - waarde: H2 → 1 (sigmoïde)
+   - zet:    per optie g = ReLU(Wa·optie + Ua·stam + ba) (HA), score = u·g, softmax over de opties
+   net3.json = {versie:'net3', N, NA, H1, H2, HA, d:{W1, b1, W2, b2, wv, bv, Wa, Ua, ba, u}}
+   W1 staat rij per tussen-eenheid (H1 × N), net als in brein.json. */
+"use strict";
+const N3_T = (typeof module !== 'undefined') ? require('./strak.js') : globalThis.STRAK;
+const N3_KM = (typeof module !== 'undefined') ? require('./kenmerk.js') : globalThis.KENMERK;
+const NA = 91;
+const N3_DELEN = ['W1', 'b1', 'W2', 'b2', 'wv', 'bv', 'Wa', 'Ua', 'ba', 'u'];
+
+/* ---------- een optie als kleine rij getallen (91 vakjes; gelijk aan het AlphaZero-prototype) ---------- */
+const n3sterk = (a, b) => a >= 0 && a <= 3 && b >= 0 && b <= 3 && N3_T.STERK[a] === b;
+function optieKenmerken(G, m, d, x, laatste){
+  const f = new Map(), zet = (i, v) => f.set(i, v === undefined ? 1 : v);
+  const p = d.p, q = 1 - p;
+  const kaart = id => { if (id == null || id < 0 || id >= G.kEl.length) return; zet(19 + Math.min(7, Math.max(0, G.kEl[id]))); zet(27 + Math.min(15, G.kVar[id])); zet(43 + Math.min(31, G.kLk[id])); };
+  const kolom = (c, mijnEl) => { if (c == null || c < 0 || c > 4) return; zet(75 + c); const tg = G.pl[q].cre[c];
+    if (tg){ zet(88); if (mijnEl != null){ if (n3sterk(mijnEl, G.kEl[tg])) zet(89); if (n3sterk(G.kEl[tg], mijnEl)) zet(90); } } };
+  if (m === 'main'){
+    if (x.k === 'play'){ zet(x.m === 'cre' ? 0 : x.m === 'spell' ? 1 : x.m === 'fuse' ? 2 : 3); kaart(x.id); }
+    else if (x.k === 'atk'){ zet(4); const id = G.pl[p].cre[x.c]; zet(87, N3_T.kracht(G, p, x.c) / 5); kolom(x.c, id ? G.kEl[id] : null); }
+    else zet(5);
+  } else if (m === 'pickmode'){ zet(x === 'cre' ? 6 : x === 'spell' ? 7 : x === 'fuse' ? 8 : 9); kaart(d.cardId); }
+  else if (m === 'slot'){
+    if (x && typeof x === 'object'){ zet(x.kind === 'cre' ? 10 : x.kind === 'spell' ? 11 : 12); kaart(laatste); kolom(x.c, laatste >= 0 ? G.kEl[laatste] : null); }
+    else zet(12);
+  } else if (m === 'priority'){ if (x === 'pass') zet(13); else { zet(14); kaart(x); } }
+  else if (m === 'opt'){ zet(15); const i = d.opts.indexOf(x); if (i >= 0 && i < 4) zet(83 + i); }
+  else if (m === 'choice'){
+    if (x == null) zet(18);
+    else if (d.kind === 'hand'){ zet(16); kaart(x); }
+    else { zet(17); kaart(x); const w = N3_T.vindWezen(G, x); if (w >= 0){ const wie = (w & 15) >> 3, c = w & 7; zet(wie === p ? 80 : 81); zet(82, G.pl[wie].hp[c] / 5); if (c < 5) zet(75 + c); } }
+  }
+  return [Int32Array.from(f.keys()), Float32Array.from(f.values())];
+}
+/* Welke kaart wordt er net gespeeld (voor een plek-keuze)? */
+function laatsteKaart(ctx){
+  let l = -1;
+  if (ctx && ctx.actie && ctx.actie.k === 'play') l = ctx.actie.id;
+  if (ctx && ctx.pre) for (const x of ctx.pre) if (typeof x.a === 'number') l = x.a;
+  return l;
+}
+function staatKenmerken(G, p, x){
+  x = N3_KM.kenmerken(G, p, x);
+  let n = 0; for (let i = 0; i < x.length; i++) if (x[i] !== 0) n++;
+  const xi = new Int32Array(n), xv = new Float32Array(n); n = 0;
+  for (let i = 0; i < x.length; i++) if (x[i] !== 0){ xi[n] = i; xv[n++] = x[i]; }
+  return [xi, xv];
+}
+
+/* ---------- het netwerk ---------- */
+function laadNet3(j){
+  if (typeof j === 'string') j = JSON.parse(j);
+  const N = N3_KM.N, H1 = j.H1, H2 = j.H2, HA = j.HA, n = {};
+  for (const k of N3_DELEN) n[k] = Float32Array.from(j.d[k]);
+  if (j.N < N){   // ouder net: nieuwe kenmerken achteraan krijgen gewicht 0
+    const W = new Float32Array(H1 * N);
+    for (let u = 0; u < H1; u++) W.set(n.W1.subarray(u * j.N, (u + 1) * j.N), u * N);
+    n.W1 = W;
+  }
+  const xbuf = new Float32Array(N), a1 = new Float32Array(H1), h1 = new Float32Array(H1), h2 = new Float32Array(H2), c = new Float32Array(HA);
+  function stam(G, p){
+    const [xi, xv] = staatKenmerken(G, p, xbuf);
+    for (let u = 0; u < H1; u++){ let s = n.b1[u]; const r = u * N; for (let t = 0; t < xi.length; t++) s += n.W1[r + xi[t]] * xv[t]; a1[u] = s; h1[u] = s > 0 ? s : 0; }
+    for (let k = 0; k < H2; k++){ let s = n.b2[k]; const r = k * H1; for (let u = 0; u < H1; u++) if (h1[u]) s += n.W2[r + u] * h1[u]; h2[k] = s > 0 ? s : 0; }
+  }
+  function waarde(G, p){
+    stam(G, p);
+    let o = n.bv[0]; for (let k = 0; k < H2; k++) o += n.wv[k] * h2[k];
+    return 1 / (1 + Math.exp(-o));
+  }
+  /* kansen per optie (lijst van zoeker2.opties) */
+  function prior(G, m, d, lijst, ctx){
+    stam(G, d.p);
+    for (let t = 0; t < HA; t++){ let s = n.ba[t]; const r = t * H2; for (let k = 0; k < H2; k++) if (h2[k]) s += n.Ua[r + k] * h2[k]; c[t] = s; }
+    const laatste = laatsteKaart(ctx), l = new Float64Array(lijst.length);
+    let mx = -Infinity;
+    for (let j = 0; j < lijst.length; j++){
+      const [fi, fv] = optieKenmerken(G, m, d, lijst[j], laatste);
+      let lj = 0;
+      for (let t = 0; t < HA; t++){ let x = c[t]; const r = t * NA; for (let q = 0; q < fi.length; q++) x += n.Wa[r + fi[q]] * fv[q]; if (x > 0) lj += n.u[t] * x; }
+      l[j] = lj; if (lj > mx) mx = lj;
+    }
+    let som = 0; for (let j = 0; j < l.length; j++){ l[j] = Math.exp(l[j] - mx); som += l[j]; }
+    for (let j = 0; j < l.length; j++) l[j] /= som;
+    return l;
+  }
+  return {waarde, prior, versie:j.versie, ronde:j.ronde, topzet:j.topzet || 0, H1, H2, HA};
+}
+/* Een net3 dat begint met de kennis van brein2.json (de stam en de waarde), met een zet-deel dat nog
+   niets weet (alle opties even waarschijnlijk). */
+function net3VanBrein(b, HA, seed){
+  HA = HA || 64;
+  const L = b.lagen, H1 = L[0].uit, H2 = L[1].uit;
+  let s = (seed || 1) >>> 0; const r = () => { s = (s * 1103515245 + 12345) >>> 0; return s / 4294967296; };
+  const rnd = (k, sc) => Array.from({length:k}, () => (r() * 2 - 1) * sc);
+  return {versie:'net3', N:b.n, NA, H1, H2, HA, ronde:0, d:{W1:L[0].w, b1:L[0].b, W2:L[1].w, b2:L[1].b, wv:L[2].w, bv:L[2].b,
+    Wa:rnd(HA * NA, 0.1), Ua:rnd(HA * H2, 0.05), ba:new Array(HA).fill(0), u:new Array(HA).fill(0)}};
+}
+const NET3 = {laadNet3, net3VanBrein, optieKenmerken, staatKenmerken, laatsteKaart, NA};
+if (typeof module !== 'undefined') module.exports = NET3; else globalThis.NET3 = NET3;
+
+})();
 /* ---- draft.js ---- */
 (function(){
 /* ================= 🃏 HET DRAFTBREIN · welke draftkeuzes winnen matches =================
@@ -6909,12 +7073,26 @@ if (typeof module !== 'undefined') module.exports = DRAFT; else globalThis.DRAFT
 const NB_T = (typeof module !== 'undefined') ? require('./strak.js') : globalThis.STRAK;
 const NB_Z = (typeof module !== 'undefined') ? require('./zoeker2.js') : globalThis.ZOEKER2;
 const NB_BR = (typeof module !== 'undefined') ? require('./brein.js') : globalThis.BREIN;
-let NB_BREIN = null;
+const NB_N3 = (typeof module !== 'undefined') ? require('./net3.js') : globalThis.NET3;
+let NB_BREIN = null, NB_NET = null;
 function nbZetBrein(json){ try { NB_BREIN = json ? NB_BR.laadBrein(json) : null; return !!NB_BREIN; } catch (e) { NB_BREIN = null; return false; } }
+/* 🧠 net3 (okt 2026): het netwerk uit de nieuwe Colab-training (winkans én zetten). Is het er, dan gaat het
+   voor brein2: de bot zoekt dan gerichter en laat zich niet door ruis leiden. */
+function nbZetNet(json){ try { NB_NET = json ? NB_N3.laadNet3(json) : null; return !!NB_NET; } catch (e) { NB_NET = null; return false; } }
+/* Dezelfde instellingen als in Colab (exit-werker.js maakBot), zodat de bot in het spel speelt zoals hij leerde. */
+function nbZoekOpties(j){
+  const o = {budget:j.budget || 300, ms:j.ms || 0, seed:j.seed || 1, diepte:2, meng:0.5};
+  if (NB_NET){
+    o.net = NB_NET; o.zeker = 1;
+    if (NB_NET.ronde > 0 && NB_NET.topzet >= 0.55) o.zekerMain = true;
+    if (NB_NET.ronde > 0 && NB_NET.topzet >= 0.5) o.snoei = 0.03;
+  } else { o.brein = NB_BREIN; o.zeker = j.zeker == null ? 1 : j.zeker; }   // zekerheidsregel: 57,5% in 360 potjes tegen zonder
+  return o;
+}
 function nbDenk(j){
   const ctx = {G0:j.G0, actie:j.actie, pre:j.pre || [], bekend:new Set(j.bekend || []),
     niet:j.niet ? {beurt:j.niet.beurt, ids:new Set(j.niet.ids)} : null};
-  const zk = NB_Z.maakZoeker({budget:j.budget || 300, ms:j.ms || 0, seed:j.seed || 1, brein:NB_BREIN, diepte:2, meng:0.5});
+  const zk = NB_Z.maakZoeker(nbZoekOpties(j));
   try {
     if (j.mode === 'main'){
       ctx.pre = []; ctx.actie = null;
@@ -6933,13 +7111,14 @@ function nbDenk(j){
     return {a:zk.kies(G, VR.m, VR.d, ctx)};
   } catch (e) { return {mis:'fout: ' + ((e && e.message) || e)}; }
 }
-const NBDENK = {nbDenk, nbZetBrein};
+const NBDENK = {nbDenk, nbZetBrein, nbZetNet};
 if (typeof module !== 'undefined') module.exports = NBDENK; else globalThis.NBDENK = NBDENK;
 /* In een Worker: luisteren naar opdrachten van het spel. */
 if (typeof WorkerGlobalScope !== 'undefined' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope){
   self.onmessage = e => {
     const m = e.data;
     if (m && m.brein !== undefined){ self.postMessage({brein:nbZetBrein(m.brein)}); return; }
+    if (m && m.net !== undefined){ self.postMessage({net:nbZetNet(m.net)}); return; }
     self.postMessage({id:m.id, r:nbDenk(m)});
   };
 }
@@ -13641,7 +13820,7 @@ async function botMove(oud){
    (NB.mis telt hoe vaak). Het nadenken gebeurt in een Worker, zodat het scherm niet hapert. */
 /* Verhaallevels die de kern precies volgt (schaduwtest: 0 afwijkingen). 1-1 is de tutorial: daar speelt Rocky zijn script. */
 const NB = {aan:true, stoel:[true, true], verhaal:new Set(["1-2", "1-3", "1-4", "1-5", "2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "4-1", "4-2", "4-3", "4-4", "4-5", "5-1", "5-2", "5-3", "5-4", "5-5"]), verhaalTest:false, schaduw:false, getoetst:0, afwijk:0, afwijkVb:"", budget:2500, ms:900, msReactie:450, G0:null, actie:null, pre:[], niet:null, mis:0, zetten:0,
-  worker:null, job:0, wacht:null, breinJson:null, breinOk:false, laatsteMis:""};
+  worker:null, job:0, wacht:null, breinJson:null, breinOk:false, netJson:null, netOk:false, laatsteMis:""};
 /* De regels van het verhaallevel (zonder teksten), voor de kern. */
 function nbLv(){
   if(!S) return null;
@@ -13728,6 +13907,7 @@ function nbWorker(){
     w.onmessage = e => { const d = e.data; if(!d || d.id == null) return; const k = NB.wacht; if(k && k.id === d.id){ NB.wacht = null; k.cb(d.r); } };
     w.onerror = () => { NB.worker = false; const k = NB.wacht; NB.wacht = null; if(k) k.cb({mis:"worker viel om"}); };
     if(NB.breinJson) w.postMessage({brein:NB.breinJson});
+    if(NB.netJson) w.postMessage({net:NB.netJson});
     NB.worker = w;
   }catch(e){ NB.worker = false; }
   return NB.worker || null;
@@ -13746,6 +13926,12 @@ function nbBreinLaad(){
       if(!t || typeof NBDENK === "undefined") return;
       NB.breinOk = NBDENK.nbZetBrein(t);           // past hij niet bij deze kern, dan speelt de bot zonder brein
       if(NB.breinOk){ NB.breinJson = t; if(NB.worker) NB.worker.postMessage({brein:t}); }
+    }).catch(() => {});
+    /* 🧠 net3.json uit de nieuwe Colab-training (okt 2026): staat hij naast het spel, dan gebruikt de bot die */
+    fetch("net3.json", {cache:"no-cache"}).then(r => r.ok ? r.text() : null).then(t => {
+      if(!t || typeof NBDENK === "undefined" || !NBDENK.nbZetNet) return;
+      NB.netOk = NBDENK.nbZetNet(t);
+      if(NB.netOk){ NB.netJson = t; if(NB.worker) NB.worker.postMessage({net:t}); }
     }).catch(() => {});
     /* 🃏 het draftbrein uit Colab (commander): kiest aether, lichtkaart, opwaardering en bans */
     fetch("draftbrein.json", {cache:"no-cache"}).then(r => r.ok ? r.text() : null).then(t => {
@@ -26469,26 +26655,16 @@ const WINKEL_DECOR = {
        op de achterrand van de toonbank: y 815 van 1024. Zijn hoofd blijft onder de prijskaartjes
        van de middelste plank. */
     baas:{x:50, y:79.6, h:34.5},   // Knort 1,5× zo groot; de onderrand blijft op de toonbank
-    /* 🐦 Lagen ervóór (okt 2026): losse dingen van Knort zelf, aan de randen, zodat de winkel
-       diepte krijgt. Elk is een los plaatje met een doorzichtige achtergrond; ontbreekt het,
-       dan is er gewoon niets. l/r/t/b in procenten van de tekening, w de breedte, d hoe sterk
-       hij meebeweegt met de muis (hoe groter, hoe dichterbij), zwaai: hangt en wiegt. */
-    lagen:[
-      {beeld:"art/winkel-knort-slinger.png", l:-2, t:-3, w:104, d:0.8, zwaai:"zacht"},
-      {beeld:"art/winkel-knort-kooi.png", r:5, t:-2, w:12, d:1.6, zwaai:true},
-      {beeld:"art/winkel-knort-schat.png", r:-2, b:0, w:14, d:2.4},
-      {beeld:"art/winkel-knort-spiegel.png", l:-2, b:0, w:10, d:2.4}
-    ]},
+    lagen:[],   /* okt 2026: losse dingen ervóór werkten niet; de diepte zit nu in de achtergrond zelf */
+    /* 🫧 De toonbank als eigen laag (okt 2026): dezelfde pixels als de tekening, vanaf de achterrand van
+       de toonbank (y 815 van 1024) naar beneden. Knort staat erachter en deint, zonder te zweven. */
+    voor:"art/winkel-knort-voor.png"},
   smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
     /* Gemeten op winkel-smidse.png (1536×1024): de houders staan op x 383, 639, 885 en 1130,
        de gleuf zit op y ≈ 570 en de achterrand van het werkblad op y ≈ 581. */
     upg:{steen:{x:24.9,y:56.5}, vuur:{x:41.6,y:56.5}, gras:{x:57.6,y:56.5}, water:{x:73.6,y:56.5}}, w:7.3,
     baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true,   // de kaarten staan op de werkbank, dus vóór Tang
-    lagen:[
-      {beeld:"art/winkel-smidse-ketting.png", r:3, t:-4, w:12, d:1.6, zwaai:true},
-      {beeld:"art/winkel-smidse-aambeeld.png", l:-3, b:0, w:21, d:2.4},
-      {beeld:"art/winkel-smidse-ton.png", r:-2, b:0, w:14, d:2.4}
-    ]}
+    lagen:[], voor:"art/winkel-smidse-voor.png"}   // de werkbank vanaf y 586: Tang staat erachter
 };
 /* De winkel is altijd de tekening. Is hij nog niet binnen, dan komt hij binnen terwijl je
    er staat (de achtergrond laadt zichzelf); alleen als het bestand echt niet bestaat valt
@@ -26531,7 +26707,10 @@ function winkelScene(kraam){
     binnen += wkItem(hartVak(), d.hart, d.hart.w || d.wPlek, null);
     binnen += wkItem(slotVak(), d.slot, d.slot.w || d.wPlek, null);
   }
-  return `<div class="wkscene${d.voorBaas ? " voorbaas" : ""}" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas) : ""}${binnen}${winkelLagen(d)}</div>`;
+  const voor = d.voor && BEELD_KLAAR[d.voor] !== "fout" && BEELD_KLAAR[d.beeld] !== "fout";
+  return `<div class="wkscene${d.voorBaas ? " voorbaas" : ""}${voor ? " metvoor" : ""}" style="--wkr:${d.ratio};background-image:url('${d.beeld}')">${d.baas ? winkelBaas(d.baas, voor) : ""}`
+    + (voor ? `<img class="wkvoor" src="${d.voor}" alt="" draggable="false" onerror="this.closest('.wkscene').classList.remove('metvoor');this.remove()">` : "")
+    + `${binnen}${winkelLagen(d)}</div>`;
 }
 /* De lagen vóór de winkel: wat ervoor hangt of staat. Ze schuiven iets mee met de muis
    (--wkpx/--wkpy op :root, zie wkMuis), dichterbij = meer. Klikken gaat er dwars doorheen. */
@@ -26568,7 +26747,7 @@ function sprBeeldPad(key){
    heeft een andere maat en komt er dan gewoon helemaal op. */
 const WINKEL_HEEL = {"1189x1323":0.55};
 /* De verkoper zelf, in de tekening: achter de toonbank, met zijn tekstballon ernaast. */
-function winkelBaas(pos){
+function winkelBaas(pos, achter){
   const K = kraamVan();
   let key = (M.spr || K.spr).replace(/_taunt$/, "");
   let pad = sprBeeldPad(key) || sprBeeldPad(K.spr);
@@ -26580,7 +26759,10 @@ function winkelBaas(pos){
     fig = `<div class="wkbaasfig"><img class="wkbaasimg" src="${pad}" alt="" draggable="false" style="height:${(100 / snij).toFixed(2)}%${ONDER_LEEG[pad] && snij === 1 ? `;--onder:${ONDER_LEEG[pad].f}` : ""}"${snij === 1 ? ` onload="onderMeet(this)"` : ""}></div>`;
   } else fig = `<span class="wkbaaspix">${spriteSVG(K.spr)}</span>`;
   const bel = M.zin ? `<div class="wkbel" style="--wkk:${K.kleur}"><span class="pbnaam">${K.naam}</span>${M.zin}</div>` : "";
-  return `<div class="wkbaas" style="left:${pos.x}%;bottom:${100 - pos.y}%;height:${pos.h}%;aspect-ratio:${asp.toFixed(3)}">${fig}${bel}</div>`;
+  /* Met de toonbank als eigen laag staat hij er een stukje achter: zijn onderkant zakt 4% onder de
+     rand, de toonbank dekt dat af, en dan kan hij deinen zonder dat je zijn middel ziet. */
+  const zak = achter ? 4 : 0;
+  return `<div class="wkbaas${achter ? " achter" : ""}" style="left:${pos.x}%;bottom:${100 - pos.y - zak}%;height:${pos.h + zak}%;aspect-ratio:${(asp * pos.h / (pos.h + zak)).toFixed(3)}">${fig}${bel}</div>`;
 }
 /* Met een tekening is de winkel het hele scherm: de tekening vult het beeld, de kop en de
    uitleg liggen er los overheen, en een koop bevestig je in een kaartje in het midden. */
