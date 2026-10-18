@@ -2238,6 +2238,13 @@ body.pvuitleg #ptbel{display:none !important}
 @media (max-width:900px), (pointer:coarse){
   .praatscherm.reus{bottom:10px}
   .praatscherm.reus .praatsprite .sprbeeld{height:78vh} }
+/* Vullen (de Naad, de Oceaan): het plaatje ligt over het hele scherm, de tekstballon ervoor. */
+.praatscherm.reus.vul .praatsprite{inset:0; left:0; top:0; transform:none; width:100vw !important; height:100vh;
+  filter:none; overflow:hidden; display:block}
+.praatscherm.reus.vul .praatsprite .sprwrap{width:100% !important; height:100%; display:block; animation:none}
+.praatscherm.reus.vul .praatsprite .sprbeeld,
+.praatscherm.reus.vul .praatsprite img{width:100vw !important; height:100vh !important; max-width:none; max-height:none;
+  object-fit:cover; object-position:center 40%; transform:none !important}
 /* De sprite zakt met zijn voeten achter de bovenrand van de tekstballon. Het deinen gaat
    alleen naar benéden, zodat hij nooit los van die rand komt te zweven. */
 .praatsprite{width:min(190px,38vw); image-rendering:pixelated; filter:drop-shadow(6px 6px 0 rgba(0,0,0,.6));
@@ -2884,12 +2891,19 @@ body.pvuitleg #ptbel{display:none !important}
 /* Valt de regen in het vergezicht, dan geen strepen meer over het hele scherm erbovenop. */
 #horizon .hz img{width:100%; height:auto; display:block}
 /* 🖼 Eén plaatje per level: vult het hele vlak, het focuspunt blijft in beeld. */
-#horizon .hz.hzbg{left:0; top:0; width:100%; height:100%; transform:none; animation:none; --ho:1; filter:none}
+/* Het plaatje is iets breder dan het vlak (3% overhang aan elke kant) en deint heel traag naar links
+   en rechts, zoals de oude lagen. De uitslag (2%) blijft binnen de overhang, dus er komt nooit een rand
+   in beeld. 24 s per haal; de negatieve vertraging zet hem meteen midden in de beweging. */
+#horizon .hz.hzbg{left:-3%; top:0; width:106%; height:100%; transform:none; --ho:1; filter:none;
+  animation:hzbgdein 24s ease-in-out -12s infinite alternate}
+@keyframes hzbgdein{
+  from{transform:translate3d(-2%,0,0)}
+  to  {transform:translate3d(2%,0,0)}}
 #horizon .hz.hzbg img{width:100%; height:100%; object-fit:cover}
 @keyframes hzsway{
   from{transform:translate3d(calc(-50% - var(--hsw,6px)),0,0)}
   to  {transform:translate3d(calc(-50% + var(--hsw,6px)),0,0)}}
-@media (prefers-reduced-motion:reduce){ #horizon .hz{animation:none} }
+@media (prefers-reduced-motion:reduce){ #horizon .hz, #horizon .hz.hzbg{animation:none} }
 @media (max-width:900px), (pointer:coarse){ #horizon{height:56vh} }
 /* Ruimte-modus (nu alleen 3-1): het veld blijft gewoon zo groot als altijd; het vergezicht
    is geen strook bovenin meer maar een volledige achtergrond die van boven tot onder achter
@@ -3308,8 +3322,10 @@ body:not(.geladen) #app{visibility:hidden}
   display:flex; justify-content:center; align-items:flex-end}
 #portret .ptfig .sprwrap{position:relative; height:100%; width:auto; --sprgroei:1;
   animation:ptdein 7s ease-in-out infinite}
-/* Hij deint zachtjes op en neer, zoals op de kaart en in de praatschermen. */
-@keyframes ptdein{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
+/* Hij deint zachtjes op en neer, zoals op de kaart en in de praatschermen. Het hoogste punt van de
+   deining is precies de onderrand van het venster: hij zakt eronder weg en komt er nooit boven, dus
+   je ziet nooit de onderkant van de tekening (het middel). */
+@keyframes ptdein{0%,100%{transform:translateY(6px)} 50%{transform:translateY(0)}}
 #portret .ptfig .sprwrap .sprbeeld{height:100%; width:auto; max-width:none;
   transform:translateY(calc(var(--onder,0) * 100%)) scale(var(--ptmaat,1)); transform-origin:50% var(--ptoorsprong,100%)}
 #portret .ptfig svg{height:100%; width:auto}
@@ -3322,11 +3338,12 @@ body:not(.geladen) #app{visibility:hidden}
 #portret.pt-geraakt .ptfig{animation:ptschud .45s steps(6) 1}
 #portret.pt-geraakt::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
   background:rgba(213,80,60,.35); animation:ptflits .6s steps(4) 1 forwards}
-#portret.pt-raak .ptfig{animation:ptsprong .5s steps(5) 1}
+#portret.pt-raak .ptfig{animation:ptsprong .5s steps(5) 1; transform-origin:50% 100%}
 @keyframes ptschud{0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(6px)}
   60%{transform:translateX(-4px)} 80%{transform:translateX(3px)}}
 @keyframes ptflits{0%{opacity:1} 100%{opacity:0}}
-@keyframes ptsprong{0%,100%{transform:translateY(0)} 40%{transform:translateY(-10px) scale(1.04)} 70%{transform:translateY(-3px)}}
+/* Een sprongetje zonder los te komen: hij groeit even vanaf de onderrand, zodat zijn middel onder de rand blijft. */
+@keyframes ptsprong{0%,100%{transform:none} 40%{transform:scale(1.07)} 70%{transform:scale(1.02)}}
 #portret.pt-stuk .ptfig{filter:grayscale(.6) brightness(.8)}
 /* De tekstballon hoort niet in het venster: hij hangt erboven en valt er half overheen,
    net als de oude ballon linksonder. Het pijltje wijst omlaag, naar wie er praat. */
@@ -3650,18 +3667,18 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
 .cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
 .cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:var(--vdim); text-shadow:1px 1px 0 #0b0d22}
 .cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
-/* De cirkel ligt op een eigen vierkant vlak in de kleur van het gevecht. Daarop een patroon
-   (art/cirkel-achter.png): een doorzichtige png met alleen witte lijnen. Het spel kleurt die
-   lijnen zelf, een paar tinten lichter dan het vlak, dus per level ziet het er anders uit.
-   Zonder tekening blijft alleen het rustige vlak over. */
+/* De cirkel ligt op een stenen plaat (art/cirkel-achter.png: een gevulde plaat in grijstinten).
+   Het spel kleurt die plaat zelf in de kleur van het gevecht: het grijs wordt over de kleur gelegd
+   (overlay), dus de stenen, de groef en de lijst blijven zichtbaar, alleen in de tint van het level.
+   Ontbreekt het plaatje, dan blijft alleen het effen vlak in die kleur over. */
 .cstrip.ckring{padding:6%; width:100%; max-width:min(100%, 38dvh); aspect-ratio:1/1; align-self:center; box-sizing:border-box;
   display:grid; place-items:center; border:3px solid var(--ink2,#0b0d12); border-radius:6px; position:relative; isolation:isolate;
-  background:linear-gradient(170deg, var(--rk2,#2a2338), color-mix(in srgb, var(--rk2,#2a2338) 70%, #000));
-  background-color:var(--rk2,#2a2338);
+  background:url("art/cirkel-achter.png") center/cover no-repeat, var(--rk2,#2a2338);
+  background-blend-mode:overlay;
   box-shadow:3px 3px 0 0 rgba(0,0,0,.45); image-rendering:pixelated}
+/* een zachte schaduw naar de randen, zodat de cirkel in het midden licht vangt */
 .cstrip.ckring::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:3px;
-  background:color-mix(in srgb, var(--rk2,#2a2338) 45%, #fff); opacity:.6;
-  -webkit-mask:url("art/cirkel-achter.png") center/cover no-repeat; mask:url("art/cirkel-achter.png") center/cover no-repeat}
+  background:radial-gradient(circle at 50% 48%, rgba(255,255,255,.07) 0 38%, rgba(0,0,0,.28) 78%)}
 .cstrip.ckring .tbeeld.cirkel{width:100%; height:100%; aspect-ratio:auto; display:block; margin:0 auto; max-width:100%}
 .cstrip.ckring .tbeeld.cirkel img, .cstrip.ckring .tbeeld.cirkel svg{width:100%; height:100%; object-fit:contain; display:block}
 .cstrip.ckring:hover .tbeeld{filter:brightness(1.15)}
@@ -3911,7 +3928,7 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
 .mppt.pt-geraakt .ptfig{animation:ptschud .45s steps(6) 1}
 .mppt.pt-geraakt::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
   background:rgba(213,80,60,.35); animation:ptflits .6s steps(4) 1 forwards}
-.mppt.pt-raak .ptfig{animation:ptsprong .5s steps(5) 1}
+.mppt.pt-raak .ptfig{animation:ptsprong .5s steps(5) 1; transform-origin:50% 100%}
 /* Net als in het verhaal: de ballon hangt half boven het portret, met een pijltje naar wie
    er praat. De rand heeft de kleur van het level van dat personage. */
 .mpbel{position:absolute; left:6px; right:6px; bottom:calc(100% - 64px); z-index:8; pointer-events:none;
@@ -7148,11 +7165,11 @@ const AETHERS = {
   /* 🟣 Oerkracht zoals De Eerste hem heeft: je kiest het element zelf. Niet meer te koop;
      wie hem vroeger kocht, houdt hem. */
   ae_hp3:    {el:null, name:"Oerkracht", kind:"passief", verhaal:true},
-  /* 🟣 De vier stukken van de Oerkracht. Elke baas laat die van zijn element achter. */
-  ae_oer_vuur: {el:"vuur",  name:"Oervuur",  kind:"passief"},
-  ae_oer_water:{el:"water", name:"Oerwater", kind:"passief"},
-  ae_oer_gras: {el:"gras",  name:"Oergras",  kind:"passief"},
-  ae_oer_steen:{el:"steen", name:"Oersteen", kind:"passief"},
+  /* 🟣 De vier stukken van de Oerkracht. Okt 2026: alleen nog van de bazen zelf, niet meer voor de speler. */
+  ae_oer_vuur: {el:"vuur",  name:"Oervuur",  kind:"passief", verhaal:true, vijand:true},
+  ae_oer_water:{el:"water", name:"Oerwater", kind:"passief", verhaal:true, vijand:true},
+  ae_oer_gras: {el:"gras",  name:"Oergras",  kind:"passief", verhaal:true, vijand:true},
+  ae_oer_steen:{el:"steen", name:"Oersteen", kind:"passief", verhaal:true, vijand:true},
   ae_graf:   {el:null, name:"Eeuwige Terugkeer", kind:"passief"},
   fu_water:  {el:"water", name:"Springvloed", kind:"fusie", fuse:{speed:"flash"}},
   fu_fire:   {el:"vuur", name:"Onweer", kind:"fusie", fuse:{speed:"flash"}},
@@ -8919,6 +8936,12 @@ SET.slots.forEach(x => { if(!x) return;
   if(Array.isArray(x.aeKeus)) x.aeKeus = om(x.aeKeus);
   if(x.koop && Array.isArray(x.koop.ae)) x.koop.ae = om(x.koop.ae);
   if(x.extra && typeof x.extra === "object") Object.keys(x.extra).forEach(id => { if(Array.isArray(x.extra[id])) x.extra[id] = om(x.extra[id]); }); });
+/* 🟣 De vier Oerkrachten zijn alleen nog van de bazen (okt 2026): uit wat je had en wat je gekozen had. */
+SET.slots.forEach(x => { if(!x) return;
+  const weg = l => l.filter(k => !/^ae_oer_/.test(k));
+  if(Array.isArray(x.aethers)) x.aethers = weg(x.aethers);
+  if(Array.isArray(x.aeKeus)) x.aeKeus = weg(x.aeKeus);
+  if(x.extra && typeof x.extra === "object") Object.keys(x.extra).forEach(id => { if(Array.isArray(x.extra[id])) x.extra[id] = weg(x.extra[id]); }); });
 SET.story = SET.slot != null ? SET.slots[SET.slot] : verseStory();
 if(!Array.isArray(SET.story.klaar)) SET.story.klaar = [];
 if(!Array.isArray(SET.story.aethers)) SET.story.aethers = [];   // verdiende 🟣 krachten
@@ -20575,7 +20598,7 @@ const STORY = {
       {s:null, naam:"…", bg:1, kleur:"#e6c88a", t:"🪨 Magnus blijft op <b>3</b> levens staan. Jullie vullen allebei je hand aan tot <b>5</b> kaarten. En het plafond komt nu op <b>twee</b> plekken per kant naar beneden."}
     ],
     bord:[{p:1, c:2, spell:"steen"}],
-    geeft:["ae_fire6", "ae_oer_steen"],     // en Oersteen: elke baas laat zijn stuk Oerkracht achter
+    geeft:"ae_fire6",     // okt 2026: Oersteen is alleen nog van Magnus zelf
     ban:10, begint:1
   },
   /* ---------- Wereld 2 · Rankenwoud ---------- */
@@ -21066,7 +21089,6 @@ const STORY = {
     ban:10, begint:1
   },
   "2-6":{
-    geeft:"ae_oer_gras",            // 🟣 Oergras: elke baas laat zijn stuk Oerkracht achter
     wereld:2, bosslag:true, naam:"Moeder Natuur", vijand:"Moeder Natuur", sprite:"moeder", zegKleur:"#e08fb0", muziek:"w2_baasgevecht",
     hzruim:true,
     intro:[
@@ -21685,7 +21707,6 @@ const STORY = {
     ban:10, begint:1
   },
   "3-6":{
-    geeft:"ae_oer_vuur",            // 🟣 Oervuur: elke baas laat zijn stuk Oerkracht achter
     wereld:3, naam:"De schoorsteen", vijand:"Flint", sprite:"fireguy", zegKleur:"#ff8a4a", muziek:"w3_flintgevecht",
     hzruim:true,
     intro:[
@@ -21982,6 +22003,7 @@ const STORY = {
       {s:"veerman", groot:true, naam:"De veerman", kleur:"#d8cfb8", t:"We doen het gewoon nog een keer. Ze heeft alle tijd en ik ook. Ik heb hierna toch niks."}
     ],
     zegSpr:"veerman", tauntSpr:"veerman_taunt", zegNaamVast:"De veerman",
+    ptSprite:"veerman",   // okt 2026: in het venster staat de veerman, niet de Zee; hij moedigt je aan
     /* De veerman telt de rondes af, net als Seraf in 2-1. */
     tellen:["Eén.", "Twee.", "Drie. Halverwege.", "Vier.", "Vijf. Blijf zitten."],
     zeg:{ beurt:[
@@ -22008,7 +22030,15 @@ const STORY = {
       ],
       bijna:["Nog één.", "Zo. Dat is het dan."],
       laag:[],
-      jij:["Blijf zitten. Niet opstaan. Nooit opstaan in een boot.", "Bijna. Echt bijna."] },
+      jij:["Blijf zitten. Niet opstaan. Nooit opstaan in een boot.", "Bijna. Echt bijna."],
+      /* als de Zee geraakt wordt */
+      goed:["Ha! Die voelde ze.", "Netjes. Zo doe je dat.", "Dat heb ik haar nog nooit zien doen. Terugdeinzen.",
+        "Goed zo. Blijven roeien. Ik bedoel: blijven doen wat u doet.", "Zie je wel. Ze is ook maar water.", "Die schrijf ik op. In mijn hoofd. Waar het blijft."],
+      /* als jij geraakt wordt */
+      au:["Au. Ja. Dat hoort erbij, dat hebben ze allemaal.", "Gaat het? Niet antwoorden, gewoon knikken.",
+        "Die zag ik ook te laat. En ik kijk hier al een eeuwigheid naar.", "Geeft niks. Ik ben zelf ook eens overboord gevallen. Twee keer. Op één dag.",
+        "Even uitzitten. De boot is nog heel, en u ook. Ongeveer.", "Dat was niet handig. Wel dapper. Maar vooral niet handig.",
+        "Kop op. Ik heb er wel slechter zien varen. Niet veel, maar wel."] },
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     /* Een deck volgens dezelfde regels als het jouwe: 6 van elk element (3 van haar water is
        al ijs), 6 lichtkaarten (hoogstens 3 van een soort), 3 aethers. Daarbovenop haar eigen
@@ -22322,7 +22352,6 @@ const STORY = {
      zich toch niet laat opdelen. Ze heeft vier werelden naar je gekeken en een conclusie
      getrokken, en die is fout. Drie getijden; springtij draait het hele bord om. */
   "4-5":{
-    geeft:"ae_oer_water",            // 🟣 Oerwater: elke baas laat zijn stuk Oerkracht achter
     wereld:4, naam:"De oceaan", vijand:"De Oceaan", sprite:"oceaan", zegKleur:"#a9e2ff", muziek:"w4_baas",
     hzruim:true, getij:true,
     intro:[
@@ -24448,9 +24477,12 @@ function praatHTML(){
     if(M && !M.loopT0) M.loopT0 = Date.now();
     st.push(`animation-delay:-${M ? (Date.now() - M.loopT0) % 9000 : 0}ms`);
   }
-  if(r.reus)       st.push("width:min(448px,76vw)");
+  /* De Naad en de Oceaan zijn te groot voor een plekje: in hun praatje vult hun plaatje het hele scherm. */
+  const vul = r.vul || (typeof r.s === "string" && /^(naad|oceaan)(_|$)/.test(r.s));
+  const reus = r.reus || vul;
+  if(reus)         st.push("width:min(448px,76vw)");
   else if(r.groot) st.push("width:min(330px,68vw)");
-  return `<div class="praatscherm${(r.groot || r.reus) ? " groot" : ""}${r.reus ? " reus" : ""}">
+  return `<div class="praatscherm${(r.groot || reus) ? " groot" : ""}${reus ? " reus" : ""}${vul ? " vul" : ""}">
     <div class="praatsprite${r.loop ? " loopt" : ""}" style="${st.join(";")}">${r.s === null || r.ogen ? "" : spriteSVG(r.s || L.sprite)}</div>
     <div class="praatbox" style="--wk:${r.kleur || W.kleur}">
       <div class="praatnaam">${r.naam || (L.faseNaam && M && L.faseNaam[M.fase]) || L.vijand}</div>
@@ -24937,23 +24969,41 @@ function portretAan(){
   return !!(S && S.story && !S.over && window.matchMedia && window.matchMedia("(min-width:1081px)").matches);
 }
 const ptSprIs = k => !!(k && (SPRITE_BEELD[k] || SPR_ART[k] || SPR_LEEN[k] || SPRITE_TERUG[k]));
+/* Wie veel groter is dan het venster: ingezoomd, zodat je alleen een stuk van hem ziet.
+   De Oceaan: alleen zijn tanden en zijn oog. x en y: het punt in het venster waar omheen we inzoomen. */
+const PT_ZOOM = {oceaan:{z:2.7, x:54, y:52}};
+function ptZoomStijl(key){
+  const z = PT_ZOOM[String(key || "").split("_")[0]];
+  return z ? ` style="scale:${z.z};transform-origin:${z.x}% ${z.y}%"` : "";
+}
 function portretPaint(){
   const vak = document.getElementById("portretvak"); if(!vak) return;
   if(!portretAan()){ if(vak.innerHTML){ vak.innerHTML = ""; vak.dataset.sig = ""; vak.dataset.bel = ""; } return; }
   const st = S.story, L = levelVan(st) || STORY[st.id] || {};
   /* In de tweede fase staat de tweede gedaante in het venster, niet meer de eerste. */
-  const basis = st.ptSpr || L.sprite || st.zegSpr;
+  /* ptSprite: wie er in het venster staat als dat niet de tegenstander is (4-1: de veerman, niet de Zee). */
+  const basis = st.ptSpr || L.ptSprite || L.sprite || st.zegSpr;
+  const vriend = !st.ptSpr && !!L.ptSprite;
   /* Wie heeft er net levens verloren? Daar komt de emote uit. */
   const nu = [P(0).life, P(1).life];
   if(st.ptLeven && !FAST){
     if(nu[1] < st.ptLeven[1]) st.ptEmote = {soort:"geraakt", tot:Date.now() + 1300, n:(st.ptEmote ? st.ptEmote.n : 0) + 1};
     else if(nu[0] < st.ptLeven[0]) st.ptEmote = {soort:"raak", tot:Date.now() + 1300, n:(st.ptEmote ? st.ptEmote.n : 0) + 1};
+    /* Een bondgenoot in het venster (de veerman) reageert: een aanmoediging als de tegenstander
+       geraakt wordt (zeg.goed), een grapje als jij iets incasseert (zeg.au). */
+    const cfgZ = st.zeg, lijstZ = cfgZ && (nu[1] < st.ptLeven[1] ? cfgZ.goed : (nu[0] < st.ptLeven[0] ? cfgZ.au : null));
+    if(lijstZ && lijstZ.length && Math.random() < 0.7){
+      const zin = verseZin(lijstZ, "zegI", nu[1] < st.ptLeven[1] ? "goed" : "au");
+      if(zin) setTimeout(() => zegLos(zin), 350);
+    }
   }
   st.ptLeven = nu;
   const em = st.ptEmote && st.ptEmote.tot > Date.now() ? st.ptEmote : null;
   let key = basis;
   const cls = [];
-  if(em && em.soort === "geraakt"){
+  if(em && em.soort === "geraakt" && vriend){
+    /* de tegenstander is geraakt: de veerman schudt niet mee, hij kijkt tevreden */
+  } else if(em && em.soort === "geraakt"){
     cls.push("pt-geraakt");
     if(ptSprIs(basis + "_boos")) key = basis + "_boos";
   } else if(em && em.soort === "raak"){
@@ -24988,7 +25038,7 @@ function portretPaint(){
     /* De cirkel erboven krijgt dezelfde lijst als het venster. */
     const links = document.getElementById("left"); if(links) links.style.setProperty("--ptrand", rand);
     vak.innerHTML = `<div id="portret" class="${cls.join(" ")}" style="--ptk:${kleur};--ptl1:${l1};--ptl2:${l2};--ptrand:${rand};--ptgloed:${/^#[0-9a-f]{6}$/i.test(rand) ? rand + "66" : "rgba(107,125,146,.35)"}">`
-      + `<div class="ptbg">${st.ptBg}</div><div class="ptfig">${spriteSVG(key)}</div>`
+      + `<div class="ptbg">${st.ptBg}</div><div class="ptfig"${ptZoomStijl(key)}>${spriteSVG(key)}</div>`
       + `<div class="ptnaam">${naam}</div></div><div id="ptbel"></div>`;
     vak.dataset.bel = "";
   }
@@ -25651,10 +25701,8 @@ function deckMetUpgrades(deck, vars){
 /* De vier stukken Oerkracht kwamen later bij de bazen. Wie die baas al versloeg, heeft zijn
    stuk dus ook: dat lezen we uit de gehaalde levels. */
 const aeBezit = () => {
-  const uit = (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k] && !AETHERS[k].uit);   // Brandoffer en Loutering niet meer
-  (SET.story.klaar || []).forEach(id => [].concat((STORY[id] || {}).geeft || [])
-    .forEach(k => { if(/^ae_oer_/.test(k) && !uit.includes(k)) uit.push(k); }));
-  return uit;
+  /* Brandoffer en Loutering niet meer; de vier Oerkrachten ook niet (okt 2026: alleen nog van de bazen) */
+  return (Array.isArray(SET.story.aethers) ? SET.story.aethers : []).filter(k => AETHERS[k] && !AETHERS[k].uit && !/^ae_oer_/.test(k));
 };
 /* De knoptekst vat samen wat je gekozen hebt. */
 function ltGekozen(u){
@@ -26645,26 +26693,31 @@ function upgVak(el){
    vak, y het bovenvlak van de plank, w de breedte van wat erop staat (allemaal in procenten). */
 const WINKEL_DECOR = {
   knort:{beeld:"art/winkel-knort.png", ratio:"3/2",
-    /* Uitgemeten op winkel-knort.png (1536×1024): de schotjes staan op x 230, 436, 658, 884,
-       1098 en 1308; het bovenvlak van de planken ligt op y 330 en 540. Tussen de onderkant
-       van de bovenste plank en de middelste zit 164 pixels, dus een kaartje is 7% breed. */
-    ae:[{x:21.7,y:32.2},{x:35.6,y:32.2},{x:50.2,y:32.2},{x:64.5,y:32.2},{x:78.3,y:32.2}],
-    lt:[{x:21.7,y:52.7},{x:35.6,y:52.7},{x:50.2,y:52.7},{x:64.5,y:52.7},{x:78.3,y:52.7}],
-    hart:{x:23.1,y:83,w:12.5,tag:100}, slot:{x:76.8,y:83,w:15,tag:70}, w:7, wPlek:13,   // tag: hoogte van het prijskaartje
-    /* Knort staat achter de toonbank, in het midden. Zijn onderrand (zijn middel) ligt precies
-       op de achterrand van de toonbank: y 815 van 1024. Zijn hoofd blijft onder de prijskaartjes
-       van de middelste plank. */
-    baas:{x:50, y:79.6, h:34.5},   // Knort 1,5× zo groot; de onderrand blijft op de toonbank
+    /* Uitgemeten op de nieuwe winkel-knort.png (1536×1024, okt 2026). Twee kasten met elk twee rijen
+       vakken. De vakken in het midden vallen achter Knort, dus:
+       - de vier aethers staan bovenop de kasten (bovenvlak y 391 links, 404 rechts), op x 222, 418,
+         1103 en 1308;
+       - de vijf lichtkaarten staan in de bovenste rij vakken (bodem y 505), op x 222, 418, 908, 1103
+         en 1308. Het vak op x 608 blijft leeg: daar steekt Knort zijn hand met de ring op.
+       De vakken zijn maar zo'n 95 pixels hoog, dus de lichtkaarten zijn kleiner (4%).
+       Het hartje is de pot met harten links op de toonbank, het slot de kist met het gloeiende vak rechts. */
+    ae:[{x:14.45,y:38.2},{x:27.2,y:38.2},{x:71.8,y:39.5},{x:85.2,y:39.5}],
+    lt:[{x:14.45,y:49.3},{x:27.2,y:49.3},{x:59.1,y:49.5},{x:71.8,y:49.5},{x:85.2,y:49.5}],
+    wAe:6, wLt:4,
+    hart:{x:15.1,y:81.5,w:14,tag:100}, slot:{x:83.9,y:82.8,w:20.5,tag:60}, w:6, wPlek:13,   // tag: hoogte van het prijskaartje
+    /* Knort staat achter de toonbank, in het midden. De achterrand van de toonbank ligt op y 793. */
+    baas:{x:50, y:77.4, h:34.5},   // Knort 1,5× zo groot; de onderrand zakt achter de toonbank
     lagen:[],   /* okt 2026: losse dingen ervóór werkten niet; de diepte zit nu in de achtergrond zelf */
-    /* 🫧 De toonbank als eigen laag (okt 2026): dezelfde pixels als de tekening, vanaf de achterrand van
-       de toonbank (y 815 van 1024) naar beneden. Knort staat erachter en deint, zonder te zweven. */
+    /* 🫧 De toonbank als eigen laag: dezelfde pixels als de tekening, vanaf de achterrand van de toonbank
+       (y 793) naar beneden. Knort staat erachter en deint, zonder dat je ooit zijn onderkant ziet. */
     voor:"art/winkel-knort-voor.png"},
   smid:{beeld:"art/winkel-smidse.png", ratio:"3/2",
-    /* Gemeten op winkel-smidse.png (1536×1024): de houders staan op x 383, 639, 885 en 1130,
-       de gleuf zit op y ≈ 570 en de achterrand van het werkblad op y ≈ 581. */
-    upg:{steen:{x:24.9,y:56.5}, vuur:{x:41.6,y:56.5}, gras:{x:57.6,y:56.5}, water:{x:73.6,y:56.5}}, w:7.3,
-    baas:{x:49.6, y:56.8, h:34.5}, voorBaas:true,   // de kaarten staan op de werkbank, dus vóór Tang
-    lagen:[], voor:"art/winkel-smidse-voor.png"}   // de werkbank vanaf y 586: Tang staat erachter
+    /* Gemeten op de nieuwe winkel-smidse.png (1536×1024, okt 2026): vier gietvormen op de werkbank, met
+       hun midden op x 397, 640, 865 en 1112; de gleuf tussen de twee nokken ligt op y ≈ 728, de achterrand
+       van de werkbank op y 730. */
+    upg:{steen:{x:25.85,y:71.1}, vuur:{x:41.67,y:71.1}, gras:{x:56.32,y:71.1}, water:{x:72.36,y:71.1}}, w:7.3,
+    baas:{x:50, y:71.3, h:34.5}, voorBaas:true,   // de kaarten staan op de werkbank, dus vóór Tang
+    lagen:[], voor:"art/winkel-smidse-voor.png"}   // de werkbank vanaf y 730, plus de gietvormen: Tang staat erachter
 };
 /* De winkel is altijd de tekening. Is hij nog niet binnen, dan komt hij binnen terwijl je
    er staat (de achtergrond laadt zichzelf); alleen als het bestand echt niet bestaat valt
@@ -26702,7 +26755,7 @@ function winkelScene(kraam){
     ["ae", "lt"].forEach(soort => KOOPWAAR[soort].forEach((k, i) => {
       const v = koopVak(soort, k, i);
       const beeld = soort === "lt" ? LICHT_BEELD[k] : AETHER_BEELD[k];
-      binnen += wkItem(v, d[soort][i], d.w, beeld);
+      binnen += wkItem(v, d[soort][i], (soort === "ae" ? d.wAe : d.wLt) || d.w, beeld);
     }));
     binnen += wkItem(hartVak(), d.hart, d.hart.w || d.wPlek, null);
     binnen += wkItem(slotVak(), d.slot, d.slot.w || d.wPlek, null);
@@ -26868,13 +26921,21 @@ function koopDoen(){
 const OVERWORLD_ZICHT = 15;
 /* De baas van een wereld is het laatste level ervan: 1-5, 2-6, 3-6, 4-5. */
 const lvBaas = id => { const w = id.split("-")[0] + "-"; const rij = STORY_ORDER.filter(x => x.startsWith(w)); return rij[rij.length - 1] === id; };
+/* Figuren met veel lege ruimte boven hun hoofd staan in het vakje op de kaart anders te laag.
+   Hoger getal = het plaatje schuift verder omhoog. Uitgemeten: het hoofd komt net onder de bovenrand. */
+const LV_PORT_Y = {cultist:72, trio:28, klinknagel:60};
+/* Een ander figuur op de kaart dan de tegenstander zelf, ingezoomd op zijn gezicht.
+   4-1: je vecht tegen de Zee, maar op de kaart zie je de veerman. */
+const LV_PORT_ANDERS = {"4-1":{spr:"veerman", zoom:1.9, x:51, y:30}};
 /* Het portret op een level: de tegenstander zelf. Zijn tekening als die er is, anders zijn
    pixelvorm — en als er echt niets is, het teken van zijn wereld. */
 function lvPortret(id){
   const L = STORY[id], W = WERELDEN[+id.split("-")[0]];
   if(!L || !L.sprite) return W.ic;
+  const an = LV_PORT_ANDERS[id], anB = an && typeof SPRITE_BEELD === "object" ? SPRITE_BEELD[an.spr] : null;
+  if(anB && beeldKlaar(anB)) return `<img class="lvport" src="${anB}" alt="" draggable="false" style="object-position:center;transform:scale(${an.zoom});transform-origin:${an.x}% ${an.y}%">`;
   const key = L.sprite, beeld = typeof SPRITE_BEELD === "object" ? SPRITE_BEELD[key] : null;
-  if(beeld && beeldKlaar(beeld)) return `<img class="lvport" src="${beeld}" alt="" draggable="false">`;
+  if(beeld && beeldKlaar(beeld)) return `<img class="lvport" src="${beeld}" alt="" draggable="false"${LV_PORT_Y[key] != null ? ` style="object-position:center ${LV_PORT_Y[key]}%"` : ""}>`;
   const pk = SPR_ART[key] ? key : (SPR_LEEN[key] || null);
   return pk ? spriteSVG.pix(pk) : W.ic;
 }
@@ -27493,6 +27554,8 @@ function muziekScherm(){
   /* De uitleg vlak voor een verhaalgevecht: het nummer van het praatje loopt gewoon door. */
   if(M && M.type === "tutorial" && M.daarna) return;
   if(liveLobby()){ AU.zet("titel"); return; }
+  /* De uitdagingen van Nimbus: zijn eigen deuntje, niet het titelnummer. */
+  if(M && M.type === "nimbus"){ AU.zet(MUZIEK.w1_nimbus ? "w1_nimbus" : "kaart"); return; }
   if(S.ui.mode === "start"){ AU.zet(M && M.type === "story" ? "kaart" : "titel"); return; }
   /* Terug op de wereldkaart, ook vlak na een gevecht: het winstdeuntje zacht weg, de kaartmuziek aan. */
   if(M && M.type === "story"){ AU.stopLosseZacht(); AU.zet("kaart"); return; }
@@ -28968,10 +29031,10 @@ const LADDER = {
   /* de zestien: wie welk deck krijgt, komt nog (LADDER_DECKS) */
   tegen:["1-1", "1-2", "1-3", "knort", "2-2", "2-3", "2-4", "2-5", "3-1", "3-2", "3-3", "3-5", "4-1", "4-2", "4-4", "5-2"].map(id => ({id})),   // Knort na Seraf, zoals in het verhaal
   bazen:[
-    {id:"1-5", deck:baasDeck("steen", "Magnus", {negate:3, vital:3}), geeft:"ae_oer_steen"},
-    {id:"2-6", deck:baasDeck("gras", "Moeder Natuur", {reborn:3, vital:3}), geeft:"ae_oer_gras"},
-    {id:"3-6", deck:baasDeck("vuur", "Flint", {sterregen:3, greed:3}), geeft:"ae_oer_vuur"},
-    {id:"4-5", deck:baasDeck("water", "De Oceaan", {negate:3, kloon:3}), geeft:"ae_oer_water"}],
+    {id:"1-5", deck:baasDeck("steen", "Magnus", {negate:3, vital:3})},
+    {id:"2-6", deck:baasDeck("gras", "Moeder Natuur", {reborn:3, vital:3})},
+    {id:"3-6", deck:baasDeck("vuur", "Flint", {sterregen:3, greed:3})},
+    {id:"4-5", deck:baasDeck("water", "De Oceaan", {negate:3, kloon:3})}],
   seraf:{id:"2-1", geeft:"ae_hemel", deck:{naam:"Seraf", mix:{water:3, steen:3, vuur:3, gras:3}, upg:{},
     ae:["ae_zwerm", "ae_zwerm", "ae_zwerm", "ae_hemel"],
     ltN:{sterregen:3, negate:3, vital:3, brenger:3, kuriboh:3, siphon:3}, zijAe:[], zijLt:{}}},
@@ -28984,7 +29047,7 @@ const LADDER = {
    aether), willekeurig verdeeld en daarna vast. Elke challenge tegen iemand is dus elke keer
    hetzelfde deck. */
 const LADDER_DECKS = {"1-1": {"mix": {"water": 7, "steen": 6, "vuur": 3, "gras": 4}, "upg": {"water": 5, "steen": 2, "gras": 3}, "ae": ["fu_fire", "ae_lichtval", "ae_zwerm"], "ltN": {"kloon": 3, "struik": 1, "sterregen": 3, "doortast": 2, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-1"}, "1-2": {"mix": {"water": 6, "steen": 2, "vuur": 5, "gras": 7}, "upg": {"water": 2, "steen": 3, "vuur": 5}, "ae": ["ae_leven", "ae_grassx2", "ae_zwerm"], "ltN": {"kuriboh": 2, "vital": 1, "sterregen": 3, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-2"}, "1-3": {"mix": {"water": 8, "steen": 9, "vuur": 4, "gras": 3}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_stonefull", "fu_stone", "fu_grass"], "ltN": {"web": 1, "master": 2, "sterregen": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-3"}, "2-2": {"mix": {"water": 8, "steen": 4, "vuur": 9, "gras": 3}, "upg": {"steen": 5, "vuur": 2, "gras": 3}, "ae": ["ae_lichtval", "fu_stone", "ae_leven"], "ltN": {"kuriboh": 1, "struik": 1, "master": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-2"}, "2-3": {"mix": {"water": 9, "steen": 4, "vuur": 4, "gras": 7}, "upg": {"water": 2, "vuur": 3, "gras": 5}, "ae": ["fu_water", "ae_lichtval", "ae_graf"], "ltN": {"vital": 2, "greed": 1, "reborn": 2, "kloon": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-3"}, "2-4": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_leven", "ae_stonefull", "ae_lichtval"], "ltN": {"sterregen": 1, "vital": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-4"}, "2-5": {"mix": {"water": 9, "steen": 3, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 2, "vuur": 3}, "ae": ["ae_alziend", "ae_graf", "ae_lichtval"], "ltN": {"vital": 2, "negate": 2, "greed": 1, "struik": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-5"}, "3-1": {"mix": {"water": 7, "steen": 5, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_lichtval", "ae_genade", "ae_fire6"], "ltN": {"sterregen": 3, "reborn": 2, "dfusion": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-1"}, "3-2": {"mix": {"water": 7, "steen": 8, "vuur": 6, "gras": 3}, "upg": {"water": 5, "steen": 3, "vuur": 2}, "ae": ["ae_lichtval", "ae_stonefull", "fu_stone"], "ltN": {"vital": 2, "kuriboh": 1, "sterregen": 1, "master": 1, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-2"}, "3-3": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"steen": 5, "vuur": 3, "gras": 2}, "ae": ["ae_leven", "ae_genade", "fu_water"], "ltN": {"dfusion": 1, "kloon": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-3"}, "3-5": {"mix": {"water": 3, "steen": 7, "vuur": 9, "gras": 5}, "upg": {"water": 3, "steen": 5, "gras": 2}, "ae": ["ae_leven", "fu_fire", "ae_ziel"], "ltN": {"kuriboh": 1, "master": 1, "negate": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-5"}, "4-1": {"mix": {"water": 2, "steen": 5, "vuur": 8, "gras": 5}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_zwerm", "fu_fire", "ae_leven"], "ltN": {"greed": 2, "kuriboh": 2, "darkhole": 1, "web": 1, "reborn": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-1"}, "4-2": {"mix": {"water": 7, "steen": 3, "vuur": 8, "gras": 6}, "upg": {"steen": 2, "vuur": 5, "gras": 3}, "ae": ["fu_water", "ae_watercycle", "ae_leven"], "ltN": {"dfusion": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-2"}, "4-4": {"mix": {"water": 9, "steen": 4, "vuur": 5, "gras": 6}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_smeed", "ae_leven", "ae_lichtval"], "ltN": {"kloon": 1, "kuriboh": 1, "vital": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-4"}, "5-2": {"mix": {"water": 6, "steen": 9, "vuur": 3, "gras": 6}, "upg": {"water": 5, "vuur": 2, "gras": 3}, "ae": ["fu_stone", "ae_genade", "ae_lichtval"], "ltN": {"sterregen": 3, "negate": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 5-2"}, "knort": {"mix": {"water": 9, "steen": 3, "vuur": 3, "gras": 9}, "upg": {"steen": 3, "vuur": 2, "gras": 5}, "ae": ["ae_grassx2", "fu_grass", "fu_water"], "ltN": {"negate": 2, "web": 1, "reborn": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge knort"}};
-const LADDER_AE = LADDER.bazen.concat([LADDER.seraf]).map(t => t.geeft);
+const LADDER_AE = LADDER.bazen.concat([LADDER.seraf]).map(t => t.geeft).filter(Boolean);
 const ladderAlle = () => LADDER.tegen.concat(LADDER.bazen, [LADDER.seraf, LADDER.eerste, LADDER.geheim]);
 const ladderZoek = id => ladderAlle().find(t => t.id === id) || null;
 function ladderStaat(){
@@ -29005,7 +29068,7 @@ const ladderSpeelbaar = t => !!t && ladderOpen(t) && !!ladderDeckVan(t);
    gevonden, dan mag hij mee. Niet online en niet in commander, net als de ladder-aethers. */
 const VERHAAL_BOT_AE = ["ae_kern"];   // okt 2026: Stroman mag overal
 const BOT_AE = LADDER_AE.concat(VERHAAL_BOT_AE);
-const ladderAeVrij = () => LADDER.bazen.concat([LADDER.seraf]).filter(t => ladderVerslagen(t.id)).map(t => t.geeft)
+const ladderAeVrij = () => LADDER.bazen.concat([LADDER.seraf]).filter(t => ladderVerslagen(t.id) && t.geeft).map(t => t.geeft)
   .concat(VERHAAL_BOT_AE.filter(k => { try { return aeBezit().includes(k) || !!(SET.story && SET.story.vrij); } catch(e) { return false; } }));
 const deckAlleenBot = d => !!d && (d.ae || []).concat(d.zijAe || []).some(k => BOT_AE.includes(k));
 let LADDER_KEUS = null, LADDER_STIL = false;
