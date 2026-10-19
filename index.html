@@ -4060,6 +4060,164 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
   border-radius:4px; padding:6px 12px; font:18px "VT323", ui-monospace, monospace; cursor:pointer; opacity:.55}
 #filmlaag .filmskip:hover{opacity:1}
 #filmlaag.laadt .filmskip{display:none}
+/* ================= 📱 TELEFOON LIGGEND · ontwerp A, de klassieke tafel =================
+   Aan als het scherm liggend en laag is (body.tel, gezet door telZet). Alles staat vast op het
+   scherm (position:fixed), zodat de oude grid- en flexregels hier niets meer uitmaken.
+   Boven: de tegenstander in een smalle strook, zijn hand piept van boven. Midden: het veld over
+   de volle breedte, het ritueel als strookje aan de buitenkant van elk wezen. Rechts: de rail met
+   de zetknoppen en je stapels. Onder: jouw hand piept uit beeld; tik erop en hij komt omhoog.
+   Cirkel, logboek, keten-overzicht en de kleine knopjes zitten in het menu (☰). */
+body.tel{
+  --sl:max(10px, env(safe-area-inset-left, 0px));
+  --sr:max(10px, env(safe-area-inset-right, 0px));
+  --sb:env(safe-area-inset-bottom, 0px);
+  --top:46px; --rail:88px; --peek:50px; --rib:20px;
+  --chh:min(calc((100dvh - 134px - var(--sb)) / 2.52), calc((100vw - var(--sl) - var(--sr) - var(--rail) - 60px) / 5 * 1.4));
+  --cw:calc(var(--chh) / 1.4);
+  --rit:calc(var(--chh) * .26);
+  --hh:min(46dvh, 200px); --hw:calc(var(--hh) / 1.4);
+}
+body.tel #app{display:block !important; position:fixed !important; inset:0; overflow:hidden; grid-template-columns:none !important}
+body.tel #menufab{top:2px; right:var(--sr); left:auto; width:40px; height:40px; z-index:70}
+
+/* --- links: alleen het portretje (en het keten-overzicht als er iets op de keten staat) --- */
+body.tel #left{display:block !important; position:fixed !important; left:0; top:0; width:0; height:0; max-height:none;
+  padding:0 !important; margin:0; border:0 !important; background:none !important; overflow:visible; z-index:45}
+body.tel #left > *{display:none !important}
+body.tel #left > #portretvak{display:block !important; position:fixed; left:var(--sl); top:3px; width:42px; height:40px;
+  min-height:0; max-height:none; margin:0; cursor:pointer; transition:width .2s, height .2s}
+body.tel #portretvak #portret{height:100% !important; border-width:2px; outline:none; border-radius:4px}
+body.tel #portretvak #portret .ptfig{height:100%}
+body.tel #portretvak #portret .ptnaam{display:none}
+body.tel.ptgroot #left > #portretvak{width:min(42dvh, 210px); height:min(42dvh, 210px); z-index:80}
+body.tel.ptgroot #portretvak #portret .ptnaam{display:block; font-size:.45rem}
+body.tel #ptbel{position:fixed; left:var(--sl); top:48px; right:auto; bottom:auto; width:max-content;
+  max-width:min(320px, 42vw); font-size:1rem; padding:6px 9px; z-index:46}
+body.tel #ptbel::after{left:16px; bottom:auto; top:-13px; transform:none; border-top-color:transparent; border-bottom-color:var(--ptk,var(--danger))}
+body.tel #ptbel .pbnaam{font-size:.36rem; margin-bottom:4px}
+body.tel.ptgroot #ptbel{top:calc(min(42dvh, 210px) + 8px)}
+body.tel #left > #chain:not(:empty){display:block !important; position:fixed; left:50%; top:calc(var(--top) + 2px);
+  transform:translateX(-50%); width:max-content; max-width:min(560px, 66vw); max-height:44dvh; overflow-y:auto; z-index:60}
+/* het logboek-scherm uit het menu: cirkel, keten, logboek en chat op één vel */
+body.tel #app.showlog #left{width:auto; height:auto; inset:0; display:flex !important; flex-wrap:wrap; align-content:flex-start;
+  gap:12px; padding:12px calc(var(--sr) + 52px) 16px calc(var(--sl) + 8px) !important; overflow-y:auto;
+  background:rgba(8,11,20,.97) !important; z-index:200}
+body.tel #app.showlog #left > #portretvak, body.tel #app.showlog #left > #logknop{display:none !important}
+body.tel #app.showlog #left > #preview{display:flex !important; flex:0 0 auto; width:min(250px, 34vw)}
+body.tel #app.showlog #left > #chain{display:block !important; position:static; transform:none; flex:1 1 260px; max-height:none}
+body.tel #app.showlog #left > #chain:empty{display:none !important}
+body.tel #app.showlog #left > #log{display:block !important; flex:1 1 300px; max-height:none; overflow:visible}
+body.tel #app.showlog #left > #chatbox:not(:empty){display:flex !important; flex:1 1 260px}
+body.tel #app.showlog #left::after{content:"tik ergens om terug te gaan"; flex:1 1 100%; text-align:center; color:var(--dim); font-size:.9rem}
+
+/* --- het midden: alles vast op het scherm --- */
+body.tel #center{position:fixed !important; inset:0; display:block !important; padding:0 !important; grid-template-rows:none}
+
+/* de tegenstander: smalle strook bovenaan */
+body.tel #pside1{position:fixed !important; left:var(--sl); right:calc(var(--sr) + 48px); top:0; height:var(--top);
+  min-height:0 !important; padding:0 !important; display:block !important; z-index:20}
+body.tel .pside .pinfo{overflow:visible !important; position:absolute !important; transform:none !important; max-width:none !important; min-width:0 !important;
+  width:auto !important; gap:2px !important; flex-direction:column !important; align-items:flex-start !important}
+body.tel #pside1 .pinfo{left:0; top:4px}
+body.tel:has(#portretvak #portret) #pside1 .pinfo{left:50px}
+body.tel .pside .pname{font-size:.4rem !important; line-height:1.2}
+body.tel .pside .plife.hpbalk{transform-origin:0 50%; transform:scale(.82); margin:-1px 0 -2px}
+body.tel .pside .pdeckinfo{font-size:.78rem !important; line-height:1; white-space:nowrap}
+body.tel .pside .pinfo .ruiten{--r:26px !important; --g:3px !important; margin:0 !important; position:absolute; left:calc(100% + 8px); top:2px}
+body.tel .pside .pinfo .aemini{display:none}
+body.tel #pside1 .hand{position:absolute !important; left:50%; top:0; width:min(34vw, 250px); height:52px;
+  --hw:37px; --hh:52px; transform:translate(-50%, -26px); flex:none; pointer-events:auto}
+body.tel #pside1 .hcard{width:var(--hw); height:var(--hh); margin-left:min(0px, calc((100% - var(--n,5) * var(--hw)) / (var(--n,5) - 1)))}
+body.tel #pside1 .hcard:first-child{margin-left:0}
+body.tel #pside1 .hcard .card{font-size:.5rem}
+body.tel .pside .handvol{display:none}
+
+/* het veld */
+body.tel #fieldwrap{position:fixed !important; left:var(--sl); right:calc(var(--sr) + var(--rail)); top:var(--top);
+  height:calc(2 * (var(--chh) + var(--rit) + 3px) + var(--rib) + 6px); display:block !important; padding:0 !important;
+  margin:0 !important; overflow:visible !important; gap:0}
+body.tel #fieldwrap .frow{position:absolute !important; left:0; right:0; max-width:none !important; width:auto !important; margin:0 !important;
+  display:grid !important; grid-template-columns:repeat(5, var(--cw)) !important; justify-content:space-evenly; gap:0 !important}
+body.tel #row1{top:0}
+body.tel #row0{top:calc(var(--chh) + var(--rit) + 3px + var(--rib) + 6px)}
+body.tel #fieldwrap .col{width:var(--cw) !important; max-width:none !important; height:calc(var(--chh) + var(--rit) + 3px) !important}
+body.tel #fieldwrap .slot.cr{left:0 !important; right:auto; width:var(--cw) !important; height:var(--chh) !important}
+body.tel #fieldwrap .slot.sp{left:0 !important; right:auto; width:var(--cw) !important; height:var(--rit) !important;
+  transform:none !important; overflow:hidden; border-radius:5px}
+body.tel #row1 .slot.sp{top:0 !important; bottom:auto !important}
+body.tel #row1 .slot.cr{top:calc(var(--rit) + 3px) !important; bottom:auto !important}
+body.tel #row0 .slot.cr{top:0 !important; bottom:auto !important}
+body.tel #row0 .slot.sp{top:calc(var(--chh) + 3px) !important; bottom:auto !important}
+/* het ritueel als strookje: dezelfde kaart, alleen het midden van de prent zichtbaar */
+body.tel #fieldwrap .slot.sp > .card, body.tel #fieldwrap .slot.sp > .cardback{inset:auto !important; position:absolute; left:0; top:50%;
+  width:var(--cw); height:var(--chh); transform:translateY(-50%)}
+body.tel #fieldwrap .slot.sp .ph::after{font-size:.7rem}
+body.tel #fieldwrap .dkruis{display:none}
+body.tel #ribbon{display:flex !important; position:absolute; left:0; right:0; top:calc(var(--chh) + var(--rit) + 6px);
+  height:var(--rib); margin:0 !important; padding:0 !important; max-width:none !important; width:auto !important; gap:6px; z-index:3}
+body.tel #ribbon .ph-step{font-size:.34rem !important; padding:3px 6px !important; line-height:1.4}
+body.tel #ribbon .ph-step:not(.on){font-size:0 !important; width:8px; height:8px; padding:0 !important; border-radius:50%;
+  background:#9a937f; border:0; opacity:.7}
+
+/* jouw kant: je levens linksonder, je hand piept onderaan */
+body.tel #pside0{position:fixed !important; left:0; right:0; bottom:0; top:auto; height:0; min-height:0 !important;
+  padding:0 !important; display:block !important; z-index:30; overflow:visible}
+body.tel #pside0 .pinfo{position:fixed !important; left:var(--sl); top:auto; bottom:calc(var(--sb) + 4px); z-index:31}
+body.tel #pside0 .pinfo .ruiten{position:relative; left:auto; top:auto; order:-1; margin-bottom:3px !important}
+body.tel #pside0 .pdeckinfo{display:none}
+body.tel #pside0 .hand{position:fixed !important; left:calc(var(--sl) + 132px); right:calc(var(--sr) + var(--rail) + 6px);
+  bottom:var(--sb); height:var(--hh); width:auto; flex:none; justify-content:center; align-items:flex-end; gap:0;
+  transform-origin:50% 100%; transform:translateY(calc(var(--hh) * .62 - var(--peek))) scale(.62);
+  transition:transform .22s cubic-bezier(.2,.8,.3,1), left .22s, right .22s; z-index:32; cursor:pointer}
+body.tel #pside0 .hcard{width:var(--hw); height:var(--hh); flex:0 0 auto;
+  margin-left:min(0px, calc((100% - var(--n,5) * var(--hw)) / (var(--n,5) - 1)))}
+body.tel #pside0 .hcard:first-child{margin-left:0}
+body.tel #pside0 .hcard .hnr{display:none}
+body.tel #pside0 .hcard.up:hover{transform:none}
+body.tel.handop #pside0 .hand{left:calc(var(--sl) + 8px); right:calc(var(--sr) + var(--rail) + 6px); transform:none; z-index:90}
+body.tel.handop #pside0 .hcard.up:hover{transform:translateY(-8px)}
+body.tel.handop #fieldwrap, body.tel.handop #pside1, body.tel.handop #right{filter:brightness(.42) saturate(.7); transition:filter .2s}
+body.tel.handop #pside0 .pinfo{opacity:0}
+
+/* rechts: de rail met de zetknoppen en jouw stapels */
+body.tel #right{position:fixed !important; right:var(--sr); top:var(--top); bottom:calc(var(--sb) + 2px); width:var(--rail);
+  display:flex !important; flex-direction:column !important; flex-wrap:nowrap !important; align-items:stretch; justify-content:center;
+  gap:8px; padding:0 0 0 6px !important; border:0 !important; background:none !important; overflow:visible; z-index:25}
+body.tel #piles1, body.tel #rtools{display:none !important}
+body.tel #app #right, body.tel #app.hzdoor #right{background:none !important; box-shadow:none !important; border:0 !important}
+body.tel #rmid{order:0; display:flex !important; flex-direction:column !important; flex:0 0 auto !important; align-items:stretch; gap:6px; width:auto}
+body.tel #turnbadge{font-size:.3rem !important; text-align:center; line-height:1.6; white-space:normal}
+body.tel #turnbadge b{display:none}
+body.tel #turnbadge .tijdmeter{font-size:.8rem; padding:1px 0; margin-top:2px}
+body.tel #actions{display:flex !important; flex-direction:column !important; gap:6px; width:auto !important; flex:none !important}
+body.tel #actions .abtn{width:100% !important; flex:none !important; min-height:44px; padding:7px 4px !important;
+  font-size:.42rem !important; line-height:1.5; white-space:normal}
+body.tel #actions .abtn.primary{min-height:62px; font-size:.5rem !important}
+body.tel #piles0{order:1; display:flex !important; justify-content:center; gap:6px; margin:0}
+body.tel #right .pile{width:calc(var(--cw) * .48) !important; height:calc(var(--chh) * .48) !important}
+body.tel #right .pile .lab{display:none}
+body.tel #right .pile .cnt{font-size:.3rem; min-width:15px; height:14px; right:-4px; top:-5px}
+/* het menu: liggend is er geen hoogte, dus de keuzes en het statusvenster naast elkaar */
+body.tel.venster .vmenu{flex-direction:row; align-items:flex-start; width:min(760px, calc(100vw - var(--sl) - var(--sr) - 20px)); gap:14px}
+body.tel.venster .vmenu > .ovbox{flex:1 1 0; max-height:calc(100dvh - 20px); overflow-y:auto; padding:12px 12px 10px}
+body.tel.venster .vmenu > .ovbox:last-child{flex:0 0 220px}
+body.tel .vmenu .menucol{gap:4px; margin-top:8px}
+body.tel .vmenu .mbtn{padding-top:8px; padding-bottom:8px}
+/* de starthand: het vraagje bovenin, compact, zodat je hand eronder helemaal zichtbaar is */
+body.tel #mullpaneel{align-items:flex-start; padding-top:6px}
+body.tel #mullpaneel .mullbox{max-width:min(560px, 70vw); padding:8px 14px !important}
+body.tel #mullpaneel .mullkop{font-size:.6rem; margin-bottom:4px}
+body.tel #mullpaneel .mullsub, body.tel #mullpaneel .mullprijs, body.tel #mullpaneel .mulltel, body.tel #mullpaneel .mulllaatste{font-size:.85rem; line-height:1.1; margin:2px 0}
+body.tel #mullpaneel .mullknop{margin-top:6px; gap:8px}
+body.tel #mullpaneel .mullknop .abtn{min-height:40px; padding:6px 10px; font-size:.48rem}
+/* de opdrachtregel ("kies een vak…") staat bovenin, over de hand van de tegenstander: zo valt hij nooit over een vak */
+body.tel #banner{position:fixed !important; left:calc(var(--sl) + 300px); right:calc(var(--sr) + 50px); top:2px; bottom:auto;
+  max-width:none; transform:none; z-index:50; text-align:center}
+body.tel #banner:not(.hidden){display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:nowrap}
+body.tel #banner .btxt{font-size:.82rem !important; line-height:1.05; padding:4px 10px !important; border-radius:6px}
+body.tel #banner .btxt b{font-size:.62rem !important}
+body.tel #banner .bskip{margin:0 !important; padding:6px 8px; font-size:.75rem; flex:0 0 auto; min-height:34px}
+body.tel.handop #banner{display:none}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -17388,6 +17546,9 @@ function menuHTML(){
       <div class="vscheid"></div>
 
       ${NET.on && NET.chan === "live" ? `<button class="mbtn" data-act="btn" data-btn="copyroom">Roomlink kopiëren <span class="mk">${LIVE.code}</span></button>` : ""}
+      ${inGame && telAan() ? `<button class="mbtn" data-act="btn" data-btn="tellog">Logboek, keten & cirkel</button>
+      <button class="mbtn" data-act="btn" data-btn="autopass">Autopass ${telAutopass() ? "staat aan" : "staat uit"}</button>
+      <button class="mbtn" data-act="btn" data-btn="help">Regels</button>` : ""}
       <button class="mbtn" data-act="btn" data-btn="audio">Geluid & effecten</button>
       ${inGame && (!online || NET.seat >= 0) ? `<div class="vscheid"></div><button class="mbtn danger" data-act="btn" data-btn="askSurrender">Opgeven</button>` : ""}
     </div></div>
@@ -24996,7 +25157,7 @@ const PT_WERELD = {1:["#3b2c1c","#120d08"], 2:["#1f3524","#0a130c"], 3:["#3d1c12
                    4:["#123150","#040b16"], 5:["#3a3c52","#0f1020"]};
 let PT_TIMER = null;
 function portretAan(){
-  return !!(S && S.story && !S.over && window.matchMedia && window.matchMedia("(min-width:1081px)").matches);
+  return !!(S && S.story && !S.over && window.matchMedia && (window.matchMedia("(min-width:1081px)").matches || telAan()));
 }
 const ptSprIs = k => !!(k && (SPRITE_BEELD[k] || SPR_ART[k] || SPR_LEEN[k] || SPRITE_TERUG[k]));
 /* Wie veel groter is dan het venster: ingezoomd, zodat je alleen een stuk van hem ziet.
@@ -25099,6 +25260,8 @@ function zegPaint(){
   }
   el.classList.remove("winkelbel");
   const st = S && S.story;
+  /* 📱 Op de telefoon praat de tegenstander uit het portretje linksboven, niet uit deze pop-up. */
+  if(telAan() && portretAan()){ el.classList.remove("show"); el.innerHTML = ""; return; }
   if(!st || !st.zin || !S.ui || S.ui.mode === "start" || S.over || tutOpen()){
     el.classList.remove("show"); el.innerHTML = ""; return;
   }
@@ -27601,6 +27764,7 @@ function render(){
     /* De zijbalk is in het verhaal breder; het vergezicht moet dan opnieuw passen. */
     if(document.body.classList.contains("verhaal") !== vh){ document.body.classList.toggle("verhaal", vh); setTimeout(laagPassen, 30); } }
   portretPaint();
+  telNaRender();
   lvKleurZet();
   vijandBalkPaint();
   mpBalkPaint();
@@ -30200,6 +30364,7 @@ function onBtn(btn, el, fromAction){
     case "koopnee": if(M && M.type === "winkel"){ M.bevestig = null; render(); } break;
     case "infoterug": M = (M && M.terug) ? M.terug : null; render(); break;
     case "mlog": { const a = document.getElementById("app"); if(a) a.classList.toggle("showlog"); break; }
+    case "tellog": { M = null; const a = document.getElementById("app"); if(a) a.classList.add("showlog"); render(); break; }
     case "logtoggle": document.body.classList.toggle("logopen"); break;
     case "restart":
       if(NET.on){ M = {type:"restart"}; render(); }
@@ -30230,6 +30395,67 @@ function toonKaartInfo(cd, terug){
   if(terug) M.terug = terug;
   render();
 }
+
+/* ================= 📱 TELEFOON LIGGEND =================
+   body.tel zet het gevechtsscherm in de telefoonopstelling (ontwerp A, zie de CSS). Je hand piept
+   onderaan: de eerste tik haalt hem omhoog, de tweede kiest een kaart (en dan zakt hij weer, zodat
+   je het vak ziet waar hij heen mag). Tik naast de hand en hij zakt zonder dat er iets gebeurt. */
+function telAan(){ return document.body.classList.contains("tel"); }
+function telAutopass(){
+  const seats = NET.on ? (NET.seat >= 0 ? [NET.seat] : []) : (S && S.vsBot ? [0] : [0,1]);
+  return !!(seats.length && seats.every(i => SET.autopass[i]));
+}
+function telZet(){
+  let aan = false;
+  try{ aan = window.matchMedia("(orientation:landscape) and (max-height:500px)").matches; }catch(e){}
+  try{ if(localStorage.getItem("elementaal_tel") === "1") aan = true; }catch(e){}
+  if(aan === telAan()) return;
+  document.body.classList.toggle("tel", aan);
+  if(!aan) document.body.classList.remove("handop", "ptgroot");
+  if(S && !FAST){ const v = document.getElementById("portretvak"); if(v){ v.dataset.sig = ""; v.dataset.bel = ""; } render(); }
+}
+/* Moet je uit je hand kiezen (afleggen, de mulligan), dan komt hij vanzelf omhoog. */
+let TEL_AUTO = false;
+function telNaRender(){
+  if(!telAan() || !S) return;
+  const u = S.ui || {}, ik = (NET.on && NET.seat === 1) ? 1 : 0;
+  const moet = !S.over && ((u.mode === "choice" && u.kind === "hand" && u.p === ik && !isBot(ik))
+    || (u.mode === "mulligan" && !isBot(u.p) && iControl(u.p)));
+  if(moet && !TEL_AUTO) telHand(true);
+  if(!moet && TEL_AUTO) telHand(false);
+  TEL_AUTO = moet;
+}
+function telHand(op){
+  document.body.classList.toggle("handop", !!op);
+}
+window.addEventListener("resize", telZet);
+window.addEventListener("orientationchange", () => setTimeout(telZet, 120));
+telZet();
+document.addEventListener("click", e => {
+  if(!telAan()) return;
+  const app = document.getElementById("app");
+  /* het logboek-vel: elke tik sluit het weer */
+  if(app && app.classList.contains("showlog")){
+    if(e.target.closest("#left")){ app.classList.remove("showlog"); e.stopPropagation(); e.preventDefault(); }
+    return;
+  }
+  if(M) return;   // een venster ligt erover: daar gaat de tik heen
+  if(DRUKGEDAAN) return;   // lang vastgehouden: dat was kaartinfo, geen tik
+  if(e.target.closest("#portretvak")){
+    document.body.classList.toggle("ptgroot"); e.stopPropagation(); return;
+  }
+  if(document.body.classList.contains("ptgroot")){ document.body.classList.remove("ptgroot"); }
+  const hand = e.target.closest("#pside0 .hand");
+  if(document.body.classList.contains("handop")){
+    if(hand && e.target.closest(".hcard")){ if(!TEL_AUTO) setTimeout(() => telHand(false), 0); return; }   // kaart kiezen
+    if(hand) return;
+    if(TEL_AUTO) return;   // je moet nu uit je hand kiezen: de hand blijft staan
+    /* een knop (zetknoppen, menu, opdrachtregel) doet gewoon wat hij doet; de hand zakt mee */
+    if(e.target.closest("button, #actions, #banner, #mullpaneel, #menufab")){ telHand(false); return; }
+    telHand(false); e.stopPropagation(); e.preventDefault(); return;                       // naast de hand: alleen dicht
+  }
+  if(hand){ telHand(true); AU.play && AU.play("click"); e.stopPropagation(); e.preventDefault(); }
+}, true);
 let DRUKT = null, DRUKGEDAAN = false;
 document.addEventListener("pointerdown", e => {
   const h = e.target.closest(".hcard[data-act='hand']");
