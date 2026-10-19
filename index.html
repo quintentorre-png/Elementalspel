@@ -3035,6 +3035,23 @@ body.hzruim #horizon{height:100%; -webkit-mask-image:none; mask-image:none}
 .verlorenkop span:nth-child(3){--r:9deg} .verlorenkop span:nth-child(6){--r:-11deg}
 @keyframes valletter{0%{transform:translateY(-120%) rotate(0); opacity:0} 60%{opacity:1} 100%{transform:translateY(0) rotate(var(--r,0deg)); opacity:1}}
 .verlorenbox{border-color:#7a1d16 !important; box-shadow:0 0 40px rgba(180,30,20,.35)}
+/* Gewonnen en verloren (okt 2026): geen plaatje meer, het woord zelf in de stijl van het logo, iets groter.
+   Gewonnen: wit naar goud, de letters springen omhoog. Verloren: wit naar rood, de letters vallen en blijven scheef hangen. */
+body .ovbox:has(h1.eindkop){width:min(780px,94vw); max-width:94vw}
+body .ovbox h1.eindkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(1.5rem,5.6vw,3.7rem); letter-spacing:.08em;
+  line-height:1.15; margin:8px 0 16px; display:flex; justify-content:center; flex-wrap:nowrap; white-space:nowrap; gap:.04em; text-shadow:none; color:inherit;
+  filter:drop-shadow(4px 4px 0 var(--vnd,#0b0d22)) drop-shadow(0 0 18px var(--vglans,rgba(232,198,122,.35)))}
+body .ovbox h1.eindkop span{display:inline-block; text-shadow:none; -webkit-text-stroke:0;
+  background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:springletter .65s cubic-bezier(.3,1.7,.5,1) both; animation-delay:calc(var(--i) * 80ms)}
+body .ovbox h1.eindkop.verlies{filter:drop-shadow(4px 4px 0 #2a0604) drop-shadow(0 0 18px rgba(255,70,50,.45))}
+body .ovbox h1.eindkop.verlies span{background:linear-gradient(180deg,#ffffff 0 46%,#ff6a52 54% 100%); -webkit-background-clip:text; background-clip:text;
+  animation:valletter .7s cubic-bezier(.3,1.6,.5,1) both; animation-delay:calc(var(--i) * 90ms)}
+body .ovbox h1.eindkop.verlies span:nth-child(2n){--r:-5deg} body .ovbox h1.eindkop.verlies span:nth-child(2n+1){--r:4deg}
+body .ovbox h1.eindkop.verlies span:nth-child(3){--r:9deg} body .ovbox h1.eindkop.verlies span:nth-child(6){--r:-11deg}
+body .ovbox h1.eindkop .spatie{width:.5em}
+@keyframes springletter{0%{transform:translateY(60%) scale(.6); opacity:0} 60%{opacity:1} 100%{transform:translateY(0) scale(1); opacity:1}}
+@media (prefers-reduced-motion:reduce){ body .ovbox h1.eindkop span{animation:none} }
 #spatiehint{position:fixed; left:50%; bottom:22%; transform:translate(-50%,8px); z-index:300; pointer-events:none; opacity:0;
   background:rgba(10,12,18,.94); border:2px solid var(--gold,#c9a86a); border-radius:6px; padding:9px 16px;
   font-family:"VT323",ui-monospace,monospace; font-size:1.25rem; color:#fff1c8; transition:opacity .15s, transform .15s}
@@ -3667,18 +3684,14 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
 .cspijl{color:#fff; font-size:.8rem; text-shadow:1px 1px 0 #0b0d22}
 .cstxt{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; letter-spacing:.06em; color:var(--vdim); text-shadow:1px 1px 0 #0b0d22}
 .cstrip:hover .cstxt, body.cirkelopen .cstxt{color:var(--vng,#e8c67a)}
-/* De cirkel ligt op een stenen plaat (art/cirkel-achter.png: een gevulde plaat in grijstinten).
-   Het spel kleurt die plaat zelf in de kleur van het gevecht: het grijs wordt over de kleur gelegd
-   (overlay), dus de stenen, de groef en de lijst blijven zichtbaar, alleen in de tint van het level.
-   Ontbreekt het plaatje, dan blijft alleen het effen vlak in die kleur over. */
-.cstrip.ckring{padding:6%; width:100%; max-width:min(100%, 38dvh); aspect-ratio:1/1; align-self:center; box-sizing:border-box;
+/* De cirkel ligt op een vlak zoals de achterkant van de kaarten: hetzelfde geometrische patroon
+   (art/cirkel-achter.png, een vierkante uitsnede van kaart-achterkant-veld.png, in grijs) en in
+   dezelfde kleur als de kaartrug van dit gevecht. Zonder plaatje: alleen die kleur. */
+.cstrip.ckring{padding:7%; width:100%; max-width:min(100%, 38dvh); aspect-ratio:1/1; align-self:center; box-sizing:border-box;
   display:grid; place-items:center; border:3px solid var(--ink2,#0b0d12); border-radius:6px; position:relative; isolation:isolate;
-  background:url("art/cirkel-achter.png") center/cover no-repeat, var(--rk2,#2a2338);
-  background-blend-mode:overlay;
+  background:url("art/cirkel-achter.png") center/cover no-repeat;
+  background-color:var(--rk1,#4a4f62); background-blend-mode:luminosity;
   box-shadow:3px 3px 0 0 rgba(0,0,0,.45); image-rendering:pixelated}
-/* een zachte schaduw naar de randen, zodat de cirkel in het midden licht vangt */
-.cstrip.ckring::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:3px;
-  background:radial-gradient(circle at 50% 48%, rgba(255,255,255,.07) 0 38%, rgba(0,0,0,.28) 78%)}
 .cstrip.ckring .tbeeld.cirkel{width:100%; height:100%; aspect-ratio:auto; display:block; margin:0 auto; max-width:100%}
 .cstrip.ckring .tbeeld.cirkel img, .cstrip.ckring .tbeeld.cirkel svg{width:100%; height:100%; object-fit:contain; display:block}
 .cstrip.ckring:hover .tbeeld{filter:brightness(1.15)}
@@ -7232,9 +7245,9 @@ EL.wolf = {name:"Wolf", icon:"🐺", strong:null, flash:false, hp:3, kaart:true,
    slaat altijd jou: wat er tegenover hem staat, springt hij overheen. */
 EL.vis = {name:"Vliegende vis", icon:"🐟", strong:null, flash:false, hp:3, kaart:true, speciaal:true,
   direct:true, vis:true, overheen:true};
-/* 🐠 De clownsvis: bij binnenkomst +2 levens voor alle vissen, en zolang hij er is slaan alle
+/* 🐠 De vaandelvis (was de clownsvis): bij binnenkomst +2 levens voor alle vissen, en zolang hij er is slaan alle
    vissen met volle slag. 🐡 De kogelvis: wie hem aanvalt, krijgt er zelf 3 terug. */
-EL.clown = {name:"Clownsvis", icon:"🐠", strong:null, flash:false, hp:1, kaart:true, speciaal:true, vis:true, overheen:true};
+EL.clown = {name:"Vaandelvis", icon:"🐠", strong:null, flash:false, hp:1, kaart:true, speciaal:true, vis:true, overheen:true};
 EL.kogel = {name:"Kogelvis", icon:"🐡", strong:null, flash:false, hp:3, kaart:true, speciaal:true, vis:true, overheen:true};
 /* 🥚 Het ei van Shelob. Vier levens, valt nooit aan, en na twee van haar beurten komt het uit. */
 EL.ei = {name:"Ei", icon:"🥚", strong:null, flash:false, hp:4, token:true, speciaal:true, stil:true, vastAtk:0, geenOffer:true,
@@ -12637,7 +12650,7 @@ async function resolveEffect(it){
   if(it.el === "clown"){
     let n = 0;
     for(let c=0;c<5;c++){ const cr = P(p).cols[c].cre; if(cr && EL[cr.card.el].vis){ cr.hp += 2; n++; pop(creSel(p, c), "+2", "heal"); } }
-    addLog(`🐠 <em>Clownsvis</em>: ${n} vis${n === 1 ? "" : "sen"} van ${pName(p)} +2 levens.`, true);
+    addLog(`🐠 <em>Vaandelvis</em>: ${n} vis${n === 1 ? "" : "sen"} van ${pName(p)} +2 levens.`, true);
     render(); return;
   }
   if(it.el === "wolf"){
@@ -13385,6 +13398,22 @@ function klokTick(){
     if(NET.on && NET.seat >= 0 && NET.seat !== w) return;   // de eigenaar meldt het zelf
     act({t:"klokuit", p:w});
   }
+}
+/* 🏆 De kop van het eindscherm: het woord zelf, in de stijl van het logo. */
+function eindKop(woord, verlies){
+  return `<h1 class="eindkop${verlies ? " verlies" : ""}" aria-label="${woord}">${[...woord].map((ch, i) => ch === " "
+    ? `<span class="spatie"></span>` : `<span style="--i:${i}">${ch}</span>`).join("")}</h1>`;
+}
+/* Wie ben jij in dit potje? Online je eigen stoel, tegen de bot de mens; op één scherm met z'n tweeën niemand. */
+function eindIk(){
+  if(NET.on) return NET.seat;
+  if(S.vsBot) return isBot(0) ? (isBot(1) ? -1 : 1) : 0;
+  return -1;
+}
+function eindKopVoor(w){
+  const ik = eindIk();
+  if(ik >= 0) return eindKop(w === ik ? "GEWONNEN" : "VERLOREN", w !== ik);
+  return eindKop(`${String(pName(w)).toUpperCase()} WINT`, false);
 }
 function klokVerloren(p){
   if(!S || S.over || !S.klok || !S.klok.aan) return;
@@ -16542,15 +16571,15 @@ function overlayHTML(){
     if(S.over.wachtVerlies) return "";               // eerst het gesprek, dan het verliesscherm
     if(matchVan() && S.match.bo === 1){
       const w = S.over.winner;
-      return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint</h1>
+      return `<div class="ovbox${eindIk() >= 0 && w !== eindIk() ? " verlorenbox" : ""}">${eindKopVoor(w)}
         <div class="sub">${S.over.reason}</div>${ladderWinHTML()}
         <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button>${S.ladder && !S.ladder.stil ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
     }
     if(matchVan()){
       const m = S.match, w = S.over.winner;
       if(S.over.matchDone)
-        return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(w)} wint de match</h1>
-          <div class="sub"><b>${m.wins[0]}–${m.wins[1]}</b> na ${m.game} potje${m.game>1?"s":""}.<br>${S.over.reason}</div>${ladderWinHTML()}
+        return `<div class="ovbox${eindIk() >= 0 && w !== eindIk() ? " verlorenbox" : ""}">${eindKopVoor(w)}
+          <div class="sub">${eindIk() >= 0 ? `${pName(w)} wint de match: ` : ""}<b>${m.wins[0]}–${m.wins[1]}</b> na ${m.game} potje${m.game>1?"s":""}.<br>${S.over.reason}</div>${ladderWinHTML()}
           <button class="obtn" data-act="btn" data-btn="newgame">Nieuwe match</button>${S.ladder && !S.ladder.stil ? `<button class="obtn" data-act="btn" data-btn="ladmenu">Andere tegenstander</button>` : ""}</div>`;
       const rd = readyState();
       const me = NET.on ? NET.seat : -1;
@@ -16576,9 +16605,8 @@ function overlayHTML(){
       const sterren = st ? `<div class="sterrij">${(st.lijst || [["verslagen", true], ["geen schade", st.geenSchade], ["onder 3 min · " + tijdTekst(st.tijd), st.snel]])
         .map(([txt, aan]) => ["★", txt, aan]).map(([ic, txt, aan], i) => `<div class="ster${aan ? " aan" : " uit"}" style="--st:${i}"><span class="sterik">${ic}</span><span class="stertxt">${txt}</span></div>`).join("")}</div>
         <div class="sub sternieuw">${st.n > best ? `<b>+${st.n - best} nieuw</b> · je beste was ${best} van 3` : (best ? `je had hier al ${best} van 3` : "")}</div>` : "";
-      /* Verloren (okt 2026): geen grafsteen meer, maar het woord zelf, letter voor letter dat valt. */
-      const verlorenKop = `<h1 class="verlorenkop" aria-label="Verloren">${[..."VERLOREN"].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join("")}</h1>`;
-      return `<div class="ovbox${gewonnen ? "" : " verlorenbox"}">${gewonnen ? `<div class="winbig">🏆</div><h1>Gewonnen!</h1>` : verlorenKop}
+      /* Gewonnen en verloren (okt 2026): geen plaatje, het woord zelf in de stijl van het logo. */
+      return `<div class="ovbox${gewonnen ? "" : " verlorenbox"}">${eindKop(gewonnen ? "GEWONNEN" : "VERLOREN", !gewonnen)}
         <div class="sub">${S.story.id} · ${L.naam}<br>${S.over.reason}</div>${sterren}
         <div class="mrow" style="margin-top:16px">
           ${gewonnen
@@ -16587,7 +16615,7 @@ function overlayHTML(){
           <button class="obtn b-dim" style="padding:11px 18px" data-act="btn" data-btn="storyterug">📖 Levelkeuze</button>
         </div></div>`;
     }
-    return `<div class="ovbox"><div class="winbig">🏆</div><h1>${pName(S.over.winner)} wint</h1>
+    return `<div class="ovbox${eindIk() >= 0 && S.over.winner !== eindIk() ? " verlorenbox" : ""}">${eindKopVoor(S.over.winner)}
       <div class="sub">${S.over.reason}</div>
       <button class="obtn" data-act="btn" data-btn="newgame">Opnieuw spelen</button></div>`;
   }
@@ -17391,6 +17419,9 @@ function audioHTML(){
     <div class="sub" style="font-size:.74rem;margin-top:14px;color:var(--dim)">
       ${muziekStand()}
     </div>
+    <div class="sub" style="margin-top:16px;margin-bottom:2px">Filmstudio</div>
+    <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">De filmpjes afspelen met muziek naar keuze, om uit te proberen wat waar past.</div>
+    <div class="segrow"><button class="seg" data-act="btn" data-btn="filmstudio">🎬 Open de filmstudio</button></div>
     <div style="text-align:center"><button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div></div>`;
 }
 /* e) Je eigen deck bekijken: wat er na de bans nog in zit en waar de rest gebleven is. */
@@ -19594,7 +19625,6 @@ const SPRITE_BEELD = {
   inkt_vast:         "art/inkt-vast.png",            // 4-2 · houdt één lepel tegen zich aan
   cape_wand:         "art/cape-wand.png",            // 4-2 · voorwerp: de rode cape aan een haak
   wit_ding:          "art/wit-ding.png",             // 4-2 · voorwerp: iets wits dat gloeit
-  spiegelgang:       "art/spiegelgang.png",          // 4-4 · zestien keer jij, in vlakken water
   spiegelbeeld_alles:"art/spiegelbeeld-alles.png",   // 4-4 · het spiegelbeeld in detail: alles wat je meenam
   oceaan_stil:       "art/oceaan-stil.png",          // 4-5 · alles staat stil, elke druppel hangt
   spiegelbeeld:      "art/spiegelbeeld.png",         // 4-4 · wat er in het water staat
@@ -21948,7 +21978,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Meer kan ik niet doen. Meer heb ik ook nooit hoeven doen."},
       {s:null, bg:4, naam:"…", kleur:"#e6c88a", t:"🛶 <b>De veerman.</b> Elke beurt is er één kolom afgesloten. Daar komt niks doorheen, van geen van beide kanten. De afgesloten kolom schuift elke beurt één plek op."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Clownsvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Vaandelvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
     ],
     nee:[
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"…"},
@@ -21958,7 +21988,7 @@ const STORY = {
       {s:"veerman", groot:true, bg:4, naam:"…", kleur:"#d8cfb8", t:"Hij zegt het niet beledigd. Hij zegt het als iemand die één ding kan en het niet mag doen."},
       {s:"veerman", groot:true, bg:4, naam:"De veerman", kleur:"#d8cfb8", t:"Zes keer. Dan bent u er. Tel maar mee. Ik tel ook mee."},
       {s:null, bg:4, naam:"…", kleur:"#a9e2ff", t:"🌊 <b>Hou het zes rondes vol.</b> Dan ben je aan de overkant. Je hoeft de Zee niet te verslaan."},
-      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Clownsvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
+      {s:null, bg:4, naam:"…", kleur:"#cfd8e0", t:"🐟 <b>De Zee speelt alleen vissen en water.</b> Vliegende vis: 3 levens, slaat altijd jou. Vaandelvis: 1 leven, geeft alle vissen +2 en volle slag zolang hij er is. Kogelvis: 3 levens, wie hem aanvalt krijgt er 3 terug. Er staan al twee vliegende vissen, en wat valt haalt de Zee terug."}
     ],
     gevechtNa:{ja:"veer", nee:"zelf"},
     varianten:{
@@ -22268,9 +22298,9 @@ const STORY = {
       {s:null, bg:4, naam:"…", mu:"w4_water", t:"Je komt neer op iets hards en het water staat tot je enkels."},
       {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"Het beweegt niet. Niet stil. Plat. Zo plat dat je het niet meer als water leest."},
       {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"Het ligt in vlakken naast elkaar, met richels ertussen, en daardoor loop je een gang in."},
-      {s:"spiegelgang", reus:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"In elk vlak staat iemand. Het is zestien keer hetzelfde en het beweegt allemaal tegelijk met jou mee."},
-      {s:"spiegelgang", reus:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"Je blijft staan om te kijken."},
-      {s:"spiegelgang", reus:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"Ze blijven ook staan. Iets later."},
+      {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"In elk vlak staat iemand. Het is zestien keer hetzelfde en het beweegt allemaal tegelijk met jou mee."},
+      {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"Je blijft staan om te kijken."},
+      {s:null, bg:4, naam:"…", kleur:"#9fb6d8", t:"Ze blijven ook staan. Iets later."},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…"},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"…", kleur:"#9fb6d8", t:"Er is niks."},
       {s:"spiegelbeeld", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…ga naar huis."},
@@ -22282,7 +22312,7 @@ const STORY = {
       {s:"spiegelbeeld_boos", groot:true, bg:4, naam:"???", kleur:"#9fb6d8", t:"…laat maar zien."}
     ],
     midden:[
-      {s:"spiegelgang", reus:true, naam:"…", kleur:"#9fb6d8", t:"Alle zestien vlakken doen dezelfde zet, iets na elkaar."},
+      {s:null, naam:"…", kleur:"#9fb6d8", t:"Alle zestien vlakken doen dezelfde zet, iets na elkaar."},
       {s:"spiegelbeeld", groot:true, naam:"???", kleur:"#9fb6d8", t:"…dat had ik ook gedaan."},
       {s:"spiegelbeeld", groot:true, naam:"???", kleur:"#9fb6d8", t:"…dat had ik ook gedaan."},
       {s:"spiegelbeeld", groot:true, naam:"???", kleur:"#9fb6d8", t:"…dat had ik ook gedaan."},
@@ -24021,7 +24051,7 @@ const VELD = {
 
   "4-1": { regels:["🌊 <b>Hou het 6 rondes vol.</b> Dan ben je aan de overkant; je hoeft de Zee niet te verslaan.",
                    "🐟 De Zee speelt alleen vissen en 💧 water, eerlijk verdeeld. <b>Vliegende vis</b>: 3 levens, {Kleurloos}, {Direct}. Er staan er al twee op het veld.",
-                   "🐠 <b>Clownsvis</b>: 1 leven. Komt hij binnen, dan krijgen alle vissen van de Zee <b>+2</b> levens (hij ook). Zolang hij er is, slaan alle vissen met {Volle slag}.",
+                   "🐠 <b>Vaandelvis</b>: 1 leven. Komt hij binnen, dan krijgen alle vissen van de Zee <b>+2</b> levens (hij ook). Zolang hij er is, slaan alle vissen met {Volle slag}.",
                    "🐡 <b>Kogelvis</b>: 3 levens. Val je hem aan, dan krijgt jouw wezen er zelf <b>3</b> schade bij. Vuur-effecten tellen niet als aanval.",
                                       "🟣 <b>School</b>: elke beurt van haar komt er een vliegende vis terug uit het graf.",
                    "🛶 Zei je ja tegen de veerman, dan is er elke beurt één kolom dicht (eerst kolom 3). Die schuift elke beurt één op. Daar valt niemand aan."] },
@@ -27549,6 +27579,7 @@ function helpHTML(){
    of het nummer van het gevecht waar je in zit. */
 function muziekScherm(){
   if(!S || FAST) return;
+  if(typeof document !== "undefined" && document.getElementById("filmstudio")){ AU.zet(null); return; }   // in de filmstudio speelt alleen de filmmuziek
   if(!window.__laadOk){ if(S.ui && S.ui.mode === "start") AU.wens = M && M.type === "story" ? "kaart" : "titel"; return; }
   if(M && M.type === "praat") return;
   /* De uitleg vlak voor een verhaalgevecht: het nummer van het praatje loopt gewoon door. */
@@ -28126,7 +28157,7 @@ function nextBroker(why){
   openPeer();
 }
 function liveSave(){
-  try{ localStorage.setItem("elementaal_live", JSON.stringify({code:LIVE.code, role:LIVE.role, kind:NET.kind, seat:NET.seat})); }catch(e){}
+  try{ localStorage.setItem("elementaal_live", JSON.stringify({code:LIVE.code, role:LIVE.role, kind:NET.kind, seat:NET.seat, t:Date.now()})); }catch(e){}
 }
 function liveForget(){ try{ localStorage.removeItem("elementaal_live"); }catch(e){} }
 function liveAvailable(){ return typeof Peer === "function"; }
@@ -28148,7 +28179,7 @@ function openPeer(){
   try{ LIVE.peer = id ? new Peer(id, peerOpts()) : new Peer(peerOpts()); }
   catch(e){ LIVE.err = "Verbinden lukt niet: " + e.message; render(); return; }
   LIVE.peer.on("open", () => {
-    clearTimeout(LIVE.watchdog); LIVE.watchdog = null; LIVE.tries = 0;
+    clearTimeout(LIVE.watchdog); LIVE.watchdog = null; LIVE.tries = 0; LIVE.idPoging = 0;
     LIVE.status = LIVE.role === "host" ? "wachten op je vriend…" : "verbinden met room…";
     LIVE.err = "";
     if(LIVE.role === "guest") liveConnect();
@@ -28159,7 +28190,16 @@ function openPeer(){
     try{ LIVE.peer.reconnect(); }catch(e){} });
   LIVE.peer.on("error", err => {
     const t = (err && err.type) || "";
-    if(t === "unavailable-id" && LIVE.role === "host"){ LIVE.code = roomCode(); liveSave(); openPeer(); return; }
+    if(t === "unavailable-id" && LIVE.role === "host"){
+      /* Is de room al bezig (je kwam terug na herladen of een hapering), dan houdt de server je oude
+         plek soms nog even vast. Dan wachten we en proberen dezelfde code opnieuw: met een nieuwe code
+         kan je vriend je niet meer vinden. Alleen een gloednieuwe room krijgt meteen een andere code. */
+      if((LIVE.started || NET.log.length > 1 || LIVE.terug) && (LIVE.idPoging = (LIVE.idPoging || 0) + 1) <= 12){
+        LIVE.status = "je room wordt nog vrijgegeven, even geduld…"; render();
+        setTimeout(openPeer, 2500); return;
+      }
+      LIVE.idPoging = 0; LIVE.code = roomCode(); liveSave(); openPeer(); return;
+    }
     if(t === "peer-unavailable"){ LIVE.status = "room nog niet open — opnieuw proberen…"; liveRetry(); render(); return; }
     if(t === "browser-incompatible"){ LIVE.err = "Deze browser ondersteunt geen directe verbinding."; render(); return; }
     if(t === "network" || t === "server-error" || t === "socket-error" || t === "socket-closed"){
@@ -28175,12 +28215,19 @@ function liveConnect(){
 function liveRetry(){
   if(LIVE.role !== "guest" || LIVE.joined) return;
   clearTimeout(LIVE.retry);
-  LIVE.retry = setTimeout(() => { if(!LIVE.joined) liveConnect(); }, 2500);
+  LIVE.retry = setTimeout(() => {
+    if(LIVE.joined) return;
+    /* Lukt het een tijdje niet (zo'n 15 seconden), dan ook de verbinding met de server vers opbouwen:
+       die kan na een hapering half dood zijn zonder dat hij het zelf weet. */
+    LIVE.pogingen = (LIVE.pogingen || 0) + 1;
+    if(LIVE.pogingen % 6 === 0 || !LIVE.peer || LIVE.peer.destroyed || LIVE.peer.disconnected) openPeer();
+    else liveConnect();
+  }, 2500);
 }
 function bindConn(c){
   LIVE.conn = c;
   c.on("open", () => {
-    LIVE.joined = true; LIVE.status = "verbonden"; LIVE.err = "";
+    LIVE.joined = true; LIVE.status = "verbonden"; LIVE.err = ""; LIVE.pogingen = 0;
     clearTimeout(LIVE.retry); clearTimeout(LIVE.watchdog); LIVE.watchdog = null; LIVE.tries = 0;
     liveMsg("verbonden met je tegenstander", true);
     liveNotify("🤝 Verbonden met je tegenstander");
@@ -28194,6 +28241,7 @@ function bindConn(c){
     LIVE.hart = setInterval(() => {
       if(LIVE.conn !== c){ clearInterval(LIVE.hart); return; }
       liveCheck();
+      if(LIVE.joined && Date.now() - (LIVE.bewaard || 0) > 30000){ LIVE.bewaard = Date.now(); liveSave(); }   // de room blijft "vers" zolang je speelt
       if(LIVE.joined && Date.now() - (LIVE.laatst || 0) > 15000){
         clearInterval(LIVE.hart);
         try{ c.close(); }catch(e){}
@@ -28268,7 +28316,18 @@ function liveCheck(){
   liveSend({t:"ping", len:NET.log.length, hash:logHash(NET.log), stand:liveRust() ? standHash() : null, seed:NET.seed});
 }
 function liveCheckIn(m){
-  if(m.len == null || m.seed !== NET.seed || m.len !== NET.log.length) return;
+  if(m.len == null || m.seed !== NET.seed) return;
+  /* De ander heeft meer zetten dan wij, en dat blijft zo (twee hartslagen achter elkaar)? Dan is er
+     onderweg een zet zoekgeraakt, terwijl de verbinding gewoon openstond. Vraag de hele lijst op,
+     anders wacht je eeuwig op een zet die nooit komt. */
+  if(m.len > NET.log.length){
+    if(!liveRust()) return;
+    LIVE.achterMis = (LIVE.achterMis || 0) + 1;
+    if(LIVE.achterMis >= 2){ LIVE.achterMis = 0; liveSend({t:"need"}); }
+    return;
+  }
+  LIVE.achterMis = 0;
+  if(m.len !== NET.log.length) return;
   const anders = m.hash !== logHash(NET.log) || (m.stand != null && liveRust() && m.stand !== standHash());
   if(!anders){ LIVE.checkMis = 0; return; }
   /* Pas bij twee keer achter elkaar ingrijpen: een zet kan net onderweg zijn. */
@@ -28769,7 +28828,8 @@ async function netBoot(){
   }catch(e){}
   try{
     const st = JSON.parse(localStorage.getItem("elementaal_live") || "null");
-    if(st && st.code && liveAvailable() && !NET.on) LIVE.resume = st;
+    /* Alleen een room van de laatste twintig minuten: een oude room van gisteren is er niet meer. */
+    if(st && st.code && liveAvailable() && !NET.on && Date.now() - (+st.t || 0) < 20 * 60000) LIVE.resume = st;
   }catch(e){}
   let snap = null;
   if(el){ try{ snap = JSON.parse(decodeURIComponent(escape(atob(el.textContent.trim())))); }catch(e){} }
@@ -29920,7 +29980,7 @@ function onBtn(btn, el, fromAction){
         NET.on = true; NET.chan = "live"; NET.seat = 0; NET.buf = [];
         NET.seed = (Date.now() ^ Math.floor(Math.random()*1e9)) >>> 0;
         NET.log = [{t:"b", b: startBtnFor(NET.kind)}]; NET.seats = ["host", "guest"];
-        LIVE.role = "host"; LIVE.code = st.code; LIVE.joined = false; LIVE.chat = [];
+        LIVE.role = "host"; LIVE.code = st.code; LIVE.joined = false; LIVE.chat = []; LIVE.terug = true; LIVE.idPoging = 0;
         LIVE.ready = [false, false]; LIVE.announced = false; LIVE.started = false; LIVE.bi = 0; LIVE.tries = 0;
         S.vsBot = false; S.set.handoff = false;
         replay(NET.seed, NET.log).then(() => { openPeer(); render(); });
@@ -30007,6 +30067,7 @@ function onBtn(btn, el, fromAction){
     case "tutvecht": tutVecht(); break;
     case "tutgo": if(M && M.type==="tutorial" && el){ M.step = +el.dataset.step; render(); } break;
     case "audio": M = {type:"audio"}; render(); break;
+    case "filmstudio": M = null; render(); filmStudio(); break;
     case "aelib": M = {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
     case "homemp":   HOME.open = HOME.open === "mp" ? null : "mp"; render(); break;
     case "homebots": HOME.open = HOME.open === "bots" ? null : "bots"; render(); break;
@@ -31086,6 +31147,12 @@ const FILM_TEKST = {
 };
 /* Muziek per filmpje (uit Suno). Ontbreekt een bestand, dan speelt het filmpje gewoon zonder.
    Het nummer mag langer zijn dan het filmpje: aan het eind fadet het weg. */
+/* Muziek per filmpje. Een pad alleen, of {pad, van, wacht, vol, in, uit}:
+   van   = waar in het nummer hij begint (seconden)
+   wacht = op welke filmtijd de muziek inzet (seconden)
+   vol   = volume (0 tot 1, bovenop je muziekvolume)
+   in    = hoe lang het infaden duurt, uit = hoe lang het uitfaden aan het eind duurt.
+   Uitproberen kan in de filmstudio: open het spel met #filmstudio achter de link. */
 const FILM_MUZIEK = {
   "opening":    "audio/film-opening.mp3",
   "opening2":   "audio/film-opening.mp3",
@@ -32097,18 +32164,36 @@ const FILM = (() => {
     }))).then(r => r.every(Boolean));
   }
   /* ---------- muziek ---------- */
-  let muz = null, muzWas = null, muzVol = .8, gT = -1;
+  let muz = null, muzWas = null, muzVol = .8, gT = -1, muzCfg = null;
+  function muziekInstelling(naam) {
+    const m = FILM_MUZIEK[naam];
+    if (!m) return null;
+    const o = typeof m === "string" ? {pad: m} : m;
+    return {pad: o.pad, van: +o.van || 0, wacht: +o.wacht || 0, vol: o.vol == null ? 1 : +o.vol, in: +o.in || 0, uit: o.uit == null ? 1.8 : +o.uit};
+  }
   function muziekAan(naam) {
-    muz = null; muzWas = null;
+    muz = null; muzWas = null; muzCfg = null;
     if (typeof AU !== "undefined") { muzWas = AU.wens; AU.zet(null); }
-    const pad = FILM_MUZIEK[naam];
-    if (!pad || (typeof SET !== "undefined" && SET.mute)) return;
+    const c = muziekInstelling(naam);
+    if (!c || !c.pad || (typeof SET !== "undefined" && SET.mute)) return;
     try {
       muzVol = typeof volM === "function" ? volM() : .8;
-      const a = new Audio(pad); a.volume = muzVol; a.onerror = () => { if (muz === a) muz = null; };
-      const pr = a.play(); if (pr && pr.catch) pr.catch(() => {});
-      muz = a;
+      const a = new Audio(c.pad); a.preload = "auto"; a.volume = 0; a.onerror = () => { if (muz === a) muz = null; };
+      muz = a; muzCfg = c; a.gestart = false;      // hij start in stap(), op de filmtijd c.wacht
     } catch (e) { muz = null; }
+  }
+  /* Het volume van de filmmuziek op filmtijd t: infaden na de inzet, uitfaden aan het eind. */
+  function muziekStap(t) {
+    if (!muz || !muzCfg || !film) return;
+    const c = muzCfg;
+    if (!muz.gestart && t >= c.wacht){
+      muz.gestart = true;
+      const zet = () => { try { muz.currentTime = c.van + (t - c.wacht); } catch (e) {} };
+      if (muz.readyState >= 1) zet(); else muz.addEventListener("loadedmetadata", zet, {once: true});
+      const pr = muz.play(); if (pr && pr.catch) pr.catch(() => {});
+    }
+    const fin = c.in > 0 ? klem((t - c.wacht) / c.in) : 1, fuit = c.uit > 0 ? klem((film.duur - t) / c.uit) : 1;
+    muz.volume = klem(muzVol * c.vol * fin * fuit);
   }
   function muziekUit() {
     const a = muz; muz = null; if (!a) return;
@@ -32118,7 +32203,7 @@ const FILM = (() => {
     if (!film) return;
     const t = (nu - t0) / 1000;
     if (t >= film.duur) { stop(); return; }
-    if (muz) muz.volume = muzVol * klem((film.duur - t) / 1.8);      // aan het eind wegfaden
+    muziekStap(t);      // inzetten, infaden, aan het eind wegfaden
     geluidTussen(film, gT, t); gT = t;
     frame(film, t);
     raf = requestAnimationFrame(stap);
@@ -32159,9 +32244,185 @@ const FILM = (() => {
     laad: f => laad(f.beelden),
     doek: zetDoek, frame,
     tekst: aan => { TEKST_AAN = aan; },
-    muziek: k => FILM_MUZIEK[k] || null,
+    muziek: k => muziekInstelling(k),
     geluid: (f, van, tot) => geluidTussen(f, van, tot)
   };
   return {speel, bezig: () => !!film, paneel};
 })();
+/* ================= 🎬 FILMSTUDIO (okt 2026) =================
+   Muziek op de filmpjes uitproberen. Open via Geluid & effecten, of met #filmstudio achter de link.
+   Per filmpje kies je een nummer (uit het spel of een eigen mp3), waar in het nummer hij begint,
+   op welke filmtijd hij inzet, het volume en het in- en uitfaden. Je instellingen blijven bewaard
+   in deze browser; met "Kopieer" krijg je een regel die je naar Claude stuurt, die zet hem in het spel. */
+function filmStudio(){
+  if(document.getElementById("filmstudio")) return;
+  const P = FILM.paneel;
+  const BEWAAR = "elementaal_filmstudio";
+  let opslag = {}; try{ opslag = JSON.parse(localStorage.getItem(BEWAAR) || "{}") || {}; }catch(e){ opslag = {}; }
+  const bewaar = () => { try{ localStorage.setItem(BEWAAR, JSON.stringify(opslag)); }catch(e){} };
+  /* alle nummers die het spel kent */
+  const nummers = [...new Set(Object.values(MUZIEK).concat(Object.values(FILM_MUZIEK).map(m => typeof m === "string" ? m : m.pad)))].filter(Boolean).sort();
+  const eigen = {};          // eigen mp3's: naam -> object-URL
+  const d = document.createElement("div"); d.id = "filmstudio";
+  d.innerHTML = `<style>
+    #filmstudio{position:fixed;inset:0;z-index:99990;background:#0b0b0e;color:#ddd;font:14px system-ui,sans-serif;overflow:auto;padding:14px;box-sizing:border-box}
+    #filmstudio .fsw{max-width:1180px;margin:0 auto}
+    #filmstudio h2{font-family:"Press Start 2P",monospace;font-size:.9rem;color:#e8c67a;margin:2px 0 10px}
+    #filmstudio .doek{width:100%;aspect-ratio:16/9;background:#000;position:relative}
+    #filmstudio canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+    #filmstudio .rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    #filmstudio button,#filmstudio select,#filmstudio input[type=number]{background:#1c1c24;color:#eee;border:1px solid #33333f;border-radius:5px;padding:6px 10px;font:inherit}
+    #filmstudio button:hover{background:#262632} #filmstudio button.aan{border-color:#e0b85a;color:#e0b85a}
+    #filmstudio input[type=range]{accent-color:#e0b85a} #filmstudio .tl{flex:1;min-width:220px}
+    #filmstudio .tijd{font-variant-numeric:tabular-nums;color:#aaa;min-width:110px}
+    #filmstudio .scenes button{font-size:12px;padding:3px 7px}
+    #filmstudio .instel{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;margin-top:12px;background:#121218;border:1px solid #26262f;border-radius:6px;padding:10px}
+    #filmstudio .instel label{color:#aaa} #filmstudio .instel input[type=range]{width:100%}
+    #filmstudio .waarde{font-variant-numeric:tabular-nums;color:#e8c67a;min-width:70px;text-align:right}
+    #filmstudio textarea{width:100%;height:90px;background:#121218;color:#cfd;border:1px solid #26262f;border-radius:6px;font:12px monospace;margin-top:8px;box-sizing:border-box}
+    #filmstudio .noot{color:#777;font-size:12px;margin-top:8px}
+    #filmstudio .muzbalk{position:relative;height:16px;background:#16161c;border-radius:4px;margin-top:6px;overflow:hidden}
+    #filmstudio .muzbalk i{position:absolute;top:0;bottom:0;background:rgba(224,184,90,.35);border-left:2px solid #e0b85a}
+    #filmstudio .muzbalk b{position:absolute;top:0;bottom:0;width:2px;background:#fff}
+  </style>
+  <div class="fsw">
+    <div class="rij" style="justify-content:space-between;margin-top:0"><h2>🎬 Filmstudio</h2><button data-k="dicht">✕ Sluiten</button></div>
+    <div class="rij"><label>Filmpje <select data-k="film"></select></label>
+      <label><input type="checkbox" data-k="tekst" checked> tekst</label>
+      <label><input type="checkbox" data-k="sfx" checked> geluidseffecten</label></div>
+    <div class="doek"><canvas width="1280" height="720"></canvas></div>
+    <div class="rij"><button data-k="speel">▶ Afspelen</button><button data-k="begin">⏮ Begin</button>
+      <input type="range" class="tl" data-k="tl" min="0" max="1000" value="0"><span class="tijd" data-k="tijd">0.0 s</span></div>
+    <div class="muzbalk" title="Waar de muziek loopt: de gouden balk is het stuk van het nummer dat onder het filmpje ligt"><i data-k="muzi"></i><b data-k="muzb"></b></div>
+    <div class="rij scenes" data-k="scenes"></div>
+    <div class="instel">
+      <label>Nummer</label><select data-k="pad"></select><label style="cursor:pointer;color:#e8c67a">＋ eigen mp3<input type="file" accept="audio/*" data-k="bestand" style="display:none"></label>
+      <label>Begin in het nummer</label><input type="range" data-k="van" min="0" max="300" step="0.1"><span class="waarde" data-k="vanw"></span>
+      <label>Muziek zet in op filmtijd</label><input type="range" data-k="wacht" min="0" max="60" step="0.1"><span class="waarde" data-k="wachtw"></span>
+      <label>Volume</label><input type="range" data-k="vol" min="0" max="1" step="0.05"><span class="waarde" data-k="volw"></span>
+      <label>Infaden</label><input type="range" data-k="in" min="0" max="10" step="0.1"><span class="waarde" data-k="inw"></span>
+      <label>Uitfaden aan het eind</label><input type="range" data-k="uit" min="0" max="10" step="0.1"><span class="waarde" data-k="uitw"></span>
+    </div>
+    <div class="rij"><button data-k="nu">⤓ Begin het nummer hier</button><span class="noot" style="margin:0">Zet het nummer zo dat het stuk dat je nu hoort precies op dit moment van de film valt.</span></div>
+    <div class="rij"><button data-k="kopieer">📋 Kopieer de instellingen</button><button data-k="terug">↺ Terug naar wat er nu in het spel zit</button></div>
+    <textarea data-k="uitvoer" readonly></textarea>
+    <div class="noot">Je instellingen blijven in deze browser bewaard. Klaar? Kopieer ze en stuur ze naar Claude, dan komen ze in het spel. Een eigen mp3 moet dan ook in de map audio/ van de repo.</div>
+  </div>`;
+  document.body.appendChild(d);
+  const $ = k => d.querySelector(`[data-k="${k}"]`);
+  const cv = d.querySelector("canvas");
+  P.doek(cv);
+  const audio = new Audio(); audio.preload = "auto";
+  let film = null, sleutel = null, t = 0, speelt = false, laatst = 0, raf = 0, gT = -1, ontbreekt = [];
+  const cfg = () => opslag[sleutel] || (opslag[sleutel] = Object.assign({}, P.muziek(sleutel) || {pad: "", van: 0, wacht: 0, vol: 1, in: 0, uit: 1.8}));
+  const bron = pad => eigen[pad] || pad;
+  /* keuzelijsten */
+  P.lijst().forEach(f => { const o = document.createElement("option"); o.value = f.sleutel; o.textContent = f.naam; $("film").appendChild(o); });
+  function vulNummers(){
+    const sel = $("pad"); sel.innerHTML = "";
+    [["", "(geen muziek)"]].concat(Object.keys(eigen).map(n => [n, "★ " + n]), nummers.map(n => [n, n.replace(/^audio\//, "")]))
+      .forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; sel.appendChild(o); });
+    sel.value = cfg().pad || "";
+  }
+  function toonWaarden(){
+    const c = cfg();
+    ["van", "wacht", "vol", "in", "uit"].forEach(k => { $(k).value = c[k]; });
+    $("vanw").textContent = c.van.toFixed(1) + " s"; $("wachtw").textContent = c.wacht.toFixed(1) + " s";
+    $("volw").textContent = Math.round(c.vol * 100) + "%"; $("inw").textContent = c.in.toFixed(1) + " s"; $("uitw").textContent = c.uit.toFixed(1) + " s";
+    $("wacht").max = film ? Math.ceil(film.duur) : 60;
+    $("van").max = audio.duration && isFinite(audio.duration) ? Math.ceil(audio.duration) : 300;
+    uitvoer();
+  }
+  function uitvoer(){
+    const regels = Object.keys(opslag).filter(k => opslag[k] && opslag[k].mijn).map(k => {
+      const c = opslag[k], r = v => Math.round(v * 10) / 10;
+      return `"${k}": {pad:"${c.pad}", van:${r(c.van)}, wacht:${r(c.wacht)}, vol:${r(c.vol * 100) / 100}, in:${r(c.in)}, uit:${r(c.uit)}},`;
+    });
+    $("uitvoer").value = regels.length ? "Filmstudio-instellingen voor FILM_MUZIEK:\n" + regels.join("\n") : "(nog niets aangepast)";
+  }
+  function laadNummer(){
+    const c = cfg();
+    audio.pause();
+    if(!c.pad){ audio.removeAttribute("src"); audio.load(); return; }
+    audio.src = bron(c.pad); audio.load();
+    audio.onloadedmetadata = () => toonWaarden();
+  }
+  async function kiesFilm(k){
+    stop(); sleutel = k; film = P.maak(k); t = 0; gT = -1; ontbreekt = [];
+    const ok = await P.laad(film);
+    if(!ok){
+      /* welke tekeningen ontbreken? */
+      ontbreekt = (await Promise.all(film.beelden.map(n => new Promise(r => { const im = new Image(); im.onload = () => r(null); im.onerror = () => r(n);
+        im.src = (typeof FILM_BRON !== "undefined" && FILM_BRON[n]) || ("art/film/" + n + ".webp"); })))).filter(Boolean);
+    }
+    const sc = $("scenes"); sc.innerHTML = "";
+    (film.scenes || []).forEach(x => { const b = document.createElement("button"); b.textContent = `${x.naam} · ${x.van.toFixed(1)}`; b.onclick = () => ga(x.van); sc.appendChild(b); });
+    vulNummers(); laadNummer(); toonWaarden(); teken();
+  }
+  /* waar het nummer hoort te zijn op filmtijd t */
+  const nummerTijd = tt => cfg().van + (tt - cfg().wacht);
+  function muziekBij(){
+    const c = cfg();
+    if(!c.pad || !audio.src){ return; }
+    const fin = c.in > 0 ? Math.max(0, Math.min(1, (t - c.wacht) / c.in)) : 1;
+    const fuit = c.uit > 0 ? Math.max(0, Math.min(1, (film.duur - t) / c.uit)) : 1;
+    audio.volume = Math.max(0, Math.min(1, (typeof volM === "function" ? (volM() || .8) : .8) * c.vol * fin * fuit));
+    if(!speelt || t < c.wacht){ if(!audio.paused) audio.pause(); return; }
+    const doel = nummerTijd(t);
+    if(audio.paused){ try{ audio.currentTime = doel; }catch(e){} const pr = audio.play(); if(pr && pr.catch) pr.catch(() => {}); }
+    else if(Math.abs(audio.currentTime - doel) > .25){ try{ audio.currentTime = doel; }catch(e){} }
+  }
+  function teken(){
+    if(!film) return;
+    P.tekst($("tekst").checked);
+    try{ P.frame(film, Math.min(t, film.duur - .001)); }
+    catch(e){ /* een tekening ontbreekt: dan een zwart doek met uitleg, de muziek kun je wel uitproberen */
+      const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#000"; x.fillRect(0, 0, cv.width, cv.height);
+      x.fillStyle = "#e8c67a"; x.font = "28px monospace"; x.fillText("Dit beeld ontbreekt nog:", 60, 320);
+      x.fillStyle = "#aaa"; x.font = "22px monospace"; x.fillText((ontbreekt.length ? ontbreekt.join(", ") : "een tekening uit art/film/").slice(0, 80), 60, 360); }
+    $("tl").value = Math.round(t / film.duur * 1000);
+    $("tijd").textContent = `${t.toFixed(1)} / ${film.duur.toFixed(1)} s`;
+    const dur = audio.duration && isFinite(audio.duration) ? audio.duration : 0, c = cfg();
+    if(dur){
+      const a = Math.max(0, c.van - Math.min(c.wacht, 0)), b = c.van + (film.duur - c.wacht);
+      $("muzi").style.left = (a / dur * 100) + "%"; $("muzi").style.width = (Math.max(0, Math.min(dur, b) - a) / dur * 100) + "%";
+      $("muzb").style.left = (Math.max(0, Math.min(dur, t >= c.wacht ? nummerTijd(t) : c.van)) / dur * 100) + "%";
+    }
+  }
+  function lus(nu){
+    if(!speelt) return;
+    const dt = (nu - laatst) / 1000; laatst = nu;
+    t += dt;
+    if(t >= film.duur){ t = film.duur; stop(); teken(); return; }
+    if($("sfx").checked) P.geluid(film, gT, t); gT = t;
+    muziekBij(); teken();
+    raf = requestAnimationFrame(lus);
+  }
+  function speel(){ if(!film) return; if(t >= film.duur - .05) t = 0; speelt = true; gT = t; $("speel").textContent = "⏸ Pauze"; laatst = performance.now(); muziekBij(); raf = requestAnimationFrame(lus); }
+  function stop(){ speelt = false; cancelAnimationFrame(raf); audio.pause(); $("speel").textContent = "▶ Afspelen"; }
+  function ga(tt){ t = Math.max(0, Math.min(film.duur, tt)); gT = t; if(speelt){ audio.pause(); muziekBij(); } teken(); }
+  /* knoppen */
+  $("film").onchange = e => kiesFilm(e.target.value);
+  $("speel").onclick = () => speelt ? stop() : speel();
+  $("begin").onclick = () => ga(0);
+  $("tl").oninput = e => ga(e.target.value / 1000 * film.duur);
+  $("tekst").onchange = teken;
+  $("pad").onchange = e => { cfg().pad = e.target.value; cfg().mijn = true; bewaar(); laadNummer(); toonWaarden(); };
+  $("bestand").onchange = e => { const f = e.target.files && e.target.files[0]; if(!f) return;
+    const naam = "audio/" + f.name; eigen[naam] = URL.createObjectURL(f); cfg().pad = naam; cfg().mijn = true; bewaar(); vulNummers(); laadNummer(); toonWaarden(); };
+  ["van", "wacht", "vol", "in", "uit"].forEach(k => { $(k).oninput = e => { cfg()[k] = +e.target.value; cfg().mijn = true; bewaar(); toonWaarden(); if(speelt){ audio.pause(); muziekBij(); } teken(); }; });
+  $("nu").onclick = () => { /* het stuk dat nu klinkt (of de kop) laten vallen op het huidige filmmoment */
+    const c = cfg(); const nu = !audio.paused ? audio.currentTime : c.van;
+    c.wacht = Math.min(t, film.duur); c.van = Math.max(0, nu); c.mijn = true; bewaar(); toonWaarden(); };
+  $("kopieer").onclick = () => { uitvoer(); const v = $("uitvoer").value;
+    (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => { $("kopieer").textContent = "✓ Gekopieerd"; setTimeout(() => $("kopieer").textContent = "📋 Kopieer de instellingen", 1600); })
+      .catch(() => { $("uitvoer").select(); document.execCommand && document.execCommand("copy"); }); };
+  $("terug").onclick = () => { delete opslag[sleutel]; bewaar(); vulNummers(); laadNummer(); toonWaarden(); teken(); };
+  $("dicht").onclick = () => { stop(); d.remove(); try{ if(location.hash.includes("filmstudio")) history.replaceState(null, "", location.pathname + location.search); }catch(e){} if(typeof AU !== "undefined" && AU.wens === null) render(); };
+  if(typeof AU !== "undefined") AU.zet(null);      // geen spelmuziek eronder
+  kiesFilm(P.lijst()[0].sleutel);
+}
+/* Met #filmstudio achter de link opent hij meteen. */
+try{ if(typeof location !== "undefined" && /filmstudio/.test(location.hash)) window.addEventListener("load", () => setTimeout(() => { try{ filmStudio(); }catch(e){ console.error(e); } }, 600)); }catch(e){}
+
 </script>
