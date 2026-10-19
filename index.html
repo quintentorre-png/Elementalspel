@@ -32038,6 +32038,20 @@ async function telAllesBinnen(){
     TEL_BINNEN.bezig = false;
   }catch(e){ TEL_BINNEN.bezig = false; }
 }
+/* 📲 Op de telefoon, buiten de geïnstalleerde app (in Chrome, of in de app zolang Android de
+   site nog niet herkent): bij de eerste tik gaat het spel schermvullend en liggend. */
+let VOLSCHERM_GEPROBEERD = false;
+document.addEventListener("pointerdown", () => {
+  if(VOLSCHERM_GEPROBEERD) return;
+  try{
+    if(!window.matchMedia("(pointer:coarse)").matches || (typeof alsApp === "function" && alsApp()) || document.fullscreenElement) return;
+    const el = document.documentElement; if(!el.requestFullscreen) return;
+    VOLSCHERM_GEPROBEERD = true;
+    el.requestFullscreen({navigationUI:"hide"}).then(() => {
+      try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {}); }catch(e){}
+    }).catch(() => {});
+  }catch(e){}
+}, true);
 /* start */
 document.body.classList.add("venster");
 function spelStart(){
