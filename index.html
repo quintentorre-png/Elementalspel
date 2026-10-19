@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><meta charset="utf-8">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0a0e18"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Elementaal"><link rel="apple-touch-icon" href="icoon-180.png"></head><body style="margin:0">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Elementaal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
@@ -1996,6 +1997,7 @@ body.pvuitleg #ptbel{display:none !important}
   font-size:1.05rem; color:var(--dim); white-space:nowrap}
 .wkvol.bev .wkscene{filter:brightness(.45); pointer-events:none}
 .wkvol.bev .wktip{display:none !important}
+.wkbprent{display:none}
 .wkbevvol{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:7; width:min(420px, calc(100vw - 32px));
   background:#0d1119; border:3px solid #3a2a18; border-radius:6px; padding:18px 18px 14px; box-shadow:0 8px 0 rgba(0,0,0,.5)}
 /* Knort staat linksonder vóór zijn kraam, iets kleiner dan in een gevecht, zodat hij de pot niet afdekt. */
@@ -2210,6 +2212,8 @@ body.pvuitleg #ptbel{display:none !important}
 .card.el-spec .ci .pix{position:absolute; inset:0; width:100%; height:100%}
 /* het praatje */
 .praatscherm{width:min(760px,96vw); display:flex; flex-direction:column; align-items:center; gap:0}
+.praatrechts{display:contents}
+.praatbg{display:none}
 .praatscherm .praatsprite{transition:filter 1s ease, width .6s ease}
 .praatscherm.groot .praatsprite{animation:none}
 /* Een reus staat niet in de rij maar vult het scherm: hij hangt vast aan de bovenrand,
@@ -4060,6 +4064,18 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
   border-radius:4px; padding:6px 12px; font:18px "VT323", ui-monospace, monospace; cursor:pointer; opacity:.55}
 #filmlaag .filmskip:hover{opacity:1}
 #filmlaag.laadt .filmskip{display:none}
+/* 📱 rechtop op een telefoon: eerst draaien */
+#draaitel{display:none}
+@media (orientation:portrait) and (pointer:coarse) and (max-width:600px){
+  #draaitel{display:flex; position:fixed; inset:0; z-index:100000; background:#0b0f18; flex-direction:column;
+    align-items:center; justify-content:center; gap:22px; text-align:center; padding:24px}
+  #draaitel .dtlogo{font-family:"Press Start 2P",ui-monospace,monospace; font-size:1.5rem; color:#f3d68a;
+    text-shadow:0 3px 0 #6b4a12, 0 6px 0 rgba(0,0,0,.6); margin-bottom:40px}
+  #draaitel .dticoon{width:150px; height:150px; animation:dtdraai 2.6s ease-in-out infinite}
+  #draaitel .dtkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.85rem; color:#efe9d8; margin-top:30px}
+  #draaitel .dtsub{font-family:"VT323",ui-monospace,monospace; font-size:1.3rem; color:#9a9484}
+}
+@keyframes dtdraai{0%,30%{transform:rotate(0)} 55%,85%{transform:rotate(-90deg)} 100%{transform:rotate(0)}}
 /* ================= 📱 TELEFOON LIGGEND · ontwerp A, de klassieke tafel =================
    Aan als het scherm liggend en laag is (body.tel, gezet door telZet). Alles staat vast op het
    scherm (position:fixed), zodat de oude grid- en flexregels hier niets meer uitmaken.
@@ -4120,9 +4136,9 @@ body.tel .pside .pinfo{overflow:visible !important; position:absolute !important
   width:auto !important; gap:2px !important; flex-direction:column !important; align-items:flex-start !important}
 body.tel #pside1 .pinfo{left:0; top:4px}
 body.tel:has(#portretvak #portret) #pside1 .pinfo{left:50px}
-body.tel .pside .pname{font-size:.4rem !important; line-height:1.2}
+body.tel .pside .pname{font-size:.5rem !important; line-height:1.2}
 body.tel .pside .plife.hpbalk{transform-origin:0 50%; transform:scale(.82); margin:-1px 0 -2px}
-body.tel .pside .pdeckinfo{font-size:.78rem !important; line-height:1; white-space:nowrap}
+body.tel .pside .pdeckinfo{font-size:.9rem !important; line-height:1; white-space:nowrap}
 body.tel .pside .pinfo .ruiten{--r:26px !important; --g:3px !important; margin:0 !important; position:absolute; left:calc(100% + 8px); top:2px}
 body.tel .pside .pinfo .aemini{display:none}
 body.tel #pside1 .hand{position:absolute !important; left:50%; top:0; width:min(34vw, 250px); height:52px;
@@ -4155,7 +4171,7 @@ body.tel #fieldwrap .slot.sp .ph::after{font-size:.7rem}
 body.tel #fieldwrap .dkruis{display:none}
 body.tel #ribbon{display:flex !important; position:absolute; left:0; right:0; top:calc(var(--chh) + var(--rit) + 6px);
   height:var(--rib); margin:0 !important; padding:0 !important; max-width:none !important; width:auto !important; gap:6px; z-index:3}
-body.tel #ribbon .ph-step{font-size:.34rem !important; padding:3px 6px !important; line-height:1.4}
+body.tel #ribbon .ph-step{font-size:.5rem !important; padding:3px 6px !important; line-height:1.4}
 body.tel #ribbon .ph-step:not(.on){font-size:0 !important; width:8px; height:8px; padding:0 !important; border-radius:50%;
   background:#9a937f; border:0; opacity:.7}
 
@@ -4186,7 +4202,7 @@ body.tel #right{position:fixed !important; right:var(--sr); top:var(--top); bott
 body.tel #piles1, body.tel #rtools{display:none !important}
 body.tel #app #right, body.tel #app.hzdoor #right{background:none !important; box-shadow:none !important; border:0 !important}
 body.tel #rmid{order:0; display:flex !important; flex-direction:column !important; flex:0 0 auto !important; align-items:stretch; gap:6px; width:auto}
-body.tel #turnbadge{font-size:.3rem !important; text-align:center; line-height:1.6; white-space:normal}
+body.tel #turnbadge{font-size:.46rem !important; text-align:center; line-height:1.6; white-space:normal}
 body.tel #turnbadge b{display:none}
 body.tel #turnbadge .tijdmeter{font-size:.8rem; padding:1px 0; margin-top:2px}
 body.tel #actions{display:flex !important; flex-direction:column !important; gap:6px; width:auto !important; flex:none !important}
@@ -4196,7 +4212,7 @@ body.tel #actions .abtn.primary{min-height:62px; font-size:.5rem !important}
 body.tel #piles0{order:1; display:flex !important; justify-content:center; gap:6px; margin:0}
 body.tel #right .pile{width:calc(var(--cw) * .48) !important; height:calc(var(--chh) * .48) !important}
 body.tel #right .pile .lab{display:none}
-body.tel #right .pile .cnt{font-size:.3rem; min-width:15px; height:14px; right:-4px; top:-5px}
+body.tel #right .pile .cnt{font-size:.46rem; min-width:15px; height:14px; right:-4px; top:-5px}
 /* het menu: liggend is er geen hoogte, dus de keuzes en het statusvenster naast elkaar */
 body.tel.venster .vmenu{flex-direction:row; align-items:flex-start; width:min(760px, calc(100vw - var(--sl) - var(--sr) - 20px)); gap:14px}
 body.tel.venster .vmenu > .ovbox{flex:1 1 0; max-height:calc(100dvh - 20px); overflow-y:auto; padding:12px 12px 10px}
@@ -4210,6 +4226,152 @@ body.tel #mullpaneel .mullkop{font-size:.6rem; margin-bottom:4px}
 body.tel #mullpaneel .mullsub, body.tel #mullpaneel .mullprijs, body.tel #mullpaneel .mulltel, body.tel #mullpaneel .mulllaatste{font-size:.85rem; line-height:1.1; margin:2px 0}
 body.tel #mullpaneel .mullknop{margin-top:6px; gap:8px}
 body.tel #mullpaneel .mullknop .abtn{min-height:40px; padding:6px 10px; font-size:.48rem}
+
+/* ---------- 📱 de kaart op de telefoon ---------- */
+.kaartkop .wchips{display:none}
+.telvel{display:none}
+body.tel .ovbox.kaartbox .kaartkop{padding:4px calc(var(--sr) + 56px) 14px calc(var(--sl) + 4px); gap:8px; flex-wrap:nowrap; align-items:center; min-height:46px}
+body.tel .kaartkop h2{font-size:.6rem; white-space:nowrap}
+body.tel .kaartkop .sub{font-size:.85rem !important; white-space:nowrap}
+body.tel .kaartkop .sterbalk{font-size:.95rem; padding:2px 7px}
+body.tel .kaartkop .obtn{padding:6px 9px; font-size:.42rem; min-height:36px}
+body.tel .kaartkop .wchips{display:flex; align-items:center; gap:6px; margin:0 auto; pointer-events:auto}
+body.tel .wchips .wchip{width:34px; height:34px; border-radius:50%; border:2px solid #3a3f4a; background:#151a22; color:var(--wk);
+  font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; padding:0; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.tel .wchips .wchip.nu{border-color:#e7bf55; box-shadow:0 0 0 2px rgba(231,191,85,.35), 0 0 12px rgba(231,191,85,.5)}
+body.tel .wchips .wchip.dicht{opacity:.35}
+body.tel .wchips .wnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.42rem; color:#efe9d8; margin-left:6px; white-space:nowrap; text-shadow:0 2px 0 #000}
+body.tel .kaartvlak{--kh:max(100vw, 260dvh)}
+body.tel .lvknop{width:46px; height:46px; font-size:1.3rem; border-width:3px}
+body.tel .lvknop.baas{width:56px; height:56px; font-size:1.6rem}
+body.tel .lvknop .lvnaam{font-size:.85rem}
+body.tel .lvknop .lvsterren{font-size:.95rem}
+body.tel .lvknop .lvvink{width:18px; height:18px; font-size:.7rem; right:-7px; top:-7px}
+body.tel .tasknop{left:calc(var(--sl) + 4px); right:auto; bottom:calc(var(--sb) + 8px); width:62px; height:66px; padding:3px}
+body.tel .tasknop img, body.tel .tasknop .pixic{width:46px; height:46px}
+body.tel .tasknop span{font-size:.75rem}
+body.tel .telvel{display:flex; flex-direction:column; gap:10px; position:absolute; right:var(--sr); top:52px; bottom:calc(var(--sb) + 8px);
+  width:min(310px, 40vw); z-index:12; padding:12px; background:rgba(13,16,26,.97); border:3px solid #c9a24a; border-radius:6px;
+  box-shadow:-8px 0 0 rgba(0,0,0,.35); text-align:left; animation:telvelin .22s ease-out}
+@keyframes telvelin{from{transform:translateX(30px); opacity:0} to{transform:none; opacity:1}}
+body.tel .telvel .vlvuitleg{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px}
+body.tel .telvel .vlvuitleg .vport{display:block; flex:0 0 110px; width:110px; height:110px; border:3px solid var(--ptrand,#6f5aa8); background:#1d1830}
+body.tel .telvel .vlvuitleg .vtxt .vkop{font-size:.5rem; padding-right:40px}
+body.tel .telvel .vlvuitleg .vtxt p{font-size:1.05rem; margin:4px 0}
+body.tel .telvel .telvelweg{position:absolute; right:8px; top:8px; width:40px; height:40px; padding:0; min-height:0; font-size:.8rem}
+body.tel .telvel .telspeel{flex:0 0 auto; min-height:50px; font-size:.6rem; width:100%; margin:0}
+body.tel .telvel .vlvuitleg .vtxt .vkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.55rem !important; line-height:1.6; color:#e7bf55; justify-content:flex-start; text-align:left}
+body.tel .telvel{text-align:left}
+/* de levellijst: werelden, levels en uitleg naast elkaar */
+body.tel.venster .vlevels{grid-template-columns:minmax(150px,.8fr) minmax(0,1fr) minmax(0,1.15fr); gap:10px;
+  width:calc(100vw - var(--sl) - var(--sr) - 52px); height:calc(100dvh - 16px); max-height:none; margin-right:44px}
+body.tel.venster .vlevels .vn{padding:10px 10px; min-height:0; overflow-y:auto}
+body.tel.venster .vwerelden{grid-row:1}
+body.tel.venster .vlevels .vr{min-height:38px}
+body.tel.venster .vlvuitleg{flex-direction:column; gap:8px; min-height:0}
+body.tel.venster .vlvuitleg .vport{display:block; flex:0 0 96px; width:96px; height:96px}
+body.tel.venster .vlvuitleg .vtxt p{font-size:1rem}
+/* het startscherm: logo en voortgang links, de keuzes rechts */
+body.tel.venster .vhome{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr);
+  column-gap:24px; row-gap:14px; align-items:start; width:calc(100vw - var(--sl) - var(--sr) - 24px); max-height:none;
+  height:calc(100dvh - 20px); padding-top:6px}
+body.tel.venster .vhome .vhrij{display:contents}
+body.tel.venster .vhome .vlogo{grid-column:1; grid-row:1; text-align:left; padding-top:18px}
+body.tel.venster .vhome .vtitel{font-size:clamp(1.3rem,4.2vw,2.2rem)}
+body.tel.venster .vhome .vtag{margin-top:10px}
+body.tel.venster .vhome .vhinfo{display:block; grid-column:1; grid-row:2; width:auto; max-width:330px; padding:12px 14px; font-size:.45rem}
+body.tel.venster .vhome .vhlijst{grid-column:2; grid-row:1 / span 2; width:auto; max-height:calc(100dvh - 30px); padding:10px 10px}
+body.tel.venster .vhome .vhlijst .vr{min-height:44px}
+body.tel #geluidfab{top:auto; bottom:calc(var(--sb) + 10px); left:calc(var(--sl) + 6px); right:auto}
+/* het praatscherm: de plek van het level erachter, het personage links, de tekst rechts */
+body.tel .praatbg{display:block; position:fixed; inset:0; width:100vw; height:100dvh; object-fit:cover; z-index:-1;
+  filter:brightness(.42) saturate(.85); pointer-events:none}
+body.tel .praatscherm:not(.reus){position:fixed; inset:0; width:auto; display:block}
+body.tel .praatscherm:not(.reus) .praatsprite{position:absolute; left:calc(var(--sl) + 8px); bottom:-8px; margin:0;
+  width:min(38vw, 64dvh) !important}
+body.tel .praatscherm:not(.reus) .praatrechts{display:flex; flex-direction:column; gap:10px; position:absolute;
+  right:calc(var(--sr) + 10px); bottom:calc(var(--sb) + 12px); width:min(54vw, 500px)}
+body.tel .praatscherm.leeg:not(.reus) .praatrechts{left:50%; right:auto; transform:translateX(-50%); width:min(76vw, 640px)}
+body.tel .praatscherm:not(.reus) .praatbox{width:100%; min-height:0; padding:12px 14px 18px}
+body.tel .praatscherm .praattxt{font-size:1.2rem; line-height:1.2; min-height:2.4em}
+body.tel .praatscherm .praatnaam{margin-bottom:6px}
+body.tel .praatscherm .praatkeus{display:flex; flex-direction:column; gap:6px; width:100%; margin:0}
+body.tel .praatscherm .praatkeus .pkbtn{min-height:44px; padding:8px 10px; flex:none}
+body.tel .praatscherm.reus .praatrechts{display:contents}
+body.tel .praatskip{top:calc(env(safe-area-inset-top, 0px) + 8px); bottom:auto; right:calc(var(--sr) + 6px); min-height:36px}
+/* de winkel: grotere prijzen, de uitleg in een vel rechts, Knort linksonder */
+body.tel .wktag{font-size:.55rem !important; transform:none; padding:5px 6px 4px}
+body.tel .wkitem.rijae .wktag{top:auto; bottom:100%; margin:0 0 4px}
+body.tel .wkhoek{left:calc(var(--sl) + 6px); top:6px}
+body.tel .wkhoek .obtn{min-height:40px}
+body.tel .wkbelmob{left:calc(var(--sl) + 6px); right:auto; width:min(46vw, 380px); bottom:calc(var(--sb) + 8px); font-size:1.05rem}
+body.tel .wkbevvol{left:auto; right:var(--sr); top:52px; bottom:calc(var(--sb) + 8px); transform:none; width:min(300px, 40vw);
+  padding:10px; overflow-y:auto; border-color:#c9a24a; animation:telvelin .22s ease-out}
+body.tel .wkbevestig{display:flex; flex-direction:column; align-items:center; gap:4px; min-height:100%; padding:10px 8px}
+body.tel .wkbevestig .wkbprent{display:block; width:110px; height:110px; object-fit:cover; border:3px solid #a07de0; image-rendering:pixelated}
+body.tel .wkbevestig .wkbprent + .wkbic{display:none}
+body.tel .wkbevestig .sub{font-size:.98rem; line-height:1.15}
+body.tel .wkbevestig h3{font-family:"Press Start 2P",ui-monospace,monospace !important; font-size:.6rem !important; line-height:1.5; margin:4px 0 2px; letter-spacing:.02em}
+body.tel .wkbevestig .wkbprent{width:88px; height:88px}
+body.tel .wkbevestig .wkprijs{font-size:1rem; margin:6px 0 4px}
+body.tel .wkbevestig .mrow{margin-top:auto; display:flex; gap:8px; width:100%}
+body.tel .wkbevestig .mrow .obtn{flex:1 1 0; min-height:48px}
+body.tel #voorwerpmelding{top:8px; right:auto; left:50%; transform:translateX(-50%) scale(.85); transform-origin:50% 0}
+/* de filmpjes: liggend past 16:9 precies, dus schermvullend zonder kader */
+body.tel #filmlaag{background:#000}
+body.tel #filmlaag canvas{width:min(100vw, calc(100dvh * 16 / 9)); border:0; border-radius:0; box-shadow:none}
+body.tel #filmlaag .filmskip{top:8px; right:calc(var(--sr) + 6px); min-height:36px}
+/* deck bouwen: één vak tegelijk met tabbladen, en knoppen van 44 pixels */
+.dbteltabs, .dbtelknop{display:none}
+body.tel.venster .dbbox{width:calc(100vw - var(--sl) - var(--sr) - 52px); max-height:calc(100dvh - 12px); padding:8px 10px; margin-right:44px}
+body.tel .dbtop{margin-bottom:6px; gap:8px}
+body.tel .dbtop h2{font-size:.55rem}
+body.tel .dbtop .dbnaam{flex:1 1 auto; min-width:0; min-height:36px}
+body.tel .dbtelknop{display:flex; gap:6px; flex:0 0 auto}
+body.tel .dbtelknop .obtn{min-height:40px; padding:6px 10px; font-size:.45rem; margin:0}
+body.tel .dbteltabs{display:flex; gap:6px; align-items:center; flex-wrap:nowrap; margin-bottom:6px; overflow-x:auto}
+body.tel .dbteltabs{min-height:42px; flex:0 0 auto}
+body.tel .dbteltabs .seg{cursor:pointer; padding:0 9px; min-height:38px; display:inline-flex; align-items:center; font-size:.6rem; white-space:nowrap; flex:0 0 auto}
+body.tel .dbteltabs .dbzij{display:inline-flex; gap:4px; margin-left:auto}
+body.tel .dbonder{display:none}
+body.tel .dbkol{grid-template-columns:1fr; overflow:hidden}
+body.tel .dbbox.teltab-el .dbkol > .dbvak:nth-child(2), body.tel .dbbox:not(.teltab-el) .dbkol > .dbvak:nth-child(1){display:none}
+body.tel .dbvak .dbtabs{display:none}
+body.tel .dbbox.teltab-el .dbkol > .dbvak:nth-child(1){display:grid; grid-template-columns:1fr 1fr; column-gap:14px; align-content:start}
+body.tel .dbbox.teltab-el .dbvak .dbkop, body.tel .dbbox.teltab-el .dbvak .dbuitleg, body.tel .dbbox.teltab-el .dbvak .vmelding{grid-column:1 / -1}
+body.tel .dbel .ltnknop{width:44px; height:44px; font-size:1.1rem; display:inline-flex; align-items:center; justify-content:center}
+body.tel .dbel .dbn{min-width:34px; text-align:center; font-size:1.3rem}
+body.tel .dbel .dbg{min-width:38px; height:34px; font-size:.9rem}
+body.tel .dbbox .dbgrid{grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))}
+/* de commander-draft: links de spelers, rechts de keuzes, de bevestigknop altijd in beeld */
+body.tel .ovbox.draftbox.dr2{width:calc(100vw - var(--sl) - var(--sr) - 8px); max-width:none !important; height:calc(100dvh - 8px); max-height:none;
+  padding:6px 8px; display:grid; grid-template-columns:200px minmax(0,1fr); gap:8px; overflow:hidden}
+body.tel .dr2 .drspelers{grid-template-columns:1fr; grid-auto-rows:min-content; align-content:start; gap:8px; margin:0; overflow-y:auto; min-height:0}
+body.tel .dr2 .drsp{padding:6px 8px; gap:8px; align-items:flex-start}
+body.tel .dr2 .drpt{width:44px; height:44px; flex-basis:44px}
+body.tel .dr2 .drwie{font-size:.48rem}
+body.tel .dr2 .drstatus{display:block; margin:5px 0 0; width:max-content}
+body.tel .dr2 .drbeurt{min-width:0; order:3; padding:6px 0}
+body.tel .dr2 .drbeurt .pijl{font-size:.55rem}
+body.tel .dr2 .drbeurt small{font-size:.85rem}
+body.tel .dr2 .drlay{grid-template-columns:1fr; overflow-y:auto; min-height:0; padding-bottom:64px; gap:8px}
+body.tel .dr2 .drtiles{grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px}
+body.tel .dr2 .drtile{flex-direction:column; gap:5px; min-height:44px}
+body.tel .dr2 .drtile .drimg{width:100%; height:64px}
+body.tel .dr2 .drtxt{-webkit-line-clamp:3; font-size:.85rem}
+body.tel .dr2 .dronder{position:fixed; right:calc(var(--sr) + 10px); bottom:calc(var(--sb) + 8px); z-index:8; margin:0}
+body.tel .dr2 .dronder .drknop{min-height:50px; box-shadow:0 6px 0 rgba(0,0,0,.5)}
+/* toetsenbordhints ([spatie], [E], esc) zijn op een aanraakscherm zinloos */
+@media (pointer:coarse){ .toets{display:none !important} }
+/* kleine dingen */
+#telchat{display:none}
+body.tel.telonline #telchat{display:flex; align-items:center; justify-content:center; position:fixed; top:2px; right:calc(var(--sr) + 46px);
+  width:40px; height:40px; z-index:70; border:1px solid var(--gold-soft); border-radius:6px; background:linear-gradient(180deg,#2a2418,#181410); font-size:1rem; padding:0}
+body.tel.telonline #pside1{right:calc(var(--sr) + 92px)}
+body.tel #tutwegknop{left:auto; right:var(--sr); bottom:calc(var(--sb) + 2px); width:var(--rail); font-size:.4rem; padding:6px 4px; white-space:normal}
+body.tel #overlay:has(.roomin){align-items:flex-start; padding-top:8px}
+/* kaartnamen op het veld: op de telefoon alleen de prent en de getallen; de naam zie je door vast te houden */
+body.tel #fieldwrap .slot.cr .card .cn{display:none}
 /* de opdrachtregel ("kies een vak…") staat bovenin, over de hand van de tegenstander: zo valt hij nooit over een vak */
 body.tel #banner{position:fixed !important; left:calc(var(--sl) + 300px); right:calc(var(--sr) + 50px); top:2px; bottom:auto;
   max-width:none; transform:none; z-index:50; text-align:center}
@@ -4225,6 +4387,9 @@ body.tel.handop #banner{display:none}
   <div class="ldtekst" id="ldtekst">laden…</div>
   <div class="ldsub" id="ldsub">de tekeningen en de muziek worden alvast opgehaald</div>
 </div></div>
+<div id="draaitel" aria-live="polite"><div class="dtlogo">ELEMENTAAL</div>
+  <svg class="dticoon" viewBox="0 0 64 64" fill="none" stroke-width="2.5" aria-hidden="true"><rect x="22" y="8" width="20" height="36" rx="3" stroke="#e7bf55"></rect><rect x="12" y="34" width="36" height="20" rx="3" stroke="#cfd6dc" stroke-dasharray="3 3"></rect><path d="M50 22a16 16 0 0 1-4 18" stroke="#cfd6dc"></path><path d="M44 38l2 3 3-2" stroke="#cfd6dc"></path></svg>
+  <div class="dtkop">DRAAI JE TELEFOON</div><div class="dtsub">Elementaal speel je liggend.</div></div>
 <div id="app">
   <aside id="left">
     <div id="cstrip"></div>
@@ -4266,6 +4431,7 @@ body.tel.handop #banner{display:none}
     </div>
   </aside>
   <button id="menufab" data-act="btn" data-btn="menu" title="Menu (Esc)">☰</button>
+  <button id="telchat" data-act="btn" data-btn="tellog" title="Chat en logboek" aria-label="Chat en logboek">💬</button>
   <button id="geluidfab" data-act="btn" data-btn="mute" title="Geluid aan of uit">🔊</button>
   <div id="fx"></div>
   <div id="praatbel"></div>
@@ -4985,9 +5151,14 @@ function losOp(G, K, it){
       if (!vrij.length) return;
       const sl = kiesPlek(G, K, p, vrij.map(c => ({p, c, kind:'cre'})), false, {el:'steen'});
       const c2 = sl && sl !== 'cancel' ? sl.c : vrij[0];
-      const kp = nieuweKaart(G, STEEN, p, BERGKETEN, F_TOKEN | F_KOPIE | F_FUSIE);
+      /* okt 2026: een echte Steen (geen token), met evenveel levens, en hij doet zijn speel-effect */
+      const kp = nieuweKaart(G, STEEN, p, 0, 0);
       plaatsWezen(G, p, c2, kp);
       G.pl[p].hp[c2] = Math.max(1, Math.ceil(hp)); G.pl[p].pld[c2] = G.gTurn;
+      for (const e of effsVan(G, kp, 'creature')){
+        if (G.over >= 0) break;
+        losOp(G, K, {type:'eff', el:e.el, ctrl:p, origin:'creature', vr:e.vr});
+      }
       return;
     }
     case E_OCEAAN: {
@@ -7569,7 +7740,7 @@ const KAART_TEKST = {
 const VAR_TEKST = {
   rots:   {speel:"De eerste keer: zet een 🪨 Kiezel (<b>2</b> levens) op een vrije eigen plek. Daarna is hij gewoon 🪨 Steen. Ook het Steen-effect."},
   bliksem:   {speel:"<b>2</b> 🔥 vuurschade aan elk wezen van de tegenstander (💧 Water is immuun, behalve met 🟣 Explosiegevaar)."},
-  bergketen: {speel:"Zet een kopie van zichzelf op een vrije eigen plek, met evenveel levens. De kopie doet zijn speel-effect niet."},
+  bergketen: {speel:"Zet een Steen op een vrije eigen plek, met evenveel levens als de Bergketen. Dat is een echte Steen (geen token) en hij doet zijn speel-effect."},
   oceaan:    {speel:"Al je andere wezens (geen tokens) gaan terug naar je hand. Daarna rust de Oceaan tot het begin van je volgende beurt."},
   oceaanrust:{eig:"Rust. Begin van je beurt wordt dit weer de 🌊 Oceaan."},
   fwoud:     {speel:"Drie keer het 🌿 Gras-effect: {verstrik} een wezen."},
@@ -7623,7 +7794,7 @@ const AETHER_TEKST = {
   ae_graf:      "Kies bij de start een kaart uit je deck (geen ✦). Einde van je beurt: {roep|roepop} er één van die soort {op|roepop} uit je graf.",
   fu_water:     "{Fusie} 💧 wordt 🌊 <b>Oceaan</b>. ▶ Al je andere wezens (geen tokens) gaan terug naar je hand; daarna rust de Oceaan tot je volgende beurt.",
   fu_fire:      "{Fusie} 🔥 wordt ⚡ <b>Bliksem</b>. ▶ <b>2</b> 🔥 vuurschade aan elk wezen van de tegenstander.",
-  fu_stone:     "{Fusie} 🪨 wordt 🏔️ <b>Bergketen</b>. ▶ Zet een kopie van zichzelf op een vrije plek, met evenveel levens.",
+  fu_stone:     "{Fusie} 🪨 wordt 🏔️ <b>Bergketen</b>. ▶ Zet een Steen op een vrije plek, met evenveel levens. Die Steen doet zijn speel-effect.",
   fu_grass:     "{Fusie} 🌿 wordt 🌳 <b>Woud</b>. ▶ Drie keer het 🌿 Gras-effect.",
   ae_hemel:     "Je eerste ✦ van elke beurt: <b>+1</b> {leven|pluslevens} en trek <b>1</b>.",
   ae_lichtval:  "Verlies je leven, trek <b>1</b>. Ook door je eigen lichtkaarten.",
@@ -8766,8 +8937,8 @@ function mulliganPaneel(){
     ${keer ? `<div class="mulltel">Je hebt al ${keer}× opnieuw getrokken.</div>` : ""}
     ${lev <= 2 ? `<div class="mulllaatste">Dit is de laatste keer dat het kan.</div>` : ""}
     <div class="mullknop">
-      <button class="abtn primary" data-act="btn" data-btn="mullhouden">✔ Houden <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>
-      ${lev > 1 ? `<button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw · −1 ❤ <span style="opacity:.6;font-size:.7rem">[E]</span></button>` : ""}
+      <button class="abtn primary" data-act="btn" data-btn="mullhouden">✔ Houden <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span></button>
+      ${lev > 1 ? `<button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw · −1 ❤ <span class="toets" style="opacity:.6;font-size:.7rem">[E]</span></button>` : ""}
     </div></div>`;
   document.body.classList.add("mulligaan");
   [0,1].forEach(q => { const h = document.getElementById("hand" + q); if(h) h.classList.toggle("mullhand", q === p); });
@@ -12757,21 +12928,28 @@ async function resolveEffect(it){
     render(); if(!FAST) await sleep(260);
     return;
   }
-  /* 🏔 Bergketen: een kopie van zichzelf ernaast, met evenveel levens, zonder speel-effect. */
+  /* 🏔 Bergketen (okt 2026): er rijst een echte Steen op een vrije eigen plek, met evenveel levens als
+     de Bergketen nu heeft. Geen token: hij gaat gewoon naar je graf. En hij doet zijn speel-effect. */
   if(it.el === "bergketen"){
     const src = it.srcCard && findCre(it.srcCard.id);
     const hp = src ? src.cr.hp : (EL.steen.hp || 3);
     const vrij = openCols(p).filter(c => !P(p).cols[c].cre);
-    if(!vrij.length){ addLog("🏔 Bergketen: geen vrije plek voor een kopie."); return; }
-    const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `🏔 Bergketen: kies een plek voor de kopie`, false, {el:"steen"});
+    if(!vrij.length){ addLog("🏔 Bergketen: geen vrije plek voor een Steen."); return; }
+    const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `🏔 Bergketen: kies een plek voor de Steen`, false, {el:"steen"});
     const c2 = sl && sl !== "cancel" ? sl.c : vrij[0];
-    const kopie = {id:++cid, el:"steen", var:"bergketen", owner:p, token:true, kopie:true, fusie:true};
-    placeCre(p, c2, kopie);
+    const steen = {id:++cid, el:"steen", owner:p};
+    placeCre(p, c2, steen);
     const k2 = P(p).cols[c2].cre;
     if(k2){ k2.hp = Math.max(1, Math.ceil(hp * BERGKETEN_DEEL)); k2.played = S.gTurn; }
-    addLog(`🏔 <em>Bergketen</em>: er rijst een kopie op in kolom ${c2+1}${k2 ? ` met ${k2.hp} levens` : ""}.`, true);
+    addLog(`🏔 <em>Bergketen</em>: er rijst een Steen op in kolom ${c2+1}${k2 ? ` met ${k2.hp} levens` : ""}.`, true);
     if(!FAST){ fxRocks(creSel(p, c2)); AU.play("place"); }
     render(); if(!FAST) await sleep(220);
+    /* en de Steen doet wat een Steen doet: tweemaal +1 leven */
+    for(const e of effsOf("steen", "creature", steen)){
+      if(S.over) break;
+      await resolveEffect({type:"eff", el:e.el, ctrl:p, origin:"creature", var:e.var});
+      render();
+    }
     return;
   }
   /* 🌊 Oceaan (okt 2026): al je andere wezens (geen tokens) terug in de hand; daarna rust de Oceaan. */
@@ -16684,7 +16862,7 @@ function draftHTML(u){
       ${elRijen}${krachten}
       <div class="drtotaal">${ORDER.map(el => { const k = deck.filter(c => c.el === el).length - (ban[el] || 0); return `<div style="flex:${k}; background:${DR_KLEUR[el]}"></div>`; }).join("")}<div style="flex:${ltTot}; background:linear-gradient(#fff6d0,#d9b45a)"></div></div>
       <div class="drtotaaltxt"><span>elementen <b>${elTot}</b></span><span>licht <b>${ltTot}</b> (${pct}%)</span></div>
-      <div class="dronder">${wacht ? `<button class="obtn dim drknop" disabled>Wachten op ${naam(act)}…</button>` : `<button class="obtn drknop" id="draftbtn" data-act="btn" data-btn="draftconfirm">Bevestig <span style="opacity:.6">[spatie]</span></button>`}</div></div>`;
+      <div class="dronder">${wacht ? `<button class="obtn dim drknop" disabled>Wachten op ${naam(act)}…</button>` : `<button class="obtn drknop" id="draftbtn" data-act="btn" data-btn="draftconfirm">Bevestig <span class="toets" style="opacity:.6">[spatie]</span></button>`}</div></div>`;
   return `<div class="ovbox draftbox dr2">
     <div class="drspelers">${speler(ik)}${beurt}${speler(ander)}</div>
     <div class="drlay">${rijen}${rechts}</div></div>`;
@@ -16693,7 +16871,7 @@ function draftBtnTxt(u){
   const lt = !u.lights.length ? "" : u.aethers[u.selA] === "ae_leven" ? " · geen ✦" : ` · ✦ ${LIGHTS[u.lights[u.selL]].name}`;
   const up = u.elementen && u.elementen.length ? ` · ⬆ ${VAR[STERK_VAN[u.elementen[u.selE || 0]]].name}` : "";
   const nb = draftBanLijst(u).length;
-  return `Bevestig · ${AETHERS[u.aethers[u.selA]].name}${lt}${up} · ${nb} ban${nb===1?"":"s"} <span style="opacity:.6;font-size:.7rem">[spatie]</span>`;
+  return `Bevestig · ${AETHERS[u.aethers[u.selA]].name}${lt}${up} · ${nb} ban${nb===1?"":"s"} <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span>`;
 }
 /* Draftkeuzes bijwerken: alleen het draftvenster opnieuw opbouwen, de rest van het scherm blijft staan. */
 function draftSync(){
@@ -16855,7 +17033,7 @@ function overlayHTML(){
         <div class="aerow">${ll.map(k=>`<div class="aecard vast licht">
         <div class="aet">${LIGHTS[k].name}${ltTel[k] ? ` · ${ltTel[k]}×` : ""}</div>${aeVak(k, true)}
         <div class="aex">${LIGHTS[k].txt}</div></div>`).join("")}</div>` : ""}
-      <button class="obtn" data-act="btn" data-btn="aeuitlegok">Begrepen <span style="opacity:.6;font-size:.7rem">[spatie]</span></button></div>`;
+      <button class="obtn" data-act="btn" data-btn="aeuitlegok">Begrepen <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span></button></div>`;
   }
   if(u0.mode === "varuitleg"){
     const vr = VAR[u0.v] || {}, bs = vr.basis || "steen";
@@ -16873,7 +17051,7 @@ function overlayHTML(){
         Elk element heeft zo'n zwaardere versie. Het blijft ${EL[bs] ? EL[bs].icon + " " + EL[bs].name : bs} —
         dezelfde plek in de cirkel, dezelfde immuniteiten, dezelfde 🟣 krachten werken erop — het kán
         alleen meer. Sommige tegenstanders spelen ermee. Misschien krijg je er zelf ooit toegang toe.</div>
-      <button class="obtn" data-act="btn" data-btn="varuitlegok">Begrepen <span style="opacity:.6;font-size:.7rem">[spatie]</span></button></div>`;
+      <button class="obtn" data-act="btn" data-btn="varuitlegok">Begrepen <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span></button></div>`;
   }
   if(u0.mode === "banpick"){
     const ae = u0.aethers || [], lt = u0.lichten || [];
@@ -16969,7 +17147,7 @@ function overlayHTML(){
         </div>`;
     }
     const klaar = voorKlaar(u0);
-    const knop = `<div class="voorvoet">${meter}<button class="obtn ${klaar ? "" : "kanniet"}" data-act="btn" data-btn="banconfirm">${voorBtnTxt(u0)}${klaar ? ' <span style="opacity:.6;font-size:.7rem">[spatie]</span>' : ""}</button></div>`;
+    const knop = `<div class="voorvoet">${meter}<button class="obtn ${klaar ? "" : "kanniet"}" data-act="btn" data-btn="banconfirm">${voorBtnTxt(u0)}${klaar ? ' <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span>' : ""}</button></div>`;
     if(!u0.cards.length && !u0.vrij) return voorB2HTML(u0);
     if(!u0.cards.length)
       return `<div class="ovbox voorbox nieuw" style="max-width:min(960px,96vw)"><h2>Voorbereiding</h2>${mixblok}
@@ -16983,7 +17161,7 @@ function overlayHTML(){
     return `<div class="ovbox" style="max-width:min(760px,94vw)"><h2>Voorbereiding · ${pName(u0.p)}</h2>${aeblok}
       <div class="sub">Klik kaarten om ze <b>uit dit potje te gooien</b> (mag ook niets). De rest wordt teruggeschud in je deck.</div>
       <div class="gravelist">${u0.cards.map(c=>`<div class="gc bansel${u0.sel.includes(c.id)?" banned":""}" data-act="bansel" data-id="${c.id}">${cardFaceHTML(c)}${u0.sel.includes(c.id)?'<div class="banx">✕</div>':""}</div>`).join("")}</div>
-      ${isBot(u0.p)?'<div class="sub">🤖 de Bot beslist…</div>':`<button class="obtn" data-act="btn" data-btn="banconfirm">${voorBtnTxt(u0)} <span style="opacity:.6;font-size:.7rem">[spatie]</span></button>`}</div>`;
+      ${isBot(u0.p)?'<div class="sub">🤖 de Bot beslist…</div>':`<button class="obtn" data-act="btn" data-btn="banconfirm">${voorBtnTxt(u0)} <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span></button>`}</div>`;
   }
   if(M){
     if(M.type==="grave"){
@@ -17075,7 +17253,7 @@ function overlayHTML(){
               `${fuBeeld}<b>${AETHERS[fk].name}</b>: je <b>offert 1 eigen wezen</b> en deze kaart komt op die plek`,
               `In plaats van het gewone speel-effect: ${fuTxt}`) : ""}
       </div>
-      <button class="obtn" style="border-color:var(--line);color:var(--muted);background:#1a2129;box-shadow:none" data-act="btn" data-btn="cancelmode">Annuleer <span style="opacity:.6">[E]</span></button></div>`;
+      <button class="obtn" style="border-color:var(--line);color:var(--muted);background:#1a2129;box-shadow:none" data-act="btn" data-btn="cancelmode">Annuleer <span class="toets" style="opacity:.6">[E]</span></button></div>`;
   }
   return "";
 }
@@ -17538,7 +17716,7 @@ function menuHTML(){
   return `<div class="vmenu"><div class="ovbox"><h2>MENU</h2>
     ${online ? `<div class="sub">Online · jij bent <b>${pName(mySeat)}</b>${NET.seat < 0 ? " (toeschouwer)" : ""}</div>` : ""}
     <div class="menucol">
-      <button class="mbtn aan" data-act="btn" data-btn="closemodal">Hervatten <span class="mk">esc</span></button>
+      <button class="mbtn aan" data-act="btn" data-btn="closemodal">Hervatten <span class="mk toets">esc</span></button>
       ${S && S.story && !online ? `<button class="mbtn" data-act="btn" data-btn="kaartterug">Terug naar de kaart</button>` : ""}
       ${online
         ? `<button class="mbtn" data-act="btn" data-btn="${NET.chan === "live" ? "askLeaveLive" : "askLeave"}">Verbinding verbreken · hoofdmenu</button>`
@@ -17594,7 +17772,7 @@ function infoHTML(){
       <div><h2 style="color:var(--ik)">${m.titel}</h2>
       ${m.sub ? `<div class="infosub">${m.sub}</div>` : ""}</div></div>
     ${m.beeld ? prentHTML(m.beeld, "info") : ""}<div class="infotxt">${m.tekst}</div>
-    <button class="obtn b-dim" style="padding:12px 22px" data-act="btn" data-btn="${m.terug ? "infoterug" : "closemodal"}">${m.terug ? "↩ Terug naar het graf" : "Sluiten"} <span class="hint">[dubbeltik of esc]</span></button></div>`;
+    <button class="obtn b-dim" style="padding:12px 22px" data-act="btn" data-btn="${m.terug ? "infoterug" : "closemodal"}">${m.terug ? "↩ Terug naar het graf" : "Sluiten"} <span class="hint toets">[dubbeltik of esc]</span></button></div>`;
 }
 /* ================= VERHAALMODUS =================
    Vijf werelden met elk hun eigen sfeer. Per level eerst een praatje met de tegenstander
@@ -24673,9 +24851,13 @@ function praatHTML(){
   const reus = r.reus || vul;
   if(reus)         st.push("width:min(448px,76vw)");
   else if(r.groot) st.push("width:min(330px,68vw)");
-  return `<div class="praatscherm${(r.groot || reus) ? " groot" : ""}${reus ? " reus" : ""}${vul ? " vul" : ""}">
+  /* 📱 Op de telefoon staat de plek van het level erachter (art/bg-<level>.png), in het donker. */
+  const telBg = telAan() && M && /^[1-5]-[1-6]$/.test(String(M.id || ""))
+    ? `<img class="praatbg" src="art/bg-${M.id}.png" alt="" onerror="this.remove()">` : "";
+  const leeg = r.s === null || r.ogen;
+  return `<div class="praatscherm${(r.groot || reus) ? " groot" : ""}${reus ? " reus" : ""}${vul ? " vul" : ""}${leeg ? " leeg" : ""}">${telBg}
     <div class="praatsprite${r.loop ? " loopt" : ""}" style="${st.join(";")}">${r.s === null || r.ogen ? "" : spriteSVG(r.s || L.sprite)}</div>
-    <div class="praatbox" style="--wk:${r.kleur || W.kleur}">
+    <div class="praatrechts"><div class="praatbox" style="--wk:${r.kleur || W.kleur}">
       <div class="praatnaam">${r.naam || (L.faseNaam && M && L.faseNaam[M.fase]) || L.vijand}</div>
       <div class="praattxt" id="praattxt"></div>
       <div class="praatpijl" id="praatpijl">▼</div>
@@ -24683,7 +24865,7 @@ function praatHTML(){
     ${openKeuze(M && M.id, r)
       ? `<div class="praatkeus">${r.keuze.map((k,i) =>
           `<button class="pkbtn${k.golf ? " golf" + k.golf : ""}" data-act="btn" data-btn="praatkeus" data-ga="${k.ga}"${k.tel ? ` data-tel="${k.tel}"` : ""}>${k.golf ? golfLetters(k.label) : k.label}</button>`).join("")}</div>`
-      : ""}
+      : ""}</div>
     ${openKeuze(M && M.id, r) ? "" : `<button class="praatskip" data-act="btn" data-btn="praatskip" title="Het gesprek overslaan (E)">⏭ Overslaan</button>`}
   </div>`;
 }
@@ -26049,7 +26231,7 @@ function voorB2HTML(u0){
       ${elRijen}${krachten}${totaal}
       <div class="drtotaaltxt"><span>elementen <b>${elTot}</b></span><span>licht <b>${ltOp}</b></span></div>
       ${balans}
-      <div class="dronder"><button class="obtn drknop${klaar ? "" : " kanniet"}" data-act="btn" data-btn="banconfirm">${klaar ? "Beginnen" : voorBtnTxt(u0)}${klaar ? ' <span style="opacity:.6">[spatie]</span>' : ""}</button></div></div>`;
+      <div class="dronder"><button class="obtn drknop${klaar ? "" : " kanniet"}" data-act="btn" data-btn="banconfirm">${klaar ? "Beginnen" : voorBtnTxt(u0)}${klaar ? ' <span class="toets" style="opacity:.6">[spatie]</span>' : ""}</button></div></div>`;
   const kop = `<div class="vbkop"><h2>Voorbereiding</h2>${L ? `<span class="vblv">${S.story.id} · ${L.naam || ""}${L.vijand ? ` · tegen ${L.vechtNaam || L.vijand}` : ""}</span>` : ""}</div>`;
   const links = `<div class="drrijen vblinks">${aePane}${ltPane}${!ae.length && !lt.length ? `<div class="lsec vbsec vbleeg"><div class="lkop">NOG NIETS TE KIEZEN <small>aethers en lichtkaarten krijg je in het verhaal en bij Knort</small></div></div>` : ""}</div>`;
   return `<div class="ovbox draftbox dr2 vb2">${kop}${opdrachtBalk(u0)}<div class="drlay vblay">${links}${rechts}</div></div>`;
@@ -26936,7 +27118,7 @@ function wkItem(v, pos, w, beeld){
   /* Wat onderaan op de toonbank staat (hartjes, het slot) krijgt zijn prijskaartje erboven:
      onder de toonbank viel het buiten beeld. */
   const tagOp = pos.y >= 75 ? " tagboven" : "";
-  return `<button class="wkitem ${staat}${beeld ? "" : " plek"}${onder}${tagOp}" style="left:${pos.x}%;bottom:${100 - pos.y}%;width:${w}%"${klik}>
+  return `<button class="wkitem ${staat}${beeld ? "" : " plek"}${onder}${tagOp}${v.soort === "ae" ? " rijae" : ""}" style="left:${pos.x}%;bottom:${100 - pos.y}%;width:${w}%"${klik}>
     ${bin}<span class="wktag"${tagOp && pos.tag != null ? ` style="bottom:${pos.tag}%"` : ""}>${tag}</span><span class="wktip"><span class="wktn">${v.naam}</span>${v.kort || ""}</span></button>`;
 }
 function winkelScene(kraam){
@@ -27018,11 +27200,19 @@ function winkelVolHTML(kop){
   if(b){
     const ic = b.soort === "hart" ? "❤" : (b.soort === "upg" ? b.ic : (b.soort === "lt" || b.soort === "slot" ? "✦" : "🟣"));
     const na = sterVrij() - b.prijs;
+    /* de prent van wat je koopt (op de telefoon staat die groot in het vel) */
+    let prent = null;
+    try{ prent = b.soort === "ae" ? (AETHER_BEELD || {})[b.key] : (b.soort === "lt" ? (LICHT_BEELD || {})[b.key]
+      : (b.soort === "upg" ? KAART_BEELD[UPG_VAN[b.key]] : null)); }catch(e){}
+    const prentHTML = prent && BEELD_KLAAR[prent] !== "fout" ? `<img class="wkbprent" src="${prent}" alt="" onerror="this.remove()">` : "";
     bev = `<div class="wkbevvol"><div class="wkbevestig">
-        <div class="wkbic">${ic}</div><h3>${b.naam}</h3><div class="sub">${b.kort}</div>
-        <div class="wkprijs">★ <b>${b.prijs}</b> ${b.prijs === 1 ? "ster" : "sterren"} · je houdt er <b>${na}</b> over</div>
+        ${prentHTML}<div class="wkbic">${ic}</div><h3>${b.naam}</h3><div class="sub">${b.kort}</div>
+        ${b.teDuur
+          ? `<div class="wkprijs">★ <b>${b.prijs}</b> · je hebt er <b>${sterVrij()}</b>, dat is te weinig</div>
+             <div class="mrow"><button class="obtn b-dim" data-act="btn" data-btn="koopnee">Terug</button></div>`
+          : `<div class="wkprijs">★ <b>${b.prijs}</b> ${b.prijs === 1 ? "ster" : "sterren"} · je houdt er <b>${na}</b> over</div>
         <div class="mrow"><button class="obtn b-story" data-act="btn" data-btn="koopja">Kopen</button>
-          <button class="obtn b-dim" data-act="btn" data-btn="koopnee">Toch niet</button></div></div></div>`;
+          <button class="obtn b-dim" data-act="btn" data-btn="koopnee">Toch niet</button></div>`}</div></div>`;
   }
   const hint = kraam === "smid" ? "Wijs een kaart aan om te zien wat smeden doet. Klik om te laten smeden."
                                 : "Wijs iets aan om te zien wat het doet. Klik om het te kopen.";
@@ -27092,6 +27282,8 @@ function koopVraag(soort, key){
   if(!M || M.type !== "winkel") return;
   const v = soort === "hart" ? hartVak() : (soort === "slot" ? slotVak() : (soort === "upg" ? upgVak(key) : koopVak(soort, key, 0)));
   if(!v || v.leeg || v.op || v.mijn) return;
+  /* 📱 Op de telefoon kun je niet "aanwijzen": daar zie je bij een tik altijd wat het is, ook als het te duur is. */
+  if(!v.kan && telAan()){ AU.play("lose"); winkelZeg(knortZin(kraamVan().arm()), kraamVan().spr + "_zuur", true); M.bevestig = Object.assign({}, v, {teDuur:true}); render(); return; }
   if(!v.kan){ AU.play("lose"); winkelZeg(knortZin(kraamVan().arm()), kraamVan().spr + "_zuur", true); return; }
   M.bevestig = v; render();
 }
@@ -27314,8 +27506,22 @@ function kaartHTML(){
     ? `<div class="hemeldim"></div>${BEELD_KLAAR[HEMEL_BEELD] !== "fout" ? `<img class="kaartart hemellaag" src="${HEMEL_BEELD}" alt="" draggable="false" onerror="this.remove()">` : ""}<div class="hemelnood"></div>`
     : "";
   const alles = !!SET.story.vrij;
+  /* 📱 Op de telefoon: knopjes per wereld (de camera springt erheen) en een vel met het
+     level dat je aantikte. Op de computer staan ze er niet. */
+  const volgendT = STORY_ORDER.find(id => STORY[id] && storyVrij(id) && !storyKlaar(id));
+  const huidigW = hemelAan ? 5 : (M.telW || (volgendT ? Math.min(4, +volgendT.split("-")[0]) : 1));
+  const telChips = `<div class="wchips">${[1,2,3,4,5].map(x => {
+      const open = STORY_ORDER.some(id => +id.split("-")[0] === x && STORY[id] && storyVrij(id)) || alles;
+      return `<button class="wchip${x === huidigW ? " nu" : ""}${open ? "" : " dicht"}" style="--wk:${WERELDEN[x].kleur}"
+        data-act="btn" data-btn="kaartwereld" data-w="${x}"${open ? "" : " disabled"} title="${WERELDEN[x].naam}">${x}</button>`;
+    }).join("")}<span class="wnaam">${WERELDEN[huidigW].naam.toUpperCase()}</span></div>`;
+  const telVel = M.kies && STORY[M.kies] ? `<div class="telvel">
+      <button class="obtn b-dim telvelweg" data-act="btn" data-btn="kaartvelweg" aria-label="Sluiten">✕</button>
+      <div class="vlvuitleg">${lvUitlegHTML(M.kies)}</div>
+      <button class="obtn telspeel" data-act="btn" data-btn="storylevel" data-id="${M.kies}" data-direct="1">${storyKlaar(M.kies) ? "Nog een keer" : "Speel"}</button>
+    </div>` : "";
   return `<div class="ovbox kaartbox">
-    <div class="kaartkop"><h2>📖 Verhaal</h2>
+    <div class="kaartkop"><h2>📖 Verhaal</h2>${telChips}
       <span class="sub" style="color:var(--gold)">${n} van de ${STORY_ORDER.length}${alles ? " · 🔓" : ""}</span>
       <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
@@ -27338,6 +27544,7 @@ function kaartHTML(){
     </div></div>
     <button class="tasknop" data-act="btn" data-btn="inventaris" title="Je rugtas">
       <img src="art/rugtas.png" alt="" draggable="false" onerror="this.remove()">${pixIcoon("tas")}<span>Rugtas</span></button>
+    ${telVel}
     </div>`;
 }
 /* Na het tekenen: onthouden wat er nu staat (dan speelt de animatie niet nog een keer),
@@ -27371,6 +27578,16 @@ function kaartNamen(){
     if(beste) k.classList.add(beste);
     geplaatst.push(box(naam));
   });
+}
+/* 📱 De camera naar het midden van een wereld (gemiddelde plek van zijn levels). */
+function telKaartNaar(w, zacht){
+  const box = document.getElementById("kaartscroll"), vlak = document.getElementById("kaartvlak");
+  if(!box || !vlak) return;
+  const ids = STORY_ORDER.filter(id => +id.split("-")[0] === w && OVERWORLD[id]);
+  if(!ids.length) return;
+  const x = ids.reduce((a, id) => a + OVERWORLD[id].x, 0) / ids.length / 100 * vlak.offsetWidth;
+  const y = ids.reduce((a, id) => a + OVERWORLD[id].y, 0) / ids.length / 100 * vlak.offsetHeight;
+  box.scrollTo({left:Math.max(0, x - box.clientWidth / 2), top:Math.max(0, y - box.clientHeight / 2), behavior:zacht === false ? "auto" : "smooth"});
 }
 function kaartScrol(){
   if(!M || M.type !== "story" || M.lijst) return;
@@ -27927,7 +28144,9 @@ function render(){
   /* Op de kaart en in de winkels staat hij er altijd, ook als je net uit een gevecht komt. */
   const opKaart = !!(M && (M.type === "story" || M.type === "winkel"));
   const gfNaast = opKaart && S.ui.mode !== "start" && window.innerWidth <= 1080;   // dan staat de ☰ ook rechtsboven
-  if(gf){ gf.classList.toggle("show", S.ui.mode === "start" || opKaart);
+  /* 📱 Op de telefoon alleen op het startscherm: elders valt hij over knoppen (geluid zit ook in Opties en het menu). */
+  const gfTel = telAan() && !(S.ui.mode === "start" && !M);
+  if(gf){ gf.classList.toggle("show", !gfTel && (S.ui.mode === "start" || opKaart));
           gf.classList.toggle("naastmenu", gfNaast);
           gf.classList.toggle("uit", !!SET.mute);
           gf.innerHTML = pixIcoon(SET.mute ? "stil" : "luid");
@@ -29658,9 +29877,19 @@ function deckbouwHTML(){
       <span class="ltnknop${(n >= kan || ltGebruikt(ltIn) >= ltMax) ? " uit" : ""}" data-act="dblt" data-k="${k}" data-d="1">+</span></div>
       ${ander ? `<div class="dbtag">${ander}× ${zij ? "IN DECK" : "SIDEBOARD"}</div>` : ""}</div>`; };
   const ok = saldo === 0;
-  return `<div class="ovbox dbbox">
+  /* 📱 Op de telefoon één vak tegelijk, met tabbladen bovenin (Elementen, Aethers, Licht). */
+  const telTab = M.telTab || "el";
+  const telTabs = `<div class="dbteltabs">
+      <span class="seg${telTab === "el" ? " on" : ""}" data-act="dbteltab" data-t="el">Elementen ${mixTotaal(d.mix)}/${eb * 4}</span>
+      <span class="seg${telTab === "ae" ? " on" : ""}" data-act="dbteltab" data-t="ae">Aethers ${aeIn.length}/${aeMax}</span>
+      <span class="seg${telTab === "lt" ? " on" : ""}" data-act="dbteltab" data-t="lt">Licht ${ltGebruikt(ltIn)}/${ltMax}</span>
+      ${telTab === "el" ? "" : `<span class="dbzij"><span class="seg${zij ? "" : " on"}" data-act="dbzij" data-z="0">Deck</span><span class="seg${zij ? " on" : ""}" data-act="dbzij" data-z="1">Sideboard</span></span>`}</div>`;
+  return `<div class="ovbox dbbox teltab-${telTab}">
     <div class="dbtop"><h2>${M.i >= 0 ? "DECK AANPASSEN" : "NIEUW DECK"}</h2>
-      <input id="decknaam" class="dbnaam" type="text" maxlength="22" value="${d.naam.replace(/"/g, "")}" placeholder="naam van je deck"></div>
+      <input id="decknaam" class="dbnaam" type="text" maxlength="22" value="${d.naam.replace(/"/g, "")}" placeholder="naam van je deck">
+      <span class="dbtelknop"><button class="obtn" data-act="btn" data-btn="deckterug">Annuleren</button>
+      <button class="obtn${ok ? "" : " uit"}" data-act="btn" data-btn="deckopslaan">Opslaan</button></span></div>
+    ${telTabs}
     <div class="dbkol">
       <div class="dbvak">
         <div class="dbkop">ELEMENTEN · <b class="${ok ? "" : "mis"}">${mixTotaal(d.mix)}/${eb * 4}</b></div>
@@ -29709,6 +29938,7 @@ function mpKlik(act, t){
       else { ORDER.forEach(o => { if(d.upg[o] === g) delete d.upg[o]; }); d.upg[e] = g; }
       render(); return true; }
     if(act === "dbtab"){ M.tab = t.dataset.t; render(); return true; }
+    if(act === "dbteltab"){ M.telTab = t.dataset.t; if(t.dataset.t !== "el") M.tab = t.dataset.t; render(); return true; }
     if(act === "dbzij"){ M.zij = t.dataset.z === "1"; render(); return true; }
     if(act === "dbae"){ const k = t.dataset.k, lijst = zij ? d.zijAe : d.ae, ander = zij ? d.ae : d.zijAe;
       const i = lijst.indexOf(k), oudAe = d.ae.slice();
@@ -30287,6 +30517,17 @@ function onBtn(btn, el, fromAction){
       else { M = {type:"story", hemel:true}; render(); }
       break;
     case "hemelaf": M = {type:"story"}; render(); break;
+    case "kaartvelweg": if(M){ delete M.kies; render(); } break;
+    case "kaartwereld": {
+      const w = +(el && el.dataset.w) || 1;
+      if(w === 5){ if(!(M && M.hemel)){
+          if(!SET.story.trapGezien && STORY["5-1"] && STORY["5-1"].trap){ storySkin(5); praatStart("5-1", "trap"); }
+          else { M = {type:"story", hemel:true}; render(); } }
+        break; }
+      M = {type:"story", telW:w, gescrold:true}; storySkin(0); render();
+      setTimeout(() => telKaartNaar(w), 30);
+      break;
+    }
     case "cirkeltoggle": if(!TUTWACHT) tutScherm("cirkel"); break;
     case "lvwereld": if(M && M.lijst){ M.wereld = +(el && el.dataset.w) || 1; M.lvInfo = null; render(); } break;
     case "storykaart": M = {type:"story"}; render(); break;
@@ -30302,6 +30543,10 @@ function onBtn(btn, el, fromAction){
     }
     case "storylevel": {
       const id = el && el.dataset.id;
+      /* 📱 Op de kaart van de telefoon eerst het vel met wie je tegenkomt; spelen is de knop daarin. */
+      if(telAan() && M && M.type === "story" && !M.lijst && !M.inv && el && !el.dataset.direct && id && STORY[id] && storyVrij(id)){
+        M.kies = id; render(); break;
+      }
       if(id === "1-3" && storyKlaar("1-3")){ nimbusOpenen(); break; }
       if(id && STORY[id] && storyVrij(id)){ storySkin(STORY[id].wereld); levelOpnieuw(id); }
       break;
@@ -30421,6 +30666,7 @@ function telNaRender(){
   const u = S.ui || {}, ik = (NET.on && NET.seat === 1) ? 1 : 0;
   const moet = !S.over && ((u.mode === "choice" && u.kind === "hand" && u.p === ik && !isBot(ik))
     || (u.mode === "mulligan" && !isBot(u.p) && iControl(u.p)));
+  document.body.classList.toggle("telonline", !!(NET.on && !S.over && u.mode !== "start"));
   if(moet && !TEL_AUTO) telHand(true);
   if(!moet && TEL_AUTO) telHand(false);
   TEL_AUTO = moet;
@@ -30984,6 +31230,8 @@ function muziekWarm(){
   const later = [...new Set(Object.values(MUZIEK).filter(pad => pad && eerst.indexOf(pad) < 0))];
   LAAD.tot += eerst.length;
   eerst.forEach(pad => muziekHaal(pad, () => laadTik("muziek")));
+  /* 📱 Op de telefoon niet alle muziek vooruit: elk nummer komt pas als het gaat spelen. */
+  try{ if(window.matchMedia("(pointer:coarse)").matches) return; }catch(e){}
   const volgende = () => {
     const pad = later.shift(); if(!pad) return;
     let door = false; const verder = () => { if(door) return; door = true; setTimeout(volgende, 50); };
@@ -31277,18 +31525,38 @@ document.addEventListener("keydown", e => {
   vnKies(knoppen[i]);
   e.preventDefault();
 });
+/* 📱 Op een telefoon (online) eerst de service worker: die haalt de lichte tekeningen
+   (art-tel/*.webp) en bewaart alles op de telefoon. Pas als hij klaar staat beginnen we
+   met laden, anders komt de eerste keer alsnog alles in het groot binnen. */
+function telSwKlaar(){
+  return new Promise(res => {
+    let af = false; const klaar = () => { if(!af){ af = true; res(); } };
+    try{
+      const mag = "serviceWorker" in navigator && location.protocol === "https:" && HOSTED
+        && window.matchMedia("(pointer:coarse)").matches;
+      if(!mag) return klaar();
+      navigator.serviceWorker.register("sw.js").catch(klaar);
+      if(navigator.serviceWorker.controller) return klaar();
+      navigator.serviceWorker.addEventListener("controllerchange", klaar);
+      setTimeout(klaar, 3000);
+    }catch(e){ klaar(); }
+  });
+}
 /* start */
 document.body.classList.add("venster");
+function spelStart(){
 { const rug = new Image(); rug.onload = () => document.body.classList.add("rugbeeld"); rug.src = "art/kaart-achterkant.png";
   for(let i = 0; i <= 5; i++){ const r = new Image(); r.onload = () => document.body.classList.add("rugw" + i); r.src = `art/kaart-achterkant-w${i}.png`; }
   let tint = 0; ["veld", "embleem"].forEach(k => { const r = new Image();
     r.onload = () => { if(++tint === 2) document.body.classList.add("rugtint"); }; r.src = `art/kaart-achterkant-${k}.png`; }); }     // stijl C: de vensters
-beeldenWarm();
-muziekWarm();
-laadPaint();
+beeldenWarm(); muziekWarm(); laadPaint();
 LAAD.tijd = setTimeout(laadKlaar, 25000);   /* wat er ook gebeurt: na 25 tellen spelen we */
 newGame();
 netBoot();
+}
+/* Op de computer (en zonder service worker) begint dit meteen. */
+if(window.matchMedia && window.matchMedia("(pointer:coarse)").matches) telSwKlaar().then(spelStart);
+else spelStart();
 
 
 /* ================= FILMPJES =================
@@ -31389,6 +31657,16 @@ const FILM_MUZIEK = {
   "boven":      "audio/film-boven.mp3",
   "water":      "audio/film-water.mp3"
 };
+/* De montage per filmpje (uit de filmstudio): welke scènes, in welke volgorde, hoe lang.
+   Een lijst van clips: {s:"naam van de scène", d:seconden} of {zwart:seconden} (een zwart beeld).
+   "*" betekent: alle overige scènes in de oorspronkelijke volgorde en duur.
+   Een scène die korter of langer wordt, speelt zijn hele animatie sneller of trager af
+   (tekst en geluid schuiven mee). Ontbreekt een filmpje hier, dan speelt hij zoals gemaakt. */
+const FILM_EDIT = {
+  "opening2": [{zwart:2}, "*"]
+};
+/* Hoe snel de tekst in een filmpje getypt wordt (letters per seconde), net als in de praatjes. */
+const FILM_TYP_CPS = 40;
 /* Welke opening er speelt bij een nieuw verhaal: "opening2" (nieuw) of "opening" (de eerste versie). */
 const OPENING_FILM = "opening2";
 /* Welk filmpje na welk gevecht, de eerste keer dat je het wint. */
@@ -31417,7 +31695,7 @@ const FILM = (() => {
      Ze gaan via het effectenvolume van het spel; in het filmpaneel via een eigen kanaal. */
   let sfxAc = null, sfxUit = null;
   function sfxBus() {
-    if (typeof AU !== "undefined" && AU.ctx && AU.sfxG) return [AU.ctx, AU.sfxG];
+    if (typeof AU !== "undefined" && AU.ctx && AU.sfxG) { if (AU.ctx.state === "suspended") { try { AU.ctx.resume(); } catch (e) {} } return [AU.ctx, AU.sfxG]; }
     if (!sfxAc) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return [null, null];
       sfxAc = new C(); sfxUit = sfxAc.createGain(); sfxUit.gain.value = .6; sfxUit.connect(sfxAc.destination); }
     if (sfxAc.state === "suspended") sfxAc.resume();
@@ -31441,9 +31719,17 @@ const FILM = (() => {
   }
   const GELUID = {
     /* hartslag: lub-dub, laag */
-    hart: (a, o, t, v) => { toon(a, o, t, "sine", 72, 38, .22, .9 * v); toon(a, o, t + .22, "sine", 64, 36, .2, .6 * v); },
+    /* (okt 2026) met een doffe tik en een boventoon erbij: alleen die lage toon hoor je niet op een laptop of telefoon */
+    hart: (a, o, t, v) => {
+      toon(a, o, t, "sine", 72, 38, .22, .9 * v); toon(a, o, t + .22, "sine", 64, 36, .2, .6 * v);
+      toon(a, o, t, "triangle", 150, 70, .13, .45 * v); toon(a, o, t + .22, "triangle", 130, 62, .12, .3 * v);
+      ruisstoot(a, o, t, "lowpass", 380, 1, .07, .55 * v); ruisstoot(a, o, t + .22, "lowpass", 320, 1, .06, .35 * v);
+    },
+    /* een letter die getypt wordt (dezelfde blip als in de praatjes) */
+    typ: (a, o, t, v) => { toon(a, o, t, "square", 880, 700, .045, .05 * v); },
     /* dezelfde hartslag, maar dof, als van ver */
-    hartdof: (a, o, t, v) => { toon(a, o, t, "sine", 55, 32, .25, .55 * v); toon(a, o, t + .24, "sine", 50, 30, .22, .35 * v); },
+    hartdof: (a, o, t, v) => { toon(a, o, t, "sine", 55, 32, .25, .55 * v); toon(a, o, t + .24, "sine", 50, 30, .22, .35 * v);
+      toon(a, o, t, "triangle", 120, 60, .12, .25 * v); ruisstoot(a, o, t, "lowpass", 280, 1, .06, .3 * v); },
     /* een zware ketting die neerslaat */
     ketting: (a, o, t, v) => {
       toon(a, o, t, "sine", 95, 34, .32, .7 * v);
@@ -31485,7 +31771,15 @@ const FILM = (() => {
   /* Speel de geluiden van een film die tussen twee tijdstippen vallen. */
   function geluidTussen(f, van, tot) {
     (f.geluid || []).forEach(([t, soort, v, extra]) => { if (t > van && t <= tot && tot - t < .25) geluid(soort, v, extra); });
+    /* het typen: een blip als er sinds de vorige keer letters bij kwamen (om de twee letters, net als de praatjes) */
+    if (tot - van > 0 && tot - van < .25) (f.tekst || []).forEach(r => {
+      if (!r[2]) return;
+      const n0 = typN(r, van), n1 = typN(r, tot);
+      if (n1 > n0 && Math.floor(n1 / 2) > Math.floor(n0 / 2) && r[2][n1 - 1] !== " ") geluid("typ", 1);
+    });
   }
+  /* hoeveel letters van regel r er op tijd t staan */
+  function typN(r, t) { return t < r[0] ? 0 : Math.min(r[2].length, Math.floor((t - r[0]) * FILM_TYP_CPS) + 1); }
 
   function cam(img, z, fx, fy, mode) {
     const iw = img.width, ih = img.height;
@@ -31566,9 +31860,11 @@ const FILM = (() => {
   }
   
   function tekst(t, regels) {
-    const r = regels.find(([a, b]) => t >= a - .3 && t <= b + .3);
+    const r = regels.find(([a, b]) => t >= a - .15 && t <= b + .3);
     if (!r || !r[2]) return;
-    const a = Math.min(seg(t, r[0] - .3, r[0] + .1), 1 - seg(t, r[1] - .1, r[1] + .3));
+    /* (okt 2026) de balk komt snel op, de letters worden getypt, aan het eind fadet alles weg */
+    const a = Math.min(seg(t, r[0] - .15, r[0]), 1 - seg(t, r[1] - .1, r[1] + .3));
+    const nT = t >= r[1] ? r[2].length : typN(r, t);
     /* Schudtekst: groter, en elke letter wipt los op en neer. */
     if (r[3] && r[3].schud) {
       ctx.save(); ctx.globalAlpha = a;
@@ -31577,6 +31873,7 @@ const FILM = (() => {
       ctx.fillStyle = "#000"; ctx.fillRect(0, H - hb, W, hb);
       const tik = Math.floor(t * 16);
       [...r[2]].forEach((ch, i) => {
+        if (i >= nT) return;
         const dy = Math.sin(t * 13 + i * 1.7) * 4 + (rnd(tik, i) - .5) * 4, dx = (rnd(tik, i + 50) - .5) * 2;
         ctx.fillStyle = "#3a2208"; ctx.fillText(ch, x + dx + 3, H - hb / 2 + dy + 3);
         ctx.fillStyle = "#ffe08a"; ctx.fillText(ch, x + dx, H - hb / 2 + dy);
@@ -31595,7 +31892,14 @@ const FILM = (() => {
     const hb = rg.length > 1 ? 104 : 74;
     ctx.fillStyle = "#000"; ctx.fillRect(0, H - hb, W, hb);
     ctx.fillStyle = "#f3efe6";
-    rg.forEach((s, i) => ctx.fillText(s, W / 2, H - hb / 2 + (i - (rg.length - 1) / 2) * 34));
+    /* de regels staan al op hun eindplek (gecentreerd op de hele zin); alleen de getypte letters zijn zichtbaar */
+    let rest = nT;
+    rg.forEach((s, i) => {
+      const y = H - hb / 2 + (i - (rg.length - 1) / 2) * 34, deel = s.slice(0, Math.max(0, rest));
+      rest -= s.length + 1;
+      if (!deel) return;
+      ctx.textAlign = "left"; ctx.fillText(deel, W / 2 - ctx.measureText(s).width / 2, y);
+    });
     ctx.restore();
   }
 
@@ -31603,14 +31907,36 @@ const FILM = (() => {
      Elke scène heeft een duur; de begintijden rekent de reeks zelf uit. Zo kun je een scène
      langer of korter maken zonder de rest aan te passen. Tekst staat per scène als
      [van, tot] binnen die scène. */
+  /* (okt 2026) De montage: EDIT_NU is de clipslijst uit FILM_EDIT of uit de filmstudio. Een scène
+     die een andere duur krijgt, speelt zijn animatie, tekst en geluid uitgerekt of samengeperst af. */
+  let EDIT_NU = null;
   function reeks(beelden, scenes) {
+    const orig = scenes.map(s => Object.assign({oorspr: s.duur}, s));
+    let lijst = orig;
+    if (Array.isArray(EDIT_NU) && EDIT_NU.length) {
+      const nieuw = [], gebruikt = new Set();
+      EDIT_NU.forEach(c => {
+        if (c === "*") { orig.forEach(s => { if (!gebruikt.has(s.naam)) { gebruikt.add(s.naam); nieuw.push(s); } }); return; }
+        if (c && c.zwart != null) { const d = Math.max(.1, +c.zwart); nieuw.push({naam: "Zwart", zwart: true, duur: d, oorspr: d, teken: () => vlak("#000", 1)}); return; }
+        const s = c && orig.find(x => x.naam === c.s && !gebruikt.has(x.naam));
+        if (!s) return;
+        gebruikt.add(s.naam);
+        nieuw.push(Object.assign({}, s, {duur: c.d != null ? Math.max(.2, +c.d) : s.oorspr}));
+      });
+      if (nieuw.length) lijst = nieuw;
+    }
     let t = 0;
-    const S = scenes.map(s => { const r = Object.assign({van: t}, s); t += s.duur; return r; });
+    const S = lijst.map(s => { const r = Object.assign({}, s, {van: t, k: s.duur / s.oorspr}); t += s.duur; return r; });
     const tekst = [], geluid = [];
-    S.forEach(s => (s.tekst || []).forEach(([a, b, z, o]) => tekst.push([s.van + a, s.van + b, z, o])));
-    S.forEach(s => (s.geluid || []).forEach(([a, ...r]) => geluid.push([s.van + a, ...r])));
-    return {duur: t, beelden, tekst, geluid, scenes: S.map(s => ({naam: s.naam, van: s.van})),
-      teken: tt => { const s = S.find(x => tt >= x.van && tt < x.van + x.duur) || S[S.length - 1]; s.teken(tt - s.van, s.duur); }};
+    S.forEach(s => (s.tekst || []).forEach(([a, b, z, o]) => tekst.push([s.van + a * s.k, s.van + b * s.k, z, o])));
+    S.forEach(s => (s.geluid || []).forEach(([a, ...r]) => geluid.push([s.van + a * s.k, ...r])));
+    return {duur: t, beelden, tekst, geluid, scenes: S.map(s => ({naam: s.naam, van: s.van, duur: s.duur, oorspr: s.oorspr, zwart: !!s.zwart})),
+      teken: tt => { const s = S.find(x => tt >= x.van && tt < x.van + x.duur) || S[S.length - 1]; s.teken((tt - s.van) / s.k, s.oorspr); }};
+  }
+  /* Een filmpje maken met een montage (null = zoals in FILM_EDIT staat, [] = het origineel). */
+  function maakFilm(naam, edit) {
+    EDIT_NU = edit === undefined || edit === null ? (FILM_EDIT[naam] || null) : edit;
+    try { return FILMS[naam].maak(); } finally { EDIT_NU = null; }
   }
   const zin = (sleutel, k) => { const o = FILM_TEKST.opening[sleutel] || []; return o[k] || ""; };
 
@@ -32453,7 +32779,7 @@ const FILM = (() => {
     const d = FILMS[naam];
     if (!d || typeof document === "undefined") { if (klaar) klaar(); return; }
     maakLaag(); zetDoek(laag.querySelector("canvas"));
-    const f = d.maak();
+    const f = maakFilm(naam);
     laag.classList.add("aan", "laadt");
     laad(f.beelden).then(alles => {
       laag.classList.remove("laadt");
@@ -32466,7 +32792,7 @@ const FILM = (() => {
   /* Voor het filmpaneel: zelf een doek geven en een frame op tijd t tekenen. */
   const paneel = {
     lijst: () => Object.keys(FILMS).map(k => ({sleutel: k, naam: FILMS[k].naam})),
-    maak: k => FILMS[k].maak(),
+    maak: (k, edit) => maakFilm(k, edit),
     laad: f => laad(f.beelden),
     doek: zetDoek, frame,
     tekst: aan => { TEKST_AAN = aan; },
@@ -32510,6 +32836,24 @@ function filmStudio(){
     #filmstudio .muzbalk{position:relative;height:16px;background:#16161c;border-radius:4px;margin-top:6px;overflow:hidden}
     #filmstudio .muzbalk i{position:absolute;top:0;bottom:0;background:rgba(224,184,90,.35);border-left:2px solid #e0b85a}
     #filmstudio .muzbalk b{position:absolute;top:0;bottom:0;width:2px;background:#fff}
+    /* de tijdlijn: clips die je kunt slepen (volgorde) en aan de rechterrand langer of korter trekken */
+    #filmstudio .tlijn{position:relative;margin-top:10px;user-select:none;-webkit-user-select:none}
+    #filmstudio .baan{position:relative;height:58px;background:#121218;border:1px solid #26262f;border-radius:6px;overflow:hidden;cursor:pointer}
+    #filmstudio .clip{position:absolute;top:4px;bottom:4px;box-sizing:border-box;border:1px solid #4a4a5c;border-radius:4px;background:#24242f;color:#ddd;
+      font-size:11px;line-height:1.2;padding:4px 10px 4px 6px;overflow:hidden;cursor:grab;touch-action:none}
+    #filmstudio .clip b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #filmstudio .clip span{color:#9a9aa8;font-variant-numeric:tabular-nums}
+    #filmstudio .clip.zw{background:#050506;border-style:dashed}
+    #filmstudio .clip.sel{border-color:#e0b85a;box-shadow:inset 0 0 0 1px #e0b85a;background:#2e2a1e}
+    #filmstudio .clip.sleept{opacity:.75;cursor:grabbing;z-index:3}
+    #filmstudio .clip .greep{position:absolute;right:0;top:0;bottom:0;width:9px;cursor:ew-resize;background:linear-gradient(90deg,transparent,rgba(224,184,90,.5))}
+    #filmstudio .muzbaan{position:relative;height:24px;margin-top:4px;background:#121218;border:1px solid #26262f;border-radius:6px;overflow:hidden}
+    #filmstudio .muzblok{position:absolute;top:3px;bottom:3px;background:rgba(224,184,90,.3);border:1px solid #e0b85a;border-radius:3px;cursor:grab;touch-action:none;
+      font-size:11px;color:#f3d89a;padding:2px 6px;box-sizing:border-box;white-space:nowrap;overflow:hidden}
+    #filmstudio .muzblok.sleept{cursor:grabbing}
+    #filmstudio .kop{position:absolute;top:0;bottom:0;width:2px;background:#fff;pointer-events:none;z-index:4}
+    #filmstudio .clipinstel{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;background:#121218;border:1px solid #26262f;border-radius:6px;padding:8px 10px}
+    #filmstudio .clipinstel input[type=number]{width:80px}
   </style>
   <div class="fsw">
     <div class="rij" style="justify-content:space-between;margin-top:0"><h2>🎬 Filmstudio</h2><button data-k="dicht">✕ Sluiten</button></div>
@@ -32519,8 +32863,14 @@ function filmStudio(){
     <div class="doek"><canvas width="1280" height="720"></canvas></div>
     <div class="rij"><button data-k="speel">▶ Afspelen</button><button data-k="begin">⏮ Begin</button>
       <input type="range" class="tl" data-k="tl" min="0" max="1000" value="0"><span class="tijd" data-k="tijd">0.0 s</span></div>
-    <div class="muzbalk" title="Waar de muziek loopt: de gouden balk is het stuk van het nummer dat onder het filmpje ligt"><i data-k="muzi"></i><b data-k="muzb"></b></div>
-    <div class="rij scenes" data-k="scenes"></div>
+    <div class="tlijn" data-k="tlijn">
+      <div class="baan" data-k="baan"></div>
+      <div class="muzbaan" data-k="muzbaan" title="De muziek: sleep het blok om te kiezen waar hij inzet"><div class="muzblok" data-k="muzblok"></div></div>
+      <div class="kop" data-k="kop"></div>
+    </div>
+    <div class="clipinstel" data-k="clipinstel"></div>
+    <div class="noot">Sleep een clip om hem te verplaatsen. Trek aan de rechterrand om hem langer of korter te maken (de animatie, tekst en geluid rekken mee). Sleep het gouden blok om de muziek te laten inzetten.</div>
+    <div class="muzbalk" title="Waar de muziek loopt in het nummer zelf: de gouden balk is het stuk van het nummer dat onder het filmpje ligt"><i data-k="muzi"></i><b data-k="muzb"></b></div>
     <div class="instel">
       <label>Nummer</label><select data-k="pad"></select><label style="cursor:pointer;color:#e8c67a">＋ eigen mp3<input type="file" accept="audio/*" data-k="bestand" style="display:none"></label>
       <label>Begin in het nummer</label><input type="range" data-k="van" min="0" max="300" step="0.1"><span class="waarde" data-k="vanw"></span>
@@ -32564,26 +32914,141 @@ function filmStudio(){
       const c = opslag[k], r = v => Math.round(v * 10) / 10;
       return `"${k}": {pad:"${c.pad}", van:${r(c.van)}, wacht:${r(c.wacht)}, vol:${r(c.vol * 100) / 100}, in:${r(c.in)}, uit:${r(c.uit)}},`;
     });
-    $("uitvoer").value = regels.length ? "Filmstudio-instellingen voor FILM_MUZIEK:\n" + regels.join("\n") : "(nog niets aangepast)";
+    const montage = Object.keys(opslag).filter(k => k.startsWith("edit:") && Array.isArray(opslag[k])).map(k =>
+      `"${k.slice(5)}": [${opslag[k].map(c => c.zwart != null ? `{zwart:${Math.round(c.zwart * 10) / 10}}` : `{s:${JSON.stringify(c.s)}, d:${Math.round(c.d * 10) / 10}}`).join(", ")}],`);
+    $("uitvoer").value = (regels.length ? "Filmstudio-instellingen voor FILM_MUZIEK:\n" + regels.join("\n") : "")
+      + (montage.length ? (regels.length ? "\n\n" : "") + "Montage voor FILM_EDIT:\n" + montage.join("\n") : "")
+      || "(nog niets aangepast)";
   }
   function laadNummer(){
     const c = cfg();
     audio.pause();
     if(!c.pad){ audio.removeAttribute("src"); audio.load(); return; }
     audio.src = bron(c.pad); audio.load();
-    audio.onloadedmetadata = () => toonWaarden();
+    audio.onloadedmetadata = () => { toonWaarden(); muzBaan(); };
   }
+  /* ---- de montage ---- */
+  let edit = [], sel = -1;
+  const origScenes = () => P.maak(sleutel, []).scenes.map(x => ({naam: x.naam, duur: x.duur}));
+  function uitklap(lijst){
+    const orig = origScenes(), gebruikt = new Set(), uit = [];
+    (lijst || ["*"]).forEach(c => {
+      if(c === "*"){ orig.forEach(o => { if(!gebruikt.has(o.naam)){ gebruikt.add(o.naam); uit.push({s:o.naam, d:o.duur}); } }); return; }
+      if(c && c.zwart != null){ uit.push({zwart:+c.zwart}); return; }
+      const o = c && orig.find(x => x.naam === c.s);
+      if(o && !gebruikt.has(o.naam)){ gebruikt.add(o.naam); uit.push({s:o.naam, d:c.d != null ? +c.d : o.duur}); }
+    });
+    return uit;
+  }
+  const bewaarEdit = () => { opslag["edit:" + sleutel] = edit; bewaar(); uitvoer(); };
+  function herbouw(){
+    const was = film && film.duur ? t : 0;
+    film = P.maak(sleutel, edit.length ? edit : [{zwart:1}]);
+    t = Math.min(was, film.duur); gT = t;
+    baan(); teken();
+  }
+  const r1 = v => Math.round(v * 10) / 10;
+  function baan(){
+    const b = $("baan"); b.innerHTML = "";
+    (film.scenes || []).forEach((x, i) => {
+      const c = document.createElement("div");
+      c.className = "clip" + (x.zwart ? " zw" : "") + (i === sel ? " sel" : "");
+      c.style.left = (x.van / film.duur * 100) + "%"; c.style.width = (x.duur / film.duur * 100) + "%";
+      c.innerHTML = `<b>${x.zwart ? "■ Zwart" : x.naam}</b><span>${x.duur.toFixed(1)} s</span><div class="greep"></div>`;
+      c.dataset.i = i;
+      b.appendChild(c);
+    });
+    clipInstel(); muzBaan();
+  }
+  function clipInstel(){
+    const ci = $("clipinstel"), c = edit[sel];
+    if(!c){ ci.innerHTML = `<span class="noot" style="margin:0">Klik een clip aan om hem te bewerken.</span>
+      <button data-a="zwartbegin">＋ Zwart aan het begin</button><button data-a="origineel">↺ Montage terug naar het origineel</button>`; }
+    else ci.innerHTML = `<b style="color:#e8c67a">${c.zwart != null ? "■ Zwart" : c.s}</b>
+      <label>duur <input type="number" min="0.2" step="0.1" value="${r1(c.zwart != null ? c.zwart : c.d)}" data-a="duur"> s</label>
+      <button data-a="links">◀ eerder</button><button data-a="rechts">later ▶</button>
+      <button data-a="zwartvoor">＋ Zwart ervoor</button><button data-a="zwartna">＋ Zwart erna</button>
+      <button data-a="weg">✕ Uit de film</button><button data-a="origineel">↺ Montage terug naar het origineel</button>
+      ${weg().length ? `<label>terugzetten: <select data-a="terugzet"><option value="">kies een scène</option>${weg().map(n => `<option>${n}</option>`).join("")}</select></label>` : ""}`;
+  }
+  /* scènes die nu niet in de film zitten */
+  const weg = () => origScenes().map(o => o.naam).filter(n => !edit.some(c => c.s === n));
+  $("clipinstel").addEventListener("click", e => {
+    const a = e.target.dataset && e.target.dataset.a; if(!a || a === "duur" || a === "terugzet") return;
+    if(a === "origineel"){ edit = uitklap(FILM_EDIT[sleutel] || ["*"]); sel = -1; }
+    else if(a === "zwartbegin"){ edit.unshift({zwart:2}); sel = 0; }
+    else if(sel >= 0){
+      if(a === "links" && sel > 0){ [edit[sel - 1], edit[sel]] = [edit[sel], edit[sel - 1]]; sel--; }
+      if(a === "rechts" && sel < edit.length - 1){ [edit[sel + 1], edit[sel]] = [edit[sel], edit[sel + 1]]; sel++; }
+      if(a === "zwartvoor"){ edit.splice(sel, 0, {zwart:1}); }
+      if(a === "zwartna"){ edit.splice(sel + 1, 0, {zwart:1}); sel++; }
+      if(a === "weg"){ edit.splice(sel, 1); sel = Math.min(sel, edit.length - 1); }
+    }
+    bewaarEdit(); herbouw();
+  });
+  $("clipinstel").addEventListener("change", e => {
+    const a = e.target.dataset && e.target.dataset.a;
+    if(a === "duur" && edit[sel]){ const v = Math.max(.2, r1(+e.target.value || .2)); if(edit[sel].zwart != null) edit[sel].zwart = v; else edit[sel].d = v; }
+    if(a === "terugzet" && e.target.value){ const o = origScenes().find(x => x.naam === e.target.value); edit.splice(sel + 1, 0, {s:o.naam, d:o.duur}); sel++; }
+    bewaarEdit(); herbouw();
+  });
+  /* slepen op de tijdlijn */
+  const tijdBij = x => { const r = $("baan").getBoundingClientRect(); return Math.max(0, Math.min(1, (x - r.left) / r.width)) * film.duur; };
+  $("baan").addEventListener("pointerdown", e => {
+    const c = e.target.closest(".clip");
+    if(!c){ sel = -1; ga(tijdBij(e.clientX)); baan(); return; }
+    const i = +c.dataset.i, sc = film.scenes[i], greep = e.target.classList.contains("greep");
+    sel = i; c.setPointerCapture(e.pointerId);
+    const x0 = e.clientX; let bewogen = false;
+    clipInstel(); [...$("baan").children].forEach((k, j) => k.classList.toggle("sel", j === i));
+    c.onpointermove = ev => {
+      if(Math.abs(ev.clientX - x0) > 4) bewogen = true;
+      if(!bewogen) return;
+      if(greep){
+        const d = Math.max(.2, r1(tijdBij(ev.clientX) - sc.van));
+        if(edit[i].zwart != null) edit[i].zwart = d; else edit[i].d = d;
+        c.style.width = (d / film.duur * 100) + "%"; c.querySelector("span").textContent = d.toFixed(1) + " s";
+      } else { c.classList.add("sleept"); c.style.transform = `translateX(${ev.clientX - x0}px)`; }
+    };
+    c.onpointerup = ev => {
+      c.onpointermove = c.onpointerup = null;
+      if(!bewogen){ ga(sc.van + .01); return; }
+      if(!greep){
+        /* waar laat je hem los: voor de clip waarvan het midden rechts van de muis ligt */
+        const tm = tijdBij(ev.clientX), mid = film.scenes.map(x => x.van + x.duur / 2);
+        let j = mid.findIndex((m, k) => k !== i && m > tm); if(j < 0) j = film.scenes.length;
+        const [stuk] = edit.splice(i, 1); if(j > i) j--; edit.splice(j, 0, stuk); sel = j;
+      }
+      bewaarEdit(); herbouw();
+    };
+  });
+  /* de muziek slepen: waar hij inzet */
+  function muzBaan(){
+    const blok = $("muzblok"), c = cfg();
+    if(!c.pad){ blok.style.display = "none"; return; }
+    blok.style.display = "";
+    const dur = audio.duration && isFinite(audio.duration) ? audio.duration - c.van : film.duur;
+    const a = Math.max(0, c.wacht), b = Math.min(film.duur, c.wacht + dur);
+    blok.style.left = (a / film.duur * 100) + "%"; blok.style.width = (Math.max(0, b - a) / film.duur * 100) + "%";
+    blok.textContent = `♪ ${String(c.pad).replace(/^audio\//, "")} · in op ${c.wacht.toFixed(1)} s · vanaf ${c.van.toFixed(1)} s in het nummer`;
+  }
+  $("muzblok").addEventListener("pointerdown", e => {
+    const blok = $("muzblok"), c = cfg(), x0 = e.clientX, w0 = c.wacht, r = $("baan").getBoundingClientRect();
+    blok.setPointerCapture(e.pointerId); blok.classList.add("sleept");
+    blok.onpointermove = ev => { c.wacht = Math.max(0, r1(w0 + (ev.clientX - x0) / r.width * film.duur)); c.mijn = true; toonWaarden(); muzBaan(); teken(); };
+    blok.onpointerup = () => { blok.onpointermove = blok.onpointerup = null; blok.classList.remove("sleept"); bewaar(); if(speelt){ audio.pause(); muziekBij(); } };
+  });
   async function kiesFilm(k){
-    stop(); sleutel = k; film = P.maak(k); t = 0; gT = -1; ontbreekt = [];
+    stop(); sleutel = k; t = 0; gT = -1; ontbreekt = []; sel = -1;
+    edit = Array.isArray(opslag["edit:" + k]) ? opslag["edit:" + k] : uitklap(FILM_EDIT[k] || ["*"]);
+    film = P.maak(k, edit);
     const ok = await P.laad(film);
     if(!ok){
       /* welke tekeningen ontbreken? */
       ontbreekt = (await Promise.all(film.beelden.map(n => new Promise(r => { const im = new Image(); im.onload = () => r(null); im.onerror = () => r(n);
         im.src = (typeof FILM_BRON !== "undefined" && FILM_BRON[n]) || ("art/film/" + n + ".webp"); })))).filter(Boolean);
     }
-    const sc = $("scenes"); sc.innerHTML = "";
-    (film.scenes || []).forEach(x => { const b = document.createElement("button"); b.textContent = `${x.naam} · ${x.van.toFixed(1)}`; b.onclick = () => ga(x.van); sc.appendChild(b); });
-    vulNummers(); laadNummer(); toonWaarden(); teken();
+    vulNummers(); laadNummer(); toonWaarden(); baan(); teken();
   }
   /* waar het nummer hoort te zijn op filmtijd t */
   const nummerTijd = tt => cfg().van + (tt - cfg().wacht);
@@ -32607,6 +33072,7 @@ function filmStudio(){
       x.fillStyle = "#e8c67a"; x.font = "28px monospace"; x.fillText("Dit beeld ontbreekt nog:", 60, 320);
       x.fillStyle = "#aaa"; x.font = "22px monospace"; x.fillText((ontbreekt.length ? ontbreekt.join(", ") : "een tekening uit art/film/").slice(0, 80), 60, 360); }
     $("tl").value = Math.round(t / film.duur * 1000);
+    $("kop").style.left = (t / film.duur * 100) + "%";
     $("tijd").textContent = `${t.toFixed(1)} / ${film.duur.toFixed(1)} s`;
     const dur = audio.duration && isFinite(audio.duration) ? audio.duration : 0, c = cfg();
     if(dur){
@@ -32633,17 +33099,17 @@ function filmStudio(){
   $("begin").onclick = () => ga(0);
   $("tl").oninput = e => ga(e.target.value / 1000 * film.duur);
   $("tekst").onchange = teken;
-  $("pad").onchange = e => { cfg().pad = e.target.value; cfg().mijn = true; bewaar(); laadNummer(); toonWaarden(); };
+  $("pad").onchange = e => { cfg().pad = e.target.value; cfg().mijn = true; bewaar(); laadNummer(); toonWaarden(); muzBaan(); };
   $("bestand").onchange = e => { const f = e.target.files && e.target.files[0]; if(!f) return;
     const naam = "audio/" + f.name; eigen[naam] = URL.createObjectURL(f); cfg().pad = naam; cfg().mijn = true; bewaar(); vulNummers(); laadNummer(); toonWaarden(); };
-  ["van", "wacht", "vol", "in", "uit"].forEach(k => { $(k).oninput = e => { cfg()[k] = +e.target.value; cfg().mijn = true; bewaar(); toonWaarden(); if(speelt){ audio.pause(); muziekBij(); } teken(); }; });
+  ["van", "wacht", "vol", "in", "uit"].forEach(k => { $(k).oninput = e => { cfg()[k] = +e.target.value; cfg().mijn = true; bewaar(); toonWaarden(); muzBaan(); if(speelt){ audio.pause(); muziekBij(); } teken(); }; });
   $("nu").onclick = () => { /* het stuk dat nu klinkt (of de kop) laten vallen op het huidige filmmoment */
     const c = cfg(); const nu = !audio.paused ? audio.currentTime : c.van;
     c.wacht = Math.min(t, film.duur); c.van = Math.max(0, nu); c.mijn = true; bewaar(); toonWaarden(); };
   $("kopieer").onclick = () => { uitvoer(); const v = $("uitvoer").value;
     (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => { $("kopieer").textContent = "✓ Gekopieerd"; setTimeout(() => $("kopieer").textContent = "📋 Kopieer de instellingen", 1600); })
       .catch(() => { $("uitvoer").select(); document.execCommand && document.execCommand("copy"); }); };
-  $("terug").onclick = () => { delete opslag[sleutel]; bewaar(); vulNummers(); laadNummer(); toonWaarden(); teken(); };
+  $("terug").onclick = () => { delete opslag[sleutel]; delete opslag["edit:" + sleutel]; bewaar(); edit = uitklap(FILM_EDIT[sleutel] || ["*"]); sel = -1; vulNummers(); laadNummer(); toonWaarden(); herbouw(); };
   $("dicht").onclick = () => { stop(); d.remove(); try{ if(location.hash.includes("filmstudio")) history.replaceState(null, "", location.pathname + location.search); }catch(e){} if(typeof AU !== "undefined" && AU.wens === null) render(); };
   if(typeof AU !== "undefined") AU.zet(null);      // geen spelmuziek eronder
   kiesFilm(P.lijst()[0].sleutel);
