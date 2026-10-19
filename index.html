@@ -4076,6 +4076,13 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
   #draaitel .dtsub{font-family:"VT323",ui-monospace,monospace; font-size:1.3rem; color:#9a9484}
 }
 @keyframes dtdraai{0%,30%{transform:rotate(0)} 55%,85%{transform:rotate(-90deg)} 100%{transform:rotate(0)}}
+/* ✋ slepen */
+#sleepkaart{position:fixed; left:0; top:0; z-index:99000; pointer-events:none; filter:drop-shadow(0 10px 14px rgba(0,0,0,.6)); transition:none}
+#sleepkaart > .card{position:absolute; inset:0; width:100%; height:100%}
+body.sleept, body.sleept *{cursor:grabbing !important}
+.slot.sleepboven{outline:3px solid #ffe08a; outline-offset:2px; z-index:9 !important}
+.hcard{touch-action:none;-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}
+.hcard img{-webkit-user-drag:none;pointer-events:none}
 /* ================= 📱 TELEFOON LIGGEND · ontwerp A, de klassieke tafel =================
    Aan als het scherm liggend en laag is (body.tel, gezet door telZet). Alles staat vast op het
    scherm (position:fixed), zodat de oude grid- en flexregels hier niets meer uitmaken.
@@ -4372,6 +4379,8 @@ body.tel #tutwegknop{left:auto; right:var(--sr); bottom:calc(var(--sb) + 2px); w
 body.tel #overlay:has(.roomin){align-items:flex-start; padding-top:8px}
 /* kaartnamen op het veld: op de telefoon alleen de prent en de getallen; de naam zie je door vast te houden */
 body.tel #fieldwrap .slot.cr .card .cn{display:none}
+.instlijst{text-align:left;margin:10px 0 0;padding-left:22px;line-height:1.35;font-size:1.05rem;color:var(--text,#e9e4d6)}
+.instlijst li{margin:6px 0}
 /* de opdrachtregel ("kies een vak…") staat bovenin, over de hand van de tegenstander: zo valt hij nooit over een vak */
 body.tel #banner{position:fixed !important; left:calc(var(--sl) + 300px); right:calc(var(--sr) + 50px); top:2px; bottom:auto;
   max-width:none; transform:none; z-index:50; text-align:center}
@@ -16893,7 +16902,8 @@ function overlayHTML(){
   if(M && M.type === "beloning") return beloningHTML();
   if(M && M.type === "winkel") return winkelHTML();
   if(M && M.type === "nimbus") return nimbusHTML();
-  if(M && (M.type === "menu" || M.type === "help" || M.type === "tutorial" || M.type === "share" || M.type === "join" || M.type === "audio" || M.type === "aelib" || M.type === "lib" || M.type === "deck")){
+  if(M && (M.type === "menu" || M.type === "help" || M.type === "tutorial" || M.type === "share" || M.type === "join" || M.type === "audio" || M.type === "aelib" || M.type === "lib" || M.type === "deck" || M.type === "installeer")){
+    if(M.type === "installeer") return installHTML();
     if(M.type === "aelib" || M.type === "lib") return libHTML();
     if(M.type === "deck") return deckHTML(M.p);
     if(M.type === "audio") return audioHTML();
@@ -17637,6 +17647,27 @@ function shareHTML(){
 /* ⌂ Het homescreen: de titel, twee grote knoppen en vier kleine. Multiplayer en Bots klappen
    hun keuzes open onder de knop; de rest opent een eigen scherm. */
 const HOME = {open:null};
+/* 📲 Als app installeren (okt 2026). Chrome op Android geeft een "beforeinstallprompt": die bewaren we,
+   dan kan de knop op het startscherm het installeervenster openen. Op een iPhone bestaat dat niet;
+   daar legt de knop uit hoe het via Delen werkt. Geïnstalleerd (of op de computer) zie je de knop niet. */
+let INSTALL_EVT = null;
+const alsApp = () => { try{ return matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone === true; }catch(e){ return false; } };
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const toonInstall = () => { try{ return !alsApp() && (!!INSTALL_EVT || matchMedia("(pointer:coarse)").matches); }catch(e){ return false; } };
+try{
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); INSTALL_EVT = e; try{ if(!S && !M) render(); }catch(x){} });
+  window.addEventListener("appinstalled", () => { INSTALL_EVT = null; try{ if(!S) render(); }catch(x){} });
+}catch(e){}
+function installHTML(){
+  const ios = isIOS();
+  const stappen = ios
+    ? `<ol class="instlijst"><li>Open deze pagina in <b>Safari</b>.</li><li>Tik onderin op <b>Delen</b> (het vierkantje met de pijl omhoog).</li>
+        <li>Kies <b>Zet op beginscherm</b> en tik op <b>Voeg toe</b>.</li><li>Open Elementaal voortaan vanaf je beginscherm.</li></ol>`
+    : `<ol class="instlijst"><li>Open deze pagina in <b>Chrome</b> (niet incognito).</li><li>Houd je telefoon even <b>rechtop</b>, dan zie je de adresbalk.</li>
+        <li>Tik rechtsboven op <b>⋮</b> en kies <b>App installeren</b> of <b>Toevoegen aan startscherm</b>.</li><li>Open Elementaal voortaan vanaf je startscherm: volledig scherm, en alleen wat nieuw is wordt nog geladen.</li></ol>`;
+  return `<div class="ovbox" style="max-width:min(520px,92vw)"><h2>📲 Als app op je telefoon</h2>${stappen}
+    <div style="display:flex;justify-content:center;margin-top:14px"><button class="obtn" data-act="btn" data-btn="installsluit">Begrepen</button></div></div>`;
+}
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
 const ELEMENTAAL_VERSIE = "16 okt · nope en nieuwe namen";
 function startHTML(){
@@ -17676,6 +17707,7 @@ function startHTML(){
         ${vr("decks", "Decks", `${basDecks().length} van de ${BAS.DECKS} · voor Basis`, "")}
         ${vr("aelib", "Library", "", "")}
         ${vr("audio", "Opties", "", "")}
+        ${toonInstall() ? vr("installeer", "📲 Installeer als app", "op je startscherm, volledig scherm", "") : ""}
       </div>
       ${info}
     </div>
@@ -17735,7 +17767,9 @@ function menuHTML(){
 function audioHTML(){
   const pct = v => Math.round(v*100);
   const seg = (k, lab, tip) => `<button class="seg${SET.fx===k?" on":""}" data-act="btn" data-btn="fx_${k}" title="${tip}">${lab}</button>`;
-  return `<div class="ovbox" style="max-width:min(460px,92vw)"><h2>Geluid &amp; effecten</h2>
+  const binnen = (typeof alsApp === "function" && alsApp() && TEL_BINNEN.totaal)
+    ? `<div class="setrow" style="justify-content:center;color:var(--muted)">📲 Op je telefoon: ${TEL_BINNEN.klaar} van ${TEL_BINNEN.totaal} bestanden${TEL_BINNEN.bezig ? " · bezig" : " · alles staat erop"}</div>` : "";
+  return `<div class="ovbox" style="max-width:min(460px,92vw)"><h2>Geluid &amp; effecten</h2>${binnen}
     <div class="setrow"><label>🎵 Muziek</label>
       <input type="range" min="0" max="100" value="${pct(SET.music)}" data-act="vol" data-kind="music">
       <span class="val">${pct(SET.music)}%</span></div>
@@ -17792,7 +17826,7 @@ const STORY_ORDER = [].concat(...[1,2,3,4,5].map(w => (w === 2 || w === 3 ? [1,2
    Waardin (2-3) is de weg verder, dan het web van Kaelid (2-4), dan Max (2-5). */
 /* Wereld 3: 3-1 leidt naar Tang (3-2). Daarna splitst het: het Rookgordijn (3-3) en het
    circus (3-4) leiden allebei naar Klinknagel (3-5). Eén van de twee is genoeg. */
-const STORY_VEREIST = {"1-4":["1-2"], "2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-2"], "3-4":["3-2"], "3-5":["3-3","3-4"]};
+const STORY_VEREIST = {"1-4":["1-3"], "2-2":["2-1"], "2-3":["2-1"], "2-4":["2-2","2-3"], "2-5":["2-4"], "3-2":["3-1"], "3-3":["3-2"], "3-4":["3-2"], "3-5":["3-3","3-4"]};
 /* Sprites: 16×16 pixelplaten. 0 = doorzichtig. */
 const SPR_PAL = {
   rots:["none","#160d06","#4a382a","#7a5b3a","#a87d4c","#cfa06a","#d5503c","#8f2d20","#f4e6c8","#3a2a18"],
@@ -20619,7 +20653,7 @@ const STORY = {
       {s:"nimbus", naam:"…", kleur:"#dfe8f2", t:"Nimbus komt dichterbij."},
       {s:"nimbus", kleur:"#dfe8f2", t:"En ik heb je bezig gezien. Vuur op je eigen bord, water dat je kaarten terughaalt, gras dat zich volzuigt. Heel knap."},
       {s:"nimbus_boos", kleur:"#dfe8f2", t:"En heel goedkoop. Met trucjes wint iedereen."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Dus. Mijn uitdaging. Geen trucjes. Allebei veertig 🪨 Steen en verder niks. Geen vuur, geen water, geen gras, geen aethers, geen bannen."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Dus. Mijn uitdaging. Geen trucjes. Allebei veertig 🪨 Steen en verder niks. Geen vuur, geen water, geen gras, geen bannen. Jij houdt je Lawine. En ik de mijne. Eerlijk is eerlijk."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Alleen jij, ik, en de vraag wie er echt kan spelen."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Wat wordt het?",
         keuze:[{label:"🤝 Afgesproken", ga:"ja"}, {label:"🚪 Nee, bedankt", ga:"nee1"}]}
@@ -20653,7 +20687,8 @@ const STORY = {
     opening:{p:1, el:"steen", col:2},
     gevechtNa:{ja:"a", nee2:"b"},
     varianten:{
-      a:{ deckJij:{steen:40}, deckVij:{steen:40}, ban:0, geenAether:true,
+      a:{ deckJij:{steen:40}, deckVij:{steen:40}, ban:0, geenAether:true, aeJij:["ae_stonefull"], aeVij:["ae_stonefull"],   // Nimbus ook (19 okt)
+            // okt 2026: jij speelt met 🟣 Lawine (Volle slag)
           zegKleur:"#dfe8f2",
           zeg:{ beurt:[
               "Veertig stenen. Geen uitvluchten. Eindelijk.",
@@ -20717,7 +20752,8 @@ const STORY = {
             {s:"nimbus_kip", kleur:"#dfe8f2", mu:"w1_rustig", t:"TOK! Ik zei het toch. Nog een keer? Ik heb alle tijd, ik ben lucht."}
           ] }
     },
-    geeft:["ae_grassx2"],     // 🌿 Woekergroei. 💧 Getijdenstroom krijg je bij zijn waterchallenge (okt 2026)
+    /* okt 2026: het gevecht zelf geeft niets behalve de sterren en de weg naar Nimbus' plek. Daar win
+       je de aethers: 🔥 Explosiegevaar (vuur), 🌿 Woekergroei (gras), 💧 Getijdenstroom (water). */
     begint:1
   },
   "1-4":{
@@ -24268,12 +24304,12 @@ let PRAAT = null;
                 die staat hier ook onder fase2 — zie S.story.bloeiGedaan.) */
 /* ☁ Nimbus' mono-challenges (okt 2026). Allebei veertig van één element, geen aethers, geen
    lichtkaarten, niets bannen. Water kan niks met zichzelf, dus daar spelen jullie allebei met
-   🟣 Getijdenstroom. Je speelt ze op volgorde: steen (het gevecht van 1-3 zelf), vuur, gras,
-   water. Water geeft je de Getijdenstroom. Elke challenge heeft zijn eigen drie sterren. */
+   🟣 Getijdenstroom. Je speelt ze op volgorde: steen (het gevecht van 1-3 zelf, met Lawine), vuur,
+   gras, water. Steen geeft niets; vuur geeft Explosiegevaar, gras Woekergroei, water de Getijdenstroom. Elke challenge heeft zijn eigen drie sterren. */
 const NIMBUS_CH = [
   {el:"steen", v:"a",     sid:"1-3",       naam:"Steen"},
-  {el:"vuur",  v:"vuur",  sid:"1-3:vuur",  naam:"Vuur"},
-  {el:"gras",  v:"gras",  sid:"1-3:gras",  naam:"Gras"},
+  {el:"vuur",  v:"vuur",  sid:"1-3:vuur",  naam:"Vuur", ae:"ae_fire6"},
+  {el:"gras",  v:"gras",  sid:"1-3:gras",  naam:"Gras", ae:"ae_grassx2"},
   {el:"water", v:"water", sid:"1-3:water", naam:"Water", ae:"ae_watercycle"}
 ];
 const NIMBUS_STER_IDS = NIMBUS_CH.filter(c => c.sid !== "1-3").map(c => c.sid);
@@ -24297,14 +24333,15 @@ const NIMBUS_STER_IDS = NIMBUS_CH.filter(c => c.sid !== "1-3").map(c => c.sid);
       deckJij:{[el]:40}, deckVij:{[el]:40}, ban:0, geenAether:true, zegKleur:K,
       zeg:a.zeg, opening:{p:1, el, col:2}, nimbusCh:el
     }, tekst[el],
-    el === "water" ? {aeJij:["ae_watercycle"], aeVij:["ae_watercycle"], geeftAe:"ae_watercycle"} : {});
+    el === "water" ? {aeJij:["ae_watercycle"], aeVij:["ae_watercycle"], geeftAe:"ae_watercycle"}
+      : {geeftAe:{vuur:"ae_fire6", gras:"ae_grassx2"}[el]});
   });
   a.nimbusCh = "steen";
 })();
 const VELD = {
   "1-2": { regels:["Na Brokko's eerste beurt krijg je een 🔥 Vuur-ritueel in jouw kolom 3 en 4."] },
 
-  "1-3": { regels:["Allebei veertig keer 🪨 Steen. Geen aethers, geen ✦ lichtkaarten, niets bannen.",
+  "1-3": { regels:["Allebei veertig keer 🪨 Steen, en allebei met 🟣 Lawine (Volle slag). Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
                    "Nimbus begint met een 🪨 Steen-ritueel in de middelste kolom."],
     varianten:{
       "b":["Jij speelt met tien van elk element, Nimbus met veertig keer 🪨 Steen.",
@@ -26687,7 +26724,7 @@ const HEMEL_RANDEN = [["hemel","5-1"], ["5-1","5-2"], ["5-2","5-3"], ["5-3","5-4
    verschijnt hij pas als díé gehaald is: de weg naar de volgende wereld begint bij het
    eerste level van de vorige, niet uit de zaal van de baas — die is een doodlopend eind. */
 const OVERWORLD_RANDEN = [
-  ["1-1","1-2"], ["1-2","1-3"], ["1-2","1-4"], ["1-4","1-5"], ["1-5","2-1"],   // ☁ Nimbus (1-3) is een zijpad
+  ["1-1","1-2"], ["1-2","1-3"], ["1-3","1-4"], ["1-4","1-5"], ["1-5","2-1"],   // ☁ Nimbus (1-3) ligt weer op de route (okt 2026)
   /* Na 2-1 eerst naar Knort; pas daarna gaan de twee wegen naar Kaelid open. */
   ["2-1","2-2","knort"], ["2-1","2-3","knort"], ["2-2","2-4"], ["2-3","2-4"], ["2-4","2-5"], ["2-5","2-6"],
   ["2-1","3-1","2-6"],
@@ -26747,6 +26784,7 @@ function pvpAePool(){
   const lijst = x => Array.isArray(x) ? x : (x ? [x] : []);
   Object.keys(STORY).forEach(id => { const L = STORY[id] || {};
     lijst(L.geeft).concat(lijst(L.geeftLicht)).forEach(k => verhaal.add(k));
+    Object.values(L.varianten || {}).forEach(v => lijst(v && v.geeftAe).forEach(k => verhaal.add(k)));   // ☁ Nimbus' challenges
     Object.values(L.winTakExtra || {}).forEach(e => lijst(e && e.licht).forEach(k => verhaal.add(k))); });
   KOOPWAAR.ae.forEach(k => verhaal.add(k));
   PVP_AE_CACHE = Object.keys(AETHERS).filter(k => !PVP_AE_NIET.includes(k) && !AETHERS[k].vijand
@@ -30461,6 +30499,11 @@ function onBtn(btn, el, fromAction){
     case "tutvecht": tutVecht(); break;
     case "tutgo": if(M && M.type==="tutorial" && el){ M.step = +el.dataset.step; render(); } break;
     case "audio": M = {type:"audio"}; render(); break;
+    case "installeer":
+      if(INSTALL_EVT){ const ev = INSTALL_EVT; ev.prompt(); (ev.userChoice || Promise.resolve()).then(r => { if(r && r.outcome === "accepted") INSTALL_EVT = null; render(); }).catch(() => {}); }
+      else { M = {type:"installeer"}; render(); }
+      break;
+    case "installsluit": M = null; render(); break;
     case "filmstudio": M = null; render(); filmStudio(); break;
     case "aelib": M = {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
     case "homemp":   HOME.open = HOME.open === "mp" ? null : "mp"; render(); break;
@@ -30678,7 +30721,7 @@ window.addEventListener("resize", telZet);
 window.addEventListener("orientationchange", () => setTimeout(telZet, 120));
 telZet();
 document.addEventListener("click", e => {
-  if(!telAan()) return;
+  if(!telAan() || SLEEP_KLIK) return;
   const app = document.getElementById("app");
   /* het logboek-vel: elke tik sluit het weer */
   if(app && app.classList.contains("showlog")){
@@ -30693,7 +30736,14 @@ document.addEventListener("click", e => {
   if(document.body.classList.contains("ptgroot")){ document.body.classList.remove("ptgroot"); }
   const hand = e.target.closest("#pside0 .hand");
   if(document.body.classList.contains("handop")){
-    if(hand && e.target.closest(".hcard")){ if(!TEL_AUTO) setTimeout(() => telHand(false), 0); return; }   // kaart kiezen
+    if(hand && e.target.closest(".hcard")){
+      if(TEL_AUTO) return;                                       // kiezen uit je hand (afleggen, starthand): gewoon kiezen
+      /* (okt 2026) tikken op een kaart = lezen wat hij doet; spelen doe je door hem naar een vak te slepen */
+      const h = e.target.closest(".hcard"), id = +h.dataset.id;
+      const cd = (P(0).hand.concat(P(1).hand)).find(x => x.id === id);
+      if(cd && handVisible(cd.owner)){ AU.play("click"); toonKaartInfo(cd); }
+      e.stopPropagation(); e.preventDefault(); return;
+    }
     if(hand) return;
     if(TEL_AUTO) return;   // je moet nu uit je hand kiezen: de hand blijft staan
     /* een knop (zetknoppen, menu, opdrachtregel) doet gewoon wat hij doet; de hand zakt mee */
@@ -30703,6 +30753,87 @@ document.addEventListener("click", e => {
   if(hand){ telHand(true); AU.play && AU.play("click"); e.stopPropagation(); e.preventDefault(); }
 }, true);
 let DRUKT = null, DRUKGEDAAN = false;
+/* ================= ✋ SLEPEN (okt 2026) =================
+   Een kaart uit je hand naar een vak slepen speelt hem daar. Op de telefoon is dat de manier om
+   te spelen (tikken = lezen); op de computer kan klikken ook nog. Onder water doet slepen precies
+   wat klikken doet: oppakken = de kaart aanklikken (dan lichten de vakken op waar hij mag),
+   loslaten = het vak aanklikken. Loslaten ergens anders = annuleren. */
+let SLEEP = null, SLEEP_KLIK = false, SLEEP_GEWEEST = false;
+function sleepKlik(el){ if(!el) return; SLEEP_KLIK = true; try{ el.click(); } finally { SLEEP_KLIK = false; } }
+document.addEventListener("pointerdown", e => {
+  if(e.button !== undefined && e.button !== 0) return;
+  const h = e.target.closest && e.target.closest(".hcard[data-act='hand']");
+  if(!h || !S || S.over || M) return;
+  const id = +h.dataset.id, cd = (P(0).hand.concat(P(1).hand)).find(x => x.id === id);
+  if(!cd || !handVisible(cd.owner)) return;
+  SLEEP = {id, x0:e.clientX, y0:e.clientY, h, bezig:false, pid:e.pointerId};
+}, true);
+document.addEventListener("pointermove", e => {
+  if(!SLEEP) return;
+  const dx = e.clientX - SLEEP.x0, dy = e.clientY - SLEEP.y0;
+  if(!SLEEP.bezig){
+    if(Math.hypot(dx, dy) < 9) return;
+    /* oppakken: een spookkaart onder je vinger, en de kaart "aanklikken" zodat de vakken oplichten */
+    SLEEP.bezig = true; SLEEP_GEWEEST = true;
+    clearTimeout(DRUKT);
+    const kaartEl = SLEEP.h.querySelector(".card");
+    const r = (kaartEl || SLEEP.h).getBoundingClientRect();
+    let w = r.width, hgt = r.height;
+    if(telAan()){ w = Math.min(96, Math.max(70, w)); hgt = w * 1.4; }
+    const g = document.createElement("div"); g.id = "sleepkaart";
+    g.style.width = w + "px"; g.style.height = hgt + "px";
+    g.innerHTML = kaartEl ? kaartEl.outerHTML : "";
+    document.body.appendChild(g);
+    SLEEP.g = g; SLEEP.w = w; SLEEP.hgt = hgt;
+    document.body.classList.add("sleept");
+    if(telAan()) telHand(false);
+    sleepKlik(SLEEP.h);
+  }
+  if(SLEEP.g){
+    SLEEP.g.style.transform = `translate(${e.clientX - SLEEP.w / 2}px, ${e.clientY - SLEEP.hgt * .75}px) rotate(${Math.max(-8, Math.min(8, dx / 30))}deg)`;
+    const doel = sleepDoel(e.clientX, e.clientY);
+    document.querySelectorAll(".sleepboven").forEach(x => { if(x !== doel) x.classList.remove("sleepboven"); });
+    if(doel) doel.classList.add("sleepboven");
+  }
+  e.preventDefault();
+}, {capture:true, passive:false});
+function sleepDoel(x, y){
+  const g = document.getElementById("sleepkaart"); if(g) g.style.display = "none";
+  const el = document.elementFromPoint(x, y);
+  if(g) g.style.display = "";
+  if(!el) return null;
+  const sl = el.closest(".slot.hl, .slot.cr[data-act], .slot.sp[data-act]");
+  if(sl && S.ui && S.ui.mode === "slot") return sl;
+  return el.closest("[data-btn='slotfuse']");
+}
+async function sleepLos(e){
+  const s = SLEEP; SLEEP = null;
+  if(!s || !s.bezig) return;
+  document.body.classList.remove("sleept");
+  document.querySelectorAll(".sleepboven").forEach(x => x.classList.remove("sleepboven"));
+  const doel = sleepDoel(e.clientX, e.clientY);
+  if(s.g) s.g.remove();
+  /* de kaart is net aangeklikt; even wachten tot het spel om een vak vraagt */
+  for(let i = 0; i < 30 && S && S.ui && S.ui.mode !== "slot" && busyFlag; i++) await sleep(30);
+  if(!S || !S.ui) return;
+  if(S.ui.mode !== "slot") return;                     // dit was geen kaart die je kon spelen
+  if(doel){
+    const ds = doel.dataset || {};
+    const vak = ds.col != null ? document.querySelector(`.slot[data-act="${ds.act}"][data-p="${ds.p}"][data-col="${ds.col}"]`) : doel;
+    sleepKlik(vak || doel);
+    return;
+  }
+  sleepKlik(document.querySelector("[data-btn='cancel']"));
+}
+document.addEventListener("pointerup", e => { if(SLEEP){ const was = SLEEP.bezig; sleepLos(e); if(was) setTimeout(() => { SLEEP_GEWEEST = false; }, 80); } }, true);
+document.addEventListener("pointercancel", e => { if(SLEEP) sleepLos(e); }, true);
+/* plaatjes en kaarten niet als bestand laten wegslepen door de browser: dat breekt het slepen af */
+document.addEventListener("dragstart", e => { if(e.target.closest && e.target.closest(".hcard, #sleepkaart")) e.preventDefault(); }, true);
+/* na slepen telt het loslaten niet als klik */
+document.addEventListener("click", e => {
+  if(SLEEP_GEWEEST && !SLEEP_KLIK){ SLEEP_GEWEEST = false; e.stopPropagation(); e.preventDefault(); }
+}, true);
+
 document.addEventListener("pointerdown", e => {
   const h = e.target.closest(".hcard[data-act='hand']");
   if(!h || !S) return;
@@ -31542,6 +31673,34 @@ function telSwKlaar(){
     }catch(e){ klaar(); }
   });
 }
+/* 📲 Als geïnstalleerde app: alles op de telefoon zetten, niet pas als je het tegenkomt.
+   Twintig tellen na de start (eerst moet het spel zelf soepel laden) haalt hij rustig, twee
+   tegelijk, elk bestand uit bestanden.json binnen dat nog niet bewaard is. De service worker
+   bewaart ze. Daarna start alles van de telefoon zelf; bij een update komt alleen het nieuwe binnen.
+   Ook vragen we Android om de opslag vast te houden, zodat de telefoon hem niet opruimt. */
+const TEL_BINNEN = {klaar:0, totaal:0, bezig:false};
+async function telAllesBinnen(){
+  try{
+    if(!(typeof alsApp === "function" && alsApp()) || !HOSTED || !("caches" in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+    if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    const r = await fetch("bestanden.json", {cache:"no-store"}); if(!r.ok) return;
+    const L = await r.json(), basis = new URL("./", location.href).pathname, cache = await caches.open("elementaal-tel");
+    const paden = Object.keys(L).filter(p => {
+      if(/^(tools|\.github)\//.test(p) || /\.(md|py|yml|zip|psd)$/i.test(p) || p === "sw.js" || p === "bestanden.json") return false;
+      const m = p.match(/^art\/([^/]+)\.(png|jpe?g)$/i);
+      return !(m && L["art-tel/" + m[1] + ".webp"]);          // die komt als lichte webp binnen
+    });
+    const nodig = [];
+    for(const p of paden) if(!(await cache.match(basis + p))) nodig.push(p);
+    TEL_BINNEN.totaal = paden.length; TEL_BINNEN.klaar = paden.length - nodig.length; TEL_BINNEN.bezig = nodig.length > 0;
+    let i = 0;
+    const werker = async () => { while(i < nodig.length){ const p = nodig[i++];
+      try{ const x = await fetch(p); await x.arrayBuffer(); }catch(e){}
+      TEL_BINNEN.klaar++; } };
+    await Promise.all([werker(), werker()]);
+    TEL_BINNEN.bezig = false;
+  }catch(e){ TEL_BINNEN.bezig = false; }
+}
 /* start */
 document.body.classList.add("venster");
 function spelStart(){
@@ -31555,7 +31714,7 @@ newGame();
 netBoot();
 }
 /* Op de computer (en zonder service worker) begint dit meteen. */
-if(window.matchMedia && window.matchMedia("(pointer:coarse)").matches) telSwKlaar().then(spelStart);
+if(window.matchMedia && window.matchMedia("(pointer:coarse)").matches) telSwKlaar().then(() => { spelStart(); setTimeout(telAllesBinnen, 20000); });
 else spelStart();
 
 
@@ -31649,7 +31808,7 @@ const FILM_TEKST = {
    Uitproberen kan in de filmstudio: open het spel met #filmstudio achter de link. */
 const FILM_MUZIEK = {
   "opening":    "audio/film-opening.mp3",
-  "opening2":   "audio/film-opening.mp3",
+  "opening2":   {pad:"audio/w2-05-web.mp3", van:20.7, wacht:0, vol:1, in:5, uit:0},   // uit de filmstudio, 19 okt
   "los-magnus": "audio/film-los.mp3", "los-moeder": "audio/film-los.mp3",
   "los-flint":  "audio/film-los.mp3", "los-oceaan": "audio/film-los.mp3",
   "ovens":      "audio/film-ovens.mp3",
@@ -31660,10 +31819,12 @@ const FILM_MUZIEK = {
 /* De montage per filmpje (uit de filmstudio): welke scènes, in welke volgorde, hoe lang.
    Een lijst van clips: {s:"naam van de scène", d:seconden} of {zwart:seconden} (een zwart beeld).
    "*" betekent: alle overige scènes in de oorspronkelijke volgorde en duur.
+   Eigen tekst: tekst:[[van, tot, "zin", {midden:true} of {schud:true}], ...] in seconden binnen die clip.
+   Heeft een clip een tekst-lijst, dan vervangt die de tekst die de scène zelf had (een lege lijst = geen tekst).
    Een scène die korter of langer wordt, speelt zijn hele animatie sneller of trager af
    (tekst en geluid schuiven mee). Ontbreekt een filmpje hier, dan speelt hij zoals gemaakt. */
 const FILM_EDIT = {
-  "opening2": [{zwart:2}, "*"]
+  "opening2": [{zwart:5}, {s:"Steenrijk", d:3.3}, {s:"Rankenwoud", d:3.3}, {s:"Asgronden", d:3.3}, {s:"Diepstroom", d:3.3}, {s:"Magnus", d:3.3}, {s:"Moeder Natuur", d:3.3}, {s:"Flint", d:3.3}, {s:"De Oceaan", d:3.3}, {s:"De engelen", d:9.5}, {s:"De vijf", d:5.7}, {s:"De eieren", d:5.2}, {s:"Het ei en je hart", d:16}, {s:"Licht", d:6}]
 };
 /* Hoe snel de tekst in een filmpje getypt wordt (letters per seconde), net als in de praatjes. */
 const FILM_TYP_CPS = 40;
@@ -31865,6 +32026,23 @@ const FILM = (() => {
     /* (okt 2026) de balk komt snel op, de letters worden getypt, aan het eind fadet alles weg */
     const a = Math.min(seg(t, r[0] - .15, r[0]), 1 - seg(t, r[1] - .1, r[1] + .3));
     const nT = t >= r[1] ? r[2].length : typN(r, t);
+    /* Midden: grote tekst midden in beeld, zonder balk (een titelkaart, bijvoorbeeld op zwart). */
+    if (r[3] && r[3].midden) {
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.font = '54px "VT323", ui-monospace, monospace'; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+      const w = r[2].split(" "), rg = []; let nu = "";
+      w.forEach(x => { const p = nu ? nu + " " + x : x; if (ctx.measureText(p).width > W - 200 && nu) { rg.push(nu); nu = x; } else nu = p; });
+      if (nu) rg.push(nu);
+      let rest = nT;
+      rg.forEach((s, i) => {
+        const y = H / 2 + (i - (rg.length - 1) / 2) * 58, deel = s.slice(0, Math.max(0, rest)), x = W / 2 - ctx.measureText(s).width / 2;
+        rest -= s.length + 1;
+        if (!deel) return;
+        ctx.fillStyle = "#000"; ctx.fillText(deel, x + 3, y + 3);
+        ctx.fillStyle = "#f3efe6"; ctx.fillText(deel, x, y);
+      });
+      ctx.restore(); return;
+    }
     /* Schudtekst: groter, en elke letter wipt los op en neer. */
     if (r[3] && r[3].schud) {
       ctx.save(); ctx.globalAlpha = a;
@@ -31917,20 +32095,29 @@ const FILM = (() => {
       const nieuw = [], gebruikt = new Set();
       EDIT_NU.forEach(c => {
         if (c === "*") { orig.forEach(s => { if (!gebruikt.has(s.naam)) { gebruikt.add(s.naam); nieuw.push(s); } }); return; }
-        if (c && c.zwart != null) { const d = Math.max(.1, +c.zwart); nieuw.push({naam: "Zwart", zwart: true, duur: d, oorspr: d, teken: () => vlak("#000", 1)}); return; }
+        const eigen = c && Array.isArray(c.tekst) ? c.tekst : null;
+        if (c && c.zwart != null) { const d = Math.max(.1, +c.zwart); nieuw.push({naam: "Zwart", zwart: true, duur: d, oorspr: d, eigenTekst: eigen, teken: () => vlak("#000", 1)}); return; }
         const s = c && orig.find(x => x.naam === c.s && !gebruikt.has(x.naam));
         if (!s) return;
         gebruikt.add(s.naam);
-        nieuw.push(Object.assign({}, s, {duur: c.d != null ? Math.max(.2, +c.d) : s.oorspr}));
+        nieuw.push(Object.assign({}, s, {duur: c.d != null ? Math.max(.2, +c.d) : s.oorspr, eigenTekst: eigen}));
       });
       if (nieuw.length) lijst = nieuw;
     }
     let t = 0;
     const S = lijst.map(s => { const r = Object.assign({}, s, {van: t, k: s.duur / s.oorspr}); t += s.duur; return r; });
     const tekst = [], geluid = [];
-    S.forEach(s => (s.tekst || []).forEach(([a, b, z, o]) => tekst.push([s.van + a * s.k, s.van + b * s.k, z, o])));
+    /* De tekst per clip, in seconden binnen die clip: je eigen tekst uit de filmstudio, of die van de scène (meegerekt). */
+    S.forEach(s => {
+      s.lokTekst = s.eigenTekst
+        ? s.eigenTekst.filter(r => r && r[2] != null).map(([a, b, z, o]) => [Math.max(0, +a || 0), Math.min(s.duur, +b || 0), String(z), o || null]).filter(r => r[1] > r[0])
+        : (s.tekst || []).map(([a, b, z, o]) => [a * s.k, b * s.k, z, o || null]);
+      s.lokTekst.forEach(([a, b, z, o]) => tekst.push([s.van + a, s.van + b, z, o]));
+    });
+    tekst.sort((x, y) => x[0] - y[0]);
     S.forEach(s => (s.geluid || []).forEach(([a, ...r]) => geluid.push([s.van + a * s.k, ...r])));
-    return {duur: t, beelden, tekst, geluid, scenes: S.map(s => ({naam: s.naam, van: s.van, duur: s.duur, oorspr: s.oorspr, zwart: !!s.zwart})),
+    return {duur: t, beelden, tekst, geluid, scenes: S.map(s => ({naam: s.naam, van: s.van, duur: s.duur, oorspr: s.oorspr, zwart: !!s.zwart,
+        tekst: s.lokTekst, eigen: !!s.eigenTekst})),
       teken: tt => { const s = S.find(x => tt >= x.van && tt < x.van + x.duur) || S[S.length - 1]; s.teken((tt - s.van) / s.k, s.oorspr); }};
   }
   /* Een filmpje maken met een montage (null = zoals in FILM_EDIT staat, [] = het origineel). */
@@ -32854,6 +33041,19 @@ function filmStudio(){
     #filmstudio .kop{position:absolute;top:0;bottom:0;width:2px;background:#fff;pointer-events:none;z-index:4}
     #filmstudio .clipinstel{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;background:#121218;border:1px solid #26262f;border-radius:6px;padding:8px 10px}
     #filmstudio .clipinstel input[type=number]{width:80px}
+    /* de tekstbaan: elke tekstregel als blokje, slepen = verschuiven, rechterrand = langer of korter */
+    #filmstudio .tekstbaan{position:relative;height:30px;margin-top:4px;background:#121218;border:1px solid #26262f;border-radius:6px;overflow:hidden;cursor:pointer}
+    #filmstudio .tblok{position:absolute;top:3px;bottom:3px;box-sizing:border-box;background:rgba(120,170,255,.22);border:1px solid #6f9be8;border-radius:3px;cursor:grab;touch-action:none;
+      font-size:11px;color:#cfe0ff;padding:3px 10px 3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #filmstudio .tblok.eigen{background:rgba(140,220,160,.22);border-color:#7fd496;color:#d6f5de}
+    #filmstudio .tblok.sel{box-shadow:inset 0 0 0 1px #fff;border-color:#fff}
+    #filmstudio .tblok.sleept{cursor:grabbing;opacity:.8}
+    #filmstudio .tblok .greep{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35))}
+    #filmstudio .tekstinstel{margin-top:6px;background:#121218;border:1px solid #26262f;border-radius:6px;padding:8px 10px}
+    #filmstudio .trij{display:flex;gap:6px;align-items:center;margin:4px 0;padding:3px;border-radius:4px}
+    #filmstudio .trij.sel{background:#1f2533}
+    #filmstudio .trij input[type=number]{width:66px}
+    #filmstudio .trij input[type=text]{flex:1;min-width:160px;background:#1c1c24;color:#eee;border:1px solid #33333f;border-radius:5px;padding:6px 8px;font:inherit}
   </style>
   <div class="fsw">
     <div class="rij" style="justify-content:space-between;margin-top:0"><h2>🎬 Filmstudio</h2><button data-k="dicht">✕ Sluiten</button></div>
@@ -32865,11 +33065,14 @@ function filmStudio(){
       <input type="range" class="tl" data-k="tl" min="0" max="1000" value="0"><span class="tijd" data-k="tijd">0.0 s</span></div>
     <div class="tlijn" data-k="tlijn">
       <div class="baan" data-k="baan"></div>
+      <div class="tekstbaan" data-k="tekstbaan" title="De tekst: sleep een blokje om het te verschuiven, trek aan de rechterrand voor de duur. Dubbelklik op een lege plek voor nieuwe tekst."></div>
       <div class="muzbaan" data-k="muzbaan" title="De muziek: sleep het blok om te kiezen waar hij inzet"><div class="muzblok" data-k="muzblok"></div></div>
       <div class="kop" data-k="kop"></div>
     </div>
     <div class="clipinstel" data-k="clipinstel"></div>
-    <div class="noot">Sleep een clip om hem te verplaatsen. Trek aan de rechterrand om hem langer of korter te maken (de animatie, tekst en geluid rekken mee). Sleep het gouden blok om de muziek te laten inzetten.</div>
+    <div class="tekstinstel" data-k="tekstinstel" style="display:none"></div>
+    <div class="noot">Sleep een clip om hem te verplaatsen. Trek aan de rechterrand om hem langer of korter te maken (de animatie, tekst en geluid rekken mee). Sleep het gouden blok om de muziek te laten inzetten.
+      Blauwe tekstblokjes zijn de tekst zoals hij was, groene heb je zelf aangepast. Dubbelklik op een lege plek in de tekstbaan voor nieuwe tekst.</div>
     <div class="muzbalk" title="Waar de muziek loopt in het nummer zelf: de gouden balk is het stuk van het nummer dat onder het filmpje ligt"><i data-k="muzi"></i><b data-k="muzb"></b></div>
     <div class="instel">
       <label>Nummer</label><select data-k="pad"></select><label style="cursor:pointer;color:#e8c67a">＋ eigen mp3<input type="file" accept="audio/*" data-k="bestand" style="display:none"></label>
@@ -32914,8 +33117,10 @@ function filmStudio(){
       const c = opslag[k], r = v => Math.round(v * 10) / 10;
       return `"${k}": {pad:"${c.pad}", van:${r(c.van)}, wacht:${r(c.wacht)}, vol:${r(c.vol * 100) / 100}, in:${r(c.in)}, uit:${r(c.uit)}},`;
     });
+    const rr = v => Math.round(v * 10) / 10;
+    const tks = c => !Array.isArray(c.tekst) ? "" : `, tekst:[${c.tekst.map(r => `[${rr(r[0])}, ${rr(r[1])}, ${JSON.stringify(String(r[2]))}${r[3] && r[3].midden ? ", {midden:true}" : r[3] && r[3].schud ? ", {schud:true}" : ""}]`).join(", ")}]`;
     const montage = Object.keys(opslag).filter(k => k.startsWith("edit:") && Array.isArray(opslag[k])).map(k =>
-      `"${k.slice(5)}": [${opslag[k].map(c => c.zwart != null ? `{zwart:${Math.round(c.zwart * 10) / 10}}` : `{s:${JSON.stringify(c.s)}, d:${Math.round(c.d * 10) / 10}}`).join(", ")}],`);
+      `"${k.slice(5)}": [${opslag[k].map(c => (c.zwart != null ? `{zwart:${rr(c.zwart)}` : `{s:${JSON.stringify(c.s)}, d:${rr(c.d)}`) + tks(c) + "}").join(", ")}],`);
     $("uitvoer").value = (regels.length ? "Filmstudio-instellingen voor FILM_MUZIEK:\n" + regels.join("\n") : "")
       + (montage.length ? (regels.length ? "\n\n" : "") + "Montage voor FILM_EDIT:\n" + montage.join("\n") : "")
       || "(nog niets aangepast)";
@@ -32934,9 +33139,10 @@ function filmStudio(){
     const orig = origScenes(), gebruikt = new Set(), uit = [];
     (lijst || ["*"]).forEach(c => {
       if(c === "*"){ orig.forEach(o => { if(!gebruikt.has(o.naam)){ gebruikt.add(o.naam); uit.push({s:o.naam, d:o.duur}); } }); return; }
-      if(c && c.zwart != null){ uit.push({zwart:+c.zwart}); return; }
+      const tk = c && Array.isArray(c.tekst) ? {tekst:c.tekst.map(r => r.slice())} : {};
+      if(c && c.zwart != null){ uit.push(Object.assign({zwart:+c.zwart}, tk)); return; }
       const o = c && orig.find(x => x.naam === c.s);
-      if(o && !gebruikt.has(o.naam)){ gebruikt.add(o.naam); uit.push({s:o.naam, d:c.d != null ? +c.d : o.duur}); }
+      if(o && !gebruikt.has(o.naam)){ gebruikt.add(o.naam); uit.push(Object.assign({s:o.naam, d:c.d != null ? +c.d : o.duur}, tk)); }
     });
     return uit;
   }
@@ -32958,8 +33164,112 @@ function filmStudio(){
       c.dataset.i = i;
       b.appendChild(c);
     });
-    clipInstel(); muzBaan();
+    clipInstel(); tekstBaan(); tekstInstel(); muzBaan();
   }
+  /* ---- de tekst ---- */
+  let selT = -1;
+  /* Vanaf de eerste aanpassing krijgt de clip zijn eigen tekst-lijst (een kopie van wat er stond). */
+  function zorgTekst(i){
+    const c = edit[i]; if(!c) return null;
+    if(!Array.isArray(c.tekst)) c.tekst = (film.scenes[i].tekst || []).map(r => [r1(r[0]), r1(r[1]), r[2], r[3] && (r[3].midden || r[3].schud) ? Object.assign({}, r[3]) : null]);
+    return c.tekst;
+  }
+  function tekstBaan(){
+    const b = $("tekstbaan"); b.innerHTML = "";
+    (film.scenes || []).forEach((sc, i) => (sc.tekst || []).forEach((r, j) => {
+      const k = document.createElement("div");
+      k.className = "tblok" + (sc.eigen ? " eigen" : "") + (i === sel && j === selT ? " sel" : "");
+      k.style.left = ((sc.van + r[0]) / film.duur * 100) + "%"; k.style.width = (Math.max(.1, r[1] - r[0]) / film.duur * 100) + "%";
+      k.textContent = r[2] || "(leeg)"; k.title = r[2];
+      k.dataset.i = i; k.dataset.j = j;
+      const g = document.createElement("div"); g.className = "greep"; k.appendChild(g);
+      b.appendChild(k);
+    }));
+  }
+  /* Opnieuw rekenen zonder het bewerkpaneel opnieuw te tekenen (dan blijft je cursor in het tekstvak staan). */
+  function herbouwStil(){ film = P.maak(sleutel, edit.length ? edit : [{zwart:1}]); t = Math.min(t, film.duur); tekstBaan(); teken(); }
+  function tekstInstel(){
+    const ti = $("tekstinstel"), c = edit[sel], sc = film.scenes[sel];
+    if(!c || !sc){ ti.style.display = "none"; ti.innerHTML = ""; return; }
+    ti.style.display = "";
+    const lijst = sc.tekst || [];
+    const plek = r => r[3] && r[3].midden ? "midden" : r[3] && r[3].schud ? "schud" : "";
+    ti.innerHTML = `<div class="rij" style="margin:0 0 4px"><b style="color:#9fc2ff">Tekst in deze clip</b>
+        <span class="noot" style="margin:0">${sc.eigen ? "eigen tekst" : "zoals de scène hem had"} · seconden binnen de clip (0 tot ${sc.duur.toFixed(1)})</span></div>
+      ${lijst.map((r, j) => `<div class="trij${j === selT ? " sel" : ""}" data-j="${j}">
+        <label>van <input type="number" min="0" step="0.1" value="${r1(r[0])}" data-t="van"></label>
+        <label>tot <input type="number" min="0" step="0.1" value="${r1(r[1])}" data-t="tot"></label>
+        <input type="text" value="${String(r[2]).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")}" data-t="zin" placeholder="typ je tekst">
+        <select data-t="plek"><option value=""${plek(r) === "" ? " selected" : ""}>onder, in de balk</option><option value="midden"${plek(r) === "midden" ? " selected" : ""}>midden, groot</option><option value="schud"${plek(r) === "schud" ? " selected" : ""}>onder, schuddend</option></select>
+        <button data-t="weg" title="Deze tekst weg">✕</button></div>`).join("") || `<div class="noot" style="margin:2px 0">Nog geen tekst in deze clip.</div>`}
+      <div class="rij" style="margin-top:6px"><button data-t="plus">＋ Tekst hier</button>
+        <button data-t="kaart">＋ Zwart met tekst erna</button>
+        ${sc.eigen ? `<button data-t="orig">↺ Tekst van de scène terug</button>` : ""}</div>`;
+  }
+  /* nieuwe tekst op filmtijd tt (of op de kop), in de clip waar die tijd in valt */
+  function tekstErbij(tt){
+    let i = film.scenes.findIndex(x => tt >= x.van && tt < x.van + x.duur); if(i < 0) i = sel >= 0 ? sel : 0;
+    const sc = film.scenes[i], lijst = zorgTekst(i); if(!lijst) return;
+    const a = r1(Math.max(0, Math.min(sc.duur - .5, tt - sc.van)));
+    lijst.push([a, r1(Math.min(sc.duur, a + 3)), "Nieuwe tekst", null]);
+    lijst.sort((x, y) => x[0] - y[0]);
+    sel = i; selT = lijst.findIndex(r => r[0] === a && r[2] === "Nieuwe tekst");
+    bewaarEdit(); herbouw();
+    const veld = $("tekstinstel").querySelector(`.trij[data-j="${selT}"] input[data-t="zin"]`); if(veld){ veld.focus(); veld.select(); }
+  }
+  $("tekstinstel").addEventListener("click", e => {
+    const a = e.target.dataset && e.target.dataset.t; if(!a || sel < 0) return;
+    const rij = e.target.closest(".trij"), j = rij ? +rij.dataset.j : -1;
+    if(a === "weg"){ zorgTekst(sel).splice(j, 1); selT = -1; }
+    else if(a === "plus"){ const sc = film.scenes[sel]; tekstErbij(t >= sc.van && t < sc.van + sc.duur ? t : sc.van); return; }
+    else if(a === "kaart"){ edit.splice(sel + 1, 0, {zwart:3, tekst:[[.3, 2.7, "Nieuwe tekst", {midden:true}]]}); sel++; selT = 0; }
+    else if(a === "orig"){ delete edit[sel].tekst; selT = -1; }
+    else return;
+    bewaarEdit(); herbouw();
+  });
+  $("tekstinstel").addEventListener("focusin", e => { const rij = e.target.closest(".trij"); if(rij){ selT = +rij.dataset.j; tekstBaan(); [...$("tekstinstel").querySelectorAll(".trij")].forEach(x => x.classList.toggle("sel", x === rij)); } });
+  $("tekstinstel").addEventListener("input", e => {
+    const a = e.target.dataset && e.target.dataset.t, rij = e.target.closest(".trij"); if(!a || !rij || sel < 0) return;
+    if(a !== "zin") return;
+    const r = zorgTekst(sel)[+rij.dataset.j]; if(!r) return;
+    r[2] = e.target.value; bewaarEdit(); herbouwStil();
+  });
+  $("tekstinstel").addEventListener("change", e => {
+    const a = e.target.dataset && e.target.dataset.t, rij = e.target.closest(".trij"); if(!a || !rij || sel < 0) return;
+    const sc = film.scenes[sel], r = zorgTekst(sel)[+rij.dataset.j]; if(!r) return;
+    if(a === "van"){ r[0] = r1(Math.max(0, Math.min(sc.duur - .2, +e.target.value || 0))); if(r[1] <= r[0]) r[1] = r1(Math.min(sc.duur, r[0] + 1)); }
+    if(a === "tot"){ r[1] = r1(Math.max(r[0] + .2, Math.min(sc.duur, +e.target.value || 0))); }
+    if(a === "plek"){ r[3] = e.target.value ? {[e.target.value]: true} : null; }
+    if(a === "zin") return;
+    bewaarEdit(); herbouw();
+  });
+  /* tekstblokjes slepen */
+  $("tekstbaan").addEventListener("dblclick", e => { if(!e.target.closest(".tblok")) tekstErbij(tijdBij(e.clientX)); });
+  $("tekstbaan").addEventListener("pointerdown", e => {
+    const k = e.target.closest(".tblok");
+    if(!k){ ga(tijdBij(e.clientX)); return; }
+    const i = +k.dataset.i, j = +k.dataset.j, sc = film.scenes[i], greep = e.target.classList.contains("greep");
+    const lijst = zorgTekst(i), r = lijst[j], a0 = r[0], b0 = r[1], x0 = e.clientX, br = $("baan").getBoundingClientRect();
+    sel = i; selT = j; k.setPointerCapture(e.pointerId);
+    let bewogen = false;
+    clipInstel(); tekstInstel(); [...$("baan").children].forEach((x, n) => x.classList.toggle("sel", n === i));
+    [...$("tekstbaan").children].forEach(x => x.classList.toggle("sel", x === k));
+    k.onpointermove = ev => {
+      const dt = (ev.clientX - x0) / br.width * film.duur;
+      if(Math.abs(ev.clientX - x0) > 3) bewogen = true;
+      if(!bewogen) return;
+      if(greep) r[1] = r1(Math.max(a0 + .2, Math.min(sc.duur, b0 + dt)));
+      else { const len = b0 - a0, a = r1(Math.max(0, Math.min(sc.duur - len, a0 + dt))); r[0] = a; r[1] = r1(a + len); }
+      k.classList.add("sleept");
+      k.style.left = ((sc.van + r[0]) / film.duur * 100) + "%"; k.style.width = ((r[1] - r[0]) / film.duur * 100) + "%";
+    };
+    k.onpointerup = () => {
+      k.onpointermove = k.onpointerup = null;
+      if(!bewogen){ ga(sc.van + r[0] + .01); return; }
+      lijst.sort((x, y) => x[0] - y[0]); selT = lijst.indexOf(r);
+      bewaarEdit(); herbouw();
+    };
+  });
   function clipInstel(){
     const ci = $("clipinstel"), c = edit[sel];
     if(!c){ ci.innerHTML = `<span class="noot" style="margin:0">Klik een clip aan om hem te bewerken.</span>
@@ -32998,9 +33308,9 @@ function filmStudio(){
     const c = e.target.closest(".clip");
     if(!c){ sel = -1; ga(tijdBij(e.clientX)); baan(); return; }
     const i = +c.dataset.i, sc = film.scenes[i], greep = e.target.classList.contains("greep");
-    sel = i; c.setPointerCapture(e.pointerId);
+    sel = i; selT = -1; c.setPointerCapture(e.pointerId);
     const x0 = e.clientX; let bewogen = false;
-    clipInstel(); [...$("baan").children].forEach((k, j) => k.classList.toggle("sel", j === i));
+    clipInstel(); tekstInstel(); tekstBaan(); [...$("baan").children].forEach((k, j) => k.classList.toggle("sel", j === i));
     c.onpointermove = ev => {
       if(Math.abs(ev.clientX - x0) > 4) bewogen = true;
       if(!bewogen) return;
@@ -33038,11 +33348,14 @@ function filmStudio(){
     blok.onpointermove = ev => { c.wacht = Math.max(0, r1(w0 + (ev.clientX - x0) / r.width * film.duur)); c.mijn = true; toonWaarden(); muzBaan(); teken(); };
     blok.onpointerup = () => { blok.onpointermove = blok.onpointerup = null; blok.classList.remove("sleept"); bewaar(); if(speelt){ audio.pause(); muziekBij(); } };
   });
+  let kiesNr = 0;
   async function kiesFilm(k){
-    stop(); sleutel = k; t = 0; gT = -1; ontbreekt = []; sel = -1;
+    const mijn = ++kiesNr;          // kies je snel een ander filmpje, dan telt alleen de laatste keus
+    stop(); sleutel = k; t = 0; gT = -1; ontbreekt = []; sel = -1; selT = -1;
     edit = Array.isArray(opslag["edit:" + k]) ? opslag["edit:" + k] : uitklap(FILM_EDIT[k] || ["*"]);
     film = P.maak(k, edit);
     const ok = await P.laad(film);
+    if(mijn !== kiesNr) return;
     if(!ok){
       /* welke tekeningen ontbreken? */
       ontbreekt = (await Promise.all(film.beelden.map(n => new Promise(r => { const im = new Image(); im.onload = () => r(null); im.onerror = () => r(n);
