@@ -4083,6 +4083,287 @@ body.sleept, body.sleept *{cursor:grabbing !important}
 .slot.sleepboven{outline:3px solid #ffe08a; outline-offset:2px; z-index:9 !important}
 .hcard{touch-action:none;-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}
 .hcard img{-webkit-user-drag:none;pointer-events:none}
+/* ================= 🖥 COMPUTER · ontwerp K1 (okt 2026) =================
+   Aan op een groot scherm (body.pc, gezet door pcZet). Geen balken links en rechts meer: het veld
+   staat in het midden, de tegenstander zit linksboven in een rond gouden medaillon met zijn naam,
+   levens en aethers ernaast, zijn hand ligt tegenover de jouwe (boven in het midden). Rechts drijven
+   zijn en jouw stapels met de grote ronde knop ertussen. Linksonder sta jij: in het verhaal een
+   balkje, in een partij met personages net zo'n medaillon als hij. Oud scherm terug:
+   localStorage elementaal_pcoud = 1. */
+body.pc{
+  --top:clamp(150px, 23dvh, 212px);
+  --med:calc(var(--top) - 50px);
+  --mx:26px; --my:20px;
+  --hh:clamp(118px, 20dvh, 190px); --hw:calc(var(--hh) / 1.4);
+  --rib:28px;
+  --chh:min(calc((100dvh - var(--top) - var(--hh) - var(--rib) - 52px) / 2.44), 214px);
+  --rit:calc(var(--chh) * .2);
+  --cw:calc(var(--chh) / 1.38);
+  --gapk:calc(var(--cw) * .48);
+  --fw:calc(5 * var(--cw) + 4 * var(--gapk));
+  --oh:calc(var(--top) * .5); --ow:calc(var(--oh) / 1.4);
+  --info:calc(var(--mx) + var(--med) + 26px);
+}
+body.pc #app{display:block !important; position:fixed !important; inset:0; overflow:hidden; grid-template-columns:none !important; padding:0 !important; gap:0 !important}
+body.pc #menufab, body.pc #geluidfab{display:none !important}
+
+/* --- links: alleen het medaillon (en wat je oproept: keten, uitleg, logboek) --- */
+body.pc #left, body.pc #app.hzdoor #left{display:block !important; position:fixed !important; left:0; top:0; width:0; height:0; max-height:none;
+  padding:0 !important; margin:0 !important; border:0 !important; background:none !important; box-shadow:none !important; overflow:visible; z-index:45}
+body.pc #left > *{display:none !important}
+body.pc #left > #portretvak{display:block !important; position:fixed; left:var(--mx); top:var(--my); width:var(--med); height:var(--med);
+  min-height:0; max-height:none; margin:0; flex:none}
+body.pc #portretvak #portret{height:100% !important; width:100% !important; border:0 !important; outline:none; border-radius:50% !important; overflow:hidden;
+  box-shadow:0 0 0 4px #c9a24a, 0 0 0 8px #1a1712, 0 0 0 10px rgba(201,162,74,.5), 0 10px 18px rgba(0,0,0,.6) !important}
+body.pc #portretvak #portret .ptfig{height:100%}
+body.pc #portretvak #portret .ptnaam{display:none}
+/* de tekstballon komt uit het medaillon, het pijltje wijst ernaar */
+body.pc #portretvak #ptbel{position:fixed; left:calc(var(--mx) + var(--med) + 20px); top:calc(var(--my) + var(--med) * .44); right:auto; bottom:auto;
+  width:max-content; max-width:min(360px, calc(50vw - min(28vw, 380px) / 2 - var(--mx) - var(--med) - 36px)); z-index:48; font-size:1.2rem}
+body.pc #portretvak #ptbel::after{left:-15px; top:16px; bottom:auto; transform:none; border:7px solid transparent; border-right-color:var(--ptk,var(--danger)); border-top-color:transparent}
+body.venster.pc #portretvak #ptbel::after{border-right-color:var(--vk3,#6b77c9); border-top-color:transparent}
+body.pc #app #left > #chain:not(:empty){display:block !important; position:fixed; left:50%; top:calc(var(--top) + 8px); transform:translateX(-50%);
+  width:max-content; max-width:min(620px, 50vw); max-height:44dvh; overflow-y:auto; z-index:60}
+/* kaartuitleg als je met de muis ergens op staat: een vel links, onder het medaillon */
+body.pc.pvuitleg #app #left > #preview{display:flex !important; position:fixed !important; left:var(--mx) !important; right:auto !important;
+  top:calc(var(--top) + 6px) !important; bottom:auto !important; width:min(260px, 19vw); z-index:58}
+body.pc #preview .pv{width:100% !important; max-width:100%}
+/* het logboek: een vel links */
+body.pc.logopen #app #left > #log{display:block !important; position:fixed; left:var(--mx); top:calc(var(--top) + 6px); bottom:calc(var(--hh) + 40px);
+  width:min(320px, 22vw); overflow-y:auto; z-index:57; background:rgba(10,13,22,.96); border:2px solid #c9a24a; border-radius:8px; padding:10px 12px}
+body.pc #app #left > #chatbox:not(:empty){display:flex !important; position:fixed; left:var(--mx); bottom:calc(var(--hh) + 40px); width:min(320px, 22vw); z-index:57}
+/* de cirkel en het logboek als knopjes rechtsboven, naast de andere */
+body.pc #app #left > #cstrip:not(:empty){display:block !important; position:fixed; right:calc(var(--mx) + 2 * 54px); top:16px; width:48px; height:48px; z-index:46}
+body.pc #cstrip .cstrip.ckring{width:48px; height:48px; max-width:none; padding:3px; border-width:2px}
+body.pc #cstrip .cstxt, body.pc #cstrip .cstrij{display:none}
+body.pc #app #left > #logknop{display:flex !important; align-items:center; justify-content:center; position:fixed; right:calc(var(--mx) + 3 * 54px); top:16px;
+  width:48px; height:48px; padding:0; font-size:0; z-index:46}
+body.pc #app #left > #logknop::before{content:"📜"; font-size:1.3rem}
+body.pc.logopen #app #left > #logknop{border-color:#e7bf55}
+
+/* --- het midden --- */
+body.pc #center{position:fixed !important; inset:0; display:block !important; padding:0 !important; grid-template-rows:none; margin:0 !important}
+body.pc #pside1, body.pc #pside0{position:fixed !important; left:0; right:0; height:0; min-height:0 !important; padding:0 !important;
+  display:block !important; overflow:visible; background:none !important; border:0 !important; box-shadow:none !important}
+body.pc #pside1{top:0; z-index:20}
+body.pc #pside0{bottom:0; top:auto; z-index:30}
+body.pc .pside .pinfo{position:fixed !important; transform:none !important; max-width:none !important; min-width:0 !important; width:auto !important;
+  display:flex !important; flex-direction:column !important; align-items:flex-start !important; gap:6px !important; margin:0 !important}
+body.pc .pside .pinfo > .pname{display:block !important; font-size:clamp(.5rem, .8vw, .78rem) !important; line-height:1.3; white-space:nowrap}
+body.pc .pside .pinfo > .plife{display:flex !important}
+body.pc .pside .plife.hpbalk{width:clamp(180px, 16vw, 250px)}
+body.pc .pside .pdeckinfo{font-size:1.1rem !important; line-height:1; white-space:nowrap; color:#a69f88}
+body.pc .pside .pinfo .ruiten{--r:42px !important; --g:5px !important; margin:2px 0 0 !important}
+body.pc .pside .pinfo .aemini{display:none}
+body.pc .pside .handvol{display:none}
+/* de tegenstander: naast zijn medaillon (zonder medaillon gewoon linksboven) */
+body.pc #pside1 .pinfo{left:var(--mx); top:var(--my)}
+body.pc:has(#portretvak #portret) #pside1 .pinfo, body.pc.mpbalk #pside1 .pinfo{left:var(--info); top:calc(var(--my) + 4px)}
+/* zijn hand: tegenover de jouwe, boven in het midden */
+body.pc #pside1 .hand{position:fixed !important; left:calc(50vw - min(28vw, 380px) / 2); top:12px; width:min(28vw, 380px); height:var(--oh);
+  --hw:var(--ow); --hh:var(--oh); display:flex !important; justify-content:center; align-items:flex-start; flex:none; transform:none; pointer-events:auto; gap:0}
+body.pc #pside1 .hcard{width:var(--ow); height:var(--oh); flex:0 0 auto; margin-left:min(0px, calc((100% - var(--n,5) * var(--ow)) / (var(--n,5) - 1)))}
+body.pc #pside1 .hcard:first-child{margin-left:0}
+body.pc #pside1 .hcard .card{font-size:.6rem}
+
+/* het veld, gecentreerd */
+body.pc #fieldwrap{position:fixed !important; left:calc(50vw - var(--fw) / 2); width:var(--fw); right:auto; top:calc(var(--top) + 4px);
+  height:calc(2 * (var(--chh) + var(--rit) + 4px) + var(--rib) + 12px); display:block !important; padding:0 !important;
+  margin:0 !important; overflow:visible !important; gap:0; transform:none !important}
+body.pc #fieldwrap .frow{position:absolute !important; left:0; right:0; max-width:none !important; width:auto !important; margin:0 !important;
+  display:grid !important; grid-template-columns:repeat(5, var(--cw)) !important; justify-content:space-between; gap:0 !important}
+body.pc #row1{top:0}
+body.pc #row0{top:calc(var(--chh) + var(--rit) + 4px + var(--rib) + 12px)}
+body.pc #fieldwrap .col{width:var(--cw) !important; max-width:none !important; height:calc(var(--chh) + var(--rit) + 4px) !important}
+body.pc #fieldwrap .slot.cr{left:0 !important; right:auto; width:var(--cw) !important; height:var(--chh) !important}
+body.pc #fieldwrap .slot.sp{left:0 !important; right:auto; width:var(--cw) !important; height:var(--rit) !important;
+  transform:none !important; overflow:hidden; border-radius:6px}
+body.pc #row1 .slot.sp{top:0 !important; bottom:auto !important}
+body.pc #row1 .slot.cr{top:calc(var(--rit) + 4px) !important; bottom:auto !important}
+body.pc #row0 .slot.cr{top:0 !important; bottom:auto !important}
+body.pc #row0 .slot.sp{top:calc(var(--chh) + 4px) !important; bottom:auto !important}
+body.pc #fieldwrap .slot.sp > .card, body.pc #fieldwrap .slot.sp > .cardback{inset:auto !important; position:absolute; left:0; top:50%;
+  width:var(--cw); height:var(--chh); transform:translateY(-50%)}
+body.pc #fieldwrap .dkruis{display:none}
+body.pc #ribbon{display:flex !important; position:absolute; left:0; right:0; top:calc(var(--chh) + var(--rit) + 10px);
+  height:var(--rib); margin:0 !important; padding:0 !important; max-width:none !important; width:auto !important; gap:10px; z-index:3; justify-content:center; align-items:center}
+body.pc #ribbon .ph-step{font-size:.55rem !important; padding:5px 9px !important; line-height:1.4}
+body.pc #ribbon .ph-step:not(.on){font-size:0 !important; width:9px; height:9px; padding:0 !important; border-radius:50%; background:#9a937f; border:0; opacity:.7}
+body.pc #banner{position:fixed !important; left:50vw; top:calc(var(--top) + var(--chh) + var(--rit) + 20px); transform:translateX(-50%)}
+
+/* jij, linksonder: in het verhaal een balkje met JIJ */
+body.pc #pside0 .pinfo{left:var(--mx); bottom:18px; top:auto; z-index:31; box-sizing:border-box; min-width:min(330px, 24vw);
+  padding:14px 18px 14px 88px !important; background:rgba(10,13,22,.92) !important; border:2px solid #c9a24a !important; border-radius:10px;
+  box-shadow:0 0 0 2px rgba(231,191,85,.2), 0 6px 0 rgba(0,0,0,.4)}
+body.pc #pside0 .pinfo::before{content:"JIJ"; position:absolute; left:16px; top:50%; transform:translateY(-50%); width:56px; height:56px; border-radius:50% !important;
+  background:#1d2a22; border:3px solid #5cb56e; display:flex; align-items:center; justify-content:center;
+  font-family:"Press Start 2P",ui-monospace,monospace; font-size:.6rem; color:#cfeccf; box-sizing:border-box}
+/* in een partij met personages: net zo'n medaillon als de tegenstander, maar dan linksonder */
+body.pc.mpbalk #pside0 .pinfo{left:var(--info); bottom:calc(var(--my) + 4px); padding:0 !important; background:none !important; border:0 !important; box-shadow:none; min-width:0}
+body.pc.mpbalk #pside0 .pinfo::before{display:none}
+body.pc.mpbalk #app #left > #mpvak{display:block !important; position:fixed; left:0; top:0; width:0; height:0; overflow:visible}
+body.pc #mpvak .mphp{display:none !important}
+body.pc #mpvak .mpptvak{position:fixed; left:var(--mx); width:var(--med); height:var(--med); flex:none; display:block}
+body.pc #mpvak .mpptvak:nth-child(2){top:var(--my)}
+body.pc #mpvak .mpptvak:nth-child(4){top:auto; bottom:var(--my)}
+body.pc #mpvak .mppt{position:absolute; inset:0; border-radius:50% !important;
+  box-shadow:0 0 0 4px #c9a24a, 0 0 0 8px #1a1712, 0 0 0 10px rgba(201,162,74,.5), 0 10px 18px rgba(0,0,0,.6) !important}
+body.pc #mpvak .mppt.eigen:hover{box-shadow:0 0 0 4px #f6dc8c, 0 0 0 8px #1a1712, 0 0 0 10px rgba(246,220,140,.7), 0 0 22px rgba(246,220,140,.5) !important}
+body.pc #mpvak .mphint{display:none}
+body.pc #mpvak .mptlijst{position:fixed; left:calc(var(--mx) + var(--med) + 20px); bottom:calc(var(--my) + var(--med) * .3); width:min(300px, 24vw); z-index:60;
+  border-radius:8px}
+body.pc #mpvak .mpbel{position:fixed; left:calc(var(--mx) + var(--med) + 20px); width:max-content; max-width:min(360px, calc(50vw - min(28vw, 380px) / 2 - var(--mx) - var(--med) - 36px)); z-index:48; right:auto}
+body.pc #mpvak .mpptvak:nth-child(2) .mpbel{top:calc(var(--my) + var(--med) * .44); bottom:auto}
+body.pc #mpvak .mpptvak:nth-child(4) .mpbel{bottom:calc(var(--my) + var(--med) * .44); top:auto}
+body.pc #mpvak .mpbel::after{left:-15px; top:16px; bottom:auto; transform:none; border:7px solid transparent; border-right-color:var(--bk,#6b77c9); border-top-color:transparent}
+/* je hand, onder in het midden, helemaal zichtbaar */
+body.pc #pside0 .hand{position:fixed !important; left:calc(50vw - min(44vw, 760px) / 2); width:min(44vw, 760px); right:auto; bottom:10px; height:var(--hh);
+  display:flex !important; justify-content:center; align-items:flex-end; gap:0; flex:none; transform:none; z-index:32;
+  background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; outline:none}
+body.pc #pside1 .hand{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important}
+body.pc #pside0 .hcard{width:var(--hw); height:var(--hh); flex:0 0 auto; margin-left:min(0px, calc((100% - var(--n,5) * var(--hw)) / (var(--n,5) - 1)))}
+body.pc #pside0 .hcard:first-child{margin-left:0}
+
+/* rechts: zijn stapels, de grote ronde knop, jouw stapels; de knopjes erboven */
+body.pc #right, body.pc #app #right, body.pc #app.hzdoor #right{position:fixed !important; right:var(--mx); top:calc(var(--top) + 4px); bottom:calc(var(--hh) * .45);
+  width:max(150px, calc(var(--cw) * 1.25 + 12px)); display:flex !important; flex-direction:column !important; flex-wrap:nowrap !important; align-items:center; justify-content:space-between;
+  gap:10px; padding:0 !important; margin:0 !important; border:0 !important; background:none !important; box-shadow:none !important; overflow:visible; z-index:25}
+body.pc #rtools{position:fixed; right:var(--mx); top:16px; display:flex !important; flex-direction:row !important; gap:6px; width:auto; margin:0; padding:0; z-index:46}
+body.pc #rtools .tbtn{width:48px; height:48px}
+body.pc #rtools .tbtn:not(#rtmenu):not(#apbtn){display:none}
+body.pc #rmid{display:flex !important; flex-direction:column !important; flex:0 0 auto !important; align-items:center; gap:10px; width:auto; margin:0; padding:0; background:none; border:0}
+body.pc #turnbadge{font-size:.5rem !important; text-align:center; line-height:1.7; background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important}
+body.pc #turnbadge .tijdmeter{font-size:1.4rem; padding:2px 0; margin-top:2px; color:#f0c75a}
+body.pc #actions{display:flex !important; flex-direction:column !important; align-items:center; gap:8px; width:auto !important; flex:none !important}
+body.pc #actions .abtn{width:150px !important; flex:none !important; min-height:44px; font-size:.5rem !important; white-space:normal}
+body.pc #actions .abtn.primary{width:124px !important; height:124px; min-height:0; border-radius:50% !important; padding:0 10px !important; font-size:.62rem !important;
+  line-height:1.5; background:radial-gradient(circle at 50% 40%, #f6dc8c, #e7bf55 60%, #c99a32) !important; color:#1a1208 !important;
+  border:6px solid #3a3122 !important; box-shadow:0 0 0 3px #f6dc8c, 0 8px 0 rgba(0,0,0,.45) !important; text-shadow:none !important}
+body.pc #actions .abtn.primary:hover{filter:brightness(1.08)}
+body.pc #piles1, body.pc #piles0{display:flex !important; justify-content:center; gap:10px; margin:0}
+body.pc #right .pile{width:calc(var(--cw) * .6) !important; height:calc(var(--chh) * .6) !important}
+body.pc #right .pile .lab{display:none}
+/* ================= 🖥 COMPUTER · de rest van het spel (okt 2026) =================
+   Dezelfde ideeën als op de telefoon, maar groot: het startscherm met het logo links en een
+   grote Verder-knop, de kaart met de werelden bovenin en een vel rechts met het level dat je
+   aanklikt, het praatje met de plek erachter en het personage groot links, de winkel met de
+   uitleg in een vel rechts. */
+.vverder{display:none}
+.wchip .wcnaam, .wchip .wcsc{display:none}
+/* het startscherm */
+body.pc.venster .vhome{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); column-gap:clamp(30px, 5vw, 90px); align-items:center;
+  width:min(1320px, calc(100vw - 80px)); max-height:none; height:calc(100dvh - 60px); padding:0}
+body.pc.venster .vhome .vhrij{display:contents}
+body.pc.venster .vhome .vlogo{grid-column:1; grid-row:1; text-align:left; align-self:center}
+body.pc.venster .vhome .vtitel{font-size:clamp(2.4rem, 4.4vw, 4.2rem)}
+body.pc.venster .vhome .vtag{margin-top:16px}
+body.pc.venster .vhome .vhinfo{display:none}
+body.pc.venster .vhome .vhlijst{grid-column:2; grid-row:1; width:auto; max-height:calc(100dvh - 80px); padding:16px 14px}
+body.pc.venster .vhome .vhlijst .vr{min-height:66px; font-size:.78rem}
+body.pc.venster .vhome .vhlijst .vr small{font-size:1.35rem; margin-top:4px}
+body.pc .vverder{display:flex; align-items:center; gap:22px; margin-top:34px; width:min(580px, 100%); padding:22px 26px; text-align:left; cursor:pointer;
+  background:rgba(40,32,14,.95); border:3px solid #e7bf55; border-radius:10px; color:#efe9d8;
+  box-shadow:0 0 0 3px rgba(231,191,85,.25), 0 8px 0 rgba(0,0,0,.45)}
+body.pc .vverder:hover{filter:brightness(1.12)}
+body.pc .vverder .vvic{flex:0 0 74px; height:74px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#f0c75a;
+  background:#1a1712; border:3px solid #c9a24a; border-radius:8px}
+body.pc .vverder .vvtx{display:flex; flex-direction:column; gap:6px}
+body.pc .vverder b{font-family:"Press Start 2P",ui-monospace,monospace; font-weight:400; font-size:1rem; color:#f3e3b0}
+body.pc .vverder em{font-style:normal; font-family:"VT323",ui-monospace,monospace; font-size:1.7rem; line-height:1; color:#e9e4d6}
+body.pc .vverder small{font-family:"VT323",ui-monospace,monospace; font-size:1.25rem; color:#a69f88}
+
+/* de kaart: de werelden als knoppen bovenin, met naam en score */
+body.pc .kaartkop .wchips{display:flex; align-items:center; gap:10px; margin:0 8px; pointer-events:auto; flex-wrap:wrap}
+body.pc .wchips .wchip{display:flex; align-items:center; gap:10px; height:44px; padding:0 14px 0 6px; border-radius:22px; border:3px solid #3a3f4a;
+  background:#151a22; color:#efe9d8; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.55rem; box-shadow:0 3px 0 rgba(0,0,0,.6); cursor:pointer}
+body.pc .wchips .wchip::first-letter{color:inherit}
+body.pc .wchips .wchip .wcnaam{display:inline; font-size:.45rem}
+body.pc .wchips .wchip .wcsc{display:inline; font-family:"VT323",ui-monospace,monospace; font-size:1.15rem; color:#a69f88}
+body.pc .wchips .wchip.nu{border-color:#e7bf55; box-shadow:0 0 0 3px rgba(231,191,85,.3), 0 0 16px rgba(231,191,85,.45)}
+body.pc .wchips .wchip.dicht{opacity:.4}
+body.pc .wchips .wnaam{display:none}
+body.pc .kaartbox:has(.telvel) .kaartkop{max-width:calc(100vw - min(440px, 32vw) - 40px); flex-wrap:wrap; row-gap:8px}
+/* het vel met het level dat je aanklikte */
+body.pc .telvel{display:flex; flex-direction:column; gap:14px; position:fixed; right:0; top:0; bottom:0; width:min(440px, 32vw); z-index:30;
+  padding:22px 24px; background:rgba(13,16,26,.97); border-left:3px solid #c9a24a; box-shadow:-12px 0 0 rgba(0,0,0,.3); text-align:left;
+  animation:telvelin .22s ease-out; box-sizing:border-box}
+body.pc .telvel .vlvuitleg{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px}
+body.pc .telvel .vlvuitleg .vport{display:block; flex:0 0 auto; width:100%; height:auto; aspect-ratio:16/10; border:3px solid var(--ptrand,#6f5aa8); background:#1d1830}
+body.pc .telvel .vlvuitleg .vtxt .vkop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.75rem !important; line-height:1.6; color:#e7bf55;
+  justify-content:flex-start; text-align:left; padding-right:40px}
+body.pc .telvel .vlvuitleg .vtxt p{font-family:"VT323",ui-monospace,monospace !important; font-size:1.45rem !important; line-height:1.1 !important; margin:8px 0}
+body.pc .telvel .telvelweg{position:absolute; right:12px; top:12px; width:44px; height:44px; padding:0; min-height:0; font-size:.9rem; z-index:2}
+body.pc .telvel .telspeel{flex:0 0 auto; min-height:68px; font-size:.85rem; width:100%; margin:0}
+
+/* het praatje: de plek erachter, het personage groot links, de tekst rechtsonder */
+body.pc .praatbg{display:block; position:fixed; inset:0; width:100vw; height:100dvh; object-fit:cover; z-index:-1;
+  filter:brightness(.55) saturate(.9); pointer-events:none}
+body.pc .praatscherm:not(.reus){position:fixed; inset:0; width:auto; display:block}
+body.pc .praatscherm:not(.reus)::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(0deg, rgba(4,6,12,.82) 0%, rgba(4,6,12,0) 50%)}
+body.pc .praatscherm:not(.reus) .praatsprite{position:absolute; left:max(30px, 3vw); bottom:-10px; margin:0; width:min(40vw, 72dvh) !important}
+body.pc .praatscherm:not(.reus) .praatrechts{display:flex; flex-direction:column; gap:12px; position:absolute;
+  right:max(30px, 3vw); bottom:max(30px, 4dvh); width:min(56vw, 860px)}
+body.pc .praatscherm.leeg:not(.reus) .praatrechts{left:50%; right:auto; transform:translateX(-50%); width:min(70vw, 900px)}
+body.pc .praatscherm:not(.reus) .praatbox{width:100%; min-height:0; padding:24px 30px 30px}
+body.pc .praatscherm .praattxt{font-size:2rem; line-height:1.1; min-height:2.2em}
+body.pc .praatscherm .praatnaam{margin-bottom:12px; font-size:.75rem}
+body.pc .praatscherm .praatkeus{display:flex; flex-direction:column; gap:8px; width:100%; margin:0}
+body.pc .praatscherm .praatkeus .pkbtn{min-height:52px; padding:10px 14px; flex:none; font-size:1.4rem}
+body.pc .praatscherm.reus .praatrechts{display:contents}
+
+/* de winkel: grote prijzen, de uitleg als vel rechts */
+body.pc .wktag{font-size:.65rem !important; padding:6px 8px 5px}
+body.pc .wkbevvol{left:auto; right:0; top:0; bottom:0; transform:none; width:min(440px, 32vw); padding:22px 24px; overflow-y:auto;
+  border:0; border-left:3px solid #c9a24a; border-radius:0; animation:telvelin .22s ease-out; box-sizing:border-box; background:rgba(13,16,26,.97)}
+body.pc .wkbevestig{display:flex; flex-direction:column; align-items:center; gap:10px; min-height:100%; padding:10px 6px}
+body.pc .wkbevestig .wkbprent{display:block; width:min(280px, 22vw); height:min(280px, 22vw); object-fit:cover; border:4px solid #a07de0; border-radius:10px; image-rendering:pixelated}
+body.pc .wkbevestig .wkbprent + .wkbic{display:none}
+body.pc .wkbevestig h3{font-family:"Press Start 2P",ui-monospace,monospace !important; font-size:.9rem !important; line-height:1.5; margin:8px 0 2px}
+body.pc .wkbevestig .sub{font-size:1.4rem; line-height:1.12}
+body.pc .wkbevestig .wkprijs{font-size:1.6rem; margin:10px 0 6px}
+body.pc .wkbevestig .mrow{margin-top:auto; display:flex; gap:10px; width:100%}
+body.pc .wkbevestig .mrow .obtn{flex:1 1 0; min-height:64px}
+/* deck bouwen: elementen links, de kaarten in het midden, je deck rechts */
+body.pc .dbsamen{display:flex}
+.dbsamen{display:none}
+body.pc .ovbox.dbbox{width:min(1440px, calc(100vw - 40px)) !important; max-width:none !important; height:calc(100dvh - 40px); max-height:none; display:flex; flex-direction:column}
+body.pc .dbbox .dbkol{display:grid !important; grid-template-columns:minmax(280px, 330px) minmax(0, 1fr) minmax(280px, 340px); gap:16px; flex:1 1 auto; min-height:0}
+body.pc .dbbox .dbkol > .dbvak{min-height:0; overflow-y:auto}
+body.pc .dbbox .dbkol > .dbsamen{order:3; flex-direction:column; gap:10px}
+body.pc .dbbox .dbonder .obtn:not(.slrood){display:none}
+body.pc .dbbox .dbgrid{grid-template-columns:repeat(auto-fill, minmax(180px, 1fr))}
+.dbsbalk{display:flex; height:22px; border:2px solid #3a3f4a; border-radius:4px; overflow:hidden}
+.dbsbalk i{display:block; height:100%}
+.dbsgetal{font-size:1.15rem; color:#cfc7ae}
+.dbskop{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.5rem; color:#c4a8ff; margin-top:8px}
+.dbskop.licht{color:#f6dc8c}
+.dbsvakken{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px}
+.dbsvak{position:relative; aspect-ratio:1/1; border:2px dashed #4a4f5a; border-radius:6px; background:#121620; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; overflow:hidden; font-size:.95rem; color:#6f6a5c; text-align:center}
+.dbsvak.vol{border:3px solid #a07de0; cursor:pointer; color:#e9e4d6}
+.dbsvak.vol.licht{border-color:#f6dc8c}
+.dbsvak .aei{position:absolute; inset:0; width:100%; height:100%; font-size:1.6rem; display:flex; align-items:center; justify-content:center}
+.dbsvak .aei img{width:100%; height:100%; object-fit:cover}
+.dbsvak span{position:relative; z-index:1; background:rgba(8,10,16,.82); width:100%; padding:2px 0; margin-top:auto; line-height:1}
+.dbsvak:not(.vol) span{background:none; margin:auto}
+.dbsknop{display:flex; flex-direction:column; gap:8px; margin-top:auto; padding-top:10px}
+.dbsknop .obtn{width:100%; min-height:54px}
+/* de library: een raster van kaarten, rechts het vel van de kaart die je aanklikt */
+body.pc .ovbox.libbox.pclib{width:min(1440px, calc(100vw - 40px)) !important; max-width:none !important; height:calc(100dvh - 40px); max-height:none; display:flex; flex-direction:column}
+body.pc .libbox.pclib .libmidden{display:grid; grid-template-columns:minmax(0, 1fr) minmax(300px, 380px); gap:18px; flex:1 1 auto; min-height:0; margin-top:10px}
+body.pc .libbox.pclib .libgrid{overflow-y:auto; min-height:0; max-height:none; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); align-content:start}
+body.pc .libbox.pclib .libitem .libtxt, body.pc .libbox.pclib .libitem .libwaar, body.pc .libbox.pclib .libitem .lktoegang{display:none}
+body.pc .libbox.pclib .libitem{cursor:pointer}
+body.pc .libbox.pclib .libitem.libsel .lk{outline:3px solid #b892ff; outline-offset:2px; box-shadow:0 0 18px rgba(184,146,255,.55)}
+.libdetail{display:flex; flex-direction:column; gap:10px; min-height:0; overflow-y:auto; padding:18px; background:rgba(10,13,22,.6);
+  border:2px solid #c9a24a; border-radius:10px; text-align:left}
+.libdetail .libdgroot{width:min(240px, 100%); align-self:center}
+.libdetail .libdgroot .lk{width:100%}
+.libdetail h3{margin:6px 0 0; font-family:"Press Start 2P",ui-monospace,monospace; font-size:.85rem; color:#e7bf55; line-height:1.4}
+.libdetail .libdsoort{font-size:1.2rem; color:#c4a8ff}
+.libdetail .libdtxt{font-size:1.35rem; line-height:1.12; color:#e9e4d6}
+.libdetail .libdwaar, .libdetail .libwaar{margin-top:auto}
 /* ================= 📱 TELEFOON LIGGEND · ontwerp A, de klassieke tafel =================
    Aan als het scherm liggend en laag is (body.tel, gezet door telZet). Alles staat vast op het
    scherm (position:fixed), zodat de oude grid- en flexregels hier niets meer uitmaken.
@@ -17694,8 +17975,12 @@ function startHTML(){
       ${volgend ? `<div class="vrij"><span>NU</span><b>${volgend}</b></div>` : ""}
     </div>` : "";
   const nPlek = SET.slots.filter(Boolean).length;
+  /* 🖥 Op de computer: een grote knop "Verder" onder het logo. */
+  const verder = opPlek && volgend && STORY[volgend] ? `<button class="vverder" data-act="btn" data-btn="story">
+      <span class="vvic">▶</span><span class="vvtx"><b>VERDER</b><em>${volgend} · ${STORY[volgend].naam}${STORY[volgend].vijand ? `, tegen ${STORY[volgend].vijand}` : ""}</em>
+      <small>${klaar} van ${STORY_ORDER.length} levels · ${sterren} sterren</small></span></button>` : "";
   return `<div class="vhome">
-    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div></div>
+    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div>${verder}</div>
     <div class="vhrij">
       <div class="vn vhlijst vlijst">
         ${LIVE.resume ? vr("resumelive", `Terug naar room ${LIVE.resume.code}`, "", "") : ""}
@@ -24889,7 +25174,7 @@ function praatHTML(){
   if(reus)         st.push("width:min(448px,76vw)");
   else if(r.groot) st.push("width:min(330px,68vw)");
   /* 📱 Op de telefoon staat de plek van het level erachter (art/bg-<level>.png), in het donker. */
-  const telBg = telAan() && M && /^[1-5]-[1-6]$/.test(String(M.id || ""))
+  const telBg = (telAan() || pcAan()) && M && /^[1-5]-[1-6]$/.test(String(M.id || ""))
     ? `<img class="praatbg" src="art/bg-${M.id}.png" alt="" onerror="this.remove()">` : "";
   const leeg = r.s === null || r.ogen;
   return `<div class="praatscherm${(r.groot || reus) ? " groot" : ""}${reus ? " reus" : ""}${vul ? " vul" : ""}${leeg ? " leeg" : ""}">${telBg}
@@ -26363,6 +26648,11 @@ function libHTML(){
   const bz = libBezit(), alles = !!(SET.story && SET.story.vrij);
   let kop = "📚 Library", sub = "Alle kaarten. Onder elke kaart staat waar je hem kunt gebruiken: in het verhaal, in de commander-draft en in je Basis-decks (doorgestreept = daar niet). <i>Verhaal: nog niet</i> = in het verhaal nog niet gevonden; in PvP kun je hem wel al gebruiken.";
   let items = "";
+  /* 🖥 Op de computer: een raster van kaarten en rechts een vel met de kaart die je aanklikt. */
+  const pcLib = pcAan() && !u0;
+  const vrijL = [];
+  const pcAttr = (k, licht, vrij, oud) => { if(!pcLib) return oud; if(vrij) vrijL.push(k); return vrij ? `data-act="libsel" data-k="${k}" data-l="${licht ? 1 : 0}"` : ""; };
+  const pcSel = k => pcLib && M.libSel === k ? " libsel" : "";
   if(tab === "ae"){
     let keys = Object.keys(AETHERS).filter(k => !AETHERS[k].uit && ((!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || (!u && (inPvp(k, false) || BOT_AE.includes(k))) || (u && (u.aethers || []).indexOf(k) >= 0)));
     const sel = u ? (Array.isArray(u.aeSel) ? u.aeSel : []) : [];
@@ -26373,9 +26663,9 @@ function libHTML(){
       const vrij = u ? i >= 0 : (alles || bz.ae.has(k) || inPvp(k, false) || ladderAeVrij().includes(k));   // wat in PvP mag, heb je daar altijd
       const slot = !u && !alles && !bz.ae.has(k);
       const gek = u && i >= 0 && sel.indexOf(i) >= 0;
-      const attr = u && vrij ? `data-act="voorae" data-i="${i}"` : (vrij ? `data-act="aeinfo" data-k="${k}"` : "");
+      const attr = pcAttr(k, false, vrij, u && vrij ? `data-act="voorae" data-i="${i}"` : (vrij ? `data-act="aeinfo" data-k="${k}"` : ""));
       const opd = u && u.opdracht && u.opdracht.ae === k;
-      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}">${lkHTML(k, false, {kl:(gek ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("l", gek) + " " : "") + (gek ? "✓" : "")})}
+      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}${pcSel(k)}">${lkHTML(k, false, {kl:(gek ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("l", gek) + " " : "") + (gek ? "✓" : "")})}
         <div class="libtxt">${vrij ? AETHERS[k].txt : "<i>Nog niet gevonden.</i>"}</div>${u ? "" : toegangHTML(k, false, slot)}</div>`;
     }).join("");
   } else {
@@ -26390,9 +26680,9 @@ function libHTML(){
       const knoppen = u && vrij ? `<div class="ltn"><span class="ltnknop${n <= 0 ? " uit" : ""}" data-act="voorltn" data-k="${k}" data-d="-1">&minus;</span>
           <span class="ltnaantal">${n}&times;</span>
           <span class="ltnknop${(n >= per || op >= max) ? " uit" : ""}" data-act="voorltn" data-k="${k}" data-d="1">+</span></div>` : "";
-      const attr = u && vrij ? `data-act="voorltn" data-k="${k}" data-d="1"` : "";
+      const attr = pcAttr(k, true, vrij, u && vrij ? `data-act="voorltn" data-k="${k}" data-d="1"` : "");
       const opd = u && u.opdracht && u.opdracht.lt === k;
-      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}">${lkHTML(k, true, {kl:(n ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("r", n >= 3) + " " : "") + (n ? n + "×" : (opd ? "3× nodig" : ""))})}
+      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}${pcSel(k)}">${lkHTML(k, true, {kl:(n ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("r", n >= 3) + " " : "") + (n ? n + "×" : (opd ? "3× nodig" : ""))})}
         ${knoppen}<div class="libtxt">${vrij ? LIGHTS[k].txt : "<i>Nog niet gevonden.</i>"}</div>${u ? "" : toegangHTML(k, true, slot)}</div>`;
     }).join("");
   }
@@ -26400,12 +26690,13 @@ function libHTML(){
     /* 👹 De aethers van tegenstanders: nooit voor jou, maar wel om na te lezen. Een silhouet tot je
        die tegenstander in het verhaal bent tegengekomen (okt 2026). */
     kop = "📚 Library · tegenstanders";
+    vrijL.length = 0;
     sub = "De eigen krachten van tegenstanders. Die kun je zelf nooit gebruiken. Ben je de tegenstander in het verhaal tegengekomen, dan zie je wat hij doet en wie hem heeft.";
     items = libSorteer(Object.keys(AETHERS).filter(k => AETHERS[k].vijand && !AETHERS[k].uit), false, true).map(k => {
       const wie = vijAeBij(k);
       const vrij = alles || wie.some(w => storyOntmoetAl(w.id) || (SET.story.klaar || []).indexOf(w.id) >= 0);
       const bij = wie.map(w => `<span>${w.naam} <i>${w.id}</i></span>`).join("");
-      return `<div class="libitem${vrij ? "" : " op"}">${lkHTML(k, false, {kl:vrij ? "" : " op", attr:vrij ? `data-act="aeinfo" data-k="${k}"` : "", op:!vrij, badge:""})}
+      return `<div class="libitem${vrij ? "" : " op"}${pcSel(k)}">${lkHTML(k, false, {kl:vrij ? "" : " op", attr:pcAttr(k, false, vrij, vrij ? `data-act="aeinfo" data-k="${k}"` : ""), op:!vrij, badge:""})}
         <div class="libtxt">${vrij ? AETHERS[k].txt : "<i>Nog niet tegengekomen.</i>"}</div>
         <div class="libwaar" title="Wie heeft deze aether">${vrij ? bij : "<span class=\"nee\" style=\"text-decoration:none\">???</span>"}</div></div>`;
     }).join("");
@@ -26414,9 +26705,21 @@ function libHTML(){
     <button class="seg${tab === "ae" ? " on" : ""}" data-act="libtab" data-w="ae">🟣 Aethers</button>
     <button class="seg${tab === "lt" ? " on" : ""}" data-act="libtab" data-w="lt">✦ Lichtkaarten</button>${u ? "" : `
     <button class="seg${tab === "vij" ? " on" : ""}" data-act="libtab" data-w="vij">👹 Tegenstanders</button>`}</div>`;
-  return `<div class="ovbox libbox">
+  let det = "";
+  if(pcLib){
+    const k = vrijL.indexOf(M.libSel) >= 0 ? M.libSel : vrijL[0], licht = tab === "lt";
+    const D = k ? (licht ? LIGHTS[k] : AETHERS[k]) : null;
+    det = D ? `<div class="libdetail">
+        <div class="libdgroot">${lkHTML(k, licht, {kl:"groot"})}</div>
+        <h3>${D.name}</h3><div class="libdsoort">${tab === "vij" ? "aether van een tegenstander" : (licht ? "lichtkaart" : (D.kind === "fusie" ? "aether · fusie" : "aether"))}</div>
+        <div class="libdtxt">${D.txt || ""}</div>
+        ${tab === "vij" ? `<div class="libwaar">${vijAeBij(k).map(w => `<span>${w.naam} <i>${w.id}</i></span>`).join("")}</div>`
+          : `<div class="libdwaar">${toegangHTML(k, licht, false)}</div>`}</div>`
+      : `<div class="libdetail"><div class="libdtxt">Hier is nog niets gevonden.</div></div>`;
+  }
+  return `<div class="ovbox libbox${pcLib ? " pclib" : ""}">
     <h2>${kop}</h2><div class="sub">${sub}</div>${u ? opdrachtBalk(u) : ""}${tabs}
-    <div class="libgrid" id="libgrid">${items}</div>
+    ${pcLib ? `<div class="libmidden"><div class="libgrid" id="libgrid">${items}</div>${det}</div>` : `<div class="libgrid" id="libgrid">${items}</div>`}
     <div class="libvoet"><button class="obtn" data-act="btn" data-btn="closemodal">${u ? "✓ Klaar" : "Sluiten"}</button></div></div>`;
 }
 function voorBtnTxt(u){
@@ -27321,7 +27624,7 @@ function koopVraag(soort, key){
   const v = soort === "hart" ? hartVak() : (soort === "slot" ? slotVak() : (soort === "upg" ? upgVak(key) : koopVak(soort, key, 0)));
   if(!v || v.leeg || v.op || v.mijn) return;
   /* 📱 Op de telefoon kun je niet "aanwijzen": daar zie je bij een tik altijd wat het is, ook als het te duur is. */
-  if(!v.kan && telAan()){ AU.play("lose"); winkelZeg(knortZin(kraamVan().arm()), kraamVan().spr + "_zuur", true); M.bevestig = Object.assign({}, v, {teDuur:true}); render(); return; }
+  if(!v.kan && (telAan() || pcAan())){ AU.play("lose"); winkelZeg(knortZin(kraamVan().arm()), kraamVan().spr + "_zuur", true); M.bevestig = Object.assign({}, v, {teDuur:true}); render(); return; }
   if(!v.kan){ AU.play("lose"); winkelZeg(knortZin(kraamVan().arm()), kraamVan().spr + "_zuur", true); return; }
   M.bevestig = v; render();
 }
@@ -27551,7 +27854,7 @@ function kaartHTML(){
   const telChips = `<div class="wchips">${[1,2,3,4,5].map(x => {
       const open = STORY_ORDER.some(id => +id.split("-")[0] === x && STORY[id] && storyVrij(id)) || alles;
       return `<button class="wchip${x === huidigW ? " nu" : ""}${open ? "" : " dicht"}" style="--wk:${WERELDEN[x].kleur}"
-        data-act="btn" data-btn="kaartwereld" data-w="${x}"${open ? "" : " disabled"} title="${WERELDEN[x].naam}">${x}</button>`;
+        data-act="btn" data-btn="kaartwereld" data-w="${x}"${open ? "" : " disabled"} title="${WERELDEN[x].naam}">${x}<span class="wcnaam">${WERELDEN[x].naam.toUpperCase()}</span><span class="wcsc">${STORY_ORDER.filter(id => +id.split("-")[0] === x && STORY[id] && storyKlaar(id)).length}/${STORY_ORDER.filter(id => +id.split("-")[0] === x && STORY[id]).length}</span></button>`;
     }).join("")}<span class="wnaam">${WERELDEN[huidigW].naam.toUpperCase()}</span></div>`;
   const telVel = M.kies && STORY[M.kies] ? `<div class="telvel">
       <button class="obtn b-dim telvelweg" data-act="btn" data-btn="kaartvelweg" aria-label="Sluiten">✕</button>
@@ -28359,7 +28662,8 @@ document.addEventListener("click", e => {
   if(act === "trioinfo"){ M = {type:"trio"}; render(); return; }
   if(act === "voorpag"){ aeBlader(t.dataset.w, +t.dataset.d); return; }
   if(act === "libopen"){ M = {type:"lib", tab:t.dataset.w === "lt" ? "lt" : "ae", modus:"kies"}; render(); return; }
-  if(act === "libtab"){ if(M && M.type === "lib"){ M.tab = t.dataset.w === "lt" ? "lt" : (t.dataset.w === "vij" ? "vij" : "ae"); render(); } return; }
+  if(act === "libsel"){ if(M && M.type === "lib"){ M.libSel = t.dataset.k; render(); } return; }
+  if(act === "libtab"){ if(M && M.type === "lib"){ M.libSel = null; M.tab = t.dataset.w === "lt" ? "lt" : (t.dataset.w === "vij" ? "vij" : "ae"); render(); } return; }
   if(act === "voorltn"){
     if(S.ui.mode === "banpick" && !isBot(S.ui.p)){
       const k = t.dataset.k, d = +t.dataset.d, ui = S.ui;
@@ -29935,6 +30239,7 @@ function deckbouwHTML(){
         ${ORDER.map(el).join("")}
         ${ok ? "" : `<div class="vmelding mis">${saldo > 0 ? `Nog ${saldo} te veel` : `Nog ${-saldo} te weinig`}: haal ergens iets af of doe er ergens iets bij.</div>`}
       </div>
+      ${pcAan() ? dbSamenHTML(d, eb, ok) : ""}
       <div class="dbvak">
         <div class="dbtabs"><span class="seg${tab === "ae" ? " on" : ""}" data-act="dbtab" data-t="ae">🟣 Aethers ${aeIn.length}/${aeMax}</span>
           <span class="seg${tab === "lt" ? " on" : ""}" data-act="dbtab" data-t="lt">✦ Licht ${ltGebruikt(ltIn)}/${ltMax}</span>
@@ -29950,6 +30255,27 @@ function deckbouwHTML(){
       <span class="dbvul"></span>
       <button class="obtn" data-act="btn" data-btn="deckterug">Annuleren</button>
       <button class="obtn${ok ? "" : " uit"}" data-act="btn" data-btn="deckopslaan">Opslaan</button></div></div>`;
+}
+/* 🖥 Op de computer: rechts een overzicht van je deck. De elementen als balk, je aethers en
+   lichtkaarten als vakjes (leeg = nog te vergeven), en daaronder opslaan. */
+function dbSamenHTML(d, eb, ok){
+  const KL = {water:"#3d8fe0", steen:"#a0703d", vuur:"#e0553d", gras:"#4cb35a"};
+  const tot = Math.max(1, mixTotaal(d.mix));
+  const balk = ORDER.map(e => `<i style="width:${d.mix[e] / tot * 100}%;background:${KL[e] || "#888"}" title="${EL[e].name}: ${d.mix[e]}"></i>`).join("");
+  const aeV = Array.from({length:BAS.AE}, (_, i) => { const k = d.ae[i];
+    return k ? `<div class="dbsvak vol" data-act="dbae" data-k="${k}" title="${AETHERS[k].name} · klik om weg te doen">${aeVak(k)}<span>${AETHERS[k].name}</span></div>` : `<div class="dbsvak"><span>vrij</span></div>`; }).join("");
+  const ltMax = ltMaxVan(d.ae), lijst = Object.keys(d.ltN || {}).filter(k => LIGHTS[k] && d.ltN[k] > 0);
+  const ltV = lijst.map(k => `<div class="dbsvak vol licht" data-act="dblt" data-k="${k}" data-d="-1" title="${LIGHTS[k].name} · klik voor één minder">${aeVak(k, true)}<span>${d.ltN[k]}× ${LIGHTS[k].name}</span></div>`).join("")
+    + Array.from({length:Math.max(0, ltMax - ltGebruikt(d.ltN || {}))}, () => `<div class="dbsvak licht"><span>vrij</span></div>`).join("");
+  return `<div class="dbvak dbsamen">
+    <div class="dbkop">JE DECK</div>
+    <div class="dbuitleg">${mixTotaal(d.mix)} elementkaarten, ${d.ae.length}/${BAS.AE} aethers, ${ltGebruikt(d.ltN || {})}/${ltMax} licht</div>
+    <div class="dbsbalk">${balk}</div>
+    <div class="dbsgetal">${ORDER.map(e => `${icon(e)} ${d.mix[e]}`).join(" · ")}</div>
+    <div class="dbskop">AETHERS</div><div class="dbsvakken">${aeV}</div>
+    <div class="dbskop licht">LICHT</div><div class="dbsvakken">${ltV}</div>
+    <div class="dbsknop"><button class="obtn${ok ? "" : " uit"}" data-act="btn" data-btn="deckopslaan">Opslaan</button>
+      <button class="obtn b-dim" data-act="btn" data-btn="deckterug">Annuleren</button></div></div>`;
 }
 function deckOpen(i, terug){
   const decks = basDecks();
@@ -30587,7 +30913,7 @@ function onBtn(btn, el, fromAction){
     case "storylevel": {
       const id = el && el.dataset.id;
       /* 📱 Op de kaart van de telefoon eerst het vel met wie je tegenkomt; spelen is de knop daarin. */
-      if(telAan() && M && M.type === "story" && !M.lijst && !M.inv && el && !el.dataset.direct && id && STORY[id] && storyVrij(id)){
+      if((telAan() || pcAan()) && M && M.type === "story" && !M.lijst && !M.inv && el && !el.dataset.direct && id && STORY[id] && storyVrij(id)){
         M.kies = id; render(); break;
       }
       if(id === "1-3" && storyKlaar("1-3")){ nimbusOpenen(); break; }
@@ -30689,6 +31015,8 @@ function toonKaartInfo(cd, terug){
    onderaan: de eerste tik haalt hem omhoog, de tweede kiest een kaart (en dan zakt hij weer, zodat
    je het vak ziet waar hij heen mag). Tik naast de hand en hij zakt zonder dat er iets gebeurt. */
 function telAan(){ return document.body.classList.contains("tel"); }
+/* 🖥 ontwerp K1 en de nieuwe schermen op de computer (body.pc) */
+function pcAan(){ return document.body.classList.contains("pc"); }
 function telAutopass(){
   const seats = NET.on ? (NET.seat >= 0 ? [NET.seat] : []) : (S && S.vsBot ? [0] : [0,1]);
   return !!(seats.length && seats.every(i => SET.autopass[i]));
@@ -30717,9 +31045,18 @@ function telNaRender(){
 function telHand(op){
   document.body.classList.toggle("handop", !!op);
 }
+/* 🖥 Op een groot scherm: ontwerp K1 (zie de CSS bij COMPUTER). */
+function pcZet(){
+  let aan = false;
+  try{ aan = !telAan() && window.matchMedia("(min-width:1081px)").matches && localStorage.getItem("elementaal_pcoud") !== "1"; }catch(e){}
+  if(aan === document.body.classList.contains("pc")) return;
+  document.body.classList.toggle("pc", aan);
+  if(S && !FAST){ const v = document.getElementById("portretvak"); if(v){ v.dataset.sig = ""; v.dataset.bel = ""; } render(); }
+}
 window.addEventListener("resize", telZet);
+window.addEventListener("resize", pcZet);
 window.addEventListener("orientationchange", () => setTimeout(telZet, 120));
-telZet();
+telZet(); pcZet();
 document.addEventListener("click", e => {
   if(!telAan() || SLEEP_KLIK) return;
   const app = document.getElementById("app");
