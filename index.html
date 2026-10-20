@@ -5114,6 +5114,115 @@ body.tel #banner .btxt{font-size:.82rem !important; line-height:1.05; padding:4p
 body.tel #banner .btxt b{font-size:.62rem !important}
 body.tel #banner .bskip{margin:0 !important; padding:6px 8px; font-size:.75rem; flex:0 0 auto; min-height:34px}
 body.tel.handop #banner{display:none}
+
+/* ================= 🖥 COMPUTER · ontwerp ronde 8 (okt 2026): twee zwarte kolommen =================
+   Links één venster over de volle hoogte: boven de tegenstander (naam, vierkant portret, levens,
+   aethers), onder jij (in het verhaal de elementencirkel, want de onverdeelde blijft een raadsel).
+   Rechts één venster: zijn stapels, de beurt en je tijd, de gele knop om je beurt te eindigen, de
+   vier knoppen en jouw stapels. Geen strepen door de kolommen. De fasenbalk tussen de rijen is weg,
+   dus het veld schuift op en de kaarten worden groter. Alleen op de computer (body.pc). */
+html body.pc{
+  --kg:16px; --kw:clamp(232px, 16.5vw, 320px); --kp:14px;
+  --h2:calc((100dvh - 2 * var(--kg)) / 2);
+  --pt:min(calc(var(--kw) - 2 * var(--kp)), calc(var(--h2) - 36px - 96px));
+  --mx:calc(var(--kg) + var(--kp)); --my:calc(var(--kg) + 36px); --med:var(--pt);
+  --info:calc(var(--mx) + var(--med) + 26px);
+  --top:clamp(90px, 13dvh, 118px); --oh:calc(var(--top) * .62); --ow:calc(var(--oh) / 1.4);
+  --rib:0px; --nk:5;
+  --chh:min(calc((100dvh - var(--top) - var(--hh) - 84px) / 2.4), 250px);
+  --cw:calc(var(--chh) / 1.38); --gapk:calc(var(--cw) * .26);
+  --fw:calc(var(--nk) * var(--cw) + (var(--nk) - 1) * var(--gapk));
+}
+html body.pc.vierkol{--nk:4}
+html body.pc #fieldwrap .frow{grid-template-columns:repeat(var(--nk), var(--cw)) !important; justify-content:space-between !important}
+/* telefoon: met vier kolommen ook maar vier sporen (stonden er vijf, dan schoof alles naar links) */
+html body.tel.vierkol #fieldwrap .frow{grid-template-columns:repeat(4, var(--cw)) !important}
+html body.pc #fieldwrap, html body.pc.vierkol #fieldwrap{width:var(--fw) !important; left:calc(50vw - var(--fw) / 2) !important}
+/* het venster */
+#lkolom, html body.pc #app aside#right, html body.pc #app.hzdoor aside#right{background:#050507 !important; border:0 !important; border-image:none !important; border-radius:6px !important;
+  box-shadow:0 0 0 3px #ececec, 0 0 0 6px #000, 0 10px 0 6px rgba(0,0,0,.35) !important; color:#fff}
+#lkolom{display:none}
+body.pc #lkolom{display:block; position:fixed; left:var(--kg); top:var(--kg); height:calc(100dvh - 2 * var(--kg)); width:var(--kw); z-index:1; pointer-events:none}
+#lkolom .lkvak{position:absolute; left:0; right:0; height:50%}
+#lkolom .lkvak.onder{top:50%}
+#lkolom .lkkop{position:absolute; left:var(--kp); right:var(--kp); top:12px; font:11px/1 "Press Start 2P",monospace; color:#fff; letter-spacing:.04em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#lkolom .lkvak.aan .lkkop::before{content:"\25B6"; color:#ffd84a; margin-right:8px; font-size:9px; vertical-align:1px}
+#lkolom .lkpt{position:absolute; left:var(--kp); top:36px; width:var(--pt); height:var(--pt); box-shadow:0 0 0 2px #ececec; background:#0b0b10; overflow:hidden}
+#lkolom .lkpt .cstrip{all:unset; display:block; width:100%; height:100%; pointer-events:none}
+#lkolom .lkpt .cstrip .tbeeld{width:100% !important; height:100% !important; margin:0 !important}
+#lkolom .lkpt .cstrip img, #lkolom .lkpt .cstrip svg{width:100%; height:100%; object-fit:contain; display:block; image-rendering:pixelated}
+#lkolom .lkpt > .cardback{position:absolute; inset:0; border-radius:0 !important; border:0 !important; box-shadow:none !important; opacity:.55}
+/* het echte portret ligt precies op het vak van de tegenstander, vierkant */
+html body.pc #left > #portretvak::after{display:none !important}
+html body.pc #portretvak #portret{border-radius:0 !important; box-shadow:0 0 0 2px #ececec !important}
+html body.pc #portretvak #portret .ptnaam{display:none !important}
+/* levens en aethers onder het portret, in het venster */
+html body.pc #app :is(#pside0, #pside1) .pinfo{position:fixed !important; left:var(--mx) !important; right:auto !important; width:var(--pt) !important; background:none !important; box-shadow:none !important;
+  border:0 !important; border-image:none !important; padding:0 !important; min-width:0 !important; transform:none !important; z-index:31; display:flex !important; flex-direction:column !important;
+  gap:8px !important; align-items:flex-start !important}
+html body.pc #app #pside1 .pinfo{top:calc(var(--my) + var(--pt) + 12px) !important; bottom:auto !important}
+html body.pc #app #pside0 .pinfo{top:calc(var(--kg) + var(--h2) + 36px + var(--pt) + 12px) !important; bottom:auto !important}
+html body.pc #app #pside0 .pinfo::before, html body.pc #app #pside1 .pinfo::before{display:none !important}
+html body.pc .pside .pinfo > .pname, html body.pc .pside .pdeckinfo{display:none !important}
+html body.pc .pside .plife .hpb{--sw:min(26px, calc((var(--pt) - 70px) / var(--n, 6))) !important; border-color:#ececec !important; background:#000 !important}
+html body.pc .pside .lnum{color:#fff !important; font-family:"Press Start 2P",monospace !important; font-size:15px !important}
+html body.pc .pside .pinfo .ruiten{position:relative !important; left:auto !important; top:auto !important; right:auto !important; bottom:auto !important; height:var(--r) !important; order:3;
+  margin:0 !important; --r:min(40px, calc((var(--pt) - 30px) / 6)) !important; --g:6px !important; transform:none !important}
+/* rechts: één venster over de volle hoogte, zonder strepen */
+html body.pc #app aside#right, html body.pc #app.hzdoor aside#right{position:fixed !important; top:var(--kg) !important; bottom:var(--kg) !important; right:var(--kg) !important; left:auto !important;
+  width:var(--kw) !important; height:auto !important; padding:16px var(--kp) !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important;
+  align-items:stretch !important; gap:12px; box-sizing:border-box}
+html body.pc #app #piles1::before, html body.pc #app #piles0::after{all:unset; content:attr(data-naam) !important; border:0 !important; border-image:none !important; background:none !important;
+  padding:0 !important; text-align:left !important; text-shadow:none !important; height:auto !important; width:100% !important; flex:0 0 100% !important; display:block !important;
+  font:11px/1 "Press Start 2P",monospace !important; color:#fff !important; letter-spacing:.04em; margin:0 0 10px !important; text-transform:uppercase}
+html body.pc #app #piles0::after{margin:10px 0 0 !important}
+html body.pc #app #piles1{order:1} html body.pc #app #rmid{order:2} html body.pc #app #rtools{order:3} html body.pc #app #piles0{order:4}
+html body.pc #app #piles1, html body.pc #app #piles0{justify-content:flex-start !important; flex-wrap:wrap !important; gap:0 16px !important; margin:0 !important}
+html body.pc #app #right .pile{width:calc(var(--kw) * .26) !important; height:calc(var(--kw) * .36) !important}
+html body.pc #app #rmid{flex:1 1 auto !important; display:flex !important; flex-direction:column !important; justify-content:center !important; align-items:center !important; gap:16px !important;
+  width:100% !important; border:0 !important; background:none !important; margin:0 !important; padding:0 !important}
+html body.pc #app #turnbadge{display:block !important; position:static !important; background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; text-align:center;
+  font:11px/1.6 "Press Start 2P",monospace !important; color:#8a8a92 !important; text-transform:uppercase; width:100%}
+html body.pc #app #turnbadge b{display:block; color:#fff; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+html body.pc #app #turnbadge .tijdmeter{font:20px "Press Start 2P",monospace !important; color:#ffd84a !important; margin-top:10px; background:none !important; border:0 !important; padding:0 !important}
+html body.pc #app #turnbadge :is(.slaapmeter, .regenmeter, .rotsmeter, .lavameter, .sluismeter, .rondeklok){margin:10px auto 0 !important; font:15px/1.15 "VT323",monospace !important; text-transform:none;
+  color:#d8d8de !important; background:#0d0d12 !important; border:2px solid #34343c !important; border-radius:3px !important; padding:5px 8px !important; box-shadow:none !important}
+/* einde beurt: de gele knop (niet de getekende munt) */
+html body.pc #app #right #actions{display:flex !important; flex-direction:column !important; align-items:center; gap:8px; width:100% !important}
+html body.pc #app #right #actions .abtn{width:100% !important; max-width:220px}
+html body.pc #app #right #actions .abtn.primary{width:calc(var(--kw) * .46) !important; height:calc(var(--kw) * .46) !important; max-width:none; min-height:0 !important; border-radius:50% !important;
+  padding:0 12px !important; font:.62rem/1.5 "Press Start 2P",monospace !important; color:#1a1208 !important; text-shadow:none !important; filter:none !important; image-rendering:auto;
+  background:radial-gradient(circle at 50% 40%, #f6dc8c, #e7bf55 60%, #c99a32) !important; border:6px solid #3a3122 !important;
+  box-shadow:0 0 0 3px #f6dc8c, 0 8px 0 rgba(0,0,0,.45) !important; transition:transform .12s, filter .12s}
+html body.pc #app #right #actions .abtn.primary:hover{filter:brightness(1.08) !important; transform:translateY(-2px); background:radial-gradient(circle at 50% 40%, #f6dc8c, #e7bf55 60%, #c99a32) !important}
+html body.pc #app #right #actions .abtn.primary:disabled{filter:grayscale(.85) brightness(.6) !important; transform:none}
+/* de vier knoppen: een rustig rijtje met tekst */
+html body.pc #app #right #rtools{all:unset; order:3 !important; position:static !important; display:grid !important; grid-template-columns:1fr 1fr; gap:6px 8px; width:100%; margin:0 !important; padding:0 !important}
+html body.pc #app #right #rtools::before{display:none !important}
+html body.pc #app #right #rtools .tbtn{all:unset; box-sizing:border-box; display:flex; align-items:center; justify-content:flex-start !important; gap:8px; width:100% !important; height:30px !important; padding:0 8px !important; cursor:pointer;
+  font:9px/1 "Press Start 2P",monospace !important; color:#d8d8de !important; border:2px solid #34343c !important; border-radius:3px !important; background:#0d0d12 !important; overflow:hidden; white-space:nowrap}
+html body.pc #app #right #rtools .tbtn:hover{border-color:#ececec !important; color:#fff !important}
+html body.pc #app #right #rtools .tbtn > *{flex:none !important; margin:0 !important; width:14px !important; height:14px !important; position:static !important}
+html body.pc #app #right #rtools .tbtn::after{margin:0 !important; flex:none}
+#lkolom .lkpt > .cardback{background-size:cover !important; background-position:center !important}
+html body.pc #app #right #rtools .tbtn:not(#apbtn):not(#rtmute):not(#rtmenu):not([data-btn="restart"]):not(#privbtn){display:none !important}
+html body.pc #app #right #rtools .tbtn[style*="none"]{display:none !important}
+html body.pc #app #right #rtools #apbtn::after{content:"AUTO"} html body.pc #app #right #rtools #rtmute::after{content:"GELUID"}
+html body.pc #app #right #rtools [data-btn="restart"]::after{content:"OPNIEUW"} html body.pc #app #right #rtools #rtmenu::after{content:"MENU"}
+html body.pc #app #right #rtools #privbtn::after{content:"PRIVACY"}
+html body.pc #app #right #rtools .tbtn.on{color:#ffd84a !important}
+/* weg van het veld: de fasenbalk en de banner tussen de rijen */
+html body.pc #ribbon{display:none !important}
+/* de regel over wat er gebeurt: rechts, in het venster, boven de knop */
+html body.pc #banner{position:fixed !important; left:auto !important; right:calc(var(--kg) + var(--kp)) !important; width:calc(var(--kw) - 2 * var(--kp)) !important;
+  top:calc(var(--kg) + 16px + var(--kw) * .36 + 36px) !important; transform:none !important; z-index:40}
+html body.pc #banner .btxt{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; font:17px/1.15 "VT323",monospace !important; color:#fff !important; text-align:left}
+html body.pc #banner .btxt small{color:#8a8a92 !important}
+/* de kaartuitleg (muis op een kaart): over de onderste helft van de linkerkolom */
+html body.pc.pvuitleg #app #left > #preview{left:var(--mx) !important; top:calc(var(--kg) + var(--h2) + 12px) !important; width:var(--pt) !important; max-height:calc(var(--h2) - 24px); overflow:auto}
+html body.pc #app #left > #chatbox:not(:empty){left:var(--mx) !important; bottom:calc(var(--kg) + 12px) !important; width:var(--pt) !important}
+html body.pc #pside1 .hand{top:10px !important}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -29362,6 +29471,24 @@ function muziekScherm(){
   /* Vrij spel: de gevechtsmuziek van het level waarvan je het decor ziet. */
   AU.zet(S.decor && S.decor.muziek && MUZIEK[S.decor.muziek] ? S.decor.muziek : "gevecht");
 }
+/* 🖥 Ronde 8: links één zwart venster over de volle hoogte. Boven de tegenstander (zijn portret is
+   het echte #portretvak, dat precies op dit vak ligt), onder jij. In het verhaal staat op jouw plek de
+   elementencirkel: de onverdeelde blijft een raadsel. In vrij spel is er (nog) geen portret: dan de
+   achterkant van de kaarten. Levens en aethers zijn de echte .pinfo's, die de CSS hierin zet. */
+function lkPaint(TOP, BOT){
+  let lk = document.getElementById("lkolom");
+  if(!pcAan()){ if(lk) lk.remove(); return; }
+  if(!lk){ lk = document.createElement("div"); lk.id = "lkolom"; const app = document.getElementById("app"); if(!app) return; app.prepend(lk); }
+  const verhaal = !!S.story;
+  const naam = q => String(pName(q)).replace(EMOJI_RE, "").trim().toUpperCase();
+  const leeg = `<div class="lkpt"><div class="cardback"></div></div>`;
+  const boven = portretAan() ? "" : leeg;
+  const onder = verhaal ? `<div class="lkpt">${cstripHTML()}</div>` : leeg;
+  const aan = q => (S.tp === q && !S.over ? " aan" : "");
+  const h = `<section class="lkvak boven${aan(TOP)}"><div class="lkkop">${naam(TOP)}</div>${boven}</section>`
+    + `<section class="lkvak onder${aan(BOT)}"><div class="lkkop">${verhaal ? "JIJ" : naam(BOT)}</div>${onder}</section>`;
+  if(lk.dataset.h !== h){ lk.dataset.h = h; lk.innerHTML = h; }
+}
 function render(){
   if(!S || FAST) return;
   { const vh = !!(S.story && !S.over);
@@ -29392,10 +29519,11 @@ function render(){
       app.classList.toggle("lavaveld", !!(S.story && S.story.lavaAan)); } }
   $("#piles1").innerHTML = pilesHTML(TOP);
   $("#piles0").innerHTML = pilesHTML(BOT);
+  lkPaint(TOP, BOT);
   /* ✦ De ring in het midden licht op als je een lichtkaart speelt. */
   { const lr = document.getElementById("lichtring");
     if(lr) lr.classList.toggle("aan", !!(S.ui && S.ui.mode === "slot" && (S.ui.valid || []).some(v => v.kind === "licht") && !isBot(S.ui.p) && iControl(S.ui.p))); }
-  $("#piles1").dataset.naam = String(pName(TOP)).replace(EMOJI_RE, "").trim(); document.body.classList.toggle("vierkol", NK() === 4);
+  $("#piles1").dataset.naam = String(pName(TOP)).replace(EMOJI_RE, "").trim(); $("#piles0").dataset.naam = S.story ? "JIJ" : String(pName(BOT)).replace(EMOJI_RE, "").trim(); document.body.classList.toggle("vierkol", NK() === 4);
   /* Is de tegenstander aan de beurt, dan staat er ook dat hij aan de beurt is. */
   const vijBeurt = S.pl && (NET.on ? S.tp !== NET.seat : (S.vsBot && isBot(S.tp)));
   $("#ribbon").innerHTML = PHASES.map(([k,lab])=>
@@ -31124,7 +31252,7 @@ function mpHTML(){
     : `<div class="mpprof"><div class="mpprofpt">${spriteSVG(c.spr)}</div><div class="mpproftxt"><b>${c.naam}</b></div></div>`;
   return `<div class="ovbox mpbox${d ? " klbox" : ""}"><h2>${M.bot ? "KLAAR?" : "HOE WIL JE SPELEN?"}</h2>${kop}
     ${inhoud}
-    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") + vr("vierkol", `Kolommen: ${SET.vierKol ? "4" : "5"}`, SET.vierKol ? "proef: spelen met vier kolommen · klik voor vijf" : "klik om met vier kolommen te spelen (proef)", "") : live}</div>
+    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") : live}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
 }
 /* ---------- 📋 het Klaar?-scherm: wat zit er in je deck ---------- */
@@ -31756,8 +31884,9 @@ function onBtn(btn, el, fromAction){
       if(u.mode==="start"){
         S.vsBot = /bot$/.test(btn);
         S.startBtn = btn;
-        /* ▥ Proef (okt 2026): tegen de bot ook met vier kolommen. Het bord is hier nog leeg. */
-        S.nk = (S.vsBot && !NET.on && SET.vierKol) ? 4 : 5;
+        /* ▥ (okt 2026) Vrij spel is vanaf nu vier kolommen: tegen de bot, hotseat en online.
+           Het bord is hier nog leeg. Het verhaal houdt (voorlopig) vijf. */
+        S.nk = 4;
         S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
         addLog(NET.on ? "Online partij: jij bent <em>Speler " + (NET.seat + 1) + "</em>."
