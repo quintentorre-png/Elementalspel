@@ -5124,8 +5124,10 @@ body.tel.handop #banner{display:none}
    vier knoppen en jouw stapels. Geen strepen door de kolommen. De fasenbalk tussen de rijen is weg,
    dus het veld schuift op en de kaarten worden groter. Alleen op de computer (body.pc). */
 html body.pc{
-  --kg:16px; --kw:clamp(232px, 16.5vw, 320px); --kp:14px;
+  --kg:16px; --kp:14px;
   --h2:calc((100dvh - 2 * var(--kg)) / 2);
+  /* de kolommen zijn net zo breed als het portret dat in de hoogte past: geen lege rand naast het portret */
+  --kw:clamp(200px, min(16.5vw, calc(var(--h2) - 132px + 2 * var(--kp))), 320px);
   --pt:min(calc(var(--kw) - 2 * var(--kp)), calc(var(--h2) - 36px - 96px));
   --mx:calc(var(--kg) + var(--kp)); --my:calc(var(--kg) + 36px); --med:var(--pt);
   --info:calc(var(--mx) + var(--med) + 26px);
@@ -5239,6 +5241,18 @@ html body.pc #row0 .slot.sp.hl::before, html body.pc #row0 .col .slot.sp::after{
 html body.pc #row1 .slot.sp.hl::before, html body.pc #row1 .col .slot.sp::after{top:33.5px !important}
 /* de rand van de kaart loopt precies door het midden van de cirkel (het zegel ligt erachter) */
 html body.pc #row0 .slot.sp{top:calc(var(--chh) - 41.5px) !important}
+/* (okt 2026) de rand van het zegel is de rand van de wezens: hetzelfde materiaal, als ring getekend (40 x 40) */
+:root{--zring-steen:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADjUlEQVR4nM2YQUsbQRTH/2+R+mEkBBPJMTksOSQ3a+mh7aXnQg2CUSFCQMFUQfTQb2BurrnpQebgHqUqEvww2uL0kMzkzczuZlcT4/+SMDuZ+eX/Zt7OPMIrtZDLSbttt70JAGi1O3jo9+k142f+sQ1UrddQKeWxs3eI7a01fP7yHT8aDf28Uspr2N32JpZXvmaaM3VnDlat1xAKgbLvIxQi8Xdl3wcAhEJge2tNt6cFncsCNz//wYFSAErcTQDY2TvUz66u73WfhVxOpgl/YgcFVq3XACASrFLK64mVlLvqexRs2fd1+JPcjH3AXbOhuI73D+KGAACsNtf1dwWkQNNARjZy55Rr21tr2Nk7RNn3NRRJiecxUSAiqfr+3GhqUA6pXI6CdBpsOO5apZTHx0/fICUAyGy7cQiqHOVupg23BuwFXVlYKsrGRlN/Didwcl5WEZEkItnYaMpe0DXm6gVdZ3zPhqvWa85iZuvsVUkXAKQcOH+8f2BsrlAIXF3fo7BUNCA1YNQbAQCOfh0YA09CNqTa5WotcicNB3fbm3rdqcVLNFk4GxKAAWmnLA8YuWc/vLu5nQoch1TLx55buUgK0H593d3c6kGmBQiYu5unn8fHJzz0+6RDHPWWmDZc3Bxl39cnIo83zkpSJmSvhVxO5zsr572piEgWlopOXpwDRuGdpYv2/KEQuDy/GISYn9Pei9Q6nANGW3zc4XPaCoVwGIxEXfb9mboZNb8HjE4WgJswZ6VQCLTanfcVYsA9zDohntVOpmEu5PO32h14D/0+XZ5fGJeh1eY63jgXyiDoolLKG69b41X3HhS1/h1Avg7fwsXhCds4JHNpQBVmJX4bm7bOTk90WO17twdA1094ugmFmPpaJCK5WCxEPrv9c0OAVVlotTuRtzkikpM+eg3H1NdZAI57AAuxXYb4fXQEAGD/cGJOeoCUUqIXdCM3hnLPAFSQl+cXxiWm7Ps4Oz0BEU0KUj4D6AVdZ2OEQhhwDiAwqu39e/qr266u77FYLKAXdPHS+7EHyOGZTzvHN0acYksfvCYDmHWUQXVBM6YqfaiQAm4RSa07273EwdUFmg/AK1pKyytfAQxCIYkgJUBs1LPTEw3FK162ouASAW1IPnBcUdIWh4r7fRLcWMBxoLwtTlF904BlAuSQNlTaErDdNw1cJkAlu7hjA9iO2n8gLdiLAW3ZwLayAtn6D9QNOI917HamAAAAAElFTkSuQmCC);--zring-vuur:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAE6UlEQVR4nMWYPUsjWxiAn4nZGSYRgrgMrOsYC1NZCJIucGGF/QGyLFikEBf8F1YW293SzssWFmmW+wMWtMqtxM4qW2wcURhcQsBkmInm3GLmnMwkGpPVxBdCkvk45znveb/Oq/FMWZ/NimH3z25b2nPGT4/7Qj9QMZOlZpgUfA/b1NmvX7JtWeoakHh+XOCRH46DFTNZbFPn46clvhz9AqDEHbapU/G6WMYbXL9DiTsAaoaJ63cw2s2xQUd6SMLl5t5S8D014UNgBd+jSpotM5WAlc8CnLZbI0OmngJbn82KYiZLMZPF9TvUDFPdPywvUzNMHC9gywyHknCOFwDg+h11T75bzGQ52F1T4w9jeNQG41qrJSa6p+J1OSwvA3DiXHAC6AgCNECwF32Dxgd7ieMuQFctAGAnAj1tt1ifzYrHtPngRQnnZ3KJ63KLvrmuuhY8bSZCTrVqvVPalBqG4Vs+sMUSrpjJArBlptSnSlrBBaCNABeSgQaCc/caxwv4+GmJmmFSJU2VNJvzc4m5+18eAMzNvQVQnlgzTKpOXYGNAPWo6JFGty0L29QBOO7OUPA9TtutAS0m/qzPZsXB7hqACh8A5+51ZGPPg+uHLNn5RDgCBiDVj/jWVkkP2NtLwfVEEwCr1jsAFaL67TFhg9LuIAwJNcMkQJsAHIDQpP8clpcp+B475ZUBx9QgGVIAFVjP3etooImKWLUWBrYZQi0qDW7Oz+H6HQq+FzqGezVhrp7IuWxTp0o6oUUVqB0voEQv2kdBd9LaA9ACNFEzTGzue+kwujkQB6MKZKqiR7Z43J1JpFIArT/ubZkp9uuXE3KMYZCIvfyiAgVoNm5CDW6k7hVcPAVNU4IYWMH31E6moJcXK15XhZbXENfvKEgpygYt442q3XSGVkATEZ2wGOkv6VLQq3jjtdu0JYg4+udPQc9zS9zheMErbXE4Z8XrqkShAGVVAQy4+fREDBwNIOYkJe7YKa/w9fP7V7HBuFRJK6WpXByPhYflZf76+79pxkKxn19U0cQ2dY67M5w4dS1xJpG12Y/vF+p8MU2R5lX1OlhGGG4UYNwwe7FIE5PPx5qIm1TB9yB2rFU+bbSbyjhdv8N+flq2KChYC8p7q6QTykpU1NION1L3OF5AzTA5cS6YlBZ1ENuWBcBOeQWAf45+Jsr+hA02Gzf4mRwVoER8219+q+W5JA5WM0xc0pQyWc5uw6J14NC0OT/HcXeGqlOnZOcp+B7fXPdF60MJtxd5rsxkMtWeu1dqnkReObttaf/+bvD183sAZRNhGSTgBdw6DifrP5nJmo2bBBw80X6T5ZfjwX5+Max23CsRFWRjajP0VlnzOV6AG02/YeoYvxthqR9trXrroaHWZ7PCz+QUoOynyE7WXv0SnTDBPwWqgwjCbwqxw5EcM9796tfe0MF3LUuctluJk548u9qmjuMFqmHZLxIIwsP5RuoeQLXjANWmk/IQ3JOrX7UWhFylDD3x1cd7g/EySf6XDU6pNbmwOJjRbg7tE45kR6vWgjDaTXUcjG+LFKlduQDZnvvx/SKhOQidAUZrYI7VAvYzOYx2U7WA5cQbqbBnWOJOtU2ktqBXzlW8rhrvsS39Y0ApH+y8gJ4N9duULNu+HP1KaE3eHxXsjwH7JW6nzcYNB7trKl35mdzYQP3yPy/dqxGYuvGOAAAAAElFTkSuQmCC);--zring-water:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAC2klEQVR4nM2ZPY7bMBCFH6XcwAfYKxhOIZ9iIahO4RukSFIt4GIBH8A3SJfOMHwKuVjDXWofwEewmSIcakgORcuy5H3NwvohP80MyZlZhb6aTHXr/fNR9Rm++8sekHp5RVFW2G83AAB9WEHN3gAARVmhXi/c9zsC3/4wA/OhCKbtNwDo064zaNYFbv79N9TLKwBgv92gKCsUZRU8LsEVZeW8nwwNo/avMIPYQc1EBCgpBic9by3aYs04oAAnTagPq+B+BuCKC4Ac8/cP+yx/jz7UxmgEUgaMwNEELtQlFUtN7M6WogfaLBkOzuKN5Axm4ZJgnnINXKBmS3vF8UQEUgSULFcvv94J1g7KF1m9XiQAJ1NNluNWU8Zq195wHBKYv3/YK7Qr+JDNhJG4U4cVrgD6W06GpE2d5Lva2QelFTsMnDsmd3NgIADiwgBg4m4IOK5cc1cD7tZjAcdzbSDjand1Uyx+4U86K+qwGgMOABTFI4kvUBuD/gZ62yH9OElnOgCouHtHsR6X9k8afdqFFizKysTe2MotGO2JgPEkN+9+uxndvW3KgIaa9BwLhoYCvLVACegzLJgBjmv5dScw99vNUyxIc/r5YsYvfgaJFozdfIbIWPQ3etTp8U4SRM9j/6gDWK0g1BpDKhZmooubJZ7fVBr2kT9HNAYpUbS+9xLJoXQF8PPPX/ubjjiSk1FTHIZl5VCxmGvJEPq0kzNqpzXhDTQEHODmAEVZBQwNoCEm61Gh1HzhIyGbesTfVjiLC2hu1OsFfvz6Zi8VZfVgyKai8xdEuuwEguqOLGq3n7vrY7mKS7VAWlsfvEaO92NSoDlrfbw9oPXhQUorm8tvHv1vHLEJWDNT6h+mOlyd228x+Z0rHhZ+hpLqx3C1p37no8L5qPRp5yz/W5OKNjC71yU6rXe3gDms5HrJove0gINkISoacDLV7mbaWDPWl67X3cFI/Y+wgf8N8Q/AVs3aL7m0AgAAAABJRU5ErkJggg==);--zring-gras:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAEg0lEQVR4nMWZz2sbRxTHv7u2FB3EWrooi2BtLBsrWwKFgg/NQZHRqfmBz0H5A0royQHf0oN7K7THNOBDLwk+5pCim5HrQy+FlECI4uDIKAKjugepyx4Wy97pYfaNZla/a0l5YLBnZ2Y/+37Nm2cNVxTbNNig55WGo11l//lxF4SBCllTef7s8AO+za0BAHyOpswfF3jkyTLYTz9sYHunjHzGRK3twYrGAAD1c09ZY0Vj0INVtbaH42prbNCRJhFcIWuieebijeuKZ7kVEzoT2hJAg2T/qDEy5EATE9jGDVO8mODyGRN3HtrY3ikjt9Ixc/OMP3eS6tZLkZj4vZA1FfMPAu37QNZarc1NZ0VjOPzIvz63YuLfv128qJx2rdWl3+/eWsRJvYVlK4GlSAy1tqfADtNmz0FZc+RXS5EYfA04/NjA27oz0kcGsMwPoB/YaQBcu7SfzgZD6uEBWXMAYDQvYEU7m0lw2jA4APCleXuVU7xxXRjNC/7ywG02bpjKu2Xp6YOrmYTYwEnOYwHA04MPMtjYEoDiXd1hb+GgiDSSqbgweSFrCk3KorzMNg22mkkIH/E1hP3sSkmXRA+C4wvLQD6j5tH9o4ZiamHififCpOEARZs4qHZrTWZRfLCQNYW/+SrOxODCkF/G4yJLEIMsephYPg0Cv5s4nAy5VzkVQQN08igxCQ1SviP/k4Ji6rJXORWmTqbiIkgVQADiTJVkatojkU1NIidyJc3I56jOF89MnOQ8EJg3merAarZpMHJMqkym7Xt9hBXttAK3f9TgJpbP2lGqkVlK11F3UG10D84IJFwB0TgAnvfq5x5yK+ZMfW+Y6EAnek/qrc/JgpN6C7W2J36AIIrvFW0AwD3Y+OXXvz4LHFmNlKUz4BgB4PZOGQAvQuUcNEvRASxbia4g1QHgx+83xICv9YicGQkpp9b2OnecSsPRHj8pKxODyndmCUcH2G+7mwJuKRJD+T0vu4Sy8hl+Maqfez3Dfdry4uc/e473tKYoyWegRXpHcWsdvoauGNCATmkjV9O1todXf3wSc6YJ+Oj2mvi7eebidZOfycLE4dsUfcl3t9emqkUdYA/stKgB5SKZmBRnO662gNCdJLgyMn/CmpQ/fOF6HD74lfayPWCRbRqsaKfZtTmwa3Ngj/JrrLS7yXSATVKTtF9pd5Pdv7XIbloGu2kZrLS7ycJ3IyVIKg1He9108fIZD3mdAaXnFZCPTAKS9qC0Ih+vj5+Uu9yty2y2abDqPw4ufeCbrxeFue88tFF6XsHT3/lVYFyTE5gcEFTmL1sJ0fkaCkiQAI/qXjUiQY4CKmudWh/JVFx0KuS2XK/Wx9Dm0VfJOJKpuHJ/pc6WrNF+ImtMhrKiMdTPB8MNBJQhVzMJGM0LFLfWlcYlwNMRpYni1joA7re9pHnmCu0BQPn98D7hWA3MuUhnLNyyICEtyVAL1+PKfXuY1mQZqXChjS7bEHnK1zqXbGVDCU7uulrRGI6rrbHggP+RfMN5isxPnSoASqeAji2SqTXR+8m0/w3xH/hwG1N8aKLVAAAAAElFTkSuQmCC);--zring-licht:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAEa0lEQVR4nM2ZT2gaeRTHv85GhJSugx6WpV6yHgS9bHP25sZTCUowsOQiSfcozSELtdDDkqUW9pLFYxPx2FJCDPSk9ZbzxoMZ8DAbsliKh4jb0ECQ+NvD5D1/M/43/tl3MePM/H4f37/fey823FOiQVX0u3900rDdZ/2RX7YC7W4+gi/kx6vnJ/j93WcAwOl+AACQzVWh181bjAo89MMyWPrXH7B3oCMe8TAIyZuPX/DLT9/yNT0DAC8zn0YGXRgFzusSiEc8aFzedDyTSoeNTwDJRJ6vk4k8Hj5YxNXXa+xueuAL+bG+UUA0qIphIPsCEtju5iMAbU0dFuomgO0tLwCgUtT4XfnvF6+DAIBXz09wlctjd9ODbK7K6/cD7XnDqjUA8IX8HQCPn54BAG5bwDdK5zrkj/QDU+kwKkUNh4U61lZcbPZekF2/lDUn+1c8Yphocek9f9ds9fdjuwL23WdPnLxGMpHnNftBdnxhNStgaK5W0rF3oOPPD/8OBdYLVI7wVDrMoBTtA/0yGlTFzqpT7Kw6RfMiJn77+XtRzgSEXYGQtTGu0DrlTEA0L2KieRETO6tOUc4ExKCcimhQFeVMQFSPlxmweRGbGJwVsnq8zIC9INmt5RuURipFDYtL73HbGt2k/YTWWor+ZUpJ3VhMced1CWRzVfhCfqTSYQ6Q1hgnzrCQ8YgHlaLG+8m+z4BELGf9WskIiElqrhskpSkAePhgkVOZydTke+VMYOJBMUhoH/J5qy/ySULmTKXDqJV0/oXTBmy2YLMrELL1DBZja/ZB+YFuZ+0sRWZZiAZVITtmpajh8dOzmWiP5M4Xxem+cW0EiwcABGuQMrt83s5DrClHAboXAfMWigkFaEPRufh/ENIkRzFVGYacdXtn6pLNVYE7zZHSFLqRtdyYh2xveVlzxLMAtNU5b/87ePsZeGs0XlQnchTXSjqyuSpUtwO3rfkAvngdxNqKC28+foF8BCIaVE0lFh11swKj+lDen4461uB3P3Y2PrMWqmxkYcBKUUM84uFyCzD3E9MS2oOCwhfym/ogBpSbagA4P1qemS+e7gc4zdVKumkaoQDtRkVONXsHOv45Xp6qFu0KxLMnTr6uFDUuVIjJVFHrdRtXEvKZOA1IWpMqaV/ID9Xt6LAkA8rt3mGhjmQij8blDbeJk26aAOD6PMa+XyvpHKgyi0mDRycN28vMJ1x9vTZp8Po8NjFIGY7O/myuisblDdY3Ch19cc/GnUYeNAUg01MCvW/jDpirqPWNAoDOxr1jmkIPyJFE2vSF/CaTD6NRuwKhoA1HgZjNVVEpaqgUtZ5wwBDDI5rP0JhCngnGIx7zkdRFTvcDUN0Ojk7V7WBfSybyA0cefc1kndOQuXvB0qR1bcVlWkduyOg91e1A4o+/+8IBA+aD0osGKMARZyrNpcxvBUulw8DdJ3WLg0Zusow1ApYHmvIgE4DpmmaBpOFxRsATGaIDhvnpoCdX2N7yshlHBRsb0CrT/jfEfxkRswsRVmsEAAAAAElFTkSuQmCC)}
+html body.pc #fieldwrap .zp .zrand{display:block !important; left:35px !important; width:76px !important; height:76px !important; right:auto !important; bottom:auto !important; inset:auto;
+  background:var(--zring-steen) 0 0/100% 100% no-repeat !important; image-rendering:pixelated; z-index:3}
+html body.pc #fieldwrap .zp.vuur .zrand{background-image:var(--zring-vuur) !important} html body.pc #fieldwrap .zp.water .zrand{background-image:var(--zring-water) !important}
+html body.pc #fieldwrap .zp.gras .zrand{background-image:var(--zring-gras) !important} html body.pc #fieldwrap .zp.licht .zrand{background-image:var(--zring-licht) !important}
+html body.pc #row0 .zp .zrand{top:3.5px !important} html body.pc #row1 .zp .zrand{top:27px !important}
+html body.pc #fieldwrap .zp .zart, html body.pc #fieldwrap .zp .zart.eigen{left:45.5px !important; width:55px !important; height:55px !important; box-shadow:none !important}
+html body.pc #row0 .zp .zart{top:14px !important} html body.pc #row1 .zp .zart{top:37.5px !important}
+html body.pc #fieldwrap .slot.sp.hl::before, html body.pc #fieldwrap .col .slot.sp::after{left:35px !important; width:76px !important; height:76px !important}
+html body.pc #row0 .slot.sp.hl::before, html body.pc #row0 .col .slot.sp::after{top:3.5px !important}
+html body.pc #row1 .slot.sp.hl::before, html body.pc #row1 .col .slot.sp::after{top:27px !important}
 html body.pc #row1 .slot.sp{top:calc(var(--rit) + 4px - 65px) !important}
 /* vrij spel met personages: de twee portretten vierkant op de vakken van de linkerkolom */
 html body.pc #mpvak .mpptvak{left:var(--mx) !important; width:var(--pt) !important; height:var(--pt) !important}
@@ -5251,6 +5265,31 @@ html body.pc #mpvak .mptlijst{top:calc(var(--kg) + var(--h2) + 36px) !important;
 /* het eind- en winstscherm: het portret ook vierkant, in hetzelfde venster als in het gevecht */
 html body.pc .eport::after{display:none !important}
 html body.pc .eportin{border-radius:0 !important; clip-path:none !important; box-shadow:0 0 0 3px #ececec, 0 0 0 6px #000, 0 12px 0 6px rgba(0,0,0,.35) !important}
+
+/* ▤ wat er nu afgaat (ronde 9, E1): een zwart berichtvenster bovenaan het veld, de bron en het doel lichten op */
+#fxvenster{display:none}
+body.pc #fxvenster{display:flex; position:fixed; left:50vw; top:10px; transform:translate(-50%, -12px); opacity:0; z-index:90; pointer-events:none;
+  width:min(560px, calc(100vw - 2 * var(--kw) - 80px)); box-sizing:border-box; gap:14px; align-items:center; padding:12px 18px; background:#050507; color:#fff;
+  border-radius:6px; box-shadow:0 0 0 3px #ececec, 0 0 0 6px #000, 0 10px 0 6px rgba(0,0,0,.35); transition:opacity .15s, transform .15s}
+body.pc #fxvenster.aan{opacity:1; transform:translate(-50%, 0)}
+#fxvenster .fxbeeld{flex:none; width:46px; height:46px; border-radius:50%; background:#120c08 center/cover no-repeat; box-shadow:0 0 0 2px #ececec; image-rendering:auto}
+#fxvenster .fxkop{font:10px/1.4 "Press Start 2P",monospace; letter-spacing:.04em}
+#fxvenster .fxkop span{color:#8a8a92}
+#fxvenster .fxzin{font:22px/1.1 "VT323",monospace; margin-top:5px; color:#fff}
+body.pc #fieldwrap .slot.cr.fxbron > .card{outline:3px solid #ffd84a !important; outline-offset:4px; box-shadow:0 0 18px 4px rgba(255,216,74,.55) !important}
+body.pc #fieldwrap .slot.cr.fxdoel > .card{outline:3px solid #ff9d4d !important; outline-offset:4px; box-shadow:0 0 18px 4px rgba(255,140,60,.55) !important}
+body.pc #fieldwrap .slot.sp.fxbron .zrand{filter:drop-shadow(0 0 2px #ffd84a) drop-shadow(0 0 8px rgba(255,216,74,.9))}
+body.pc #fieldwrap .slot.sp.fxdoel .zrand{filter:drop-shadow(0 0 2px #ff9d4d) drop-shadow(0 0 8px rgba(255,140,60,.9))}
+
+/* wat de tegenstander speelt: op de computer in hetzelfde zwarte venster bovenaan het veld (ronde 9) */
+body.pc #zetmelding{left:50vw !important; right:auto !important; top:10px !important; width:min(560px, calc(100vw - 2 * var(--kw) - 80px)) !important; margin-left:calc(min(560px, calc(100vw - 2 * var(--kw) - 80px)) / -2);
+  flex-direction:row !important; align-items:center !important; gap:14px !important; padding:10px 18px !important; box-sizing:border-box; border:0 !important; border-radius:6px !important;
+  background:#050507 !important; box-shadow:0 0 0 3px #ececec, 0 0 0 6px #000, 0 10px 0 6px rgba(0,0,0,.35) !important; z-index:89 !important}
+body.pc #zetmelding .zmkaart{width:40px !important; height:56px !important}
+body.pc #zetmelding .zmtxt{font:20px/1.1 "VT323",monospace !important; color:#fff !important; text-align:left !important}
+body.pc #zetmelding .zmwie{font:10px/1.4 "Press Start 2P",monospace !important; color:#8a8a92 !important; letter-spacing:.04em; text-transform:uppercase; margin-bottom:4px}
+body.pc #zetmelding .zmdoel{color:#ffd84a !important; font-size:18px !important}
+body.pc:has(#fxvenster.aan) #zetmelding{visibility:hidden !important}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -11874,7 +11913,7 @@ async function declarePlan0(p, card, asSpell, col, opts){
 /* Bouwt het stack-item voor één gepland effect. */
 function effItem(p, e, selfId){
   const it = {type:"eff", el:e.el, ctrl:p, origin:e.origin, tid:e.tid, tp:e.tp, tc:e.tc, dec:true, var:e.var,
-              col:e.col, cheat:e.cheat, srcCard:e.srcCard, spell:e.spell};
+              col:e.col, cheat:e.cheat, srcCard:e.srcCard, spell:e.spell, bronId:e.origin === "creature" ? selfId : null};
   if(e.el === "vuur"){
     it.excl = (e.origin === "creature" && selfId != null) ? [selfId] : [];
     it.srcId = e.origin === "creature" ? selfId : null;
@@ -12276,36 +12315,105 @@ function takeFromHand(p, cardId){
 }
 async function resolveTop(){
   const it = S.stack.pop();
+  /* ▤ Ronde 9 (E1): wat er nu afgaat staat in een venster bovenaan het veld; de bron en het doel lichten op. */
+  FXNU = (it.type === "eff" || it.type === "light") ? fxNuVan(it) : null;
   S.ui = {mode:"busy"}; render();
   await sleep(120);
-  if(it.type === "play") await resolvePlay(it);
-  else if(it.type === "light") await resolveLight(it);
-  else if(it.type === "attack") await resolveAttack(it);
-  else await resolveEffect(it);
+  if(FXNU && !FAST) await sleep(isBot(it.ctrl) || !iControl(it.ctrl) ? 750 : 450);
+  try{
+    if(it.type === "play") await resolvePlay(it);
+    else if(it.type === "light") await resolveLight(it);
+    else if(it.type === "attack") await resolveAttack(it);
+    else await resolveEffect(it);
+  } finally { FXNU = null; }
   if(S.story && S.story.band) bandSchuif();
   render();
 }
+/* ---------- ▤ wat er nu afgaat (ronde 9, E1) ---------- */
+let FXNU = null;
+const FX_ZIN = {vuur:"schade aan %D%", gras:"verstrikt %D%", steen:"+1 leven voor %D%", water:"herspeelt %D%", ws:"het speel-effect van %D% gaat nog een keer",
+  kogel:"prikt %D%", ijs:"bevriest %D%", bliksem:"2 schade aan alles van de tegenstander"};
+const FX_ZONDER = {vuur:"vuurschade", gras:"verstrikt een wezen", steen:"+1 leven", water:"herspeelt een eigen wezen", ws:"een speel-effect gaat nog een keer"};
+function fxPlat(t){ return String(t || "").replace(/<[^>]+>/g, "").replace(/\{([^{}|]+)(?:\|[a-z]+)?\}/g, "$1").replace(EMOJI_RE, "").replace(/\s+/g, " ").trim(); }
+function fxNuVan(it){
+  try{
+    const p = it.ctrl;
+    let bron = null, kop = "", beeld = null;
+    if(it.type === "light"){
+      const L = LIGHTS[it.lk] || {}; kop = "\u2726 " + String(L.name || "Licht").toUpperCase();
+      bron = it.card && it.card.id != null ? it.card : null;
+      return {p, kop, zin:fxPlat(LICHT_TEKST[it.lk]), beeld:bron, bronPlek:null, doel:fxDoel(it)};
+    }
+    let plek = null;
+    if(it.origin === "spell" && it.col != null && P(p).cols[it.col] && P(p).cols[it.col].spell){
+      beeld = P(p).cols[it.col].spell.card; plek = {p, c:it.col, kind:"sp"};
+      kop = "RITUEEL " + String(kNaam(beeld)).toUpperCase() + " \u00b7 KOLOM " + (it.col + 1);
+    } else {
+      const id = it.bronId != null ? it.bronId : (it.srcId != null ? it.srcId : null);
+      const f = id != null ? findCre(id) : null;
+      if(f){ beeld = f.cr.card; plek = {p:f.p, c:f.c, kind:"cr"}; kop = String(kNaam(beeld)).toUpperCase() + " \u00b7 KOLOM " + (f.c + 1); }
+      else if(it.srcCard){ beeld = it.srcCard; kop = String(kNaam(beeld)).toUpperCase(); }
+      else kop = String((EL[it.el] && EL[it.el].name) || it.el).toUpperCase();
+    }
+    const doel = fxDoel(it);
+    const dn = doel ? doel.naam : null;
+    const zin = dn && FX_ZIN[it.el] ? FX_ZIN[it.el].replace("%D%", dn) : (FX_ZONDER[it.el] || FX_ZIN[it.el] || "");
+    return {p, kop, zin, beeld, bronPlek:plek, doel};
+  }catch(e){ return null; }
+}
+function fxDoel(it){
+  if(it.tid == null) return null;
+  const f = (typeof findKaart === "function") ? findKaart(it.tid) : null;
+  if(!f) return null;
+  const van = f.p !== it.ctrl ? " van " + String(pName(f.p)).replace(EMOJI_RE, "").trim() : "";
+  return {p:f.p, c:f.c, kind:f.kind === "spell" ? "sp" : "cr", naam:kNaam(f.card) + van};
+}
+function fxBeeldStijl(card){
+  if(!card) return "";
+  if(card.el === "licht" || card.lk){ const f = cardFaceHTML(card, true), m = f.match(/src="([^"]+)"/); return m ? `background-image:url('${m[1]}')` : ""; }
+  const soort = (card.var && RITUEEL_ART.has(card.var)) ? card.var : (!card.var && RITUEEL_ART.has(card.el) ? card.el : null);
+  if(soort) return `background-image:url('art/ritueel-${soort}.png'); background-size:100% 100%`;
+  const f = cardFaceHTML(card, true), m = f.match(/src="([^"]+)"/);
+  return m ? `background-image:url('${m[1]}'); background-size:210%; background-position:center 42%` : "";
+}
+function fxNuPaint(){
+  document.querySelectorAll(".fxbron, .fxdoel").forEach(e => e.classList.remove("fxbron", "fxdoel"));
+  let v = document.getElementById("fxvenster");
+  if(!pcAan() || !FXNU || !S || S.over){ if(v) v.classList.remove("aan"); return; }
+  if(!v){ v = document.createElement("div"); v.id = "fxvenster"; document.body.appendChild(v); }
+  const n = FXNU, van = n.p !== ((NET.on && NET.seat === 1) ? 1 : 0) ? String(pName(n.p)).replace(EMOJI_RE, "").trim() : "";
+  const h = `<div class="fxbeeld" style="${fxBeeldStijl(n.beeld)}"></div><div class="fxtekst"><div class="fxkop">${n.kop}${van ? ` <span>\u00b7 ${van.toUpperCase()}</span>` : ""}</div>`
+    + `<div class="fxzin">${n.zin ? n.zin.charAt(0).toUpperCase() + n.zin.slice(1) : ""}</div></div>`;
+  if(v.dataset.h !== h){ v.dataset.h = h; v.innerHTML = h; v.classList.remove("aan"); void v.offsetWidth; }
+  v.classList.add("aan");
+  const slot = (pl) => { if(!pl) return null; const side = document.querySelector(`.pside[data-side="${pl.p}"]`) ? null : null;
+    const row = document.getElementById(pl.p === ((NET.on && NET.seat === 1) ? 1 : 0) ? "row0" : "row1"); if(!row) return null;
+    const col = row.querySelectorAll(".col")[pl.c]; return col ? col.querySelector(pl.kind === "sp" ? ".slot.sp" : ".slot.cr") : null; };
+  const b = slot(n.bronPlek); if(b) b.classList.add("fxbron");
+  const d = slot(n.doel); if(d) d.classList.add("fxdoel");
+}
 function pushOwnEffect(p, col, cre){
   const el = cre.card.el;
-  if(el === "vuur")  S.stack.push({type:"eff", el:"vuur",  ctrl:p, excl:[cre.card.id], srcId:cre.card.id, protect:null, origin:"creature"});
-  if(el === "gras")  S.stack.push({type:"eff", el:"gras",  ctrl:p, srcId:cre.card.id, origin:"creature"});
+  const b = cre.card.id;
+  if(el === "vuur")  S.stack.push({type:"eff", el:"vuur",  ctrl:p, excl:[cre.card.id], srcId:cre.card.id, protect:null, origin:"creature", bronId:b});
+  if(el === "gras")  S.stack.push({type:"eff", el:"gras",  ctrl:p, srcId:cre.card.id, origin:"creature", bronId:b});
   if(el === "steen"){
-    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"creature"});
-    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"creature"});   // tweemaal +1
+    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"creature", bronId:b});
+    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"creature", bronId:b});   // tweemaal +1
   }
-  if(el === "water") S.stack.push({type:"eff", el:"water", ctrl:p, exclId:cre.card.id, origin:"creature"});
+  if(el === "water") S.stack.push({type:"eff", el:"water", ctrl:p, exclId:cre.card.id, origin:"creature", bronId:b});
 }
 function pushSpellTrigger(p, col, trigCre){
   const sp = P(p).cols[col].spell; if(!sp) return;
   const el = sp.card.el, tid = trigCre ? trigCre.card.id : null;
   addLog(`✦ Ritueel-trigger: ${icon(el)} ${EL[el].name} in kolom ${col+1} van ${pName(p)}.`);
-  if(el === "vuur")  S.stack.push({type:"eff", el:"vuur",  ctrl:p, excl:[], srcId:null, protect:tid, origin:"spell"});
-  if(el === "gras")  S.stack.push({type:"eff", el:"gras",  ctrl:p, srcId:tid, origin:"spell"});
+  if(el === "vuur")  S.stack.push({type:"eff", el:"vuur",  ctrl:p, excl:[], srcId:null, protect:tid, origin:"spell", col});
+  if(el === "gras")  S.stack.push({type:"eff", el:"gras",  ctrl:p, srcId:tid, origin:"spell", col});
   if(el === "steen"){
-    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"spell"});
-    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"spell"});
+    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"spell", col});
+    S.stack.push({type:"eff", el:"steen", ctrl:p, origin:"spell", col});
   }
-  if(el === "water" && tid !== null) S.stack.push({type:"eff", el:"water", ctrl:p, exclId:tid, origin:"spell"});
+  if(el === "water" && tid !== null) S.stack.push({type:"eff", el:"water", ctrl:p, exclId:tid, origin:"spell", col});
 }
 /* ============ SPELEN ============
    Het NEERLEGGEN van een wezen of spell gaat buiten de chain om: de kaart staat er
@@ -29555,6 +29663,7 @@ function render(){
   $("#piles1").innerHTML = pilesHTML(TOP);
   $("#piles0").innerHTML = pilesHTML(BOT);
   lkPaint(TOP, BOT);
+  fxNuPaint();
   /* ✦ De ring in het midden licht op als je een lichtkaart speelt. */
   { const lr = document.getElementById("lichtring");
     if(lr) lr.classList.toggle("aan", !!(S.ui && S.ui.mode === "slot" && (S.ui.valid || []).some(v => v.kind === "licht") && !isBot(S.ui.p) && iControl(S.ui.p))); }
@@ -32498,8 +32607,10 @@ document.addEventListener("mouseover", e => {
   setPreview(pvHTML(el, {cur, lk:t.dataset.pvlk, var:t.dataset.pvvar, ws:!!t.dataset.pvws}));
 });
 document.addEventListener("mouseout", e => {
-  const t = e.target.closest("[data-pv]");
-  if(t) setPreview(null);
+  /* Ook aethers, veldregels en de lichtkaarten van de tegenstander: weg zodra je ervan af gaat
+     (okt 2026: in de linkerkolom bleef de uitleg van een aether anders staan). */
+  const t = e.target.closest("[data-pv], [data-pvae], [data-pvveld], [data-pvlt]");
+  if(t && !(e.relatedTarget && t.contains(e.relatedTarget))) setPreview(null);
 });
 /* Sneltoetsen tijdens het spelen. Een cijfer is steeds "de zoveelste": in je hand de
    zoveelste kaart, op het spelen-als-scherm 1 wezen / 2 ritueel / 3 fusie, daarna de
