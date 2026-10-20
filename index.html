@@ -4437,6 +4437,8 @@ body.pc #fieldwrap .slot.sp{width:146px !important; height:109px !important; lef
   background:none !important; border:0 !important; outline:0 !important; box-shadow:none !important; overflow:visible !important; border-radius:50% !important; z-index:1 !important}
 /* (okt 2026) het zegel ligt áchter de kaart: de naam en de getallen blijven leesbaar; het raakt alleen de rand */
 body.pc #fieldwrap .slot.cr{z-index:3 !important}
+/* jouw rij boven die van de tegenstander: het zwaardje boven je kaart valt dan over zijn kaarten heen, niet eronder */
+body.pc #row0 .slot.cr{z-index:4 !important}
 body.pc #row1 .slot.sp{top:calc(var(--rit) + 4px - 83px) !important}
 body.pc #row0 .slot.sp{top:calc(var(--chh) - 23px) !important}
 body.pc #fieldwrap .slot.sp > .card, body.pc #fieldwrap .slot.sp > .cardback{display:none !important}
@@ -5145,8 +5147,8 @@ html body.pc #fieldwrap, html body.pc.vierkol #fieldwrap{width:var(--fw) !import
 body.pc #lkolom{display:block; position:fixed; left:var(--kg); top:var(--kg); height:calc(100dvh - 2 * var(--kg)); width:var(--kw); z-index:1; pointer-events:none}
 #lkolom .lkvak{position:absolute; left:0; right:0; height:50%}
 #lkolom .lkvak.onder{top:50%}
-#lkolom .lkkop{position:absolute; left:var(--kp); right:var(--kp); top:12px; font:11px/1 "Press Start 2P",monospace; color:#fff; letter-spacing:.04em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#lkolom .lkkop{position:absolute; left:var(--kp); right:var(--kp); top:8px; height:22px; font:11px/22px "Press Start 2P",monospace; color:#fff; letter-spacing:.04em;
+  white-space:nowrap; overflow:visible; text-overflow:clip}
 #lkolom .lkvak.aan .lkkop::before{content:"\25B6"; color:#ffd84a; margin-right:8px; font-size:9px; vertical-align:1px}
 #lkolom .lkpt{position:absolute; left:var(--kp); top:36px; width:var(--pt); height:var(--pt); box-shadow:0 0 0 2px #ececec; background:#0b0b10; overflow:hidden}
 #lkolom .lkpt .cstrip{all:unset; display:block; width:100%; height:100%; pointer-events:none}
@@ -5223,6 +5225,32 @@ html body.pc #banner .btxt small{color:#8a8a92 !important}
 html body.pc.pvuitleg #app #left > #preview{left:var(--mx) !important; top:calc(var(--kg) + var(--h2) + 12px) !important; width:var(--pt) !important; max-height:calc(var(--h2) - 24px); overflow:auto}
 html body.pc #app #left > #chatbox:not(:empty){left:var(--mx) !important; bottom:calc(var(--kg) + 12px) !important; width:var(--pt) !important}
 html body.pc #pside1 .hand{top:10px !important}
+/* het ritueel (okt 2026): alleen een strakke cirkel, 0,8 keer zo groot, met een witte rand zoals de vensters.
+   Geen naamlint, geen getekende ring, geen gloed eromheen. */
+html body.pc .zp{filter:drop-shadow(0 3px 0 rgba(0,0,0,.45)) !important}
+html body.pc .zp .zrand, html body.pc .zp .zlint, html body.pc .zgl{display:none !important}
+html body.pc #fieldwrap .zp .zart, html body.pc #fieldwrap .zp .zart.eigen{left:41.5px !important; width:63px !important; height:63px !important; border-radius:50% !important;
+  box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000 !important}
+html body.pc #fieldwrap .zp .zart:not(.eigen){background-color:#120c08 !important}
+html body.pc #fieldwrap .zp .zart.eigen{background-color:#000 !important; background-size:104% 104% !important}
+html body.pc #row0 .zp .zart{top:10px !important} html body.pc #row1 .zp .zart{top:33.5px !important}
+html body.pc #fieldwrap .slot.sp.hl::before, html body.pc #fieldwrap .col .slot.sp::after{left:41.5px !important; width:63px !important; height:63px !important}
+html body.pc #row0 .slot.sp.hl::before, html body.pc #row0 .col .slot.sp::after{top:10px !important}
+html body.pc #row1 .slot.sp.hl::before, html body.pc #row1 .col .slot.sp::after{top:33.5px !important}
+/* de rand van de kaart loopt precies door het midden van de cirkel (het zegel ligt erachter) */
+html body.pc #row0 .slot.sp{top:calc(var(--chh) - 41.5px) !important}
+html body.pc #row1 .slot.sp{top:calc(var(--rit) + 4px - 65px) !important}
+/* vrij spel met personages: de twee portretten vierkant op de vakken van de linkerkolom */
+html body.pc #mpvak .mpptvak{left:var(--mx) !important; width:var(--pt) !important; height:var(--pt) !important}
+html body.pc #mpvak .mpptvak:nth-child(2){top:var(--my) !important; bottom:auto !important}
+html body.pc #mpvak .mpptvak:nth-child(4){top:calc(var(--kg) + var(--h2) + 36px) !important; bottom:auto !important}
+html body.pc #mpvak .mppt{border-radius:0 !important; box-shadow:0 0 0 2px #ececec !important}
+html body.pc #mpvak .mppt.eigen:hover{box-shadow:0 0 0 2px #ffd84a !important}
+html body.pc #mpvak .mpptvak:nth-child(4) .mpbel{top:calc(var(--kg) + var(--h2) + 36px + var(--pt) * .44) !important; bottom:auto !important}
+html body.pc #mpvak .mptlijst{top:calc(var(--kg) + var(--h2) + 36px) !important; bottom:auto !important}
+/* het eind- en winstscherm: het portret ook vierkant, in hetzelfde venster als in het gevecht */
+html body.pc .eport::after{display:none !important}
+html body.pc .eportin{border-radius:0 !important; clip-path:none !important; box-shadow:0 0 0 3px #ececec, 0 0 0 6px #000, 0 12px 0 6px rgba(0,0,0,.35) !important}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -17846,7 +17874,7 @@ function eindStats(ik, gewonnen){
   const tegel = (n, lab, tekst) => `<div class="estat"><b${tekst ? "" : ` class="tel" style="--doel:${Math.max(0, Math.round(n))}"`}>${tekst || ""}</b><span>${lab}</span></div>`;
   const rij = [
     tegel(S.turnNo ? S.turnNo[ik] : S.gTurn, "beurten"),
-    tegel(0, "tijd", tijdTekst(tijd)),
+    tegel(0, "tijd", tijdTekst(Math.max(0, tijd || 0))),
     tegel(st.leven[ik], "schade op de levens"),
     tegel(st.gedood[ik], "wezens omgelegd")
   ];
@@ -29482,8 +29510,15 @@ function lkPaint(TOP, BOT){
   const verhaal = !!S.story;
   const naam = q => String(pName(q)).replace(EMOJI_RE, "").trim().toUpperCase();
   const leeg = `<div class="lkpt"><div class="cardback"></div></div>`;
-  const boven = portretAan() ? "" : leeg;
-  const onder = verhaal ? `<div class="lkpt">${cstripHTML()}</div>` : leeg;
+  /* Vrij spel met personages: hun portretten (#mpvak) liggen al op beide vakken. */
+  const mp = !verhaal && typeof mpBalkAan === "function" && mpBalkAan();
+  const boven = portretAan() || mp ? "" : leeg;
+  const onder = verhaal ? `<div class="lkpt">${cstripHTML()}</div>` : (mp ? "" : leeg);
+  if(mp){ const nm = q => String(mpChar(S.char[q]).naam || pName(q)).replace(EMOJI_RE, "").trim().toUpperCase();
+    const h = `<section class="lkvak boven${S.tp === TOP && !S.over ? " aan" : ""}"><div class="lkkop">${nm(TOP)}</div></section>`
+      + `<section class="lkvak onder${S.tp === BOT && !S.over ? " aan" : ""}"><div class="lkkop">${nm(BOT)}</div></section>`;
+    if(lk.dataset.h !== h){ lk.dataset.h = h; lk.innerHTML = h; }
+    return; }
   const aan = q => (S.tp === q && !S.over ? " aan" : "");
   const h = `<section class="lkvak boven${aan(TOP)}"><div class="lkkop">${naam(TOP)}</div>${boven}</section>`
     + `<section class="lkvak onder${aan(BOT)}"><div class="lkkop">${verhaal ? "JIJ" : naam(BOT)}</div>${onder}</section>`;
@@ -29523,7 +29558,8 @@ function render(){
   /* ✦ De ring in het midden licht op als je een lichtkaart speelt. */
   { const lr = document.getElementById("lichtring");
     if(lr) lr.classList.toggle("aan", !!(S.ui && S.ui.mode === "slot" && (S.ui.valid || []).some(v => v.kind === "licht") && !isBot(S.ui.p) && iControl(S.ui.p))); }
-  $("#piles1").dataset.naam = String(pName(TOP)).replace(EMOJI_RE, "").trim(); $("#piles0").dataset.naam = S.story ? "JIJ" : String(pName(BOT)).replace(EMOJI_RE, "").trim(); document.body.classList.toggle("vierkol", NK() === 4);
+  { const mpn = q => (!S.story && typeof mpBalkAan === "function" && mpBalkAan()) ? mpChar(S.char[q]).naam : pName(q);
+    $("#piles1").dataset.naam = String(mpn(TOP)).replace(EMOJI_RE, "").trim(); $("#piles0").dataset.naam = S.story ? "JIJ" : String(mpn(BOT)).replace(EMOJI_RE, "").trim(); } document.body.classList.toggle("vierkol", NK() === 4);
   /* Is de tegenstander aan de beurt, dan staat er ook dat hij aan de beurt is. */
   const vijBeurt = S.pl && (NET.on ? S.tp !== NET.seat : (S.vsBot && isBot(S.tp)));
   $("#ribbon").innerHTML = PHASES.map(([k,lab])=>
@@ -29564,7 +29600,7 @@ function render(){
         : "");
   const stoelKnop = S.story && S.story.stoelOpen && !S.over
     ? `<button class="stoelknop${stoelKan() ? "" : " wacht"}" data-act="btn" data-btn="stoel" title="${stoelKan() ? "" : "kan op je eigen beurt"}">DE STOEL<small>wat kost het?</small></button>` : "";
-  $("#turnbadge").innerHTML = stoelKnop + (matchBo3() ? `${S.mode === "basis" ? "⚜️" : "🟣"} Potje ${S.match.game} · ${S.match.wins[0]}–${S.match.wins[1]}<br>` : "") + `Beurt ${S.turnNo[S.tp]}<b>${pName(S.tp)}</b>`
+  $("#turnbadge").innerHTML = stoelKnop + (matchBo3() ? `${S.mode === "basis" ? "⚜️" : "🟣"} Potje ${S.match.game} · ${S.match.wins[0]}–${S.match.wins[1]}<br>` : "") + `Beurt ${S.turnNo[S.tp]}<b>${(!S.story && typeof mpBalkAan === "function" && mpBalkAan()) ? mpChar(S.char[S.tp]).naam : pName(S.tp)}</b>`
     + (S.story ? `<div class="tijdmeter${(S.story.mijnTijd || 0) >= STER_SNEL ? " traag" : ""}" id="tijdbalk" title="je eigen gevechtstijd · onder 3 minuten = ★">⏱ ${tijdTekst(S.story.mijnTijd || 0)}</div>` : "")
     + badgeExtra;
   if(typeof tutBalk === "function") tutBalk();
@@ -31252,7 +31288,7 @@ function mpHTML(){
     : `<div class="mpprof"><div class="mpprofpt">${spriteSVG(c.spr)}</div><div class="mpproftxt"><b>${c.naam}</b></div></div>`;
   return `<div class="ovbox mpbox${d ? " klbox" : ""}"><h2>${M.bot ? "KLAAR?" : "HOE WIL JE SPELEN?"}</h2>${kop}
     ${inhoud}
-    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") : live}</div>
+    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") + vr("vierkol", `Kolommen: ${SET.vijfKol ? "5" : "4"}`, SET.vijfKol ? "proef: spelen met vijf kolommen · klik voor vier" : "klik om met vijf kolommen te spelen (proef)", "") : live}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
 }
 /* ---------- 📋 het Klaar?-scherm: wat zit er in je deck ---------- */
@@ -31878,15 +31914,16 @@ function onBtn(btn, el, fromAction){
   }
   if(!fromAction && mpKnop(btn, el)) return;
   switch(btn){
-    case "vierkol": SET.vierKol = !SET.vierKol; saveSet(); render(); break;
+    case "vierkol": SET.vijfKol = !SET.vijfKol; saveSet(); render(); break;   // (okt 2026) vier is standaard; vijf blijft als proef
     case "startpvp": case "startbot": case "cmdpvp": case "cmdbot":
     case "bas1pvp": case "bas3pvp": case "bas1bot": case "bas3bot":
       if(u.mode==="start"){
         S.vsBot = /bot$/.test(btn);
         S.startBtn = btn;
-        /* ▥ (okt 2026) Vrij spel is vanaf nu vier kolommen: tegen de bot, hotseat en online.
+        /* ▥ (okt 2026) Vrij spel is vanaf nu vier kolommen. Tegen de bot en in hotseat kun je als proef
+           nog vijf kiezen (SET.vijfKol); online altijd vier, zodat beide kanten hetzelfde bord hebben.
            Het bord is hier nog leeg. Het verhaal houdt (voorlopig) vijf. */
-        S.nk = 4;
+        S.nk = (SET.vijfKol && !NET.on) ? 5 : 4;
         S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
         addLog(NET.on ? "Online partij: jij bent <em>Speler " + (NET.seat + 1) + "</em>."
