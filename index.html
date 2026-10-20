@@ -4647,7 +4647,7 @@ html body.pc.vierkol #fieldwrap{width:calc(var(--fw) * .8) !important; left:calc
 body.pc #left > #portretvak:not(:has(#portret))::after{display:none !important}
 
 /* ================= 🏁 het eindscherm (okt 2026) ================= */
-@property --n{syntax:"<integer>"; inherits:false; initial-value:0}
+@property --eindn{syntax:"<integer>"; inherits:false; initial-value:0}
 body .ovbox.eindbox{width:min(1180px, 94vw) !important; max-width:94vw !important; display:grid; grid-template-columns:minmax(0, 420px) minmax(0, 1fr); gap:clamp(24px, 4vw, 60px);
   align-items:center; text-align:left; padding:clamp(18px, 3vw, 40px) !important; border:0 !important; box-shadow:none !important;
   background:radial-gradient(ellipse 70% 80% at 30% 50%, rgba(36,30,18,.55), rgba(6,7,12,.0) 70%) !important}
@@ -4687,9 +4687,9 @@ body .ovbox.eindbox.zonder h1.eindkop, .eindbox.zonder .etekst{text-align:center
 .verloren .estat{border-left-color:#c2402e}
 .estat b{display:block; font:1.5rem/1.2 "Press Start 2P",ui-monospace,monospace; color:#f6dc8c; font-weight:400}
 .verloren .estat b{color:#ffb3a3}
-.estat b.tel{counter-reset:n var(--n); animation:eTel 1.2s steps(24) forwards; animation-delay:calc(2.1s - var(--el, 0ms))}
+.estat b.tel{counter-reset:n var(--eindn); animation:eTel 1.2s steps(24) forwards; animation-delay:calc(2.1s - var(--el, 0ms))}
 .estat b.tel::after{content:counter(n)}
-@keyframes eTel{to{--n:var(--doel)}}
+@keyframes eTel{to{--eindn:var(--doel)}}
 .estat span{display:block; margin-top:4px; font:1rem/1.1 "VT323",ui-monospace,monospace; color:#a9a28d}
 .efav{margin:0 0 12px; font:1.2rem "VT323",ui-monospace,monospace; color:#c8c0aa; animation:eWoord .4s ease-out both; animation-delay:calc(2.5s - var(--el, 0ms))}
 .efav b{color:#f6dc8c; font-weight:400}
@@ -4705,7 +4705,7 @@ body .ovbox.eindbox.zonder h1.eindkop, .eindbox.zonder .etekst{text-align:center
   body .ovbox.eindbox h1.eindkop{text-align:center} .eregel{margin-left:auto; margin-right:auto} .estats, .eindbox .sterrij, .eknoppen{justify-content:center}
 }
 body.tel .ovbox.eindbox{gap:16px; padding:12px !important} body.tel .eport{width:min(180px, 30vh)} body.tel .estat{min-width:90px; padding:6px 10px} body.tel .estat b{font-size:1rem}
-@media (prefers-reduced-motion: reduce){.eindbox *, .eindbox *::before, .eindbox *::after{animation:none !important} .estat b.tel{--n:var(--doel)}}
+@media (prefers-reduced-motion: reduce){.eindbox *, .eindbox *::before, .eindbox *::after{animation:none !important} .estat b.tel{--eindn:var(--doel)}}
 
 
 /* ================= ♟ de kaart als spelbord (okt 2026) ================= */
@@ -17121,11 +17121,20 @@ function vonkBeeld(v){
 /* 🖥 Het ritueel als zegel (alleen op de computer zichtbaar): de prent van de kaart in een
    getekende ring in de kleur van het element, en de naam op een lint. */
 function zegelEl(card){ return card.lk || card.el === "licht" ? "licht" : (["vuur","water","gras","steen"].includes(card.el) ? card.el : "licht"); }
+/* 🔘 Eigen tekeningen voor in het kleine rondje van een ritueel: art/ritueel-<soort>.png
+   (vuur, water, gras, steen, rots, plasma, roos, wolf, vis, clown, kogel, swipe, stab, schild,
+   knoop). Zolang er geen is, staat er een uitsnede van de kaart. */
+const RITUEEL_ART = new Set();
+["vuur","water","gras","steen","rots","plasma","roos","wolf","vis","clown","kogel","swipe","stab","schild","knoop"].forEach(k => {
+  const im = new Image(); im.onload = () => { RITUEEL_ART.add(k); if(typeof render === "function" && S && !M) try{ render(); }catch(e){} }; im.src = `art/ritueel-${k}.png`; });
 function zegelHTML(card){
   if(!card || inMist()) return "";
   const el = zegelEl(card), f = cardFaceHTML(card, true), m = f.match(/src="([^"]+)"/);
   const naam = card.lk && LIGHTS[card.lk] ? LIGHTS[card.lk].name : kNaam(card);
-  return `<div class="zp ${el}" style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart"${m ? ` style="background-image:url('${m[1]}')"` : ""}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
+  const soort = (card.var && RITUEEL_ART.has(card.var)) ? card.var : (!card.var && RITUEEL_ART.has(card.el) ? card.el : null);
+  const stijl = soort ? ` style="background-image:url('art/ritueel-${soort}.png'); background-size:100% 100%; background-position:center"`
+    : (m ? ` style="background-image:url('${m[1]}')"` : "");
+  return `<div class="zp ${el}" style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart${soort ? " eigen" : ""}"${stijl}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
 }
 const ZEGEL_KLEUR = {vuur:"#ff7a3c", water:"#4fb3ff", gras:"#6fd27a", steen:"#c9a06a", licht:"#ffe08a"};
 function zegelGloed(col){
