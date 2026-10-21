@@ -3699,6 +3699,8 @@ body.venster .pile .lab{color:var(--vsub); text-shadow:1px 1px 0 var(--vnd)}
   background-color:var(--rk1,#4a4f62); background-blend-mode:luminosity;
   box-shadow:3px 3px 0 0 rgba(0,0,0,.45); image-rendering:pixelated}
 .cstrip.ckring .tbeeld.cirkel{width:100%; height:100%; aspect-ratio:auto; display:block; margin:0 auto; max-width:100%}
+.cstrip.ckring.ckspeler{padding:0; overflow:hidden; background:#050507}
+.cstrip.ckring.ckspeler img{width:100%; height:100%; object-fit:cover; display:block; image-rendering:pixelated}
 .cstrip.ckring .tbeeld.cirkel img, .cstrip.ckring .tbeeld.cirkel svg{width:100%; height:100%; object-fit:contain; display:block}
 .cstrip.ckring:hover .tbeeld{filter:brightness(1.15)}
 .cstrip.ckring .tbeeld.cirkel.leeg .tterug{display:block; width:100%; height:100%}
@@ -4549,9 +4551,11 @@ body.pc .praatscherm:not(.reus) .praatkeus .pkbtn:hover::before{transform:transl
 /* het donker onderin: lichter waar het personage staat */
 body.pc .praatscherm:not(.reus) .praatbox{background:none !important; isolation:isolate}
 body.pc .praatscherm:not(.reus) .praatbox::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:linear-gradient(0deg, rgba(6,8,14,.97) 0%, rgba(6,8,14,.9) 55%, rgba(6,8,14,0) 100%);
-  -webkit-mask-image:linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(0,0,0,.42) 22vw, #000 33vw); mask-image:linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(0,0,0,.42) 22vw, #000 33vw)}
-body.pc .praatscherm.leeg:not(.reus) .praatbox::before{-webkit-mask-image:none; mask-image:none}
+  background:#050507; border-top:2px solid #ececec; box-shadow:0 -2px 0 #000}
+/* okt 2026: terug naar de zwarte balk, in de huisstijl: geen fade meer */
+body.pc .praatscherm:not(.reus) .praatbox{padding:30px 8vw 34px 33vw !important; min-height:190px !important}
+body.pc .praatscherm.leeg:not(.reus) .praatbox{padding-left:18vw !important; padding-right:18vw !important}
+body.pc .praatscherm:not(.reus) .praatkeus{bottom:calc(100% + 16px) !important}
 
 /* --- wereldkaart W3: alleen de naam van de wereld, groot over de kaart --- */
 body.pc .kaartbox .kaartkop{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; max-width:none !important;
@@ -5402,10 +5406,45 @@ body.tel .ksinfo .ksiport{min-height:150px}
 body.tel .ksinfo .ksitekst{padding:10px 14px; gap:5px; overflow-y:auto}
 body.tel .ksinfo .ksiregels p{font-size:16px}
 .boekbox .bordhud{display:none !important}
+.kaartbox.ks-dagboek .tasknop{display:none !important}   /* in het boek zit de rugtas al als tabje */
+/* het einde van een gevecht: hard en kort schudden, het portret gaat stuk */
+#app.eindschud{animation:eindschud .5s cubic-bezier(.36,.07,.19,.97) 1}
+@keyframes eindschud{0%,100%{transform:translate(0,0)} 10%{transform:translate(-14px,6px) rotate(-.6deg)} 20%{transform:translate(12px,-8px) rotate(.5deg)}
+  30%{transform:translate(-10px,10px)} 40%{transform:translate(9px,-5px) rotate(-.4deg)} 55%{transform:translate(-6px,4px)} 70%{transform:translate(4px,-3px)} 85%{transform:translate(-2px,1px)}}
+body.eindreactie #app{pointer-events:none}
+#portret.pt-stuk .ptfig, .mppt.pt-stuk .ptfig{animation:ptstuk .9s steps(5) both}
+#portret.pt-stuk::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none; background:linear-gradient(115deg, transparent 47%, rgba(255,255,255,.85) 48%, transparent 49.5%),
+  linear-gradient(62deg, transparent 58%, rgba(255,255,255,.6) 58.6%, transparent 59.6%); mix-blend-mode:screen; animation:ptbarst .25s steps(2) both}
+@keyframes ptstuk{0%{filter:none; transform:none} 20%{filter:brightness(2.2) saturate(0)} 40%{transform:translate(-6px,3px) rotate(-3deg); filter:saturate(.3) brightness(.9)}
+  100%{transform:translate(0,10px) rotate(-4deg); filter:saturate(.35) brightness(.75) contrast(1.1)}}
+@keyframes ptbarst{from{opacity:0} to{opacity:1}}
+#portret.pt-juich .ptfig{animation:ptjuich .5s steps(4) 2}
+@keyframes ptjuich{50%{transform:translateY(-8%)}}
+
 .kaartbox.ks-dagboek .kaartkop, .kaartbox.ks-panorama .kaartkop{pointer-events:none}
 .kaartbox.ks-dagboek .kaartkop > *, .kaartbox.ks-panorama .kaartkop > *{pointer-events:auto}
 body.tel .kaartbox.ks-dagboek .ksknop{display:none !important}   /* op de telefoon kies je de kaart in het boek zelf, bij de opties */
 body:not(.pc) .boekbox .kaartkop{position:absolute; top:8px; left:8px; z-index:5}
+
+/* okt 2026: onderin de kaart, in het boek en het panorama, één rij in de huisstijl op de hoogte van de startknop */
+body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .sterbalk, body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .sterbalk,
+body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .obtn[data-btn="storylijst"], body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .obtn[data-btn="storylijst"],
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop{position:fixed !important; bottom:24px !important; height:36px !important; box-sizing:border-box; display:inline-flex !important; align-items:center;
+  padding:0 14px !important; border:0 !important; border-radius:4px !important; background:#050507 !important; box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000 !important; transform:none !important}
+body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .obtn[data-btn="storylijst"], body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .obtn[data-btn="storylijst"],
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop{font:10px/1 "Press Start 2P",monospace !important; color:#ececec !important}
+/* in het boek staan de lijst en de sterren rechtsboven, tegenover de titel: onderin ligt het boek zelf */
+body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .sterbalk{right:20px !important; top:24px !important; bottom:auto !important}
+body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .obtn[data-btn="storylijst"]{right:150px !important; top:24px !important; bottom:auto !important}
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop{right:20px !important; width:auto !important; flex-direction:row; gap:0}
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop img, body.pc:not(.tel) .kaartbox.ks-panorama .tasknop .pixic{display:none !important}
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop span{font:10px/1 "Press Start 2P",monospace; letter-spacing:0; color:#ececec}
+body.pc:not(.tel) .kaartbox.ks-panorama .tasknop:hover span{color:#ffd84a}
+body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .sterbalk{right:122px !important}
+body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .obtn[data-btn="storylijst"]{right:252px !important}
+html body.pc.tel .kaartbox.ks-panorama .tasknop{width:auto !important; height:auto !important; padding:8px 12px !important; background:#050507 !important; border:0 !important; border-radius:4px !important; box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000 !important}
+html body.pc.tel .kaartbox.ks-panorama .tasknop img, html body.pc.tel .kaartbox.ks-panorama .tasknop .pixic{display:none !important}
+html body.pc.tel .kaartbox.ks-panorama .tasknop span{font:9px/1 "Press Start 2P",monospace; color:#ececec}
 .ksmenuweg{position:fixed; inset:0; z-index:39; background:transparent; border:0; padding:0; cursor:default}
 .ksmenu .ksoptie{font:9px/1 "Press Start 2P",monospace; color:#ececec; background:none; border:0; text-align:left; padding:9px 12px 9px 22px; cursor:pointer; position:relative; border-radius:2px}
 .ksmenu .ksoptie:hover, .ksmenu .ksoptie:focus-visible{background:#1e1c26; color:#fff; outline:none}
@@ -10289,6 +10328,28 @@ function glitchAan(aan){
   if(!el){ el = document.createElement("div"); el.id = "glitchlaag"; document.body.appendChild(el); }
   el.classList.toggle("aan", !!aan);
 }
+/* Wat de tegenstander zegt op het moment dat hij verslagen is. Kort. */
+const EIND_REACTIE = {
+  "1-1":"Mijn steen…!", "1-2":"Kramp. KRAMP.", "1-3":"Dat telt niet! Dat…", "1-4":"Broer… sorry.", "1-5":"Magnus… wankelt?",
+  "2-1":"Dit… komt in het verslag.", "2-2":"Mijn takken!", "2-3":"Je gaat toch niet weg?", "2-4":"Mijn web…", "2-5":"…woef.", "2-6":"Nee… niet nu al.",
+  "3-1":"Oh. Ik ben stuk.", "3-2":"Dat was mijn beste…", "3-3":"…", "3-4":"Het doek valt!", "3-5":"VER… branden…", "3-6":"Hm. Niet slecht.",
+  "4-1":"Dat is hem! Instappen!", "4-2":"Maar ik wilde je houden…", "4-3":"Het slotakkoord… valt.", "4-4":"Ik… ben jij niet.", "4-5":"Stil. Even stil.",
+  "5-1":"Je bent… klaar.", "5-2":"Mijn collectie!", "5-3":"Een schakel… los.", "5-4":"Niet… weer…", "5-5":"De stoel…"
+};
+function eindReactie(klaar){
+  const st = S.story, app = document.getElementById("app");
+  st.ptEmote = {soort:"stuk", tot:Date.now() + 2600, n:(st.ptEmote ? st.ptEmote.n : 0) + 1};
+  document.body.classList.add("eindreactie");
+  if(app){ app.classList.remove("eindschud"); void app.offsetWidth; app.classList.add("eindschud"); }
+  try{ witFlits(); }catch(e){}
+  try{ AU.play("kill"); }catch(e){}
+  portretPaint();
+  const zin = (st.zeg && st.zeg.verslagen) || EIND_REACTIE[st.id] || "Nee…";
+  setTimeout(() => { if(S && S.story === st){ st.zin = zin; st.zinHard = true; noteerGezegd(zin); zegPaint();
+    const el = document.getElementById("praatbel"); if(el){ el.classList.remove("puls"); void el.offsetWidth; el.classList.add("puls"); } } }, 380);
+  setTimeout(() => { if(app) app.classList.remove("eindschud"); document.body.classList.remove("eindreactie");
+    clearTimeout(ZEGT); if(S && S.story === st){ st.zin = null; st.zinHard = false; } klaar(); }, 2100);
+}
 function sterfFlits(){
   if(FAST) return;
   witFlits();
@@ -13867,7 +13928,6 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
 async function announceLight(p, card, flash){
   const fxVoor = FXNU;
   const L = LIGHTS[card.lk] || {};
-  lichtFlits(card, p); if(!FAST) await sleep(650);
   FXNU = {p, kop:"\u2726 " + String(L.name || "Licht").toUpperCase() + (flash ? " \u00b7 REACTIE" : "") + " \u00b7 GESPEELD", zin:fxPlat(LICHT_TEKST[card.lk]), beeld:card, bronPlek:null, doel:null};
   if(!FAST) render();
   try{ return await metSnap(p, card, () => announceLight0(p, card, flash)); }
@@ -13879,7 +13939,7 @@ async function announceLight(p, card, flash){
 const LICHT_DIRECT = new Set(["greed", "darkhole", "kuriboh", "reborn", "master", "brenger", "kloon", "doortast", "vital", "struik", "max"]);   // okt 2026: Bloedmaan gaat weer op de keten
 async function announceLight0(p, card, flash){
   const k = card.lk;
-  if(k === "dfusion") return await announceDirectFusion(p, card, flash);
+  if(k === "dfusion"){ lichtFlits(card, p); if(!FAST) await sleep(650); return await announceDirectFusion(p, card, flash); }
   /* Tribute-kaarten kosten naast het leven ook een eigen wezen — er komt niets voor terug. */
   let offerId = null;
   if(LIGHTS[k].tribute){
@@ -13916,6 +13976,8 @@ async function announceLight0(p, card, flash){
     bloedPlan = {tid:id1, tp:a ? a.p : null, tc:a ? a.c : null, t2:b ? {tid:id2, tp:b.p, tc:b.c} : null};
   }
   const col = null;
+  /* nu is hij gespeeld (alles gekozen): de korte flits in het midden */
+  lichtFlits(card, p); if(!FAST) await sleep(650);
   render(); AU.play("light"); fxLight("#lichtring");
   await sleep(FAST ? 0 : (p === 0 ? 330 : 520));
   render();
@@ -15501,6 +15563,13 @@ function gameOver(winner, reason){
     const Lx = levelVan(S.story);
     /* 🌹 Moeder Natuur staat op nul en weigert dat. */
     if(Lx && Lx.bloei && !S.story.bloeiGedaan){ S.story.bloeiGedaan = true; S.story.omslagBezig = true; naRust(() => moederBloei(Lx.bloei)); return; }
+  }
+  /* Okt 2026: niet meteen naar het winstscherm. Eerst schrikt de tegenstander in zijn portret:
+     het scherm schudt hard en kort, het portret gaat stuk, hij zegt nog iets. Dan pas win je. */
+  if(winner === 0 && S.story && !FAST && !NET.on && !S.story.eindReactie && typeof portretAan === "function" && portretAan()){
+    S.story.eindReactie = true; S.story.omslagBezig = true;
+    eindReactie(() => { if(!S || !S.story) return; S.story.omslagBezig = false; gameOver(winner, reason); });
+    return;
   }
   S.over = {winner, reason};
   /* Het beeldbederf hoort bij het gevecht. Is dat beslist, dan houdt het scherm op met
@@ -17731,9 +17800,16 @@ function cstripHTML(){
   while(ring.length < ORDER.length){ const nx = EL[ring[ring.length-1]].strong; if(!nx || ring.includes(nx)) break; ring.push(nx); }
   const tegel = el => `<span class="cst" style="background-image:url('${kaartSrc(KAART_BEELD[el])}')" title="${EL[el].name}"></span>`;
   /* De cirkel staat er meteen helemaal, zoals in de tutorial. Klik erop voor de uitleg erbij. */
+  /* Okt 2026: in het verhaal heb jij ook een portret (art/pt-onverdeelde.png). Zolang dat er niet is,
+     staat hier de cirkel. Klik je erop, dan krijg je nog steeds de uitleg van de cirkel. */
+  if(S && S.story && beeldKlaar(PT_ONVERDEELDE)) return `<button class="cstrip ckring ckspeler" data-act="btn" data-btn="cirkeltoggle" title="Jij. Klik voor de elementcirkel">
+    <img src="${PT_ONVERDEELDE}" alt="" draggable="false"></button>`;
   return `<button class="cstrip ckring" data-act="btn" data-btn="cirkeltoggle" title="De elementcirkel: klik voor de uitleg">
     ${tutBeeld("art/elementcirkel.png", cirkelBeeldSVG(), "cirkel")}</button>`;
 }
+const PT_ONVERDEELDE = "art/pt-onverdeelde.png";
+/* het portret één keer proberen te laden; is het er, dan tekenen we opnieuw */
+(function(){ if(typeof Image === "undefined") return; const im = new Image(); im.onload = () => { BEELD_KLAAR[PT_ONVERDEELDE] = true; if(S && S.story && typeof render === "function") render(); }; im.src = PT_ONVERDEELDE; })();
 function cstripPaint(){
   const el = document.getElementById("cstrip"); if(!el) return;
   const aan = portretAan();
@@ -25856,17 +25932,26 @@ function beloningHTML(){
     return `<div class="belrij${klaar ? " gepakt" : ""}${dood ? " dood" : ""}" ${!klaar && !dood ? `data-act="btn" data-btn="belpak" data-i="${i}"` : ""}>
       <span class="belic">${it.ic}</span>
       <span class="beltxt"><b>${it.naam}</b>${ster}<small>${it.sub || ""}</small></span>
-      <span class="belknop">${klaar ? "✔" : (it.oud ? "al van jou" : (it.leeg || it.info ? "" : "pak"))}</span></div>`;
+      <span class="belknop">nieuw</span></div>`;
   };
   return `<div class="ovbox belbox">
-    <h2>Beloningen</h2>
+    <h2>Je krijgt</h2>
     <div class="sub">${m.id} · ${L.naam || ""}${L.vijand ? ` · ${L.vijand} verslagen` : ""}</div>
     <div class="bellijst">${m.items.map(rij).join("")}</div>
-    <div class="belmunt">★ <b id="belsaldo">${sterVrij()}</b> sterren te besteden</div>
     <button class="obtn b-story" data-act="btn" data-btn="belverder">Verder ▶</button></div>`;
 }
 /* Eén beloning oppakken. De sterren staan al op je naam op het moment dat het scherm
    gemaakt wordt; oppakken is hier het gebaar, niet de boekhouding. */
+/* Okt 2026: je hoeft niets meer te pakken, je krijgt het gewoon. De sterren staan al op het
+   winstscherm, dus die laten we hier weg; wat al van jou was ook. Blijft er niets over, dan
+   slaan we het scherm helemaal over. */
+function beloningToon(id, items, daarna){
+  const nieuw = (items || []).filter(it => it.k !== "ster" && !it.oud && !it.leeg && !it.info);
+  nieuw.forEach(it => { it.gepakt = true; });
+  M = {type:"beloning", id, items:nieuw, daarna};
+  if(!nieuw.length){ beloningKlaar(); return; }
+  AU.play("win"); render();
+}
 function beloningPak(i){
   const it = M && M.items && M.items[i]; if(!it || it.gepakt || it.oud || it.leeg || it.info) return;
   it.gepakt = true;
@@ -26642,8 +26727,7 @@ function praatKlaar(id, fase){
   if(Lv && Lv.klaarNa && Lv.klaarNa[fase]){
     const b = beloningMaak(id, Lv.klaarNa[fase]);
     storyVoltooi(id, Lv.klaarNa[fase]);
-    M = {type:"beloning", id, items:b, daarna:(Lv.na || []).length ? "na" : "kaart"};
-    render(); return;
+    beloningToon(id, b, (Lv.na || []).length ? "na" : "kaart"); return;
   }
   if(fase === "intro" && Lv && Lv.gevechtNa){ M = kaartM(); storySkin(0); render(); return; }
   if(fase === "intro"){ if(tutVoorGevecht(id)) return; M = null; startStoryGevecht(id); return; }
@@ -26664,8 +26748,7 @@ function praatKlaar(id, fase){
     const ex = extraSamen(Lw && Lw.geeftExtra, WIN_TAK_EXTRA); WIN_TAK_EXTRA = null;
     const b = beloningMaak(id, ex);
     storyVoltooi(id, ex);
-    M = {type:"beloning", id, items:b, daarna:id === "1-3" ? "nimbus" : ((STORY[id].na || []).length ? "na" : "kaart")};
-    render(); return;
+    beloningToon(id, b, id === "1-3" ? "nimbus" : ((STORY[id].na || []).length ? "na" : "kaart")); return;
   }
   if(fase === "verlies"){ M = null; if(S && S.over) S.over.wachtVerlies = false; render(); return; }   /* terug naar het verliesscherm */
   if(fase === "na"){ M = kaartM(); storySkin(0); render(); return; }
@@ -27217,7 +27300,8 @@ function portretPaint(){
   const vriend = !st.ptSpr && !!L.ptSprite;
   /* Wie heeft er net levens verloren? Daar komt de emote uit. */
   const nu = [P(0).life, P(1).life];
-  if(st.ptLeven && !FAST){
+  const stukNu = st.ptEmote && st.ptEmote.soort === "stuk" && st.ptEmote.tot > Date.now();
+  if(st.ptLeven && !FAST && !stukNu){
     if(nu[1] < st.ptLeven[1]) st.ptEmote = {soort:"geraakt", tot:Date.now() + 1300, n:(st.ptEmote ? st.ptEmote.n : 0) + 1};
     else if(nu[0] < st.ptLeven[0]) st.ptEmote = {soort:"raak", tot:Date.now() + 1300, n:(st.ptEmote ? st.ptEmote.n : 0) + 1};
     /* Een bondgenoot in het venster (de veerman) reageert: een aanmoediging als de tegenstander
@@ -27232,7 +27316,12 @@ function portretPaint(){
   const em = st.ptEmote && st.ptEmote.tot > Date.now() ? st.ptEmote : null;
   let key = basis;
   const cls = [];
-  if(em && em.soort === "geraakt" && vriend){
+  if(em && em.soort === "stuk"){
+    /* verslagen: zijn eigen kapotte tekening als die er is, anders boos, en het venster gaat mee stuk */
+    cls.push(vriend ? "pt-juich" : "pt-stuk");
+    if(!vriend){ if(SPRITE_BEELD[basis + "_stuk"]) key = basis + "_stuk"; else if(SPRITE_BEELD[basis + "_boos"]) key = basis + "_boos";
+      else if(!SPRITE_BEELD[basis] && ptSprIs(basis + "_stuk")) key = basis + "_stuk"; }
+  } else if(em && em.soort === "geraakt" && vriend){
     /* de tegenstander is geraakt: de veerman schudt niet mee, hij kijkt tevreden */
   } else if(em && em.soort === "geraakt"){
     cls.push("pt-geraakt");
@@ -29826,7 +29915,7 @@ document.addEventListener("keydown", e => {
    (SET.story.bordBij), en de startknop onderin (bordHud). */
 const KS_STIJLEN = [["bord", "Spelbord"], ["dagboek", "Het reisdagboek"], ["panorama", "Het panorama"]];
 const KS_PERWERELD = {dagboek:true};   // het dagboek toont één rijk tegelijk; het panorama is één doorlopende reis
-const ksStijl = () => (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "bord";
+const ksStijl = () => (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "dagboek";   // okt 2026: standaard het boek
 const KP = {zw:"#0b0a10", nacht:"#141228", d1:"#1e1c26", d2:"#2c2a38", g1:"#4a4858", g2:"#77748a", g3:"#b8b4c0", wit:"#f2f0e8", goud:"#ffd84a", goudd:"#c0902a",
   bruin:"#7a4e2c", bruind:"#4a2e1a", tan:"#cfa06a", groen:"#7fd18c", groend:"#2e6a3a", oranje:"#ffb03a", rood:"#d5503c", roodd:"#6a1e14", blauw:"#a9e2ff",
   blauwm:"#3f8fd0", blauwd:"#142a5a", paars:"#9a5cff", lila:"#c9a2ff", room:"#fffdf2", inkt:"#1a1630", papier:"#e8dcc0", papierd:"#b8a882"};
@@ -29954,17 +30043,18 @@ function ksData(){
     return {id, w, n:+id.split("-")[1], open:w === 5 ? trap && (storyVrij(id) || !!SET.story.vrij) : open.has(id), klaar:storyKlaar(id),
       st:storyKlaar(id) ? sterrenBest(id) : 0, baas:w === 5 ? !!lvBaas(id) : BORD_BAAS(id), naam:STORY[id].naam}; });
   const knort = open.has("knort"), hemel = open.has("hemel"), seq = [];
+  seq.push("start");   // 0-0: waar je uit het ei kwam
   lv.forEach(l => { if(l.w === 5 && hemel && !trap && !seq.includes("hemel")) seq.push("hemel"); if(l.open) seq.push(l.id); if(l.id === OVERWORLD_WINKEL.na && knort) seq.push("knort"); });
   if(hemel && !pano) seq.push("hemel");
   const bij = SET.story.bordBij;
   let hier = seq.includes(bij) ? bij : bordPionPlek();
-  if(!seq.includes(hier)) hier = seq.find(id => STORY[id] && !storyKlaar(id)) || seq[seq.length - 1] || "1-1";
+  if(!seq.includes(hier) || (hier === "start" && bij !== "start")) hier = seq.find(id => STORY[id] && !storyKlaar(id)) || seq[seq.length - 1] || "1-1";
   const by = {}; lv.forEach(l => { by[l.id] = l; });
   const wereldOpen = w => w === 5 ? (hemel || lv.some(l => l.w === 5 && l.open)) : bordWereldOpen(w, open);
   return {open, lv, knort, hemel, seq, hier, by, wereldOpen, alles:!!SET.story.vrij};
 }
-const ksW = id => id === "knort" ? 2 : id === "hemel" ? 5 : +String(id)[0];
-const ksNaam = id => id === "knort" ? "Knort" : id === "hemel" ? "De trap" : (STORY[id] ? STORY[id].naam : id);
+const ksW = id => id === "knort" ? 2 : id === "hemel" ? 5 : id === "start" ? 1 : +String(id)[0];
+const ksNaam = id => id === "knort" ? "Knort" : id === "hemel" ? "De trap" : id === "start" ? "Het ei" : (STORY[id] ? STORY[id].naam : id);
 /* wat er nieuw is sinds je de kaart de vorige keer zag: open gekomen, of net gehaald */
 function ksNieuwBepaal(D){
   if(M && M.ksNieuw) return M.ksNieuw;
@@ -29984,7 +30074,8 @@ function ksAnim(id, soort, duur, wacht){
 /* ---- kiezen, stappen, starten ---- */
 function ksKies(id, metInfo){
   const D = ksData(); if(!D.seq.includes(id)) return;
-  if(id === D.hier){ if(metInfo !== false){ const b = document.querySelector(STORY[id] ? "#bknoppen .binfo" : "#bknoppen .bstart"); if(b) b.click(); } return; }
+  if(id === D.hier){ if(metInfo !== false){ if(id === "start"){ M.kies = "start"; render(); return; }
+      const b = document.querySelector(STORY[id] ? "#bknoppen .binfo" : "#bknoppen .bstart"); if(b) b.click(); } return; }
   SET.story.bordBij = id; saveSet(); AU.play && AU.play("place");
   if(ksStijl() === "dagboek" && M && M.boek && M.boek.links) M.boek.links = id;   // staat er iemand links, dan bladert die mee
   const w = ksW(id);
@@ -30009,7 +30100,14 @@ function ksNaarWereld(w){
 /* De uitleg van een level in de kaartstijlen: geen paars vel aan de zijkant, maar een venster in de
    huisstijl (zwart, lichte rand) midden over het doek. Links de tegenstander voor de achtergrond van
    zijn level, rechts de naam in de stijl van het logo, wie je tegenkomt en wat er bijzonder is. */
+/* 0-0: waar het begon. Wat erbij staat, zegt niet te veel. */
+const KS_EI = {kaart:"0-0. Hier begon het.", tekst:["Een schaal, nog warm van binnen.", "Ik weet niet wie hem heeft neergelegd. Ik weet niet eens of ik erin zat, of erop wachtte.", "Er stond niemand. Of er was net iemand weggegaan."]};
 function ksInfoHTML(id){
+  if(id === "start") return `<div class="ksinfo" role="dialog" aria-label="Het ei">
+    <div class="ksiport" style="background-image:radial-gradient(circle at 50% 70%, rgba(255,236,190,.35), rgba(5,5,7,0) 60%), url('art/bg-0-0.png'); background-color:#0b0a10">${ksBeeld("art/bg-0-0.png") ? "" : `<img src="art/inv-schaal.png" alt="" draggable="false" style="height:46%; bottom:14%" onerror="this.remove()">`}</div>
+    <div class="ksitekst"><small>0-0 &nbsp;·&nbsp; HET BEGIN</small><h3 style="--ksk:#e8c67a">HET EI</h3>
+      <div class="ksiregels">${KS_EI.tekst.map(t => `<p>${t}</p>`).join("")}</div>
+      <div class="ksiknoppen"><button class="obtn b-dim" data-act="btn" data-btn="kaartvelweg">Terug</button></div></div></div>`;
   const L = STORY[id], w = +id[0], klaar = storyKlaar(id), st = klaar ? sterrenBest(id) : 0;
   const pad = L.sprite ? sprBeeldPad(L.sprite) : null, V = (typeof VELD === "object" && VELD[id]) || {};
   const regels = (V.regels || []).slice(0, 3).map(r => `<p>${r}</p>`).join("") || "<p>Geen bijzondere regels. Gewoon vechten.</p>";
@@ -30189,10 +30287,26 @@ function ksGloed(c, x, y, r, kleur, a){
 const KSD_SYMBOOL = {1:"berg", 2:"boom", 3:"vulkaan", 4:"golf", 5:"wolk"};
 const KSD_LAND = {1:"#e6d6b0", 2:"#dfe0b6", 3:"#ecd2b2", 4:"#d6dcd6", 5:"#ece6d2"};
 const KSD_INKT = "#1a1630", KSD_POTLOOD = "#6a6478", KSD_ROOD = "#b8382a";
+/* waar in art/boek-open.png (1920x1080) de kaft, het papier en de rug liggen, gemeten in de tekening zelf */
+const KSD_PLAAT = {kaft:[200, 54, 1725, 925], papier:[316, 96, 1602, 850], rug:957};
 function ksdBoek(){
+  let B;
   /* op de telefoon zo groot als het kan: tussen de rugtas links en de knoppen rechts, tot vlak boven de startknop */
-  if(KS.tel){ const x0 = Math.max(ksP(26, 0)[0], 50), x1 = Math.round(KS.W) - x0; return {x0, y0:26, x1, y1:Math.round(KS.H) - 34, mid:Math.round((x0 + x1) / 2)}; }
-  const [x0, y0] = ksP(26, 32), [x1, y1] = ksP(454, 256); return {x0, y0, x1, y1, mid:Math.round((x0 + x1) / 2)}; }
+  if(KS.tel){ const x0 = Math.max(ksP(26, 0)[0], 50), x1 = Math.round(KS.W) - x0; B = {x0, y0:26, x1, y1:Math.round(KS.H) - 34}; }
+  else { const [x0, y0] = ksP(26, 32), [x1, y1] = ksP(454, 256); B = {x0, y0, x1, y1}; }
+  B.mid = Math.round((B.x0 + B.x1) / 2);
+  /* met de echte tekening: de kaft past in de ruimte en de bladzijden komen precies op het papier van de tekening.
+     Hooguit 15% breder getrokken, anders zie je het aan de hoeken. */
+  if(!ksBeeld("art/boek-open.png")) return B;
+  const L = KSD_PLAAT, kw = L.kaft[2] - L.kaft[0], kh = L.kaft[3] - L.kaft[1];
+  const A = KS.tel ? {x0:B.x0 - 30, y0:20, x1:B.x1 + 30, y1:Math.round(KS.H) - 30}
+                   : {x0:ksP(6, 0)[0], y0:ksP(0, 30)[1], x1:ksP(474, 0)[0], y1:ksP(0, 262)[1]};
+  const aw = A.x1 - A.x0, ah = A.y1 - A.y0, sy = Math.min(ah / kh, aw / kw), sx = Math.min(aw / kw, sy * 1.15);
+  const kx = (A.x0 + A.x1) / 2 - kw * sx / 2, ky = A.y0 + (ah - kh * sy) / 2;
+  const X = v => Math.round(kx + (v - L.kaft[0]) * sx), Y = v => Math.round(ky + (v - L.kaft[1]) * sy);
+  return {x0:X(L.papier[0]), y0:Y(L.papier[1]), x1:X(L.papier[2]), y1:Y(L.papier[3]), mid:X(L.rug), top:Math.round(ky),
+    plaat:{x:kx - L.kaft[0] * sx, y:ky - L.kaft[1] * sy, w:1920 * sx, h:1080 * sy}};
+}
 const ksdPagina = (B, rechts) => rechts ? {x:B.mid + 14, y:B.y0 + 9, w:B.x1 - B.mid - 26, h:B.y1 - B.y0 - 18} : {x:B.x0 + 12, y:B.y0 + 9, w:B.mid - B.x0 - 26, h:B.y1 - B.y0 - 18};
 /* een eiland: een golvende rand om een rij punten heen */
 function ksEiland(punten, pad, seed){
@@ -30282,6 +30396,7 @@ const KS_DOODLE = {
   "5-3":["...........", "...........", "####...####", "#..#...#..#", "#..#####..#", "#..#...#..#", "####...####", "...........", "...........", "...........", "..........."],
   "5-4":[".....#.....", "....#.#....", "#####.#####", ".#.......#.", "..#..#..#..", "...#.#.#...", "..#..#..#..", ".#..#.#..#.", "#.##...##.#", "#.........#", "..........."],
   "5-5":["..#######..", "..#.....#..", "..#.....#..", "..#.....#..", "..#.....#..", "..#######..", ".#########.", ".#.......#.", ".#.......#.", ".#.......#.", "..........."],
+  start:["...........", "....###....", "...#...#...", "..#.....#..", "..#.....#..", ".#..#.#..#.", ".#.#.#.#.#.", ".#.......#.", "..#.....#..", "...#####...", "..........."],
   knort:["....###....", ".....#.....", "...#####...", "..#.....#..", ".#...#...#.", "#...###...#", "#....#....#", "#...###...#", ".#...#...#.", "..#######..", "..........."],
   hemel:["........###", "........#..", "......###..", "......#....", "....###....", "....#......", "..###......", "..#........", "###........", "...........", "..........."]
 };
@@ -30320,10 +30435,11 @@ function ksBlad(zijde, vanaf){ KS.blad = {t0:performance.now(), zijde:zijde || "
 
 /* ---- de tabjes bovenop ---- */
 function ksdTabs(c, D, B, st, w){
-  const tab = (x, t, aan, open, vul, hit) => { const tw = ksBreed(t) + 12, ty = B.y0 - (aan ? 16 : 12);
+  const top = B.top != null ? B.top : B.y0;
+  const tab = (x, t, aan, open, vul, hit) => { const tw = ksBreed(t) + 12, ty = top - (aan ? 16 : 12);
     kpR(c, x - 1, ty - 1, tw + 2, 22, "zw"); kpR(c, x, ty, tw, 21, open ? vul : "d2"); kpR(c, x, ty, tw, 1, open ? "room" : "g1");
     ksTekst(c, t, x + 6, ty + 4, aan ? "inkt" : (open ? "room" : "g2"));
-    if(open && hit) ksHit("tab:" + t, x, ty, tw, 14, hit); return tw + 3; };
+    if(open && hit) ksHit("tab:" + t, x - 1, ty - 4, tw + 4, top - ty + 10, hit); return tw + 3; };
   let x = B.x0 + 14;
   const secties = [["lib", "LIBRARY"], ["opties", "OPTIES"]]; if(ksBoekVerhaal()) secties.unshift(["tas", "RUGTAS"]);
   secties.forEach(([s, t]) => { const aan = st.sectie === s; x += tab(x, t, aan, true, aan ? "papier" : "bruin", {soort:"sectie", s}); });
@@ -30335,7 +30451,7 @@ function ksdTabs(c, D, B, st, w){
 }
 
 /* ---- een rijk, links: de kaart van alleen dat rijk ---- */
-function ksdPlek(id){ if(id === "knort") return OVERWORLD_WINKEL; if(id === "hemel") return HEMEL_POS["5-1"] ? {x:HEMEL_POS["5-1"].x - 4, y:Math.min(98, HEMEL_POS["5-1"].y + 16)} : null;
+function ksdPlek(id){ if(id === "knort") return OVERWORLD_WINKEL; if(id === "start") return OVERWORLD_START; if(id === "hemel") return HEMEL_POS["5-1"] ? {x:HEMEL_POS["5-1"].x - 4, y:Math.min(98, HEMEL_POS["5-1"].y + 16)} : null;
   return OVERWORLD[id] || HEMEL_POS[id] || null; }
 function ksdKaart(c, D, P, w){
   const st = ksBoekStaat();
@@ -30346,6 +30462,7 @@ function ksdKaart(c, D, P, w){
   const ids = D.lv.filter(l => l.w === w).map(l => l.id);
   if(w === 2 && D.knort) ids.push("knort");
   if(w === 5 && D.hemel) ids.unshift("hemel");
+  if(w === 1) ids.unshift("start");
   const ruw = ids.map(id => [id, ksdPlek(id)]).filter(([, p]) => p);
   if(!ruw.length) return;
   const xs = ruw.map(([, p]) => p.x), ys = ruw.map(([, p]) => p.y);
@@ -30363,9 +30480,9 @@ function ksdKaart(c, D, P, w){
   const raakt = (r, q) => Math.max(0, Math.min(r[0] + r[2], q[0] + q[2]) - Math.max(r[0], q[0])) * Math.max(0, Math.min(r[1] + r[3], q[1] + q[3]) - Math.max(r[1], q[1]));
   const plek = {};
   ids.forEach(id => { const p = pt[id]; if(!p) return; const [x, y] = p;
-    const l = D.by[id], open = id === "knort" ? D.knort : id === "hemel" ? D.hemel : l.open; if(!open) return;
-    const kent = id === "knort" || id === "hemel" || l.klaar || lvStand(id) === "portret";
-    const tekst = kent ? (KS_KRABBEL[id] || {}).kaart || "" : "Nog niet geweest.";
+    const l = D.by[id], open = id === "knort" ? D.knort : id === "hemel" ? D.hemel : id === "start" ? true : l.open; if(!open) return;
+    const kent = id === "knort" || id === "hemel" || id === "start" || l.klaar || lvStand(id) === "portret";
+    const tekst = id === "start" ? KS_EI.kaart : kent ? (KS_KRABBEL[id] || {}).kaart || "" : "Nog niet geweest.";
     const tb = Math.min(74, Math.ceil(ksHandBreed(c, tekst, 9))), tw = Math.max(13, tb), th = 13 + (ksHandBreed(c, tekst, 9) > 74 ? 18 : 9);
     let best = null, minst = Infinity;
     for(const [dx, dy] of [[8, -14], [-8 - tw, -14], [8, 4], [-8 - tw, 4], [-tw / 2, -18 - th], [-tw / 2, 10], [14, -th / 2], [-14 - tw, -th / 2]]){
@@ -30398,7 +30515,7 @@ function ksdKaart(c, D, P, w){
     kpPad(c, pts, KSD_ROOD, 2); });
   /* bij elk level: een stip, een tekeningetje en een krabbel */
   ids.forEach(id => { const p = pt[id]; if(!p) return; const [x, y] = p, l = D.by[id];
-    const open = id === "knort" ? D.knort : id === "hemel" ? D.hemel : l.open;
+    const open = id === "knort" ? D.knort : id === "hemel" ? D.hemel : id === "start" ? true : l.open;
     if(!open){ ksHand(c, "?", x - 2, y - 6, 10, {maat:12, kleur:KSD_POTLOOD, recht:true}); return; }
     const {r, kent, tekst, tw} = plek[id], [rx, ry] = r, links = rx + tw / 2 < x;
     kpLijn(c, x, y, links ? rx + tw - 2 : rx + 2, ry + 6, KSD_POTLOOD, 1);
@@ -30417,6 +30534,20 @@ function ksdKaart(c, D, P, w){
 
 /* ---- een rijk, links na een klik: wie je daar tegenkomt ---- */
 function ksdPersoon(c, D, P, id){
+  if(id === "start"){
+    ksHand(c, "< terug naar de kaart", P.x, P.y - 2, 140, {maat:10, kleur:KSD_POTLOOD, recht:true});
+    ksHit("kaartterug", P.x - 2, P.y - 4, 104, 14, {soort:"kaartterug"});
+    const fh = Math.round(Math.min(104, P.h * .42)), fw = Math.round(fh * .88), fx = P.x + 2, fy = P.y + 16;
+    kpSchaduw(c, fx, fy, fw, fh, 3, .3); kpR(c, fx, fy, fw, fh, "room"); kpO(c, fx, fy, fw, fh, "papierd");
+    const eig = ksBeeld("art/bg-0-0.png"), sch = ksBeeld("art/inv-schaal.png");
+    if(eig) ksVul(c, eig, fx + 4, fy + 4, fw - 8, fh - 18); else { kpR(c, fx + 4, fy + 4, fw - 8, fh - 18, "#0d0b14"); ksGloed(c, fx + fw / 2, fy + fh * .6, fh * .5, "255,236,190", .25);
+      if(sch){ const h = fh * .4; c.save(); c.imageSmoothingEnabled = false; c.drawImage(sch, fx + fw / 2 - h / 2, fy + fh - 20 - h, h, h); c.restore(); } }
+    ksHand(c, "0-0", fx + 4, fy + fh - 13, fw - 8, {maat:10, recht:true});
+    const tx = fx + fw + 10, tw = P.x + P.w - tx; let y = fy + 2;
+    y = ksHand(c, "Het ei", tx, y, tw, {maat:16, recht:true}) + 6;
+    KS_EI.tekst.forEach(t => { y = ksHand(c, t, tx, y, tw, {maat:10, max:4}) + 4; });
+    return;
+  }
   const L = STORY[id], l = D.by[id], kn = id === "knort", tr = id === "hemel";
   const kent = kn || tr || (l && (l.klaar || lvStand(id) === "portret"));
   /* terug naar de kaart */
@@ -30461,6 +30592,7 @@ function ksdPersoon(c, D, P, id){
 function ksdFotos(c, D, P, w){
   const nm = WERELDEN[w].naam.toUpperCase(), lv = D.lv.filter(l => l.w === w).map(l => ({id:l.id, l}));
   if(w === 5 && D.hemel && !(SET.story.trapGezien || D.alles)) lv.unshift({id:"hemel"});
+  if(w === 1) lv.unshift({id:"start"});
   ksTitel(c, nm, P.x, P.y, KS_WK[w][1] === "blauwm" ? "blauwd" : (w === 5 ? "goudd" : KS_WK[w][1]), {schaduw:false});
   ksTekst(c, `${lv.filter(x => x.l && x.l.klaar).length} VAN ${lv.filter(x => x.l).length} GEHAALD`, P.x, P.y + 12, "inkt");
   const kolW = Math.floor((P.w - 10) / 2), fw = kolW, fh = Math.round(fw * .56), rij = Math.floor((P.y + P.h - (P.y + 24)) / 3);
@@ -30469,7 +30601,7 @@ function ksdFotos(c, D, P, w){
     const kol = i % 2, r = Math.floor(i / 2), sx = Math.round((ksRuis(i, w, 4) - .5) * 4), sy = Math.round((ksRuis(i, w, 6) - .5) * 4);
     const x = P.x + kol * (kolW + 10) + sx, y = P.y + 26 + r * rij + sy, ah = Math.min(fh, rij - 18);
     pos[id] = {x, y, w:fw, h:ah + 4, cx:x + fw / 2, cy:y + ah / 2};
-    const open = l ? l.open : D.hemel;
+    const open = l ? l.open : (id === "start" ? true : D.hemel);
     if(!open){
       for(let s = 0; s < fw; s += 4){ kpR(c, x + s, y, 2, 1, "g3"); kpR(c, x + s, y + ah + 3, 2, 1, "g3"); }
       for(let s = 0; s < ah + 4; s += 4){ kpR(c, x, y + s, 1, 2, "g3"); kpR(c, x + fw - 1, y + s, 1, 2, "g3"); }
@@ -30480,11 +30612,15 @@ function ksdFotos(c, D, P, w){
     const op = id === KS.hover && id !== D.hier ? 1 : 0;
     kpSchaduw(c, x, y - op, fw, ah + 4, 2 + op, .3);
     kpR(c, x, y - op, fw, ah + 4, "room"); kpO(c, x, y - op, fw, ah + 4, "papierd");
-    ksVul(c, ksPrent(id === "hemel" ? "5-1" : id, true), x + 2, y + 2 - op, fw - 4, ah, .5, .5);
+    if(id === "start"){ const eig = ksBeeld("art/bg-0-0.png"), sch = ksBeeld("art/inv-schaal.png");
+      if(eig) ksVul(c, eig, x + 2, y + 2 - op, fw - 4, ah, .5, .5);
+      else { kpR(c, x + 2, y + 2 - op, fw - 4, ah, "#0d0b14"); ksGloed(c, x + fw / 2, y + ah * .75 - op, ah * .6, "255,236,190", .25);
+        if(sch){ const h = ah * .45; c.save(); c.imageSmoothingEnabled = false; c.drawImage(sch, x + fw / 2 - h / 2, y + ah * .9 - h - op, h, h); c.restore(); } } }
+    else ksVul(c, ksPrent(id === "hemel" ? "5-1" : id, true), x + 2, y + 2 - op, fw - 4, ah, .5, .5);
     c.fillStyle = "rgba(232,222,190,.82)";
     c.save(); c.translate(x + 2, y - op); c.rotate(-.6); c.fillRect(-6, -2, 12, 5); c.restore();
     c.save(); c.translate(x + fw - 2, y - op); c.rotate(.6); c.fillRect(-6, -2, 12, 5); c.restore();
-    const naam = id === "hemel" ? "DE TRAP" : `${id} ${ksLetters(l.naam)}`, past = Math.floor((fw - (l && l.klaar ? 20 : 0)) / 4);
+    const naam = id === "hemel" ? "DE TRAP" : id === "start" ? "0-0 HET EI" : `${id} ${ksLetters(l.naam)}`, past = Math.floor((fw - (l && l.klaar ? 20 : 0)) / 4);
     ksTekst(c, naam.length > past ? naam.slice(0, past - 1) + "." : naam, x + 1, y + ah + 8, "inkt");
     if(l && l.klaar) kpSterren(c, x + fw - 18, y + ah + 8, l.st, "rood", "papierd");
     ksHit(id, x, y - op, fw, ah + 14, {soort:"lv"});
@@ -30618,7 +30754,7 @@ function ksdOpties(c, P, Q){
     ksdVink(c, Q.x + 6, y, SET.fx === k, nm, {soort:"knop", btn:"fx_" + k}, sub); y += 24; });
   y += 4; ksdVink(c, Q.x + 6, y, SET.horizon !== false, "horizon", {soort:"knop", btn:SET.horizon !== false ? "horizonuit" : "horizonaan"}, "een vergezicht in lagen boven het veld"); y += 30;
   ksHand(c, "De kaart", Q.x + 2, y, Q.w, {maat:14, recht:true}); y += 18;
-  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, (SET.kaartStijl || "bord") === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
+  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, ksStijl() === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
   y += 8; ksHand(c, "> de filmstudio", Q.x + 6, y, 120, {maat:11, recht:true}); ksHit("film-studio", Q.x + 4, y - 1, 90, 12, {soort:"knop", btn:"filmstudio"});
   if(typeof ELEMENTAAL_VERSIE !== "undefined" && y + 26 < Q.y + Q.h) ksHand(c, "versie " + ELEMENTAAL_VERSIE, Q.x + 2, Q.y + Q.h - 10, Q.w - 4, {maat:9, kleur:KSD_POTLOOD, recht:true, max:1});
 }
@@ -30634,7 +30770,7 @@ function ksdLaag(c, D){
   ksdTabs(c, D, B, st, w);
   /* het boek: een eigen tekening als die er is (art/boek-open.png), anders kaft, papier en vouw uit code */
   const eigen = ksBeeld("art/boek-open.png");
-  if(eigen){ c.save(); c.imageSmoothingEnabled = true; c.drawImage(eigen, B.x0 - 10, B.y0 - 8, B.x1 - B.x0 + 20, B.y1 - B.y0 + 18); c.restore(); }
+  if(eigen && B.plaat){ c.save(); c.imageSmoothingEnabled = true; c.drawImage(eigen, B.plaat.x, B.plaat.y, B.plaat.w, B.plaat.h); c.restore(); }
   else {
     kpR(c, B.x0 - 4, B.y0 - 2, B.x1 - B.x0 + 8, B.y1 - B.y0 + 7, "zw"); kpR(c, B.x0 - 3, B.y0 - 1, B.x1 - B.x0 + 6, B.y1 - B.y0 + 5, "roodd");
     for(let i = 0; i < 3; i++) kpR(c, B.x0 + i, B.y1 + 1 + (i >> 1), B.x1 - B.x0 - i * 2, 1, "papierd");
@@ -30652,7 +30788,7 @@ function ksdLaag(c, D){
   else if(st.sectie === "lib") ksdLib(c, P, Q);
   else if(st.sectie === "opties") ksdOpties(c, P, Q);
   else {
-    if(st.links && (STORY[st.links] || st.links === "knort" || st.links === "hemel")) ksdPersoon(c, D, P, st.links);
+    if(st.links && (STORY[st.links] || st.links === "knort" || st.links === "hemel" || st.links === "start")) ksdPersoon(c, D, P, st.links);
     else ksdKaart(c, D, P, w);
     KS.pos = ksdFotos(c, D, Q, w);
   }
@@ -30681,7 +30817,7 @@ function ksdKlik(h){
   if(h.soort === "sectie"){ if(st.sectie !== h.s){ M.boek = {sectie:h.s}; ksBlad("rechts", 1); AU.play && AU.play("place"); KS.laagSleutel = ""; bordHud(); } return true; }
   if(h.soort === "tab"){ if(st.sectie !== "rijk"){ M.boek = {sectie:"rijk"}; } ksNaarWereld(h.w); return true; }
   if(h.soort === "lv"){ const D = ksData();
-    if(!D.seq.includes(h.id) && !(h.id === "knort" && D.knort)){ AU.play && AU.play("thud"); return true; }
+    if(!D.seq.includes(h.id) && !(h.id === "knort" && D.knort) && h.id !== "start"){ AU.play && AU.play("thud"); return true; }
     const nieuw = st.links !== h.id; st.links = h.id; if(nieuw) ksBlad("links");
     if(h.id !== D.hier){ SET.story.bordBij = h.id; saveSet(); } AU.play && AU.play("place"); KS.laagSleutel = ""; bordHud(); return true; }
   if(h.soort === "kaartterug"){ st.links = null; ksBlad("links"); KS.laagSleutel = ""; return true; }
@@ -30719,8 +30855,9 @@ function boekHTML(){
    getekend als het in beeld komt, zodat ook een lange reis licht blijft. */
 const KSPA_OV = 26;   // hoe ver twee stukken in elkaar overlopen
 const KSPA_KLEUR = {1:"#cfa06a", 2:"#7fd18c", 3:"#ffb03a", 4:"#a9e2ff", 5:"#e8c67a"};
+const KSPA_BALK = {1:"#8a5a2e", 2:"#2e7a3a", 3:"#a8281a", 4:"#2a5ab8", 5:"#e8e4d8"};   // bruin, groen, rood, blauw, wit
 function kspaDelen(D){
-  const delen = [];
+  const delen = [{id:"start", w:1}];
   D.lv.forEach(l => {
     if(l.w === 5 && !delen.some(d => d.id === "hemel")) delen.push({id:"hemel", w:5});
     delen.push({id:l.id, w:l.w, l});
@@ -30728,17 +30865,25 @@ function kspaDelen(D){
   return delen;
 }
 function kspaMaat(){ const y0 = 48, y1 = Math.round(KS.H - Math.max(KS.tel ? KS.r1 + 4 : 30, KS.H * .1)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
-const kspaOpen = (D, d) => d.id === "hemel" ? D.hemel : d.l.open;
+const kspaOpen = (D, d) => d.id === "hemel" ? D.hemel : d.id === "start" ? true : d.l.open;
 /* één stuk van het doek, op de schermmaat; links loopt het zacht over in het vorige stuk */
 function kspaDeel(D, i, M_){
   const P = KS.pano, d = P.delen[i], open = kspaOpen(D, d), k = KS.k, OV = KSPA_OV;
-  const eigen = d.id === "hemel" ? ksBeeld("art/pano-trap.png") : null;
-  const img = eigen || (d.id === "hemel" ? ksPrent("5-1", true) : ksPrent(d.id, true));
-  const sleutel = [M_.h, M_.SW, k, !!img, open].join("|");
+  const eigen = d.id === "hemel" ? ksBeeld("art/pano-trap.png") : d.id === "start" ? ksBeeld("art/bg-0-0.png") : null;
+  const img = eigen || (d.id === "hemel" ? ksPrent("5-1", true) : d.id === "start" ? null : ksPrent(d.id, true));
+  const schaal = d.id === "start" && !eigen ? ksBeeld("art/inv-schaal.png") : null;
+  const sleutel = [M_.h, M_.SW, k, !!img, !!eigen, !!schaal, open].join("|");
   const oud = P.cache.get(i); if(oud && oud.sleutel === sleutel) return oud.cv;
   const ww = M_.SW + OV * 2, cv = document.createElement("canvas"); cv.width = ww * k; cv.height = M_.h * k;
   const c = cv.getContext("2d"); c.setTransform(k, 0, 0, k, 0, 0);
-  if(img) ksVul(c, img, 0, 0, ww, M_.h, .5, d.id === "hemel" && !eigen ? 0 : .55); else kpR(c, 0, 0, ww, M_.h, "d1");
+  if(img) ksVul(c, img, 0, 0, ww, M_.h, .5, d.id === "hemel" && !eigen ? 0 : .55);
+  else if(d.id === "start"){
+    /* zolang er geen eigen tekening is: duister, een zacht licht, en de schaal op de grond */
+    const g = c.createLinearGradient(0, 0, 0, M_.h); g.addColorStop(0, "#07060c"); g.addColorStop(1, "#1a1626"); c.fillStyle = g; c.fillRect(0, 0, ww, M_.h);
+    ksGloed(c, ww / 2, M_.h * .74, M_.h * .55, "255,236,190", .22);
+    for(let i = 0; i < 40; i++){ c.fillStyle = `rgba(255,236,190,${.15 + ksRuis(i, 3, 1) * .4})`; c.fillRect(Math.round(ksRuis(i, 1, 2) * ww), Math.round(ksRuis(i, 2, 2) * M_.h * .8), 1, 1); }
+    if(schaal){ const h = M_.h * .22, w2 = h * schaal.naturalWidth / schaal.naturalHeight; c.save(); c.imageSmoothingEnabled = false; c.drawImage(schaal, ww / 2 - w2 / 2, M_.h * .86 - h, w2, h); c.restore(); }
+  } else kpR(c, 0, 0, ww, M_.h, "d1");
   if(!open){ /* nog onbekend: kleurloos, donker, in de mist */
     c.globalCompositeOperation = "saturation"; c.fillStyle = "#000"; c.fillRect(0, 0, ww, M_.h);
     c.globalCompositeOperation = "source-over"; c.fillStyle = "rgba(5,5,10,.7)"; c.fillRect(0, 0, ww, M_.h);
@@ -30766,7 +30911,6 @@ function ksLogoTekst(c, s, cx, y, maat, kleur, alfa){
 /* een venstertje in de huisstijl: zwart, met een lichte rand en een zwarte rand daarbuiten */
 function ksVenster(c, x, y, w, h, rand){ kpR(c, x - 2, y - 2, w + 4, h + 4, "#000"); kpR(c, x - 1, y - 1, w + 2, h + 2, rand || "#ececec"); kpR(c, x, y, w, h, "#050507"); }
 function kspaLaag(c, D){
-  kpR(c, 0, 0, KS.W, KS.H, "#050507");
   const M_ = kspaMaat(), delen = kspaDelen(D);
   const sleutel = [M_.h, M_.SW, KS.k, delen.map(d => d.id + (kspaOpen(D, d) ? "o" : "d")).join(",")].join("|");
   if(!KS.pano || KS.pano.sleutel !== sleutel) KS.pano = {sleutel, delen, M:M_, cache:new Map(), breed:delen.length * M_.SW};
@@ -30776,6 +30920,12 @@ function kspaLaag(c, D){
 function kspaBoven(c, D){
   const P = KS.pano; if(!P) return;
   const M_ = P.M, k = KS.k, hier = KS.pos[D.hier], maxX = Math.max(0, P.breed - KS.W);
+  /* de zwarte balken boven en onder: een vleugje van de kleur van het rijk dat in beeld is; die
+     kleur loopt zacht over als je naar een ander rijk schuift */
+  { const wNu = (P.delen[Math.max(0, Math.min(P.delen.length - 1, Math.floor(((KS.pan ? KS.pan.x : 0) + KS.W / 2) / M_.SW)))] || {}).w || 1;
+    const doelK = ksMeng([5, 5, 7], ksHex(KSPA_BALK[wNu]), .2);
+    KS.balk = KS.balk ? KS.balk.map((v, i) => v + (doelK[i] - v) * .06) : doelK;
+    c.fillStyle = `rgb(${KS.balk.map(Math.round).join(",")})`; c.fillRect(0, 0, KS.W, M_.y0); c.fillRect(0, M_.y1, KS.W, KS.H - M_.y1); }
   /* de camera: zacht naar je plek, maar nooit voorbij het begin of het eind van het doek */
   const doel = hier ? Math.max(0, Math.min(maxX, hier.cx - KS.W / 2)) : 0;
   if(!KS.pan || KS.pan.H !== KS.H || KS.pan.W !== KS.W){ KS.pan = {x:doel, doel, H:KS.H, W:KS.W, laatst:D.hier}; }
@@ -30802,15 +30952,6 @@ function kspaBoven(c, D){
   /* de randen van het doek in de huisstijl: zwart, met een dun licht lijntje */
   kpR(c, 0, M_.y0 - 1, KS.W, 1, "#ececec"); kpR(c, 0, M_.y1, KS.W, 1, "#ececec");
   const grond = wx => M_.y1 - 16 + Math.round(Math.sin(wx / 37) * 2);
-  /* voetstappen: lichtende afdrukken tot aan het level waar je heen moet, met een golfje licht dat meeloopt */
-  const verst = D.seq.find(id => STORY[id] && !storyKlaar(id)) || D.seq[D.seq.length - 1], vp = KS.pos[verst];
-  if(vp){ const eind = vp.cx - 20, t = KS.t;
-    for(let wx = 24, n = 0; wx < eind; wx += 8, n++){ const x = Math.round(wx - px); if(x < -6 || x > KS.W + 6) continue;
-      /* links, rechts, links: een zool en een hak, om en om iets hoger en lager */
-      const y = grond(wx) + (n % 2 ? 2 : -1), golf = Math.max(0, Math.cos((wx - t * .09) / 70)), a = .38 + .55 * Math.pow(golf, 5);
-      if(golf > .82) ksGloed(c, x + 1, y + 1, 6, "255,216,74", (golf - .82) * 2.2);
-      c.fillStyle = `rgba(0,0,0,${a * .6})`; c.fillRect(x + 1, y + 1, 3, 2); c.fillRect(x + 1, y + 4, 2, 1);
-      c.fillStyle = `rgba(255,240,205,${a})`; c.fillRect(x, y, 3, 2); c.fillRect(x, y + 3, 2, 1); } }
   /* het level dat je gekozen hebt: een zuil van zacht licht */
   if(hier){ const x = Math.round(hier.cx - px), y = grond(hier.cx), a = .16 + .08 * ksPuls(700);
     /* zacht naar de zijkanten: smalle strookjes die naar buiten toe doorzichtiger worden */
@@ -30821,12 +30962,12 @@ function kspaBoven(c, D){
   /* bordjes, namen, en wat je kunt aanklikken */
   P.delen.forEach(d => { const p = KS.pos[d.id], x = Math.round(p.cx - px); if(x < -M_.SW || x > KS.W + M_.SW) return;
     const open = kspaOpen(D, d), sel = d.id === D.hier, hov = d.id === KS.hover && !sel, y = grond(p.cx);
-    const klaar = d.l && d.l.klaar, t = d.id === "hemel" ? "DE TRAP" : d.id, bw = ksBreed(t) + 12, bx = x - Math.round(bw / 2), by = y - 26 - (hov ? 1 : 0);
+    const klaar = d.l && d.l.klaar, t = d.id === "hemel" ? "DE TRAP" : d.id === "start" ? "0-0" : d.id, bw = ksBreed(t) + 12, bx = x - Math.round(bw / 2), by = y - 26 - (hov ? 1 : 0);
     kpR(c, x - 1, y - 14, 2, 15, "#000"); kpR(c, x, y - 14, 1, 15, open ? "#4a4858" : "#2c2a38");
     ksVenster(c, bx, by, bw, 11, open ? (sel ? "#ffd84a" : "#ececec") : "#4a4858");
     ksTekst(c, t, bx + 6, by + 3, open ? (sel ? "#ffd84a" : "#ececec") : "#77748a");
     if(klaar){ kpR(c, x - 10, y - 11, 21, 7, "rgba(5,5,7,.75)"); kpSterren(c, x - 8, y - 10, d.l.st, "goud", "g1"); }
-    if(d.l){ if(open){ const nm = ksLetters(d.l.naam), nb = ksBreed(nm); ksVenster(c, x - nb / 2 - 4, M_.y0 + 6, nb + 8, 9, sel ? "#ffd84a" : "#ececec"); ksTekst(c, nm, x - nb / 2, M_.y0 + 8, sel ? "#ffd84a" : "#ececec"); }
+    if(d.l || d.id === "start"){ if(open){ const nm = d.id === "start" ? "HET EI" : ksLetters(d.l.naam), nb = ksBreed(nm); ksVenster(c, x - nb / 2 - 4, M_.y0 + 6, nb + 8, 9, sel ? "#ffd84a" : "#ececec"); ksTekst(c, nm, x - nb / 2, M_.y0 + 8, sel ? "#ffd84a" : "#ececec"); }
       else ksTekst(c, "?", x - 1, M_.y0 + 8, "#77748a"); }
     const sel_ = open && D.seq.includes(d.id);
     ksHit(d.id, x - M_.SW / 2, M_.y0, M_.SW, M_.h, sel_ ? null : {soort:"dicht"});
@@ -30985,7 +31126,7 @@ function kaartHTML(){
     <b>${eilandT ? "ELEMENTAAL" : WERELDEN[huidigW].naam.toUpperCase()}</b>
     <button class="kpijl" data-act="btn" data-btn="kaartwereld" data-w="${huidigW + 1}"${wOpen(huidigW + 1) && !hemelAan ? "" : " disabled"} aria-label="Volgende wereld">&gt;</button></div>
     <span class="kpips">${kLv.map(id => `<i${storyKlaar(id) ? ' class="vol"' : ""}></i>`).join("")}</span></div>`;
-  const telVel = M.kies && STORY[M.kies] && bordAan && ksStijl() !== "bord" ? ksInfoHTML(M.kies) : M.kies && STORY[M.kies] ? `<div class="telvel">
+  const telVel = M.kies && (STORY[M.kies] || M.kies === "start") && bordAan && ksStijl() !== "bord" ? ksInfoHTML(M.kies) : M.kies && STORY[M.kies] ? `<div class="telvel">
       <button class="obtn b-dim telvelweg" data-act="btn" data-btn="kaartvelweg" aria-label="Sluiten">✕</button>
       <div class="vlvuitleg">${lvUitlegHTML(M.kies)}</div>
       <button class="obtn telspeel" data-act="btn" data-btn="storylevel" data-id="${M.kies}" data-direct="1">${storyKlaar(M.kies) ? "Nog een keer" : "Speel"}</button>
