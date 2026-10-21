@@ -5290,6 +5290,16 @@ body.pc #zetmelding .zmtxt{font:20px/1.1 "VT323",monospace !important; color:#ff
 body.pc #zetmelding .zmwie{font:10px/1.4 "Press Start 2P",monospace !important; color:#8a8a92 !important; letter-spacing:.04em; text-transform:uppercase; margin-bottom:4px}
 body.pc #zetmelding .zmdoel{color:#ffd84a !important; font-size:18px !important}
 body.pc:has(#fxvenster.aan) #zetmelding{visibility:hidden !important}
+
+/* tokens op een wezen (verstrikt, ijs, binnenkomend, web): pixelicoon in een zwart vakje met witte rand, linksboven op de kaart */
+.stat > span.tok{width:auto !important; min-width:24px; height:24px; border-radius:3px !important; background:#050507 !important; border:2px solid #ececec !important; padding:0 4px !important; gap:3px; box-sizing:border-box}
+.stat > span.tok .pixic{width:14px; height:14px; display:block}
+.stat > span.tok b{font:9px "Press Start 2P",monospace; color:#fff}
+body.pc #fieldwrap .slot.cr .stat{left:-8px !important; top:-8px !important; z-index:8 !important}
+
+/* het homescreen op de computer: rechtsboven een knop om het geluid aan en uit te zetten */
+html body.pc #geluidfab.show.thuis{display:block !important; width:44px; height:44px; top:16px; right:16px; background:#050507; border:2px solid #ececec; border-radius:4px; color:#fff}
+html body.pc #geluidfab.show.thuis.uit{color:#6a6a72; border-color:#6a6a72}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -11870,8 +11880,9 @@ function planPlat(plan){
 /* Vraagt per effect één doelwit en geeft het plan terug, of "cancel". */
 async function declarePlan(p, card, asSpell, col, opts){
   S.decl = (S.decl || 0) + 1;
+  const fxVoor = FXNU;
   try{ return await declarePlan0(p, card, asSpell, col, opts); }
-  finally{ S.decl = Math.max(0, (S.decl || 1) - 1); }
+  finally{ S.decl = Math.max(0, (S.decl || 1) - 1); FXNU = fxVoor; }
 }
 async function declarePlan0(p, card, asSpell, col, opts){
   const o = opts || {};
@@ -11891,6 +11902,15 @@ async function declarePlan0(p, card, asSpell, col, opts){
     /* Wat er in dit plan al op een doelwit mikt: dan kiest de bot bij een dubbel effect
        (het trio, Getijdenstroom, Echo) niet twee keer hetzelfde als één keer al genoeg is. */
     const eerder = plan.slice(0, i).filter(x => x.tid != null && x.el === e.el).map(x => x.tid);
+    /* ▤ Welk speel-effect kies je nu? Het venster bovenaan zegt het, en de bron licht op (okt 2026). */
+    if(!isBot(p)){
+      const vanSp = asSpell || e.origin === "spell", sc = e.col != null ? e.col : col;
+      const bc = vanSp ? (P(p).cols[sc] && P(p).cols[sc].spell ? P(p).cols[sc].spell.card : card) : card;
+      const tel = plan.filter(x => x.el === e.el && x.origin === e.origin).length > 1 ? ` (${plan.slice(0,i+1).filter(x=>x.el===e.el&&x.origin===e.origin).length} van 2)` : "";
+      FXNU = {p, kop:(vanSp ? "RITUEEL " : "") + String(kNaam(bc)).toUpperCase() + " \u00b7 KOLOM " + (sc + 1) + " \u00b7 KIES",
+        zin:fxPlat(effPromptTxt(p, e.el)) + tel, beeld:bc, bronPlek:{p, c:sc, kind:vanSp ? "sp" : "cr"}, doel:null, kies:true};
+      render();
+    }
     /* 🧊→💧 het eerste water-doel is al gekozen toen je het ijs neerlegde */
     const voor = e.el === "water" && o.waterVoor && !o.waterVoor.op ? (o.waterVoor.op = true, o.waterVoor) : null;
     /* 💧 Water als ritueel heeft maar één keus (het wezen in zijn eigen kolom): die gaat vanzelf. */
@@ -12319,7 +12339,7 @@ async function resolveTop(){
   FXNU = (it.type === "eff" || it.type === "light") ? fxNuVan(it) : null;
   S.ui = {mode:"busy"}; render();
   await sleep(120);
-  if(FXNU && !FAST) await sleep(isBot(it.ctrl) || !iControl(it.ctrl) ? 750 : 450);
+  if(FXNU && !FAST) await sleep(isBot(it.ctrl) || !iControl(it.ctrl) ? 450 : 200);
   try{
     if(it.type === "play") await resolvePlay(it);
     else if(it.type === "light") await resolveLight(it);
@@ -12713,8 +12733,9 @@ async function ijsNeemtOver(p, card, asSpell, col){
     addLog(`🧊 <em>IJs</em> smelt en is weg. ${pName(p)} neemt ${kIcon(doel.card)} <em>${kNaam(doel.card)}</em> (${doel.hp} levens) over uit kolom ${col+1}. Hij krijgt een 🧊 ijs-token.`, true);
     if(!FAST){ pop(creSel(p, col), "🧊 VAN JOU", "heal"); render(); await sleep(260); }
     render();
-    const plan = await declarePlan(p, doel.card, false, col, {onField:true, geenSpell:true});
-    pushPlay(p, doel.card, false, col, false, plan === "cancel" ? [] : plan, {geenSpell:true});
+    /* (okt 2026) net als gewoon spelen: zijn speel-effect én het ritueel in die kolom gaan af */
+    const plan = await declarePlan(p, doel.card, false, col, {onField:true});
+    pushPlay(p, doel.card, false, col, false, plan === "cancel" ? [] : plan);
     await toonZet(p, cardFaceHTML(doel.card, false), `IJs pakt <b>${kNaam(doel.card)}</b>`, plan === "cancel" ? [] : plan);
     return;
   }
@@ -13301,7 +13322,16 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
    Een lichtkaart flitst op de ✦ in het midden van het veld (okt 2026: niet meer op een
    ritueelplek, dus je rituelen blijven liggen) en gaat meteen naar het graf. Zijn effect
    volgt de chain — behalve Volledige Negatie, die meteen afgaat. */
+/* ▤ Een lichtkaart spelen: zolang je kiest (en als hij meteen afgaat) staat bovenaan wat hij doet. */
 async function announceLight(p, card, flash){
+  const fxVoor = FXNU;
+  const L = LIGHTS[card.lk] || {};
+  FXNU = {p, kop:"\u2726 " + String(L.name || "Licht").toUpperCase() + (flash ? " \u00b7 REACTIE" : "") + " \u00b7 GESPEELD", zin:fxPlat(LICHT_TEKST[card.lk]), beeld:card, bronPlek:null, doel:null};
+  if(!FAST) render();
+  try{ return await announceLight0(p, card, flash); }
+  finally{ FXNU = fxVoor; if(!FAST) render(); }
+}
+async function announceLight0(p, card, flash){
   const k = card.lk;
   if(k === "dfusion") return await announceDirectFusion(p, card, flash);
   /* Tribute-kaarten kosten naast het leven ook een eigen wezen — er komt niets voor terug. */
@@ -13947,10 +13977,15 @@ async function resolveEffect(it){
     addLog(`🏔 <em>Bergketen</em>: er rijst een Steen op in kolom ${c2+1}${k2 ? ` met ${k2.hp} levens` : ""}.`, true);
     if(!FAST){ fxRocks(creSel(p, c2)); AU.play("place"); }
     render(); if(!FAST) await sleep(220);
-    /* en de Steen doet wat een Steen doet: tweemaal +1 leven */
-    for(const e of effsOf("steen", "creature", steen)){
+    /* en de Steen doet wat een Steen doet (tweemaal +1 leven), en net als bij gewoon spelen gaat
+       ook het ritueel in die kolom af (okt 2026). */
+    const plan = plannedEffects(p, steen, false, c2, {});
+    for(const e of plan){
       if(S.over) break;
-      await resolveEffect({type:"eff", el:e.el, ctrl:p, origin:"creature", var:e.var});
+      const it2 = Object.assign(effItem(p, e, steen.id), {dec:false});
+      if(e.origin === "spell"){ it2.col = c2; addLog(`✦ Ritueel-trigger: ${icon(e.el)} ${EL[e.el] ? EL[e.el].name : e.el} in kolom ${c2+1} van ${pName(p)}.`); }
+      FXNU = fxNuVan(it2); render();
+      await resolveEffect(it2);
       render();
     }
     return;
@@ -17462,7 +17497,7 @@ function slotHTML(p, c, hl){
     const spent = ((S.phase==="beurt" || S.phase==="battle") && p===S.tp && u.attackedT===S.gTurn) ? " spent" : "";
     const sick = u.played === S.gTurn && S.gTurn === 1, ent = u.ent > 0;
     const nIjs = Math.min(u.ijsT || 0, u.ent || 0), nGras = (u.ent || 0) - nIjs;
-    const stat = (sick||ent||u.web) ? `<div class="stat">${sick?"<span>⏳</span>":""}${nIjs?`<span>🧊${nIjs>1?nIjs:""}</span>`:""}${nGras?`<span>🌿${nGras>1?nGras:""}</span>`:""}${u.web?"<span>🕸</span>":""}</div>` : "";
+    const stat = (sick||ent||u.web) ? `<div class="stat">${sick?`<span class="tok zand" title="komt net binnen">${pixIcoon("zand","#e8d6a0")}</span>`:""}${nIjs?`<span class="tok ijs" title="ijs-token: valt niet aan">${pixIcoon("ijs","#bfe6ff")}${nIjs>1?`<b>${nIjs}</b>`:""}</span>`:""}${nGras?`<span class="tok rank" title="verstrikt: valt niet aan">${pixIcoon("rank","#7ad06a")}${nGras>1?`<b>${nGras}</b>`:""}</span>`:""}${u.web?`<span class="tok web" title="in het web">${pixIcoon("web","#e6e6ee")}</span>`:""}</div>` : "";
     const gemCls = u.hp>2 ? " buff" : (u.hp<2 ? " hurt" : "");
     if(inMist()){
       /* Levens en aanval blijven zichtbaar — anders valt er niet te vechten, alleen te gokken.
@@ -26542,7 +26577,7 @@ function portretAan(){
 const ptSprIs = k => !!(k && (SPRITE_BEELD[k] || SPR_ART[k] || SPR_LEEN[k] || SPRITE_TERUG[k]));
 /* Wie veel groter is dan het venster: ingezoomd, zodat je alleen een stuk van hem ziet.
    De Oceaan: alleen zijn tanden en zijn oog. x en y: het punt in het venster waar omheen we inzoomen. */
-const PT_ZOOM = {oceaan:{z:2.7, x:54, y:52}};
+const PT_ZOOM = {oceaan:{z:2.7, x:54, y:52}, klinknagel:{z:1.45, x:50, y:96}};   // Klinknagel: groter in het portret (okt 2026)
 function ptZoomStijl(key){
   const z = PT_ZOOM[String(key || "").split("_")[0]];
   return z ? ` style="scale:${z.z};transform-origin:${z.x}% ${z.y}%"` : "";
@@ -29812,6 +29847,7 @@ function render(){
   const gfTel = telAan() && !(S.ui.mode === "start" && !M);
   if(gf){ gf.classList.toggle("show", !gfTel && (S.ui.mode === "start" || opKaart));
           gf.classList.toggle("naastmenu", gfNaast);
+          gf.classList.toggle("thuis", S.ui.mode === "start" && !M);   // 🖥 op de computer alleen op het homescreen (okt 2026)
           gf.classList.toggle("uit", !!SET.mute);
           gf.innerHTML = pixIcoon(SET.mute ? "stil" : "luid");
           gf.title = SET.mute ? "Geluid staat uit — klik om aan te zetten" : "Geluid aan — klik om uit te zetten"; }
@@ -33181,6 +33217,11 @@ const EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:️|⃣|[
 const EMOJI_IS = /\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]/u;
 /* Kleine pixel-iconen voor de knoppen die alleen een plaatje hadden. '#' = gevuld. */
 const PIXIC = {
+  /* tokens op een wezen (okt 2026): verstrikt, ijs, slaap/ziek, web */
+  rank:["....##...","...####..","..######.",".###.###.",".##..##..","..#..#...",".....#...","....#....","...#....."],
+  ijs:["....#....",".#..#..#.","..#.#.#..","...###...","#########","...###...","..#.#.#..",".#..#..#.","....#...."],
+  zand:["#######",".#...#.","..#.#..","...#...","..#.#..",".#.#.#.","#######"],
+  web:["#...#...#",".#..#..#.","..#####..","..#.#.#..","#########","..#.#.#..","..#####..",".#..#..#.","#...#...#"],
   bliksem:["....####.","...####..","...###...","..###....",".#######.","..#####..","....###..","...###...","...##....","..##.....","..#......"],
   luid:["....#........","...##...#....","..###....#...","####...#..#..","####....#.#..","####....#.#..","####...#..#..","..###....#...","...##...#....","....#........"],
   stil:["....#........","...##........","..###..#...#.","####....#.#..","####.....#...","####....#.#..","..###..#...#.","...##........","....#........"],
