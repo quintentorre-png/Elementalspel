@@ -4472,7 +4472,7 @@ body.pc #fieldwrap .slot.sp.hl .zp{filter:drop-shadow(0 0 3px #f6dc8c) drop-shad
 #row0 .zp.licht .zrand{background-image:var(--zegel-licht)} #row1 .zp.licht .zrand{background-image:var(--zegelb-licht)}
 
 body.pc #fieldwrap .slot.sp.tgt .zp{filter:drop-shadow(0 0 3px #ff9d4d) drop-shadow(0 0 12px rgba(255,140,60,.9))}
-body.pc #fieldwrap .slot.sp.gespeeld .zp{animation:zegelIn .5s ease both}
+body.pc #fieldwrap .slot.sp .zp.in{animation:zegelIn .5s ease both}
 @keyframes zegelIn{from{transform:scale(.6); opacity:0}}
 .zgl{position:absolute; left:-30px; right:-30px; height:240px; z-index:0; pointer-events:none;
   background:radial-gradient(ellipse 50% 50% at 50% 50%, color-mix(in srgb, var(--ek) 34%, transparent), transparent 70%)}
@@ -5327,8 +5327,8 @@ html body.pc #geluidfab.show.thuis.uit{color:#6a6a72; border-color:#6a6a72}
   animation:bzDrijf 90s linear infinite}
 @keyframes bzDrijf{to{background-position:24% 6%}}
 /* de randen van de kaart lopen zacht over in die zee */
-.bordvlak .kaartart{-webkit-mask-image:linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent), linear-gradient(180deg, transparent, #000 4%, #000 96%, transparent);
-  -webkit-mask-composite:source-in; mask-image:linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent), linear-gradient(180deg, transparent, #000 4%, #000 96%, transparent); mask-composite:intersect}
+.bordvlak .kaartart{-webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-composite:source-in; mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent); mask-composite:intersect}
 .bordvlak .kaartart, .bordvlak canvas, .bordvlak .bordlaag{z-index:1}
 /* werelden die nog dicht zijn: zwarte mist */
 .bmist path{fill:#030408 !important; opacity:.96 !important}
@@ -5351,6 +5351,69 @@ html body.pc #geluidfab.show.thuis.uit{color:#6a6a72; border-color:#6a6a72}
 .kaartbox .bknoppen .obtn.b-dim{color:#ececec !important}
 .kaartbox .bknoppen .obtn:hover{color:#fff !important}
 .kaartbox .bknoppen .obtn:disabled{opacity:0; pointer-events:none}
+
+/* 🌊 de doorgetekende zee: drie keer de kaart, pixelig, met golfjes erover; verderop de oude tegel en mist */
+.bordvlak .bordzeeverf{position:absolute !important; left:-100% !important; top:-100% !important; width:300% !important; height:300% !important; inset:auto; z-index:0 !important; image-rendering:pixelated}
+.bordvlak .bordgolf{position:absolute; left:-100%; top:-100%; width:300%; height:300%; z-index:0; pointer-events:none; mix-blend-mode:screen; opacity:.9;
+  background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA+VemSAAAE3UlEQVR42u3dvW4TQRQG0CyFC6ooBQVFijxBCh6Xx6GkyBOkcIEQRZSKwk0oEBLCIzH2zM7fPaeMEhHW/nTHX2Z2txuKHD5+erv2Z0+vxz6/9M8fW5d/9/2Ht6FfzNrXpfb/N/H7vRNBmJcAgwADAgxcZBu+WKjscHt/9c+evn29vuQouc69SqcWKr//ur2+na6VCQyW0IAAAwIMUZR9aG+w04S03B1gwxczmMAgwIAAAwIMZJiy4Khe4PTajaa0wwQGAQYEGBBgIIsShd9GOlY6Urk3eMFpAoMlNCDAgABDFPXLghnvsbXwjqiiG8+PdBRxlXu3VX6vmcBgCQ0IMCDAEEW/e2I5SsceZjwaWvA7m8BgCQ0IMCDAEIUiaXXu92UCAwIMCDAgwLCAtY8Tzlik2N22zvuvwetmAoMlNCDAgAADAAAAADCIeDt3GuzUOdzeZ33f6fV4/kW7qbyHLuDPSDAxAQYBBgQYuIjCpFDu0/+6Pelvlaf6ja5T+WgCgyU0IMCAAEMUW7LksBuIVhYu2XJ35KUkd+mZwGAJDQgwIMAQWLqsql0s1C7FCn6/kmIhJbXDKnd3Vq67h8ezr708P2X9Li2uabTSc6TddyYwWEIDAgwIMETRpsSqbeXSxNMdl1a7ADOBwRIaEGBAgCEKJQX8MWF5awKDJTQgwIAAQxRjlVi9SoSBdhw1OarmOpvAgAADAgwCDEwmu1QY/il8MJoGZaEJDJbQgAADAgxR9CucVnkqnd1FmMCAAIMAAwIM7K5NAeNG8esY/cmVJjAgwIAAAwIMS1IgXCD3SGWuZY5euseWCQwIMAgwIMDAzrbhd9a0KEiUIWO9Hr1eywmPuJrAYAkNCDAgwBCF8mYHJTu23BgfExgEGBBgQICBc3PeE8vOKTCBQYABAQYEGELZUruG7AbaQUmRt8oRuWjlY8G1P9zem8BgCQ0IMCDAwF+UVcS0yM3oTWCwhAYEGBBgiGKb8WbWQ0mVEnY/YQIDAgwCDAgwAAAAAACx1N+lYxdSPIu85qn7w909PJ5938vz09nXet1Hzp+RYGICDAIMCDBwkbIP3qscRVR2YQIDAgwIMAgwMDTlDX2NXoQOXnCawGAJDQgwIMAQRfoDupu957OLq7rUsb5c2cf6WrzHG7w3TGCwhAYEGBBgiCL/Q/YiH/rBBAYEGBBgEGBgPltROaV0AhMYEGAQYECAgQbalFAzHk9U0HHT6GijCQyW0IAAAwIM/JeihstEeyJl7f9v5XLUBAZLaECAAQGGKJRYOxh9987wBi+OTGBAgEGAAQEG2hv/w32vnT8lxYeb4GMCAwIMAgwIMFDVpnC5wCo3wR/9SKCCzgQGAQYEGBBg4B+bQmMhM+5aW+X6Ja5Bi2OlJjBYQgMCDAgwRBGuICopFlJOr8frf1hB18ZI99iqXJSZwGAJDQgwIMAQhRKFpUS7qb4JDJbQgAADAgxRKLEmUH33mCcgpk14HNMEBktoQIABAYYo2pQZ7tUEJjAgwCDAgAADBTYF06Q8VdLrawKDJTQgwIAAQyDr7MRSuPS79g1ej9SRyruHx7Pv+/7l8+7vg9zjnS2ObZrAYAkNCDAgwBBF/Q/ZCiswgQEBBgEGBBiorN9xwpTRy6mRrlW0a+99YAKDJTQgwIAAQ2i/AETiUvmednEcAAAAAElFTkSuQmCC) 0 0/6.38% 6.38% repeat; image-rendering:pixelated;
+  -webkit-mask-image:radial-gradient(closest-side, transparent 36%, #000 56%); mask-image:radial-gradient(closest-side, transparent 36%, #000 56%); animation:bzGolf 40s linear infinite}
+@keyframes bzGolf{to{background-position:12.76% 0}}
+html .bordvlak .bordzee::after{background:radial-gradient(circle at 50% 50%, rgba(2,3,6,0) 46%, rgba(2,3,6,.5) 56%, #020306 70%) !important}
+html .bordvlak .bordzee .bzmist{-webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 44%, #000 62%) !important; mask-image:radial-gradient(circle at 50% 50%, transparent 44%, #000 62%) !important}
+.kaartbox .bordbak{cursor:grab} body.bveegt .kaartbox .bordbak{cursor:grabbing}
+
+/* ✦ de gebroken Seraf hapert: schudden, kleuren uit elkaar, een paar repen die verspringen */
+.mpptvak.hapert .mppt{animation:serafHapert 1.05s steps(1) both}
+.mpptvak.hapert .mppt .ptfig{animation:serafReep 1.05s steps(1) both}
+@keyframes serafHapert{
+  0%{transform:translate(0,0); filter:none}
+  8%{transform:translate(-6px,2px); filter:drop-shadow(4px 0 0 rgba(255,40,80,.9)) drop-shadow(-4px 0 0 rgba(40,220,255,.9)) contrast(1.4)}
+  16%{transform:translate(5px,-3px); filter:hue-rotate(90deg) saturate(2)}
+  24%{transform:translate(-3px,0); filter:invert(1) contrast(1.6)}
+  32%{transform:translate(7px,1px); filter:drop-shadow(-6px 0 0 rgba(255,40,80,.9)) drop-shadow(6px 0 0 rgba(40,220,255,.9))}
+  44%{transform:translate(-5px,-2px); filter:brightness(2.2) grayscale(1)}
+  56%{transform:translate(3px,3px); filter:hue-rotate(-120deg) saturate(3)}
+  68%{transform:translate(-2px,0); filter:drop-shadow(3px 0 0 rgba(255,40,80,.8)) drop-shadow(-3px 0 0 rgba(40,220,255,.8))}
+  80%{transform:translate(2px,-1px); filter:contrast(1.3)}
+  100%{transform:none; filter:none}}
+@keyframes serafReep{
+  0%, 100%{clip-path:none}
+  10%{clip-path:polygon(0 0,100% 0,100% 30%,0 30%,0 44%,100% 44%,100% 100%,0 100%); transform:translateX(8px)}
+  22%{clip-path:polygon(0 10%,100% 10%,100% 60%,0 60%); transform:translateX(-10px)}
+  36%{clip-path:polygon(0 0,100% 0,100% 72%,0 72%,0 80%,100% 80%,100% 100%,0 100%); transform:translateX(5px)}
+  50%{clip-path:none; transform:none; opacity:.2}
+  60%{opacity:1; clip-path:polygon(0 20%,100% 20%,100% 90%,0 90%); transform:translateX(-6px)}
+  76%{clip-path:none; transform:none}}
+
+/* 🕊 Laatste Adem: doorzichtige pixelvleugels en een klein wit licht */
+.heilig{position:fixed; z-index:470; pointer-events:none; width:0; height:0}
+.heilig .hgloed{position:absolute; left:calc(var(--kw) * -.7); top:calc(var(--kw) * -.7); width:calc(var(--kw) * 1.4); height:calc(var(--kw) * 1.4); border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.75) 0, rgba(255,250,230,.35) 30%, rgba(255,255,255,0) 66%); animation:hGloed 2.2s ease-out both}
+.heilig .hvl{position:absolute; top:calc(var(--kw) * -.42); width:calc(var(--kw) * .95); opacity:0; image-rendering:pixelated; filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
+.heilig .hvl svg{width:100%; height:auto; display:block}
+.heilig .hvl.links{right:calc(var(--kw) * .18); transform-origin:100% 60%; animation:hVlL 2.2s ease-out both}
+.heilig .hvl.rechts{left:calc(var(--kw) * .18); transform-origin:0 60%; animation:hVlR 2.2s ease-out both}
+@keyframes hGloed{0%{opacity:0; transform:scale(.4)} 20%{opacity:1; transform:scale(1)} 70%{opacity:.8} 100%{opacity:0; transform:scale(1.15)}}
+@keyframes hVlL{0%{opacity:0; transform:rotate(30deg) scale(.6)} 25%{opacity:.38; transform:rotate(-6deg) scale(1)} 45%{transform:rotate(4deg)} 65%{opacity:.34; transform:rotate(-4deg)} 100%{opacity:0; transform:rotate(0) translateY(-12px)}}
+@keyframes hVlR{0%{opacity:0; transform:rotate(-30deg) scale(.6)} 25%{opacity:.38; transform:rotate(6deg) scale(1)} 45%{transform:rotate(-4deg)} 65%{opacity:.34; transform:rotate(4deg)} 100%{opacity:0; transform:rotate(0) translateY(-12px)}}
+/* het aethervakje van Laatste Adem als hij deze beurt al gebruikt is: zwart, het licht is uit */
+.ruitw.ae.aeuit .ruit{filter:grayscale(1) brightness(.18) !important}
+/* ✦ lichtkaart gespeeld: wit licht in het midden met de kaart erin */
+.lichtflits{position:fixed; z-index:480; pointer-events:none; width:0; height:0}
+.lichtflits .lfgloed{position:absolute; left:-260px; top:-260px; width:520px; height:520px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.95) 0, rgba(255,252,236,.6) 22%, rgba(255,250,230,.18) 48%, rgba(255,255,255,0) 70%); animation:lfGloed 1.65s ease-out both}
+.lichtflits .lfstraal{position:absolute; left:-340px; top:-340px; width:680px; height:680px; border-radius:50%;
+  background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.18) 0 6deg, rgba(255,255,255,0) 6deg 18deg);
+  -webkit-mask-image:radial-gradient(circle, #000 18%, transparent 68%); mask-image:radial-gradient(circle, #000 18%, transparent 68%); animation:lfStraal 1.65s ease-out both}
+.lichtflits .lfkaart{position:absolute; left:-62px; top:-104px; width:124px; height:172px; animation:lfKaart 1.65s cubic-bezier(.2,.8,.3,1) both;
+  filter:drop-shadow(0 0 18px rgba(255,255,255,.9))}
+.lichtflits .lfkaart .card{position:absolute !important; inset:0 !important; width:100% !important; height:100% !important}
+.lichtflits .lfnaam{position:absolute; left:-200px; width:400px; top:84px; text-align:center; font:13px/1.4 "Press Start 2P",monospace; color:#fff; text-shadow:0 2px 0 #000, 0 0 12px rgba(255,255,255,.8);
+  animation:lfKaart 1.65s cubic-bezier(.2,.8,.3,1) both}
+.lichtflits .lfnaam small{display:block; font-size:8px; color:#e8e2cc; letter-spacing:.1em}
+@keyframes lfGloed{0%{opacity:0; transform:scale(.3)} 15%{opacity:1; transform:scale(1)} 75%{opacity:.85} 100%{opacity:0; transform:scale(1.2)}}
+@keyframes lfStraal{0%{opacity:0; transform:rotate(0) scale(.5)} 20%{opacity:1; transform:rotate(10deg) scale(1)} 100%{opacity:0; transform:rotate(40deg) scale(1.15)}}
+@keyframes lfKaart{0%{opacity:0; transform:scale(.4) translateY(20px)} 18%{opacity:1; transform:scale(1.08)} 28%{transform:scale(1)} 80%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(.92) translateY(-10px)}}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -10083,6 +10146,37 @@ function rectOf(sel){ if(FAST) return null; const e=document.querySelector(sel);
     if(alt) return alt.getBoundingClientRect(); }
   return r; }
 function creSel(p,c){ return `.slot[data-act="cre"][data-p="${p}"][data-col="${c}"]`; }
+/* 🕊 Laatste Adem redt iets: heel doorzichtige pixelvleugels en een klein wit heilig licht. */
+const VLEUGEL = ["...........####","........#######","......#########","....###########","..############.",".############..","###########....",".##########....","..########.....","...######......","....####.......","......##......."];
+function vleugelSVG(spiegel){
+  const w = VLEUGEL[0].length, h = VLEUGEL.length; let r = "";
+  VLEUGEL.forEach((rij, y) => { for(let x = 0; x < w; x++) if(rij[x] === "#"){ const rand = (rij[x - 1] !== "#" || rij[x + 1] !== "#" || !VLEUGEL[y - 1] || VLEUGEL[y - 1][x] !== "#");
+    r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${rand ? "#ffffff" : "#e8f0ff"}" fill-opacity="${rand ? .9 : .45}"/>`; } });
+  return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" style="transform:scaleX(${spiegel ? -1 : 1})">${r}</svg>`;
+}
+function heiligLicht(sel){
+  if(FAST) return;
+  const el = document.querySelector(sel); if(!el) return;
+  const r = el.getBoundingClientRect();
+  const d = document.createElement("div"); d.className = "heilig";
+  d.style.cssText = `left:${r.left + r.width / 2}px; top:${r.top + r.height * .42}px; --kw:${r.width}px`;
+  d.innerHTML = `<i class="hgloed"></i><b class="hvl links">${vleugelSVG(false)}</b><b class="hvl rechts">${vleugelSVG(true)}</b>`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2300);
+  try{ AU.play("light"); }catch(e){}
+}
+/* ✦ Een lichtkaart wordt gespeeld: kort in het midden van het veld, in wit licht, de kaart zelf. */
+function lichtFlits(card, p){
+  if(FAST || !card) return;
+  const fw = document.getElementById("fieldwrap"), r = fw ? fw.getBoundingClientRect() : {left:innerWidth / 2, top:innerHeight / 2, width:0, height:0};
+  const d = document.createElement("div"); d.className = "lichtflits";
+  d.style.cssText = `left:${r.left + r.width / 2}px; top:${r.top + r.height / 2}px`;
+  const wie = String(pName(p)).replace(EMOJI_RE, "").trim();
+  d.innerHTML = `<i class="lfstraal"></i><i class="lfgloed"></i><div class="lfkaart">${cardFaceHTML(card)}</div><div class="lfnaam"><small>${wie.toUpperCase()} SPEELT</small>${(LIGHTS[card.lk] || {}).name || "Licht"}</div>`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1700);
+  try{ AU.play("light"); }catch(e){}
+}
 /* 🟣 Een aether gaat af (okt 2026): het vakje van de aether licht op, een paars bolletje vliegt
    naar waar het gebeurt, en daar staat even wat de aether doet. Zonder tekst alleen het oplichten. */
 function aeFlits(p, key, doelSel, tekst){
@@ -11584,8 +11678,7 @@ function destroyCre(p, c, cause){
      && S.genade && S.genade[p] !== S.gTurn){
     S.genade[p] = S.gTurn;
     cr.hp = 1;
-    pop(creSel(p, c), "1", "heal");
-    aeFlits(p, "ae_genade", creSel(p, c), "blijft staan op 1 leven");
+    heiligLicht(creSel(p, c));
     addLog(`🕊 <em>Laatste Adem</em>: ${icon(cr.card.el)} ${EL[cr.card.el].name} van ${pName(p)} blijft staan op <b>1 leven</b>.`, true);
     render();
     return;
@@ -13411,6 +13504,7 @@ async function announceFusion(p, card, tributeId, fuseKey, opts){
 async function announceLight(p, card, flash){
   const fxVoor = FXNU;
   const L = LIGHTS[card.lk] || {};
+  lichtFlits(card, p); if(!FAST) await sleep(650);
   FXNU = {p, kop:"\u2726 " + String(L.name || "Licht").toUpperCase() + (flash ? " \u00b7 REACTIE" : "") + " \u00b7 GESPEELD", zin:fxPlat(LICHT_TEKST[card.lk]), beeld:card, bronPlek:null, doel:null};
   if(!FAST) render();
   try{ return await announceLight0(p, card, flash); }
@@ -17504,6 +17598,7 @@ function zegelEl(card){ return card.lk || card.el === "licht" ? "licht" : (["vuu
 const RITUEEL_ART = new Set();
 ["vuur","water","gras","steen","rots","plasma","roos","wolf","vis","clown","kogel","swipe","stab","schild","knoop"].forEach(k => {
   const im = new Image(); im.onload = () => { RITUEEL_ART.add(k); if(typeof render === "function" && S && !M) try{ render(); }catch(e){} }; im.src = `art/ritueel-${k}.png`; });
+const ZEGEL_GEZIEN = new Set();
 function zegelHTML(card){
   if(!card || inMist()) return "";
   const el = zegelEl(card), f = cardFaceHTML(card, true), m = f.match(/src="([^"]+)"/);
@@ -17511,7 +17606,10 @@ function zegelHTML(card){
   const soort = (card.var && RITUEEL_ART.has(card.var)) ? card.var : (!card.var && RITUEEL_ART.has(card.el) ? card.el : null);
   const stijl = soort ? ` style="background-image:url('art/ritueel-${soort}.png'); background-size:100% 100%; background-position:center"`
     : (m ? ` style="background-image:url('${m[1]}')"` : "");
-  return `<div class="zp ${el}" style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart${soort ? " eigen" : ""}"${stijl}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
+  /* Alleen de eerste keer dat dit ritueel getekend wordt, komt het binnen met een animatie. Daarna
+     ligt het er gewoon: bij elke nieuwe tekening opnieuw beginnen liet het steeds even wegflitsen. */
+  const nieuw = card.id != null && !ZEGEL_GEZIEN.has(card.id); if(nieuw) ZEGEL_GEZIEN.add(card.id);
+  return `<div class="zp ${el}${nieuw && !FAST ? " in" : ""}" style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart${soort ? " eigen" : ""}"${stijl}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
 }
 const ZEGEL_KLEUR = {vuur:"#ff7a3c", water:"#4fb3ff", gras:"#6fd27a", steen:"#c9a06a", licht:"#ffe08a"};
 function zegelGloed(col){
@@ -17723,10 +17821,12 @@ function ruitenHTML(p){
       : (k === "ae_graf" && tk ? `<span class="ruitmerk">${soortIc(tk)}</span>` : "");
     /* 🟣 Stroman: staat hij deze beurt nog klaar (goud), of is hij al gebruikt (grijs, ✕)? */
     const strom = k === "ae_deken" ? (stromanKlaar(p) ? " stroman klaar" : " stroman op") : "";
+    /* 🕊 Laatste Adem al gebruikt deze beurt: het licht is uit, het vakje wordt zwart (okt 2026). */
+    const aeUit = (k === "ae_genade" && S.genade && S.genade[p] === S.gTurn) ? " aeuit" : "";
     const zn = (k === "ae_ziel" && Array.isArray(S.ziel)) ? S.ziel[p] : 0;
     const merk2 = k === "ae_deken" ? `<span class="ruitmerk strommerk">${stromanKlaar(p) ? "✓" : "✕"}</span>`
       : (k === "ae_ziel" ? `<span class="ruitmerk zielmerk" title="${zn} van 3">${[0, 1, 2].map(i => `<i class="${i < zn ? "vol" : ""}"></i>`).join("")}</span>` : merk);
-    return {cls:"ae" + (isVak(AETHER_BEELD[k]) ? " vakz" : "") + strom, attr:`data-act="aeinfo" data-k="${k}" data-pvae="${k}" title="${AETHERS[k].name}${k === "ae_deken" ? (stromanKlaar(p) ? " · staat klaar deze beurt" : " · deze beurt al gebruikt") : ""}"`,
+    return {cls:"ae" + (isVak(AETHER_BEELD[k]) ? " vakz" : "") + strom + aeUit, attr:`data-act="aeinfo" data-k="${k}" data-pvae="${k}" title="${AETHERS[k].name}${k === "ae_deken" ? (stromanKlaar(p) ? " · staat klaar deze beurt" : " · deze beurt al gebruikt") : ""}"`,
       ic:aeIcon(k), img:beeld(AETHER_BEELD[k]), merk:merk2};
   });
   /* okt 2026: geen vakjes meer voor veldcondities en zijn lichtkaarten. Dat staat nu in de
@@ -20868,7 +20968,7 @@ const HORIZON = {
    het vergezicht van het level zelf. */
 function hzSleutel(id, variant){
   if(!id) return null;
-  const v = variant !== undefined ? variant : (S && S.story ? S.story.variant : undefined);
+  const v = variant !== undefined ? variant : (S && S.story ? S.story.variant : (S && S.decor && S.decor.id === id ? S.decor.variant : undefined));
   if(v !== undefined && v !== null && HORIZON[id + ":" + v]) return id + ":" + v;
   return HORIZON[id] ? id : null;
 }
@@ -25404,6 +25504,19 @@ function vrijDecor(){
     ds = (ds + 0x6D2B79F5) >>> 0; let t = ds; t = Math.imul(t ^ t >>> 15, t | 1);
     t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const kies = a => a[Math.floor(trek() * a.length)];
+  /* 🎭 (okt 2026) Spelen er twee personages, dan is het decor het domein van een van hen.
+     Wie meer domeinen heeft (Seraf, de Veerman die ook bij de trap staat), doet met al die
+     domeinen mee in de loting. */
+  const dom = typeof mpDomeinen === "function" ? mpDomeinen() : [];
+  if(dom.length){
+    let pool = dom;
+    if(m){ m.decorGehad = m.decorGehad || []; const vers = dom.filter(d => !m.decorGehad.includes(d.id + ":" + (d.v || ""))); if(vers.length) pool = vers; }
+    const d = kies(pool);
+    if(m) m.decorGehad.push(d.id + ":" + (d.v || ""));
+    S.decor = {sleutel, id:d.id, variant:d.v || null, wereld:STORY[d.id].wereld, muziek:STORY[d.id].muziek};
+    horizonVerf(d.id, d.v || null);
+    return;
+  }
   let w = m ? m.decorW : null;
   if(w == null){
     const ws = [...new Set(decorKandidaten().map(id => STORY[id].wereld))];
@@ -28773,6 +28886,7 @@ const BORD_MIST = {
 };
 /* Waar de camera naar kijkt per wereld: midden (x, y) en hoeveel procent van de kaart in beeld is. */
 const BORD_CAM = {1:[42,71.5,48], 2:[28,37,42], 3:[75,22.5,48], 4:[77,63,42]};
+const BORD_CAM_VER = 1.45;
 const BORD_BAAS = id => /^\d/.test(id) && !!lvBaas(id);
 const bordW = id => id === "start" ? 1 : id === "knort" ? 2 : id === "hemel" ? 3 : +String(id)[0];
 function bordPos(id){
@@ -28874,6 +28988,7 @@ function bordHTML(huidigW){
       aria-label="${id === "start" ? "Het begin" : id === "knort" ? "Knort" : id === "hemel" ? "De trap" : id + " " + STORY[id].naam}"></button>`; }).join("");
   return `<div class="bordbak" id="bordbak"><div class="bordvlak" id="bordvlak">
       <div class="bordzee" aria-hidden="true"><i class="bzmist"></i></div>
+      <canvas class="bordzeeverf" id="bordzeeverf" width="627" height="627" aria-hidden="true"></canvas><i class="bordgolf" aria-hidden="true"></i>
       <img class="kaartart" id="bordkaart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">
       <canvas id="bordgrond" width="2560" height="2560"></canvas>
       <svg class="bordlaag" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -28899,7 +29014,7 @@ function bordHTML(huidigW){
 const BORD = {cam:null, loop:null, xy:null, sleep:null};
 function bordNa(){
   const vlak = document.getElementById("bordvlak"); if(!vlak) return;
-  bordGrond(); bordCamera(); bordPionZet(); bordHud();
+  bordZee(); bordGrond(); bordCamera(); bordPionZet(); bordHud(); bordSwipeKlaar();
   const pion = document.getElementById("bpion");
   if(pion) pion.addEventListener("pointerdown", bordSleepStart);
   const n = M.bordNieuw;
@@ -28992,12 +29107,103 @@ function bordGrond(){
   };
   teken();
 }
+/* 🌊 De zee loopt door buiten de kaart (okt 2026). Langs elke rand lezen we de kleur van het water
+   (de donkerdere helft, zodat rotsen en schuim niet meetellen), smeren die uit langs de rand, en
+   trekken hem naar buiten door. Zo sluit het overal aan: waar de kaart lichter water heeft, is de
+   zee daarbuiten ook lichter, en verderop zakt alles weg in dezelfde diepe kleur. In blokjes van
+   ongeveer één pixel van de kaart, zodat het pixelart blijft. */
+function bordZee(){
+  const cv = document.getElementById("bordzeeverf"), img = document.getElementById("bordkaart");
+  if(!cv || !img) return;
+  if(!img.complete || !img.naturalWidth){ img.addEventListener("load", bordZee, {once:true}); return; }
+  const N = 209, E = 627, O = N;   // de kaart in 209 blokjes; de zee is drie keer zo groot
+  let d;
+  try{
+    const t = document.createElement("canvas"); t.width = t.height = N;
+    const tc = t.getContext("2d"); tc.imageSmoothingEnabled = true; tc.imageSmoothingQuality = "high";
+    tc.drawImage(img, 0, 0, N, N); d = tc.getImageData(0, 0, N, N).data;
+  }catch(e){ return; }
+  const px = (x, y) => { const i = (y * N + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const lum = c => c[0] * .3 + c[1] * .59 + c[2] * .11;
+  const BAND = 6;
+  const randKleur = get => { const l = []; for(let k = 0; k < BAND; k++) l.push(get(k)); l.sort((a, b) => lum(a) - lum(b));
+    const h = l.slice(0, Math.ceil(l.length / 2)); return [0, 1, 2].map(j => h.reduce((s, c) => s + c[j], 0) / h.length); };
+  const glad = (arr, r) => { let a = arr; for(let pas = 0; pas < 3; pas++){ a = a.map((_, i) => { const s = [0, 0, 0]; let n = 0;
+    for(let k = -r; k <= r; k++){ const c = a[Math.min(N - 1, Math.max(0, i + k))]; s[0] += c[0]; s[1] += c[1]; s[2] += c[2]; n++; } return s.map(v => v / n); }); } return a; };
+  const L = glad(Array.from({length:N}, (_, y) => randKleur(k => px(k, y))), 6);
+  const R = glad(Array.from({length:N}, (_, y) => randKleur(k => px(N - 1 - k, y))), 6);
+  const T = glad(Array.from({length:N}, (_, x) => randKleur(k => px(x, k))), 6);
+  const B = glad(Array.from({length:N}, (_, x) => randKleur(k => px(x, N - 1 - k))), 6);
+  const diep = [0, 15, 46];
+  const c2 = cv.getContext("2d"), out = c2.createImageData(E, E), o = out.data;
+  for(let y = 0; y < E; y++) for(let x = 0; x < E; x++){
+    const mx = x - O, my = y - O;
+    const i = (y * E + x) * 4;
+    if(mx >= 0 && mx < N && my >= 0 && my < N){ const c = px(mx, my); o[i] = c[0]; o[i + 1] = c[1]; o[i + 2] = c[2]; o[i + 3] = 255; continue; }
+    const cx = Math.min(N - 1, Math.max(0, mx)), cy = Math.min(N - 1, Math.max(0, my));
+    const dx = mx < 0 ? -mx : (mx >= N ? mx - N + 1 : 0), dy = my < 0 ? -my : (my >= N ? my - N + 1 : 0);
+    const kx = mx < 0 ? L[cy] : (mx >= N ? R[cy] : null), ky = my < 0 ? T[cx] : (my >= N ? B[cx] : null);
+    let c;
+    if(kx && ky){ const w = dx / (dx + dy); c = [0, 1, 2].map(j => kx[j] * w + ky[j] * (1 - w)); }
+    else c = kx || ky;
+    const afst = Math.hypot(dx, dy), t = Math.min(1, afst / 55), tt = t * t * (3 - 2 * t);
+    let r0 = c[0] + (diep[0] - c[0]) * tt, g0 = c[1] + (diep[1] - c[1]) * tt, b0 = c[2] + (diep[2] - c[2]) * tt;
+    /* vlak bij de rand: een gespiegeld, wegstervend stukje van de kaart zelf, zodat het water niet
+       ineens glad wordt waar de kaart ophoudt */
+    const M2 = 22;
+    if(afst < M2){
+      const sx = mx < 0 ? Math.min(N - 1, -mx - 1) : (mx >= N ? Math.max(0, 2 * N - mx - 1) : mx);
+      const sy = my < 0 ? Math.min(N - 1, -my - 1) : (my >= N ? Math.max(0, 2 * N - my - 1) : my);
+      const m = px(sx, sy), f = Math.pow(1 - afst / M2, 2) * .75, ml = lum(m) > 70 ? .35 : 1;   // fel schuim en rotsen dempen
+      r0 += (m[0] - r0) * f * ml; g0 += (m[1] - g0) * f * ml; b0 += (m[2] - b0) * f * ml;
+    }
+    o[i] = r0; o[i + 1] = g0; o[i + 2] = b0; o[i + 3] = 255;
+  }
+  c2.putImageData(out, 0, 0);
+}
+/* 👆 Vegen tussen werelden: sleep het bord opzij (vinger of muis) en je gaat naar de wereld die die
+   kant op ligt. Tijdens het slepen schuift het bord mee. */
+function bordSwipeKlaar(){
+  const bak = document.getElementById("bordbak"); if(!bak || bak.dataset.swipe) return;
+  bak.dataset.swipe = "1";
+  bak.addEventListener("pointerdown", e => {
+    if(BORD.loop || BORD.sleep || e.button > 0 || (e.target.closest && e.target.closest(".bpion, .obtn, .bknoppen"))) return;
+    BORD.veeg = {x:e.clientX, y:e.clientY, dx:0, dy:0, id:e.pointerId};
+  });
+}
+document.addEventListener("pointermove", e => {
+  const v = BORD.veeg; if(!v || BORD.sleep) return;
+  v.dx = e.clientX - v.x; v.dy = e.clientY - v.y;
+  if(Math.hypot(v.dx, v.dy) < 10) return;
+  v.bezig = true;
+  const vlak = document.getElementById("bordvlak");
+  if(vlak && BORD.cam){ vlak.style.transition = "none"; vlak.style.transform = `translate(${v.dx * .6}px, ${v.dy * .6}px) ${BORD.cam}`; }
+});
+function bordVeegEind(){
+  const v = BORD.veeg; if(!v) return; BORD.veeg = null;
+  if(!v.bezig) return;
+  /* het klikje dat erop volgt mag geen plek aanklikken */
+  BORD.veegKlik = Date.now();
+  const vlak = document.getElementById("bordvlak");
+  if(vlak){ vlak.style.transition = ""; vlak.style.transform = BORD.cam; }
+  if(!M || M.eiland || Math.hypot(v.dx, v.dy) < 70) return;
+  const nu = bordCamW() || 1, [x0, y0] = BORD_CAM[nu];
+  /* je sleept de kaart: de wereld aan de andere kant komt in beeld */
+  const rx = -v.dx, ry = -v.dy, l = Math.hypot(rx, ry);
+  let best = null, score = .45;
+  [1, 2, 3, 4].forEach(w => { if(w === nu || !bordWereldOpen(w)) return; const [x, y] = BORD_CAM[w], vx = x - x0, vy = y - y0, lv = Math.hypot(vx, vy) || 1;
+    const s = (vx * rx + vy * ry) / (lv * l) - lv / 400; if(s > score){ score = s; best = w; } });
+  if(best){ M.telW = best; AU.play && AU.play("place"); bordCamera(); bordHud(); }
+}
+document.addEventListener("pointerup", bordVeegEind);
+document.addEventListener("pointercancel", bordVeegEind);
 /* De camera: één wereld van dichtbij, of het hele eiland. Bij een andere stand glijdt hij erheen. */
 function bordCamDoel(){
   const bak = document.getElementById("bordbak"); if(!bak) return null;
   const vw = bak.clientWidth, vh = bak.clientHeight, S = Math.min(vw, vh);
   const w = bordCamW();
-  const [cxp, cyp, span] = w ? BORD_CAM[w] : [50, 50, 100];
+  const [cxp, cyp, span0] = w ? BORD_CAM[w] : [50, 50, 100];
+  const span = w ? Math.min(100, span0 * BORD_CAM_VER) : 100;   // (okt 2026) minder ingezoomd: je ziet de hele wereld en wat eromheen
   const s = 100 / span, left = (vw - S) / 2, top = (vh - S) / 2;
   /* het midden van wat er tussen de titel en de balk onderin overblijft */
   const midY = w ? vh / 2 + (pcAan() ? 30 : -24) : vh / 2;
@@ -29019,7 +29225,7 @@ function bordCamera(zacht){
   if(nv){ const w = bordCamW();
     if(w){ const [cx, cy, span] = BORD_CAM[w];
       nv.style.setProperty("--nx", (37.5 + cx * .25) + "%"); nv.style.setProperty("--ny", (37.5 + cy * .25) + "%");
-      nv.style.setProperty("--nr", (span * .62 * .25) + "%"); nv.classList.remove("uit"); }
+      nv.style.setProperty("--nr", (span * BORD_CAM_VER * .5 * .25) + "%"); nv.classList.remove("uit"); }
     else nv.classList.add("uit"); }
 }
 window.addEventListener("resize", () => { if(document.getElementById("bordvlak")){ BORD.cam = null; bordCamera(); } });
@@ -31111,15 +31317,46 @@ const MP_CHARS = [
   {id:"3-5"}, {id:"3-6"},
   {id:"4-1", naam:"De Veerman", spr:"veerman"}, {id:"4-2"}, {id:"4-3"}, {id:"4-4"}, {id:"4-5"},
   {id:"5-2"}, {id:"5-3"},
-  /* ✦ 5-4: Seraf in elk gezicht apart, voor het vergezicht van dat gezicht */
+  /* ✦ 5-4: de gebroken Seraf is één personage (okt 2026). Hij begint met een willekeurig gezicht
+     en aan het begin van elke ronde hapert hij en springt naar een ander. Zijn domeinen zijn alle
+     vier de vergezichten van die gezichten. */
+  {id:"5-4", lv:"5-4", naam:"De gebroken Seraf", spr:"seraf_magnus", exact:true,
+   vormen:["5-4:magnus", "5-4:moeder", "5-4:flint", "5-4:oceaan"],
+   domeinen:[["5-4", null], ["5-4", "moeder"], ["5-4", "flint"], ["5-4", "oceaan"]]},
+  {id:"5-5"}
+];
+/* De vier gezichten van de gebroken Seraf (alleen nog als vorm, niet los te kiezen). */
+const SERAF_VORMEN = [
   {id:"5-4:magnus", lv:"5-4", naam:"Seraf · Magnus", spr:"seraf_magnus", exact:true},
   {id:"5-4:moeder", lv:"5-4", naam:"Seraf · Moeder Natuur", spr:"seraf_moeder", hz:"moeder", fase:0, exact:true},
   {id:"5-4:flint", lv:"5-4", naam:"Seraf · Flint", spr:"seraf_flint", hz:"flint", fase:1, exact:true},
-  {id:"5-4:oceaan", lv:"5-4", naam:"Seraf · de Oceaan", spr:"seraf_oceaan", hz:"oceaan", fase:2, exact:true},
-  {id:"5-5"}
-];
+  {id:"5-4:oceaan", lv:"5-4", naam:"Seraf · de Oceaan", spr:"seraf_oceaan", hz:"oceaan", fase:2, exact:true}];
+/* Welk gezicht nu: zonder geheugen, uit een zaadje en het rondenummer. Online is het zaadje de
+   gedeelde seed, dus beide spelers zien hetzelfde gezicht. */
+function vormIdx(n){
+  if(!S) return 0;
+  if(!S.vormSeed) S.vormSeed = NET.on ? ((NET.seed >>> 0) || 7) : ((Math.random() * 1e9) | 0) + 1;
+  const h = k => { let t = (S.vormSeed + k * 0x9E3779B1) >>> 0; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return (t ^ t >>> 14) >>> 0; };
+  const R = S.gTurn ? Math.max(0, Math.floor((S.gTurn - 1) / 2)) : 0;
+  let i = h(0) % n;
+  for(let r = 1; r <= R; r++) i = (i + 1 + h(r) % (n - 1)) % n;
+  return i;
+}
+/* De domeinen van de twee personages die nu spelen: hun eigen level, een tweede level (ook), en
+   eventuele extra domeinen (domeinen: [[level, variant], ...]). Alleen wat een vergezicht heeft. */
+function mpDomeinen(){
+  if(!S || !Array.isArray(S.char) || !S.char[0] || !S.char[1]) return [];
+  const uit = [], zie = new Set();
+  const voeg = (id, v) => { const k = id + ":" + (v || ""); if(zie.has(k) || !STORY[id] || !STORY[id].muziek || !MUZIEK[STORY[id].muziek]) return;
+    const hz = v ? HORIZON[id + ":" + v] : HORIZON[id]; if(!hz || !hz.length) return; zie.add(k); uit.push({id, v:v || null}); };
+  S.char.forEach(cid => { const c = mpChar(cid), d = c.def || {};
+    voeg(c.lv, c.hz); if(d.ook) voeg(d.ook); (d.domeinen || []).forEach(([id, v]) => voeg(id, v)); });
+  return uit;
+}
 function mpChar(id){
-  const c = MP_CHARS.find(x => x.id === id) || (typeof LADDER_EXTRA !== "undefined" && LADDER_EXTRA.find(x => x.id === id)) || MP_CHARS[0];
+  const c = MP_CHARS.find(x => x.id === id) || SERAF_VORMEN.find(x => x.id === id) || (typeof LADDER_EXTRA !== "undefined" && LADDER_EXTRA.find(x => x.id === id)) || MP_CHARS[0];
+  if(c.vormen){ const v = mpChar(c.vormen[vormIdx(c.vormen.length)]);
+    return Object.assign({}, v, {id:c.id, vorm:v.id, def:Object.assign({}, v.def, {domeinen:c.domeinen})}); }
   const lv = c.lv || c.id, L = STORY[lv] || {};
   const spr = c.spr || L.sprite;
   return {id:c.id, lv, hz:c.hz || null, def:c, naam:c.naam || L.vechtNaam || L.vijand || "?", spr,
@@ -31238,7 +31475,8 @@ function profielSchoon(v, p){
     return {char:v.char, deck:ladderDeckSchoon(v.deck)};
   /* tegen de bot mag je eigen deck de aethers bevatten die je op de ladder verdiende; online niet */
   const extra = (p != null && S.vsBot && !NET.on && !isBot(p)) ? ladderAeVrij() : [];
-  return {char:MP_CHARS.some(c => c.id === v.char) ? v.char : "1-1", deck:basDeckSchoon(v.deck, extra)};
+  const ch = /^5-4:/.test(String(v.char)) ? "5-4" : v.char;   // de vier losse Serafs zijn er één geworden
+  return {char:MP_CHARS.some(c => c.id === ch) ? ch : "1-1", deck:basDeckSchoon(v.deck, extra)};
 }
 /* 🤖 De decks van de bot in Basis: gevonden door duizenden potjes in Colab (decklab). Staat er
    een botdecks.json naast index.html, dan gebruikt hij die; anders deze lijst. */
@@ -31907,6 +32145,7 @@ const MP_SOORT = [
 ];
 const MP_UIT = {};
 function mpUitingen(id){
+  { const c0 = MP_CHARS.find(x => x.id === id); if(c0 && c0.vormen) return mpUitingen(mpChar(id).vorm); }
   if(MP_UIT[id]) return MP_UIT[id];
   const c = mpChar(id), d = c.def || {}, L = STORY[c.lv] || {};
   /* Een gezicht uit een latere fase (5-4) heeft de zinnen van die fase. Een vonk van het trio
@@ -32048,7 +32287,13 @@ function mpBalkPaint(){
   MPPT.leven = nu; MPPT.cre = cr;
   const me = (NET.on && NET.seat === 1) ? 1 : 0, top = 1 - me;
   const nuT = Date.now(), actief = x => x && x.tot > nuT ? x.n : 0;
-  const sig = [top, S.char.join(), nu.join(), S.tp, MPPT.menu ? MPPT.soort + MPPT.lijst.join() : "-",
+  /* ✦ De gebroken Seraf: springt hij naar een ander gezicht, dan hapert zijn portret even. */
+  const vormNu = S.char.map(id => mpChar(id).vorm || "").join();
+  if(MPPT.vorm && MPPT.vorm !== vormNu && !FAST){ const oud = MPPT.vorm.split(","); MPPT.hapert = [0, 1].filter(q => oud[q] !== vormNu.split(",")[q]); MPPT.hapertTot = Date.now() + 1100;
+    setTimeout(() => { MPPT.hapert = null; const v = document.getElementById("mpvak"); if(v) v.dataset.sig = ""; mpBalkPaint(); }, 1150);
+    try{ AU.play("glitch"); }catch(e){} }
+  MPPT.vorm = vormNu;
+  const sig = [vormNu, (MPPT.hapert || []).join(), top, S.char.join(), nu.join(), S.tp, MPPT.menu ? MPPT.soort + MPPT.lijst.join() : "-",
     actief(MPPT.em[0]), actief(MPPT.em[1]), actief(MPPT.zin[0]), actief(MPPT.zin[1]),
     (MPPT.em[0] || {}).soort, (MPPT.em[1] || {}).soort].join("|");
   if(vak.dataset.sig === sig) return;
@@ -32057,6 +32302,7 @@ function mpBalkPaint(){
     return `<div class="vbrij mphp${S.tp === p ? " aan" : ""}" data-side="${p}"><div class="vbnaam">${c.naam}</div>`
       + `<div class="plife hpbalk">${levensBalk(P(p).life, levensPiek(p, 5))}</div></div>`; };
   vak.innerHTML = hp(top) + mpPtHTML(top, false) + hp(me) + mpPtHTML(me, !NET.on || NET.seat === me);
+  if(MPPT.hapert) MPPT.hapert.forEach(q => { const el = vak.querySelectorAll(".mpptvak")[q === top ? 0 : 1]; if(el) el.classList.add("hapert"); });
 }
 /* Een soort kiezen: vijf zinnen daaruit, willekeurig als er meer zijn. */
 function mpSoortKies(k){
@@ -32362,7 +32608,7 @@ function onBtn(btn, el, fromAction){
       else { M = {type:"story", hemel:true}; render(); }
       break;
     case "hemelaf": M = {type:"story"}; render(); break;
-    case "bordplek": { const id = el && el.dataset.id; if(id){
+    case "bordplek": { const id = el && el.dataset.id; if(BORD.veegKlik && Date.now() - BORD.veegKlik < 350) break; if(id){
         if(id === bordPionPlek()){ const b = document.querySelector(STORY[id] ? "#bknoppen .binfo" : "#bknoppen .bstart"); if(b) b.click(); else bordHud(); }
         else bordLoop(id); } break; }
     case "bordstap": { const r = {op:[0, -1], neer:[0, 1], links:[-1, 0], rechts:[1, 0]}[el && el.dataset.r]; if(r) bordStap(...r); break; }
