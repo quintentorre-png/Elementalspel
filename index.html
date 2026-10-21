@@ -4822,7 +4822,7 @@ body.tel{
   --sr:max(10px, env(safe-area-inset-right, 0px));
   --sb:env(safe-area-inset-bottom, 0px);
   --top:46px; --rail:88px; --peek:50px; --rib:20px;
-  --chh:min(calc((100dvh - 134px - var(--sb)) / 2.52), calc((100vw - var(--sl) - var(--sr) - var(--rail) - 60px) / 5 * 1.4));
+  --chh:min(calc((100dvh - 134px - var(--sb)) / 2.52), calc((100vw - var(--sl) - var(--sr) - var(--rail) - 60px) / 4 * 1.4));
   --cw:calc(var(--chh) / 1.4);
   --rit:calc(var(--chh) * .26);
   --hh:min(46dvh, 200px); --hw:calc(var(--hh) / 1.4);
@@ -8521,7 +8521,7 @@ EL.spin = {name:"Spin", icon:"🕷", strong:null, flash:false, hp:7, token:true,
 EL.swipe = {name:"Swipe", icon:"🗡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
 EL.stab = {name:"Stab", icon:"🔪", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
 EL.schild = {name:"Schild", icon:"🛡", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
-/* ⛓ 5-3 · De knoop: het ritueel van de Naad in de middelste kolom. Wat daar als wezen wordt
+/* ⛓ 5-3 · De knoop: het ritueel van de Naad in de derde kolom. Wat daar als wezen wordt
    gespeeld, doet zijn speel-effect drie keer, en mag overspeeld worden. */
 EL.knoop = {name:"De knoop", icon:"⛓", strong:null, flash:false, hp:2, speciaal:true, kaart:true, alleenSpell:true};
 EL.schildje = {name:"Schildje", icon:"🛡", strong:null, flash:false, hp:3, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true, overheen:true, geenEnt:true};
@@ -8751,7 +8751,7 @@ const AETHER_TEKST = {
   ae_armen:     "Begin van jouw beurt wijzen twee armen elk een plek aan jouw kant aan. Staat daar aan het eind van je beurt een wezen, dan pakt ze die: heeft ze plek, dan is die nu van haar, anders knijpt ze: <b>3</b> schade.",
   ae_veertig:   "Onder water {fizzelt} elk 🔥 Vuur-effect, van iedereen. Een 🔥-wezen dooft meteen zodra die het veld raakt.",
   ae_spiegel:   "Ze heeft al jouw aethers, en ze staan zoals jij ze instelde.",
-  ae_knoop:     "In zijn middelste kolom ligt ⛓ de knoop, een ritueel die nooit weggaat. Een wezen dat hij daar speelt doet zijn speel-effect <b>drie keer</b> en {wijkt}.",
+  ae_knoop:     "In zijn derde kolom ligt ⛓ de knoop, een ritueel die nooit weggaat. Een wezen dat hij daar speelt doet zijn speel-effect <b>drie keer</b> en {wijkt}.",
   ae_staal:     "Zijn 🪨 Steen en ⛰️ Rots zijn van staal: Rots laat geen kiezel achter (wel het Steen-effect), en 🌿 Gras kan ze niet verstrikken of aanwijzen, net als 🔥 Vuur.",
   ae_roedel:    "Begin van elke beurt van Max: er komt gratis een 🐺 wolf bij op een vrije plek, en die doet zijn speel-effect.",
   ae_dubbel:    "Van het eerste wezen dat de eigenaar elke beurt neerzet, komt er meteen een <b>tweede exemplaar</b> bij op een vrije plek: zelfde kaart, zelfde levens, geen speel-effect. Gaat het dood, dan is het weg.",
@@ -9197,7 +9197,7 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+
 
 /* ---- lookups ---- */
 /* ▥ Het aantal kolommen. Normaal vijf; in een potje tegen de bot kan het ook met vier (okt 2026, proef). */
-const NK = () => (S && S.nk) || 5;
+const NK = () => (S && S.nk) || 4;   // (okt 2026) het spel is vier kolommen, overal
 const kolLijst = () => Array.from({length:NK()}, (_, i) => i);
 function eachCre(fn){ for(let p=0;p<2;p++) for(let c=0;c<NK();c++){ const cr=P(p).cols[c].cre; if(cr) fn(cr,p,c); } }
 function allCreIds(pred){ const out=[]; eachCre((cr,p,c)=>{ if(!pred || pred(cr,p,c)) out.push(cr.card.id); }); return out; }
@@ -9308,7 +9308,7 @@ function canAttack(cr, p){
 function sluisBij(){
   const st = S && S.story;
   if(!st || !st.sluisAan || S.over) return;
-  st.sluis = st.sluis == null ? (st.sluisStart != null ? st.sluisStart : 2) : (st.sluis + 1) % 5;
+  st.sluis = st.sluis == null ? (st.sluisStart != null ? st.sluisStart : 2) : (st.sluis + 1) % NK();
   if(st.sluisNaam) addLog(`${st.sluisIc || "🚪"} <em>${st.sluisNaam[0].toUpperCase() + st.sluisNaam.slice(1)} houdt kolom ${st.sluis + 1} dicht.</em> Daar gaat deze beurt niets door, aan geen van beide kanten.`, true);
   else addLog(`🚪 <em>De sluis in kolom ${st.sluis + 1} klapt dicht.</em> Daar gaat deze beurt niets door, aan geen van beide kanten.`, true);
   if(!FAST) AU.play("rock");
@@ -9690,7 +9690,7 @@ function hitteVerf(){
 function rotsMerkBij(){
   if(!S || !S.story || !S.story.rotsAan || S.over) return;
   /* Aan allebei de kanten een willekeurige plek — het plafond kiest geen partij. */
-  const merken = [0, 1].map(p => ({p, c: Math.floor(rnd() * 5)}));
+  const merken = [0, 1].map(p => ({p, c: Math.floor(rnd() * NK())}));
   /* 5-4: het gezicht van Magnus laat het aan jouw kant twee keer zo vaak vallen. Zijn eigen
      kant krijgt gewoon één plek. */
   /* 1-5, fase 2: twee per kant. */
@@ -11688,7 +11688,7 @@ function vonkOverslag(tp, tc, srcEl, o){
   const woede = !!(o && o.woede), plasma = !!(o && o.plasma);
   if(!woede && !plasma && !trioKracht(baas, "spat")) return;
   [tc-1, tc+1].forEach(c => {
-    if(c < 0 || c > 4) return;
+    if(c < 0 || c > NK() - 1) return;
     const cr = P(tp).cols[c].cre; if(!cr) return;
     if(hexVan(cr, tp, baas)) return;                                                          // 🕯 Onaantastbaar
     if(cr.card.el === "water" && !(o && o.heet) && !oerkrachtOp(baas, "vuur")) return;      // 💧 Water voelt de overslag niet (ook niet met Explosiegevaar; wel met 🟣 Oervuur)
@@ -12101,7 +12101,10 @@ async function naadNa(){
         if(app){ app.classList.remove("beefthard"); void app.offsetWidth; app.classList.add("beefthard");
                  setTimeout(() => app.classList.remove("beefthard"), 700); }
       }
-      sluitKolommen(st.naadHits === 1 ? [0, 4] : [1, 3]);
+      /* Eerst de buitenste twee, dan nog één: er blijft precies één kolom open (bij vier kolommen
+         kolom 3, waar de knoop ligt; bij vijf het midden). */
+      const vier = NK() === 4;
+      sluitKolommen(st.naadHits === 1 ? [0, NK() - 1] : (vier ? [1] : [1, 3]));
       if(st.flintHulp) st.flintOpen = (st.flintOpen || []).concat([st.naadHits === 1 ? 0 : 1]);
       render();
       if(!FAST) await sleep(500);
@@ -13059,10 +13062,9 @@ async function flintTrektZwartGat(){
 async function bordSpiegel(){
   for(const p of [0, 1]){
     const k = P(p).cols;
-    [k[0], k[4]] = [k[4], k[0]];
-    [k[1], k[3]] = [k[3], k[1]];
+    k.reverse();                                   // 1↔4 en 2↔3 (bij vijf: 1↔5, 2↔4)
   }
-  addLog(`💨 <em>De rook draait.</em> Links is rechts en rechts is links; alleen het midden ligt nog waar het lag.`, true);
+  addLog(`💨 <em>De rook draait.</em> Links is rechts en rechts is links.`, true);
   if(!FAST){ grijsFlits(); AU.play("water"); render(); await sleep(520); }
   render();
 }
@@ -13074,8 +13076,8 @@ function bandSchuif(stil){
   for(const p of [0, 1]){
     const k = P(p).cols;
     for(let laag of ["cre", "spell"]){
-      for(let pas=0; pas<5; pas++){
-        for(let c=3; c>=0; c--){
+      for(let pas=0; pas<NK(); pas++){
+        for(let c=NK()-2; c>=0; c--){
           if(k[c][laag] && !k[c+1][laag]){ k[c+1][laag] = k[c][laag]; k[c][laag] = null; bewogen = true; }
         }
       }
@@ -13088,10 +13090,10 @@ function bandSchuif(stil){
 async function forgeEet(){
   const weg = [];
   for(const p of [0, 1]){
-    const sl = P(p).cols[4];
+    const L = NK() - 1, sl = P(p).cols[L];
     /* ⚙ Staal smelt niet (okt 2026): Klinknagels stalen steen blijft gewoon liggen. */
     if(sl.cre && staalKaart(sl.cre.card)) addLog(`⚙️ ${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} is van staal: de oven krijgt hem niet klein.`, true);
-    else if(sl.cre){ weg.push(`${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} van ${pName(p)}`); destroyCre(p, 4, "⚙️ de oven"); }
+    else if(sl.cre){ weg.push(`${kIcon(sl.cre.card)} ${kNaam(sl.cre.card)} van ${pName(p)}`); destroyCre(p, L, "⚙️ de oven"); }
     if(sl.spell){ weg.push(`het ritueel ${kIcon(sl.spell.card)} van ${pName(p)}`); grafSp(sl.spell.card); sl.spell = null; }
   }
   if(weg.length){
@@ -17586,7 +17588,7 @@ function slotHTML(p, c, hl){
   }
   const poort = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
   const leegvonk = (S.story && S.story.trio && p === 1 && !S.story.trio.some(v => v.kol === c)) ? " leegvonk" : "";
-  return `<div class="col${poort ? " dicht" : ""}${leegvonk}${bandAan && c === 4 ? " bandeind" : ""}">${zegelGloed(col)}${vonkMerk}${sp}${cr}${kruis}${rots}${poort}${bandMerk}</div>`;
+  return `<div class="col${poort ? " dicht" : ""}${leegvonk}${bandAan && c === NK() - 1 ? " bandeind" : ""}">${zegelGloed(col)}${vonkMerk}${sp}${cr}${kruis}${rots}${poort}${bandMerk}</div>`;
 }
 function handHTML(p, hl){
   const up = handVisible(p);
@@ -18485,7 +18487,7 @@ function overlayHTML(){
    zelf een plaatje (`v`). `live` is een plaatje dat het spel altijd zelf tekent. */
 const TUT_ALL = [
   {t:"Het doel", ic:"⚜️", img:"art/tut-bord.jpg", fit:"cover", v:"board",
-   b:`Breng je tegenstander naar <b>0 levens</b>.<br><br>Het veld heeft <b>vijf kolommen</b>, recht tegenover elkaar. In elke kolom past één <b>wezen</b> en één <b>ritueel</b>.`},
+   b:`Breng je tegenstander naar <b>0 levens</b>.<br><br>Het veld heeft <b>vier kolommen</b>, recht tegenover elkaar. In elke kolom past één <b>wezen</b> en één <b>ritueel</b>.`},
   {t:"De cirkel", ic:"🔥", live:"circle",
    b:`💧 Water › 🔥 Vuur › 🌿 Gras › 🪨 Steen › 💧 Water<br><br>Sterk tegen zwak: <span class="kw" data-kw="instakill">instakill</span>.<br>Zwak tegen sterk: <span class="kw" data-kw="immuun">immuun</span>.<br>Verder gewone schade.`},
   {t:"Wezen of ritueel", ic:"🃏", live:"twoways",
@@ -18512,7 +18514,7 @@ const TUT_ALL = [
 const TUT_VID = n => "video/tut-" + n + ".mp4";
 const TUT_NIEUW = [
   {t:"Welkom",
-   b:`In Elementaal vecht je met <b>kaarten</b>.<br><br>Je speelt ze in een van de <b>vijf kolommen</b>.<br><br>Kaarten spelen mag in <b>allebei de beurten</b>. Vechten met je wezens doe je alleen in <b>je eigen beurt</b>.<br><br>Wie als eerste de <b>levens</b> van de ander op <b>nul</b> krijgt, wint!`,
+   b:`In Elementaal vecht je met <b>kaarten</b>.<br><br>Je speelt ze in een van de <b>vier kolommen</b>.<br><br>Kaarten spelen mag in <b>allebei de beurten</b>. Vechten met je wezens doe je alleen in <b>je eigen beurt</b>.<br><br>Wie als eerste de <b>levens</b> van de ander op <b>nul</b> krijgt, wint!`,
    media:{soort:"een", vids:[{v:"1"}]}},
   {t:"Vechten",
    b:`In <b>je eigen beurt</b> mag elk wezen één keer aanvallen. Het slaat recht vooruit.<br><br>Het doet schade: <b>de helft van zijn levens</b>.`,
@@ -18593,11 +18595,11 @@ function tutVisual(v){
     </div>`;
   if(v === "board") return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 0 4px">
       <div style="font-size:.68rem;color:var(--dim);letter-spacing:.1em">TEGENSTANDER</div>
-      <div style="display:flex;gap:7px">${[0,1,2,3,4].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--line);border-radius:6px"></div>`).join("")}</div>
-      <div style="display:flex;gap:7px;color:var(--danger);font-size:.9rem;line-height:1">${[0,1,2,3,4].map(()=>`<span style="width:34px;text-align:center">↕</span>`).join("")}</div>
-      <div style="display:flex;gap:7px">${[0,1,2,3,4].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--gold-soft);border-radius:6px"></div>`).join("")}</div>
+      <div style="display:flex;gap:7px">${[0,1,2,3].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--line);border-radius:6px"></div>`).join("")}</div>
+      <div style="display:flex;gap:7px;color:var(--danger);font-size:.9rem;line-height:1">${[0,1,2,3].map(()=>`<span style="width:34px;text-align:center">↕</span>`).join("")}</div>
+      <div style="display:flex;gap:7px">${[0,1,2,3].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--gold-soft);border-radius:6px"></div>`).join("")}</div>
       <div style="font-size:.68rem;color:var(--gold);letter-spacing:.1em">JIJ</div>
-      <div style="font-size:.72rem;color:var(--dim);margin-top:4px">5 kolommen · elke aanval gaat recht vooruit</div>
+      <div style="font-size:.72rem;color:var(--dim);margin-top:4px">4 kolommen · elke aanval gaat recht vooruit</div>
     </div>`;
   if(v === "twoways") return `<div style="display:flex;justify-content:center;gap:34px;margin:14px 0 4px">
       <div style="text-align:center"><div style="width:62px;height:87px;position:relative;margin:0 auto">${cardFaceHTML("vuur")}<div class="hpgem" style="right:-7px;bottom:-7px">2</div></div>
@@ -21714,7 +21716,7 @@ const STORY = {
       1:[{el:"steen", col:2, doelen:["zelf","zelf"]}],
       2:[{el:"gras",  col:0, doelen:[{p:0, el:"steen"}]}],
       3:[{el:"vuur",  col:1, doelen:[{p:0, el:"vuur"}]}],
-      4:[{el:"water", col:4, doelen:[]}]},
+      4:[{el:"water", col:3, doelen:[]}]},
     vijAanval:{2:[2]},
     tutRechtdoor:"Ho. Recht vooruit. Dat weet zelfs ik.",
     tut:[
@@ -23128,7 +23130,7 @@ const STORY = {
     ltVij:["greed"],
     aeVij:["ae_draw3"],
     levensVij:8, handVijMinder:2,   // het Rookgordijn begint met twee kaarten minder (en heeft er daarom een leven bij)
-    bord:[{p:1, c:0, el:"steen"},{p:1, c:2, el:"vuur"},{p:1, c:4, el:"gras"}],
+    bord:[{p:1, c:0, el:"steen"},{p:1, c:2, el:"vuur"},{p:1, c:3, el:"gras"}],
     mist:true, mistZicht:true, spiegel:true,
     geeftLicht:"darkhole",    // was Gokkersbrouwsel (uit het spel, okt 2026)
     ban:10, begint:1
@@ -23226,7 +23228,7 @@ const STORY = {
     levensVij:6,
     trio:[{naam:"Knetter", hp:2, kol:0, kracht:"vuur",  ae:"ae_knetter", uitleg:"🔥 Vuur: +3 levens en het speel-effect twee keer"},
           {naam:"Spetter", hp:2, kol:2, kracht:"gras",  ae:"ae_spetter", uitleg:"🌿 Gras: +3 levens en het speel-effect twee keer"},
-          {naam:"Fikkie",  hp:2, kol:4, kracht:"steen", ae:"ae_fikkie",  uitleg:"🪨 Steen: +3 levens en het speel-effect twee keer"}],
+          {naam:"Fikkie",  hp:2, kol:3, kracht:"steen", ae:"ae_fikkie",  uitleg:"🪨 Steen: +3 levens en het speel-effect twee keer"}],
     /* 🟣 Elke vonk is een aether. Gaat de vonk uit, dan gaat zijn aether mee. */
     aeVij:["ae_knetter","ae_spetter","ae_fikkie"],
     /* beloning: nog te kiezen (Vonkoverslag is uit het spel) */
@@ -23669,7 +23671,7 @@ const STORY = {
        kaart: vijf vliegende vissen, twee al op het veld en drie in het deck. */
     /* Alleen vissen en water, eerlijk verdeeld. Twee vliegende vissen staan al op het veld. */
     deckVij:{vis:3, clown:8, kogel:6, water:7},
-    bord:[{p:1, c:1, el:"vis"}, {p:1, c:3, el:"vis"}, {p:1, c:0, spell:"clown"}, {p:1, c:4, spell:"clown"}],
+    bord:[{p:1, c:1, el:"vis"}, {p:1, c:3, el:"vis"}, {p:1, c:0, spell:"clown"}, {p:1, c:3, spell:"clown"}],
     ltVij:[],
     /* Eeuwige terugkeer is haar thema: wat in het water verdwijnt, komt terug. */
     aeVij:["ae_school","ae_watercycle","fu_water"],
@@ -24309,7 +24311,7 @@ const STORY = {
     ltVij:["reborn","brenger"],
     aeVij:["ae_dubbel","ae_kweb"],
     eieren:true, eiLeg:false,
-    bord:[{p:1, c:0, spell:"wolf"}, {p:1, c:2, spell:"wolf"}, {p:1, c:4, spell:"wolf"}],
+    bord:[{p:1, c:0, spell:"wolf"}, {p:1, c:2, spell:"wolf"}, {p:1, c:3, spell:"wolf"}],
     levensVij:9, levensJij:8,
     geeft:"ae_genade",
     ban:10, begint:1
@@ -24333,7 +24335,7 @@ const STORY = {
       {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ En elke keer dat je raak slaat, trekt de ketting het veld dichter. De eerste keer gaan kolom <b>1</b> en <b>5</b> dicht, de tweede keer kolom <b>2</b> en <b>4</b>. Wat daar staat, van jou en van de Naad, is <b>uit het spel</b>. Meteen, midden in je beurt."},
       {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ Is er nog één kolom over, dan slaat een aanval die het wezen tegenover vernietigt <b>door</b> op de speler: <b>1</b> schade. Voor allebei."},
       {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"👁 <b>De Naad ziet je.</b> Begin van je beurt mag je het soort kaart niet spelen dat je in dit gevecht het vaakst hebt gespeeld. In je eerste beurt is dat een willekeurig soort uit je hand."},
-      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ <b>De knoop.</b> In de middelste kolom van de Naad ligt een ritueel die nooit weggaat: wat daar als wezen binnenkomt, doet zijn speel-effect <b>drie keer</b>, en mag overspeeld worden. En er staan al twee 🪨 stenen blokkers."}
+      {s:null, bg:5, naam:"…", kleur:"#e6c46a", t:"⛓ <b>De knoop.</b> In de derde kolom van de Naad ligt een ritueel die nooit weggaat: wat daar als wezen binnenkomt, doet zijn speel-effect <b>drie keer</b>, en mag overspeeld worden. En er staan al twee 🪨 stenen blokkers."}
     ],
     naadKlap1:[
       {s:"naad_strak", reus:true, naam:"De Naad", kleur:"#e6c46a", t:"Tot hier."},
@@ -24824,7 +24826,7 @@ function tutSchermHTML(k){
     <p>Vuur. Water. Gras. Steen. Iedereen in deze wereld heeft er één.</p>
     <p><b>Jij hebt ze alle vier.</b></p>`;
   if(k === "zowin"){
-    const rij = (wie, kl) => `<div class="tsrij ${kl}"><span class="tslab">${wie}</span>${[1,2,3,4,5].map(n => `<span class="tsvak">${n}</span>`).join("")}</div>`;
+    const rij = (wie, kl) => `<div class="tsrij ${kl}"><span class="tslab">${wie}</span>${[1,2,3,4].map(n => `<span class="tsvak">${n}</span>`).join("")}</div>`;
     return `<div class="tskop">Zo win je</div>
       <div class="tsbord">
         <div class="tsleven boven"><span>zijn levens</span><i></i></div>
@@ -24832,7 +24834,7 @@ function tutSchermHTML(k){
         ${rij("jouw kant", "onder")}
         <div class="tsleven onder"><span>jouw levens</span><i></i></div>
       </div>
-      <p>Je zet kaarten neer in <b>vijf kolommen</b>. Ze vechten voor je.</p>
+      <p>Je zet kaarten neer in <b>vier kolommen</b>. Ze vechten voor je.</p>
       <p><b>Haal zijn levens naar nul.</b></p>`;
   }
   if(k === "cirkel") return `<div class="tskop">De cirkel</div>
@@ -25561,23 +25563,23 @@ const VELD = {
   "1-2": { regels:["Na Brokko's eerste beurt krijg je een 🔥 Vuur-ritueel in jouw kolom 3 en 4."] },
 
   "1-3": { regels:["Allebei veertig keer 🪨 Steen, en allebei met 🟣 Lawine (Volle slag). Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
-                   "Nimbus begint met een 🪨 Steen-ritueel in de middelste kolom."],
+                   "Nimbus begint met een 🪨 Steen-ritueel in de derde kolom."],
     varianten:{
       "b":["Jij speelt met tien van elk element, Nimbus met veertig keer 🪨 Steen.",
-           "Nimbus begint met een 🪨 Steen-ritueel in de middelste kolom."],
+           "Nimbus begint met een 🪨 Steen-ritueel in de derde kolom."],
       "vuur":["Allebei veertig keer 🔥 Vuur. Geen aethers, geen ✦ lichtkaarten, niets bannen.",
-              "Nimbus begint met een 🔥 Vuur-ritueel in de middelste kolom."],
+              "Nimbus begint met een 🔥 Vuur-ritueel in de derde kolom."],
       "gras":["Allebei veertig keer 🌿 Gras. Geen aethers, geen ✦ lichtkaarten, niets bannen.",
-              "Nimbus begint met een 🌿 Gras-ritueel in de middelste kolom."],
+              "Nimbus begint met een 🌿 Gras-ritueel in de derde kolom."],
       "water":["Allebei veertig keer 💧 Water, en allebei 🟣 Getijdenstroom. Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
-               "Nimbus begint met een 💧 Water-ritueel in de middelste kolom.",
+               "Nimbus begint met een 💧 Water-ritueel in de derde kolom.",
                "Win je, dan krijg je de 🟣 Getijdenstroom."] } },
 
-  "1-4": { regels:["Rocky begint met een 🪨 Steen-ritueel in zijn middelste kolom."] },
+  "1-4": { regels:["Rocky begint met een 🪨 Steen-ritueel in zijn derde kolom."] },
 
   "1-5": { regels:["🧱 <b>Rotsval.</b> Elke beurt komt er aan allebei de kanten een ✕ boven een willekeurige plek.",
                    "Staat daar aan het eind van die beurt iets, dan wordt het verpletterd. 🪨 Steen (ook ⛰️ Rots en kiezels) overleeft het.",
-                   "Magnus begint met een 🪨 Steen-ritueel in zijn middelste kolom.",
+                   "Magnus begint met een 🪨 Steen-ritueel in zijn derde kolom.",
                    "Op <b>3</b> levens blijft hij één keer staan. Dan vullen jullie allebei aan tot <b>5</b> kaarten, komt er op al zijn ritueelplekken 🪨 Steen, en valt de rots op <b>twee</b> plekken per kant."] },
 
   "2-1": { regels:["✦ <b>Overleef 5 rondes.</b> Een ronde is één beurt van Seraf en één van jou. Hou je het zo lang uit, dan win je.",
@@ -25587,7 +25589,7 @@ const VELD = {
     fase2:["De struik staat op als Struikrover, met een nieuw deck en 5 kaarten. Jouw kant blijft staan.",
                       "🟣 Swipe, Stab en Schild onder zijn kolom 2, 3 en 4 zijn nu zijn aether: <b>Arsenaal</b>."] },
 
-  "2-4": { regels:["🥚 <b>Eieren.</b> Er hangt er al één in haar middelste kolom. Elke beurt van haar legt ze er een bij: 4 levens, {Muur}.",
+  "2-4": { regels:["🥚 <b>Eieren.</b> Er hangt er al één in haar derde kolom. Elke beurt van haar legt ze er een bij: 4 levens, {Muur}.",
                     "Na <b>twee</b> beurten van haar komt een ei uit: een 🕷 spin van 7 levens die altijd voor <b>7</b> slaat."] },
 
   "2-3": { regels:["💤 <b>Het wiegelied.</b> Doe je de Waardin in je beurt geen schade, dan zak je een stap weg en heelt zij 1 leven.",
@@ -25608,7 +25610,7 @@ const VELD = {
 
   "2-6": { regels:["🌧 <b>Om de andere ronde regent het</b>, vanaf ronde 1. Dan doet 🔥 Vuur niets meer, behalve tegen je eigen wezens.",
                    "Haar 🌿 Gras is allemaal 🌹 Roos: {Volle slag}.",
-                   "Ze begint met een 🌿 Gras-ritueel in haar middelste kolom."],
+                   "Ze begint met een 🌿 Gras-ritueel in haar derde kolom."],
     fase2:["🌹 <b>Bloei.</b> Op nul staat ze weer op, met <b>5</b> levens.",
            "Op al haar ritueelplekken komt een 🌹 Roos te liggen; wat er lag is weg. Jullie vullen allebei aan tot <b>5</b> kaarten.",
            "🌧 De regen blijft: om de andere ronde doet 🔥 Vuur niets."] },
@@ -25619,7 +25621,7 @@ const VELD = {
                    "🟣 <b>Warme Deken</b>: de eerste klap per beurt op haar levens doet <b>0</b>."] },
 
   "3-3": { regels:["💨 <b>Alles ligt dicht</b>, ook jouw kaarten. Je ziet levens, aanval en wie op wie mikt; wát er ligt moet je onthouden.",
-                   "💨 Eind van elke beurt van het Rookgordijn draait de rook: kolom 1↔5 en 2↔4 wisselen, aan allebei de kanten. Het midden blijft.",
+                   "💨 Eind van elke beurt van het Rookgordijn draait de rook: kolom 1↔4 en 2↔3 wisselen, aan allebei de kanten.",
                    "Het Rookgordijn begint met drie wezens op het veld, in kolom 1, 3 en 5, en met twee kaarten minder in de hand. Het log schrijft niets op."] },
 
   "3-4": { regels:["🎪 Drie vonken van <b>2</b> levens: Knetter in kolom 1, Spetter in 3, Fikkie in 5. Samen zijn ze de levensbalk.",
@@ -25628,7 +25630,7 @@ const VELD = {
                     "Gaat er een uit, dan trekken de anderen kaarten: 1 bij de eerste, 2 bij de tweede."] },
 
   "3-5": { regels:["⚙️ <b>Lopende band.</b> Alles wat neergelegd wordt, aan allebei de kanten, schuift meteen zo ver mogelijk naar rechts.",
-                   "🔥 Begin van de beurt van Klinknagel: de oven eet wat in kolom 5 ligt (wezen én ritueel), aan allebei de kanten. Daarna schuift alles door."] },
+                   "🔥 Begin van de beurt van Klinknagel: de oven eet wat in kolom 4 ligt (wezen én ritueel), aan allebei de kanten. Daarna schuift alles door."] },
 
   "3-6": { regels:["🔥 <b>Vuurzee.</b> Eind van elke <b>derde</b> ronde gaan alle wezens op het veld eraan, van allebei. Rituelen blijven.",
                    "🌋 <b>De grond is lava.</b> Eind van elke ronde brandt hij als vuur: 🌿 verbrandt, 💧 voelt niets, de rest (behalve 🔥) verliest 1 leven.",
@@ -25663,7 +25665,7 @@ const VELD = {
   "4-5": { regels:["🌊 <b>Het getij</b> schuift elke ronde door: vloed, eb, springtij, en dan weer opnieuw.",
                    "🌊 Vloed: niemand valt aan. 🏖 Eb: 💧 Water slaat <b>+3</b> en 🔥 Vuur dooft.",
                    "🌀 Springtij: eind van elke beurt spoelt alles op het bord naar de overkant en wisselt van eigenaar. Rituelen blijven liggen.",
-                   "Ze begint met een 💧 Water in haar middelste kolom."],
+                   "Ze begint met een 💧 Water in haar derde kolom."],
     fase2:["🌊 Op nul staat ze weer op, met <b>6</b> levens. Ze houdt alles wat ze heeft.",
            "Op al haar ritueelplekken komt 💧 Water te liggen. Jullie vullen allebei aan tot <b>5</b> kaarten."] },
 
@@ -29770,8 +29772,8 @@ function render(){
     + (S.story && S.story.lavaAan ? `<div class="lavameter">🌋 lava · eind van elke ronde −1</div>` : "")
     + (S.story && S.story.lavaJij ? `<div class="lavameter">🌋 jouw grond is lava<br>begin van je beurt −1</div>` : "")
     + (S.story && S.story.balrogHeal ? `<div class="rotsmeter">🌋 golem +${S.story.balrogHeal} per beurt van haar</div>` : "")
-    + (S.story && (S.story.mistAan || S.story.rookAan) ? `<div class="rotsmeter">💨 alles ligt dicht${S.story.spiegel ? "<br>na zijn beurt: 1↔5 en 2↔4" : ""}</div>` : "")
-    + (S.story && S.story.band ? `<div class="rotsmeter">⚙️ lopende band →<br>oven eet kolom 5 bij zijn beurt</div>` : "")
+    + (S.story && (S.story.mistAan || S.story.rookAan) ? `<div class="rotsmeter">💨 alles ligt dicht${S.story.spiegel ? "<br>na zijn beurt: 1↔4 en 2↔3" : ""}</div>` : "")
+    + (S.story && S.story.band ? `<div class="rotsmeter">⚙️ lopende band →<br>oven eet kolom 4 bij zijn beurt</div>` : "")
     + (S.story && S.story.vuurzee ? (() => { const per = S.story.vuurzeeSnel ? 4 : 6, g = S.gTurn;
         const volgende = Math.ceil(g / per) * per, rondes = Math.ceil((volgende - g + 1) / 2);
         return `<div class="lavameter">🔥 vuurzee ${rondes <= 1 ? "<b>eind van deze ronde</b>" : `over <b>${rondes}</b> rondes`}</div>`; })() : "")
@@ -31483,7 +31485,7 @@ function mpHTML(){
     : `<div class="mpprof"><div class="mpprofpt">${spriteSVG(c.spr)}</div><div class="mpproftxt"><b>${c.naam}</b></div></div>`;
   return `<div class="ovbox mpbox${d ? " klbox" : ""}"><h2>${M.bot ? "KLAAR?" : "HOE WIL JE SPELEN?"}</h2>${kop}
     ${inhoud}
-    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") + vr("vierkol", `Kolommen: ${SET.vijfKol ? "5" : "4"}`, SET.vijfKol ? "proef: spelen met vijf kolommen · klik voor vier" : "klik om met vijf kolommen te spelen (proef)", "") : live}</div>
+    <div class="vlijst mplijst">${M.bot ? vr("mpstart", "Beginnen", "", " aan") : live}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
 }
 /* ---------- 📋 het Klaar?-scherm: wat zit er in je deck ---------- */
@@ -32109,16 +32111,13 @@ function onBtn(btn, el, fromAction){
   }
   if(!fromAction && mpKnop(btn, el)) return;
   switch(btn){
-    case "vierkol": SET.vijfKol = !SET.vijfKol; saveSet(); render(); break;   // (okt 2026) vier is standaard; vijf blijft als proef
     case "startpvp": case "startbot": case "cmdpvp": case "cmdbot":
     case "bas1pvp": case "bas3pvp": case "bas1bot": case "bas3bot":
       if(u.mode==="start"){
         S.vsBot = /bot$/.test(btn);
         S.startBtn = btn;
-        /* ▥ (okt 2026) Vrij spel is vanaf nu vier kolommen. Tegen de bot en in hotseat kun je als proef
-           nog vijf kiezen (SET.vijfKol); online altijd vier, zodat beide kanten hetzelfde bord hebben.
-           Het bord is hier nog leeg. Het verhaal houdt (voorlopig) vijf. */
-        S.nk = (SET.vijfKol && !NET.on) ? 5 : 4;
+        /* ▥ (okt 2026) Elementaal is vier kolommen, overal. */
+        S.nk = 4;
         S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
         addLog(NET.on ? "Online partij: jij bent <em>Speler " + (NET.seat + 1) + "</em>."
