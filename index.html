@@ -5414,6 +5414,31 @@ html .bordvlak .bordzee .bzmist{-webkit-mask-image:radial-gradient(circle at 50%
 @keyframes lfGloed{0%{opacity:0; transform:scale(.3)} 15%{opacity:1; transform:scale(1)} 75%{opacity:.85} 100%{opacity:0; transform:scale(1.2)}}
 @keyframes lfStraal{0%{opacity:0; transform:rotate(0) scale(.5)} 20%{opacity:1; transform:rotate(10deg) scale(1)} 100%{opacity:0; transform:rotate(40deg) scale(1.15)}}
 @keyframes lfKaart{0%{opacity:0; transform:scale(.4) translateY(20px)} 18%{opacity:1; transform:scale(1.08)} 28%{transform:scale(1)} 80%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(.92) translateY(-10px)}}
+
+/* 🕹 de plekken op het spelbord (ronde 10, D): bordjes met nummer en sterren */
+.bordvlak{container-type:inline-size}
+.bordvlak .bringen{display:none}
+.bordvlak .bbord{position:absolute; z-index:3; pointer-events:none; transform:translate(-50%, calc(-100% - .9cqw)); transition:transform .25s cubic-bezier(.2,.8,.3,1)}
+.bordvlak .bbord.hier{z-index:4}
+.bordvlak .bbord.hier.hb{transform:translate(-50%, calc(-100% - 7.2cqw))}
+.bordvlak .bbord.hier.hr{transform:translate(1.9cqw, calc(-100% - 2.6cqw))}
+.bordvlak .bbord.hier.hl{transform:translate(calc(-100% - 1.9cqw), calc(-100% - 2.6cqw))}
+.bordvlak .bbord.hier:is(.hr, .hl) .bbpijl{opacity:0}
+.bordvlak .bbord .bbin{background:#050507; border-radius:.25cqw; padding:.5cqw .7cqw .55cqw; text-align:center; min-width:4.2cqw;
+  box-shadow:0 0 0 .2cqw #ececec, 0 0 0 .4cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.35)}
+.bordvlak .bbord b{display:block; font:400 1.5cqw/1 "Press Start 2P",monospace; color:#fff; white-space:nowrap; letter-spacing:.02em}
+.bordvlak .bbord.gedaan b{color:#ffd84a}
+.bordvlak .bbord.baas .bbin{box-shadow:0 0 0 .2cqw #ffd84a, 0 0 0 .4cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.35)}
+.bordvlak .bbord svg{display:block; width:4.1cqw; height:auto; margin:.45cqw auto 0}
+.bordvlak .bbord.zonder b{font-size:1.15cqw}
+.bordvlak .bbord .bbpijl{display:block; width:0; height:0; margin:0 auto; border:.6cqw solid transparent; border-top-color:#ececec; border-bottom:0}
+.bordvlak .bbord.baas .bbpijl{border-top-color:#ffd84a}
+.bordvlak .bbord.boven .bbin{box-shadow:0 0 0 .2cqw #ffd84a, 0 0 0 .4cqw #000, 0 0 1.6cqw rgba(255,216,74,.7)}
+.bordvlak .bbord:not(.gedaan):not(.zonder) .bbin{animation:bbKnipoog 1.6s steps(2) infinite}
+@keyframes bbKnipoog{50%{box-shadow:0 0 0 .2cqw #ffd84a, 0 0 0 .4cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.35)}}
+.bordvlak .bbord.nieuw{animation:bbIn .5s steps(4) 1.4s both}
+@keyframes bbIn{from{opacity:0; transform:translate(-50%, calc(-100% + 1cqw))}}
+.bordvlak.eiland .bbord{display:none}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -28125,7 +28150,8 @@ const OVERWORLD_BEELD = "art/overworld.png";
    zelf: de open plekken langs het pad, de steiger, de herberg, de tent, de sluis, de kolk. */
 const OVERWORLD = {
   /* Okt 2026: het spelbord. Elk level op zijn herkenningspunt, ongeveer even ver uit elkaar, en geen pad dat een ander kruist. */
-  "1-1":{x:36,y:77}, "1-2":{x:32.5,y:68.5}, "1-3":{x:42.5,y:67.5}, "1-4":{x:51.5,y:72.5}, "1-5":{x:42,y:58.5},
+  /* wereld 1 (okt 2026): het pad gaat steeds verder omhoog, zigzaggend van het strand naar de grot */
+  "1-1":{x:50.5,y:78.5}, "1-2":{x:36,y:76}, "1-3":{x:32.5,y:68.5}, "1-4":{x:43,y:67.5}, "1-5":{x:42,y:58.5},
   "2-1":{x:34,y:47.5}, "2-2":{x:26,y:41}, "2-3":{x:17.5,y:45}, "2-4":{x:21.5,y:35.5}, "2-5":{x:34,y:30}, "2-6":{x:25.5,y:24.5},
   "3-1":{x:65.5,y:37}, "3-2":{x:77,y:38.5}, "3-3":{x:88,y:31}, "3-4":{x:65,y:29.5}, "3-5":{x:76.5,y:19.5}, "3-6":{x:75.5,y:8.5},
   "4-1":{x:66,y:59.5}, "4-2":{x:78,y:51}, "4-3":{x:88,y:56.5}, "4-4":{x:74.5,y:67}, "4-5":{x:82,y:76}
@@ -28153,7 +28179,7 @@ const OVERWORLD_RANDEN = [
 ];
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
-  "start>1-1":[[40,82]], "1-1>1-2":[[33,73]], "1-2>1-3":[[37.5,70]], "1-3>1-4":[[47,71]], "1-4>1-5":[[49,64],[45,61.5]],
+  "start>1-1":[[48,83]], "1-1>1-2":[[44,79]], "1-2>1-3":[[33,72.5]], "1-3>1-4":[[37.5,69.5]], "1-4>1-5":[[44,63]],
   "1-5>2-1":[[45,52],[40,48.5]],
   "2-1>knort":[[37,44]], "2-1>2-2":[[30,45]], "2-1>2-3":[[28,48],[22,47.5]], "2-2>2-4":[[24,38]], "2-3>2-4":[[17,40]],
   "2-4>2-5":[[27,34],[30,32.5]], "2-5>2-6":[[30,26]],
@@ -28945,7 +28971,7 @@ function bordRoute(van, naar){
   return delen.flat();
 }
 const bordMaat = id => id === "start" ? 4 : BORD_BAAS(id) ? 6.2 : (id === "knort" || id === "hemel") ? 4.6 : 5;
-const bordOp = id => BORD_BAAS(id) ? 1.1 : .75;
+const bordOp = id => .3;   // (okt 2026) de pion staat op een plat blokje
 /* Wat er nieuw is sinds je de kaart de vorige keer zag: dat speelt zijn animatie af. Eén keer
    per keer dat je de kaart opent; een tussentijdse render laat het gewoon doorlopen. */
 function bordNieuw(open){
@@ -28966,6 +28992,38 @@ function bordNieuw(open){
   if(doel.length === 1) n.loop = doel[0];
   M.bordNieuw = n;
   return n;
+}
+/* 🕹 Het bordje boven elke plek: een zwart venster met het nummer en drie sterren (ronde 10, D). */
+const STERPIX = ["..#..", ".###.", "#####", ".###.", ".#.#."];
+function sterrenPix(n){
+  let r = "";
+  for(let k = 0; k < 3; k++) STERPIX.forEach((rij, y) => { for(let x = 0; x < 5; x++) if(rij[x] === "#") r += `<rect x="${k * 6 + x}" y="${y}" width="1" height="1" fill="${k < n ? "#ffd84a" : "#5c5c68"}"/>`; });
+  return `<svg viewBox="0 0 17 5" shape-rendering="crispEdges">${r}</svg>`;
+}
+function bordBordjes(open, nieuw){
+  const hier = bordPionPlek();
+  return [...open].filter(id => id !== "start").map(id => {
+    const p = bordPos(id); if(!p) return "";
+    const lv = /^\d/.test(id), gedaan = bordKlaar(id), baas = BORD_BAAS(id);
+    const naam = lv ? id : (id === "knort" ? "KNORT" : "DE TRAP");
+    const nw = nieuw && nieuw.plekken && nieuw.plekken.has(id);
+    return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}" data-id="${id}" style="left:${p.x}%;top:${p.y}%">
+      <div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
+}
+/* Het bordje van de plek waar de pion staat schuift omhoog, boven zijn hoofd. */
+function bordBordjeHier(){
+  const loopt = !!BORD.loop, hier = bordPionPlek();
+  const alle = [...document.querySelectorAll(".bbord")];
+  alle.forEach(b => b.classList.remove("hier", "hb", "hr", "hl"));
+  if(loopt) return;
+  const b = alle.find(x => x.dataset.id === hier); if(!b) return;
+  /* boven het hoofd van de pion, anders rechts, anders links: waar het geen ander bordje raakt */
+  const rest = alle.filter(x => x !== b && x.offsetParent).map(x => x.getBoundingClientRect());
+  const over = r => rest.reduce((t, q) => t + Math.max(0, Math.min(r.right, q.right) - Math.max(r.left, q.left)) * Math.max(0, Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top)), 0);
+  b.style.transition = "none";
+  let keus = "hb", minst = Infinity;
+  for(const k of ["hb", "hr", "hl"]){ b.classList.add("hier", k); const o = over(b.getBoundingClientRect()); b.classList.remove(k); if(o < minst - 1){ minst = o; keus = k; } if(!o) break; }
+  b.classList.add("hier", keus); void b.offsetWidth; b.style.transition = "";
 }
 /* De mist van een dichte wereld loopt door tot ver in de zee: wat op de rand van de kaart ligt (0 of 100)
    schuift naar buiten, anders zie je bij de rand een streep waar de zee ineens licht wordt. */
@@ -28996,7 +29054,7 @@ function bordHTML(huidigW){
         <g class="bringen">${ringen}</g><g class="bmist" filter="url(#bordzacht)">${mist}</g>
       </svg>
       <div class="bordnevel" id="bordnevel" aria-hidden="true"></div>
-      ${plekken}
+      ${plekken}${bordBordjes(open, nieuw)}
       <div class="bpion" id="bpion"><i class="bpgloed"></i><b class="bpbeeld"></b></div>
     </div></div>
     <div class="bordhud" id="bordhud">
@@ -29053,7 +29111,7 @@ function bordGrond(){
     cx.fillStyle = g; cx.beginPath(); cx.arc(x * K, y * K, rx * K, 0, Math.PI * 2); cx.fill(); cx.restore();
   };
   const ellips = (x, y, rx, ry, van, tot) => { const p = []; for(let i = 0; i <= 28; i++){ const t = van + (tot - van) * i / 28; p.push([x + Math.cos(t) * rx, y + Math.sin(t) * ry]); } return p; };
-  const tegel = (x, yy, w, d, val, a) => {
+  let tegel = (x, yy, w, d, val, a) => {
     const y = yy - val, h = w / 2;
     cx.globalAlpha = a; schaduw(x + .15, yy + .35, w * .55, h * .5, a);
     const zij = [[x - w/2, y - d], [x, y + h/2 - d], [x + w/2, y - d], [x + w/2, y], [x, y + h/2], [x - w/2, y]];
@@ -29065,7 +29123,7 @@ function bordGrond(){
     cx.moveTo((x - w/2 + .15) * K, (y - d) * K); cx.lineTo(x * K, (y - h/2 - d + .08) * K); cx.lineTo((x + w/2 - .15) * K, (y - d) * K); cx.stroke();
     cx.globalAlpha = 1;
   };
-  const sokkel = (x, y, w, op, sc, a) => {
+  let sokkel = (x, y, w, op, sc, a) => {
     const rx = w / 2 * sc, ry = w / 4 * sc, o = op * sc;
     cx.globalAlpha = a; schaduw(x + .3, y + .5, rx * 1.12, ry * 1.15, a);
     grondIn([...ellips(x, y - o, rx, ry, Math.PI, 0), ...ellips(x, y, rx, ry, 0, Math.PI)], .6);
@@ -29076,6 +29134,17 @@ function bordGrond(){
     cx.strokeStyle = "rgba(0,0,0,.25)"; cx.lineWidth = .12 * K; vorm(ellips(x, y - o, rx * .78, ry * .78, 0, Math.PI * 2)); cx.stroke();
     cx.globalAlpha = 1;
   };
+  /* 🕹 Ronde 10 (D): het pad is een rij kleine pixelblokjes en elke plek een groter blokje op de grond;
+     het bordje met nummer en sterren hangt erboven (HTML). Grove pixels, zwarte rand. */
+  const vakjes = (x, y, rows, pal, p, val, a) => {
+    const h = rows.length, w = rows[0].length, ox = x - w * p / 2, oy = y - h * p / 2 - val;
+    cx.globalAlpha = a; cx.fillStyle = "rgba(0,0,0,.45)"; cx.fillRect((ox + p * .6) * K, (oy + p * .9) * K, w * p * K, h * p * K);
+    rows.forEach((r, j) => { for(let i = 0; i < w; i++){ const c = pal[r[i]]; if(!c) continue; cx.fillStyle = c; cx.fillRect(Math.round((ox + i * p) * K), Math.round((oy + j * p) * K), Math.ceil(p * K), Math.ceil(p * K)); } });
+    cx.globalAlpha = 1;
+  };
+  tegel = (x, yy, w, d, val, a) => vakjes(x, yy, ["KKK", "KWK", "KKK"], {K:"#000", W:"#fffdf4"}, .26, val, a);
+  sokkel = (x, y, w, op, sc, a, id) => { const gedaan = bordKlaar(id), sp = id === "start";
+    vakjes(x, y, [".KKK.", "KWWWK", "KWWWK", ".KKK."], {K:"#000", W:sp ? "#9aa4c8" : (gedaan ? "#ffd84a" : "#ffffff")}, .42 * Math.max(.3, sc), 0, a); };
   const n = M.bordNieuw || {randen:new Set(), plekken:new Set(), t0:0}, open = bordOpenPlekken();
   const lijst = []; let k = 0;
   const nieuweTegels = bordRanden().filter(r => n.randen.has(r[0] + ">" + r[1])).reduce((a, r) => a + bordStappen(bordRandPunten(r[0], r[1]), 2.4).length, 0);
@@ -29089,7 +29158,7 @@ function bordGrond(){
     });
   });
   const wacht = Math.round(k * per) + 150;
-  open.forEach(id => { const p = bordPos(id); lijst.push({t:"s", x:p.x, y:p.y, w:bordMaat(id), op:bordOp(id), v:n.plekken.has(id) ? wacht : null}); });
+  open.forEach(id => { const p = bordPos(id); lijst.push({t:"s", id, x:p.x, y:p.y, w:bordMaat(id), op:bordOp(id), v:n.plekken.has(id) ? wacht : null}); });
   lijst.sort((a, b) => a.y - b.y);
   const teken = () => {
     if(!document.body.contains(cv)) return;
@@ -29101,7 +29170,7 @@ function bordGrond(){
       if(f <= 0) return;
       const g = Math.min(1, f);
       if(o.t === "t") tegel(o.x, o.y, o.w, o.d, (1 - (1 - Math.pow(1 - g, 3))) * 5, g);
-      else sokkel(o.x, o.y, o.w, o.op, g < 1 ? Math.max(.01, 1 + 1.4 * Math.pow(g - 1, 3) + .4 * Math.pow(g - 1, 2)) : 1, Math.min(1, g * 2));
+      else sokkel(o.x, o.y, o.w, o.op, g < 1 ? Math.max(.01, 1 + 1.4 * Math.pow(g - 1, 3) + .4 * Math.pow(g - 1, 2)) : 1, Math.min(1, g * 2), o.id);
     });
     if(bezig) requestAnimationFrame(teken);
   };
@@ -29212,6 +29281,7 @@ function bordCamDoel(){
 const bordCamW = () => M && M.eiland ? 0 : Math.min(4, (M && M.telW) || bordW(bordPionPlek()));
 function bordCamera(zacht){
   const vlak = document.getElementById("bordvlak"), d = bordCamDoel(); if(!vlak || !d) return;
+  vlak.classList.toggle("eiland", !bordCamW());
   vlak.style.width = vlak.style.height = d.S + "px"; vlak.style.left = d.left + "px"; vlak.style.top = d.top + "px";
   const tf = `translate(${d.tx}px, ${d.ty}px) scale(${d.s})`;
   if(BORD.cam && BORD.cam !== tf && !matchMedia("(prefers-reduced-motion: reduce)").matches){
@@ -29290,13 +29360,13 @@ document.addEventListener("pointermove", e => {
   const s = BORD.sleep; if(!s) return;
   s.z.style.left = e.clientX + "px"; s.z.style.top = e.clientY + "px";
   const id = bordPlekOnder(e.clientX, e.clientY);
-  if(id !== s.boven){ document.querySelectorAll(".bdoel.boven").forEach(g => g.classList.remove("boven"));
-    if(id){ const g = document.querySelector(`.bdoel[data-id="${id}"]`); if(g) g.classList.add("boven"); } s.boven = id; }
+  if(id !== s.boven){ document.querySelectorAll(".bdoel.boven, .bbord.boven").forEach(g => g.classList.remove("boven"));
+    if(id){ document.querySelectorAll(`.bdoel[data-id="${id}"], .bbord[data-id="${id}"]`).forEach(g => g.classList.add("boven")); } s.boven = id; }
 });
 function bordSleepEind(e){
   const s = BORD.sleep; if(!s) return;
   BORD.sleep = null; s.z.remove(); document.body.classList.remove("bsleept");
-  document.querySelectorAll(".bdoel.boven").forEach(g => g.classList.remove("boven"));
+  document.querySelectorAll(".bdoel.boven, .bbord.boven").forEach(g => g.classList.remove("boven"));
   const pion = document.getElementById("bpion"); if(pion) pion.style.opacity = "";
   const klik = Math.hypot(e.clientX - s.x0, e.clientY - s.y0) <= 8;
   /* Even op de pion tikken = uitleg over waar je staat (of naar binnen bij Knort, naar boven bij de trap). */
@@ -29316,6 +29386,7 @@ document.addEventListener("pointerup", bordSleepEind);
 document.addEventListener("pointercancel", bordSleepEind);
 /* ---- onderin: waar je staat, en starten ---- */
 function bordHud(){
+  bordBordjeHier();
   const hier = document.getElementById("bhier"), kn = document.getElementById("bknoppen"); if(!hier || !kn) return;
   const id = bordPionPlek(), loopt = !!BORD.loop;
   let klein = "", naam = "", sub = "", knoppen = "";
