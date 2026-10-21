@@ -5426,6 +5426,43 @@ body.eindreactie #app{pointer-events:none}
 body.tel .kaartbox.ks-dagboek .ksknop{display:none !important}   /* op de telefoon kies je de kaart in het boek zelf, bij de opties */
 body:not(.pc) .boekbox .kaartkop{position:absolute; top:8px; left:8px; z-index:5}
 
+
+/* okt 2026: het startscherm als panorama */
+.vhpano{position:fixed; inset:0; z-index:1; background:#050507; overflow:hidden}
+.vhpano .ksbak{position:absolute; inset:0; background:#050507}
+.hplogo{position:absolute; left:0; right:0; top:0; height:23%; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:2; padding-top:.5%}
+body .hplogo .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(1.3rem, 3.1vw + 1.6vh, 5.2rem); letter-spacing:.08em; line-height:1.05;
+  background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(5px 5px 0 #0b0d22) drop-shadow(0 0 18px rgba(232,198,122,.35))}
+body .hplogo .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.38rem, .5vw + .35vh, .82rem); letter-spacing:.3em; color:#cfc6b0; text-shadow:2px 2px 0 #0b0d22; margin-top:clamp(8px, 1.8vh, 22px)}
+.hpversie{position:absolute; left:16px; top:10px; z-index:2; font:16px/1 "VT323",monospace; letter-spacing:.08em; color:#8a8698; opacity:.55; pointer-events:none}
+.hprij{position:absolute; left:0; right:0; bottom:0; height:15%; display:flex; flex-wrap:wrap; align-items:center; align-content:center; justify-content:center; gap:14px 24px; padding:0 24px; z-index:2}
+.hpil{display:inline-flex; align-items:center; gap:12px; height:44px; padding:0 18px; margin:0; background:#050507; border:0; border-radius:4px; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000;
+  color:#ececec; cursor:pointer; font:12px/1 "Press Start 2P",ui-monospace,monospace; letter-spacing:.02em; white-space:nowrap; transition:transform .12s}
+.hpil b{font-weight:normal}
+.hpil small{font:22px/1 "VT323",ui-monospace,monospace; color:#a9a39a; letter-spacing:.03em}
+.hpil:hover, .hpil:focus-visible{color:#ffd84a; box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000; outline:none; transform:translateY(-2px)}
+.hpil.goud{color:#ffd84a; box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000}
+.hpil.goud:hover{background:#17130a}
+.hpil.open{color:#ffd84a}
+.hpil.hpplek{padding:0 12px; margin-left:-14px; color:#a9a39a}
+body.tel .hpil.hpplek{margin-left:-6px; padding:0 8px}
+.hpuit{position:absolute; left:50%; bottom:calc(15% + 18px); transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; gap:4px; padding:14px 12px 10px;
+  background:#050507; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000; border-radius:4px; min-width:min(360px, 90vw)}
+.hpuitkop{font:9px/1 "Press Start 2P",ui-monospace,monospace; letter-spacing:.14em; color:#8a8698; padding:0 8px 8px}
+.hpuit .hpil{height:auto; padding:10px 8px; flex-direction:column; align-items:flex-start; gap:6px; box-shadow:none; transform:none; text-align:left; white-space:normal}
+.hpuit .hpil:hover{background:#15141c; box-shadow:none}
+body.tel .hprij{height:20%; gap:8px 9px; padding:0 10px}
+body.tel .hpil:not(.goud) small{display:none}
+body.tel .vhpano .hpil[data-btn="installeer"]{position:fixed; top:24px; left:10px; z-index:3}
+body.tel .hpil{height:28px; padding:0 10px; gap:7px; font-size:8px; box-shadow:0 0 0 1px #ececec, 0 0 0 3px #000}
+body.tel .hpil.goud{box-shadow:0 0 0 1px #ffd84a, 0 0 0 3px #000}
+body.tel .hpil small{font-size:15px}
+body.tel .hpuit{bottom:calc(20% + 10px); padding:8px 6px 6px}
+.vhpano .hpuit .hpil{height:auto !important; box-shadow:none !important}
+body.tel .vhpano .hpuit .hpil{padding:6px !important}
+body.tel .vhpano .hpuit .hpil small{display:block; font-size:14px}
+body.tel .hpversie{font-size:12px; top:6px; left:10px}
 /* okt 2026: onderin de kaart, in het boek en het panorama, één rij in de huisstijl op de hoogte van de startknop */
 body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .sterbalk, body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .sterbalk,
 body.pc:not(.tel) .kaartbox.ks-dagboek .kaartkop > .obtn[data-btn="storylijst"], body.pc:not(.tel) .kaartbox.ks-panorama .kaartkop > .obtn[data-btn="storylijst"],
@@ -19515,7 +19552,38 @@ function installHTML(){
 }
 /* Zo zie je in het startscherm meteen welke versie er online staat. */
 const ELEMENTAAL_VERSIE = "16 okt · nope en nieuwe namen";
+/* okt 2026: het startscherm als panorama. Het logo staat in de bovenste balk, het doek schuift vanzelf
+   van het ei naar waar je bent, en onderin staat één rij knoppen in de huisstijl, met Verder in goud. */
+function startPanoHTML(){
+  const open = HOME.open, opPlek = SET.slot != null, klaar = opPlek ? SET.story.klaar.length : 0;
+  const volgend = opPlek ? STORY_ORDER.find(id => STORY[id] && storyVrij(id) && !storyKlaar(id)) : null;
+  const nPlek = SET.slots.filter(Boolean).length;
+  const pil = (btn, lab, sub, extra, data) => `<button class="hpil${extra || ""}" data-act="btn" data-btn="${btn}"${data || ""}><b>${lab}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  const verhaal = (opPlek && volgend && STORY[volgend] ? pil("thuisverder", "&#9654; VERDER", `${volgend} · ${STORY[volgend].naam.toLowerCase()}`, " goud")
+    : opPlek ? pil("thuisverder", "&#9654; VERHAAL", `plek ${SET.slot + 1} · uitgespeeld`, " goud")
+    : pil("story", "&#9654; VERHAAL", nPlek ? "kies een plek" : "begin bij 1-1", " goud"))
+    + (opPlek && nPlek > 1 ? `<button class="hpil hpplek" data-act="btn" data-btn="story" title="Andere opslagplek"><b>P${SET.slot + 1}</b></button>` : "");
+  const modi = bot => (bot ? ["cmd", "wil", "chal"] : ["cmd", "bas1"]).map(m => pil("mpmodus", MP_MODUS[m].naam, MP_MODUS[m].sub, "", ` data-m="${m}" data-bot="${bot ? 1 : 0}"`)).join("");
+  const uit = open === "mp" || open === "bots" ? `<div class="hpuit" role="menu"><div class="hpuitkop">${open === "mp" ? "SAMEN SPELEN" : "TEGEN DE BOT"}</div>${modi(open === "bots")}</div>` : "";
+  return `<div class="vhpano">
+    <div class="bordbak ksbak ks-panorama" id="ksbak"><canvas id="ksdoek" aria-hidden="true"></canvas></div>
+    <div class="hplogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
+    <div class="hpversie">versie ${ELEMENTAAL_VERSIE}</div>
+    ${uit}
+    <nav class="hprij">
+      ${LIVE.resume ? pil("resumelive", "TERUG", `naar room ${LIVE.resume.code}`, "") : ""}
+      ${verhaal}
+      ${pil("homemp", "SAMEN SPELEN", "", open === "mp" ? " open" : "")}
+      ${pil("homebots", "TEGEN DE BOT", "", open === "bots" ? " open" : "")}
+      ${pil("decks", "DECKS", `${basDecks().length} van ${BAS.DECKS}`, "")}
+      ${pil("aelib", "LIBRARY", "", "")}
+      ${pil("audio", "OPTIES", "", "")}
+      ${toonInstall() ? pil("installeer", "INSTALLEER", "als app", "") : ""}
+    </nav>
+  </div>`;
+}
 function startHTML(){
+  if(THUIS_PANO) return startPanoHTML();
   const open = HOME.open;
   const opPlek = SET.slot != null;
   const klaar = opPlek ? SET.story.klaar.length : 0;
@@ -29915,7 +29983,10 @@ document.addEventListener("keydown", e => {
    (SET.story.bordBij), en de startknop onderin (bordHud). */
 const KS_STIJLEN = [["bord", "Spelbord"], ["dagboek", "Het reisdagboek"], ["panorama", "Het panorama"]];
 const KS_PERWERELD = {dagboek:true};   // het dagboek toont één rijk tegelijk; het panorama is één doorlopende reis
-const ksStijl = () => (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "dagboek";   // okt 2026: standaard het boek
+const ksStijl = () => ksThuis() ? "panorama" : (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "panorama";   // okt 2026: standaard het panorama
+/* het startscherm is het panorama: het logo in de bovenste balk, onderin de knoppen, en het doek schuift vanzelf door je reis */
+const THUIS_PANO = true;
+function ksThuis(){ return THUIS_PANO && !M && typeof S !== "undefined" && !!S && !!S.ui && S.ui.mode === "start"; }
 const KP = {zw:"#0b0a10", nacht:"#141228", d1:"#1e1c26", d2:"#2c2a38", g1:"#4a4858", g2:"#77748a", g3:"#b8b4c0", wit:"#f2f0e8", goud:"#ffd84a", goudd:"#c0902a",
   bruin:"#7a4e2c", bruind:"#4a2e1a", tan:"#cfa06a", groen:"#7fd18c", groend:"#2e6a3a", oranje:"#ffb03a", rood:"#d5503c", roodd:"#6a1e14", blauw:"#a9e2ff",
   blauwm:"#3f8fd0", blauwd:"#142a5a", paars:"#9a5cff", lila:"#c9a2ff", room:"#fffdf2", inkt:"#1a1630", papier:"#e8dcc0", papierd:"#b8a882"};
@@ -30165,7 +30236,7 @@ function ksBeweeg(e){
     if(s.bewogen && KS.pan){ const r = KS.cv.getBoundingClientRect(); KS.pan.x = s.pan0 - dx * (KS.cv.width / r.width) / KS.k; KS.pan.doel = KS.pan.x; } return; }
   const [x, y] = ksXY(e), h = ksRaak(x, y), id = h ? h.id : null;
   if(id !== KS.hover){ KS.hover = id; KS.laagSleutel = ""; }
-  KS.cv.style.cursor = h ? "pointer" : (ksStijl() === "panorama" ? "grab" : "");
+  KS.cv.style.cursor = h ? "pointer" : (ksStijl() === "panorama" && !ksThuis() ? "grab" : "");
 }
 /* losgelaten na slepen of scrollen: ligt er een open level vlakbij het midden, dan wordt dat je plek; anders kijk je gewoon even rond */
 function ksSnap(mid){
@@ -30176,7 +30247,7 @@ function ksSnap(mid){
   ksKies(best, false);
 }
 function ksNeer(e){
-  if(e.button > 0) return;
+  if(e.button > 0 || ksThuis()) return;
   if(M && M.kies){ delete M.kies; render(); return; }
   const [x, y] = ksXY(e), h = ksRaak(x, y);
   if(h && h.soort === "schuif"){
@@ -30207,7 +30278,7 @@ function ksKlik(h){
   ksKies(h.id);
 }
 function ksWiel(e){
-  if(ksStijl() !== "panorama" || !KS.pan) return;
+  if(ksStijl() !== "panorama" || !KS.pan || ksThuis()) return;
   e.preventDefault(); const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   KS.pan.doel += d / KS.k * 1.2; clearTimeout(KS.wielT);
   KS.wielT = setTimeout(() => ksSnap(KS.pan.doel + KS.W / 2), 380);
@@ -30754,7 +30825,7 @@ function ksdOpties(c, P, Q){
     ksdVink(c, Q.x + 6, y, SET.fx === k, nm, {soort:"knop", btn:"fx_" + k}, sub); y += 24; });
   y += 4; ksdVink(c, Q.x + 6, y, SET.horizon !== false, "horizon", {soort:"knop", btn:SET.horizon !== false ? "horizonuit" : "horizonaan"}, "een vergezicht in lagen boven het veld"); y += 30;
   ksHand(c, "De kaart", Q.x + 2, y, Q.w, {maat:14, recht:true}); y += 18;
-  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, ksStijl() === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
+  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, (KS_STIJLEN.some(s => s[0] === SET.kaartStijl) ? SET.kaartStijl : "panorama") === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
   y += 8; ksHand(c, "> de filmstudio", Q.x + 6, y, 120, {maat:11, recht:true}); ksHit("film-studio", Q.x + 4, y - 1, 90, 12, {soort:"knop", btn:"filmstudio"});
   if(typeof ELEMENTAAL_VERSIE !== "undefined" && y + 26 < Q.y + Q.h) ksHand(c, "versie " + ELEMENTAAL_VERSIE, Q.x + 2, Q.y + Q.h - 10, Q.w - 4, {maat:9, kleur:KSD_POTLOOD, recht:true, max:1});
 }
@@ -30864,7 +30935,9 @@ function kspaDelen(D){
   });
   return delen;
 }
-function kspaMaat(){ const y0 = 48, y1 = Math.round(KS.H - Math.max(KS.tel ? KS.r1 + 4 : 30, KS.H * .1)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
+function kspaMaat(){
+  if(ksThuis()){ const y0 = Math.round(KS.H * .23), y1 = Math.round(KS.H * (KS.tel ? .8 : .85)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
+  const y0 = 48, y1 = Math.round(KS.H - Math.max(KS.tel ? KS.r1 + 4 : 30, KS.H * .1)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
 const kspaOpen = (D, d) => d.id === "hemel" ? D.hemel : d.id === "start" ? true : d.l.open;
 /* één stuk van het doek, op de schermmaat; links loopt het zacht over in het vorige stuk */
 function kspaDeel(D, i, M_){
@@ -30927,10 +31000,18 @@ function kspaBoven(c, D){
     KS.balk = KS.balk ? KS.balk.map((v, i) => v + (doelK[i] - v) * .06) : doelK;
     c.fillStyle = `rgb(${KS.balk.map(Math.round).join(",")})`; c.fillRect(0, 0, KS.W, M_.y0); c.fillRect(0, M_.y1, KS.W, KS.H - M_.y1); }
   /* de camera: zacht naar je plek, maar nooit voorbij het begin of het eind van het doek */
-  const doel = hier ? Math.max(0, Math.min(maxX, hier.cx - KS.W / 2)) : 0;
-  if(!KS.pan || KS.pan.H !== KS.H || KS.pan.W !== KS.W){ KS.pan = {x:doel, doel, H:KS.H, W:KS.W, laatst:D.hier}; }
-  if(KS.pan.laatst !== D.hier){ KS.pan.doel = doel; KS.pan.laatst = D.hier; }
-  if(!KS.sleep){ KS.pan.doel = Math.max(0, Math.min(maxX, KS.pan.doel)); KS.pan.x += (KS.pan.doel - KS.pan.x) * .12; }
+  const doel = hier ? Math.max(0, Math.min(maxX, hier.cx - KS.W / 2)) : 0, thuis = ksThuis();
+  if(!KS.pan || KS.pan.H !== KS.H || KS.pan.W !== KS.W || !!KS.pan.thuis !== thuis){ KS.pan = {x:thuis ? 0 : doel, doel:thuis ? 0 : doel, H:KS.H, W:KS.W, laatst:D.hier, thuis, t0:performance.now()}; }
+  if(thuis){
+    /* op het startscherm: even stil bij het ei, dan langzaam over het pad naar waar je nu bent, even stil, en terug */
+    const afst = doel, v = M_.SW * .09, rust = 3000, reis = afst / v * 1000, per = 2 * (rust + reis), f = (performance.now() - KS.pan.t0) % per;
+    const zacht = u => .5 - .5 * Math.cos(Math.PI * Math.max(0, Math.min(1, u)));
+    KS.pan.x = afst < 4 ? 0 : f < rust ? 0 : f < rust + reis ? zacht((f - rust) / reis) * afst : f < 2 * rust + reis ? afst : (1 - zacht((f - 2 * rust - reis) / reis)) * afst;
+    KS.pan.doel = KS.pan.x;
+  } else {
+    if(KS.pan.laatst !== D.hier){ KS.pan.doel = doel; KS.pan.laatst = D.hier; }
+    if(!KS.sleep){ KS.pan.doel = Math.max(0, Math.min(maxX, KS.pan.doel)); KS.pan.x += (KS.pan.doel - KS.pan.x) * .12; }
+  }
   KS.pan.x = Math.max(0, Math.min(maxX, KS.pan.x));
   const px = KS.pan.x;
   /* het doek: alleen de stukken die in beeld zijn */
@@ -30970,7 +31051,7 @@ function kspaBoven(c, D){
     if(d.l || d.id === "start"){ if(open){ const nm = d.id === "start" ? "HET EI" : ksLetters(d.l.naam), nb = ksBreed(nm); ksVenster(c, x - nb / 2 - 4, M_.y0 + 6, nb + 8, 9, sel ? "#ffd84a" : "#ececec"); ksTekst(c, nm, x - nb / 2, M_.y0 + 8, sel ? "#ffd84a" : "#ececec"); }
       else ksTekst(c, "?", x - 1, M_.y0 + 8, "#77748a"); }
     const sel_ = open && D.seq.includes(d.id);
-    ksHit(d.id, x - M_.SW / 2, M_.y0, M_.SW, M_.h, sel_ ? null : {soort:"dicht"});
+    if(!thuis) ksHit(d.id, x - M_.SW / 2, M_.y0, M_.SW, M_.h, sel_ ? null : {soort:"dicht"});
   });
   /* Knort tussen 2-1 en 2-2: zijn kraampje langs de weg */
   if(KS.pos.knort){ const x = Math.round(KS.pos.knort.cx - px), y = grond(KS.pos.knort.cx), kn = ksBeeld("art/knort.png"), sel = D.hier === "knort";
@@ -30978,7 +31059,8 @@ function kspaBoven(c, D){
       if(kn){ const h = Math.round(M_.h * .32), ww = Math.round(h * kn.naturalWidth / kn.naturalHeight);
         c.save(); c.imageSmoothingEnabled = true; c.drawImage(kn, x - ww / 2, y - h + 2, ww, h); c.restore(); }
       const bw = ksBreed("KNORT") + 12; ksVenster(c, x - bw / 2, y - 8, bw, 11, sel ? "#ffd84a" : "#ececec"); ksTekst(c, "KNORT", x - bw / 2 + 6, y - 5, sel ? "#ffd84a" : "#ececec");
-      ksHit("knort", x - 24, y - M_.h * .34, 48, M_.h * .34 + 6); } }
+      if(!thuis) ksHit("knort", x - 24, y - M_.h * .34, 48, M_.h * .34 + 6); } }
+  if(thuis) return;
   /* boven het doek: de naam van het rijk dat in beeld is, in de stijl van het logo */
   const dm = P.delen[Math.max(0, Math.min(P.delen.length - 1, midI))], w = dm.w;
   if(!KS.titel || KS.titel.w !== w) KS.titel = {w, t0:performance.now()};
@@ -31231,6 +31313,7 @@ function kaartStandBij(){
   if(anders) saveSet();
 }
 function kaartScrol(){
+  if(ksThuis()){ if(document.getElementById("ksdoek")) ksNa(); return; }
   if(M && M.type === "boek"){ if(document.getElementById("ksdoek")) ksNa(); return; }
   if(!M || M.type !== "story" || M.lijst) return;
   if(document.getElementById("bordvlak")){ kaartStandBij(); bordNa(); return; }
@@ -33727,6 +33810,8 @@ function mpKnop(btn, el){
   const i = el && el.dataset ? el.dataset.i : null;
   switch(btn){
     case "story": M = {type:"slots"}; render(); return true;
+    /* startscherm: Verder gaat meteen naar de kaart van de plek waar je het laatst speelde */
+    case "thuisverder": if(SET.slot != null && SET.slots[SET.slot]){ slotKies(SET.slot); M = {type:"story"}; storySkin(0); render(); } else { M = {type:"slots"}; render(); } return true;
     case "stoel": stoelVraag(); return true;
     case "slotkies": if(M && M.type === "slots" && M.wis == null){
       slotKies(+i);
@@ -34228,14 +34313,14 @@ function onBtn(btn, el, fromAction){
     case "tutprev": if(M && M.type==="tutorial" && M.step > 0){ M.step--; render(); } break;
     case "tutvecht": tutVecht(); break;
     case "tutgo": if(M && M.type==="tutorial" && el){ M.step = +el.dataset.step; render(); } break;
-    case "audio": M = el && el.closest && el.closest(".vhome") ? {type:"boek", boek:{sectie:"opties"}} : {type:"audio"}; render(); break;
+    case "audio": M = el && el.closest && el.closest(".vhome, .vhpano") ? {type:"boek", boek:{sectie:"opties"}} : {type:"audio"}; render(); break;
     case "installeer":
       if(INSTALL_EVT){ const ev = INSTALL_EVT; ev.prompt(); (ev.userChoice || Promise.resolve()).then(r => { if(r && r.outcome === "accepted") INSTALL_EVT = null; render(); }).catch(() => {}); }
       else { M = {type:"installeer"}; render(); }
       break;
     case "installsluit": M = null; render(); break;
     case "filmstudio": M = null; render(); filmStudio(); break;
-    case "aelib": M = el && el.closest && el.closest(".vhome") ? {type:"boek", boek:{sectie:"lib"}} : {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
+    case "aelib": M = el && el.closest && el.closest(".vhome, .vhpano") ? {type:"boek", boek:{sectie:"lib"}} : {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
     case "homemp":   HOME.open = HOME.open === "mp" ? null : "mp"; render(); break;
     case "homebots": HOME.open = HOME.open === "bots" ? null : "bots"; render(); break;
     case "deck": {
