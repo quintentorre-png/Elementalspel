@@ -5455,8 +5455,36 @@ body:not(.tel) .kaartbox.ks-bord .ksinfo{bottom:auto; transform:none; width:min(
 .broute polyline{fill:none; stroke:#ffd84a; stroke-width:3px; stroke-dasharray:9 7; vector-effect:non-scaling-stroke; opacity:.8; stroke-linecap:round}
 .kbstijl{position:fixed !important; right:22px; top:18px; z-index:31}
 body.tel .kbstijl{top:8px; right:10px}
+
+/* ronde 18 */
+.vkarakter{display:flex; align-items:center; gap:16px; margin-top:22px; width:min(580px, 100%); padding:12px 18px; text-align:left; cursor:pointer;
+  background:#050507; border:0; border-radius:4px; box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000; color:#ececec}
+.vkarakter:hover, .vkarakter:focus-visible{box-shadow:0 0 0 2px #ffd84a, 0 0 0 4px #000; outline:none}
+.vkarakter .vkpt{width:64px; height:64px; flex:none; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#15141c; border-radius:2px}
+.vkarakter .vkpt svg, .vkarakter .vkpt img{width:100%; height:100%; object-fit:contain}
+.vkarakter .vktx{display:flex; flex-direction:column; gap:6px; min-width:0}
+.vkarakter small{font:9px/1 "Press Start 2P",monospace; color:#8a8698; letter-spacing:.12em}
+.vkarakter b{font:14px/1.1 "Press Start 2P",monospace; color:#ffd84a; font-weight:normal}
+.vkarakter em{font:18px/1 "VT323",monospace; color:#a9a39a; font-style:normal}
+body.tel.venster .vhome .vhinfo{display:none !important}
+body.tel .vkarakter{margin-top:10px; padding:8px 12px; gap:10px} body.tel .vkarakter .vkpt{width:42px; height:42px} body.tel .vkarakter b{font-size:10px} body.tel .vkarakter em{font-size:14px}
+/* de kaart: de wereldnaam klein in de hoek, geen pijltjes naar andere werelden */
+body.pc .kaartbox.ks-bord .ktitel{left:100px; top:24px; transform:none; align-items:flex-start; gap:6px}
+body.pc .kaartbox.ks-bord .ktitel b{font-size:clamp(16px, 1.6vw, 26px) !important}
+body.pc .kaartbox.ks-bord .ktitel small{font-size:9px !important}
+.kaartbox.ks-bord .ktitel .kpijl{display:none !important}
+.kaartbox.ks-bord .bordvlak .bbord{pointer-events:auto; cursor:pointer}
+.kaartbox.ks-bord .bordvlak .bordnevel{display:none}
+/* challenges */
+.chalbox .bordhud .bhier{display:none !important}
+html body .chalbox #bordhud .bknoppen{gap:22px !important}
+html body .chalbox #bordhud .bknoppen .obtn{font:12px/1 "Press Start 2P",monospace !important; height:44px; padding:0 18px !important; background:#050507 !important; color:#ececec !important;
+  border:0 !important; border-radius:4px !important; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000 !important; min-height:0 !important}
+html body .chalbox #bordhud .bknoppen .obtn.bstart{color:#ffd84a !important; box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000 !important}
+html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height:30px; padding:0 10px !important}
+.kspdeck{font-size:clamp(13px,1.05vw,21px) !important; color:#a9a39a !important}
 /* zonder pion: het bordje blijft op zijn plek, en een gouden ring op de grond wijst aan waar je bent */
-.kaartbox.ks-bord .bpion{display:none !important}
+.kaartbox.ks-bord.zonderpion .bpion{display:none !important}
 .kaartbox.ks-bord .bordvlak .bringen{display:inline}
 .kaartbox.ks-bord .bpuls{display:none}
 .kaartbox.ks-bord .bdoel.nu{display:inline; fill:rgba(255,216,74,.16); stroke:#ffd84a; stroke-width:.45; animation:bpuls 1.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
@@ -19184,6 +19212,7 @@ function overlayHTML(){
         <b>twee keer</b>, ook als ritueel. Gaat er eentje uit, dan is dat weg en trekken de anderen kaarten.</div>
         <button class="obtn ovclose" data-act="btn" data-btn="closemodal">Sluiten</button></div>`;
     }
+    if(M.type==="chal") return chalHTML();
     if(M.type==="help") return helpHTML();
     if(M.type==="tutorial") return tutorialHTML();
     if(M.type==="menu") return menuHTML();
@@ -19709,8 +19738,11 @@ function startHTML(){
   const verder = opPlek && volgend && STORY[volgend] ? `<button class="vverder" data-act="btn" data-btn="story">
       <span class="vvic">▶</span><span class="vvtx"><b>VERDER</b><em>${volgend} · ${STORY[volgend].naam}${STORY[volgend].vijand ? `, tegen ${STORY[volgend].vijand}` : ""}</em>
       <small>${klaar} van ${STORY_ORDER.length} levels · ${sterren} sterren</small></span></button>` : "";
+  const kk = mpKeus(), kc = kk.wil ? {naam:"Willekeurig", wil:true} : mpChar(mijnProfiel().char);
+  const karakter = `<button class="vkarakter" data-act="btn" data-btn="thuischar" title="Je karakter voor samen spelen en tegen de bot">
+      <span class="vkpt">${mpPt(kc)}</span><span class="vktx"><small>JOUW KARAKTER</small><b>${kc.naam}</b><em>samen spelen en bots · wijzig</em></span></button>`;
   return `<div class="vhome">
-    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div>${verder}</div>
+    <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div>${verder}${karakter}</div>
     <div class="vhrij">
       <div class="vn vhlijst vlijst">
         ${LIVE.resume ? vr("resumelive", `Terug naar room ${LIVE.resume.code}`, "", "") : ""}
@@ -29658,7 +29690,7 @@ function bordBordjes(open, nieuw){
     const lv = /^\d/.test(id), gedaan = bordKlaar(id), baas = BORD_BAAS(id);
     const naam = lv ? id : (id === "knort" ? "KNORT" : "DE TRAP");
     const nw = nieuw && nieuw.plekken && nieuw.plekken.has(id);
-    return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}" data-id="${id}" style="left:${p.x}%;top:${p.y}%">
+    return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}" data-id="${id}" data-act="btn" data-btn="bordplek" style="left:${p.x}%;top:${p.y}%">
       ${bordStijl() === "3" ? bordMedaille(id) : ""}<div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
 }
 /* Het bordje van de plek waar de pion staat schuift omhoog, boven zijn hoofd. */
@@ -29667,7 +29699,7 @@ function bordBordjeHier(){
   const alle = [...document.querySelectorAll(".bbord")];
   alle.forEach(b => b.classList.remove("hier", "hb", "hr", "hl"));
   if(loopt) return;
-  document.querySelectorAll(".bdoel").forEach(g => g.classList.toggle("nu", g.dataset.id === hier));
+  if(BORD_ZONDER_PION) document.querySelectorAll(".bdoel").forEach(g => g.classList.toggle("nu", g.dataset.id === hier));
   const b = alle.find(x => x.dataset.id === hier); if(!b) return;
   if(BORD_ZONDER_PION){ b.classList.add("hier"); return; }
   /* boven het hoofd van de pion, anders rechts, anders links: waar het geen ander bordje raakt */
@@ -29688,7 +29720,7 @@ function bordGelopen(){
     .map(r => `<polyline points="${bordRandPunten(r[0], r[1]).map(q => q.join(",")).join(" ")}"/>`).join("");
 }
 /* ronde 17, voorstel 3: een rond portret boven elk level dat je kent */
-function bordStijl(){ return SET && SET.bordStijl === "3" ? "3" : "1"; }
+function bordStijl(){ return "3"; }   // ronde 18: de portretten zijn de kaart
 function bordMedaille(id){
   if(id === "hemel") return "";
   const src = id === "start" ? "art/inv-schaal.png" : ksPersSrc(id); if(!src) return "";
@@ -29717,8 +29749,7 @@ function bordHTML(huidigW){
       <img class="kaartart" id="bordkaart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">
       <canvas id="bordgrond" width="2560" height="2560"></canvas>
       <svg class="bordlaag" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs><filter id="bordzacht" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="2" seed="7" result="n"/>
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="1.6"/></filter>
+        <defs><filter id="bordzacht" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.4"/></filter>
 </defs>
         <g class="broute">${bordGelopen()}</g>
         <g class="bringen">${ringen}</g><g class="bmist" filter="url(#bordzacht)">${mist}</g>
@@ -29741,6 +29772,12 @@ function bordHTML(huidigW){
 }
 /* ---- na het tekenen: grond, camera, pion, onderbalk ---- */
 const BORD = {cam:null, loop:null, xy:null, sleep:null};
+function bordTitelBij(){
+  const t = document.querySelector(".kaartbox .ktitel"); if(!t || !M || M.eiland) return;
+  const w = Math.min(5, bordW(bordPionPlek())), W = WERELDEN[w]; if(!W) return;
+  const sm = t.querySelector("small"), b = t.querySelector("b");
+  if(sm) sm.textContent = "WERELD " + w; if(b) b.textContent = W.naam.toUpperCase(); t.style.setProperty("--wk", W.kleur);
+}
 function bordInfoVolg(){
   if(BORD.infoLus) return;
   const stap = () => {
@@ -29932,7 +29969,7 @@ document.addEventListener("pointermove", e => {
   if(Math.hypot(v.dx, v.dy) < 10) return;
   v.bezig = true;
   const vlak = document.getElementById("bordvlak");
-  if(vlak && BORD.cam){ vlak.style.transition = "none"; vlak.style.transform = `translate(${v.dx * .6}px, ${v.dy * .6}px) ${BORD.cam}`; }
+  if(vlak && BORD.cam){ vlak.style.transition = "none"; vlak.style.transform = `translate(${v.dx}px, ${v.dy}px) ${BORD.cam}`; }
 });
 function bordVeegEind(){
   const v = BORD.veeg; if(!v) return; BORD.veeg = null;
@@ -29940,8 +29977,12 @@ function bordVeegEind(){
   /* het klikje dat erop volgt mag geen plek aanklikken */
   BORD.veegKlik = Date.now();
   const vlak = document.getElementById("bordvlak");
-  if(vlak){ vlak.style.transition = ""; vlak.style.transform = BORD.cam; }
-  if(!M || M.eiland || Math.hypot(v.dx, v.dy) < 70) return;
+  if(!M || M.eiland){ if(vlak){ vlak.style.transition = ""; vlak.style.transform = BORD.cam; } return; }
+  /* ronde 18: gewoon schuiven; de kaart blijft waar je hem neerlegt (tot de pion ergens heen loopt) */
+  const p0 = BORD.pan || [0, 0]; BORD.pan = [p0[0] + v.dx, p0[1] + v.dy];
+  if(vlak) vlak.style.transition = "none"; BORD.cam = null; bordCamera(); if(vlak){ void vlak.offsetWidth; vlak.style.transition = ""; }
+  return;
+  if(Math.hypot(v.dx, v.dy) < 70) return;
   const nu = bordCamW() || 1, [x0, y0] = BORD_CAM[nu];
   /* je sleept de kaart: de wereld aan de andere kant komt in beeld */
   const rx = -v.dx, ry = -v.dy, l = Math.hypot(rx, ry);
@@ -29957,12 +29998,15 @@ function bordCamDoel(){
   const bak = document.getElementById("bordbak"); if(!bak) return null;
   const vw = bak.clientWidth, vh = bak.clientHeight, S = Math.min(vw, vh);
   const w = bordCamW();
-  const [cxp, cyp, span0] = w ? BORD_CAM[w] : [50, 50, 100];
-  const span = w ? Math.min(100, span0 * BORD_CAM_VER) : 100;   // (okt 2026) minder ingezoomd: je ziet de hele wereld en wat eromheen
+  /* ronde 18: geen wereldzoom meer; de camera staat op het level (of loopt mee naar het volgende) */
+  const doelP = bordPos((BORD.camNaar) || bordPionPlek()) || {x:50, y:50};
+  const [cxp, cyp] = w ? [Math.max(22, Math.min(78, doelP.x)), Math.max(20, Math.min(80, doelP.y))] : [50, 50];
+  const span = w ? (pcAan() ? 52 : 44) : 100;
   const s = 100 / span, left = (vw - S) / 2, top = (vh - S) / 2;
   /* het midden van wat er tussen de titel en de balk onderin overblijft */
-  const midY = w ? vh / 2 + (pcAan() ? 30 : -24) : vh / 2;
-  return {S, left, top, tx:vw / 2 - left - s * cxp * S / 100, ty:midY - top - s * cyp * S / 100, s};
+  const midY = w ? vh / 2 + (pcAan() ? 10 : -10) : vh / 2;
+  const pan = w && BORD.pan ? BORD.pan : [0, 0];
+  return {S, left, top, tx:vw / 2 - left - s * cxp * S / 100 + pan[0], ty:midY - top - s * cyp * S / 100 + pan[1], s};
 }
 const bordCamW = () => M && M.eiland ? 0 : Math.min(4, (M && M.telW) || bordW(bordPionPlek()));
 function bordCamera(zacht){
@@ -29975,10 +30019,10 @@ function bordCamera(zacht){
     vlak.style.transition = ""; vlak.style.transform = tf;
   } else { vlak.style.transition = "none"; vlak.style.transform = tf; void vlak.offsetWidth; vlak.style.transition = ""; }
   BORD.cam = tf;
-  /* 🌫 Ingezoomd op een wereld: daaromheen hangt zwarte mist. Loop je naar een andere wereld,
-     dan schuift het gat mee en loop je er even doorheen. Op het hele eiland: geen mist. */
+  /* 🌫 ronde 18: de zwarte mist rond de wereld is weg; alleen de mist over wat je nog niet kent */
   const nv = document.getElementById("bordnevel");
-  if(nv){ const w = bordCamW();
+  if(nv) nv.classList.add("uit");
+  if(false){ const w = bordCamW();
     if(w){ const [cx, cy, span] = BORD_CAM[w];
       nv.style.setProperty("--nx", (37.5 + cx * .25) + "%"); nv.style.setProperty("--ny", (37.5 + cy * .25) + "%");
       nv.style.setProperty("--nr", (span * BORD_CAM_VER * .5 * .25) + "%"); nv.classList.remove("uit"); }
@@ -29992,17 +30036,20 @@ function bordPionZet(x, y, hop){
   el.style.left = x + "%"; el.style.top = y + "%"; el.style.setProperty("--hop", (hop || 0) + "");
   el.classList.toggle("loopt", !!BORD.loop);
 }
-const BORD_ZONDER_PION = true;
+const BORD_ZONDER_PION = false;   // ronde 18: de pion is terug
+const OUDE_KAART = false;   // de oude scrollkaart (voor het spelbord) staat nog in de code
 function bordLoop(naar){
   const van = bordPionPlek();
   if(BORD.loop || naar === van) return;
   const pts = bordRoute(van, naar); if(!pts) return;
-  const klaar = () => { BORD.loop = null; BORD.xy = null; SET.story.bordBij = naar; saveSet(); bordPionZet(); bordHud();
+  const klaar = () => { BORD.loop = null; BORD.xy = null; BORD.camNaar = null; SET.story.bordBij = naar; saveSet(); bordPionZet(); bordHud(); bordTitelBij();
     if(BORD.infoNa === naar && M && M.type === "story"){ BORD.infoNa = null; M.kies = naar; render(); return; } BORD.infoNa = null;
     if(M && !M.eiland && M.telW && M.telW !== Math.min(4, bordW(naar))){ M.telW = Math.min(4, bordW(naar)); render(); } };
   /* okt 2026: geen pion meer; het gouden vak springt meteen naar de nieuwe plek */
   if(BORD_ZONDER_PION || matchMedia("(prefers-reduced-motion: reduce)").matches){ AU.play && AU.play("place"); klaar(); return; }
   BORD.loop = {naar}; bordHud(); AU.play && AU.play("place");
+  /* de camera gaat alvast mee naar waar de pion heen loopt */
+  BORD.camNaar = naar; BORD.pan = null; bordCamera();
   let i = 0, t0 = performance.now(); const per = 120;
   const z0 = bordOp(van), z1 = bordOp(naar);
   const stap = nu => {
@@ -30014,7 +30061,7 @@ function bordLoop(naar){
     /* Loopt de pion een andere wereld in terwijl je ingezoomd bent: de camera gaat mee. */
     const w = Math.min(4, bordW(naar));
     if(f >= 1){ i++; t0 = nu;
-      if(i === Math.floor(pts.length / 2) && M && !M.eiland && bordCamW() !== w && bordWereldOpen(w)){ M.telW = w; bordCamera(); }
+
       if(i >= pts.length - 1){ klaar(); return; } }
     requestAnimationFrame(stap);
   };
@@ -30075,6 +30122,7 @@ document.addEventListener("pointerup", bordSleepEind);
 document.addEventListener("pointercancel", bordSleepEind);
 /* ---- onderin: waar je staat, en starten ---- */
 function bordHud(){
+  if(ksChal()){ chalBalk(); return; }
   bordBordjeHier();
   const hier = document.getElementById("bhier"), kn = document.getElementById("bknoppen"); if(!hier || !kn) return;
   const id = document.getElementById("ksdoek") ? ksData().hier : bordPionPlek(), loopt = !!BORD.loop;
@@ -30121,9 +30169,10 @@ document.addEventListener("keydown", e => {
    (SET.story.bordBij), en de startknop onderin (bordHud). */
 const KS_STIJLEN = [["bord", "Spelbord"], ["dagboek", "Het reisdagboek"], ["panorama", "Het panorama"]];
 const KS_PERWERELD = {dagboek:true};   // het dagboek toont één rijk tegelijk; het panorama is één doorlopende reis
-const ksStijl = () => ksThuis() ? "panorama" : (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "bord";   // okt 2026: standaard weer de oude kaart (ronde 17)
+const ksStijl = () => (ksThuis() || ksChal()) ? "panorama" : "bord";   // ronde 18: één kaart; het panorama is het challenge-scherm   // okt 2026: standaard weer de oude kaart (ronde 17)
 /* het startscherm is het panorama: het logo in de bovenste balk, onderin de knoppen, en het doek schuift vanzelf door je reis */
-const THUIS_PANO = true;
+const THUIS_PANO = false;   // okt 2026 (ronde 18): weer het oude startscherm met het venster
+function ksChal(){ return !!M && M.type === "chal"; }
 function ksThuis(){ return THUIS_PANO && !M && typeof S !== "undefined" && !!S && !!S.ui && S.ui.mode === "start"; }
 const KP = {zw:"#0b0a10", nacht:"#141228", d1:"#1e1c26", d2:"#2c2a38", g1:"#4a4858", g2:"#77748a", g3:"#b8b4c0", wit:"#f2f0e8", goud:"#ffd84a", goudd:"#c0902a",
   bruin:"#7a4e2c", bruind:"#4a2e1a", tan:"#cfa06a", groen:"#7fd18c", groend:"#2e6a3a", oranje:"#ffb03a", rood:"#d5503c", roodd:"#6a1e14", blauw:"#a9e2ff",
@@ -30243,7 +30292,44 @@ const ksMeng = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const ksP = (x, y) => [Math.round(KS.ox + x * KS.sx), Math.round(KS.oy + y * KS.sy)];
 
 /* ---- de toestand: welke plekken er zijn en wat open is ---- */
+/* ---- ronde 18: het panorama is het challenge-scherm ----
+   Elke tegenstander van de challenges staat op zijn eigen plek in het panorama. Een challenge kan
+   pas als je die tegenstander in het verhaal hebt verslagen (op je verste verhaalplek). */
+const CHAL_VOLGORDE = () => { const ids = ladderAlle().map(t => t.id), uit = [];
+  STORY_ORDER.forEach(id => { if(ids.includes(id)) uit.push(id); if(id === "2-1" && ids.includes("knort")) uit.push("knort"); });
+  if(ladderOpen(LADDER.geheim)) uit.push("geheim"); return uit; };
+function chalVerhaal(id){
+  const st = mpVerste(); if(!st) return false; if(st.vrij) return true;
+  if(id === "knort") return !!st.knortGezien || (st.klaar || []).includes("2-1");
+  if(id === "geheim") return true;
+  return (st.klaar || []).includes(id);
+}
+const chalOpen = id => { const t = ladderZoek(id); return ladderSpeelbaar(t) && chalVerhaal(id); };
+function ksChalData(){
+  const lv = CHAL_VOLGORDE().map(id => ({id, w:ksW(id), n:0, open:chalOpen(id), klaar:ladderVerslagen(id), st:0, baas:!!(LADDER.bazen.some(b => b.id === id) || id === "5-5"),
+    naam:id === "geheim" ? "???" : mpChar(id).naam}));
+  const seq = lv.filter(l => l.open).map(l => l.id);
+  let hier = seq.includes(SET.chalBij) ? SET.chalBij : (lv.find(l => l.open && !l.klaar) || lv.find(l => l.open) || lv[0] || {}).id;
+  const by = {}; lv.forEach(l => { by[l.id] = l; });
+  return {open:new Set(seq), lv, knort:false, hemel:false, seq, hier, by, wereldOpen:w => lv.some(l => l.w === w && l.open), alles:false, chal:true};
+}
+function chalHTML(){
+  return `<div class="ovbox kaartbox ks-panorama ksgeentitel chalbox">
+    <div class="kaartkop"><h2>Challenges</h2><button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
+    ${ksHTML()}</div>`;
+}
+/* de balk onderin van het challenge-scherm */
+function chalBalk(){
+  const hier = document.getElementById("bhier"), kn = document.getElementById("bknoppen"); if(!hier || !kn) return;
+  const D = ksData(), id = D.hier, t = ladderZoek(id), ch = id ? mpChar(id) : null, deck = mijnProfiel().deck;
+  const nV = D.lv.filter(l => l.klaar).length;
+  hier.innerHTML = id ? `<small>CHALLENGE &middot; ${nV} VAN ${D.lv.length} VERSLAGEN</small><b>${id === "geheim" ? "???" : ch.naam}</b><span>${ladderVerslagen(id) ? "verslagen &middot; nog een keer?" : (t && ladderDeckVan(t) ? aeKortLijst(ladderDeckVan(t).ae) : "")}</span>` : `<small>CHALLENGES</small><b>Nog niemand</b><span>versla eerst iemand in het verhaal</span>`;
+  kn.innerHTML = `<button class="obtn b-dim" data-act="btn" data-btn="chaldeck" title="Kies of bewerk je deck">Deck: ${String(deck.naam || "deck").replace(/</g, "")} &#9998;</button>
+    <button class="obtn b-dim" data-act="btn" data-btn="chalwil">Willekeurig</button>
+    <button class="obtn bstart" data-act="btn" data-btn="chalstart"${id && chalOpen(id) ? "" : " disabled"}>${id && ladderVerslagen(id) ? "Nog een keer" : "Start"}</button>`;
+}
 function ksData(){
+  if(ksChal()) return ksChalData();
   const open = bordOpenPlekken();
   /* de Hemelrand (wereld 5) hoort alleen bij het panorama: daar loopt de reis door tot het eind.
      Die levels zijn open zodra je de trap op bent geweest (de eerste keer met Nimbus). */
@@ -30262,11 +30348,12 @@ function ksData(){
   const wereldOpen = w => w === 5 ? (hemel || lv.some(l => l.w === 5 && l.open)) : bordWereldOpen(w, open);
   return {open, lv, knort, hemel, seq, hier, by, wereldOpen, alles:!!SET.story.vrij};
 }
-const ksW = id => id === "knort" ? 2 : id === "hemel" ? 5 : id === "start" ? 1 : +String(id)[0];
+const ksW = id => id === "knort" ? 2 : (id === "hemel" || id === "geheim") ? 5 : id === "start" ? 1 : +String(id)[0];
 const ksNaam = id => id === "knort" ? "Knort" : id === "hemel" ? "De trap" : id === "start" ? "Het ei" : (STORY[id] ? STORY[id].naam : id);
 /* wat er nieuw is sinds je de kaart de vorige keer zag: open gekomen, of net gehaald */
 function ksNieuwBepaal(D){
   if(M && M.ksNieuw) return M.ksNieuw;
+  if(D.chal) return {t0:performance.now(), open:new Set(), klaar:new Set()};
   const oud = SET.story.ksGezien, n = {t0:performance.now(), open:new Set(), klaar:new Set()};
   const nuOpen = D.seq.slice(), nuKlaar = D.lv.filter(l => l.klaar).map(l => l.id);
   if(oud && Array.isArray(oud.open)){ nuOpen.forEach(id => { if(!oud.open.includes(id)) n.open.add(id); }); nuKlaar.forEach(id => { if(!oud.klaar.includes(id)) n.klaar.add(id); }); }
@@ -30283,6 +30370,7 @@ function ksAnim(id, soort, duur, wacht){
 /* ---- kiezen, stappen, starten ---- */
 function ksKies(id, metInfo){
   const D = ksData(); if(!D.seq.includes(id)) return;
+  if(D.chal){ if(id !== D.hier){ SET.chalBij = id; saveSet(); AU.play && AU.play("place"); KS.laagSleutel = ""; chalBalk(); } return; }
   if(id === D.hier){ if(metInfo !== false){ if(id === "start"){ M.kies = "start"; render(); return; }
       const b = document.querySelector(STORY[id] ? "#bknoppen .binfo" : "#bknoppen .bstart"); if(b) b.click(); } return; }
   SET.story.bordBij = id; saveSet(); AU.play && AU.play("place");
@@ -30342,8 +30430,7 @@ function ksInfoHTML(id){
 /* ---- het canvas ---- */
 function ksHTML(){
   const st = ksStijl(), pano = st === "panorama" && !ksThuis();
-  return `<div class="bordbak ksbak ks-${st}" id="ksbak"><canvas id="ksdoek" aria-label="De kaart"></canvas>${pano ? `<div class="kspers" id="kspers" aria-hidden="true"></div>${ksMiniHTML()}
-    <button class="kspstijl" data-act="btn" data-btn="kspstijl" title="Proef: hoe de personages in het panorama staan"><small>PROEF &middot; PERSONAGES</small><b class="${ksPersStijl() === "D" ? "aan" : ""}">EEN GROOT</b><b class="${ksPersStijl() === "A" ? "aan" : ""}">OP HUN PLEK</b></button>` : ""}</div>
+  return `<div class="bordbak ksbak ks-${st}" id="ksbak"><canvas id="ksdoek" aria-label="De kaart"></canvas>${pano ? `<div class="kspers" id="kspers" aria-hidden="true"></div>` : ""}</div>
     ${pano && M && M.lens ? ksLensHTML() : ""}
     <div class="bordhud" id="bordhud">
       <div class="bhier" id="bhier"></div>
@@ -30424,7 +30511,7 @@ function ksWiel(e){
   KS.wielT = setTimeout(() => ksSnap(KS.pan.doel + KS.W / 2), 380);
 }
 document.addEventListener("keydown", e => {
-  if(!M || (M.type !== "story" && M.type !== "boek") || M.lijst || M.inv || M.hemel || !document.getElementById("ksdoek")) return;
+  if(!M || (M.type !== "story" && M.type !== "boek" && M.type !== "chal") || M.lijst || M.inv || M.hemel || !document.getElementById("ksdoek")) return;
   if(M.type === "story" && ksStijl() === "panorama" && !(e.target && e.target.closest && e.target.closest("input, textarea, select"))){
     const t = e.key.toLowerCase();
     if(t === "m" || (t === "escape" && M.lens)){ e.preventDefault(); e.stopPropagation(); M.lens = !M.lens; render(); return; }
@@ -31076,6 +31163,7 @@ const KSPA_BREED = 1.6;   // okt 2026: een stuk is 1,6 keer zo breed als hoog (w
 const KSPA_KLEUR = {1:"#cfa06a", 2:"#7fd18c", 3:"#ffb03a", 4:"#a9e2ff", 5:"#e8c67a"};
 const KSPA_BALK = {1:"#8a5a2e", 2:"#2e7a3a", 3:"#a8281a", 4:"#2a5ab8", 5:"#e8e4d8"};   // bruin, groen, rood, blauw, wit
 function kspaDelen(D){
+  if(D.chal) return D.lv.map(l => ({id:l.id, w:l.w, l}));
   const delen = [{id:"start", w:1}];
   D.lv.forEach(l => {
     if(l.w === 5 && !delen.some(d => d.id === "hemel")) delen.push({id:"hemel", w:5});
@@ -31090,8 +31178,8 @@ const kspaOpen = (D, d) => d.id === "hemel" ? D.hemel : d.id === "start" ? true 
 /* één stuk van het doek, op de schermmaat; links loopt het zacht over in het vorige stuk */
 function kspaDeel(D, i, M_){
   const P = KS.pano, d = P.delen[i], open = kspaOpen(D, d), k = KS.k, OV = KSPA_OV;
-  const eigen = d.id === "hemel" ? ksBeeld("art/pano-trap.png") : d.id === "start" ? ksBeeld("art/bg-0-0.png") : null;
-  const img = eigen || (d.id === "hemel" ? ksPrent("5-1", true) : d.id === "start" ? null : ksPrent(d.id, true));
+  const eigen = d.id === "hemel" ? ksBeeld("art/pano-trap.png") : d.id === "start" ? ksBeeld("art/bg-0-0.png") : d.id === "knort" ? ksBeeld("art/winkel-knort.png") : null;
+  const img = eigen || (d.id === "hemel" ? ksPrent("5-1", true) : (d.id === "start" || d.id === "geheim" || d.id === "knort") ? null : ksPrent(d.id, true));
   const schaal = d.id === "start" && !eigen ? ksBeeld("art/inv-schaal.png") : null;
   const sil = !open && d.l ? kspaSilhouet(d.id) : null;
   const sleutel = [M_.h, M_.SW, k, !!img, !!eigen, !!schaal, open, !!sil].join("|");
@@ -31215,11 +31303,12 @@ function kspaBoven(c, D){
   /* bordjes, namen, en wat je kunt aanklikken */
   if(!thuis) P.delen.forEach(d => { const p = KS.pos[d.id], x = Math.round(p.cx - px); if(x < -M_.SW || x > KS.W + M_.SW) return;
     const open = kspaOpen(D, d), sel = d.id === D.hier, hov = d.id === KS.hover && !sel, y = grond(p.cx);
-    const klaar = d.l && d.l.klaar, t = d.id === "hemel" ? "DE TRAP" : d.id === "start" ? "0-0" : d.id, bw = ksBreed(t) + 12, bx = x - Math.round(bw / 2), by = y - 26 - (hov ? 1 : 0);
+    const klaar = d.l && d.l.klaar, t = d.id === "hemel" ? "DE TRAP" : d.id === "start" ? "0-0" : d.id === "knort" ? "KNORT" : d.id === "geheim" ? "???" : d.id, bw = ksBreed(t) + 12, bx = x - Math.round(bw / 2), by = y - 26 - (hov ? 1 : 0);
     kpR(c, x - 1, y - 14, 2, 15, "#000"); kpR(c, x, y - 14, 1, 15, open ? "#4a4858" : "#2c2a38");
     ksVenster(c, bx, by, bw, 11, open ? (sel ? "#ffd84a" : "#ececec") : "#4a4858");
     ksTekst(c, t, bx + 6, by + 3, open ? (sel ? "#ffd84a" : "#ececec") : "#77748a");
-    if(klaar){ kpR(c, x - 10, y - 11, 21, 7, "rgba(5,5,7,.75)"); kpSterren(c, x - 8, y - 10, d.l.st, "goud", "g1"); }
+    if(klaar && D.chal) kspaKroon(c, x - 5, y - 11);
+    else if(klaar){ kpR(c, x - 10, y - 11, 21, 7, "rgba(5,5,7,.75)"); kpSterren(c, x - 8, y - 10, d.l.st, "goud", "g1"); }
     if(d.l || d.id === "start"){ if(open){ const nm = d.id === "start" ? "HET EI" : ksLetters(d.l.naam), nb = ksBreed(nm); ksVenster(c, x - nb / 2 - 4, M_.y0 + 6, nb + 8, 9, sel ? "#ffd84a" : "#ececec"); ksTekst(c, nm, x - nb / 2, M_.y0 + 8, sel ? "#ffd84a" : "#ececec"); }
       else ksTekst(c, "?", x - 1, M_.y0 + 8, "#77748a"); }
     const sel_ = open && D.seq.includes(d.id);
@@ -31260,6 +31349,7 @@ function kspaNaarWereld(w){
 /* welke tekening hoort bij een level (dezelfde als in het portret) */
 function ksPersSrc(id){
   if(id === "knort") return "art/knort.png";
+  if(id === "geheim") return null;
   const L = STORY[id]; if(!L || !L.sprite || typeof SPRITE_BEELD !== "object") return null;
   const an = LV_PORT_ANDERS[id]; if(an && SPRITE_BEELD[an.spr]) return SPRITE_BEELD[an.spr];
   return SPRITE_BEELD[L.sprite] || null;
@@ -31275,7 +31365,18 @@ function kspaSilhouet(id){
   return (KS.sil[src] = cv);
 }
 const ksEsc = t => String(t || "").replace(/[&<>"]/g, ch => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}[ch]));
+/* het kroontje van een verslagen challenge, in pixels */
+function kspaKroon(c, x, y){
+  kpR(c, x - 1, y - 1, 12, 8, "rgba(5,5,7,.8)");
+  ["#...#...#", "##.###.##", "#########", "#########", ".#######."].forEach((r, j) => [...r].forEach((ch, i) => { if(ch === "#") kpR(c, x + i, y + j, 1, 1, "#ffd84a"); }));
+}
 function kspaPersHTML(id){
+  if(ksChal()){ const src = ksPersSrc(id); if(!src) return "";
+    const ch = mpChar(id), t = ladderZoek(id), deck = ladderDeckVan(t), versl = ladderVerslagen(id);
+    return `<div class="kspschaduw"></div><img class="kspimg" src="${src}" alt="" draggable="false">
+      <div class="ksptekst"><small>CHALLENGE &middot; ${id === "knort" ? "DE KRAAM" : id + " " + ksEsc((STORY[id] || {}).naam || "").toUpperCase()}</small>
+        <b class="ksplogo" style="--k:${KSPA_KLEUR[ksW(id)] || "#e8c67a"}${ch.naam.length > 12 ? ";font-size:clamp(13px,1.5vw,30px)" : ""}">${ksEsc(ch.naam.toUpperCase())}</b>
+        <p>${versl ? "Verslagen. Het kroontje is van jou." : "Nog niet verslagen in een challenge."}</p>${deck ? `<p class="kspdeck">${ksEsc(aeKortLijst(deck.ae))}</p>` : ""}</div>`; }
   const src = ksPersSrc(id); if(!src) return "";
   if(id === "knort") return `<div class="kspschaduw"></div><img class="kspimg" src="${src}" alt="" draggable="false">
     <div class="ksptekst"><small>DE KRAAM IN HET WOUD</small><b class="ksplogo" style="--k:#7fd18c">KNORT</b><p>Verkoopt alles. Bijna alles.</p></div>`;
@@ -31285,7 +31386,7 @@ function kspaPersHTML(id){
     <div class="ksptekst"><small>${id} &middot; ${ksEsc(L.naam.toUpperCase())}</small><b class="ksplogo" style="--k:${KSPA_KLEUR[ksW(id)] || "#e8c67a"}${naam.length > 12 ? ";font-size:clamp(13px,1.5vw,30px)" : ""}">${ksEsc(naam.toUpperCase())}</b>${regel ? `<p>${ksEsc(regel)}</p>` : ""}</div>`;
 }
 /* het personage van je level, groot rechts in het doek. Schuif je weg, dan stapt het even opzij. */
-function ksPersStijl(){ return SET && SET.persStijl === "A" ? "A" : "D"; }
+function ksPersStijl(){ return "D"; }
 function kspaPers(D, M_){
   const el = document.getElementById("kspers"); if(!el) return;
   if(ksPersStijl() === "A"){ el.classList.remove("in"); if(KS.miniHier !== D.hier){ KS.miniHier = D.hier; document.querySelectorAll(".ksmini .ksmk").forEach(m => m.classList.toggle("nu", m.dataset.id === D.hier)); } return; }
@@ -31451,7 +31552,7 @@ function kaartHTML(){
   /* 📱 Op de telefoon: knopjes per wereld (de camera springt erheen) en een vel met het
      level dat je aantikte. Op de computer staan ze er niet. */
   const volgendT = STORY_ORDER.find(id => STORY[id] && storyVrij(id) && !storyKlaar(id));
-  const bordAan = !hemelAan && artOk;
+  const bordAan = !hemelAan && artOk && !OUDE_KAART;
   const huidigW = hemelAan ? 5 : (M.telW || (bordAan ? Math.min(4, bordW(bordPionPlek())) : (volgendT ? Math.min(4, +volgendT.split("-")[0]) : 1)));
   const telChips = `<div class="wchips">${[1,2,3,4,5].map(x => {
       const open = STORY_ORDER.some(id => +id.split("-")[0] === x && STORY[id] && storyVrij(id)) || alles;
@@ -31483,9 +31584,7 @@ function kaartHTML(){
       <span class="sub" style="color:var(--gold)">${n} van de ${STORY_ORDER.length}${alles ? " · 🔓" : ""}</span>
       <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
-      ${bordAan && ksStijl() === "bord" ? `<button class="obtn b-dim" data-act="btn" data-btn="kaarteiland">${M.eiland ? "Inzoomen" : "Het eiland"}</button>
-        <button class="kspstijl kbstijl" data-act="btn" data-btn="kbstijl" title="Proef: hoe de levels op de kaart staan"><small>PROEF &middot; KAART</small><b class="${bordStijl() === "1" ? "aan" : ""}">ZWARTE BORDJES</b><b class="${bordStijl() === "3" ? "aan" : ""}">PORTRETTEN</b></button>` : ""}
-      ${bordAan ? `<button class="obtn b-dim ksknop" data-act="btn" data-btn="ksmenu" aria-expanded="${M.ksMenu ? "true" : "false"}"><small>KAART</small><span>${(KS_STIJLEN.find(x => x[0] === ksStijl()) || [0, ""])[1]}<i class="kspijl"></i></span></button>` : ""}
+      ${bordAan && ksStijl() === "bord" ? `<button class="obtn b-dim" data-act="btn" data-btn="kaarteiland">${M.eiland ? "Inzoomen" : "Het eiland"}</button>` : ""}
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
     ${bordAan ? (ksStijl() === "bord" ? bordHTML(huidigW) : ksHTML()) : `<div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}${hemelAan ? " inhemel" : ""}" id="kaartvlak">
       ${artOk ? `<img class="kaartart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">` : ""}
@@ -31577,6 +31676,7 @@ function kaartStandBij(){
   if(anders) saveSet();
 }
 function kaartScrol(){
+  if(M && M.type === "chal"){ if(document.getElementById("ksdoek")) ksNa(); return; }
   if(ksThuis()){ if(document.getElementById("ksdoek")) ksNa(); return; }
   if(M && M.type === "boek"){ if(document.getElementById("ksdoek")) ksNa(); return; }
   if(!M || M.type !== "story" || M.lijst) return;
@@ -33783,7 +33883,7 @@ function mpHTML(){
       ${M.melding ? `<div class="vmelding mis">${M.melding}</div>` : ""}
       <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button></div></div>`;
   }
-  if(M.stap === "char") return charKiesHTML(kop);
+  if(M.stap === "char") return charKiesHTML(M.thuis ? `<div class="mpstap">VOOR SAMEN SPELEN EN TEGEN DE BOT</div>` : kop);
   if(M.stap === "tegen") return ladderHTML(kop);
   /* hoe: room openen, meedoen, of een willekeurige tegenstander */
   const wil = !!k.wil, c0 = mpChar(mijnProfiel().char), d = md.kind === "commander" ? null : mijnProfiel().deck;
@@ -34116,19 +34216,21 @@ function mpKnop(btn, el){
     }
     case "mpmodus": {
       const md = el ? el.dataset.m : "cmd", bot = !!(el && el.dataset.bot === "1");
-      M = {type:"mp", modus:md, bot, stap:"char"}; render(); return true;
+      M = md === "chal" ? {type:"chal"} : {type:"mp", modus:md, bot, stap:"hoe"}; render(); return true;
     }
     case "mpdeck": if(M && M.type === "mp"){
       if(!M.bot && deckAlleenBot(basDecks()[+i])){ M.melding = "Dit deck gebruikt een aether die alleen tegen de bot mag (van de ladder of uit het verhaal)."; render(); return true; }
-      M.melding = ""; mpKeus().deck = +i; saveSet(); M.stap = "hoe"; render(); } return true;
+      M.melding = ""; mpKeus().deck = +i; saveSet(); if(M.terugChal){ M = {type:"chal"}; render(); return true; } M.stap = "hoe"; render(); } return true;
     case "mpchar": if(M && M.type === "mp" && mpCharsVrij().indexOf(i) >= 0){ const k = mpKeus(); k.char = i; k.wil = false; saveSet(); render(); } return true;
     case "mpcharwil": if(M && M.type === "mp"){ mpKeus().wil = true; saveSet(); render(); } return true;
     case "mpdeckwissel": if(M && M.type === "mp"){ M.melding = ""; M.stap = "deck"; render(); } return true;
     case "mpcharok": if(M && M.type === "mp"){
       if(!M.bot && M.modus !== "cmd" && deckAlleenBot(mijnProfiel().deck)){ M.stap = "deck"; M.melding = "Dit deck gebruikt een aether die alleen tegen de bot mag (van de ladder of uit het verhaal)."; render(); return true; }
+      if(M.thuis){ M = null; render(); return true; }
       M.stap = (M.bot && M.modus === "chal") ? "tegen" : "hoe"; render(); } return true;
+    case "thuischar": M = {type:"mp", modus:"cmd", bot:false, stap:"char", thuis:true}; render(); return true;
     case "mpterug":
-      if(M && M.type === "mp"){ if(M.stap === "hoe") M.stap = (M.bot && M.modus === "chal") ? "tegen" : "char"; else if(M.stap === "tegen") M.stap = "char";
+      if(M && M.type === "mp"){ if(M.terugChal) M = {type:"chal"}; else if(M.stap === "hoe") M = (M.bot && M.modus === "chal") ? {type:"chal"} : null;
         else if(M.stap === "deck") M.stap = "hoe"; else M = null; if(M) M.melding = ""; render(); }
       return true;
     /* ⚔ de tegenstander kiezen (tegen de bot, Basis) */
@@ -34139,7 +34241,7 @@ function mpKnop(btn, el){
       render(); } return true;
     case "ladok": if(M && M.type === "mp" && M.tegen){ M.stap = "hoe"; render(); } return true;
     case "ladmenu": {      // na een partij: terug naar de tegenstanders
-      M = {type:"mp", modus:"chal", bot:true, stap:"tegen", tegen:LADDER_KEUS};
+      M = {type:"chal"}; if(LADDER_KEUS){ SET.chalBij = LADDER_KEUS; saveSet(); }
       render(); return true;
     }
     case "mpstart": case "mphost": {
@@ -34577,14 +34679,14 @@ function onBtn(btn, el, fromAction){
     case "tutprev": if(M && M.type==="tutorial" && M.step > 0){ M.step--; render(); } break;
     case "tutvecht": tutVecht(); break;
     case "tutgo": if(M && M.type==="tutorial" && el){ M.step = +el.dataset.step; render(); } break;
-    case "audio": M = el && el.closest && el.closest(".vhome, .vhpano") ? {type:"boek", boek:{sectie:"opties"}} : {type:"audio"}; render(); break;
+    case "audio": M = el && el.closest && {type:"audio"}; render(); break;
     case "installeer":
       if(INSTALL_EVT){ const ev = INSTALL_EVT; ev.prompt(); (ev.userChoice || Promise.resolve()).then(r => { if(r && r.outcome === "accepted") INSTALL_EVT = null; render(); }).catch(() => {}); }
       else { M = {type:"installeer"}; render(); }
       break;
     case "installsluit": M = null; render(); break;
     case "filmstudio": M = null; render(); filmStudio(); break;
-    case "aelib": M = el && el.closest && el.closest(".vhome, .vhpano") ? {type:"boek", boek:{sectie:"lib"}} : {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
+    case "aelib": M = el && el.closest && {type:"lib", tab:"ae", modus:"kijk"}; render(); break;
     case "homemp":   HOME.open = HOME.open === "mp" ? null : "mp"; render(); break;
     case "homebots": HOME.open = HOME.open === "bots" ? null : "bots"; render(); break;
     case "deck": {
@@ -34729,6 +34831,11 @@ function onBtn(btn, el, fromAction){
       if(nb){ horizonWeg(); nimbusOpenen(); break; }     // ☁ terug naar Nimbus, niet naar de kaart
       M = kaartM(); storySkin(0); render(); break; }
     case "closemodal": M = null; render(); break;
+    case "chalstart": { const D = ksData(), id = D.hier; if(!id || !chalOpen(id)) break;
+      if(!basDecks().length){ M = {type:"mp", modus:"chal", bot:true, stap:"deck", terugChal:true}; render(); break; }
+      M = {type:"mp", modus:"chal", bot:true, stap:"hoe", tegen:id}; onBtn("mpstart", null); break; }
+    case "chalwil": { const D = ksData(); if(D.seq.length){ const id = D.seq[Math.floor(Math.random() * D.seq.length)]; ksKies(id, false); if(KS.pan && KS.pos[id]) KS.pan.doel = KS.pos[id].cx - KS.W / 2; } break; }
+    case "chaldeck": M = {type:"mp", modus:"chal", bot:true, stap:"deck", terugChal:true}; render(); break;
     case "infospeel": { const id = +(el && el.dataset.id); M = null; if(telAan()) telHand(false); render(); if(id && S && S.ui && S.ui.mode === "main" && mayAct(S.tp)) doAct({t:"play", id}); break; }
     case "belpak": beloningPak(+(el && el.dataset.i)); break;
     case "belverder": beloningKlaar(); break;
