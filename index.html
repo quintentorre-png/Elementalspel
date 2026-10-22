@@ -5441,18 +5441,26 @@ body:not(.pc) .boekbox .kaartkop{position:absolute; top:8px; left:8px; z-index:5
   filter:drop-shadow(3px 3px 0 #0b0d22) drop-shadow(0 0 12px rgba(232,198,122,.3))}
 .ksptekst p{font:clamp(15px,1.35vw,28px)/1.15 "VT323",monospace; color:#d8d2c4; margin-top:14px}
 body.tel .kspers{width:52vw} body.tel .ksptekst{top:8%; width:46%} body.tel .ksptekst p{display:none}
-/* de minikaart rechtsonder */
-.ksmini{position:absolute; right:22px; top:18px; width:min(13vw, 200px); aspect-ratio:1/1; padding:0; border:0; border-radius:4px; z-index:3; cursor:pointer; overflow:hidden;
+/* proef: schakelaar voor de personages (A of D) */
+.kspstijl{position:absolute; right:22px; top:18px; z-index:4; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 12px; border:0; border-radius:4px; cursor:pointer;
+  background:#050507; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000; color:#77748a; font:9px/1 "Press Start 2P",monospace}
+.kspstijl small{font:16px/1 "VT323",monospace; color:#8a8698; letter-spacing:.08em}
+.kspstijl b{font-weight:normal; padding:6px 8px; border-radius:2px}
+.kspstijl b.aan{background:#ffd84a; color:#050507}
+.kspstijl:hover{box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000}
+body.tel .kspstijl{top:8px; right:10px; gap:6px; padding:5px 6px; font-size:6px} body.tel .kspstijl small{display:none} body.tel .kspstijl b{padding:4px 5px}
+/* de minikaart linksonder */
+.ksmini{position:absolute; left:22px; bottom:24px; width:min(19.5vw, 300px); aspect-ratio:1/1; padding:0; border:0; border-radius:4px; z-index:3; cursor:pointer; overflow:hidden;
   background:#0a1430; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000, 0 8px 22px rgba(0,0,0,.6); transition:transform .15s}
 .ksmini:hover, .ksmini:focus-visible{transform:translateY(-3px); box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000, 0 8px 22px rgba(0,0,0,.6); outline:none}
 .ksmini img{position:absolute; inset:0; width:100%; height:100%; image-rendering:auto; filter:brightness(.8)}
 .ksmini svg{position:absolute; inset:0; width:100%; height:100%}
-.ksmk{position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; background:#050507; box-shadow:0 0 0 1.5px #ececec}
+.ksmk{position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; background:#050507; box-shadow:0 0 0 1.5px #ececec}
 .ksmk.dicht{box-shadow:0 0 0 1.5px #4a4858}
-.ksmk.nu{width:11px; height:11px; margin:-5.5px 0 0 -5.5px; background:#ffd84a; box-shadow:0 0 0 2px #000, 0 0 10px 4px rgba(255,216,74,.75); animation:ksmkpuls 1.2s ease-in-out infinite}
+.ksmk.nu{width:14px; height:14px; margin:-7px 0 0 -7px; background:#ffd84a; box-shadow:0 0 0 2px #000, 0 0 10px 4px rgba(255,216,74,.75); animation:ksmkpuls 1.2s ease-in-out infinite}
 @keyframes ksmkpuls{50%{box-shadow:0 0 0 2px #000, 0 0 3px 1px rgba(255,216,74,.4)}}
-.ksminilab{position:absolute; left:0; right:0; bottom:0; padding:5px 0 4px; background:rgba(5,5,7,.82); font:8px/1 "Press Start 2P",monospace; color:#ececec; letter-spacing:.12em}
-body.tel .ksmini{width:21vh; top:8px; right:10px}
+.ksminilab{position:absolute; left:0; right:0; bottom:0; padding:7px 0 6px; background:rgba(5,5,7,.82); font:10px/1 "Press Start 2P",monospace; color:#ececec; letter-spacing:.12em}
+body.tel .ksmini{width:31vh; height:31vh; bottom:62px; left:10px}
 body.tel .ksmk{width:4px; height:4px; margin:-2px 0 0 -2px; box-shadow:0 0 0 1px #ececec} body.tel .ksmk.nu{width:6px; height:6px; margin:-3px 0 0 -3px} body.tel .ksminilab{font-size:6px}
 /* de grote kaart */
 .kslens{position:fixed; inset:0; z-index:40; background:#050507; overflow:hidden; animation:kslensin .28s ease}
@@ -30261,7 +30269,8 @@ function ksInfoHTML(id){
 /* ---- het canvas ---- */
 function ksHTML(){
   const st = ksStijl(), pano = st === "panorama" && !ksThuis();
-  return `<div class="bordbak ksbak ks-${st}" id="ksbak"><canvas id="ksdoek" aria-label="De kaart"></canvas>${pano ? `<div class="kspers" id="kspers" aria-hidden="true"></div>${ksMiniHTML()}` : ""}</div>
+  return `<div class="bordbak ksbak ks-${st}" id="ksbak"><canvas id="ksdoek" aria-label="De kaart"></canvas>${pano ? `<div class="kspers" id="kspers" aria-hidden="true"></div>${ksMiniHTML()}
+    <button class="kspstijl" data-act="btn" data-btn="kspstijl" title="Proef: hoe de personages in het panorama staan"><small>PROEF &middot; PERSONAGES</small><b class="${ksPersStijl() === "D" ? "aan" : ""}">EEN GROOT</b><b class="${ksPersStijl() === "A" ? "aan" : ""}">OP HUN PLEK</b></button>` : ""}</div>
     ${pano && M && M.lens ? ksLensHTML() : ""}
     <div class="bordhud" id="bordhud">
       <div class="bhier" id="bhier"></div>
@@ -31105,6 +31114,19 @@ function kspaBoven(c, D){
     v.addColorStop(0, "rgba(5,5,7,0)"); v.addColorStop(1, "rgba(5,5,7,.7)"); c.fillStyle = v; c.fillRect(0, M_.y0, KS.W, M_.h);
     const ly = M_.y0 + M_.h * .3, l = c.createRadialGradient(cx, ly, 0, cx, ly, KS.W * .42);
     l.addColorStop(0, "rgba(5,5,7,.62)"); l.addColorStop(1, "rgba(5,5,7,0)"); c.fillStyle = l; c.fillRect(0, M_.y0, KS.W, M_.h); }
+  /* proef (ronde 16, A): elk personage staat bij zijn eigen plek, onderaan uit beeld. Wat nog dicht is staat al als silhouet in het doek. */
+  if(!thuis && ksPersStijl() === "A"){
+    P.delen.forEach(d => { if(!d.l && d.id !== "knort") return; if(!kspaOpen(D, d)) return;
+      const p = KS.pos[d.id], x = p.cx - px + M_.SW * .2; if(x < -M_.SW || x > KS.W + M_.SW) return;
+      const src = ksPersSrc(d.id), img = src && ksBeeld(src); if(!img || !img.naturalWidth) return;
+      const L = STORY[d.id], geheim = L && !storyKlaar(d.id) && /\?/.test(L.vijand || ""), nu = d.id === D.hier;
+      const h = M_.h * (nu ? .8 : .7), w = Math.min(M_.SW * .62, h * img.naturalWidth / img.naturalHeight), h2 = w * img.naturalHeight / img.naturalWidth;
+      if(nu) ksGloed(c, x, M_.y1 - h2 * .45, h2 * .7, "255,216,74", .16 + .05 * ksPuls(700));
+      c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = "high";
+      if(geheim){ const sil = kspaSilhouet(d.id); if(sil) c.drawImage(sil, x - w / 2, M_.y1 - h2 + 2, w, h2); }
+      else { if(!nu) c.globalAlpha = .9; c.drawImage(img, x - w / 2, M_.y1 - h2 + 2, w, h2); }
+      c.restore(); });
+  }
   /* onderin iets donkerder, zodat de bordjes leesbaar blijven */
   { const g = c.createLinearGradient(0, M_.y1 - 50, 0, M_.y1); g.addColorStop(0, "rgba(5,5,7,0)"); g.addColorStop(1, "rgba(5,5,7,.7)"); c.fillStyle = g; c.fillRect(0, M_.y1 - 50, KS.W, 50); }
   /* de randen van het doek in de huisstijl: zwart, met een dun licht lijntje */
@@ -31190,8 +31212,10 @@ function kspaPersHTML(id){
     <div class="ksptekst"><small>${id} &middot; ${ksEsc(L.naam.toUpperCase())}</small><b class="ksplogo" style="--k:${KSPA_KLEUR[ksW(id)] || "#e8c67a"}${naam.length > 12 ? ";font-size:clamp(13px,1.5vw,30px)" : ""}">${ksEsc(naam.toUpperCase())}</b>${regel ? `<p>${ksEsc(regel)}</p>` : ""}</div>`;
 }
 /* het personage van je level, groot rechts in het doek. Schuif je weg, dan stapt het even opzij. */
+function ksPersStijl(){ return SET && SET.persStijl === "A" ? "A" : "D"; }
 function kspaPers(D, M_){
   const el = document.getElementById("kspers"); if(!el) return;
+  if(ksPersStijl() === "A"){ el.classList.remove("in"); if(KS.miniHier !== D.hier){ KS.miniHier = D.hier; document.querySelectorAll(".ksmini .ksmk").forEach(m => m.classList.toggle("nu", m.dataset.id === D.hier)); } return; }
   const id = D.hier, f = KS.k / Math.min(2, window.devicePixelRatio || 1);
   const maat = Math.round(M_.y0 * f) + "|" + Math.round((M_.y1 - M_.y0) * f);
   if(el.dataset.maat !== maat){ el.dataset.maat = maat; el.style.top = Math.round(M_.y0 * f) + "px"; el.style.height = Math.round((M_.y1 - M_.y0) * f) + "px"; }
@@ -34524,6 +34548,7 @@ function onBtn(btn, el, fromAction){
       break;
     case "story": M = kaartM(); storySkin(0); render(); break;
     case "storylijst": M = {type:"story", lijst:true}; render(); break;
+    case "kspstijl": SET.persStijl = ksPersStijl() === "A" ? "D" : "A"; saveSet(); KS.laagSleutel = ""; render(); break;
     case "kslens": if(M && M.type === "story"){ M.lens = !M.lens; AU.play && AU.play("place"); render(); } break;
     case "kslenskies": if(M && M.lens && el && el.dataset.id){ ksKies(el.dataset.id, false); M.lens = true; render(); } break;
     case "kslensstap": if(M && M.lens && el){ ksStap(+el.dataset.r || 1); M.lens = true; render(); } break;
