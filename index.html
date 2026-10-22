@@ -4551,11 +4551,9 @@ body.pc .praatscherm:not(.reus) .praatkeus .pkbtn:hover::before{transform:transl
 /* het donker onderin: lichter waar het personage staat */
 body.pc .praatscherm:not(.reus) .praatbox{background:none !important; isolation:isolate}
 body.pc .praatscherm:not(.reus) .praatbox::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:#050507; border-top:2px solid #ececec; box-shadow:0 -2px 0 #000}
-/* okt 2026: terug naar de zwarte balk, in de huisstijl: geen fade meer */
-body.pc .praatscherm:not(.reus) .praatbox{padding:30px 8vw 34px 33vw !important; min-height:190px !important}
-body.pc .praatscherm.leeg:not(.reus) .praatbox{padding-left:18vw !important; padding-right:18vw !important}
-body.pc .praatscherm:not(.reus) .praatkeus{bottom:calc(100% + 16px) !important}
+  background:linear-gradient(0deg, rgba(6,8,14,.97) 0%, rgba(6,8,14,.9) 55%, rgba(6,8,14,0) 100%);
+  -webkit-mask-image:linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(0,0,0,.42) 22vw, #000 33vw); mask-image:linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(0,0,0,.42) 22vw, #000 33vw)}
+body.pc .praatscherm.leeg:not(.reus) .praatbox::before{-webkit-mask-image:none; mask-image:none}
 
 /* --- wereldkaart W3: alleen de naam van de wereld, groot over de kaart --- */
 body.pc .kaartbox .kaartkop{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; max-width:none !important;
@@ -5430,13 +5428,16 @@ body:not(.pc) .boekbox .kaartkop{position:absolute; top:8px; left:8px; z-index:5
 /* okt 2026: het startscherm als panorama */
 .vhpano{position:fixed; inset:0; z-index:1; background:#050507; overflow:hidden}
 .vhpano .ksbak{position:absolute; inset:0; background:#050507}
-.hplogo{position:absolute; left:0; right:0; top:0; height:23%; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:2; padding-top:.5%}
-body .hplogo .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(1.3rem, 3.1vw + 1.6vh, 5.2rem); letter-spacing:.08em; line-height:1.05;
+.hplogo{position:absolute; left:0; right:0; top:8%; height:40%; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:2;
+  transition:opacity .3s, transform .3s}
+body .hplogo .vtitel{margin:0; font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(1.6rem, 4.4vw + 2vh, 7rem); letter-spacing:.08em; line-height:1.05;
   background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(5px 5px 0 #0b0d22) drop-shadow(0 0 18px rgba(232,198,122,.35))}
-body .hplogo .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.38rem, .5vw + .35vh, .82rem); letter-spacing:.3em; color:#cfc6b0; text-shadow:2px 2px 0 #0b0d22; margin-top:clamp(8px, 1.8vh, 22px)}
+body .hplogo .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-size:clamp(.42rem, .55vw + .45vh, 1rem); letter-spacing:.3em; color:#d8cfb8; text-shadow:2px 2px 0 #0b0d22; margin-top:clamp(8px, 1.8vh, 22px)}
 .hpversie{position:absolute; left:16px; top:10px; z-index:2; font:16px/1 "VT323",monospace; letter-spacing:.08em; color:#8a8698; opacity:.55; pointer-events:none}
-.hprij{position:absolute; left:0; right:0; bottom:0; height:15%; display:flex; flex-wrap:wrap; align-items:center; align-content:center; justify-content:center; gap:14px 24px; padding:0 24px; z-index:2}
+.vhpano.weg .hplogo{opacity:0; transform:translateY(-14px)}
+.vhpano.weg .hprij, .vhpano.weg .hpuit, .vhpano.weg .hpversie{opacity:0; transition:opacity .25s}
+.hprij{position:absolute; left:0; right:0; bottom:0; height:16%; display:flex; flex-wrap:wrap; align-items:center; align-content:center; justify-content:center; gap:14px 24px; padding:0 24px; z-index:2}
 .hpil{display:inline-flex; align-items:center; gap:12px; height:44px; padding:0 18px; margin:0; background:#050507; border:0; border-radius:4px; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000;
   color:#ececec; cursor:pointer; font:12px/1 "Press Start 2P",ui-monospace,monospace; letter-spacing:.02em; white-space:nowrap; transition:transform .12s}
 .hpil b{font-weight:normal}
@@ -5447,7 +5448,7 @@ body .hplogo .vtag{font-family:"Press Start 2P",ui-monospace,monospace; font-siz
 .hpil.open{color:#ffd84a}
 .hpil.hpplek{padding:0 12px; margin-left:-14px; color:#a9a39a}
 body.tel .hpil.hpplek{margin-left:-6px; padding:0 8px}
-.hpuit{position:absolute; left:50%; bottom:calc(15% + 18px); transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; gap:4px; padding:14px 12px 10px;
+.hpuit{position:absolute; left:50%; bottom:calc(16% + 18px); transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; gap:4px; padding:14px 12px 10px;
   background:#050507; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000; border-radius:4px; min-width:min(360px, 90vw)}
 .hpuitkop{font:9px/1 "Press Start 2P",ui-monospace,monospace; letter-spacing:.14em; color:#8a8698; padding:0 8px 8px}
 .hpuit .hpil{height:auto; padding:10px 8px; flex-direction:column; align-items:flex-start; gap:6px; box-shadow:none; transform:none; text-align:left; white-space:normal}
@@ -19582,6 +19583,12 @@ function startPanoHTML(){
     </nav>
   </div>`;
 }
+/* van het startscherm naar de kaart: het filmbeeld wordt de kaart. Logo en knoppen gaan eerst even weg. */
+function thuisVerder(){
+  const ga = () => { if(SET.slot != null && SET.slots[SET.slot]){ slotKies(SET.slot); M = {type:"story"}; storySkin(0); render(); } else { M = {type:"slots"}; render(); } };
+  const vh = document.querySelector(".vhpano"); if(!vh){ ga(); return; }
+  if(vh.classList.contains("weg")) return; vh.classList.add("weg"); setTimeout(ga, 340);
+}
 function startHTML(){
   if(THUIS_PANO) return startPanoHTML();
   const open = HOME.open;
@@ -30936,7 +30943,7 @@ function kspaDelen(D){
   return delen;
 }
 function kspaMaat(){
-  if(ksThuis()){ const y0 = Math.round(KS.H * .23), y1 = Math.round(KS.H * (KS.tel ? .8 : .85)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
+  if(ksThuis()){ const y0 = Math.round(KS.H * .08), y1 = Math.round(KS.H * (KS.tel ? .8 : .84)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
   const y0 = 48, y1 = Math.round(KS.H - Math.max(KS.tel ? KS.r1 + 4 : 30, KS.H * .1)); return {y0, y1, h:y1 - y0, SW:Math.round((y1 - y0) * 1.12)}; }
 const kspaOpen = (D, d) => d.id === "hemel" ? D.hemel : d.id === "start" ? true : d.l.open;
 /* één stuk van het doek, op de schermmaat; links loopt het zacht over in het vorige stuk */
@@ -30996,7 +31003,7 @@ function kspaBoven(c, D){
   /* de zwarte balken boven en onder: een vleugje van de kleur van het rijk dat in beeld is; die
      kleur loopt zacht over als je naar een ander rijk schuift */
   { const wNu = (P.delen[Math.max(0, Math.min(P.delen.length - 1, Math.floor(((KS.pan ? KS.pan.x : 0) + KS.W / 2) / M_.SW)))] || {}).w || 1;
-    const doelK = ksMeng([5, 5, 7], ksHex(KSPA_BALK[wNu]), .2);
+    const doelK = ksThuis() ? [5, 5, 7] : ksMeng([5, 5, 7], ksHex(KSPA_BALK[wNu]), .2);
     KS.balk = KS.balk ? KS.balk.map((v, i) => v + (doelK[i] - v) * .06) : doelK;
     c.fillStyle = `rgb(${KS.balk.map(Math.round).join(",")})`; c.fillRect(0, 0, KS.W, M_.y0); c.fillRect(0, M_.y1, KS.W, KS.H - M_.y1); }
   /* de camera: zacht naar je plek, maar nooit voorbij het begin of het eind van het doek */
@@ -31028,20 +31035,26 @@ function kspaBoven(c, D){
     const h = Math.round(M_.h * .4), tw = Math.round(h * img.naturalWidth / img.naturalHeight), off = -((px * 1.25) % tw);
     c.save(); c.beginPath(); c.rect(Math.max(0, a), M_.y0, Math.min(KS.W, b) - Math.max(0, a), M_.h); c.clip(); c.imageSmoothingEnabled = true;
     for(let x = off - tw; x < KS.W + tw; x += tw) c.drawImage(img, x, M_.y1 - h, tw, h); c.restore(); });
+  /* thuis is het doek een filmbeeld: iets donkerder, donkere randen, en rust achter het logo */
+  if(thuis){ c.fillStyle = "rgba(5,5,7,.22)"; c.fillRect(0, M_.y0, KS.W, M_.h);
+    const cx = KS.W / 2, r = Math.max(KS.W, M_.h) * .75, v = c.createRadialGradient(cx, M_.y0 + M_.h / 2, r * .35, cx, M_.y0 + M_.h / 2, r);
+    v.addColorStop(0, "rgba(5,5,7,0)"); v.addColorStop(1, "rgba(5,5,7,.7)"); c.fillStyle = v; c.fillRect(0, M_.y0, KS.W, M_.h);
+    const ly = M_.y0 + M_.h * .3, l = c.createRadialGradient(cx, ly, 0, cx, ly, KS.W * .42);
+    l.addColorStop(0, "rgba(5,5,7,.62)"); l.addColorStop(1, "rgba(5,5,7,0)"); c.fillStyle = l; c.fillRect(0, M_.y0, KS.W, M_.h); }
   /* onderin iets donkerder, zodat de bordjes leesbaar blijven */
   { const g = c.createLinearGradient(0, M_.y1 - 50, 0, M_.y1); g.addColorStop(0, "rgba(5,5,7,0)"); g.addColorStop(1, "rgba(5,5,7,.7)"); c.fillStyle = g; c.fillRect(0, M_.y1 - 50, KS.W, 50); }
   /* de randen van het doek in de huisstijl: zwart, met een dun licht lijntje */
   kpR(c, 0, M_.y0 - 1, KS.W, 1, "#ececec"); kpR(c, 0, M_.y1, KS.W, 1, "#ececec");
   const grond = wx => M_.y1 - 16 + Math.round(Math.sin(wx / 37) * 2);
   /* het level dat je gekozen hebt: een zuil van zacht licht */
-  if(hier){ const x = Math.round(hier.cx - px), y = grond(hier.cx), a = .16 + .08 * ksPuls(700);
+  if(hier && !thuis){ const x = Math.round(hier.cx - px), y = grond(hier.cx), a = .16 + .08 * ksPuls(700);
     /* zacht naar de zijkanten: smalle strookjes die naar buiten toe doorzichtiger worden */
     for(let dx = -26; dx < 26; dx++){ const f = Math.exp(-Math.pow(dx / 11, 2)); if(f < .03) continue;
       const g = c.createLinearGradient(0, M_.y0, 0, y); g.addColorStop(0, "rgba(255,216,74,0)"); g.addColorStop(1, `rgba(255,216,74,${a * f})`);
       c.fillStyle = g; c.fillRect(x + dx, M_.y0, 1, y - M_.y0); }
     ksGloed(c, x, y - 4, 34, "255,216,74", a * 1.6); }
   /* bordjes, namen, en wat je kunt aanklikken */
-  P.delen.forEach(d => { const p = KS.pos[d.id], x = Math.round(p.cx - px); if(x < -M_.SW || x > KS.W + M_.SW) return;
+  if(!thuis) P.delen.forEach(d => { const p = KS.pos[d.id], x = Math.round(p.cx - px); if(x < -M_.SW || x > KS.W + M_.SW) return;
     const open = kspaOpen(D, d), sel = d.id === D.hier, hov = d.id === KS.hover && !sel, y = grond(p.cx);
     const klaar = d.l && d.l.klaar, t = d.id === "hemel" ? "DE TRAP" : d.id === "start" ? "0-0" : d.id, bw = ksBreed(t) + 12, bx = x - Math.round(bw / 2), by = y - 26 - (hov ? 1 : 0);
     kpR(c, x - 1, y - 14, 2, 15, "#000"); kpR(c, x, y - 14, 1, 15, open ? "#4a4858" : "#2c2a38");
@@ -31058,7 +31071,7 @@ function kspaBoven(c, D){
     if(x > -60 && x < KS.W + 60){
       if(kn){ const h = Math.round(M_.h * .32), ww = Math.round(h * kn.naturalWidth / kn.naturalHeight);
         c.save(); c.imageSmoothingEnabled = true; c.drawImage(kn, x - ww / 2, y - h + 2, ww, h); c.restore(); }
-      const bw = ksBreed("KNORT") + 12; ksVenster(c, x - bw / 2, y - 8, bw, 11, sel ? "#ffd84a" : "#ececec"); ksTekst(c, "KNORT", x - bw / 2 + 6, y - 5, sel ? "#ffd84a" : "#ececec");
+      const bw = ksBreed("KNORT") + 12; if(!thuis) ksVenster(c, x - bw / 2, y - 8, bw, 11, sel ? "#ffd84a" : "#ececec"); if(!thuis) ksTekst(c, "KNORT", x - bw / 2 + 6, y - 5, sel ? "#ffd84a" : "#ececec");
       if(!thuis) ksHit("knort", x - 24, y - M_.h * .34, 48, M_.h * .34 + 6); } }
   if(thuis) return;
   /* boven het doek: de naam van het rijk dat in beeld is, in de stijl van het logo */
@@ -33811,7 +33824,7 @@ function mpKnop(btn, el){
   switch(btn){
     case "story": M = {type:"slots"}; render(); return true;
     /* startscherm: Verder gaat meteen naar de kaart van de plek waar je het laatst speelde */
-    case "thuisverder": if(SET.slot != null && SET.slots[SET.slot]){ slotKies(SET.slot); M = {type:"story"}; storySkin(0); render(); } else { M = {type:"slots"}; render(); } return true;
+    case "thuisverder": thuisVerder(); return true;
     case "stoel": stoelVraag(); return true;
     case "slotkies": if(M && M.type === "slots" && M.wis == null){
       slotKies(+i);
