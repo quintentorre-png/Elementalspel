@@ -1212,7 +1212,7 @@ h3{font-size:.66rem; line-height:1.9}
   repeating-linear-gradient(0deg, rgba(61,90,140,.10) 0 1px, transparent 1px 8px),
   repeating-linear-gradient(90deg, rgba(61,90,140,.10) 0 1px, transparent 1px 8px),
   radial-gradient(900px 520px at 50% 45%, #16233a 0%, var(--bg) 70%)}
-#app::after{content:""; position:fixed; inset:0; z-index:200; pointer-events:none;
+#app::after{display:none; content:""; position:fixed; inset:0; z-index:200; pointer-events:none;
   background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
   mix-blend-mode:multiply; opacity:.55}
 #left{border-right:3px solid var(--line-soft)}
@@ -5483,6 +5483,45 @@ html body .chalbox #bordhud .bknoppen .obtn{font:12px/1 "Press Start 2P",monospa
 html body .chalbox #bordhud .bknoppen .obtn.bstart{color:#ffd84a !important; box-shadow:0 0 0 2px #ffd84a, 0 0 0 5px #000 !important}
 html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height:30px; padding:0 10px !important}
 .kspdeck{font-size:clamp(13px,1.05vw,21px) !important; color:#a9a39a !important}
+
+/* ronde 19: de cirkels staan precies op hun plek (het midden van de cirkel is het punt op de kaart) */
+.bk-3 .bordvlak .bbord.med{--d:5.6cqw; transform:translate(-50%, calc(var(--d) * -.75)) !important}
+.bk-3 .bordvlak .bbord.med.baas{--d:8.4cqw}
+.bk-3 .bordvlak .bbord.med.hier{--d:7.6cqw}
+.bk-3 .bordvlak .bbord.med.baas.hier{--d:11.2cqw}
+.bk-3 .bordvlak .bbord.med .bbmed{width:var(--d); height:calc(var(--d) * 1.25); transition:width .2s, height .2s}
+.bk-3 .bordvlak .bbord.med .bbmed i{width:var(--d); height:var(--d); transition:width .2s, height .2s}
+.bk-3 .bordvlak .bbord.med .bbmed span{width:var(--d); height:calc(var(--d) * 1.25); border-radius:0 0 calc(var(--d) / 2) calc(var(--d) / 2) !important; transition:width .2s, height .2s}
+.bk-3 .bordvlak .bbord.med .bbpijl{display:none}
+.bk-3 .bordvlak .bbord.med .bbin{margin-top:-1cqw}
+.bk-3 .bordvlak .bbord.med.hier{z-index:6}
+.bk-3 .bordvlak .bbord.med.baas:not(.hier) .bbmed i{box-shadow:0 0 0 .25cqw #ececec, 0 0 0 .5cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.3)}
+/* e: in het venster op de kaart geen tweede plaatje van het personage, dat staat al in de cirkel */
+.kaartbox.ks-bord .ksinfo{grid-template-columns:1fr !important}
+body:not(.tel) .kaartbox.ks-bord .ksinfo{width:min(520px, calc(100vw - 48px))}
+.kaartbox.ks-bord .ksinfo .ksiport{display:none !important}
+/* g: geen rugtas-knop op de kaart; de rugtas zit bij het ei (0-0) */
+.kaartbox.ks-bord .tasknop{display:none !important}
+.inveibg{position:fixed; inset:0; z-index:0; overflow:hidden; background:#06050a; pointer-events:none}
+.inveibg i{position:absolute; left:-4%; top:-2%; width:108%; height:104%; image-rendering:pixelated;
+  background:radial-gradient(ellipse at 50% 72%, rgba(255,226,170,.28), rgba(255,226,170,0) 38%), linear-gradient(180deg, rgba(255,240,205,0) 0, rgba(255,240,205,.07) 60%, rgba(255,240,205,0) 61%),
+    url('art/bg-0-0.png') center/cover no-repeat, radial-gradient(ellipse at 50% 80%, #241d30 0%, #0c0a12 55%, #040306 100%);
+  animation:hzbgdein 24s ease-in-out -12s infinite alternate}
+.inveibg ~ .invbox{position:relative; z-index:1}
+
+/* ronde 19: een CRT-filter over het hele spel. De sterkte (0 tot 100%) staat in de instellingen. */
+#crt{position:fixed; inset:0; z-index:2147483000; pointer-events:none; opacity:var(--crt, .5)}
+#crt::before{content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.42) 0 1px, rgba(0,0,0,0) 1px 3px),
+    repeating-linear-gradient(90deg, rgba(255,40,40,.07) 0 1px, rgba(40,255,90,.06) 1px 2px, rgba(60,90,255,.07) 2px 3px)}
+#crt::after{content:""; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 58%, rgba(0,0,0,.32) 85%, rgba(0,0,0,.7) 100%), linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0) 40%);
+  animation:crtflik 4.5s steps(1) infinite}
+#crt i{position:absolute; left:0; right:0; height:22vh; top:-22vh; background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.035), rgba(255,255,255,0));
+  animation:crtband 9s linear infinite}
+@keyframes crtflik{0%{opacity:1} 47%{opacity:.93} 48%{opacity:1} 81%{opacity:.96} 82%{opacity:1}}
+@keyframes crtband{to{transform:translateY(122vh)}}
+@media (prefers-reduced-motion: reduce){ #crt::after, #crt i{animation:none} }
 /* zonder pion: het bordje blijft op zijn plek, en een gouden ring op de grond wijst aan waar je bent */
 .kaartbox.ks-bord.zonderpion .bpion{display:none !important}
 .kaartbox.ks-bord .bordvlak .bringen{display:inline}
@@ -10952,6 +10991,10 @@ if(!SET.story.w4num){
   try{ localStorage.setItem("elementaal.set", JSON.stringify(SET)); }catch(e){}
 }
 /* Het verhaal staat al in SET.slots; het niet nog eens los opslaan. */
+function crtZet(){ try{
+  if(!document.getElementById("crt") && document.body) document.body.insertAdjacentHTML("beforeend", '<div id="crt" aria-hidden="true"><i></i></div>');
+  document.documentElement.style.setProperty("--crt", String(SET && typeof SET.crt === "number" ? SET.crt : .5)); }catch(e){} }
+if(typeof document !== "undefined") (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => crtZet()) : setTimeout(() => crtZet(), 0));
 function saveSet(){ try{ const o = Object.assign({}, SET); delete o.story; localStorage.setItem("elementaal.set", JSON.stringify(o)); }catch(e){} }
 /* Autopass: dit scherm laat de chain automatisch door voor speler p.
    Dat gaat via een echte pass-actie, dus hij komt gewoon in de zettenlijst en over het net. */
@@ -19823,6 +19866,9 @@ function audioHTML(){
     <div class="setrow"><label>🔊 Effecten</label>
       <input type="range" min="0" max="100" value="${pct(SET.sfx)}" data-act="vol" data-kind="sfx">
       <span class="val">${pct(SET.sfx)}%</span></div>
+    <div class="setrow"><label>CRT-filter</label>
+      <input type="range" min="0" max="100" value="${pct(typeof SET.crt === "number" ? SET.crt : .5)}" data-act="vol" data-kind="crt">
+      <span class="val">${pct(typeof SET.crt === "number" ? SET.crt : .5)}%</span></div>
     <div class="sub" style="margin-top:18px;margin-bottom:2px">Autopass</div>
     <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">Staat dit aan, dan laat je de chain automatisch door en word je nooit gevraagd te reageren.</div>
     <div class="segrow">${
@@ -29685,13 +29731,14 @@ function sterrenPix(n){
 }
 function bordBordjes(open, nieuw){
   const hier = bordPionPlek();
-  return [...open].filter(id => id !== "start").map(id => {
+  return [...open].map(id => {
     const p = bordPos(id); if(!p) return "";
     const lv = /^\d/.test(id), gedaan = bordKlaar(id), baas = BORD_BAAS(id);
-    const naam = lv ? id : (id === "knort" ? "KNORT" : "DE TRAP");
+    const naam = lv ? id : (id === "knort" ? "KNORT" : id === "start" ? "0-0" : "DE TRAP");
+    const med = bordStijl() === "3" ? bordMedaille(id) : "";
     const nw = nieuw && nieuw.plekken && nieuw.plekken.has(id);
-    return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}" data-id="${id}" data-act="btn" data-btn="bordplek" style="left:${p.x}%;top:${p.y}%">
-      ${bordStijl() === "3" ? bordMedaille(id) : ""}<div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
+    return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}${med ? " med" : ""}" data-id="${id}" data-act="btn" data-btn="bordplek" style="left:${p.x}%;top:${p.y}%">
+      ${med}<div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
 }
 /* Het bordje van de plek waar de pion staat schuift omhoog, boven zijn hoofd. */
 function bordBordjeHier(){
@@ -29699,7 +29746,7 @@ function bordBordjeHier(){
   const alle = [...document.querySelectorAll(".bbord")];
   alle.forEach(b => b.classList.remove("hier", "hb", "hr", "hl"));
   if(loopt) return;
-  if(BORD_ZONDER_PION) document.querySelectorAll(".bdoel").forEach(g => g.classList.toggle("nu", g.dataset.id === hier));
+
   const b = alle.find(x => x.dataset.id === hier); if(!b) return;
   if(BORD_ZONDER_PION){ b.classList.add("hier"); return; }
   /* boven het hoofd van de pion, anders rechts, anders links: waar het geen ander bordje raakt */
@@ -30036,7 +30083,7 @@ function bordPionZet(x, y, hop){
   el.style.left = x + "%"; el.style.top = y + "%"; el.style.setProperty("--hop", (hop || 0) + "");
   el.classList.toggle("loopt", !!BORD.loop);
 }
-const BORD_ZONDER_PION = false;   // ronde 18: de pion is terug
+const BORD_ZONDER_PION = true;   // ronde 19: geen pion; je selecteert een level (pijltjes of klikken)
 const OUDE_KAART = false;   // de oude scrollkaart (voor het spelbord) staat nog in de code
 function bordLoop(naar){
   const van = bordPionPlek();
@@ -30046,7 +30093,7 @@ function bordLoop(naar){
     if(BORD.infoNa === naar && M && M.type === "story"){ BORD.infoNa = null; M.kies = naar; render(); return; } BORD.infoNa = null;
     if(M && !M.eiland && M.telW && M.telW !== Math.min(4, bordW(naar))){ M.telW = Math.min(4, bordW(naar)); render(); } };
   /* okt 2026: geen pion meer; het gouden vak springt meteen naar de nieuwe plek */
-  if(BORD_ZONDER_PION || matchMedia("(prefers-reduced-motion: reduce)").matches){ AU.play && AU.play("place"); klaar(); return; }
+  if(BORD_ZONDER_PION || matchMedia("(prefers-reduced-motion: reduce)").matches){ AU.play && AU.play("place"); BORD.pan = null; klaar(); bordCamera(); return; }
   BORD.loop = {naar}; bordHud(); AU.play && AU.play("place");
   /* de camera gaat alvast mee naar waar de pion heen loopt */
   BORD.camNaar = naar; BORD.pan = null; bordCamera();
@@ -30127,7 +30174,7 @@ function bordHud(){
   const hier = document.getElementById("bhier"), kn = document.getElementById("bknoppen"); if(!hier || !kn) return;
   const id = document.getElementById("ksdoek") ? ksData().hier : bordPionPlek(), loopt = !!BORD.loop;
   let klein = "", naam = "", sub = "", knoppen = "";
-  if(id === "start"){ klein = "HET BEGIN"; naam = "Het ei"; sub = "Hier begon het."; }
+  if(id === "start"){ klein = "0-0 · HET BEGIN"; naam = "Het ei"; sub = "Hier begon het."; knoppen = `<button class="obtn bstart" data-act="btn" data-btn="inventaris">Rugtas</button>`; }
   else if(id === "knort"){ klein = "WERELD 2"; naam = "Knort"; sub = "De kraam"; knoppen = `<button class="obtn bstart" data-act="btn" data-btn="winkel">Naar binnen</button>`; }
   else if(id === "hemel"){ klein = "WERELD 3"; naam = "De trap"; sub = "naar de Hemelrand"; knoppen = `<button class="obtn bstart" data-act="btn" data-btn="hemelop">Naar boven</button>`; }
   else if(STORY[id]){
@@ -30307,7 +30354,7 @@ function chalVerhaal(id){
 const chalOpen = id => { const t = ladderZoek(id); return ladderSpeelbaar(t) && chalVerhaal(id); };
 function ksChalData(){
   const lv = CHAL_VOLGORDE().map(id => ({id, w:ksW(id), n:0, open:chalOpen(id), klaar:ladderVerslagen(id), st:0, baas:!!(LADDER.bazen.some(b => b.id === id) || id === "5-5"),
-    naam:id === "geheim" ? "???" : mpChar(id).naam}));
+    naam:chalNaam(id)}));
   const seq = lv.filter(l => l.open).map(l => l.id);
   let hier = seq.includes(SET.chalBij) ? SET.chalBij : (lv.find(l => l.open && !l.klaar) || lv.find(l => l.open) || lv[0] || {}).id;
   const by = {}; lv.forEach(l => { by[l.id] = l; });
@@ -30321,7 +30368,7 @@ function chalHTML(){
 /* de balk onderin van het challenge-scherm */
 function chalBalk(){
   const hier = document.getElementById("bhier"), kn = document.getElementById("bknoppen"); if(!hier || !kn) return;
-  const D = ksData(), id = D.hier, t = ladderZoek(id), ch = id ? mpChar(id) : null, deck = mijnProfiel().deck;
+  const D = ksData(), id = D.hier, t = ladderZoek(id), ch = id ? {naam:chalNaam(id)} : null, deck = mijnProfiel().deck;
   const nV = D.lv.filter(l => l.klaar).length;
   hier.innerHTML = id ? `<small>CHALLENGE &middot; ${nV} VAN ${D.lv.length} VERSLAGEN</small><b>${id === "geheim" ? "???" : ch.naam}</b><span>${ladderVerslagen(id) ? "verslagen &middot; nog een keer?" : (t && ladderDeckVan(t) ? aeKortLijst(ladderDeckVan(t).ae) : "")}</span>` : `<small>CHALLENGES</small><b>Nog niemand</b><span>versla eerst iemand in het verhaal</span>`;
   kn.innerHTML = `<button class="obtn b-dim" data-act="btn" data-btn="chaldeck" title="Kies of bewerk je deck">Deck: ${String(deck.naam || "deck").replace(/</g, "")} &#9998;</button>
@@ -30400,11 +30447,11 @@ function ksNaarWereld(w){
 /* 0-0: waar het begon. Wat erbij staat, zegt niet te veel. */
 const KS_EI = {kaart:"0-0. Hier begon het.", tekst:["Een schaal, nog warm van binnen.", "Ik weet niet wie hem heeft neergelegd. Ik weet niet eens of ik erin zat, of erop wachtte.", "Er stond niemand. Of er was net iemand weggegaan."]};
 function ksInfoHTML(id){
-  if(id === "start") return `<div class="ksinfo" role="dialog" aria-label="Het ei">
+  if(id === "start") return `<div class="ksinfo kseis" role="dialog" aria-label="Het ei">
     <div class="ksiport" style="background-image:radial-gradient(circle at 50% 70%, rgba(255,236,190,.35), rgba(5,5,7,0) 60%), url('art/bg-0-0.png'); background-color:#0b0a10">${ksBeeld("art/bg-0-0.png") ? "" : `<img src="art/inv-schaal.png" alt="" draggable="false" style="height:46%; bottom:14%" onerror="this.remove()">`}</div>
     <div class="ksitekst"><small>0-0 &nbsp;·&nbsp; HET BEGIN</small><h3 style="--ksk:#e8c67a">HET EI</h3>
       <div class="ksiregels">${KS_EI.tekst.map(t => `<p>${t}</p>`).join("")}</div>
-      <div class="ksiknoppen"><button class="obtn b-dim" data-act="btn" data-btn="kaartvelweg">Terug</button></div></div></div>`;
+      <div class="ksiknoppen"><button class="obtn b-dim" data-act="btn" data-btn="kaartvelweg">Terug</button><button class="obtn ksispeel" data-act="btn" data-btn="inventaris">Rugtas</button></div></div></div>`;
   const L = STORY[id], w = +id[0], klaar = storyKlaar(id), st = klaar ? sterrenBest(id) : 0;
   const pad = L.sprite ? sprBeeldPad(L.sprite) : null, V = (typeof VELD === "object" && VELD[id]) || {};
   const regels = (V.regels || []).slice(0, 3).map(r => `<p>${r}</p>`).join("") || "<p>Geen bijzondere regels. Gewoon vechten.</p>";
@@ -31315,7 +31362,7 @@ function kspaBoven(c, D){
     if(!thuis) ksHit(d.id, x - M_.SW / 2, M_.y0, M_.SW, M_.h, sel_ ? null : {soort:"dicht"});
   });
   /* Knort tussen 2-1 en 2-2: zijn kraampje langs de weg */
-  if(KS.pos.knort){ const x = Math.round(KS.pos.knort.cx - px), y = grond(KS.pos.knort.cx), kn = ksBeeld("art/knort.png"), sel = D.hier === "knort";
+  if(KS.pos.knort && !D.chal){ const x = Math.round(KS.pos.knort.cx - px), y = grond(KS.pos.knort.cx), kn = ksBeeld("art/knort.png"), sel = D.hier === "knort";
     if(x > -60 && x < KS.W + 60){
       if(kn){ const h = Math.round(M_.h * .32), ww = Math.round(h * kn.naturalWidth / kn.naturalHeight);
         c.save(); c.imageSmoothingEnabled = true; c.drawImage(kn, x - ww / 2, y - h + 2, ww, h); c.restore(); }
@@ -31372,7 +31419,7 @@ function kspaKroon(c, x, y){
 }
 function kspaPersHTML(id){
   if(ksChal()){ const src = ksPersSrc(id); if(!src) return "";
-    const ch = mpChar(id), t = ladderZoek(id), deck = ladderDeckVan(t), versl = ladderVerslagen(id);
+    const ch = {naam:chalNaam(id)}, t = ladderZoek(id), deck = ladderDeckVan(t), versl = ladderVerslagen(id);
     return `<div class="kspschaduw"></div><img class="kspimg" src="${src}" alt="" draggable="false">
       <div class="ksptekst"><small>CHALLENGE &middot; ${id === "knort" ? "DE KRAAM" : id + " " + ksEsc((STORY[id] || {}).naam || "").toUpperCase()}</small>
         <b class="ksplogo" style="--k:${KSPA_KLEUR[ksW(id)] || "#e8c67a"}${ch.naam.length > 12 ? ";font-size:clamp(13px,1.5vw,30px)" : ""}">${ksEsc(ch.naam.toUpperCase())}</b>
@@ -31830,7 +31877,7 @@ function invHTML(){
   }
   const pot = sel && sel.pot ? `<div class="invpot">${potFilms().map((f, i) =>
       `<button class="obtn b-dim invfilm" data-act="btn" data-btn="potkijk" data-i="${i}">${f.naam}</button>`).join("")}</div>` : "";
-  return `<div class="ovbox invbox">
+  return `<div class="inveibg" aria-hidden="true"><i></i></div><div class="ovbox invbox">
     <div class="invkop"><h2>${pixIcoon("tas")} Rugtas</h2>
       <span class="sub">${heb.length} ${heb.length === 1 ? "voorwerp" : "voorwerpen"}</span>
       <button class="obtn b-dim" data-act="btn" data-btn="invterug">Terug naar de kaart</button></div>
@@ -32331,7 +32378,7 @@ document.addEventListener("input", e => {
   const t = e.target.closest('[data-act="vol"]'); if(!t) return;
   const v = (+t.value) / 100, kind = t.dataset.kind;
   AU.boot();
-  if(kind === "music") AU.setMusic(v); else AU.setSfx(v);
+  if(kind === "crt"){ SET.crt = v; crtZet(); } else if(kind === "music") AU.setMusic(v); else AU.setSfx(v);
   saveSet();
   const lab = t.parentElement.querySelector(".val"); if(lab) lab.textContent = Math.round(v*100) + "%";
 });
@@ -33663,7 +33710,16 @@ const LADDER = {
    hetzelfde deck. */
 const LADDER_DECKS = {"1-1": {"mix": {"water": 7, "steen": 6, "vuur": 3, "gras": 4}, "upg": {"water": 5, "steen": 2, "gras": 3}, "ae": ["fu_fire", "ae_lichtval", "ae_zwerm"], "ltN": {"kloon": 3, "struik": 1, "sterregen": 3, "doortast": 2, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-1"}, "1-2": {"mix": {"water": 6, "steen": 2, "vuur": 5, "gras": 7}, "upg": {"water": 2, "steen": 3, "vuur": 5}, "ae": ["ae_leven", "ae_grassx2", "ae_zwerm"], "ltN": {"kuriboh": 2, "vital": 1, "sterregen": 3, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-2"}, "1-3": {"mix": {"water": 8, "steen": 9, "vuur": 4, "gras": 3}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_stonefull", "fu_stone", "fu_grass"], "ltN": {"web": 1, "master": 2, "sterregen": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 1-3"}, "2-2": {"mix": {"water": 8, "steen": 4, "vuur": 9, "gras": 3}, "upg": {"steen": 5, "vuur": 2, "gras": 3}, "ae": ["ae_lichtval", "fu_stone", "ae_leven"], "ltN": {"kuriboh": 1, "struik": 1, "master": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-2"}, "2-3": {"mix": {"water": 9, "steen": 4, "vuur": 4, "gras": 7}, "upg": {"water": 2, "vuur": 3, "gras": 5}, "ae": ["fu_water", "ae_lichtval", "ae_graf"], "ltN": {"vital": 2, "greed": 1, "reborn": 2, "kloon": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-3"}, "2-4": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_leven", "ae_stonefull", "ae_lichtval"], "ltN": {"sterregen": 1, "vital": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-4"}, "2-5": {"mix": {"water": 9, "steen": 3, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 2, "vuur": 3}, "ae": ["ae_alziend", "ae_graf", "ae_lichtval"], "ltN": {"vital": 2, "negate": 2, "greed": 1, "struik": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 2-5"}, "3-1": {"mix": {"water": 7, "steen": 5, "vuur": 7, "gras": 5}, "upg": {"water": 5, "steen": 3, "gras": 2}, "ae": ["ae_lichtval", "ae_genade", "ae_fire6"], "ltN": {"sterregen": 3, "reborn": 2, "dfusion": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-1"}, "3-2": {"mix": {"water": 7, "steen": 8, "vuur": 6, "gras": 3}, "upg": {"water": 5, "steen": 3, "vuur": 2}, "ae": ["ae_lichtval", "ae_stonefull", "fu_stone"], "ltN": {"vital": 2, "kuriboh": 1, "sterregen": 1, "master": 1, "greed": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-2"}, "3-3": {"mix": {"water": 8, "steen": 3, "vuur": 7, "gras": 6}, "upg": {"steen": 5, "vuur": 3, "gras": 2}, "ae": ["ae_leven", "ae_genade", "fu_water"], "ltN": {"dfusion": 1, "kloon": 2}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-3"}, "3-5": {"mix": {"water": 3, "steen": 7, "vuur": 9, "gras": 5}, "upg": {"water": 3, "steen": 5, "gras": 2}, "ae": ["ae_leven", "fu_fire", "ae_ziel"], "ltN": {"kuriboh": 1, "master": 1, "negate": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 3-5"}, "4-1": {"mix": {"water": 2, "steen": 5, "vuur": 8, "gras": 5}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_zwerm", "fu_fire", "ae_leven"], "ltN": {"greed": 2, "kuriboh": 2, "darkhole": 1, "web": 1, "reborn": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-1"}, "4-2": {"mix": {"water": 7, "steen": 3, "vuur": 8, "gras": 6}, "upg": {"steen": 2, "vuur": 5, "gras": 3}, "ae": ["fu_water", "ae_watercycle", "ae_leven"], "ltN": {"dfusion": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-2"}, "4-4": {"mix": {"water": 9, "steen": 4, "vuur": 5, "gras": 6}, "upg": {"water": 3, "steen": 2, "gras": 5}, "ae": ["ae_smeed", "ae_leven", "ae_lichtval"], "ltN": {"kloon": 1, "kuriboh": 1, "vital": 1}, "zijAe": [], "zijLt": {}, "naam": "Challenge 4-4"}, "5-2": {"mix": {"water": 6, "steen": 9, "vuur": 3, "gras": 6}, "upg": {"water": 5, "vuur": 2, "gras": 3}, "ae": ["fu_stone", "ae_genade", "ae_lichtval"], "ltN": {"sterregen": 3, "negate": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge 5-2"}, "knort": {"mix": {"water": 9, "steen": 3, "vuur": 3, "gras": 9}, "upg": {"steen": 3, "vuur": 2, "gras": 5}, "ae": ["ae_grassx2", "fu_grass", "fu_water"], "ltN": {"negate": 2, "web": 1, "reborn": 3}, "zijAe": [], "zijLt": {}, "naam": "Challenge knort"}};
 const LADDER_AE = LADDER.bazen.concat([LADDER.seraf]).map(t => t.geeft).filter(Boolean);
-const ladderAlle = () => LADDER.tegen.concat(LADDER.bazen, [LADDER.seraf, LADDER.eerste, LADDER.geheim]);
+/* ronde 19: de Hemelrand compleet in de challenges. Voorlopige decks, tot er echte zijn. */
+LADDER.hemel = [
+  {id:"5-1", char:"2-1", naam:"Seraf", voorlopig:true, deck:{naam:"Seraf, de toets", mix:{water:4, steen:4, vuur:4, gras:4}, upg:{},
+    ae:["ae_zwerm", "ae_hemel", "ae_lichtval"], ltN:{sterregen:3, negate:3, vital:3, brenger:3, siphon:2}, zijAe:[], zijLt:{}}},
+  {id:"5-3", naam:"De Naad", voorlopig:true, deck:{naam:"De Naad", mix:{water:6, steen:6, vuur:6, gras:6}, upg:{steen:5, water:3, vuur:2},
+    ae:["ae_alziend", "ae_stonefull", "ae_genade"], ltN:{web:2, negate:2, kuriboh:2}, zijAe:[], zijLt:{}}},
+  {id:"5-4", naam:"Gebroken Seraf", voorlopig:true, deck:{naam:"Gebroken Seraf", mix:{water:7, steen:7, vuur:7, gras:7}, upg:{water:5, steen:3, vuur:3, gras:2},
+    ae:["ae_graf", "ae_genade", "ae_zwerm"], ltN:{reborn:3, negate:2, sterregen:3, kloon:2}, zijAe:[], zijLt:{}}}];
+const ladderAlle = () => LADDER.tegen.concat(LADDER.bazen, [LADDER.seraf], LADDER.hemel || [], [LADDER.eerste, LADDER.geheim]);
+const chalNaam = id => { const t = (LADDER.hemel || []).find(x => x.id === id); return t && t.naam ? t.naam : id === "geheim" ? "???" : mpChar(id).naam; };
 const ladderZoek = id => ladderAlle().find(t => t.id === id) || null;
 function ladderStaat(){
   if(!SET.ladder || typeof SET.ladder !== "object") SET.ladder = {};
@@ -33704,7 +33760,7 @@ function ladderUitslag(gewonnen){
   if(!t || !gewonnen) return null;
   const was = ladderVerslagen(t.id), eersteWas = ladderOpen(LADDER.eerste), geheimWas = ladderOpen(LADDER.geheim);
   ladderStaat().v[t.id] = Date.now(); saveSet();
-  const uit = {naam:mpChar(t.id).naam, nieuw:!was, regels:[]};
+  const uit = {naam:chalNaam(t.id), nieuw:!was, regels:[]};
   if(!was && t.geeft) uit.regels.push(`🟣 <b>${AETHERS[t.geeft].name}</b> is van jou: je kunt hem nu in je decks gebruiken als je tegen de bot speelt.`);
   if(!eersteWas && ladderOpen(LADDER.eerste)) uit.regels.push(`Alle bazen en Seraf verslagen. <b>De Eerste</b> wacht op je.`);
   if(!geheimWas && ladderOpen(LADDER.geheim)) uit.regels.push(`Je hebt iedereen verslagen. Er is nog iemand…`);
@@ -33753,7 +33809,7 @@ function ladderHTML(kop){
    gekozen tegenstander: dat karakter en zijn deck. */
 function botProfiel(){
   const lad = S.mode === "basis" && LADDER_KEUS ? ladderZoek(LADDER_KEUS) : null;
-  if(lad && ladderSpeelbaar(lad)){ S.ladder = {id:lad.id}; return {char:lad.id, deck:ladderDeckVan(lad), ladder:true}; }
+  if(lad && ladderSpeelbaar(lad)){ S.ladder = {id:lad.id}; return {char:lad.char || lad.id, deck:ladderDeckVan(lad), ladder:true}; }
   /* 🎲 Willekeurig: elk potje stiekem een van de challenge-tegenstanders die al speelbaar zijn.
      Telt niet mee voor de kroontjes en er staat niets over op het scherm. */
   if(S.mode === "basis" && LADDER_STIL){
