@@ -5455,6 +5455,11 @@ body:not(.tel) .kaartbox.ks-bord .ksinfo{bottom:auto; transform:none; width:min(
 .broute polyline{fill:none; stroke:#ffd84a; stroke-width:3px; stroke-dasharray:9 7; vector-effect:non-scaling-stroke; opacity:.8; stroke-linecap:round}
 .kbstijl{position:fixed !important; right:22px; top:18px; z-index:31}
 body.tel .kbstijl{top:8px; right:10px}
+/* zonder pion: het bordje blijft op zijn plek, en een gouden ring op de grond wijst aan waar je bent */
+.kaartbox.ks-bord .bpion{display:none !important}
+.kaartbox.ks-bord .bordvlak .bringen{display:inline}
+.kaartbox.ks-bord .bpuls{display:none}
+.kaartbox.ks-bord .bdoel.nu{display:inline; fill:rgba(255,216,74,.16); stroke:#ffd84a; stroke-width:.45; animation:bpuls 1.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
 /* voorstel 3: het portret boven het bordje, het personage steekt er net bovenuit */
 .bk-3 .bordvlak .bbord{display:flex; flex-direction:column; align-items:center}
 .bk-3 .bordvlak .bbord .bbin{padding:.35cqw .5cqw .4cqw; min-width:3.4cqw; margin-top:-.6cqw; position:relative; z-index:2}
@@ -29662,7 +29667,9 @@ function bordBordjeHier(){
   const alle = [...document.querySelectorAll(".bbord")];
   alle.forEach(b => b.classList.remove("hier", "hb", "hr", "hl"));
   if(loopt) return;
+  document.querySelectorAll(".bdoel").forEach(g => g.classList.toggle("nu", g.dataset.id === hier));
   const b = alle.find(x => x.dataset.id === hier); if(!b) return;
+  if(BORD_ZONDER_PION){ b.classList.add("hier"); return; }
   /* boven het hoofd van de pion, anders rechts, anders links: waar het geen ander bordje raakt */
   const rest = alle.filter(x => x !== b && x.offsetParent).map(x => x.getBoundingClientRect());
   const over = r => rest.reduce((t, q) => t + Math.max(0, Math.min(r.right, q.right) - Math.max(r.left, q.left)) * Math.max(0, Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top)), 0);
@@ -29985,6 +29992,7 @@ function bordPionZet(x, y, hop){
   el.style.left = x + "%"; el.style.top = y + "%"; el.style.setProperty("--hop", (hop || 0) + "");
   el.classList.toggle("loopt", !!BORD.loop);
 }
+const BORD_ZONDER_PION = true;
 function bordLoop(naar){
   const van = bordPionPlek();
   if(BORD.loop || naar === van) return;
@@ -29992,7 +30000,8 @@ function bordLoop(naar){
   const klaar = () => { BORD.loop = null; BORD.xy = null; SET.story.bordBij = naar; saveSet(); bordPionZet(); bordHud();
     if(BORD.infoNa === naar && M && M.type === "story"){ BORD.infoNa = null; M.kies = naar; render(); return; } BORD.infoNa = null;
     if(M && !M.eiland && M.telW && M.telW !== Math.min(4, bordW(naar))){ M.telW = Math.min(4, bordW(naar)); render(); } };
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ klaar(); return; }
+  /* okt 2026: geen pion meer; het gouden vak springt meteen naar de nieuwe plek */
+  if(BORD_ZONDER_PION || matchMedia("(prefers-reduced-motion: reduce)").matches){ AU.play && AU.play("place"); klaar(); return; }
   BORD.loop = {naar}; bordHud(); AU.play && AU.play("place");
   let i = 0, t0 = performance.now(); const per = 120;
   const z0 = bordOp(van), z1 = bordOp(naar);
