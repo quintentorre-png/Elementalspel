@@ -5441,6 +5441,34 @@ body:not(.pc) .boekbox .kaartkop{position:absolute; top:8px; left:8px; z-index:5
   filter:drop-shadow(3px 3px 0 #0b0d22) drop-shadow(0 0 12px rgba(232,198,122,.3))}
 .ksptekst p{font:clamp(15px,1.35vw,28px)/1.15 "VT323",monospace; color:#d8d2c4; margin-top:14px}
 body.tel .kspers{width:52vw} body.tel .ksptekst{top:8%; width:46%} body.tel .ksptekst p{display:none}
+
+/* ronde 17: de oude kaart in de huisstijl (1) of met portretten (3) */
+body:not(.tel) .kaartbox.ks-bord .ksinfo{bottom:auto; transform:none; width:min(720px, calc(100vw - 48px)); animation:ksinfoNaast .22s cubic-bezier(.2,.8,.3,1) both}
+@keyframes ksinfoNaast{from{opacity:0; transform:translateY(10px)}}
+.kaartbox.ks-bord .bordvlak .bbord.gedaan b{color:#fff}
+.kaartbox.ks-bord .bordvlak .bbord .bbin{animation:none !important}
+.kaartbox.ks-bord .bordvlak .bbord.baas .bbin{box-shadow:0 0 0 .2cqw #ececec, 0 0 0 .4cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.35)}
+.kaartbox.ks-bord .bordvlak .bbord.baas .bbpijl{border-top-color:#ececec}
+.kaartbox.ks-bord .bordvlak .bbord.hier .bbin{box-shadow:0 0 0 .2cqw #ffd84a, 0 0 0 .4cqw #000, 0 0 2cqw .4cqw rgba(255,216,74,.55)}
+.kaartbox.ks-bord .bordvlak .bbord.hier b{color:#ffd84a}
+.kaartbox.ks-bord .bordvlak .bbord.hier .bbpijl{border-top-color:#ffd84a}
+.broute polyline{fill:none; stroke:#ffd84a; stroke-width:3px; stroke-dasharray:9 7; vector-effect:non-scaling-stroke; opacity:.8; stroke-linecap:round}
+.kbstijl{position:fixed !important; right:22px; top:18px; z-index:31}
+body.tel .kbstijl{top:8px; right:10px}
+/* voorstel 3: het portret boven het bordje, het personage steekt er net bovenuit */
+.bk-3 .bordvlak .bbord{display:flex; flex-direction:column; align-items:center}
+.bk-3 .bordvlak .bbord .bbin{padding:.35cqw .5cqw .4cqw; min-width:3.4cqw; margin-top:-.6cqw; position:relative; z-index:2}
+.bk-3 .bordvlak .bbord b{font-size:1.1cqw}
+.bk-3 .bordvlak .bbord svg{width:3.2cqw; margin-top:.3cqw}
+.bbmed{position:relative; width:6.4cqw; height:8cqw}
+.bbmed i{position:absolute; left:0; bottom:0; width:6.4cqw; height:6.4cqw; border-radius:50% !important; background:#15141c center/cover no-repeat;
+  box-shadow:0 0 0 .2cqw #ececec, 0 0 0 .45cqw #000, 0 .5cqw 0 .3cqw rgba(0,0,0,.3)}
+.bbmed span{position:absolute; left:0; bottom:0; width:6.4cqw; height:8cqw; overflow:hidden; border-radius:0 0 3.2cqw 3.2cqw !important}
+.bbmed img{position:absolute; left:50%; bottom:0; height:88%; max-width:none; transform:translateX(-50%); image-rendering:auto}
+.bbmed img.sil{filter:brightness(0) drop-shadow(0 0 .4cqw rgba(140,130,200,.5))}
+.bbord.hier .bbmed{width:8.6cqw; height:10.6cqw}
+.bbord.hier .bbmed i{width:8.6cqw; height:8.6cqw; box-shadow:0 0 0 .25cqw #ffd84a, 0 0 0 .55cqw #000, 0 0 2.4cqw .6cqw rgba(255,216,74,.5)}
+.bbord.hier .bbmed span{width:8.6cqw; height:10.6cqw; border-radius:0 0 4.3cqw 4.3cqw !important}
 /* proef: schakelaar voor de personages (A of D) */
 .kspstijl{position:absolute; right:22px; top:18px; z-index:4; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 12px; border:0; border-radius:4px; cursor:pointer;
   background:#050507; box-shadow:0 0 0 2px #ececec, 0 0 0 5px #000; color:#77748a; font:9px/1 "Press Start 2P",monospace}
@@ -29626,7 +29654,7 @@ function bordBordjes(open, nieuw){
     const naam = lv ? id : (id === "knort" ? "KNORT" : "DE TRAP");
     const nw = nieuw && nieuw.plekken && nieuw.plekken.has(id);
     return `<div class="bbord${gedaan ? " gedaan" : ""}${baas ? " baas" : ""}${lv ? "" : " zonder"}${id === hier ? " hier" : ""}${nw ? " nieuw" : ""}" data-id="${id}" style="left:${p.x}%;top:${p.y}%">
-      <div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
+      ${bordStijl() === "3" ? bordMedaille(id) : ""}<div class="bbin"><b>${naam}</b>${lv ? sterrenPix(sterrenBest(id)) : ""}</div><i class="bbpijl"></i></div>`; }).join("");
 }
 /* Het bordje van de plek waar de pion staat schuift omhoog, boven zijn hoofd. */
 function bordBordjeHier(){
@@ -29647,6 +29675,20 @@ function bordBordjeHier(){
    schuift naar buiten, anders zie je bij de rand een streep waar de zee ineens licht wordt. */
 function bordMistBuiten(d){ return String(d).replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => {
   const f = v => (+v <= 0 ? -150 : (+v >= 100 ? 250 : +v)); return f(x) + "," + f(y); }); }
+/* de weg die je al gelopen hebt: een gouden stippellijn over de tegels */
+function bordGelopen(){
+  return bordRanden().filter(r => bordRandOpen(r) && bordKlaar(r[0]) && bordKlaar(r[1]))
+    .map(r => `<polyline points="${bordRandPunten(r[0], r[1]).map(q => q.join(",")).join(" ")}"/>`).join("");
+}
+/* ronde 17, voorstel 3: een rond portret boven elk level dat je kent */
+function bordStijl(){ return SET && SET.bordStijl === "3" ? "3" : "1"; }
+function bordMedaille(id){
+  if(id === "hemel") return "";
+  const src = id === "start" ? "art/inv-schaal.png" : ksPersSrc(id); if(!src) return "";
+  const L = STORY[id], geheim = L && !storyKlaar(id) && /\?/.test(L.vijand || "");
+  const ach = id === "start" ? "url('art/bg-0-0.png')" : id === "knort" ? "url('art/winkel-knort.png')" : `url('art/pt-${id}.png'), url('art/bg-${id}.png')`;
+  return `<div class="bbmed"><i style="background-image:${ach}"></i><span><img src="${src}" alt="" draggable="false"${geheim ? ' class="sil"' : ""}></span></div>`;
+}
 function bordHTML(huidigW){
   const open = bordOpenPlekken(), nieuw = bordNieuw(open), alles = !!SET.story.vrij;
   const el = Date.now() - nieuw.t0;
@@ -29668,8 +29710,12 @@ function bordHTML(huidigW){
       <img class="kaartart" id="bordkaart" src="${OVERWORLD_BEELD}" alt="" draggable="false" onerror="beeldFout(this)">
       <canvas id="bordgrond" width="2560" height="2560"></canvas>
       <svg class="bordlaag" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs><filter id="bordzacht" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter></defs>
+        <defs><filter id="bordzacht" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="2" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="1.6"/></filter>
+</defs>
+        <g class="broute">${bordGelopen()}</g>
         <g class="bringen">${ringen}</g><g class="bmist" filter="url(#bordzacht)">${mist}</g>
+
       </svg>
       <div class="bordnevel" id="bordnevel" aria-hidden="true"></div>
       ${plekken}${bordBordjes(open, nieuw)}
@@ -29688,8 +29734,23 @@ function bordHTML(huidigW){
 }
 /* ---- na het tekenen: grond, camera, pion, onderbalk ---- */
 const BORD = {cam:null, loop:null, xy:null, sleep:null};
+function bordInfoVolg(){
+  if(BORD.infoLus) return;
+  const stap = () => {
+    const win = document.querySelector(".kaartbox.ks-bord .ksinfo");
+    if(!win || !M || !M.kies || document.body.classList.contains("tel")){ BORD.infoLus = 0; return; }
+    BORD.infoLus = requestAnimationFrame(stap);
+    const doel = document.querySelector(`.bbord[data-id="${M.kies}"]`) || document.getElementById("bpion"); if(!doel) return;
+    const r = doel.getBoundingClientRect(), w = win.offsetWidth, h = win.offsetHeight, vw = innerWidth, vh = innerHeight;
+    let x = r.right + 28; if(x + w > vw - 16) x = r.left - 28 - w; x = Math.max(16, Math.min(vw - w - 16, x));
+    const y = Math.max(90, Math.min(vh - h - 90, r.top + r.height / 2 - h / 2));
+    win.style.left = Math.round(x) + "px"; win.style.top = Math.round(y) + "px";
+  };
+  BORD.infoLus = requestAnimationFrame(stap);
+}
 function bordNa(){
   const vlak = document.getElementById("bordvlak"); if(!vlak) return;
+  if(M && M.kies) bordInfoVolg();
   bordZee(); bordGrond(); bordCamera(); bordPionZet(); bordHud(); bordSwipeKlaar();
   const pion = document.getElementById("bpion");
   if(pion) pion.addEventListener("pointerdown", bordSleepStart);
@@ -29929,6 +29990,7 @@ function bordLoop(naar){
   if(BORD.loop || naar === van) return;
   const pts = bordRoute(van, naar); if(!pts) return;
   const klaar = () => { BORD.loop = null; BORD.xy = null; SET.story.bordBij = naar; saveSet(); bordPionZet(); bordHud();
+    if(BORD.infoNa === naar && M && M.type === "story"){ BORD.infoNa = null; M.kies = naar; render(); return; } BORD.infoNa = null;
     if(M && !M.eiland && M.telW && M.telW !== Math.min(4, bordW(naar))){ M.telW = Math.min(4, bordW(naar)); render(); } };
   if(matchMedia("(prefers-reduced-motion: reduce)").matches){ klaar(); return; }
   BORD.loop = {naar}; bordHud(); AU.play && AU.play("place");
@@ -30026,9 +30088,11 @@ function bordHud(){
 }
 /* Pijltjes, WASD, Enter en spatie op de kaart. Gaat voor de gewone sneltoetsen. */
 document.addEventListener("keydown", e => {
-  if(!M || M.type !== "story" || M.lijst || M.inv || M.hemel || M.kies || !document.getElementById("bordvlak")) return;
+  if(!M || M.type !== "story" || M.lijst || M.inv || M.hemel || !document.getElementById("bordvlak")) return;
   if(e.target && e.target.closest && e.target.closest("input, textarea, select")) return;
   const k = e.key.toLowerCase();
+  if(M.kies){ if(k === "escape"){ e.preventDefault(); e.stopPropagation(); delete M.kies; render(); return; }
+    if(!/^(arrow|[wasd]$)/.test(k)) return; delete M.kies; render(); }
   const r = {arrowup:[0, -1], w:[0, -1], arrowdown:[0, 1], s:[0, 1], arrowleft:[-1, 0], a:[-1, 0], arrowright:[1, 0], d:[1, 0]}[k];
   if(r){ e.preventDefault(); e.stopPropagation(); bordStap(...r); return; }
   if(k === "enter" || k === " "){
@@ -30048,7 +30112,7 @@ document.addEventListener("keydown", e => {
    (SET.story.bordBij), en de startknop onderin (bordHud). */
 const KS_STIJLEN = [["bord", "Spelbord"], ["dagboek", "Het reisdagboek"], ["panorama", "Het panorama"]];
 const KS_PERWERELD = {dagboek:true};   // het dagboek toont één rijk tegelijk; het panorama is één doorlopende reis
-const ksStijl = () => ksThuis() ? "panorama" : (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "panorama";   // okt 2026: standaard het panorama
+const ksStijl = () => ksThuis() ? "panorama" : (M && M.type === "boek") ? "dagboek" : (SET && KS_STIJLEN.some(s => s[0] === SET.kaartStijl)) ? SET.kaartStijl : "bord";   // okt 2026: standaard weer de oude kaart (ronde 17)
 /* het startscherm is het panorama: het logo in de bovenste balk, onderin de knoppen, en het doek schuift vanzelf door je reis */
 const THUIS_PANO = true;
 function ksThuis(){ return THUIS_PANO && !M && typeof S !== "undefined" && !!S && !!S.ui && S.ui.mode === "start"; }
@@ -30899,7 +30963,7 @@ function ksdOpties(c, P, Q){
     ksdVink(c, Q.x + 6, y, SET.fx === k, nm, {soort:"knop", btn:"fx_" + k}, sub); y += 24; });
   y += 4; ksdVink(c, Q.x + 6, y, SET.horizon !== false, "horizon", {soort:"knop", btn:SET.horizon !== false ? "horizonuit" : "horizonaan"}, "een vergezicht in lagen boven het veld"); y += 30;
   ksHand(c, "De kaart", Q.x + 2, y, Q.w, {maat:14, recht:true}); y += 18;
-  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, (KS_STIJLEN.some(s => s[0] === SET.kaartStijl) ? SET.kaartStijl : "panorama") === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
+  KS_STIJLEN.forEach(([k, nm]) => { ksdVink(c, Q.x + 6, y, (KS_STIJLEN.some(s => s[0] === SET.kaartStijl) ? SET.kaartStijl : "bord") === k, nm.toLowerCase(), {soort:"stijl", s:k}); y += 14; });
   y += 8; ksHand(c, "> de filmstudio", Q.x + 6, y, 120, {maat:11, recht:true}); ksHit("film-studio", Q.x + 4, y - 1, 90, 12, {soort:"knop", btn:"filmstudio"});
   if(typeof ELEMENTAAL_VERSIE !== "undefined" && y + 26 < Q.y + Q.h) ksHand(c, "versie " + ELEMENTAAL_VERSIE, Q.x + 2, Q.y + Q.h - 10, Q.w - 4, {maat:9, kleur:KSD_POTLOOD, recht:true, max:1});
 }
@@ -31398,19 +31462,20 @@ function kaartHTML(){
     <b>${eilandT ? "ELEMENTAAL" : WERELDEN[huidigW].naam.toUpperCase()}</b>
     <button class="kpijl" data-act="btn" data-btn="kaartwereld" data-w="${huidigW + 1}"${wOpen(huidigW + 1) && !hemelAan ? "" : " disabled"} aria-label="Volgende wereld">&gt;</button></div>
     <span class="kpips">${kLv.map(id => `<i${storyKlaar(id) ? ' class="vol"' : ""}></i>`).join("")}</span></div>`;
-  const telVel = M.kies && (STORY[M.kies] || M.kies === "start") && bordAan && ksStijl() !== "bord" ? ksInfoHTML(M.kies) : M.kies && STORY[M.kies] ? `<div class="telvel">
+  const telVel = M.kies && (STORY[M.kies] || M.kies === "start") && bordAan ? ksInfoHTML(M.kies) : M.kies && STORY[M.kies] ? `<div class="telvel">
       <button class="obtn b-dim telvelweg" data-act="btn" data-btn="kaartvelweg" aria-label="Sluiten">✕</button>
       <div class="vlvuitleg">${lvUitlegHTML(M.kies)}</div>
       <button class="obtn telspeel" data-act="btn" data-btn="storylevel" data-id="${M.kies}" data-direct="1">${storyKlaar(M.kies) ? "Nog een keer" : "Speel"}</button>
     </div>` : "";
   const ksSt = bordAan ? ksStijl() : "bord";
   const ksMenu = bordAan && M.ksMenu ? `<button class="ksmenuweg" data-act="btn" data-btn="ksmenu" aria-label="Sluiten"></button><div class="ksmenu" role="menu">${KS_STIJLEN.map(([k, nm]) => `<button class="ksoptie${k === ksSt ? " nu" : ""}" role="menuitem" data-act="btn" data-btn="ksstijl" data-s="${k}">${nm}</button>`).join("")}</div>` : "";
-  return `<div class="ovbox kaartbox ks-${ksSt}${ksSt !== "bord" ? " ksgeentitel" : ""}">
+  return `<div class="ovbox kaartbox ks-${ksSt}${ksSt !== "bord" ? " ksgeentitel" : ` bk-${bordStijl()}`}">
     <div class="kaartkop"><h2>📖 Verhaal</h2>${telChips}${kTitel}
       <span class="sub" style="color:var(--gold)">${n} van de ${STORY_ORDER.length}${alles ? " · 🔓" : ""}</span>
       <span class="sterbalk" title="sterren die je nog kunt uitgeven bij Knort, van alles wat je verdiend hebt">★ <b>${sterVrij()}</b> <small>van ${sterVerdiend()}</small></span>
       <button class="obtn b-dim" data-act="btn" data-btn="storylijst">📋 Lijst</button>
-      ${bordAan && ksStijl() === "bord" ? `<button class="obtn b-dim" data-act="btn" data-btn="kaarteiland">${M.eiland ? "Inzoomen" : "Het eiland"}</button>` : ""}
+      ${bordAan && ksStijl() === "bord" ? `<button class="obtn b-dim" data-act="btn" data-btn="kaarteiland">${M.eiland ? "Inzoomen" : "Het eiland"}</button>
+        <button class="kspstijl kbstijl" data-act="btn" data-btn="kbstijl" title="Proef: hoe de levels op de kaart staan"><small>PROEF &middot; KAART</small><b class="${bordStijl() === "1" ? "aan" : ""}">ZWARTE BORDJES</b><b class="${bordStijl() === "3" ? "aan" : ""}">PORTRETTEN</b></button>` : ""}
       ${bordAan ? `<button class="obtn b-dim ksknop" data-act="btn" data-btn="ksmenu" aria-expanded="${M.ksMenu ? "true" : "false"}"><small>KAART</small><span>${(KS_STIJLEN.find(x => x[0] === ksStijl()) || [0, ""])[1]}<i class="kspijl"></i></span></button>` : ""}
       <button class="obtn b-dim" data-act="btn" data-btn="closemodal">Terug</button></div>
     ${bordAan ? (ksStijl() === "bord" ? bordHTML(huidigW) : ksHTML()) : `<div class="kaartscroll" id="kaartscroll"><div class="kaartvlak${artOk ? "" : " geenart"}${hemelAan ? " inhemel" : ""}" id="kaartvlak">
@@ -34548,6 +34613,7 @@ function onBtn(btn, el, fromAction){
       break;
     case "story": M = kaartM(); storySkin(0); render(); break;
     case "storylijst": M = {type:"story", lijst:true}; render(); break;
+    case "kbstijl": SET.bordStijl = bordStijl() === "3" ? "1" : "3"; saveSet(); render(); break;
     case "kspstijl": SET.persStijl = ksPersStijl() === "A" ? "D" : "A"; saveSet(); KS.laagSleutel = ""; render(); break;
     case "kslens": if(M && M.type === "story"){ M.lens = !M.lens; AU.play && AU.play("place"); render(); } break;
     case "kslenskies": if(M && M.lens && el && el.dataset.id){ ksKies(el.dataset.id, false); M.lens = true; render(); } break;
@@ -34574,7 +34640,7 @@ function onBtn(btn, el, fromAction){
     case "hemelaf": M = {type:"story"}; render(); break;
     case "bordplek": { const id = el && el.dataset.id; if(BORD.veegKlik && Date.now() - BORD.veegKlik < 350) break; if(id){
         if(id === bordPionPlek()){ const b = document.querySelector(STORY[id] ? "#bknoppen .binfo" : "#bknoppen .bstart"); if(b) b.click(); else bordHud(); }
-        else bordLoop(id); } break; }
+        else { BORD.infoNa = (STORY[id] || id === "start") ? id : null; bordLoop(id); } } break; }
     case "bordstap": { const r = {op:[0, -1], neer:[0, 1], links:[-1, 0], rechts:[1, 0]}[el && el.dataset.r]; if(r) bordStap(...r); break; }
     case "kaarteiland": if(M){ M.eiland = !M.eiland; if(!M.eiland) delete M.telW; render(); } break;
     case "kaartvelweg": if(M){ delete M.kies; render(); } break;
