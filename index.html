@@ -5515,6 +5515,33 @@ html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height
 .tverder b{font-size:clamp(16px, 1.5vw, 30px)} .tverder em{font-size:clamp(20px, 1.9vw, 38px)} .tverder i{font-size:clamp(17px, 1.45vw, 30px)}
 .tverder .tic{flex-basis:clamp(56px, 5.2vw, 100px); height:clamp(56px, 5.2vw, 100px); font-size:clamp(20px, 1.8vw, 34px)}
 .trechts{grid-column:2; grid-row:2; display:grid; grid-template-rows:1fr 1fr auto; gap:clamp(12px, 2.2vh, 26px); min-height:0}
+/* ronde 23: de knoppen staan onderin de rechterkolom, die zo even hoog eindigt als het verhaal links */
+.trechts .tonder{grid-column:auto; grid-row:auto; display:flex; gap:clamp(8px, .9vw, 16px); justify-content:stretch; padding:0 0 5px}
+.trechts .tonder .tklein{flex:1 1 auto; justify-content:center; padding:0 clamp(8px, .8vw, 16px); font-size:clamp(9px, .62vw, 12px)}
+.trechts .tonder .tgeluid{flex:0 0 44px; padding:0} .tgeluid .pixic{width:18px; height:16px}
+.tgeluid.uit{color:#6a6a72; box-shadow:0 0 0 2px #6a6a72, 0 0 0 5px #000}
+html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
+.tthuis:has(.trechts .tonder){grid-template-rows:auto minmax(0, 1fr)}
+/* jouw karakter in de PvP-kaart: in de buurt komen is al genoeg om hem op te laten lichten */
+.tkmijn{position:relative; height:84%; display:flex; align-items:flex-end; justify-content:center; pointer-events:auto; cursor:pointer;
+  padding:0 6%; margin:-8% 0 0; box-sizing:content-box}
+.tkaart.blauw .tkfig{width:44%; right:2%; z-index:3}
+.tkaart.blauw .tkfig .tkmijn{flex:0 1 64%; min-width:0; height:82%; padding:0 2%; margin:0; align-self:flex-end}
+.tkaart.blauw .tkfig .tkmijn img{height:auto !important; width:auto; max-height:100%; max-width:100% !important; object-fit:contain; transition:filter .15s}
+.tkaart.blauw .tkfig .tksil{max-width:40%}
+.tkaart.blauw > span:not(.tkbg):not(.tkfig):not(.tic){max-width:38%}
+.trechts .tonder .tklein{min-width:0}
+body.tel .trechts .tonder{gap:6px; padding-bottom:3px} body.tel .trechts .tonder .tklein{font-size:7px; padding:0 5px; height:28px}
+body.tel .trechts .tonder .tklein small{display:none} body.tel .trechts .tonder .tgeluid{flex-basis:30px}
+body.tel .tkwijzig{font-size:7px; padding:3px 4px; bottom:2px} body.tel .tkwijzig .tkw2{display:none}
+.tkmijn .tkvraag{margin:0 0 18% 0}
+.tkwijzig{position:absolute; left:50%; bottom:4px; transform:translateX(-50%); white-space:nowrap; font:clamp(9px, .62vw, 12px)/1 "Press Start 2P",monospace; font-style:normal;
+  color:#efe9d8; background:rgba(5,5,7,.82); padding:5px 7px; border-radius:3px; box-shadow:0 0 0 2px rgba(110,176,240,.6); opacity:.85; transition:opacity .15s}
+.tkwijzig .tkw2{color:#a9a39a}
+.tkmijn:hover img, .tkmijn:focus-visible img{filter:drop-shadow(0 0 2px #ffd84a) drop-shadow(0 0 3px #ffd84a) drop-shadow(0 0 14px rgba(255,216,74,.65))}
+.tkmijn:hover .tkwijzig{opacity:1; color:#ffd84a; box-shadow:0 0 0 2px #ffd84a}
+.tkmijn:hover .tkwijzig .tkw2{color:#ffd84a}
+.tkmijn:hover .tkvraag{text-shadow:0 0 14px rgba(255,216,74,.8), 0 6px 0 rgba(0,0,0,.5)}
 .trechts .tkaart{min-height:0}
 .tkar{margin:0 !important; width:100% !important}
 .tonder{grid-column:1 / -1; grid-row:3; display:flex; gap:22px; justify-content:flex-end; align-items:center; padding-bottom:6px}
@@ -19909,7 +19936,8 @@ function thuisDHTML(){
   let tegen = null;
   try{ const vrij = mpCharsVrij().filter(c => c && c.id !== (kc && kc.id)); if(vrij.length) tegen = mpChar(vrij[new Date().getDate() % vrij.length].id); }catch(e){}
   const mijnFig = figSrc(kc), tegenFig = figSrc(tegen);
-  const pvpFig = `<span class="tkfig">${mijnFig ? `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">` : `<span class="tkvraag">?</span>`}${tegenFig ? `<img class="tksil" src="${tegenFig}" alt="" draggable="false" onerror="this.remove()">` : ""}</span>`;
+  /* ronde 23: jouw karakter in de PvP-kaart is de knop naar het karakterscherm (het aparte vak is weg) */
+  const pvpFig = `<span class="tkfig"><span class="tkmijn" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">` : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span>${tegenFig ? `<img class="tksil" src="${tegenFig}" alt="" draggable="false" onerror="this.remove()">` : ""}</span>`;
   let chalFig = "", chalBg = "url('art/bg-1-1.png')";
   try{ const ids = CHAL_VOLGORDE(), v = ids.find(id => chalOpen(id) && !ladderVerslagen(id)) || ids.filter(chalOpen).pop();
     if(v){ const c = mpChar(v), src = ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);
@@ -19917,19 +19945,18 @@ function thuisDHTML(){
   return `<div class="tthuis">
     <div class="tlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
     <div class="tboven">${LIVE.resume ? `<button class="tklein" data-act="btn" data-btn="resumelive">TERUG NAAR ROOM ${LIVE.resume.code}</button>` : ""}
-      ${toonInstall() ? `<button class="tklein" data-act="btn" data-btn="installeer">INSTALLEER</button>` : ""}
-      <button class="tklein" data-act="btn" data-btn="plekken">PLEK ${opPlek ? SET.slot + 1 : "?"} <small>wissel</small></button></div>
+      ${toonInstall() ? `<button class="tklein" data-act="btn" data-btn="installeer">INSTALLEER</button>` : ""}</div>
     <button class="tkaart goud tverder" data-act="btn" data-btn="verhaalstart">
       <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>
       <span class="tverderin"><span class="tic">&#9654;</span><span><b>${titel}</b><em>${regel}</em>${stand ? `<i>${stand}</i>` : ""}</span></span></button>
     <div class="trechts">
-      <button class="tkaart blauw tmetbeeld" data-act="btn" data-btn="pvp"><span class="tkbg" style="background-image:${lvBg(kc && kc.lv)}"></span>${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></button>
+      <div class="tkaart blauw tmetbeeld" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="background-image:${lvBg(kc && kc.lv)}"></span>${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
       <button class="tkaart rood tmetbeeld" data-act="btn" data-btn="mpmodus" data-m="chal" data-bot="1"><span class="tkbg" style="background-image:${chalBg}"></span>${chalFig}<span class="tic">&#9733;</span><span><b>CHALLENGES</b><em>${chal.n} van ${chal.tot} kroontjes</em>${chal.volg ? `<i>volgende: ${chal.volg}</i>` : `<i>versla eerst iemand in het verhaal</i>`}</span></button>
-      <button class="vkarakter tkar" data-act="btn" data-btn="thuischar" title="Je karakter voor PvP en challenges">
-        <span class="vkpt">${kopPt(kc)}</span><span class="vktx"><small>JOUW KARAKTER</small><b>${kc.naam}</b><em>voor PvP en challenges · wijzig</em></span></button>
+      <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
+        <button class="tklein" data-act="btn" data-btn="decks">DECKS</button>
+        <button class="tklein" data-act="btn" data-btn="plekken" title="Een ander verhaal kiezen">VERHAAL ${opPlek ? SET.slot + 1 : "?"} <small>wissel</small></button>
+        <button class="tklein tgeluid${SET.mute ? " uit" : ""}" data-act="btn" data-btn="mute" title="${SET.mute ? "Geluid staat uit" : "Geluid staat aan"}">${pixIcoon(SET.mute ? "stil" : "luid")}</button></div>
     </div>
-    <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
-      <button class="tklein" data-act="btn" data-btn="muziek">MUZIEK</button><button class="tklein" data-act="btn" data-btn="decks">DECKS</button></div>
     <div class="tversie">versie ${ELEMENTAAL_VERSIE}</div></div>`;
 }
 /* ronde 21: in het kleine karaktervakje zie je het hoofd, niet de hele tekening. Per tekening:
