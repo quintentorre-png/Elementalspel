@@ -5526,7 +5526,7 @@ html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
 .tkmijn{position:relative; height:84%; display:flex; align-items:flex-end; justify-content:center; pointer-events:auto; cursor:pointer;
   padding:0 6%; margin:-8% 0 0; box-sizing:content-box}
 .tkaart.blauw .tkfig{width:44%; right:2%; z-index:3}
-.tkaart.blauw .tkfig .tkmijn{flex:0 1 64%; min-width:0; height:82%; padding:0 2%; margin:0; align-self:flex-end}
+.tkaart.blauw .tkfig .tkmijn{flex:0 1 100%; min-width:0; height:88%; padding:0 2%; margin:0; align-self:flex-end}
 .tkaart.blauw .tkfig .tkmijn img{height:auto !important; width:auto; max-height:100%; max-width:100% !important; object-fit:contain; transition:filter .15s}
 .tkaart.blauw .tkfig .tksil{max-width:40%}
 .tkaart.blauw > span:not(.tkbg):not(.tkfig):not(.tic){max-width:38%}
@@ -5568,6 +5568,29 @@ body.tel .tkwijzig{font-size:7px; padding:3px 4px; bottom:2px} body.tel .tkwijzi
 .tplek.leeg{justify-content:center; align-items:center; text-align:center; gap:14px}
 .tplek.leeg .tplus{font:clamp(30px, 3vw, 56px)/1 "Press Start 2P",monospace; color:#4a4858}
 .tplek.wis{justify-content:center}
+/* ronde 24: opslagkaarten */
+.tplektitel{display:flex; flex-direction:column; align-items:center; gap:8px; margin:clamp(6px, 1.4vh, 16px) 0 clamp(4px, 1vh, 12px)}
+.tplektitel b{font:clamp(14px, 1.3vw, 24px)/1 "Press Start 2P",monospace; color:#ffd84a; font-weight:normal; letter-spacing:.12em; text-shadow:3px 3px 0 #000}
+.tplektitel span{font:clamp(17px, 1.25vw, 24px)/1 "VT323",monospace; color:#cfc6b0}
+.tplekkop{position:absolute; z-index:3; left:0; right:0; top:0; display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(5,5,7,.9); border-bottom:3px solid var(--r); pointer-events:none}
+.tpleknr{font:clamp(11px, .85vw, 15px)/1 "Press Start 2P",monospace; color:var(--r); letter-spacing:.08em}
+.tplektijd{font:clamp(16px, 1.1vw, 21px)/1 "VT323",monospace; color:#a9a39a}
+.tplek .tplekbg{top:0}
+.tplek .tplekwis{top:auto; bottom:auto; top:6px; right:8px}
+.tplek.wis .tplekin, .tplek.leeg .tplekleeg{margin-top:44px}
+.tplekleeg{display:flex; flex-direction:column; align-items:center; gap:12px}
+.tplek.grijs .tplekkop{border-bottom-color:#3a3946}
+.tplekbalk{display:flex; align-items:center; gap:10px; margin-top:12px}
+.tplekbalk > span{flex:1; height:10px; background:rgba(0,0,0,.55); box-shadow:0 0 0 2px rgba(231,191,85,.45); border-radius:2px; overflow:hidden}
+.tplekbalk .tplekvul{display:block; height:100%; background:linear-gradient(90deg, #b8892e, #ffd84a)}
+.tplekbalk small{font:clamp(15px, 1vw, 19px)/1 "VT323",monospace; color:#cfc6b0; white-space:nowrap; letter-spacing:0}
+.tplekdata{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; margin-top:12px}
+.tplekgetal{display:flex; flex-direction:column; gap:4px; padding:8px 6px; background:rgba(0,0,0,.45); border-radius:3px; text-align:center}
+.tplekgetal b{font:clamp(11px, .9vw, 16px)/1 "Press Start 2P",monospace; color:#ffd84a; margin:0}
+.tplekgetal small{font:clamp(13px, .85vw, 17px)/1 "VT323",monospace; color:#a9a39a; letter-spacing:0}
+body.tel .tplektitel span{display:none} body.tel .tplektijd{display:none} body.tel .tplek .tplekwis{font-size:14px; padding:3px 6px; top:4px} body.tel .tplekkop{padding:6px 8px} body.tel .tplekin em{display:none}
+body.tel .tplekdata{gap:4px; margin-top:6px} body.tel .tplekgetal{padding:4px 2px} body.tel .tplekgetal small{font-size:11px}
+body.tel .tplekbalk{margin-top:6px} body.tel .tplek.wis .tplekin, body.tel .tplek.leeg .tplekleeg{margin-top:30px}
 .trij{display:flex; gap:16px; margin-top:20px}
 /* pvp */
 .tpvp{grid-template-columns:1fr; grid-template-rows:auto auto auto auto; align-content:center; justify-items:center; row-gap:clamp(14px, 3vh, 34px)}
@@ -9960,7 +9983,7 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+
 
 /* ---- lookups ---- */
 /* ▥ Het aantal kolommen. Normaal vijf; in een potje tegen de bot kan het ook met vier (okt 2026, proef). */
-const NK = () => (S && S.nk) || 4;   // (okt 2026) het spel is vier kolommen, overal
+const NK = () => (S && S.nk) || 5;   // (okt 2026) het spel is vijf kolommen, overal (was even vier)
 const kolLijst = () => Array.from({length:NK()}, (_, i) => i);
 function eachCre(fn){ for(let p=0;p<2;p++) for(let c=0;c<NK();c++){ const cr=P(p).cols[c].cre; if(cr) fn(cr,p,c); } }
 function allCreIds(pred){ const out=[]; eachCre((cr,p,c)=>{ if(!pred || pred(cr,p,c)) out.push(cr.card.id); }); return out; }
@@ -11128,7 +11151,8 @@ function crtZet(){ try{
   if(!document.getElementById("crt") && document.body) document.body.insertAdjacentHTML("beforeend", '<div id="crt" aria-hidden="true"><i></i></div>');
   document.documentElement.style.setProperty("--crt", String(SET && typeof SET.crt === "number" ? SET.crt : .5)); }catch(e){} }
 if(typeof document !== "undefined") (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => crtZet()) : setTimeout(() => crtZet(), 0));
-function saveSet(){ try{ const o = Object.assign({}, SET); delete o.story; localStorage.setItem("elementaal.set", JSON.stringify(o)); }catch(e){} }
+function saveSet(){ try{ if(SET.slot != null && SET.slots && SET.slots[SET.slot] && SET.story === SET.slots[SET.slot] && typeof PLEK_GEKOZEN !== "undefined" && PLEK_GEKOZEN) SET.story.laatst = Date.now();   // voor "laatst gespeeld" op het opslagscherm
+  const o = Object.assign({}, SET); delete o.story; localStorage.setItem("elementaal.set", JSON.stringify(o)); }catch(e){} }
 /* Autopass: dit scherm laat de chain automatisch door voor speler p.
    Dat gaat via een echte pass-actie, dus hij komt gewoon in de zettenlijst en over het net. */
 const iControl = p => NET.on ? p === NET.seat : !isBot(p);
@@ -19453,7 +19477,7 @@ function overlayHTML(){
    zelf een plaatje (`v`). `live` is een plaatje dat het spel altijd zelf tekent. */
 const TUT_ALL = [
   {t:"Het doel", ic:"⚜️", img:"art/tut-bord.jpg", fit:"cover", v:"board",
-   b:`Breng je tegenstander naar <b>0 levens</b>.<br><br>Het veld heeft <b>vier kolommen</b>, recht tegenover elkaar. In elke kolom past één <b>wezen</b> en één <b>ritueel</b>.`},
+   b:`Breng je tegenstander naar <b>0 levens</b>.<br><br>Het veld heeft <b>vijf kolommen</b>, recht tegenover elkaar. In elke kolom past één <b>wezen</b> en één <b>ritueel</b>.`},
   {t:"De cirkel", ic:"🔥", live:"circle",
    b:`💧 Water › 🔥 Vuur › 🌿 Gras › 🪨 Steen › 💧 Water<br><br>Sterk tegen zwak: <span class="kw" data-kw="instakill">instakill</span>.<br>Zwak tegen sterk: <span class="kw" data-kw="immuun">immuun</span>.<br>Verder gewone schade.`},
   {t:"Wezen of ritueel", ic:"🃏", live:"twoways",
@@ -19480,7 +19504,7 @@ const TUT_ALL = [
 const TUT_VID = n => "video/tut-" + n + ".mp4";
 const TUT_NIEUW = [
   {t:"Welkom",
-   b:`In Elementaal vecht je met <b>kaarten</b>.<br><br>Je speelt ze in een van de <b>vier kolommen</b>.<br><br>Kaarten spelen mag in <b>allebei de beurten</b>. Vechten met je wezens doe je alleen in <b>je eigen beurt</b>.<br><br>Wie als eerste de <b>levens</b> van de ander op <b>nul</b> krijgt, wint!`,
+   b:`In Elementaal vecht je met <b>kaarten</b>.<br><br>Je speelt ze in een van de <b>vijf kolommen</b>.<br><br>Kaarten spelen mag in <b>allebei de beurten</b>. Vechten met je wezens doe je alleen in <b>je eigen beurt</b>.<br><br>Wie als eerste de <b>levens</b> van de ander op <b>nul</b> krijgt, wint!`,
    media:{soort:"een", vids:[{v:"1"}]}},
   {t:"Vechten",
    b:`In <b>je eigen beurt</b> mag elk wezen één keer aanvallen. Het slaat recht vooruit.<br><br>Het doet schade: <b>de helft van zijn levens</b>.`,
@@ -19561,11 +19585,11 @@ function tutVisual(v){
     </div>`;
   if(v === "board") return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 0 4px">
       <div style="font-size:.68rem;color:var(--dim);letter-spacing:.1em">TEGENSTANDER</div>
-      <div style="display:flex;gap:7px">${[0,1,2,3].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--line);border-radius:6px"></div>`).join("")}</div>
-      <div style="display:flex;gap:7px;color:var(--danger);font-size:.9rem;line-height:1">${[0,1,2,3].map(()=>`<span style="width:34px;text-align:center">↕</span>`).join("")}</div>
-      <div style="display:flex;gap:7px">${[0,1,2,3].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--gold-soft);border-radius:6px"></div>`).join("")}</div>
+      <div style="display:flex;gap:7px">${[0,1,2,3,4].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--line);border-radius:6px"></div>`).join("")}</div>
+      <div style="display:flex;gap:7px;color:var(--danger);font-size:.9rem;line-height:1">${[0,1,2,3,4].map(()=>`<span style="width:34px;text-align:center">↕</span>`).join("")}</div>
+      <div style="display:flex;gap:7px">${[0,1,2,3,4].map(()=>`<div style="width:34px;height:48px;border:1px dashed var(--gold-soft);border-radius:6px"></div>`).join("")}</div>
       <div style="font-size:.68rem;color:var(--gold);letter-spacing:.1em">JIJ</div>
-      <div style="font-size:.72rem;color:var(--dim);margin-top:4px">4 kolommen · elke aanval gaat recht vooruit</div>
+      <div style="font-size:.72rem;color:var(--dim);margin-top:4px">5 kolommen · elke aanval gaat recht vooruit</div>
     </div>`;
   if(v === "twoways") return `<div style="display:flex;justify-content:center;gap:34px;margin:14px 0 4px">
       <div style="text-align:center"><div style="width:62px;height:87px;position:relative;margin:0 auto">${cardFaceHTML("vuur")}<div class="hpgem" style="right:-7px;bottom:-7px">2</div></div>
@@ -19893,26 +19917,36 @@ function thuisVerder(){
    De grote knoppen hebben de stijl van Verder, elk in een eigen kleur. */
 let PLEK_GEKOZEN = false;
 const plekBg = id => id ? `url('art/bg-${id}.png'), url('art/pt-${id}.png')` : "url('art/bg-1-1.png')";
+/* ronde 24: het opslagscherm. Elke opslag is een eigen kaart met een kop (OPSLAG 1, 2, 3), waar je
+   bent, hoe ver je bent en wat je al verzameld hebt. */
+const plekTijd = t => { if(!t) return ""; const d = Math.floor((new Date().setHours(0,0,0,0) - new Date(t).setHours(0,0,0,0)) / 864e5);
+  return d <= 0 ? "vandaag gespeeld" : d === 1 ? "gisteren gespeeld" : d < 7 ? `${d} dagen geleden` : new Date(t).toLocaleDateString("nl-NL", {day:"numeric", month:"short"}); };
 function plekkenHTML(eerste){
+  const kop = (i, extra) => `<div class="tplekkop"><span class="tpleknr">OPSLAG ${i + 1}</span>${extra || ""}</div>`;
   const plek = i => {
     const st = SET.slots[i], sd = slotStand(st);
-    if(M && M.wis === i) return `<div class="tkaart goud tplek wis"><div class="tplekin"><small>PLEK ${i + 1}</small><b>Wissen?</b>
-        <em>Deze voortgang echt wissen? Dat kan niet ongedaan worden.</em>
+    if(M && M.wis === i) return `<div class="tkaart goud tplek wis">${kop(i)}<div class="tplekin"><b>Wissen?</b>
+        <em>Deze opslag echt wissen? Dat kan niet ongedaan worden.</em>
         <div class="trij"><button class="tklein rood" data-act="btn" data-btn="plekwisja" data-i="${i}">JA, WISSEN</button><button class="tklein" data-act="btn" data-btn="plekwisnee">NEE</button></div></div></div>`;
-    if(!sd) return `<button class="tkaart grijs tplek leeg" data-act="btn" data-btn="plekkies" data-i="${i}"><small>PLEK ${i + 1}</small><span class="tplus">+</span><em>nieuw verhaal</em><i>begint bij het ei</i></button>`;
-    const L = sd.volgend && STORY[sd.volgend];
+    if(!sd) return `<button class="tkaart grijs tplek leeg" data-act="btn" data-btn="plekkies" data-i="${i}">${kop(i, `<span class="tplektijd">leeg</span>`)}<span class="tplekleeg"><span class="tplus">+</span><em>nieuw verhaal</em><i>begint bij het ei</i></span></button>`;
+    const L = sd.volgend && STORY[sd.volgend], w = L ? L.wereld : 5;
+    const tot = STORY_ORDER.length, pct = Math.round(sd.klaar / tot * 100);
+    const tijd = SET.slot === i ? "laatst gespeeld" : plekTijd(st.laatst);
+    const tegel = (n, lab) => `<span class="tplekgetal"><b>${n}</b><small>${lab}</small></span>`;
     return `<div class="tkaart goud tplek${SET.slot === i ? " nu" : ""}">
-      <button class="tplekklik" data-act="btn" data-btn="plekkies" data-i="${i}" aria-label="Plek ${i + 1}"></button>
+      <button class="tplekklik" data-act="btn" data-btn="plekkies" data-i="${i}" aria-label="Opslag ${i + 1}"></button>
+      ${kop(i, tijd ? `<span class="tplektijd">${tijd}</span>` : "")}
       <div class="tplekbg" style="background-image:${plekBg(sd.volgend)}"></div>
-      <div class="tplekin"><small>PLEK ${i + 1}${SET.slot === i ? " · LAATST GESPEELD" : ""}</small>
+      <div class="tplekin"><small>${L ? `WERELD ${w} · ${WERELDEN[w].naam.toUpperCase()}` : "HET VERHAAL IS UIT"}</small>
         <b>${L ? `${sd.volgend} · ${L.naam.toUpperCase()}` : "UITGESPEELD"}</b>
         ${L ? `<em>tegen ${String(L.vechtNaam || L.vijand || "?").replace(EMOJI_RE, "").trim()}</em>` : "<em>alles gehaald</em>"}
-        <i>${sd.klaar} van ${STORY_ORDER.length} levels · ${sd.sterren} sterren</i></div>
+        <div class="tplekbalk"><span><span class="tplekvul" style="width:${pct}%"></span></span><small>${sd.klaar}/${tot} levels</small></div>
+        <div class="tplekdata">${tegel(`★ ${sd.sterren}`, `van ${tot * 3} sterren`)}${tegel(sd.ae, "aethers")}${tegel(sd.lt, "lichtkaarten")}${tegel(sd.chars, "karakters")}</div></div>
       <button class="tplekwis" data-act="btn" data-btn="plekwis" data-i="${i}">wissen</button></div>`;
   };
   return `<div class="tthuis tplekken">
     <div class="tlogo midden"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
-    <div class="tkop">KIES JE VERHAAL</div>
+    <div class="tplektitel"><b>KIES JE OPSLAG</b><span>drie opslagen, elk met een eigen verhaal, sterren en verzameling</span></div>
     <div class="tplekrij">${[0, 1, 2].map(plek).join("")}</div>
     ${eerste ? "" : `<button class="tterug" data-act="btn" data-btn="closemodal" aria-label="Terug">&#8249;</button>`}
     <div class="tversie">versie ${ELEMENTAAL_VERSIE}</div></div>`;
@@ -19923,7 +19957,7 @@ function thuisDHTML(){
   const vg = sd && sd.volgend, L = vg && STORY[vg];
   const titel = !opPlek ? "VERHAAL" : (sd.klaar ? "VERDER" : "BEGIN");
   const regel = L ? `${vg} · ${L.naam}, tegen ${String(L.vechtNaam || L.vijand || "?").replace(EMOJI_RE, "").trim()}` : (opPlek ? "alles gehaald · kies een level op de kaart" : "kies eerst een plek");
-  const stand = opPlek ? `${sd.klaar} van ${STORY_ORDER.length} levels · ${sd.sterren} sterren · plek ${SET.slot + 1}` : "";
+  const stand = opPlek ? `${sd.klaar} van ${STORY_ORDER.length} levels · ${sd.sterren} sterren · opslag ${SET.slot + 1}` : "";
   /* challenges: hoeveel kroontjes, en wie je als volgende kunt verslaan */
   let chal = {n:0, tot:0, volg:null};
   try{ const ids = CHAL_VOLGORDE(); chal.tot = ids.length; chal.n = ids.filter(ladderVerslagen).length;
@@ -19937,7 +19971,7 @@ function thuisDHTML(){
   try{ const vrij = mpCharsVrij().filter(c => c && c.id !== (kc && kc.id)); if(vrij.length) tegen = mpChar(vrij[new Date().getDate() % vrij.length].id); }catch(e){}
   const mijnFig = figSrc(kc), tegenFig = figSrc(tegen);
   /* ronde 23: jouw karakter in de PvP-kaart is de knop naar het karakterscherm (het aparte vak is weg) */
-  const pvpFig = `<span class="tkfig"><span class="tkmijn" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">` : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span>${tegenFig ? `<img class="tksil" src="${tegenFig}" alt="" draggable="false" onerror="this.remove()">` : ""}</span>`;
+  const pvpFig = `<span class="tkfig"><span class="tkmijn" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">` : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
   let chalFig = "", chalBg = "url('art/bg-1-1.png')";
   try{ const ids = CHAL_VOLGORDE(), v = ids.find(id => chalOpen(id) && !ladderVerslagen(id)) || ids.filter(chalOpen).pop();
     if(v){ const c = mpChar(v), src = ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);
@@ -19954,7 +19988,7 @@ function thuisDHTML(){
       <button class="tkaart rood tmetbeeld" data-act="btn" data-btn="mpmodus" data-m="chal" data-bot="1"><span class="tkbg" style="background-image:${chalBg}"></span>${chalFig}<span class="tic">&#9733;</span><span><b>CHALLENGES</b><em>${chal.n} van ${chal.tot} kroontjes</em>${chal.volg ? `<i>volgende: ${chal.volg}</i>` : `<i>versla eerst iemand in het verhaal</i>`}</span></button>
       <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
         <button class="tklein" data-act="btn" data-btn="decks">DECKS</button>
-        <button class="tklein" data-act="btn" data-btn="plekken" title="Een ander verhaal kiezen">VERHAAL ${opPlek ? SET.slot + 1 : "?"} <small>wissel</small></button>
+        <button class="tklein" data-act="btn" data-btn="plekken" title="Een andere opslag kiezen">OPSLAG ${opPlek ? SET.slot + 1 : "?"} <small>wissel</small></button>
         <button class="tklein tgeluid${SET.mute ? " uit" : ""}" data-act="btn" data-btn="mute" title="${SET.mute ? "Geluid staat uit" : "Geluid staat aan"}">${pixIcoon(SET.mute ? "stil" : "luid")}</button></div>
     </div>
     <div class="tversie">versie ${ELEMENTAAL_VERSIE}</div></div>`;
@@ -25961,7 +25995,7 @@ function tutSchermHTML(k){
         ${rij("jouw kant", "onder")}
         <div class="tsleven onder"><span>jouw levens</span><i></i></div>
       </div>
-      <p>Je zet kaarten neer in <b>vier kolommen</b>. Ze vechten voor je.</p>
+      <p>Je zet kaarten neer in <b>vijf kolommen</b>. Ze vechten voor je.</p>
       <p><b>Haal zijn levens naar nul.</b></p>`;
   }
   if(k === "cirkel") return `<div class="tskop">De cirkel</div>
@@ -33629,7 +33663,7 @@ async function netBoot(){
 /* ---------- 💾 opslagplekken ---------- */
 function slotKies(i){
   if(!SET.slots[i]) SET.slots[i] = verseStory();
-  SET.slot = i; SET.story = SET.slots[i]; saveSet();
+  SET.slot = i; SET.story = SET.slots[i]; SET.story.laatst = Date.now(); saveSet();
 }
 function slotWis(i){
   SET.slots[i] = null;
@@ -34823,8 +34857,8 @@ function onBtn(btn, el, fromAction){
       if(u.mode==="start"){
         S.vsBot = /bot$/.test(btn);
         S.startBtn = btn;
-        /* ▥ (okt 2026) Elementaal is vier kolommen, overal. */
-        S.nk = 4;
+        /* ▥ (okt 2026) Elementaal is weer vijf kolommen, overal. */
+        S.nk = 5;
         S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
         SET.autopass = [false, false]; saveSet();      // elk potje begint met autopass uit
         addLog(NET.on ? "Online partij: jij bent <em>Speler " + (NET.seat + 1) + "</em>."
