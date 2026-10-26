@@ -173,6 +173,20 @@ body.verhaal #klokbtn{display:none}
 .slot.cr.valtaan .card{animation:valpuls .85s ease-in-out infinite !important}
 @keyframes valpuls{0%,100%{box-shadow:0 0 0 3px #c42a1e, 0 0 8px rgba(255,60,40,.45); filter:brightness(1)}
   50%{box-shadow:0 0 0 5px #ff6a4a, 0 0 30px rgba(255,70,40,.95); filter:brightness(1.18)}}
+/* ⚔ ronde 25: de kolom van een aanval in de keten, en het wezen dat aanvalt */
+#fieldwrap .col.aanvalkol{position:relative}
+#fieldwrap .col.aanvalkol::before{content:""; position:absolute; inset:-7px -6px; border-radius:8px; pointer-events:none; z-index:0;
+  background:linear-gradient(180deg, rgba(255,70,40,.22), rgba(255,70,40,.34)); box-shadow:inset 0 0 0 4px rgba(255,96,64,.95), 0 0 30px rgba(255,60,40,.6);
+  animation:aanvlaan 1s ease-in-out infinite}
+@keyframes aanvlaan{0%,100%{opacity:.55} 50%{opacity:1}}
+#fieldwrap .col.aanvleeg::after{content:"RECHT OP DE LEVENS"; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); z-index:2; pointer-events:none;
+  white-space:nowrap; font:9px/1.3 "Press Start 2P",monospace; color:#fff; background:#a3261a; padding:6px 8px; border-radius:3px; box-shadow:0 0 0 2px #000, 0 0 16px rgba(255,60,40,.7)}
+.slot.cr.valtaan .valtaanmerk{position:absolute; inset:-6px; z-index:8; pointer-events:none; border:4px solid #ff5a3c; border-radius:7px;
+  box-shadow:0 0 0 2px #000, 0 0 24px rgba(255,70,40,.95); animation:aanvlaan .8s ease-in-out infinite}
+.slot.cr.valtaan .valtaanmerk span{position:absolute; left:50%; top:-14px; transform:translateX(-50%); white-space:nowrap;
+  font:10px/1 "Press Start 2P",monospace; color:#fff; background:#c42a1e; padding:6px 8px; border-radius:3px; box-shadow:0 0 0 2px #000}
+body.tel .slot.cr.valtaan .valtaanmerk span{font-size:7px; padding:4px 5px; top:-10px}
+body.tel #fieldwrap .col.aanvleeg::after{font-size:6px; padding:4px 5px}
 /* De kaart die net gespeeld is en als link in de chain staat: daar wordt op gereageerd. */
 .slot.gespeeld{z-index:6}
 .slot.gespeeld .card{animation:speelpuls .9s ease-in-out infinite !important}
@@ -4077,10 +4091,14 @@ body.venster .tutlinks h2{margin:0 0 16px; font-size:.9rem; line-height:1.5}
 #filmlaag .filmskip:hover{opacity:1}
 #filmlaag.laadt .filmskip{display:none}
 /* 📱 rechtop op een telefoon: eerst draaien */
-#draaitel{display:none}
-@media (orientation:portrait) and (pointer:coarse) and (max-width:600px){
-  #draaitel{display:flex; position:fixed; inset:0; z-index:100000; background:#0b0f18; flex-direction:column;
+/* ronde 25: het draai-je-telefoonscherm staat er ALTIJD als een telefoon rechtop staat, niet alleen tijdens
+   het laden. Twee wegen, voor de zekerheid: de media query, en html.draaimoet (gezet door draaiZet). */
+#draaitel{display:none; position:fixed; inset:0; z-index:2147483600; background:#0b0f18; flex-direction:column;
     align-items:center; justify-content:center; gap:22px; text-align:center; padding:24px}
+html.draaimoet #draaitel{display:flex !important}
+html.draaimoet body{overflow:hidden}
+@media (orientation:portrait) and (max-width:820px) and (any-pointer:coarse){
+  #draaitel{display:flex !important}
   #draaitel .dtlogo{font-family:"Press Start 2P",ui-monospace,monospace; font-size:1.5rem; color:#f3d68a;
     text-shadow:0 3px 0 #6b4a12, 0 6px 0 rgba(0,0,0,.6); margin-bottom:40px}
   #draaitel .dticoon{width:150px; height:150px; animation:dtdraai 2.6s ease-in-out infinite}
@@ -5529,7 +5547,7 @@ html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
 .tkaart.blauw .tkfig .tkmijn{flex:0 1 100%; min-width:0; height:88%; padding:0 2%; margin:0; align-self:flex-end}
 .tkaart.blauw .tkfig .tkmijn img{height:auto !important; width:auto; max-height:100%; max-width:100% !important; object-fit:contain; transition:filter .15s}
 .tkaart.blauw .tkfig .tksil{max-width:40%}
-.tkaart.blauw > span:not(.tkbg):not(.tkfig):not(.tic){max-width:38%}
+.tkaart.blauw.tmetbeeld > span:not(.tkbg):not(.tkfig):not(.tic){max-width:38%}
 .trechts .tonder .tklein{min-width:0}
 body.tel .trechts .tonder{gap:6px; padding-bottom:3px} body.tel .trechts .tonder .tklein{font-size:7px; padding:0 5px; height:28px}
 body.tel .trechts .tonder .tklein small{display:none} body.tel .trechts .tonder .tgeluid{flex-basis:30px}
@@ -5575,15 +5593,16 @@ body.tel .tkwijzig{font-size:7px; padding:3px 4px; bottom:2px} body.tel .tkwijzi
 .tplekkop{position:absolute; z-index:3; left:0; right:0; top:0; display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(5,5,7,.9); border-bottom:3px solid var(--r); pointer-events:none}
 .tpleknr{font:clamp(11px, .85vw, 15px)/1 "Press Start 2P",monospace; color:var(--r); letter-spacing:.08em}
 .tplektijd{font:clamp(16px, 1.1vw, 21px)/1 "VT323",monospace; color:#a9a39a}
-.tplek .tplekbg{top:0}
+.tplek .tplekbg{top:0; height:74%}
+.tplek:not(.leeg):not(.wis)::after{top:50%; height:26%}
 .tplek .tplekwis{top:auto; bottom:auto; top:6px; right:8px}
 .tplek.wis .tplekin, .tplek.leeg .tplekleeg{margin-top:44px}
 .tplekleeg{display:flex; flex-direction:column; align-items:center; gap:12px}
 .tplek.grijs .tplekkop{border-bottom-color:#3a3946}
 .tplekbalk{display:flex; align-items:center; gap:10px; margin-top:12px}
-.tplekbalk > span{flex:1; height:10px; background:rgba(0,0,0,.55); box-shadow:0 0 0 2px rgba(231,191,85,.45); border-radius:2px; overflow:hidden}
+.tplekbalk > span{flex:1; height:14px; background:rgba(0,0,0,.55); box-shadow:0 0 0 2px rgba(231,191,85,.45); border-radius:2px; overflow:hidden}
 .tplekbalk .tplekvul{display:block; height:100%; background:linear-gradient(90deg, #b8892e, #ffd84a)}
-.tplekbalk small{font:clamp(15px, 1vw, 19px)/1 "VT323",monospace; color:#cfc6b0; white-space:nowrap; letter-spacing:0}
+.tplekbalk small{font:clamp(10px, .75vw, 14px)/1 "Press Start 2P",monospace; color:#ffd84a !important; min-width:4ch; text-align:right; font-style:normal; color:#cfc6b0; white-space:nowrap; letter-spacing:0}
 .tplekdata{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; margin-top:12px}
 .tplekgetal{display:flex; flex-direction:column; gap:4px; padding:8px 6px; background:rgba(0,0,0,.45); border-radius:3px; text-align:center}
 .tplekgetal b{font:clamp(11px, .9vw, 16px)/1 "Press Start 2P",monospace; color:#ffd84a; margin:0}
@@ -5593,13 +5612,21 @@ body.tel .tplekdata{gap:4px; margin-top:6px} body.tel .tplekgetal{padding:4px 2p
 body.tel .tplekbalk{margin-top:6px} body.tel .tplek.wis .tplekin, body.tel .tplek.leeg .tplekleeg{margin-top:30px}
 .trij{display:flex; gap:16px; margin-top:20px}
 /* pvp */
-.tpvp{grid-template-columns:1fr; grid-template-rows:auto auto auto auto; align-content:center; justify-items:center; row-gap:clamp(14px, 3vh, 34px)}
+.tpvp{grid-template-columns:1fr; grid-template-rows:auto auto minmax(0, 1fr) auto; align-content:stretch; justify-items:center; row-gap:clamp(10px, 2.2vh, 26px)}
 .tpvptitel{font:clamp(26px, 3vw, 56px)/1 "Press Start 2P",monospace; letter-spacing:.08em; background:linear-gradient(180deg,#fff 0 46%,#6eb0f0 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(5px 5px 0 #0b0d22)}
-.tkolrij{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:clamp(16px, 2.6vw, 50px); width:100%; max-width:1560px; min-height:0; align-items:start}
-.tkol{flex-direction:column; align-items:stretch; justify-content:flex-start; cursor:default; padding:clamp(16px, 3vh, 34px) clamp(16px, 1.6vw, 30px)}
+.tkolrij{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:clamp(16px, 2.6vw, 50px); width:100%; max-width:1560px; min-height:0; align-items:stretch; max-height:780px; align-self:center; height:100%}
+.tkol{flex-direction:column; align-items:stretch; justify-content:flex-end; cursor:default; padding:clamp(14px, 2.6vh, 30px) clamp(16px, 1.6vw, 30px); min-height:0; overflow:hidden; gap:0}
+.tkolbg{position:absolute; inset:0; z-index:0; background-size:cover; background-position:50% 22%; image-rendering:pixelated; transition:transform .5s ease}
+.tkolbg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(12,24,42,0) 0%, rgba(12,24,42,.05) 22%, rgba(12,24,42,.75) 46%, rgba(12,24,42,.97) 62%, rgba(12,24,42,.99) 100%)}
+.tkol:hover .tkolbg{transform:scale(1.045)}
+.tkol > *:not(.tkolbg){position:relative; z-index:1}
+.tkoltekst{display:block; margin-bottom:clamp(4px, 1vh, 12px)}
+.tkoltekst b{font-size:clamp(14px, 1.35vw, 26px); text-shadow:3px 3px 0 #000, 0 0 18px rgba(0,0,0,.8)}
+.tkoltekst em, .tkoltekst i{text-shadow:2px 2px 0 #000}
+.tkol .tkolknop{background:rgba(5,5,7,.88)}
 .tkol:hover{filter:none}
-.tkolbeeld{display:block; height:clamp(56px, 19vh, 200px); margin:calc(-1 * clamp(16px, 3vh, 34px)) calc(-1 * clamp(16px, 1.6vw, 30px)) clamp(12px, 2.4vh, 26px);
+.tkolbeeld-oud{display:none;
   background-size:cover; background-position:50% 35%; image-rendering:pixelated; border-bottom:3px solid var(--r)}
 /* ronde 21: PvP (en plek wisselen) houden de kaart van het hoofdscherm als achtergrond, zonder de knoppen
    van het hoofdscherm erachter */
@@ -5610,7 +5637,7 @@ body:has(#overlay .tpvp) .tthuis:not(.tpvp), body:has(#overlay .tplekken) .tthui
 .tkolknop span{display:block; font:clamp(10px, .75vw, 13px)/1 "Press Start 2P",monospace}
 .tkolknop small{display:block; font:clamp(16px, 1.1vw, 22px)/1 "VT323",monospace; color:#a9a39a; margin-top:8px; letter-spacing:0}
 .tkolknop:hover{box-shadow:0 0 0 2px #ffd84a, 0 0 0 4px #000} .tkolknop:hover span{color:#ffd84a}
-.tpvponder{display:flex; gap:24px; align-items:center; width:100%; max-width:1560px}
+.tpvponder{display:flex; gap:24px; align-items:center; justify-content:center; width:100%; max-width:1560px}
 .tpvponder .tkar{width:auto !important}
 /* telefoon */
 body.tel .tthuis{width:calc(100vw - var(--sl, 0px) - var(--sr, 0px) - 24px); height:calc(100dvh - 16px); gap:8px 12px}
@@ -5619,8 +5646,8 @@ body.tel .tonder{gap:10px} body.tel .tversie{display:none}
 body.tel .tkaart{border-width:2px; border-radius:8px} body.tel .tkaart i{display:none} body.tel .tverder i{display:block}
 body.tel .trechts .vkarakter{padding:6px 10px} body.tel .trechts .vkarakter em{display:none}
 body.tel .tplekrij{height:min(62vh, 300px)} body.tel .tkolknop small{display:none}
-body.tel .tpvp{row-gap:6px} body.tel .tkolbeeld{height:clamp(30px, 9vh, 48px); margin-bottom:8px}
-body.tel .tkol{padding-top:clamp(16px, 3vh, 34px)} body.tel .tkol em{margin-top:4px} body.tel .tkol i{display:none}
+body.tel .tpvp{row-gap:6px}
+body.tel .tkol{padding:8px 10px} body.tel .tkoltekst b{font-size:10px} body.tel .tkol em{margin-top:4px} body.tel .tkol i{display:none}
 body.tel .tkolknop, body.tel .tkolknop:first-of-type{margin-top:6px; padding:7px 12px}
 body.tel .tpvponder .tkar{padding:4px 8px}
 body.tel .tterug{left:10px; top:8px; width:40px; height:40px; font-size:22px}
@@ -18544,15 +18571,16 @@ function slotHTML(p, c, hl){
       cr = `<div class="slot cr${creHl}${tgt}${atk} dicht" data-act="cre" data-p="${p}" data-col="${c}">${gloed}${backHTML(p)}
         <div class="rookvraag">?</div><div class="hpgem">${u.hp}</div></div>`;
       const poort0 = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
-      return `<div class="col${poort0 ? " dicht" : ""}">${vonkMerk}${sp}${cr}${kruis}${rots}${poort0}${bandMerk}</div>`;
+      return `<div class="col${poort0 ? " dicht" : ""}${aanvalKolKlas(p, c)}">${vonkMerk}${sp}${cr}${kruis}${rots}${poort0}${bandMerk}</div>`;
     }
     const valt = (S.stack || []).some(it => it.type === "attack" && it.creId === u.card.id) ? " valtaan"
       : (S.stack || []).some(it => it.type === "play" && it.card && it.card.id === u.card.id) ? " gespeeld" : "";
+    const valtMerk = valt === " valtaan" ? `<div class="valtaanmerk" aria-hidden="true"><span>VALT AAN</span></div>` : "";
     cr = `<div class="slot cr${creHl}${tgt}${atk}${mik}${spent}${valt}${aeBoosts(p, u.card.el) ? " aeup" : ""}${trioKracht(p, u.card.el) ? " vonkup" : ""}" data-act="cre" data-p="${p}" data-col="${c}"
       data-pv="${u.card.el}"${u.card.ws ? ` data-pvws="1"` : ""}${toonVarKey(u.card) ? ` data-pvvar="${toonVarKey(u.card)}"` : ""} data-pvhp="${u.hp}" data-pvent="${u.ent}" data-pvatk="${atkOf(u, p)}" data-pvst="${(sick?"s":"")+(ent?"e":"")+(u.attackedT===S.gTurn?"a":"")}">
       ${gloed}${cardFaceHTML(u.card)}${EL[u.card.el].sprite ? `<div class="cresprite${EL[u.card.el].spriteKlein ? " klein" : ""}">${spriteSVG(EL[u.card.el].sprite)}</div>` : ""}${stat}
       <div class="atkgem${tw(atkOf(u, p))}">⚔${atkOf(u, p)}</div>
-      <div class="hpgem${gemCls}${tw(u.hp)}">${u.hp}</div>${mikm}</div>`;
+      <div class="hpgem${gemCls}${tw(u.hp)}">${u.hp}</div>${mikm}${valtMerk}</div>`;
   } else {
     /* Een lege plek die nog aangewezen staat (het wezen ging terug naar de hand). */
     const mk0 = (hl.mik || {})["pos" + p + ":" + c];
@@ -18576,7 +18604,7 @@ function slotHTML(p, c, hl){
   }
   const poort = (S.story && S.story.sluis === c) ? `<div class="sluislabel">${S.story.sluisIc || "🚪"} DICHT</div>` : "";
   const leegvonk = (S.story && S.story.trio && p === 1 && !S.story.trio.some(v => v.kol === c)) ? " leegvonk" : "";
-  return `<div class="col${poort ? " dicht" : ""}${leegvonk}${bandAan && c === NK() - 1 ? " bandeind" : ""}">${zegelGloed(col)}${vonkMerk}${sp}${cr}${kruis}${rots}${poort}${bandMerk}</div>`;
+  return `<div class="col${poort ? " dicht" : ""}${leegvonk}${bandAan && c === NK() - 1 ? " bandeind" : ""}${aanvalKolKlas(p, c)}">${zegelGloed(col)}${vonkMerk}${sp}${cr}${kruis}${rots}${poort}${bandMerk}</div>`;
 }
 function handHTML(p, hl){
   const up = handVisible(p);
@@ -19921,6 +19949,30 @@ const plekBg = id => id ? `url('art/bg-${id}.png'), url('art/pt-${id}.png')` : "
    bent, hoe ver je bent en wat je al verzameld hebt. */
 const plekTijd = t => { if(!t) return ""; const d = Math.floor((new Date().setHours(0,0,0,0) - new Date(t).setHours(0,0,0,0)) / 864e5);
   return d <= 0 ? "vandaag gespeeld" : d === 1 ? "gisteren gespeeld" : d < 7 ? `${d} dagen geleden` : new Date(t).toLocaleDateString("nl-NL", {day:"numeric", month:"short"}); };
+/* ⚔ ronde 25: staat er een aanval in de keten, dan licht die hele kolom op (aan beide kanten), zodat
+   je ziet waar je op reageert. Kant van de aanvaller en van de verdediger apart; is de verdediger leeg,
+   dan staat er dat het recht op de levens gaat. */
+function aanvalKolKlas(p, c){
+  if(!S || !S.stack || !S.stack.length || !S.ui || S.ui.mode === "start") return "";
+  const it = S.stack.find(x => x.type === "attack" && x.col === c); if(!it) return "";
+  const aanv = p === it.ctrl, leeg = !aanv && !(P(p).cols[c] && P(p).cols[c].cre);
+  return " aanvalkol" + (aanv ? " aanvkant" : " verdkant") + (leeg ? " aanvleeg" : "");
+}
+/* ronde 25: hoe ver een opslag is, in één getal van 0 tot 100. Alles telt mee: levels, sterren,
+   aethers, lichtkaarten en karakters. (Achievements komen er later bij, met hun eigen gewicht.) */
+const PLEK_GEWICHT = {levels:35, sterren:25, aethers:15, licht:15, karakters:10};
+function plekProcent(sd){
+  if(!sd) return 0;
+  const tot = STORY_ORDER.length;
+  let totAe = 0, totLt = 0;
+  try{ totAe = Object.keys(AETHERS).filter(k => { const A = AETHERS[k]; return !A.uit && !A.vijand && !A.pvp && !/^ae_oer_/.test(k); }).length; }catch(e){}
+  try{ totLt = Object.keys(LIGHTS).filter(k => !LIGHTS[k].weg && !LIGHTS[k].verhaalNiet).length; }catch(e){}
+  const deel = (n, d) => d > 0 ? Math.min(1, n / d) : 0, G = PLEK_GEWICHT;
+  const som = G.levels * deel(sd.klaar, tot) + G.sterren * deel(sd.sterren, tot * 3) + G.aethers * deel(sd.ae, totAe)
+    + G.licht * deel(sd.lt, totLt) + G.karakters * deel(sd.chars, MP_CHARS.length);
+  const tot100 = Object.values(G).reduce((a, b) => a + b, 0);
+  return Math.round(som / tot100 * 100);
+}
 function plekkenHTML(eerste){
   const kop = (i, extra) => `<div class="tplekkop"><span class="tpleknr">OPSLAG ${i + 1}</span>${extra || ""}</div>`;
   const plek = i => {
@@ -19930,9 +19982,8 @@ function plekkenHTML(eerste){
         <div class="trij"><button class="tklein rood" data-act="btn" data-btn="plekwisja" data-i="${i}">JA, WISSEN</button><button class="tklein" data-act="btn" data-btn="plekwisnee">NEE</button></div></div></div>`;
     if(!sd) return `<button class="tkaart grijs tplek leeg" data-act="btn" data-btn="plekkies" data-i="${i}">${kop(i, `<span class="tplektijd">leeg</span>`)}<span class="tplekleeg"><span class="tplus">+</span><em>nieuw verhaal</em><i>begint bij het ei</i></span></button>`;
     const L = sd.volgend && STORY[sd.volgend], w = L ? L.wereld : 5;
-    const tot = STORY_ORDER.length, pct = Math.round(sd.klaar / tot * 100);
+    const pct = plekProcent(sd);
     const tijd = SET.slot === i ? "laatst gespeeld" : plekTijd(st.laatst);
-    const tegel = (n, lab) => `<span class="tplekgetal"><b>${n}</b><small>${lab}</small></span>`;
     return `<div class="tkaart goud tplek${SET.slot === i ? " nu" : ""}">
       <button class="tplekklik" data-act="btn" data-btn="plekkies" data-i="${i}" aria-label="Opslag ${i + 1}"></button>
       ${kop(i, tijd ? `<span class="tplektijd">${tijd}</span>` : "")}
@@ -19940,8 +19991,7 @@ function plekkenHTML(eerste){
       <div class="tplekin"><small>${L ? `WERELD ${w} · ${WERELDEN[w].naam.toUpperCase()}` : "HET VERHAAL IS UIT"}</small>
         <b>${L ? `${sd.volgend} · ${L.naam.toUpperCase()}` : "UITGESPEELD"}</b>
         ${L ? `<em>tegen ${String(L.vechtNaam || L.vijand || "?").replace(EMOJI_RE, "").trim()}</em>` : "<em>alles gehaald</em>"}
-        <div class="tplekbalk"><span><span class="tplekvul" style="width:${pct}%"></span></span><small>${sd.klaar}/${tot} levels</small></div>
-        <div class="tplekdata">${tegel(`★ ${sd.sterren}`, `van ${tot * 3} sterren`)}${tegel(sd.ae, "aethers")}${tegel(sd.lt, "lichtkaarten")}${tegel(sd.chars, "karakters")}</div></div>
+        <div class="tplekbalk"><span><span class="tplekvul" style="width:${pct}%"></span></span><small>${pct}%</small></div></div>
       <button class="tplekwis" data-act="btn" data-btn="plekwis" data-i="${i}">wissen</button></div>`;
   };
   return `<div class="tthuis tplekken">
@@ -20007,7 +20057,8 @@ function kopPt(c){
 }
 /* PvP: drie kolommen, elk met room openen, room meedoen en tegen de bots */
 function pvpHTML(){
-  const kol = (m, t, sub, uit, bot, img) => `<div class="tkaart blauw tkol"><span class="tkolbeeld" style="background-image:url('art/film/${img}.webp')"></span><b>${t}</b><em>${sub}</em><i>${uit}</i>
+  /* ronde 25: de tekening is de achtergrond van de hele kolom; tekst en knoppen staan onderin, op het donker */
+  const kol = (m, t, sub, uit, bot, img) => `<div class="tkaart blauw tkol"><span class="tkolbg" style="background-image:url('art/film/${img}.webp')"></span><span class="tkoltekst"><b>${t}</b><em>${sub}</em><i>${uit}</i></span>
     <button class="tkolknop" data-act="btn" data-btn="pvphost" data-m="${m}"><span>ROOM OPENEN</span><small>je krijgt een code voor je vriend</small></button>
     <button class="tkolknop" data-act="btn" data-btn="mpjoin"><span>ROOM MEEDOEN</span><small>met de code van je vriend</small></button>
     <button class="tkolknop" data-act="btn" data-btn="pvpbot" data-m="${bot}"><span>TEGEN DE BOTS</span><small>oefenen, ook zonder internet</small></button></div>`;
@@ -20018,7 +20069,7 @@ function pvpHTML(){
     <div class="tkolrij">${kol("cmd", "COMMANDER", "best of 3 met een draft", "aethers en licht kies je om de beurt", "cmd", "schim-magnus")}
       ${kol("bas1", "BEST OF 1", "één potje met je eigen deck", "basis · 24 kaarten", "wil", "schim-oceaan")}
       ${kol("bas3", "BEST OF 3", "drie potjes, met sideboard", "basis · wissel tussen de potjes", "bas3", "engelen-dicht")}</div>
-    <div class="tpvponder"><button class="vkarakter tkar" data-act="btn" data-btn="thuischar"><span class="vkpt">${kopPt(kc)}</span><span class="vktx"><small>JOUW KARAKTER</small><b>${kc.naam}</b><em>wijzig</em></span></button>
+    <div class="tpvponder"><button class="tklein" data-act="btn" data-btn="thuischar">KARAKTER <small>${kc.naam} ›</small></button>
       <button class="tklein" data-act="btn" data-btn="pvpdeck">DECK <small>${String(deck.naam || "").replace(/</g, "")} ›</small></button></div></div>`;
 }
 /* Verhaal (of Verder): naar de kaart van je plek; een nieuw verhaal begint met de openingsfilm */
@@ -35265,6 +35316,18 @@ function pcZet(){
   document.body.classList.toggle("pc", aan);
   if(S && !FAST){ const v = document.getElementById("portretvak"); if(v){ v.dataset.sig = ""; v.dataset.bel = ""; } render(); }
 }
+/* 📱 rechtop: altijd het draaischerm (ook midden in een gevecht of op de kaart) */
+function draaiZet(){
+  let aan = false;
+  try{ const touch = (navigator.maxTouchPoints || 0) > 0 || "ontouchstart" in window;
+    const kort = Math.min(screen.width || innerWidth, screen.height || innerHeight);
+    aan = touch && kort <= 820 && innerHeight > innerWidth; }catch(e){}
+  document.documentElement.classList.toggle("draaimoet", aan);
+}
+window.addEventListener("resize", draaiZet);
+window.addEventListener("orientationchange", () => setTimeout(draaiZet, 120));
+try{ if(screen.orientation) screen.orientation.addEventListener("change", draaiZet); }catch(e){}
+draaiZet();
 window.addEventListener("resize", telZet);
 window.addEventListener("resize", pcZet);
 window.addEventListener("orientationchange", () => setTimeout(() => { telZet(); pcZet(); }, 120));
