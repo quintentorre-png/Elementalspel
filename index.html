@@ -2048,6 +2048,9 @@ body.pvuitleg #ptbel{display:none !important}
 .wkvoor{position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; image-rendering:pixelated}
 .wkscene.metvoor .wkitem{z-index:3}
 .wkbaas.achter .wkbaasfig{overflow:visible; animation:wkdein 5.5s ease-in-out infinite}
+.wkbaas.onrust{transform:translate(-50%, var(--knhop, 0%))}
+.wkbaas.belrechts .wkbel{right:auto; left:calc(100% - 10%)}
+.wkbaas.belrechts .wkbel::after{right:auto; left:-13px; border-left-color:transparent; border-right-color:var(--wkk, #e8a0a8)}
 @keyframes wkdein{0%,100%{transform:translateY(0)} 50%{transform:translateY(-2.2%)}}
 @media (prefers-reduced-motion:reduce){ .wkbaas.achter .wkbaasfig{animation:none} }
 /* Lagen vóór de winkel (okt 2026): ze schuiven tegen de muis in, dichterbij = meer; wat hangt wiegt. */
@@ -2575,6 +2578,11 @@ body.pvuitleg #ptbel{display:none !important}
 /* Het onderwerp van een aetherprent zit in het midden; zoom daarop in zodat het de ruit vult. */
 .ruitw.ae .ruitbeeld{transform:scale(1.15)}
 .ruitw.ae.vakz .ruitbeeld{transform:none}
+/* 🟣 ronde 32: aethersymbolen als tegeltje: beige rand zoals de levensbalk, ronde hoekjes, een harde schaduw */
+.ruitw.ae.vakz{--rk:#d8d2bf; filter:drop-shadow(2px 2px 0 rgba(0,0,0,.55))}
+.ruitw.ae.vakz .ruit{border-radius:5px}
+.ruitw.ae.vakz .ruitin{border-radius:3px; background:#0b0f14}
+.ruitw.ae.vakz .ruitbeeld{image-rendering:auto}
 .ruitmerk{position:absolute; left:50%; transform:translateX(-50%); font-size:calc(var(--r) * .3); line-height:1;
   filter:drop-shadow(0 0 3px rgba(201,162,255,.9)); pointer-events:none}
 .ruitw.r0 .ruitmerk{top:calc(var(--r) * -.34)}
@@ -5639,6 +5647,9 @@ html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
 .tkaart.blauw .tkfig .tkmijn{flex:0 1 100%; min-width:0; height:88%; padding:0 2%; margin:0; align-self:flex-end}
 .tkaart.blauw .tkfig .tkmijn img{height:auto !important; width:auto; max-height:100%; max-width:100% !important; object-fit:contain; transition:filter .15s}
 .tkaart.blauw .tkfig .tksil{max-width:40%}
+/* ronde 31: de figuur in de Challenges-kaart staat recht onder die van PvP (zelfde vak, gecentreerd) */
+.tkaart.rood .tkfig{width:44%; right:2%; justify-content:center}
+.tkaart.rood .tkfig img{max-height:94%; max-width:100%}
 .tkaart.blauw.tmetbeeld > span:not(.tkbg):not(.tkfig):not(.tic){max-width:38%}
 .trechts .tonder .tklein{min-width:0}
 body.tel .trechts .tonder{gap:6px; padding-bottom:3px} body.tel .trechts .tonder .tklein{font-size:7px; padding:0 5px; height:28px}
@@ -5771,8 +5782,29 @@ body:not(.tel) .kaartbox.ks-bord .ksinfo{width:min(520px, calc(100vw - 48px))}
     url('art/film/eieren.webp') 50% 45%/cover no-repeat, radial-gradient(ellipse at 50% 80%, #241d30 0%, #0c0a12 55%, #040306 100%);
   animation:hzbgdein 24s ease-in-out -12s infinite alternate}
 .inveibg ~ .invbox{position:relative; z-index:1}
+/* ronde 32: de rugtas half doorzichtig, zodat de eieren erachter doorschemeren */
+.inveibg ~ .ovbox.invbox{background:rgba(8,7,12,.58) !important; backdrop-filter:blur(1.5px); -webkit-backdrop-filter:blur(1.5px)}
+.inveibg ~ .invbox .invvak, .inveibg ~ .invbox .invgroot{background:rgba(0,0,0,.4)}
 
 /* ronde 19: een CRT-filter over het hele spel. De sterkte (0 tot 100%) staat in de instellingen. */
+/* ⭕ ronde 32: de iris tussen de grote schermen (onder het CRT-filter) */
+#iris{position:fixed; inset:0; z-index:2147482000; display:none; background:#000; pointer-events:auto;
+  -webkit-mask:radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 1px));
+  mask:radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 1px))}
+/* 🌋 ronde 32: de levende kaart: drie lagen precies over de tekening, onder het pad en de medaillons, met dezelfde zachte randen */
+.bordvlak .bordleven{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated; z-index:1;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-composite:source-in; mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent); mask-composite:intersect}
+.bordvlak .bordleven.fijn{image-rendering:auto}
+/* de medaillons deinen heel langzaam, elk in zijn eigen tempo; je huidige level iets meer */
+.bordvlak .bbord.med .bbmed{animation:bbadem 7.5s ease-in-out infinite}
+.bordvlak .bbord.med:nth-child(3n) .bbmed{animation-delay:-2.5s}
+.bordvlak .bbord.med:nth-child(3n+1) .bbmed{animation-delay:-5s}
+.bordvlak .bbord.med:nth-child(4n) .bbmed{animation-duration:8.6s}
+.bordvlak .bbord.med.hier .bbmed{animation:bbademhier 5.5s ease-in-out infinite}
+@keyframes bbadem{0%, 100%{translate:0 0} 50%{translate:0 -1.6%}}
+@keyframes bbademhier{0%, 100%{translate:0 0} 50%{translate:0 -2.6%}}
+@media (prefers-reduced-motion: reduce){ .bordvlak .bbord.med .bbmed{animation:none} }
 #crt{position:fixed; inset:0; z-index:2147483000; pointer-events:none; opacity:var(--crt, .5)}
 #crt::before{content:""; position:absolute; inset:0;
   background:repeating-linear-gradient(0deg, rgba(0,0,0,.42) 0 1px, rgba(0,0,0,0) 1px 3px),
@@ -11103,6 +11135,8 @@ function doelFlits(plan){
     setTimeout(() => el.classList.remove("mikflits"), 1600);
   });
 }
+/* ⏩ ronde 31: de bot (en de ander online) speelt vlotter: alle wachttijden rond zijn zetten korter. */
+const TEMPO_ANDER = 0.45;   // ronde 32: was 0.55
 async function toonZet(p, faceHTML, kop, plan, wacht){
   /* Alleen wat de ánder doet: online is dat de andere stoel, tegen de bot de bot. */
   if(FAST || p === kijkerStoel()) return;
@@ -11121,7 +11155,7 @@ async function toonZet(p, faceHTML, kop, plan, wacht){
   if(!mist) doelFlits(plan);
   clearTimeout(toonZet._t);
   toonZet._t = setTimeout(() => { const e2 = document.getElementById("zetmelding"); if(e2) e2.classList.remove("aan"); }, 2800);
-  await sleep(wacht == null ? (doelen.length ? 1200 : 750) : wacht);
+  await sleep(Math.round((wacht == null ? (doelen.length ? 1200 : 750) : wacht) * TEMPO_ANDER));
 }
 /* Kiest de ander pas bij het afgaan een doelwit (Onweer, Kloon, Echo, herspelen…), dan
    zie je dat ook: een korte melding en het doelwit licht op. Tijdens het aankondigen van
@@ -12553,7 +12587,211 @@ const AETHER_VAKKEN = {
 /* Wat het spel nu voor elke aether laat zien: de eerste uit het lijstje, tot blijkt dat die er niet is. */
 const AETHER_BEELD = {};
 Object.keys(AETHER_VAKKEN).forEach(k => { AETHER_BEELD[k] = AETHER_VAKKEN[k][0]; });
-const isVak = pad => typeof pad === "string" && pad.indexOf("art/vak-") === 0;
+/* 🟣 ronde 32: de aethersymbolen. Elke aether is een vierkant tegeltje in de kleur van zijn element (of een
+   eigen kleur) met een eenvoudig teken in beenkleur en een harde, zwarte schaduw, zoals op een arcade-
+   titelscherm. Fusies zijn twee ringen die in elkaar grijpen, in de kleur van het element, op de kleur
+   van wat het wordt. De tegeltjes worden hier één keer getekend (canvas) en vervangen de oude prenten
+   overal: op het veld, in de draft, de library, de winkel en het infoscherm. */
+const AE_TINT = {};
+/* In een vak dat niet vierkant is (een liggende of staande kaart) past het tegeltje er helemaal in, met
+   de tegelkleur eromheen, in plaats van dat er een stuk van het teken wordt afgesneden. */
+const aeSymStijl = k => AE_TINT[k] && AETHER_BEELD[k] === AE_SYMBOOL[k] ? ` style="background:${AE_TINT[k]};object-fit:contain;object-position:center;transform:none"` : "";
+const AE_SYMBOOL = (function(){
+  if(typeof document === "undefined") return {};
+/* ===== hulpjes om vormen te tekenen, alles op een vlak van 100 x 100 ===== */
+const PI = Math.PI;
+const poly = (c, pts) => { pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); };
+const ster = (c, x, y, n, R, r, rot = -PI / 2) => { for(let i = 0; i < n * 2; i++){ const t = i * PI / n + rot, q = i % 2 ? r : R; i ? c.lineTo(x + Math.cos(t) * q, y + Math.sin(t) * q) : c.moveTo(x + Math.cos(t) * q, y + Math.sin(t) * q); } c.closePath(); };
+const cirkel = (c, x, y, r) => { c.moveTo(x + r, y); c.arc(x, y, r, 0, PI * 2); };
+const ovaal = (c, x, y, rx, ry, rot = 0) => { c.moveTo(x + Math.cos(rot) * rx, y + Math.sin(rot) * rx); c.ellipse(x, y, rx, ry, rot, 0, PI * 2); };
+const blad = (c, x, y, l, w, a) => { const dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
+  c.moveTo(x, y); c.quadraticCurveTo(x + dx * l / 2 + nx * w, y + dy * l / 2 + ny * w, x + dx * l, y + dy * l); c.quadraticCurveTo(x + dx * l / 2 - nx * w, y + dy * l / 2 - ny * w, x, y); c.closePath(); };
+const druppel = (c, x, y, s) => { c.moveTo(x, y - s); c.bezierCurveTo(x - s * .1, y - s * .7, x - s * .62, y - s * .1, x - s * .62, y + s * .35); c.bezierCurveTo(x - s * .62, y + s * .72, x - s * .32, y + s, x, y + s);
+  c.bezierCurveTo(x + s * .32, y + s, x + s * .62, y + s * .72, x + s * .62, y + s * .35); c.bezierCurveTo(x + s * .62, y - s * .1, x + s * .1, y - s * .7, x, y - s); c.closePath(); };
+const vlam = (c, x, y, s) => { c.moveTo(x, y + s); c.bezierCurveTo(x - s * .7, y + s, x - s * .8, y + s * .2, x - s * .4, y - s * .3); c.bezierCurveTo(x - s * .35, y + s * .05, x - s * .1, y + s * .15, x - s * .1, y - s * .1);
+  c.bezierCurveTo(x - s * .1, y - s * .5, x + s * .1, y - s * .8, x + s * .05, y - s); c.bezierCurveTo(x + s * .6, y - s * .55, x + s * .75, y + s * .1, x + s * .6, y + s * .55); c.bezierCurveTo(x + s * .45, y + s * .9, x + s * .25, y + s, x, y + s); c.closePath(); };
+const hart = (c, x, y, s) => { c.moveTo(x, y + s * .9); c.bezierCurveTo(x - s * 1.1, y + s * .15, x - s * 1.05, y - s * .85, x - s * .5, y - s * .9); c.bezierCurveTo(x - s * .2, y - s * .93, x, y - s * .65, x, y - s * .45);
+  c.bezierCurveTo(x, y - s * .65, x + s * .2, y - s * .93, x + s * .5, y - s * .9); c.bezierCurveTo(x + s * 1.05, y - s * .85, x + s * 1.1, y + s * .15, x, y + s * .9); c.closePath(); };
+const pijlRing = (c, x, y, r, a0, a1) => { c.arc(x, y, r, a0, a1); };
+const pijlPunt = (c, x, y, r, a, s = 10) => { const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a);
+  c.moveTo(px + tx * s, py + ty * s); c.lineTo(px + nx * s * .8, py + ny * s * .8); c.lineTo(px - nx * s * .8, py - ny * s * .8); c.closePath(); };
+const rots = (c, x, y, r) => poly(c, [[x - r * .7, y - r * .45], [x - r * .2, y - r * .85], [x + r * .5, y - r * .75], [x + r, y - r * .1], [x + r * .8, y + r * .6], [x + r * .1, y + r * .85], [x - r * .65, y + r * .7], [x - r, y + r * .1]]);
+const golf = (c, x, y, s) => { c.moveTo(x - s * .92, y + s * .7); c.bezierCurveTo(x - s * .8, y, x - s * .32, y - s * .62, x + s * .32, y - s * .62); c.bezierCurveTo(x + s * .8, y - s * .62, x + s * .98, y - s * .2, x + s * .8, y + s * .1);
+  c.bezierCurveTo(x + s * .66, y + s * .34, x + s * .26, y + s * .3, x + s * .24, y + s * .02); c.bezierCurveTo(x + s * .24, y - s * .18, x + s * .46, y - s * .24, x + s * .54, y - s * .08);
+  c.bezierCurveTo(x + s * .4, y - s * .36, x - s * .06, y - s * .26, x - s * .14, y + s * .16); c.bezierCurveTo(x - s * .2, y + s * .44, x - s * .04, y + s * .62, x + s * .14, y + s * .72); c.lineTo(x - s * .92, y + s * .72); c.closePath(); };
+const bliksem = (c, x, y, s) => poly(c, [[x + s * .1, y - s], [x - s * .5, y + s * .1], [x - s * .05, y + s * .1], [x - s * .25, y + s], [x + s * .55, y - s * .2], [x + s * .1, y - s * .2], [x + s * .38, y - s]]);
+const bergen = (c, x, y, s) => poly(c, [[x - s, y + s * .7], [x - s * .45, y - s * .5], [x - s * .15, y - s * .05], [x + s * .3, y - s * .85], [x + s, y + s * .7]]);
+const den = (c, x, y, s) => { poly(c, [[x, y - s], [x + s * .42, y - s * .3], [x + s * .22, y - s * .3], [x + s * .55, y + s * .3], [x + s * .3, y + s * .3], [x + s * .65, y + s * .8], [x - s * .65, y + s * .8], [x - s * .3, y + s * .3], [x - s * .55, y + s * .3], [x - s * .22, y - s * .3], [x - s * .42, y - s * .3]]); c.rect(x - s * .1, y + s * .78, s * .2, s * .22); };
+
+/* ===== de tekens: r = rol (h hoofdvorm in been, a accent in elementkleur, g gat), s = lijndikte, k = vaste kleur ===== */
+const SYM = {
+  /* ---- van jou ---- */
+  ae_watercycle:{naam:"Getijdenstroom", el:"water", groep:"jij", d:[
+    {r:"a", s:9, p:c => pijlRing(c, 50, 52, 40, PI * .8, PI * 2.28)}, {r:"a", p:c => poly(c, [[60, 98], [80, 98], [72, 79]])},
+    {r:"h", p:c => druppel(c, 50, 52, 32)}, {r:"g", p:c => { c.rect(46, 52, 8, 22); c.rect(39, 59, 22, 8); }}]},
+  ae_fire6:{naam:"Explosiegevaar", el:"vuur", groep:"jij", d:[
+    {r:"h", p:c => { c.moveTo(50, 7); c.lineTo(95, 88); c.quadraticCurveTo(97, 94, 90, 94); c.lineTo(10, 94); c.quadraticCurveTo(3, 94, 5, 88); c.closePath(); }},
+    {r:"g", p:c => ster(c, 50, 64, 8, 25, 11)}, {r:"a", p:c => ster(c, 50, 64, 8, 17, 8)}]},
+  ae_stonefull:{naam:"Lawine", el:"steen", groep:"jij", d:[
+    {r:"a", s:6, p:c => { c.moveTo(6, 58); c.lineTo(24, 58); c.moveTo(2, 72); c.lineTo(22, 72); c.moveTo(10, 86); c.lineTo(28, 86); }},
+    {r:"h", p:c => rots(c, 60, 62, 32)}, {r:"h", p:c => rots(c, 26, 24, 15)},
+    {r:"g", s:3.5, p:c => { c.moveTo(62, 36); c.lineTo(54, 52); c.lineTo(66, 62); c.lineTo(58, 80); }}]},
+  ae_grassx2:{naam:"Woekergroei", el:"gras", groep:"jij", d:[
+    {r:"h", s:10, p:c => { c.moveTo(50, 98); c.bezierCurveTo(52, 74, 18, 74, 20, 50); c.bezierCurveTo(22, 26, 56, 18, 64, 38); c.bezierCurveTo(70, 54, 50, 62, 44, 50); }},
+    {r:"h", p:c => { poly(c, [[18, 64], [6, 60], [16, 54]]); poly(c, [[30, 26], [24, 14], [36, 22]]); poly(c, [[70, 46], [82, 46], [72, 38]]); poly(c, [[44, 76], [52, 84], [36, 82]]); }},
+    {r:"a", p:c => { blad(c, 62, 30, 30, 9, -.5); blad(c, 50, 92, 28, 8, -2.6); }}]},
+  ae_graf:{naam:"Eeuwige Terugkeer", el:"paars", groep:"jij", d:[
+    {r:"a", s:8, p:c => pijlRing(c, 50, 54, 42, PI * .95, PI * 2.2)}, {r:"a", p:c => pijlPunt(c, 50, 54, 42, PI * 2.2)},
+    {r:"h", p:c => { c.moveTo(30, 90); c.lineTo(30, 46); c.arc(50, 46, 20, PI, 0); c.lineTo(70, 90); c.closePath(); }},
+    {r:"g", p:c => { c.rect(46, 34, 8, 34); c.rect(38, 44, 24, 7); }}]},
+  ae_hemel:{naam:"Hemelschoon", el:"goud", groep:"jij", d:[
+    {r:"a", s:5.5, p:c => ovaal(c, 50, 16, 24, 8)},
+    {r:"h", p:c => ster(c, 50, 60, 4, 36, 11)}, {r:"a", p:c => { c.rect(78, 70, 16, 6); c.rect(83, 65, 6, 16); }}]},
+  ae_lichtval:{naam:"Wraakzucht", el:"rood", groep:"jij", d:[
+    {r:"h", p:c => poly(c, [[86, 8], [92, 14], [46, 60], [40, 54]])}, {r:"h", p:c => { poly(c, [[30, 46], [36, 40], [60, 64], [54, 70]]); }},
+    {r:"h", s:10, p:c => { c.moveTo(38, 62); c.lineTo(20, 80); }}, {r:"h", p:c => cirkel(c, 15, 85, 8)},
+    {r:"a", p:c => druppel(c, 72, 68, 14)}]},
+  ae_deken:{naam:"Stroman", el:"stro", groep:"jij", d:[
+    {r:"h", p:c => { cirkel(c, 46, 22, 14); c.roundRect(32, 34, 28, 36, 4); c.roundRect(10, 38, 72, 12, 6); c.roundRect(32, 64, 12, 32, 5); c.roundRect(48, 64, 12, 32, 5); }},
+    {r:"g", p:c => { cirkel(c, 41, 20, 3.2); cirkel(c, 51, 20, 3.2); }}, {r:"g", s:4.5, p:c => { c.moveTo(39, 46); c.lineTo(53, 60); c.moveTo(53, 46); c.lineTo(39, 60); }},
+    {r:"a", s:5, p:c => { c.moveTo(56, 52); c.lineTo(86, 20); }}, {r:"a", p:c => cirkel(c, 88, 17, 7.5)}]},
+  ae_altaar:{naam:"Altaar", el:"paars", groep:"jij", d:[
+    {r:"h", p:c => { c.rect(10, 50, 80, 12); poly(c, [[20, 62], [80, 62], [74, 92], [26, 92]]); c.rect(16, 92, 68, 6); }},
+    {r:"g", p:c => ster(c, 50, 77, 4, 10, 3.5)},
+    {r:"h", p:c => { c.rect(18, 30, 10, 20); c.rect(72, 30, 10, 20); }}, {r:"a", p:c => { vlam(c, 23, 20, 9); vlam(c, 77, 20, 9); }}]},
+  ae_ziel:{naam:"Zielenoffer", el:"paars", groep:"jij", d:[
+    {r:"h", p:c => { c.moveTo(50, 76); c.bezierCurveTo(27, 70, 26, 46, 41, 30); c.bezierCurveTo(41, 42, 49, 45, 49, 34); c.bezierCurveTo(49, 24, 56, 14, 54, 3); c.bezierCurveTo(73, 20, 76, 50, 65, 65); c.bezierCurveTo(61, 71, 56, 76, 50, 76); c.closePath(); }},
+    {r:"g", p:c => { ovaal(c, 43, 54, 4, 6); ovaal(c, 57, 52, 4, 6); }}]},
+  ae_smeed:{naam:"Aambeeld", el:"vuur", groep:"jij", d:[
+    {r:"h", p:c => { c.moveTo(4, 36); c.lineTo(30, 36); c.lineTo(30, 32); c.lineTo(92, 32); c.lineTo(92, 40); c.quadraticCurveTo(80, 50, 66, 52); c.lineTo(62, 70); c.lineTo(76, 70); c.lineTo(80, 86); c.lineTo(20, 86); c.lineTo(24, 70); c.lineTo(38, 70); c.lineTo(34, 52); c.quadraticCurveTo(14, 48, 4, 36); c.closePath(); }},
+    {r:"a", p:c => { ster(c, 58, 14, 4, 10, 3); ster(c, 34, 12, 4, 6, 2); ster(c, 80, 20, 4, 5, 1.8); }}]},
+  ae_alziend:{naam:"Alziend", el:"paars", groep:"jij", d:[
+    {r:"h", p:c => { c.moveTo(4, 52); c.quadraticCurveTo(50, 6, 96, 52); c.quadraticCurveTo(50, 98, 4, 52); c.closePath(); }},
+    {r:"g", p:c => cirkel(c, 50, 52, 20)}, {r:"a", p:c => cirkel(c, 50, 52, 11)}, {r:"g", p:c => cirkel(c, 45, 47, 3.5)}]},
+  ae_genade:{naam:"Laatste Adem", el:"goud", groep:"jij", d:[
+    {r:"h", p:c => { c.moveTo(14, 60); c.bezierCurveTo(30, 52, 44, 54, 54, 60); c.bezierCurveTo(50, 40, 56, 18, 74, 8); c.bezierCurveTo(70, 26, 72, 40, 66, 54); c.bezierCurveTo(78, 52, 88, 44, 96, 44);
+      c.bezierCurveTo(90, 60, 76, 74, 54, 76); c.bezierCurveTo(44, 80, 34, 88, 24, 90); c.bezierCurveTo(30, 82, 32, 76, 30, 72); c.bezierCurveTo(24, 70, 18, 66, 14, 60); c.closePath(); }},
+    {r:"g", p:c => cirkel(c, 86, 49, 2.6)}, {r:"a", p:c => hart(c, 22, 30, 11)}]},
+  ae_leven:{naam:"Levenskracht", el:"rood", groep:"jij", d:[
+    {r:"h", p:c => hart(c, 50, 54, 42)}, {r:"g", p:c => { c.rect(44, 36, 12, 34); c.rect(33, 47, 34, 12); }}, {r:"a", p:c => { ster(c, 86, 16, 4, 9, 3); ster(c, 14, 88, 4, 7, 2.5); }}]},
+  ae_zwerm:{naam:"Lichtzwerm", el:"goud", groep:"jij", d:[
+    {r:"h", p:c => { ster(c, 40, 46, 4, 26, 8); ster(c, 76, 26, 4, 14, 4.5); ster(c, 74, 74, 4, 16, 5); ster(c, 20, 84, 4, 9, 3); }}, {r:"a", p:c => { ster(c, 16, 16, 4, 9, 3); ster(c, 92, 50, 4, 7, 2.5); ster(c, 46, 90, 4, 7, 2.5); }}]},
+  ae_kern:{naam:"Kern van Maatje", el:"vuur", groep:"jij", d:[
+    {r:"h", p:c => rots(c, 50, 52, 42)}, {r:"g", p:c => cirkel(c, 50, 52, 20)}, {r:"a", p:c => cirkel(c, 50, 52, 14)},
+    {r:"g", s:4, p:c => { c.moveTo(22, 30); c.lineTo(34, 40); c.moveTo(78, 74); c.lineTo(66, 64); c.moveTo(80, 32); c.lineTo(68, 40); }}]},
+  ae_lente:{naam:"Lentebloei", el:"gras", groep:"jij", d:[
+    {r:"h", s:7, p:c => { c.moveTo(50, 96); c.bezierCurveTo(50, 80, 46, 64, 50, 44); }},
+    {r:"h", p:c => { blad(c, 49, 76, 36, 13, -2.6); blad(c, 50, 66, 36, 13, -.45); }}, {r:"h", p:c => c.rect(30, 92, 40, 6)},
+    {r:"a", p:c => { for(let i = 0; i < 5; i++){ const t = i * 2 * PI / 5 - PI / 2; cirkel(c, 50 + Math.cos(t) * 11, 30 + Math.sin(t) * 11, 9); } }}, {r:"h", p:c => cirkel(c, 50, 30, 6)}]},
+  ae_rouw:{naam:"Nagloed", el:"paars", groep:"jij", d:[
+    {r:"h", p:c => { c.arc(46, 50, 40, PI * .35, PI * 1.65); c.bezierCurveTo(46, 22, 44, 76, 64, 88); c.closePath(); }},
+    {r:"a", p:c => hart(c, 72, 44, 14)}, {r:"a", p:c => { ster(c, 86, 12, 4, 7, 2.4); }}]},
+  /* ---- van tegenstanders ---- */
+  ae_draw3:{naam:"Hoorn van Overvloed", el:"goud", groep:"vijand", d:[
+    {r:"h", p:c => { c.moveTo(8, 86); c.bezierCurveTo(30, 90, 56, 80, 66, 52); c.lineTo(88, 62); c.bezierCurveTo(80, 30, 66, 18, 50, 16); c.lineTo(52, 42); c.bezierCurveTo(46, 66, 28, 78, 8, 86); c.closePath(); }},
+    {r:"a", p:c => { c.roundRect(64, 16, 16, 22, 2); cirkel(c, 88, 40, 7); c.roundRect(76, 4, 12, 16, 2); }}]},
+  ae_arsenaal:{naam:"Arsenaal", el:"grijs", groep:"vijand", d:[
+    {r:"h", p:c => poly(c, [[86, 6], [94, 14], [40, 68], [32, 60]])}, {r:"h", s:9, p:c => { c.moveTo(24, 58); c.lineTo(42, 76); c.moveTo(30, 70); c.lineTo(14, 86); }},
+    {r:"h", p:c => { c.moveTo(56, 40); c.lineTo(94, 40); c.lineTo(92, 70); c.quadraticCurveTo(86, 88, 75, 96); c.quadraticCurveTo(64, 88, 58, 70); c.closePath(); }},
+    {r:"a", p:c => ster(c, 75, 64, 4, 11, 4)}]},
+  ae_kweb:{naam:"Het web", el:"paars", groep:"vijand", d:[
+    {r:"h", s:3.6, p:c => { for(let i = 0; i < 8; i++){ const t = i * PI / 4; c.moveTo(50, 40); c.lineTo(50 + Math.cos(t) * 46, 40 + Math.sin(t) * 46); }
+      [14, 26, 38].forEach(r => { for(let i = 0; i <= 8; i++){ const t = i * PI / 4; const x = 50 + Math.cos(t) * r, y = 40 + Math.sin(t) * r; i ? c.lineTo(x, y) : c.moveTo(x, y); } }); }},
+    {r:"h", s:3, p:c => { c.moveTo(50, 40); c.lineTo(50, 72); }}, {r:"a", p:c => ovaal(c, 50, 84, 11, 14)}]},
+  ae_doorslaan:{naam:"Doorslaan", el:"vuur", groep:"vijand", d:[
+    {r:"h", p:c => { c.save(); c.translate(48, 44); c.rotate(-.6); c.roundRect(-30, -16, 46, 26, 4); c.rect(-6, 10, 10, 50); c.restore(); }},
+    {r:"a", p:c => ster(c, 76, 76, 8, 20, 8)}, {r:"a", s:5, p:c => { c.moveTo(14, 20); c.lineTo(6, 12); c.moveTo(22, 12); c.lineTo(18, 2); }}]},
+  ae_maatje:{naam:"Maatje", el:"vuur", groep:"vijand", d:[
+    {r:"h", p:c => { poly(c, [[20, 30], [34, 12], [66, 12], [80, 30], [86, 62], [74, 90], [26, 90], [14, 62]]); }},
+    {r:"g", p:c => { c.rect(30, 40, 14, 10); c.rect(56, 40, 14, 10); c.rect(36, 68, 28, 8); }}, {r:"a", p:c => { c.rect(32, 42, 10, 6); c.rect(58, 42, 10, 6); }},
+    {r:"a", s:3.5, p:c => { c.moveTo(50, 12); c.lineTo(46, 26); c.lineTo(52, 34); }}]},
+  ae_lavameer:{naam:"Lavameer", el:"vuur", groep:"vijand", d:[
+    {r:"h", p:c => { c.moveTo(2, 60); for(let x = 2; x <= 98; x += 12) c.quadraticCurveTo(x + 6, 50, x + 12, 60); c.lineTo(98, 96); c.lineTo(2, 96); c.closePath(); }},
+    {r:"g", s:4, p:c => { c.moveTo(14, 76); c.quadraticCurveTo(24, 70, 34, 76); c.moveTo(56, 84); c.quadraticCurveTo(66, 78, 76, 84); }},
+    {r:"a", p:c => { vlam(c, 30, 34, 13); vlam(c, 68, 28, 17); cirkel(c, 86, 46, 4); }}]},
+  ae_knetter:{naam:"Knetter", el:"vuur", groep:"vijand", d:[
+    {r:"h", p:c => vlam(c, 50, 54, 42)}, {r:"g", p:c => { ovaal(c, 42, 66, 5, 7); ovaal(c, 60, 64, 5, 7); }}, {r:"a", p:c => { ster(c, 14, 30, 4, 8, 2.6); ster(c, 88, 24, 4, 7, 2.4); ster(c, 86, 80, 4, 6, 2); }}]},
+  ae_spetter:{naam:"Spetter", el:"gras", groep:"vijand", d:[
+    {r:"h", p:c => blad(c, 50, 94, 86, 30, -PI / 2)}, {r:"g", p:c => { ovaal(c, 42, 54, 4.5, 6.5); ovaal(c, 58, 54, 4.5, 6.5); }},
+    {r:"g", s:2.6, p:c => { c.moveTo(50, 92); c.lineTo(50, 70); }}, {r:"a", p:c => { druppel(c, 14, 30, 8); druppel(c, 88, 40, 7); }}]},
+  ae_fikkie:{naam:"Fikkie", el:"steen", groep:"vijand", d:[
+    {r:"h", p:c => rots(c, 50, 60, 38)}, {r:"g", p:c => { ovaal(c, 40, 58, 5, 7); ovaal(c, 60, 58, 5, 7); }}, {r:"a", p:c => vlam(c, 52, 16, 14)}]},
+  ae_school:{naam:"School", el:"water", groep:"vijand", d:[
+    {r:"h", p:c => { const vis = (x, y, s) => { c.moveTo(x + s, y); c.quadraticCurveTo(x, y - s * .7, x - s * .7, y); c.lineTo(x - s * 1.2, y - s * .45); c.lineTo(x - s * 1.1, y + s * .45); c.lineTo(x - s * .7, y); c.quadraticCurveTo(x, y + s * .7, x + s, y); c.closePath(); };
+      vis(62, 28, 22); vis(40, 58, 22); vis(70, 82, 18); }},
+    {r:"g", p:c => { cirkel(c, 74, 25, 3.2); cirkel(c, 52, 55, 3.2); cirkel(c, 80, 79, 2.6); }}, {r:"a", p:c => { cirkel(c, 18, 22, 5); cirkel(c, 10, 36, 3.5); }}]},
+  ae_armen:{naam:"Acht armen", el:"water", groep:"vijand", d:[
+    {r:"h", p:c => { c.moveTo(24, 98); c.bezierCurveTo(20, 60, 40, 30, 70, 22); c.bezierCurveTo(92, 16, 96, 46, 78, 50); c.bezierCurveTo(66, 52, 64, 40, 72, 38);
+      c.bezierCurveTo(60, 40, 46, 62, 48, 98); c.closePath(); }},
+    {r:"g", p:c => { cirkel(c, 40, 80, 3.6); cirkel(c, 42, 62, 3.4); cirkel(c, 52, 46, 3); cirkel(c, 66, 36, 2.6); }}, {r:"a", p:c => { cirkel(c, 14, 30, 5); cirkel(c, 24, 16, 3.5); }}]},
+  ae_veertig:{naam:"Veertig meter", el:"water", groep:"vijand", d:[
+    {r:"h", p:c => { cirkel(c, 38, 66, 20); cirkel(c, 68, 36, 13); cirkel(c, 30, 24, 8); cirkel(c, 76, 76, 9); }}, {r:"g", p:c => { cirkel(c, 32, 60, 5); cirkel(c, 64, 32, 3.5); }},
+    {r:"a", s:5, p:c => { c.moveTo(92, 6); c.lineTo(92, 46); }}, {r:"a", p:c => poly(c, [[84, 44], [100, 44], [92, 56]])}]},
+  ae_spiegel:{naam:"Weerspiegeling", el:"paars", groep:"vijand", d:[
+    {r:"h", p:c => { ovaal(c, 50, 38, 30, 34); c.roundRect(44, 70, 12, 28, 4); }}, {r:"g", p:c => ovaal(c, 50, 38, 21, 25)},
+    {r:"a", s:5, p:c => { c.moveTo(38, 46); c.lineTo(54, 24); c.moveTo(48, 54); c.lineTo(60, 38); }}]},
+  ae_tothier:{naam:"Tot hier", el:"grijs", groep:"vijand", d:[
+    {r:"h", p:c => { c.moveTo(16, 10); c.lineTo(84, 10); c.lineTo(84, 50); c.quadraticCurveTo(80, 80, 50, 96); c.quadraticCurveTo(20, 80, 16, 50); c.closePath(); }},
+    {r:"g", p:c => { c.moveTo(50, 22); c.lineTo(50, 22); c.rect(44, 28, 12, 40); }}, {r:"a", p:c => c.rect(46, 30, 8, 36)}]},
+  ae_staal:{naam:"Staal", el:"grijs", groep:"vijand", d:[
+    {r:"h", p:c => { for(let i = 0; i < 8; i++){ const t = i * PI / 4; c.save(); c.translate(50, 50); c.rotate(t); c.rect(-8, -46, 16, 16); c.restore(); } cirkel(c, 50, 50, 34); }},
+    {r:"g", p:c => cirkel(c, 50, 50, 14)}, {r:"a", p:c => { cirkel(c, 50, 50, 7); }}]},
+  ae_knoop:{naam:"De knoop", el:"goud", groep:"vijand", d:[
+    {r:"h", s:9, p:c => { ovaal(c, 36, 40, 22, 16, .6); ovaal(c, 64, 40, 22, 16, -.6); ovaal(c, 50, 66, 16, 22); }}, {r:"a", p:c => cirkel(c, 50, 50, 7)}]},
+  ae_roedel:{naam:"Roedel", el:"gras", groep:"vijand", d:[
+    {r:"a", p:c => { c.arc(74, 22, 16, 0, PI * 2); }},
+    {r:"h", p:c => poly(c, [[20, 12], [36, 34], [50, 30], [64, 34], [80, 12], [80, 48], [70, 70], [56, 92], [44, 92], [30, 70], [20, 48]])},
+    {r:"g", p:c => { poly(c, [[30, 50], [44, 54], [34, 60]]); poly(c, [[70, 50], [56, 54], [66, 60]]); poly(c, [[44, 80], [56, 80], [50, 88]]); }}]},
+  ae_slaapthee:{naam:"Slaapthee", el:"gras", groep:"vijand", d:[
+    {r:"h", p:c => { c.moveTo(12, 48); c.lineTo(76, 48); c.bezierCurveTo(76, 76, 62, 90, 44, 90); c.bezierCurveTo(26, 90, 12, 76, 12, 48); c.closePath(); c.rect(8, 92, 72, 6); }},
+    {r:"h", s:6, p:c => { c.arc(80, 62, 10, -PI / 2, PI / 2); }},
+    {r:"a", s:5, p:c => { c.moveTo(34, 12); c.lineTo(48, 12); c.lineTo(34, 30); c.lineTo(48, 30); c.moveTo(58, 6); c.lineTo(68, 6); c.lineTo(58, 18); c.lineTo(68, 18); }}]},
+  ae_bloei:{naam:"Volle bloei", el:"rood", groep:"vijand", d:[
+    {r:"h", p:c => { for(let i = 0; i < 5; i++){ const t = i * 2 * PI / 5 - PI / 2; cirkel(c, 50 + Math.cos(t) * 24, 52 + Math.sin(t) * 24, 19); } }},
+    {r:"g", s:3, p:c => { for(let i = 0; i < 5; i++){ const t = i * 2 * PI / 5 - PI / 2 + PI / 5; c.moveTo(50, 52); c.lineTo(50 + Math.cos(t) * 40, 52 + Math.sin(t) * 40); } }},
+    {r:"a", p:c => cirkel(c, 50, 52, 12)}]},
+  ae_dubbel:{naam:"Tweede exemplaar", el:"paars", groep:"vijand", d:[
+    {r:"h", s:5, p:c => c.roundRect(14, 8, 46, 62, 5)}, {r:"h", p:c => c.roundRect(38, 30, 48, 64, 5)}, {r:"g", p:c => { c.rect(58, 50, 8, 26); c.rect(49, 59, 26, 8); }},
+    {r:"a", p:c => { c.rect(59, 51, 6, 24); c.rect(50, 60, 24, 6); }}]},
+  ae_vitrine:{naam:"Uit de vitrine", el:"paars", groep:"vijand", d:[
+    {r:"h", s:5, p:c => { c.roundRect(16, 10, 68, 80, 3); c.moveTo(16, 62); c.lineTo(84, 62); }}, {r:"h", p:c => c.rect(10, 88, 80, 8)},
+    {r:"a", p:c => { cirkel(c, 50, 36, 14); c.rect(42, 44, 16, 12); }}, {r:"g", p:c => { cirkel(c, 45, 36, 3.5); cirkel(c, 55, 36, 3.5); }},
+    {r:"h", s:3, p:c => { c.moveTo(24, 20); c.lineTo(32, 14); }}]}
+};
+
+  const BOT = "#d8d2bf";
+  const TINT = {water:{diep:"#16406c", licht:"#9fdcff"}, vuur:{diep:"#651d10", licht:"#ffb35a"}, steen:{diep:"#4a3a24", licht:"#e8c88e"}, gras:{diep:"#1f4a28", licht:"#a6ec88"},
+    paars:{diep:"#3f267a", licht:"#d2c0ff"}, stro:{diep:"#58431f", licht:"#f3dd9c"}, goud:{diep:"#5a4410", licht:"#ffe08a"}, rood:{diep:"#5e1420", licht:"#ff9aa8"},
+    grijs:{diep:"#2c3038", licht:"#d6dce6"}, water2:{diep:"#0e5560", licht:"#8ff0f0"}, gras2:{diep:"#133a22", licht:"#7fe08a"}};
+  const RINGEN = [{r:"a", s:7, p:c => { cirkel(c, 34, 50, 30); cirkel(c, 66, 50, 30); }}];
+  const FUSIE = {fu_water:["water", "water2"], fu_fire:["vuur", "goud"], fu_stone:["steen", "grijs"], fu_grass:["gras", "gras2"], fu_portaal:["paars", "paars"]};
+  /* één tegel van 256 x 256: de achtergrond, en het teken (op 32 van de 36 pixels) met zijn schaduw */
+  function tekenTegel(d, kleur, achter){
+    const N = 256, cv = document.createElement("canvas"); cv.width = cv.height = N; const c = cv.getContext("2d");
+    c.fillStyle = achter; c.fillRect(0, 0, N, N);
+    const m = N * 2 / 36, s = N * 32 / 36 / 96;
+    const laag = zwart => {
+      const L = document.createElement("canvas"); L.width = L.height = N; const l = L.getContext("2d");
+      l.translate(m, m); l.scale(s, s); l.translate(4, 2); l.scale(.86, .86);
+      const kl = p => zwart ? "#000" : (p.r === "a" ? kleur : BOT);
+      const doe = (p, uit) => { l.beginPath(); p.p(l); if(p.s){ l.lineWidth = p.s; l.lineCap = "round"; l.lineJoin = "round"; if(!uit) l.strokeStyle = kl(p); l.stroke(); } else { if(!uit) l.fillStyle = kl(p); l.fill(); } };
+      d.filter(p => p.r === "h").forEach(p => doe(p));
+      l.globalCompositeOperation = "destination-out"; d.filter(p => p.r === "g").forEach(p => doe(p, true));
+      l.globalCompositeOperation = "source-over"; d.filter(p => p.r === "a").forEach(p => doe(p));
+      return L;
+    };
+    c.globalAlpha = .85; c.drawImage(laag(true), 6 * s, 6 * s); c.globalAlpha = 1; c.drawImage(laag(false), 0, 0);
+    return cv.toDataURL("image/png");
+  }
+  const uit = {};
+  try{
+    Object.keys(SYM).forEach(k => { const T = TINT[SYM[k].el] || TINT.paars; uit[k] = tekenTegel(SYM[k].d, T.licht, T.diep); AE_TINT[k] = T.diep; });
+    Object.keys(FUSIE).forEach(k => { const [van, naar] = FUSIE[k]; uit[k] = tekenTegel(RINGEN, TINT[van].licht, TINT[naar].diep); AE_TINT[k] = TINT[naar].diep; });
+  }catch(e){ console.warn("aethersymbolen", e); }
+  return uit;
+})();
+Object.keys(AE_SYMBOOL).forEach(k => { AETHER_BEELD[k] = AE_SYMBOOL[k]; });
+const isVak = pad => typeof pad === "string" && (pad.indexOf("art/vak-") === 0 || pad.indexOf("data:image/png") === 0);
 let vakT = null;
 /* Een prent uit het lijstje is niet te vinden: dan de volgende proberen. */
 function vakMis(pad){
@@ -12576,7 +12814,7 @@ function aeBeeldHTML(k, licht){
   const eigen = licht ? (LICHT_BEELD[k] || KAART_BEELD[k]) : AETHER_BEELD[k];
   const pad = (eigen && BEELD_KLAAR[eigen] !== "fout") ? eigen : (licht ? LICHT_KAART : AETHER_KAART);
   if(!pad || BEELD_KLAAR[pad] === "fout") return null;
-  return `<img class="aebeeld${pad === eigen ? " eigen" : ""}" src="${pad}" alt="" decoding="sync" onerror="this.closest('.aei').classList.remove('beeld'); this.remove()">`;
+  return `<img class="aebeeld${pad === eigen ? " eigen" : ""}" src="${pad}" alt="" decoding="sync"${licht ? "" : aeSymStijl(k)} onerror="this.closest('.aei').classList.remove('beeld'); this.remove()">`;
 }
 function aeVak(k, licht){
   const img = aeBeeldHTML(k, licht);
@@ -12596,7 +12834,7 @@ function waitUI(mode, data){
     if(data && isBot(data.p) && mode !== "handoff" && (SIM || FAST) && (MICRO_N = (MICRO_N + 1) % 50))
       Promise.resolve().then(() => { if(GEN === g) botDecide(mode); });
     else if(data && isBot(data.p) && mode !== "handoff")
-      setTimeout(() => { if(GEN === g) botDecide(mode); }, FAST ? 0 : 260 + Math.random()*220);   // (okt 2026) vlotter
+      setTimeout(() => { if(GEN === g) botDecide(mode); }, FAST ? 0 : 110 + Math.random()*90);   // ronde 32: de denktijd zit er al in, dus korter (was 260+220)
     /* 🎭 Je profiel (karakter en deck) vult zichzelf in: je koos het al in het menu. Online
        alleen voor je eigen stoel, en pas als er niets meer van de ander binnenkomt. */
     else if(mode === "profiel" && data && !(NET.on && data.p !== NET.seat))
@@ -13617,7 +13855,7 @@ async function resolveTop(){
   FXNU = (it.type === "eff" || it.type === "light") ? fxNuVan(it) : null;
   S.ui = {mode:"busy"}; render();
   await sleep(120);
-  if(FXNU && !FAST) await sleep(isBot(it.ctrl) || !iControl(it.ctrl) ? 260 : 120);
+  if(FXNU && !FAST) await sleep(isBot(it.ctrl) || !iControl(it.ctrl) ? 160 : 120);
   try{
     if(it.type === "play") await resolvePlay(it);
     else if(it.type === "light") await resolveLight(it);
@@ -14719,9 +14957,9 @@ async function announceLight0(p, card, flash){
   }
   const col = null;
   /* nu is hij gespeeld (alles gekozen): de korte flits in het midden */
-  lichtFlits(card, p); if(!FAST) await sleep(650);
+  lichtFlits(card, p); if(!FAST) await sleep(isBot(p) ? 400 : 650);
   render(); AU.play("light"); fxLight("#lichtring");
-  await sleep(FAST ? 0 : (p === 0 ? 330 : 520));
+  await sleep(FAST ? 0 : (p === 0 ? 330 : 300));
   render();
   if(LIGHTS[k].cost && !stromanVangt(p)){
     if(S.story) S.story.naadEigen = true;
@@ -16014,7 +16252,7 @@ async function startTurnSequence(){
   if(S.over) return;
   S.phase = "upkeep"; render();
   turnCry(S.tp);
-  await sleep(FAST ? 0 : 1250);
+  await sleep(FAST ? 0 : 800);   // ronde 32: was 1250
   await upkeepEntangle(S.tp);
   if(S.over) return;
   /* 🌹 Roos groeit niet meer: hij geeft alleen Volle slag. */
@@ -16132,7 +16370,7 @@ function backToPhase(){
   }
   if(isBot(S.tp) && !S.over){
     clearTimeout(botT);
-    botT = setTimeout(botMove, FAST ? 0 : 380 + Math.random()*220);   // (okt 2026) vlotter
+    botT = setTimeout(botMove, FAST ? 0 : 170 + Math.random()*120);   // ronde 31: nog vlotter
   }
 }
 async function endTurn(){
@@ -16722,7 +16960,7 @@ async function botMove(oud){
    zo kan de kern elke vraag precies naspelen. Lukt dat ergens niet, dan beslist de oude bot
    (NB.mis telt hoe vaak). Het nadenken gebeurt in een Worker, zodat het scherm niet hapert. */
 /* Verhaallevels die de kern precies volgt (schaduwtest: 0 afwijkingen). 1-1 is de tutorial: daar speelt Rocky zijn script. */
-const NB = {aan:true, stoel:[true, true], verhaal:new Set(["1-2", "1-3", "1-4", "1-5", "2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "4-1", "4-2", "4-3", "4-4", "4-5", "5-1", "5-2", "5-3", "5-4", "5-5"]), verhaalTest:false, schaduw:false, getoetst:0, afwijk:0, afwijkVb:"", budget:2500, ms:900, msReactie:450, G0:null, actie:null, pre:[], niet:null, mis:0, zetten:0,
+const NB = {aan:true, stoel:[true, true], verhaal:new Set(["1-2", "1-3", "1-4", "1-5", "2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "4-1", "4-2", "4-3", "4-4", "4-5", "5-1", "5-2", "5-3", "5-4", "5-5"]), verhaalTest:false, schaduw:false, getoetst:0, afwijk:0, afwijkVb:"", budget:2500, ms:550, msReactie:280, G0:null, actie:null, pre:[], niet:null, mis:0, zetten:0,
   worker:null, job:0, wacht:null, breinJson:null, breinOk:false, netJson:null, netOk:false, laatsteMis:""};
 /* De regels van het verhaallevel (zonder teksten), voor de kern. */
 function nbLv(){
@@ -16816,7 +17054,7 @@ function nbWorker(){
   return NB.worker || null;
 }
 function nbDenkNu(job, cb){
-  job.budget = NB.budget; job.ms = FAST ? 0 : (job.mode === "priority" ? NB.msReactie : NB.ms); job.seed = (Math.random() * 1e9) >>> 0 || 1;
+  job.budget = NB.budget; job.ms = FAST ? 0 : (job.mode === "main" ? NB.ms : NB.msReactie);   // ronde 32: alleen de hoofdzet krijgt de lange denktijd; wezen-of-ritueel, plek, keuze en reageren zijn kort job.seed = (Math.random() * 1e9) >>> 0 || 1;
   const w = FAST ? null : nbWorker();
   if(!w){ cb(NBDENK.nbDenk(job)); return; }
   job.id = ++NB.job; NB.wacht = {id:job.id, cb};
@@ -20635,6 +20873,16 @@ function menuHTML(){
         <button class="obtn" style="border-color:var(--line);color:var(--muted);background:#1a2129;box-shadow:none" data-act="btn" data-btn="menuback">Nee, doorspelen</button>
       </div></div>`;
   }
+  /* ronde 32: weg uit een lopend gevecht vraagt eerst of je echt opgeeft */
+  if(M.confirm === "weg"){
+    const naar = M.naar === "kaartterug" ? "kaartterug" : "tomain";
+    return `<div class="ovbox"><h2>Gevecht opgeven?</h2>
+      <div class="sub">Hiermee geef je het gevecht op. Wil je dat?<br>Je gaat dan ${naar === "kaartterug" ? "terug naar de kaart" : "terug naar het hoofdmenu"}.</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+        <button class="obtn" style="border-color:var(--danger);color:#ffb3a6;background:linear-gradient(180deg,#4a2018,#2a120d)" data-act="btn" data-btn="${naar}">Ja, opgeven</button>
+        <button class="obtn" style="border-color:var(--line);color:var(--muted);background:#1a2129;box-shadow:none" data-act="btn" data-btn="menuback">Nee, doorspelen</button>
+      </div></div>`;
+  }
   if(M.confirm === "leave"){
     return `<div class="ovbox"><h2>Partij verlaten?</h2>
       <div class="sub">Je gaat terug naar het hoofdmenu. Je vriend blijft in de partij achter en ziet jou niet meer zetten doen.<br><br>Wil je je vriend de winst geven, kies dan eerst <b>opgeven</b>.</div>
@@ -20657,10 +20905,10 @@ function menuHTML(){
     ${online ? `<div class="sub">Online · jij bent <b>${pName(mySeat)}</b>${NET.seat < 0 ? " (toeschouwer)" : ""}</div>` : ""}
     <div class="menucol">
       <button class="mbtn aan" data-act="btn" data-btn="closemodal">Hervatten <span class="mk toets">esc</span></button>
-      ${S && S.story && !online ? `<button class="mbtn" data-act="btn" data-btn="kaartterug">Terug naar de kaart</button>` : ""}
+      ${S && S.story && !online ? `<button class="mbtn" data-act="btn" data-btn="${inGame ? "askWeg" : "kaartterug"}" data-naar="kaartterug">Terug naar de kaart</button>` : ""}
       ${online
         ? `<button class="mbtn" data-act="btn" data-btn="${NET.chan === "live" ? "askLeaveLive" : "askLeave"}">Verbinding verbreken · hoofdmenu</button>`
-        : `<button class="mbtn" data-act="btn" data-btn="tomain">Terug naar hoofdmenu</button>`}
+        : `<button class="mbtn" data-act="btn" data-btn="${inGame ? "askWeg" : "tomain"}" data-naar="tomain">Terug naar hoofdmenu</button>`}
       <div class="vscheid"></div>
 
       ${NET.on && NET.chan === "live" ? `<button class="mbtn" data-act="btn" data-btn="copyroom">Roomlink kopiëren <span class="mk">${LIVE.code}</span></button>` : ""}
@@ -29278,7 +29526,7 @@ function lkHTML(k, licht, o){
   const pad = licht ? lichtPad(k) : (AETHER_BEELD[k] || AETHER_KAARTVORM);
   const naam = licht ? LIGHTS[k].name : AETHERS[k].name;
   const img = pad && BEELD_KLAAR[pad] !== "fout"
-    ? `<img src="${pad}" alt="" decoding="async" onerror="this.remove()">` : "";
+    ? `<img src="${pad}" alt="" decoding="async"${licht ? "" : aeSymStijl(k)} onerror="this.remove()">` : "";
   return `<div class="lk ${licht ? "licht" : "ae"}${o.kl ? " " + o.kl : ""}" ${o.attr || ""}>
     <div class="lkbeeld${!licht && img && isVak(pad) ? " vakz" : ""}"><span class="lkic">${licht ? "✦" : aeIcon(k)}</span>${img}</div>
     <div class="lknaam">${naam}</div>
@@ -29890,10 +30138,10 @@ const OVERWORLD = {
   /* Okt 2026: het spelbord. Elk level op zijn herkenningspunt, ongeveer even ver uit elkaar, en geen pad dat een ander kruist. */
   /* wereld 1 (okt 2026): het pad gaat steeds verder omhoog, zigzaggend van het strand naar de grot */
   /* okt 2026 (ronde 20): geen twee cirkels over elkaar; de Oceaan in de draaikolk, de Spiegel op de pier */
-  "1-1":{x:50.5,y:78.5}, "1-2":{x:36,y:76}, "1-3":{x:31.5,y:67.5}, "1-4":{x:44,y:71.5}, "1-5":{x:42,y:58.5},
+  "1-1":{x:50.5,y:78.5}, "1-2":{x:36,y:76}, /* ronde 32: 1-3 en 1-4 van plek gewisseld */ "1-3":{x:44,y:71.5}, "1-4":{x:31.5,y:67.5}, "1-5":{x:42,y:58.5},
   "2-1":{x:34,y:47.5}, "2-2":{x:27.5,y:43}, "2-3":{x:17.5,y:45}, "2-4":{x:21.5,y:35.5}, "2-5":{x:34,y:30}, "2-6":{x:25.5,y:24.5},
   "3-1":{x:64.5,y:42}, "3-2":{x:77,y:38.5}, "3-3":{x:88,y:31}, "3-4":{x:65,y:29.5}, "3-5":{x:76.5,y:19.5}, "3-6":{x:75.5,y:8.5},
-  "4-1":{x:66,y:59.5}, "4-2":{x:80,y:55.5}, "4-3":{x:74.5,y:67}, "4-4":{x:81.5,y:78}, "4-5":{x:88.5,y:64.5}
+  /* ronde 32: de nieuwe ijswereld (overworld-schoon3): 4-1 voor de poort, 4-2 bij het wrak met de schat, 4-3 op de ijsschotsen, 4-4 op het eilandje met de spiegel, 4-5 in de draaikolk */ "4-1":{x:66,y:59.5}, "4-2":{x:85,y:57}, "4-3":{x:70.2,y:67.8}, "4-4":{x:83,y:75.4}, "4-5":{x:87.7,y:66.6}
 };
 /* 🌥 De Hemelrand is een laag over de bovenkant van de kaart (art/overworld-hemel.png). Die
    verschijnt als je de trap neemt. De vijf levels staan op die laag; op de plek van de trap
@@ -29919,16 +30167,16 @@ const OVERWORLD_RANDEN = [
 ];
 /* Tussenpunten per pad ("van>naar") — alleen waar het niet rechtdoor kan. */
 const OVERWORLD_PAD = {
-  "start>1-1":[[48,83]], "1-1>1-2":[[44,79]], "1-2>1-3":[[33,72.5]], "1-3>1-4":[[37.5,69.5]], "1-4>1-5":[[44,63]],
+  "start>1-1":[[48,83]], "1-1>1-2":[[44,79]], "1-2>1-3":[[40,74.5]], "1-3>1-4":[[37.5,69.5]], "1-4>1-5":[[35,62]],
   "1-5>2-1":[[45,52],[40,48.5]],
   "2-1>knort":[[38.5,44]], "2-1>2-2":[[30.5,46]], "2-1>2-3":[[28,48],[22,47.5]], "2-2>2-4":[[24,38]], "2-3>2-4":[[17,40]],
   "2-4>2-5":[[27,34],[30,32.5]], "2-5>2-6":[[30,26]],
   "2-1>3-1":[[44,45],[54,43],[60,42.5]],
   "3-1>3-2":[[71,38.5]], "3-2>3-3":[[83,35]], "3-2>3-4":[[71,33.5]], "3-3>3-5":[[83,24]], "3-4>3-5":[[70,23]], "3-5>3-6":[[76,14]],
   "3-1>4-1":[[65,48],[66,53]], "3-1>hemel":[[60,35],[55,24]],
-  "4-1>4-2":[[72,57]], "4-2>4-3":[[77,61]], "4-3>4-4":[[77,73]], "4-4>4-5":[[85,71.5]],
+  "4-1>4-2":[[75,60.5]], "4-2>4-3":[[78,63]], "4-3>4-4":[[76.5,73]], "4-4>4-5":[[86.5,71]],
   /* de zijweg vanaf Inkt, om de draaikolk heen over het water, langs Nimbus naar de Spiegel */
-  "4-2>n4":[[87,55.5],[94.5,60]], "n4>4-4":[[91.5,77.5],[86,79.5]]
+  "4-2>n4":[[91,61],[95,65.5]], "n4>4-4":[[91,76.5],[87,77.5]]
 };
 /* Paden die een stuk samen oplopen: 3-1 → 3-2 (Tang) volgt de eerste 2,5 bolletjes van het
    pad naar 3-3 (het Rookgordijn) en buigt daarna af. */
@@ -30126,15 +30374,80 @@ function winkelStil(){
   if(M.dag) return;
   M.zin = null; M.spr = kraamVan().spr;
   clearTimeout(WINKELT);
-  WINKELT = setTimeout(winkelTik, 6000 + Math.random() * 4000);
+  WINKELT = setTimeout(winkelTik, (M.kraam || "knort") === "knort" ? 3500 + Math.random() * 3000 : 6000 + Math.random() * 4000);
   render();
 }
 function winkelTik(){
   if(!M || M.type !== "winkel"){ clearTimeout(WINKELT); WINKELT = null; return; }
   const K = kraamVan();
+  /* ronde 32: Knort is een onrustig type. Hij zwijgt minder vaak en mompelt ook korte dingen. */
+  if((M.kraam || "knort") === "knort"){
+    if(Math.random() < 0.3){ clearTimeout(WINKELT); WINKELT = setTimeout(winkelTik, 3500 + Math.random() * 3000); return; }
+    if(Math.random() < 0.5){ winkelZeg(knortZin(KNORT_ONRUST), K.spr + "_taunt", true); return; }
+  }
   /* De helft van de keren zegt hij gewoon niks. */
   if(Math.random() < 0.5){ clearTimeout(WINKELT); WINKELT = setTimeout(winkelTik, 7000 + Math.random() * 4000); return; }
   winkelZeg(knortZin(K.kijk()), K.spr + "_taunt");
+}
+/* 🐦 ronde 32: Knort staat nooit stil. Hij loopt achter zijn toonbank heen en weer, schuifelt, schiet
+   soms ineens naar de andere kant, en pakt af en toe iets uit zijn jas (een ander plaatje). Dit loopt
+   per beeldje, los van render(): wordt de winkel opnieuw getekend, dan staat hij gewoon waar hij was. */
+const KN = {x:50, van:50, naar:50, t0:0, dur:0, rust:0, raf:0, terug:null};
+const KNORT_ONRUST = [
+  "Hm. Hm-hm.",
+  "Waar heb ik dat ding nou gelaten.",
+  "Niet aankomen. Wel kopen.",
+  "Hoorde je dat? Nee? Mooi.",
+  "Iemand heeft hier aan gezeten. Ik zie dat.",
+  "Stilstaan is voor stenen.",
+  "Ik tel even. Niet storen.",
+  "Er beweegt iets in mijn jas. Dat is normaal.",
+  "Ja ja. Ik sta. Ik sta.",
+  "Glimt. Alles glimt hier. Dat is het probleem."
+];
+function knortOnrustMag(){
+  if(!M || M.type !== "winkel" || (M.kraam || "knort") !== "knort") return false;
+  try{ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return false; }catch(e){}
+  return true;
+}
+function knortNieuwDoel(t){
+  const r = Math.random();
+  let doel = r < 0.3 ? KN.x + (Math.random() < 0.5 ? -1 : 1) * (2 + Math.random() * 4)   // een schuifeltje
+                     : 26 + Math.random() * 48;                                          // ergens anders heen
+  doel = Math.max(26, Math.min(74, doel));
+  KN.van = KN.x; KN.naar = doel; KN.t0 = t;
+  KN.dur = Math.max(280, Math.abs(doel - KN.x) * (Math.random() < 0.3 ? 20 : 42));      // soms schiet hij weg
+  KN.rust = KN.t0 + KN.dur + (Math.random() < 0.2 ? 2200 + Math.random() * 2200 : 350 + Math.random() * 1300);
+  /* Af en toe, als hij niks zegt, pakt hij iets: hij telt, hij doet zijn jas open, hij grijnst. */
+  if(!M.zin && !KN.terug && Math.random() < 0.22){
+    const img = document.querySelector(".wkbaas.onrust .wkbaasimg");
+    const opties = ["knorst_tel", "knorst_geheim", "knorst_blij"].map(sprBeeldPad).filter(Boolean);
+    if(img && opties.length){
+      const oud = img.getAttribute("src"), nieuw = opties[Math.floor(Math.random() * opties.length)];
+      if(nieuw !== oud){
+        img.src = nieuw;
+        KN.terug = setTimeout(() => { KN.terug = null;
+          const im = document.querySelector(".wkbaas.onrust .wkbaasimg");
+          if(im && im.getAttribute("src") === nieuw && M && !M.zin) im.src = oud; }, 1600 + Math.random() * 1600);
+      }
+    }
+  }
+}
+function knortLoop(t){
+  KN.raf = 0;
+  if(!knortOnrustMag()){ clearTimeout(KN.terug); KN.terug = null; return; }
+  if(t >= KN.rust) knortNieuwDoel(t);
+  const f = KN.dur ? Math.min(1, Math.max(0, (t - KN.t0) / KN.dur)) : 1;
+  const e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+  KN.x = KN.van + (KN.naar - KN.van) * e;
+  const el = document.querySelector(".wkbaas.onrust");
+  if(el){
+    el.style.left = KN.x.toFixed(2) + "%";
+    el.classList.toggle("belrechts", KN.x < 42);   // staat hij links, dan praat hij naar rechts
+    const loopt = f < 1;
+    el.style.setProperty("--knhop", (loopt ? -Math.abs(Math.sin((t - KN.t0) / 85)) * 1.8 : 0).toFixed(2) + "%");
+  }
+  KN.raf = requestAnimationFrame(knortLoop);
 }
 /* 🐷 De eerste keer bij Knort: een deur waarvan je niet weet wat erachter zit. */
 const KNORT_OPENING = [
@@ -30214,8 +30527,20 @@ function cheatTotLevel(id){
     if(L.geeftHart) st.hart = L.geeftHart;
     if(FILM_NA_WINST[x]) st.films[FILM_NA_WINST[x]] = true;
     if(FILM_VOOR_GEVECHT[x]) st.films[FILM_VOOR_GEVECHT[x]] = true;
+    /* ronde 32: ook wat er los te halen viel: Nimbus' challenges en de extra's van een tak */
+    const geefAe = k => { if(AETHERS[k] && !st.aethers.includes(k)) st.aethers.push(k); };
+    const geefLt = k => { if(LIGHTS[k] && !st.lichten.includes(k)) st.lichten.push(k); else geefAe(k); };
+    Object.values(L.varianten || {}).forEach(v => [].concat((v && v.geeftAe) || []).forEach(geefAe));
+    Object.values(L.winTakExtra || {}).forEach(e => [].concat((e && e.licht) || []).forEach(geefLt));
+    st.sterren[x] = 2;   // ronde 32: elk level ervoor telt als gehaald met 2 sterren
   });
   st.knortGezien = i > STORY_ORDER.indexOf("2-1");
+  /* ronde 32: staat de winkel van Knort al open, dan heb je alles uit zijn schap al. De sterren
+     blijven gewoon vrij te besteden (aan hartjes, slots en de smidse). */
+  { const oud = koopState();
+    st.koop = {ae:st.knortGezien ? KOOPWAAR.ae.filter(k => AETHERS[k]) : [], lt:st.knortGezien ? KOOPWAAR.lt.filter(k => LIGHTS[k]) : [],
+               hart:0, slot:0, upg:[], aeSlot:!!oud.aeSlot};
+    st.sterUit = 0; }
   st.flintSlot = i > STORY_ORDER.indexOf("1-5");      // de tweede aetherplek, van Flint
   st.trapGezien = i > STORY_ORDER.indexOf("5-1");
   if(st.trapGezien) st.films.boven = true;
@@ -30243,7 +30568,7 @@ function winkelSluit(){
   clearTimeout(WINKELT); WINKELT = null;
   if(M && M.type === "winkel" && !M.dag && !FAST){
     M.dag = true; M.bevestig = null; M.zin = knortZin(kraamVan().dag()); M.spr = kraamVan().spr; render();
-    WINKELT = setTimeout(() => { if(M && M.type === "winkel"){ M = {type:"story"}; storySkin(0); render(); } }, 1300);
+    WINKELT = setTimeout(() => irisOvergang(() => { if(M && M.type === "winkel"){ M = {type:"story"}; storySkin(0); render(); } }), 1300);   // ⭕ ronde 32
     return;
   }
   M = {type:"story"}; storySkin(0); render();
@@ -30414,7 +30739,9 @@ function winkelBaas(pos, achter){
   /* Met de toonbank als eigen laag staat hij er een stukje achter: zijn onderkant zakt 4% onder de
      rand, de toonbank dekt dat af, en dan kan hij deinen zonder dat je zijn middel ziet. */
   const zak = achter ? 4 : 0;
-  return `<div class="wkbaas${achter ? " achter" : ""}" style="left:${pos.x}%;bottom:${100 - pos.y - zak}%;height:${pos.h + zak}%;aspect-ratio:${(asp * pos.h / (pos.h + zak)).toFixed(3)}">${fig}${bel}</div>`;
+  const onrust = achter && knortOnrustMag();
+  if(onrust && !KN.raf) KN.raf = requestAnimationFrame(knortLoop);
+  return `<div class="wkbaas${achter ? " achter" : ""}${onrust ? " onrust" : ""}" style="left:${onrust ? KN.x.toFixed(2) : pos.x}%;bottom:${100 - pos.y - zak}%;height:${pos.h + zak}%;aspect-ratio:${(asp * pos.h / (pos.h + zak)).toFixed(3)}">${fig}${bel}</div>`;
 }
 /* Met een tekening is de winkel het hele scherm: de tekening vult het beeld, de kop en de
    uitleg liggen er los overheen, en een koop bevestig je in een kaartje in het midden. */
@@ -30845,7 +31172,7 @@ function bordInfoVolg(){
 function bordNa(){
   const vlak = document.getElementById("bordvlak"); if(!vlak) return;
   if(M && M.kies) bordInfoVolg(); else if(M && !M.infoDicht && !document.body.classList.contains("tel")) bordInfoToon(bordPionPlek());
-  bordZee(); bordGrond(); bordCamera(); bordHud(); bordSwipeKlaar();
+  bordZee(); bordGrond(); bordCamera(); bordHud(); bordSwipeKlaar(); bordLevenStart();   // 🌋 ronde 32: de kaart leeft
   const n = M.bordNieuw;
   if(n && n.loop && !n.loopGestart){
     n.loopGestart = true;
@@ -30952,6 +31279,660 @@ function bordGrond(){
    trekken hem naar buiten door. Zo sluit het overal aan: waar de kaart lichter water heeft, is de
    zee daarbuiten ook lichter, en verderop zakt alles weg in dezelfde diepe kleur. In blokjes van
    ongeveer één pixel van de kaart, zodat het pixelart blijft. */
+
+/* ================= 🌋 DE LEVENDE KAART (ronde 32, uit de proefpagina) =================
+   Drie lagen over de kaart, onder het pad en de medaillons: een grove laag (314 x 314) voor lava, rook,
+   lichtjes, deeltjes en dieren; een laag op de echte resolutie van de tekening (1254) voor de zee, de
+   rivier, wolken, mist, het noorderlicht, de spin en wereld 1; en een fijne laag (2508) voor Knort en Nimbus.
+   Hoort bij art/overworld.png = overworld-schoon3 (de kaart met de nieuwe ijswereld). */
+const LVAAN = {wolk:true, kolk:true, lava:true, water:true, kust:true, zee:true, maan:true, lichten:true, boom:true, web:true, ogen:true,
+  route:false, deeltjes:true, rook:true, vleer:true, kraai:true, vogel:true, boot:false, nimbus:true, knort:true, mist:true, aurora:true, drijf:true, w1:true};
+function bordLevenStart(){
+  if(FAST) return;
+  try{ if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return; }catch(e){}
+  const img = document.getElementById("bordkaart"); if(!img) return;
+  if(!img.complete || !img.naturalWidth){ img.addEventListener("load", bordLevenStart, {once:true}); return; }
+  const doek = (id, n, kl) => { let c = document.getElementById(id); if(!c){ c = document.createElement("canvas"); c.id = id; c.className = "bordleven" + (kl ? " " + kl : ""); c.width = c.height = n; c.setAttribute("aria-hidden", "true"); } return c; };
+  const a = doek("bordleven", LEVEN.G), b = doek("wolkdoek", 1254), c = doek("figdoek", 2508, "fijn");
+  img.after(a, b, c);                                   // vlak na de tekening: onder het pad en de medaillons
+  wd = b.getContext("2d"); wd.imageSmoothingEnabled = false; fd = c.getContext("2d");
+  if(!LEVEN.data || LEVEN.src !== img.src){ try{ LEVEN.data = levenAnalyse(img); LEVEN.src = img.src; FIJN.klaar = false; DEIN.klaar = false; DEIN.half = null; FABRIEKIMG = null; KNORTIM = DEURVOOR = null; }catch(e){ return; } }
+  LEVEN.route = levenRoute();
+  if(!LEVEN.t) LEVEN.t = setInterval(levenTik, 83);
+}
+const LEVEN = {ogen:[], stuif:[], glint:[], stof:null, G:314, t:null, f:0, data:null, src:"", deel:[], rook:[], bel:[], vonk:[], kraai:null, vleer:[], vogel:null, boot:null, nimbus:null, laatst:0};
+const KOLK2 = {x:276.3, y:210.2, rx:32.5, ry:17.5};   // ronde 32: de draaikolk op de nieuwe kaart
+const LEVEN_PLEK = {
+  val:[{x:135, y:85, w:4}, {x:162, y:104, w:4}, {x:176, y:200, w:6}],   // onderkant van de drie watervallen
+  graf:[{x:96, y:236}, {x:108, y:244}, {x:120, y:234}, {x:102, y:226}, {x:90, y:246}, {x:115, y:252}],   // de grafstenen in wereld 1
+  rook:[{x:43, y:120, soort:"huis"}, {x:259.3, y:100.5, soort:"smidse"}, {x:239, y:9, soort:"vulkaan"}],
+  kolk:{x:276, y:208, r:27},
+  maan:{x:48, y:17},
+  krater:{x:239, y:13},
+  knort:{x:120, y:110},
+  vulkaan:{x:238, y:30},
+  web:{x0:52, y0:93, x1:76, y1:113},
+  boom:{x0:52, y0:40, x1:118, y1:70},
+  boot:{y:292, x0:24, x1:120},
+  nimbus:{x0:118, y0:6, x1:182, y1:24}
+};
+const levenHash = i => { const s = Math.sin(i * 12.9898) * 43758.5453; return s - Math.floor(s); };
+/* De tekening één keer doorlopen: welke cel is wat. */
+function levenAnalyse(img){
+  const G = LEVEN.G, c = document.createElement("canvas"); c.width = c.height = G;
+  const cx = c.getContext("2d", {willReadFrequently:true}); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = "high";
+  cx.drawImage(img, 0, 0, G, G);
+  const d = cx.getImageData(0, 0, G, G).data;
+  const uit = {lava:[], stroom:[], kust:[], zee:[], schuim:[], web:[], groen:[], ster:[], lichten:[], donker:[], kolkW:[], val:[], ijs:[], beeld:c};
+  const geel = new Uint8Array(G * G);
+  for(let y = 0; y < G; y++) for(let x = 0; x < G; x++){
+    const i = (y * G + x) * 4, R = d[i], Gc = d[i + 1], B = d[i + 2], lum = R * .3 + Gc * .59 + B * .11, k = y * G + x;
+    if(R > 200 && Gc > 150 && B < 140 && R - B > 90) geel[k] = 2; else if(R > 170 && Gc < 150 && B < 80 && R - Gc > 70) geel[k] = 1;
+    const rivier = x > 95 && x < 186 && y > 50 && y < 212;
+    if(rivier && B > R + 45 && B > 95 && R < 150 && !(R > 120 && Gc > 170)){ uit.stroom.push(k); if(lum > 135) uit.val.push(k); }
+    else if(B > 170 && Gc > 110 && R < 120 && B - R > 95){ uit.kust.push(k); }
+    else if(lum < 60 && B > R + 12 && B > 40) uit.zee.push(k);
+    if(x > 240 && y > 210 && R > 170 && Gc > 180 && B > 200) uit.schuim.push(k);
+    const W = LEVEN_PLEK.web; if(x >= W.x0 && x <= W.x1 && y >= W.y0 && y <= W.y1 && B > 135 && B - R > 40 && R > 65) uit.web.push(k);
+    const T = LEVEN_PLEK.boom; if(x >= T.x0 && x <= T.x1 && y >= T.y0 && y <= T.y1 && Gc > 60 && Gc - R > 40 && Gc - B > 25) uit.groen.push(k);
+    if(y < 40 && lum < 30 && levenHash(k) < .012) uit.ster.push(k);
+    if(x > 150 && y > 120 && y < 240 && R > 140 && Gc > 185 && B > 225 && levenWereld(x, y) === 4) uit.ijs.push(k);   // ronde 32: lichte ijsranden
+  }
+  /* ronde 32: branding alleen echt langs de kust: een lichte cel die vlak bij donkere zee ligt (niet het bevroren meer) */
+  { const zee = new Uint8Array(G * G); uit.zee.forEach(k => zee[k] = 1);
+    uit.kust = uit.kust.filter(k => { const x = k % G, y = (k / G) | 0; for(let dy = -3; dy <= 3; dy++) for(let dx = -3; dx <= 3; dx++){ const xx = x + dx, yy = y + dy; if(xx >= 0 && yy >= 0 && xx < G && yy < G && zee[yy * G + xx]) return true; } return false; }); }
+  /* lichtjes: kleine groepjes gele cellen (grote gele vlakken zijn lava of vuur) */
+  const gezien = new Uint8Array(G * G);
+  for(let k = 0; k < G * G; k++){
+    if(!geel[k] || gezien[k]) continue;
+    const st = [k], cel = []; gezien[k] = 1;
+    while(st.length){ const q = st.pop(); cel.push(q); const qx = q % G, qy = (q / G) | 0;
+      for(const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const nx = qx + dx, ny = qy + dy; if(nx < 0 || ny < 0 || nx >= G || ny >= G) continue;
+        const n = ny * G + nx; if(geel[n] && !gezien[n]){ gezien[n] = 1; st.push(n); } } }
+    /* ronde 32: een klein groepje met een gele kern is een vlammetje (fakkel, lantaarn, raam); al het andere is lava */
+    if(cel.length <= 40 && cel.some(q => geel[q] === 2)){ let sx = 0, sy = 0; cel.forEach(q => { sx += q % G; sy += (q / G) | 0; });
+      uit.lichten.push({x:sx / cel.length, y:sy / cel.length, n:Math.min(12, cel.length), cel:cel.filter(q => geel[q] === 2), fase:levenHash(k) * 100}); }
+    else cel.forEach(q => uit.lava.push(q));
+  }
+  /* de draaikolk, één keer uitgeknipt */
+  const K = LEVEN_PLEK.kolk, kc = document.createElement("canvas"); kc.width = kc.height = K.r * 2;
+  kc.getContext("2d").drawImage(c, K.x - K.r, K.y - K.r, K.r * 2, K.r * 2, 0, 0, K.r * 2, K.r * 2);
+  uit.kolk = kc;
+  /* ronde 32: donkere plekken in het bos (wereld 2) voor de oogjes, en het water van de draaikolk (zonder de ijsschotsen) */
+  for(let y = 0; y < G; y++) for(let x = 0; x < G; x++){
+    const i = (y * G + x) * 4, R = d[i], Gc = d[i + 1], B = d[i + 2], lum = R * .3 + Gc * .59 + B * .11, k = y * G + x;
+    if(x < 130 && y > 40 && y < 160 && lum < 26 && Gc >= R && levenHash(k + 7) < .25) uit.donker.push(k);
+    const nx = (x - KOLK2.x) / KOLK2.rx, ny = (y - KOLK2.y) / KOLK2.ry;
+    if(nx * nx + ny * ny < 1 && lum < 105 && B > R + 10) uit.kolkW.push(k);
+  }
+  /* de kleur van de zee net buiten de kolk, zodat de rand naadloos overloopt */
+  let zr = 0, zg = 0, zb = 0, zn = 0;
+  for(let y = 0; y < G; y++) for(let x = 0; x < G; x++){ const nx = (x - KOLK2.x) / KOLK2.rx, ny = (y - KOLK2.y) / KOLK2.ry, q = nx * nx + ny * ny;
+    if(q > 1.05 && q < 1.4){ const i = (y * G + x) * 4; if(d[i + 2] > d[i] + 10 && d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11 < 90){ zr += d[i]; zg += d[i + 1]; zb += d[i + 2]; zn++; } } }
+  uit.zeeKl = zn ? [zr / zn, zg / zn, zb / zn] : [16, 32, 78];
+  return uit;
+}
+/* Ligt een punt (in procenten) in een wereld? Wereld 1 is wat overblijft. */
+function levenWereld(x, y){
+  const px = x / LEVEN.G * 100, py = y / LEVEN.G * 100;
+  for(const w of [2, 3, 4]){
+    const pts = String(BORD_MIST[w]).match(/-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?/g).map(s => s.split(",").map(Number));
+    let in_ = false;
+    for(let i = 0, j = pts.length - 1; i < pts.length; j = i++){
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if(((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) in_ = !in_;
+    }
+    if(in_) return w;
+  }
+  return 1;
+}
+function levenRoute(){
+  try{
+    const uit = [];
+    bordRanden().forEach(r => {
+      if(!bordRandOpen(r) || !bordKlaar(r[0]) || bordKlaar(r[1])) return;
+      const a = bordPos(r[0]), b = bordPos(r[1]);
+      const st = bordStappen(bordRandPunten(r[0], r[1]), 2.4).filter(([x, y]) => Math.min(Math.hypot(x - a.x, y - a.y), Math.hypot(x - b.x, y - b.y)) >= 3.4);
+      if(st.length) uit.push(st.map(([x, y]) => [x / 100 * LEVEN.G, y / 100 * LEVEN.G]));
+    });
+    return uit;
+  }catch(e){ return []; }
+}
+function levenTik(){
+  const cv = document.getElementById("bordleven");
+  if(!cv || !document.body.contains(cv)){ clearInterval(LEVEN.t); LEVEN.t = null; return; }
+  if(document.hidden) return;
+  LEVEN.f++;
+  levenTeken(cv.getContext("2d"), LEVEN.f);
+  if(wd) wolkTeken();
+}
+function levenTeken(cx, f){
+  const G = LEVEN.G, D = LEVEN.data; if(!D) return;
+  cx.globalCompositeOperation = "source-over"; cx.globalAlpha = 1;
+  cx.clearRect(0, 0, G, G);
+  const px = (x, y, kl, a) => { cx.globalAlpha = a; cx.fillStyle = kl; cx.fillRect(x | 0, y | 0, 1, 1); };
+  const blok = (x, y, s, kl, a) => { cx.globalAlpha = a; cx.fillStyle = kl; cx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s); };
+  const halo = (x, y, r, kl, a) => {   // een ronde gloed in harde ringen
+    for(let i = r; i >= 1; i--){ cx.globalAlpha = a * (1 - i / (r + 1)); cx.fillStyle = kl; cx.beginPath(); cx.arc(Math.round(x) + .5, Math.round(y) + .5, i, 0, Math.PI * 2); cx.fill(); }
+  };
+
+  if(LVAAN.wolk){
+  /* ☁ wolkschaduwen: drie grote, zachte vlekken die heel traag over het land trekken */
+  cx.fillStyle = "#020414";
+  for(let i = 0; i < 3; i++){
+    const sp = .05 + i * .015, x = ((f * sp + i * 137) % (G + 160)) - 80, y = 40 + i * 95 + Math.sin(f / 300 + i) * 12;
+    for(let r = 26; r > 0; r -= 4){ cx.globalAlpha = .045; cx.beginPath(); cx.ellipse(Math.round(x), Math.round(y), r * 1.7, r, 0, 0, Math.PI * 2); cx.fill(); }
+  }
+  }
+  cx.globalAlpha = 1;
+
+  if(LVAAN.kolk){
+  /* 🌀 ronde 32: de draaikolk wordt helemaal door de code getekend, over de getekende heen (alleen op het
+     water, de ijsschotsen blijven). Drie armen draaien naar binnen, het midden is diep en donker, en de rand
+     loopt naadloos over in de zee eromheen. */
+  const Z = D.zeeKl, t = f * .055;
+  const toon = (v, a) => { const r = Z[0] * v, g = Z[1] * v, b = Z[2] * v; cx.globalAlpha = a; cx.fillStyle = `rgb(${r | 0},${g | 0},${b | 0})`; };
+  for(const k of D.kolkW){
+    const x = k % G, y = (k / G) | 0, nx = (x + .5 - KOLK2.x) / KOLK2.rx, ny = (y + .5 - KOLK2.y) / KOLK2.ry, r = Math.hypot(nx, ny), th = Math.atan2(ny, nx);
+    const band = Math.sin(3 * th + 7.5 * Math.log(r + .04) + t);           // drie spiraalarmen
+    const diep = Math.pow(1 - Math.min(1, r), 1.6);                          // hoe dieper, hoe donkerder
+    let v = 1.05 - diep * .95 + band * (.16 + .12 * (1 - r));
+    v = Math.round(v * 6) / 6;                                               // in harde stapjes: pixelart
+    const rand = r > .82 ? Math.max(0, 1 - (r - .82) / .18) : 1;
+    toon(Math.max(.05, v), rand); cx.fillRect(x, y, 1, 1);
+    if(band > .88 && r > .25 && r < .95 && levenHash(k + Math.floor(f / 5) * 131) < .3){ cx.globalAlpha = .55 * rand; cx.fillStyle = "#8fc4ee"; cx.fillRect(x, y, 1, 1); }
+  }
+  LEVEN.kolkDeel = LEVEN.kolkDeel || [];
+  if(LEVEN.kolkDeel.length < 5 && Math.random() < .05) LEVEN.kolkDeel.push({th:Math.random() * 6.28, r:.95, kl:Math.random() < .3 ? "#8a6a44" : "#e8f6ff"});
+  LEVEN.kolkDeel = LEVEN.kolkDeel.filter(dd => { dd.th -= .03 + .05 / (dd.r + .1); dd.r -= .006; if(dd.r < .08) return false;
+    cx.globalAlpha = Math.min(1, dd.r * 3); cx.fillStyle = dd.kl; cx.fillRect(Math.round(KOLK2.x + Math.cos(dd.th) * dd.r * KOLK2.rx), Math.round(KOLK2.y + Math.sin(dd.th) * dd.r * KOLK2.ry), 1, 1); return true; });
+  cx.globalAlpha = 1;
+  }
+  cx.globalCompositeOperation = "lighter";
+  if(LVAAN.lava){
+  /* 🌋 lava: een gloed die door de stromen schuift, en af en toe een bubbel */
+  for(const k of D.lava){
+    const x = k % G, y = (k / G) | 0, v = Math.sin(f * .16 - (x * .21 + y * .17) + levenHash(k) * 5);
+    if(v > .45) px(x, y, "#ffcf6a", (v - .45) * 1.1);
+  }
+  if(f % 5 === 0 && D.lava.length){ const k = D.lava[(Math.random() * D.lava.length) | 0]; LEVEN.bel.push({x:k % G, y:(k / G) | 0, l:0}); }
+  LEVEN.bel = LEVEN.bel.filter(b => { b.l++; const a = 1 - b.l / 7; if(a <= 0) return false; px(b.x, b.y - b.l * .4, "#fff0b0", a); return true; });
+  { const k = LEVEN_PLEK.krater, p = .55 + .45 * Math.sin(f * .07); halo(k.x, k.y, 6, "#ff7a2a", .22 * p); }
+
+  }
+  if(false){
+  /* 💧 ronde 32: het water stroomt zoals de lava: lichte banden schuiven met de stroom mee naar beneden,
+     in de watervallen sneller en feller, en onderaan elke waterval stuift het */
+  for(const k of D.stroom){
+    const x = k % G, y = (k / G) | 0;
+    const v = Math.sin(f * .24 - (y * .45 - x * .1) + levenHash(k) * 2.2);
+    if(v > .62) px(x, y, "#e6f8ff", (v - .62) * 1.6); else if(v > .25) px(x, y, "#7cc8ff", (v - .25) * .35);
+  }
+  for(const k of D.val){
+    const x = k % G, y = (k / G) | 0, v = (y - f * 1.3 + levenHash(x) * 9) % 5;
+    if(v >= 0 && v < 1.2) px(x, y, "#ffffff", .7);
+  }
+  if(f % 2 === 0) LEVEN_PLEK.val.forEach(b => LEVEN.stuif.push({x:b.x + (Math.random() - .5) * b.w, y:b.y, l:0, vx:(Math.random() - .5) * .5}));
+  LEVEN.stuif = LEVEN.stuif.filter(s => { s.l++; if(s.l > 14) return false; s.y -= .25; s.x += s.vx; px(s.x, s.y, "#eaf8ff", (1 - s.l / 14) * .7); return true; });
+  }
+  if(false){
+  /* de branding langs de kust gaat op en neer */
+  for(const k of D.kust){
+    const x = k % G, y = (k / G) | 0, v = Math.sin(f * .09 + (x + y) * .16 + levenHash(k) * 4);
+    if(v > .9) px(x, y, "#ffffff", (v - .9) * 5);
+  }
+  }
+  if(false){
+  /* het schuim op de golven en glinsteringen op zee */
+  for(const k of D.schuim){ const v = Math.sin(f * .2 + levenHash(k) * 20); if(v > .8) px(k % G, (k / G) | 0, "#ffffff", (v - .8) * 2.5); }
+  if(false && D.zee.length && f % 2 === 0){ const k = D.zee[(Math.random() * D.zee.length) | 0]; LEVEN.vonk.push({x:k % G, y:(k / G) | 0, l:0, kruis:Math.random() < .3}); }
+  LEVEN.vonk = LEVEN.vonk.filter(s => { s.l++; const a = s.l < 3 ? s.l / 3 : 1 - (s.l - 3) / 4; if(a <= 0) return false;
+    px(s.x, s.y, "#bfe6ff", a * .8); if(s.kruis && s.l > 1 && s.l < 5){ px(s.x - 1, s.y, "#6fb8ff", a * .5); px(s.x + 1, s.y, "#6fb8ff", a * .5); px(s.x, s.y - 1, "#6fb8ff", a * .5); px(s.x, s.y + 1, "#6fb8ff", a * .5); } return true; });
+
+  }
+  if(LVAAN.maan){
+  /* 🌙 de maan ademt, de sterren twinkelen */
+  { const m = LEVEN_PLEK.maan; halo(m.x, m.y, 9, "#fff3c0", .07 + .04 * Math.sin(f * .05)); }
+  for(const k of D.ster){ const v = Math.sin(f * .11 + levenHash(k) * 40); if(v > .55) px(k % G, (k / G) | 0, levenHash(k + 1) < .5 ? "#ffffff" : "#ffe8a8", (v - .55) * 2); }
+
+  }
+  if(LVAAN.lichten){
+  /* 🔥 lantaarns, fakkels en ramen flikkeren */
+  for(const L of D.lichten){
+    const s = Math.floor(f / 2 + L.fase), fl = .55 + .45 * levenHash(s * 7.13 + L.fase);
+    halo(L.x, L.y, L.n > 5 ? 5 : 4, "#ffb24a", .1 * fl);
+    if(fl > .85) L.cel.forEach(q => px(q % G, (q / G) | 0, "#fff6c8", .15));
+  }
+  }
+  if(LVAAN.boom){
+  /* het groen in de grote boom gloeit zacht na */
+  for(const k of D.groen){ const v = Math.sin(f * .06 + levenHash(k) * 9); if(v > .6) px(k % G, (k / G) | 0, "#b8ff9a", (v - .6) * 1.2); }
+  }
+  if(LVAAN.route){
+  /* ✨ het pad naar wat je nu kunt spelen: een lichtje loopt van stip naar stip */
+  (LEVEN.route || []).forEach((st, ri) => {
+    const n = st.length + 5, i = Math.floor(f / 2 + ri * 7) % n;
+    if(i < st.length){ const [x, y] = st[i]; halo(x, y, 4, "#ffd84a", .5); if(i > 0){ const [x2, y2] = st[i - 1]; halo(x2, y2, 3, "#ffd84a", .22); } }
+  });
+
+  }
+  if(LVAAN.deeltjes){
+  /* deeltjes per wereld */
+  const wil = {1:7, 2:14, 3:16, 4:12};   // ronde 32: veel minder sneeuw
+  const tel = {1:0, 2:0, 3:0, 4:0}; LEVEN.deel.forEach(p => tel[p.w]++);
+  for(const w of [1, 2, 3, 4]){
+    if(tel[w] >= wil[w] || Math.random() > .35) continue;
+    let x, y, t = 0; do { x = Math.random() * G; y = Math.random() * G; } while(levenWereld(x, y) !== w && t++ < 12);
+    if(levenWereld(x, y) !== w) continue;
+    if(w === 3 && D.lava.length){ const k = D.lava[(Math.random() * D.lava.length) | 0]; x = k % G; y = (k / G) | 0; }
+    LEVEN.deel.push({w, x, y, l:0, max:w === 2 ? 60 + Math.random() * 60 : w === 3 ? 30 + Math.random() * 30 : 80 + Math.random() * 60, s:Math.random() * 10});
+  }
+  LEVEN.deel = LEVEN.deel.filter(p => {
+    p.l++; if(p.l > p.max) return false;
+    const a = Math.min(1, p.l / 6, (p.max - p.l) / 8);
+    if(p.w === 2){ p.x += Math.sin(p.l / 9 + p.s) * .35; p.y += Math.cos(p.l / 13 + p.s) * .25;      // 🌿 vuurvliegjes
+      const aan = Math.sin(p.l / 4 + p.s) > 0; if(aan){ px(p.x, p.y, "#e8ff7a", a); halo(p.x, p.y, 2, "#c8ff4a", .25 * a); } }
+    else if(p.w === 3){ p.y -= .45; p.x += Math.sin(p.l / 5 + p.s) * .25; px(p.x, p.y, p.l < p.max / 2 ? "#ffb04a" : "#ff6a2a", a * .9); }   // 🔥 vonken
+    else if(p.w === 4){ p.y += .22; p.x += Math.sin(p.l / 10 + p.s) * .3; px(p.x, p.y, "#ffffff", a * .75); }   // ❄ een paar vlokjes
+    else { p.x += .12; p.y -= .03; px(p.x, p.y, "#e6cf9a", a * .35); }   // 🪨 stofjes
+    return true;
+  });
+
+  }
+  /* ✨ ronde 32: korte glinsters, precies op de lichte randen van het ijs */
+  if(false && LVAAN.deeltjes && D.ijs.length){
+    if(LEVEN.glint.length < 5 && Math.random() < .3){ const k = D.ijs[(Math.random() * D.ijs.length) | 0]; LEVEN.glint.push({x:k % G, y:(k / G) | 0, l:0}); }
+    LEVEN.glint = LEVEN.glint.filter(g => { g.l++; if(g.l > 7) return false; const a = g.l < 4 ? g.l / 3 : (8 - g.l) / 4;
+      px(g.x, g.y, "#ffffff", a); if(g.l > 1 && g.l < 6){ px(g.x - 1, g.y, "#cfeeff", a * .6); px(g.x + 1, g.y, "#cfeeff", a * .6); px(g.x, g.y - 1, "#cfeeff", a * .6); px(g.x, g.y + 1, "#cfeeff", a * .6); } return true; });
+  }
+  /* 🏜 ronde 32: wereld 1 leeft ook: dwaallichtjes tussen de graven en af en toe een stofhoos over het zand */
+  if(LVAAN.w1){
+    LEVEN_PLEK.graf.forEach((g, i) => { const t = f * .03 + i * 1.7, aan = .5 + .5 * Math.sin(f * .05 + i * 2.1); if(aan < .15) return;
+      const x = g.x + Math.sin(t) * 2.5, y = g.y - 4 + Math.sin(t * 1.6) * 1.5; halo(x, y, 4, "#7ff0d8", .38 * aan); px(x, y, "#e8fff8", aan); px(x, y + 1, "#9ff0e0", .6 * aan); });
+  }
+  cx.globalCompositeOperation = "source-over";
+  if(LVAAN.rook){
+  /* 💨 rook uit de schoorstenen en de vulkaan */
+  /* ronde 32: de Waardin dikker, de fabriek en de vulkaan veel meer */
+  LEVEN_PLEK.rook.forEach((r, i) => { const elk = r.soort === "vulkaan" ? 2 : r.soort === "smidse" ? 3 : 4; if(f % elk === 0) LEVEN.rook.push({x:r.x + (Math.random() - .5) * (r.soort === "vulkaan" ? 3 : 1), y:r.y, l:0, soort:r.soort}); });
+  LEVEN.rook = LEVEN.rook.filter(r => {
+    r.l++; const max = r.soort === "vulkaan" ? 60 : r.soort === "smidse" ? 52 : 44; if(r.l > max) return false;
+    r.y -= r.soort === "vulkaan" ? .34 : .24; r.x += .12 + Math.sin(r.l / 6) * .08;
+    const s = 2 + Math.floor(r.l / (r.soort === "vulkaan" ? 8 : 10)), a = (1 - r.l / max) * (r.soort === "vulkaan" ? .55 : r.soort === "smidse" ? .5 : .5);
+    blok(r.x, r.y, s, r.soort === "vulkaan" ? (r.l < 8 ? "#5a3328" : "#3d3540") : "#8c8a96", a);
+    return true;
+  });
+
+  }
+  if(LVAAN.vleer){
+  /* 🦇 vleermuizen om de vulkaan */
+  const V = LEVEN_PLEK.vulkaan;
+  for(let i = 0; i < 3; i++){
+    const t = f * .03 + i * 2.1, x = V.x + Math.cos(t) * (20 + i * 6), y = V.y + Math.sin(t * 1.7) * 8 - 6, vl = Math.floor(f / 2 + i) % 2;
+    cx.globalAlpha = .9; cx.fillStyle = "#120a12"; cx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    cx.fillRect(Math.round(x) - 2, Math.round(y) - vl, 2, 1); cx.fillRect(Math.round(x) + 1, Math.round(y) - vl, 2, 1);
+  }
+  }
+  if(LVAAN.kraai){
+  /* 🐦‍⬛ de kraaien van Knort: af en toe vliegen ze een rondje boven de winkel */
+  const Kn = LEVEN_PLEK.knort;
+  if(!LEVEN.kraai && Math.random() < .006) LEVEN.kraai = {l:0};
+  if(LEVEN.kraai){
+    const k = LEVEN.kraai; k.l++;
+    for(let i = 0; i < 3; i++){
+      const t = k.l * .05 + i * .8, x = Kn.x + Math.sin(t) * 18 + i * 2, y = Kn.y - 10 - Math.abs(Math.sin(t * .5)) * 14 - i, vl = Math.floor(k.l / 2 + i) % 2;
+      cx.globalAlpha = .95; cx.fillStyle = "#0a0a10";
+      cx.fillRect(Math.round(x), Math.round(y), 1, 1); cx.fillRect(Math.round(x) - 1, Math.round(y) - vl, 1, 1); cx.fillRect(Math.round(x) + 1, Math.round(y) - vl, 1, 1);
+    }
+    if(k.l > 130) LEVEN.kraai = null;
+  }
+  }
+  if(LVAAN.vogel){
+  /* 🕊 een paar vogels over zee, af en toe */
+  if(!LEVEN.vogel && Math.random() < .004) LEVEN.vogel = {x:-6, y:150 + Math.random() * 100, l:0};
+  if(LEVEN.vogel){
+    const v = LEVEN.vogel; v.l++; v.x += .6; v.y += Math.sin(v.l / 14) * .15;
+    for(let i = 0; i < 3; i++){ const x = v.x - i * 5, y = v.y + i * 3 + (i === 1 ? -3 : 0), vl = Math.floor(v.l / 3 + i) % 2;
+      cx.globalAlpha = .85; cx.fillStyle = "#dfe8f2"; cx.fillRect(Math.round(x), Math.round(y), 1, 1); cx.fillRect(Math.round(x) - 1, Math.round(y) - vl, 1, 1); cx.fillRect(Math.round(x) + 1, Math.round(y) - vl, 1, 1); }
+    if(v.x > G + 20) LEVEN.vogel = null;
+  }
+  }
+  if(LVAAN.boot){
+  /* ⛵ het bootje van de veerman vaart langs de kust */
+  { const B = LEVEN_PLEK.boot, bereik = B.x1 - B.x0, t = (f * .07) % (bereik * 2), heen = t < bereik, x = B.x0 + (heen ? t : bereik * 2 - t), y = B.y + Math.round(Math.sin(f / 9));
+    const r = heen ? 1 : -1, X = Math.round(x);
+    cx.globalAlpha = 1;
+    cx.fillStyle = "#3a2414"; cx.fillRect(X - 4, y, 9, 2); cx.fillRect(X - 3, y + 2, 7, 1);
+    cx.fillStyle = "#6b4426"; cx.fillRect(X - 4, y, 9, 1);
+    cx.fillStyle = "#2a1a10"; cx.fillRect(X, y - 6, 1, 6);
+    cx.fillStyle = "#e8e2d0"; for(let j = 0; j < 5; j++) cx.fillRect(r > 0 ? X + 1 : X - j, y - 6 + j, j + 1 > 4 ? 4 : j, 1);
+    cx.fillStyle = "#ff5a3c"; cx.fillRect(X, y - 7, r, 1);
+    cx.globalAlpha = .5; cx.fillStyle = "#cfe8ff"; for(let j = 1; j < 4; j++) if((f + j) % 3) cx.fillRect(X - r * (5 + j * 2), y + 2, 1, 1);
+  }
+  }
+  cx.globalAlpha = 1;
+}
+
+document.querySelectorAll(".eff input").forEach(i => { LVAAN[i.dataset.k] = i.checked; i.onchange = () => LVAAN[i.dataset.k] = i.checked; });
+
+const WOLKEN = [];   // ronde 32: zes losse wolken uit art/kaart-wolken.png
+(function(){ if(typeof Image === "undefined") return; const im = new Image();
+  im.onload = () => [[524, 193, 438, 196], [104, 231, 312, 135], [1047, 248, 373, 104], [1043, 594, 385, 204], [104, 625, 332, 158], [535, 651, 412, 122]].forEach(([x, y, w, h]) => {
+    const c = document.createElement("canvas"); c.width = Math.round(w * .62); c.height = Math.round(h * .62); const k = c.getContext("2d"); k.imageSmoothingEnabled = false; k.drawImage(im, x, y, w, h, 0, 0, c.width, c.height); WOLKEN.push(c); });
+  im.src = "art/kaart-wolken.png"; })();
+const DRIJF = [[0, 30, .30], [3, 120, .2], [1, 205, .26], [5, 280, .32], [4, 380, .22], [2, 470, .3], [0, 560, .18], [1, 660, .25], [3, 760, .21], [5, 860, .28], [4, 960, .2]].map(([i, y, v], n) => ({i, y, v, x:(n * 523) % 1500 - 200}));
+let wd = null;
+/* 🌫 de fabriek als eigen laagje, zodat de mist er achterlangs gaat */
+/* 🏭 de fabriek als eigen laag ervoor (fabriek-voor.png, net als de toonbank van de winkel): de mist loopt erachter langs */
+let FABRIEKIMG = null;
+const mistDoek = (typeof document !== "undefined" && document.createElement) ? document.createElement("canvas") : {}; mistDoek.width = mistDoek.height = 314; const md = mistDoek.getContext ? mistDoek.getContext("2d") : null;
+const MIST = Array.from({length:7}, (_, i) => ({a:i * .9, r:9 + (i % 3) * 4, s:.003 + (i % 4) * .0012, rx:26 + (i % 4) * 9, ry:14 + (i % 3) * 6}));
+/* ronde 32: Knort en Nimbus op een fijnere laag (twee keer zo scherp), met hun echte silhouet */
+const KNORT = {fase:"binnen", t:0, kijk:1, wacht:120, uit:0};
+const NIMBUSIM = (typeof Image !== "undefined") ? Object.assign(new Image(), {src:"art/nimbus.png"}) : {};
+let fd = null;
+/* Knorts silhouet, getekend: ekster met hoed en veer, lange snavel naar links, kraag van zijn jas (eenheid: 1 = een pixel van de fijne laag) */
+let KNORTIM = null, DEURVOOR = null; const DEURBOX = [440, 450, 474, 492];
+function knortVorm(c){
+  c.fillStyle = "#0c0a10"; c.beginPath();
+  c.moveTo(-20, 30); c.bezierCurveTo(-22, 12, -14, 4, -4, 3);                  // jas, linkerschouder
+  c.lineTo(-6, -2); c.bezierCurveTo(-10, -4, -12, -8, -11, -12);               // keel
+  c.lineTo(-31, -10); c.lineTo(-11, -17);                                      // de snavel, lang en spits
+  c.bezierCurveTo(-10, -22, -4, -26, 2, -25);                                  // achterhoofd onder de hoed
+  c.lineTo(-9, -26); c.lineTo(-8, -29); c.lineTo(12, -29); c.lineTo(13, -26); c.lineTo(5, -25);   // hoedrand
+  c.lineTo(10, -24); c.bezierCurveTo(12, -18, 11, -10, 8, -5);                 // nek
+  c.bezierCurveTo(18, 0, 22, 12, 22, 30); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(-8, 2); c.lineTo(-2, 12); c.lineTo(4, 2); c.lineTo(12, 0); c.lineTo(6, 16); c.lineTo(-12, 16); c.closePath(); c.fill();   // kraag
+  c.beginPath(); c.moveTo(-6, -29); c.lineTo(-5, -38); c.lineTo(8, -39); c.lineTo(10, -29); c.closePath(); c.fill();   // hoed
+  c.beginPath(); c.moveTo(8, -36); c.quadraticCurveTo(20, -46, 26, -54); c.quadraticCurveTo(18, -42, 10, -33); c.closePath(); c.fill();   // veer
+  c.shadowBlur = 0; c.fillStyle = "#ffd28a"; c.fillRect(-9, -20, 2, 2);         // het oogje vangt licht
+}
+function figTeken(f){
+  fd.clearRect(0, 0, 2508, 2508); fd.imageSmoothingEnabled = true;
+  if(LVAAN.nimbus && NIMBUSIM.complete){ const N = LEVEN_PLEK.nimbus, t = f * .012;
+    const x = ((N.x0 + N.x1) / 2 + Math.sin(t) * (N.x1 - N.x0) / 2) * 8, y = ((N.y0 + N.y1) / 2 + Math.sin(t * 2.3) * 3) * 8 + Math.sin(f / 6) * 3, w = 124, hh = w * NIMBUSIM.naturalHeight / NIMBUSIM.naturalWidth;
+    fd.save(); fd.translate(x, y); if(Math.cos(t) < 0) fd.scale(-1, 1); fd.drawImage(NIMBUSIM, -w / 2, -hh / 2, w, hh); fd.restore(); }
+  if(LVAAN.knort){
+    /* hij kijkt alleen even met de helft van zijn lijf de deur uit, kijkt links en rechts, en gaat weer naar binnen */
+    const K = KNORT; K.t++;
+    if(K.fase === "binnen" && K.t > K.wacht){ K.fase = "uit"; K.t = 0; }
+    else if(K.fase === "uit"){ K.uit = Math.min(1, K.t / 10); if(K.t > 10){ K.fase = "kijk"; K.t = 0; } }
+    else if(K.fase === "kijk"){ if(K.t % 16 === 0) K.kijk = -K.kijk; if(K.t > 54){ K.fase = "in"; K.t = 0; } }
+    else if(K.fase === "in"){ K.uit = Math.max(0, 1 - K.t / 10); if(K.t > 10){ K.fase = "binnen"; K.t = 0; K.wacht = 160 + Math.random() * 240; K.kijk = 1; } }
+    if(K.fase !== "binnen" && knortKlaar()){
+      /* zijn echte tekening, wat donkerder (tegenlicht), die vanachter de rechter deurpost de deuropening in buigt;
+         de muur en de deurpost liggen er als losse laag overheen, net als de toonbank in de winkel */
+      const w = 40, hh = 48, x = 2 * 463 - K.uit * 16 - w * .35, y = 2 * 486 - hh;
+      fd.save(); fd.translate(x + w / 2, y + hh); fd.rotate(-.1 * K.uit * (K.kijk > 0 ? 1 : .6)); fd.drawImage(KNORTIM, -w / 2, -hh, w, hh); fd.restore();
+      fd.imageSmoothingEnabled = false; fd.drawImage(DEURVOOR, 2 * DEURBOX[0], 2 * DEURBOX[1], DEURVOOR.width * 2, DEURVOOR.height * 2); fd.imageSmoothingEnabled = true;
+    }
+  }
+}
+const SPIN = {x:262, y:396, aan:0, l:0, knip:0};
+/* 🌌 ronde 32: een plaatselijk noorderlicht boven de ijsvlakte van 4-3: drie gordijnen die golven */
+const AUR = {x:880, y:950, w:300};
+function auroraTeken(f){
+  wd.save(); wd.globalCompositeOperation = "lighter";
+  [["#4dffb0", 0, 1], ["#7a6cff", 1.7, .75], ["#3fd6ff", 3.4, .6]].forEach(([kl, fase, sterk]) => {
+    for(let i = 0; i < 64; i++){
+      const t = i / 63, x = AUR.x - AUR.w / 2 + t * AUR.w + Math.sin(f * .018 + fase + t * 4) * 18;
+      const top = AUR.y - 120 + Math.sin(f * .03 + fase * 2 + t * 6) * 22 + fase * 10, len = 70 + Math.sin(f * .025 + t * 9 + fase) * 26;
+      const rand = Math.sin(t * Math.PI), a = (.34 + .16 * Math.sin(f * .05 + t * 12 + fase)) * rand * sterk;
+      const g = wd.createLinearGradient(0, top, 0, top + len); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(.25, kl); g.addColorStop(1, "rgba(0,0,0,0)");
+      wd.globalAlpha = Math.max(0, a); wd.fillStyle = g; wd.fillRect(Math.round(x), Math.round(top), 8, Math.round(len));
+    }
+  });
+  wd.restore(); wd.globalAlpha = 1;
+}
+/* 💧 ronde 32: de rivier op de volle resolutie van de tekening, in een mix van stijlen: zachte lichtbanden
+   die met de stroom meegaan, een fijne schuimrand langs de oevers, en in de watervallen snelle strepen
+   met nevel onderaan. 🌊 De branding op het strand van wereld 1 rolt aan en trekt terug, met nat zand. */
+const FIJN = {klaar:false};
+function fijnAnalyse(){
+  const img = document.getElementById("bordkaart"); if(!img.complete || !img.naturalWidth) return false;
+  const W = 1254, c = document.createElement("canvas"); c.width = c.height = W; const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(img, 0, 0, W, W);
+  /* rivier */
+  const RB = {x0:360, y0:230, x1:790, y1:840}, rw = RB.x1 - RB.x0, rh = RB.y1 - RB.y0, d = x.getImageData(RB.x0, RB.y0, rw, rh).data;
+  const riv = new Uint8Array(rw * rh);
+  for(let i = 0; i < rw * rh; i++){ const R = d[i * 4], G = d[i * 4 + 1], B = d[i * 4 + 2]; if(B > 185 && R < 95 && G > 85 && G < 180 && B - R > 120) riv[i] = 1; }
+  const rand = new Uint8Array(rw * rh), val = new Uint8Array(rw * rh);
+  for(let yy = 0; yy < rh; yy++) for(let xx = 0; xx < rw; xx++){ const i = yy * rw + xx; if(!riv[i]) continue;
+    let r = 0; for(let dy = -2; dy <= 2 && !r; dy++) for(let dx = -2; dx <= 2; dx++){ const a = xx + dx, b = yy + dy; if(a < 0 || b < 0 || a >= rw || b >= rh || !riv[b * rw + a]){ r = Math.max(Math.abs(dx), Math.abs(dy)); break; } }
+    rand[i] = r; }
+  for(let xx = 0; xx < rw; xx++){ let n = 0; for(let yy = 0; yy <= rh; yy++){ const aan = yy < rh && riv[yy * rw + xx]; if(aan) n++; else { if(n > 26) for(let k = yy - n; k < yy; k++) val[k * rw + xx] = 1; n = 0; } } }
+  FIJN.riv = {RB, rw, rh, riv, rand, val, buf:new ImageData(rw, rh), cx:document.createElement("canvas")}; FIJN.riv.cx.width = rw; FIJN.riv.cx.height = rh;
+  FIJN.stuif = []; for(let xx = 0; xx < rw; xx++) for(let yy = rh - 1; yy > 0; yy--){ const i = yy * rw + xx; if(val[i] && !val[i + rw]){ if(xx % 3 === 0) FIJN.stuif.push([RB.x0 + xx, RB.y0 + yy]); break; } }
+  /* strand van wereld 1: hoe ver elk stukje zand van de zee ligt */
+  const SB = {x0:360, y0:990, x1:900, y1:1150}, sw = SB.x1 - SB.x0, sh = SB.y1 - SB.y0, e = x.getImageData(SB.x0, SB.y0, sw, sh).data;
+  const zee = new Uint8Array(sw * sh), zand = new Uint8Array(sw * sh);
+  for(let i = 0; i < sw * sh; i++){ const R = e[i * 4], G = e[i * 4 + 1], B = e[i * 4 + 2]; if(B > R + 35 && B > 70) zee[i] = 1; else if(R > G && G > B && R > 90 && R - B > 30) zand[i] = 1; }
+  const afst = new Uint8Array(sw * sh).fill(255), rij = [];
+  for(let i = 0; i < sw * sh; i++) if(zee[i]){ afst[i] = 0; rij.push(i); }
+  for(let q = 0; q < rij.length; q++){ const i = rij[q], xx = i % sw, yy = (i / sw) | 0, a = afst[i]; if(a >= 16) continue;
+    for(const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const nx = xx + dx, ny = yy + dy; if(nx < 0 || ny < 0 || nx >= sw || ny >= sh) continue; const n = ny * sw + nx; if(afst[n] > a + 1 && zand[n]){ afst[n] = a + 1; rij.push(n); } } }
+  FIJN.strand = {SB, sw, sh, afst, buf:new ImageData(sw, sh), cx:document.createElement("canvas")}; FIJN.strand.cx.width = sw; FIJN.strand.cx.height = sh;
+  FIJN.klaar = true; return true;
+}
+const ruis = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+function rivierTeken(f){
+  const V = FIJN.riv, o = V.buf.data, t = f * .2;
+  for(let i = 0; i < V.rw * V.rh; i++){
+    const j = i * 4; if(!V.riv[i]){ o[j + 3] = 0; continue; }
+    const xx = i % V.rw, yy = (i / V.rw) | 0;
+    let r = 255, g = 255, b = 255, a = 0;
+    if(V.val[i]){ const s = ((yy - f * 3.2 + ruis(xx, 1) * 40) % 13 + 13) % 13; a = s < 4 ? .55 * (1 - s / 4) : 0; a += .08; }
+    else {
+      const band = Math.sin(t - yy * .085 - xx * .025 + Math.sin(xx * .05 + yy * .03) * 1.4);
+      a = band > .4 ? (band - .4) * 1.1 : 0;                                        // zachte lichtbanden
+      if(band < -.5){ r = 8; g = 34; b = 100; a = (-.5 - band) * .5; }             // en donkere dalen
+      if(V.rand[i] === 1) a = Math.max(a, .45 + .3 * Math.sin(f * .3 + xx * .4 + yy * .3));   // schuimrand langs de oever
+      else if(V.rand[i] === 2) a = Math.max(a, .18 + .12 * Math.sin(f * .25 + xx * .3 - yy * .2));
+    }
+    o[j] = r; o[j + 1] = g; o[j + 2] = b; o[j + 3] = a * 255;
+  }
+  V.cx.getContext("2d").putImageData(V.buf, 0, 0); wd.drawImage(V.cx, V.RB.x0, V.RB.y0);
+  /* nevel onderaan de watervallen: zachte bolletjes, niet blokkerig */
+  if(f % 2 === 0) FIJN.stuif.forEach(([x, y]) => { if(Math.random() < .35) (LEVEN.nevel = LEVEN.nevel || []).push({x:x + (Math.random() - .5) * 3, y, l:0, vx:(Math.random() - .5) * .7}); });
+  LEVEN.nevel = (LEVEN.nevel || []).filter(n => { n.l++; if(n.l > 16) return false; n.y -= .5; n.x += n.vx; wd.globalAlpha = .35 * (1 - n.l / 16); wd.fillStyle = "#eaf8ff"; wd.beginPath(); wd.arc(n.x, n.y, 1.2 + n.l * .12, 0, Math.PI * 2); wd.fill(); return true; });
+  wd.globalAlpha = 1;
+}
+function strandTeken(f){
+  const S = FIJN.strand, o = S.buf.data;
+  for(let i = 0; i < S.sw * S.sh; i++){
+    const j = i * 4, d = S.afst[i]; if(d === 0 || d > 16){ o[j + 3] = 0; continue; }
+    const xx = i % S.sw, golf = 5 + 5 * Math.sin(f * .045 + xx * .018) + 1.5 * Math.sin(f * .11 + xx * .07), nat = 11 + 1.5 * Math.sin(xx * .07);
+    if(d < golf){ const rand = golf - d < 1.4; o[j] = rand ? 255 : 190; o[j + 1] = rand ? 255 : 225; o[j + 2] = 255; o[j + 3] = (rand ? .75 : .32 * (d / golf) + .08) * 255; }
+    else if(d < nat){ o[j] = 20; o[j + 1] = 14; o[j + 2] = 10; o[j + 3] = .22 * (1 - (d - golf) / (nat - golf + .01)) * 255; }
+    else o[j + 3] = 0;
+  }
+  S.cx.getContext("2d").putImageData(S.buf, 0, 0); wd.drawImage(S.cx, S.SB.x0, S.SB.y0);
+}
+/* 🦀 twee krabbetjes die zijwaarts over het strand scharrelen */
+const KRAB = [{x:780, y:1046, van:760, tot:860, v:.5, wacht:0}, {x:560, y:1092, van:520, tot:600, v:-.5, wacht:40}];
+function krabTeken(f){
+  KRAB.forEach(k => {
+    if(k.wacht > 0) k.wacht--; else { k.x += k.v; if(k.x > k.tot || k.x < k.van || Math.random() < .01){ k.v = -k.v; k.wacht = 30 + Math.random() * 80; } }
+    const x = Math.round(k.x), y = k.y, stap = k.wacht > 0 ? 0 : Math.floor(f / 2) % 2;
+    wd.fillStyle = "#3a1408"; wd.fillRect(x - 4, y + 1, 9, 2);
+    wd.fillStyle = "#d8552a"; wd.fillRect(x - 3, y - 2, 7, 3); wd.fillRect(x - 5, y - 4, 2, 2); wd.fillRect(x + 4, y - 4, 2, 2);
+    wd.fillStyle = "#a83a18"; [-3, -1, 1, 3].forEach((lx, n) => wd.fillRect(x + lx, y + 1 + ((n + stap) % 2), 1, 1));
+    wd.fillStyle = "#fff"; wd.fillRect(x - 1, y - 3, 1, 1); wd.fillRect(x + 1, y - 3, 1, 1);
+  });
+}
+/* 🪨 kiezelwachters: af en toe kijkt er een klein kiezelmannetje om een rots heen en duikt weer weg */
+const KIEZEL = {plekken:[{x:560, y:953, k:1}, {x:652, y:957, k:-1}, {x:592, y:1000, k:1}, {x:398, y:968, k:-1}], nu:null, wacht:90};
+function kiezelTeken(f){
+  const K = KIEZEL;
+  if(!K.nu){ if(--K.wacht <= 0){ K.nu = {p:K.plekken[(Math.random() * K.plekken.length) | 0], l:0}; } return; }
+  const n = K.nu; n.l++; const op = Math.min(1, n.l / 8, (70 - n.l) / 8), p = n.p;
+  if(n.l > 70){ K.nu = null; K.wacht = 100 + Math.random() * 200; return; }
+  const cx = p.x + p.k * 7 * op, cy = p.y - 2 - 5 * op;
+  wd.save(); wd.beginPath(); wd.rect(p.x - 30, p.y - 30, 60, 30); wd.clip();
+  wd.fillStyle = "#7e7888"; wd.beginPath(); wd.ellipse(cx, cy + 2, 6, 5.5, 0, 0, Math.PI * 2); wd.fill();
+  wd.fillStyle = "#a6a0b0"; wd.beginPath(); wd.ellipse(cx - 1.5, cy, 3, 2, 0, 0, Math.PI * 2); wd.fill();
+  const kijk = Math.sin(n.l * .15) > 0 ? 1 : 0;
+  wd.fillStyle = "#fff"; wd.fillRect(cx - 3, cy + 1, 2, 2); wd.fillRect(cx + 1, cy + 1, 2, 2);
+  wd.fillStyle = "#14101a"; wd.fillRect(cx - 3 + kijk, cy + 2, 1, 1); wd.fillRect(cx + 1 + kijk, cy + 2, 1, 1);
+  wd.restore();
+}
+/* 🌊 ronde 32: de zee op de volle resolutie: golfjes die naar elke kust (en om elk rotsje en elke ijsschots)
+   toe rollen en op de kust breken, en kleine glinsteringen op open zee */
+function zeeAnalyse(){
+  /* op halve resolutie (627 x 627), zacht opgeschaald: fijn genoeg en licht genoeg om vlot te lopen */
+  const img = document.getElementById("bordkaart"), W = 627, c = document.createElement("canvas"); c.width = c.height = W; const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(img, 0, 0, W, W);
+  const d = x.getImageData(0, 0, W, W).data, zee = new Uint8Array(W * W), B2 = 13;
+  for(let i = 0; i < W * W; i++){ const R = d[i * 4], B = d[i * 4 + 2], xx = (i % W) * 2, yy = ((i / W) | 0) * 2;
+    const G = d[i * 4 + 1]; if(B > R + 30 && B > G + 15 && R < 60 && B > 35){ const nx = (xx - KOLK2.x * 4) / (KOLK2.rx * 4.2), ny = (yy - KOLK2.y * 4) / (KOLK2.ry * 4.2); if(nx * nx + ny * ny > 1) zee[i] = 2; } }
+  /* alleen water dat met de rand van de kaart verbonden is, is zee (geen donkere rotsen of bosschaduw) */
+  { const st = []; for(let k = 0; k < W; k++){ st.push(k, (W - 1) * W + k, k * W, k * W + W - 1); }
+    while(st.length){ const i = st.pop(); if(zee[i] !== 2) continue; zee[i] = 1; const xx = i % W, yy = (i / W) | 0;
+      if(xx > 0) st.push(i - 1); if(xx < W - 1) st.push(i + 1); if(yy > 0) st.push(i - W); if(yy < W - 1) st.push(i + W); }
+    for(let i = 0; i < W * W; i++) if(zee[i] === 2) zee[i] = 0; }
+  const afst = new Uint8Array(W * W).fill(255), rij = [];
+  for(let i = 0; i < W * W; i++) if(!zee[i]){ const xx = i % W, yy = (i / W) | 0; if((xx > 0 && zee[i - 1]) || (xx < W - 1 && zee[i + 1]) || (yy > 0 && zee[i - W]) || (yy < W - 1 && zee[i + W])){ afst[i] = 0; rij.push(i); } }
+  for(let q = 0; q < rij.length; q++){ const i = rij[q], a = afst[i]; if(a >= B2) continue; const xx = i % W, yy = (i / W) | 0;
+    for(const n of [xx > 0 ? i - 1 : -1, xx < W - 1 ? i + 1 : -1, yy > 0 ? i - W : -1, yy < W - 1 ? i + W : -1]) if(n >= 0 && zee[n] && afst[n] > a + 1){ afst[n] = a + 1; rij.push(n); } }
+  const kust = [], open = [];
+  for(let i = 0; i < W * W; i++){ if(!zee[i]) continue; if(afst[i] <= B2) kust.push(i); else if(ruis(i % 97, i % 89) < .03) open.push(i); }
+  FIJN.zee = {W, B2, kust:Uint32Array.from(kust), af:Uint8Array.from(kust.map(i => afst[i])), fase:Float32Array.from(kust.map(i => ruis((i % W) * .02, ((i / W) | 0) * .02) * 3)), open, buf:new ImageData(W, W), vorig:[], cx:document.createElement("canvas"), glint:[]};
+  FIJN.zee.cx.width = FIJN.zee.cx.height = W;
+}
+function zeeTeken(f){
+  const Z = FIJN.zee, o = Z.buf.data, W = Z.W, B2 = Z.B2;
+  for(const i of Z.vorig) o[i * 4 + 3] = 0;
+  Z.vorig = [];
+  for(let n = 0; n < Z.kust.length; n++){
+    const i = Z.kust[n], d = Z.af[n], xx = i % W, yy = (i / W) | 0;
+    const front = B2 - ((f * .16 + Z.fase[n] + Math.sin(xx * .042 + yy * .034) * 1.1) % 6.5) * 2;   // twee golven tegelijk op weg naar de kust
+    const v = d - front;
+    let a = 0;
+    if(v >= 0 && v < .9) a = .6 * (1 - d / B2) + .08;                                      // de kam van de golf
+    else if(v >= .9 && v < 2.6) a = .14 * (1 - (v - .9) / 1.7) * (1 - d / B2);               // het schuim erachter
+    if(d <= 1) a = Math.max(a, .2 + .16 * Math.sin(f * .12 + xx * .18 + yy * .14));         // schuim op de kustlijn zelf
+    if(a <= .02) continue;
+    const j = i * 4; o[j] = 225; o[j + 1] = 245; o[j + 2] = 255; o[j + 3] = a * 255; Z.vorig.push(i);
+  }
+  if(Z.open.length && Z.glint.length < 22 && Math.random() < .6) Z.glint.push({i:Z.open[(Math.random() * Z.open.length) | 0], l:0});
+  Z.glint = Z.glint.filter(g => { g.l++; if(g.l > 12) return false; const a = g.l < 5 ? g.l / 5 : (13 - g.l) / 8;
+    for(let k = -1; k <= 1; k++){ const i = g.i + k, j = i * 4; o[j] = 205; o[j + 1] = 232; o[j + 2] = 255; o[j + 3] = Math.max(o[j + 3], (k ? .25 : .6) * a * 255); Z.vorig.push(i); } return true; });
+  Z.cx.getContext("2d").putImageData(Z.buf, 0, 0); wd.imageSmoothingEnabled = true; wd.drawImage(Z.cx, 0, 0, 1254, 1254); wd.imageSmoothingEnabled = false;
+}
+/* 🌊 ronde 32: de zee, rustig. Geen glinsters of losse streepjes. Drie lagen, allemaal traag:
+   1. het water zelf deint: elke rij van de zee schuift een fractie heen en weer (een paar pixels, golvend over de hoogte),
+      zodat het getekende golfpatroon zachtjes beweegt, zoals water onder een licht briesje;
+   2. brede, vage lichtbanden van de maan trekken heel langzaam schuin over open zee;
+   3. de lichte rand langs de kust ademt: hij wordt langzaam iets lichter en weer zachter, als een deining die aanrolt.
+   De draaikolk en de rivier doen niet mee (die hebben hun eigen beweging). */
+const DEIN = {klaar:false};
+function deinAnalyse(){
+  const img = document.getElementById("bordkaart"); if(!img.complete || !img.naturalWidth) return;
+  const W = 1254, c = document.createElement("canvas"); c.width = c.height = W; const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(img, 0, 0, W, W);
+  const d = x.getImageData(0, 0, W, W).data, zee = new Uint8Array(W * W);
+  for(let i = 0; i < W * W; i++){ const R = d[i * 4], G = d[i * 4 + 1], B = d[i * 4 + 2], xx = i % W, yy = (i / W) | 0;
+    const nx = (xx - KOLK2.x * 4) / (KOLK2.rx * 4.3), ny = (yy - KOLK2.y * 4) / (KOLK2.ry * 4.3);
+    if(B > R + 25 && B > G + 10 && R < 140 && B > 30 && nx * nx + ny * ny > 1) zee[i] = 2; }
+  const st = []; for(let k = 0; k < W; k++) st.push(k, (W - 1) * W + k, k * W, k * W + W - 1);
+  while(st.length){ const i = st.pop(); if(zee[i] !== 2) continue; zee[i] = 1; const xx = i % W, yy = (i / W) | 0;
+    if(xx > 0) st.push(i - 1); if(xx < W - 1) st.push(i + 1); if(yy > 0) st.push(i - W); if(yy < W - 1) st.push(i + W); }
+  /* afstand tot het land, voor de zachte overgang en de kustrand */
+  const af = new Uint8Array(W * W).fill(255), rij = [];
+  for(let i = 0; i < W * W; i++){ if(zee[i] !== 1){ af[i] = 0; rij.push(i); } }
+  for(let q = 0; q < rij.length; q++){ const i = rij[q], a = af[i]; if(a >= 24) continue; const xx = i % W, yy = (i / W) | 0;
+    for(const n of [xx > 0 ? i - 1 : -1, xx < W - 1 ? i + 1 : -1, yy > 0 ? i - W : -1, yy < W - 1 ? i + W : -1]) if(n >= 0 && af[n] > a + 1){ af[n] = a + 1; rij.push(n); } }
+  /* masker voor het deinen: zee, niet vlak langs de kust (daar blijft de tekening stil staan), zacht ingevaagd */
+  const m = new ImageData(W, W), rand = new ImageData(W, W);
+  for(let i = 0; i < W * W; i++){
+    const a = af[i]; m.data[i * 4 + 3] = a <= 3 ? 0 : a >= 9 ? 255 : (a - 3) / 6 * 255;
+    /* de lichte kustrand: lichte pixels in de eerste 14 pixels zee */
+    const R = d[i * 4], G = d[i * 4 + 1], B = d[i * 4 + 2];
+    if(a > 0 && a <= 14 && B > 150 && G > 90){ const sterk = Math.min(1, (B - 150) / 90) * (1 - a / 16); rand.data[i * 4] = 210; rand.data[i * 4 + 1] = 238; rand.data[i * 4 + 2] = 255; rand.data[i * 4 + 3] = sterk * 255; }
+  }
+  const mk = document.createElement("canvas"); mk.width = mk.height = W; mk.getContext("2d").putImageData(m, 0, 0);
+  const rk = document.createElement("canvas"); rk.width = rk.height = W; rk.getContext("2d").putImageData(rand, 0, 0);
+  const bron = document.createElement("canvas"); bron.width = bron.height = W; bron.getContext("2d").drawImage(img, 0, 0, W, W);
+  const werk = document.createElement("canvas"); werk.width = werk.height = W;
+  /* de golf langs de kust: een masker dat met de afstand tot het land meeloopt, zodat de deining naar de kust toe rolt */
+  const golf = new Float32Array(W * W); for(let i = 0; i < W * W; i++) golf[i] = af[i] === 255 ? 30 : af[i];
+  DEIN.W = W; DEIN.masker = mk; DEIN.rand = rk; DEIN.bron = bron; DEIN.werk = werk; DEIN.af = af; DEIN.klaar = true;
+  const rw = document.createElement("canvas"); rw.width = rw.height = W; DEIN.randWerk = rw;
+}
+function deinTeken(f){
+  if(!DEIN.klaar){ deinAnalyse(); if(!DEIN.klaar) return; }
+  /* op halve resolutie, en heel rustig */
+  if(!DEIN.half){
+    const H = 627, mk = (bron, filter) => { const c = document.createElement("canvas"); c.width = c.height = H; const x = c.getContext("2d"); if(filter) x.filter = filter; x.drawImage(bron, 0, 0, H, H); return c; };
+    DEIN.half = {H, bron:mk(DEIN.bron, "blur(1.2px)"), masker:mk(DEIN.masker), rand:mk(DEIN.rand), werk:document.createElement("canvas"), rw:document.createElement("canvas")};
+    DEIN.half.werk.width = DEIN.half.werk.height = H; DEIN.half.rw.width = DEIN.half.rw.height = H;
+  }
+  const D = DEIN.half, H = D.H, t = f * .03, w = D.werk.getContext("2d");
+  /* 1. open zee: een zachtere versie van het water (minder spikkels) die heel langzaam deint */
+  w.globalCompositeOperation = "source-over"; w.clearRect(0, 0, H, H);
+  for(let y = 0; y < H; y += 2){ const dx = Math.sin(y * .09 + t) * .7 + Math.sin(y * .026 - t * .5) * .5; w.drawImage(D.bron, 0, y, H, 2, dx, y, H, 2); }
+  /* 2. één brede, vage lichtband van de maan die heel traag schuin voorbijtrekt */
+  w.globalCompositeOperation = "lighter";
+  { const p = ((f * .12) % 900) - 150, g = w.createLinearGradient(p - 120, p * .35 - 40, p + 120, p * .35 + 40);
+    g.addColorStop(0, "rgba(80,120,200,0)"); g.addColorStop(.5, "rgba(80,120,200,.05)"); g.addColorStop(1, "rgba(80,120,200,0)"); w.fillStyle = g; w.fillRect(0, 0, H, H); }
+  w.globalCompositeOperation = "destination-in"; w.drawImage(D.masker, 0, 0);
+  wd.imageSmoothingEnabled = true; wd.globalAlpha = .7; wd.drawImage(D.werk, 0, 0, 1254, 1254);
+  /* 3. de kust ademt: de lichte rand wordt in een trage golf iets lichter en weer zachter */
+  const rw = D.rw.getContext("2d"); rw.globalCompositeOperation = "source-over"; rw.clearRect(0, 0, H, H); rw.drawImage(D.rand, 0, 0);
+  rw.globalCompositeOperation = "destination-in";
+  const g = rw.createLinearGradient(0, 0, H, H), fase = (f * .0025) % 1;
+  for(let k = 0; k <= 8; k++){ const s = k / 8, a = .5 + .5 * Math.sin((s * 3 - fase * 3) * Math.PI * 2); g.addColorStop(s, `rgba(0,0,0,${(a * a).toFixed(3)})`); }
+  rw.fillStyle = g; rw.fillRect(0, 0, H, H);
+  wd.globalAlpha = .2; wd.drawImage(D.rw, 0, 0, 1254, 1254); wd.globalAlpha = 1; wd.imageSmoothingEnabled = false;
+}
+function fijnTeken(f){
+  if(LVAAN.zee) deinTeken(f);
+  if(!FIJN.klaar) fijnAnalyse();
+  if(FIJN.klaar){ if(LVAAN.water) rivierTeken(f); if(LVAAN.w1){ krabTeken(f); kiezelTeken(f); } }
+  if(LVAAN.aurora) auroraTeken(f);
+  if(LVAAN.mist){
+    md.clearRect(0, 0, 314, 314);
+    MIST.forEach((m, i) => { const t = f * m.s * 1.6 + m.a, x = 268 + Math.cos(t) * m.rx, y = 106 + Math.sin(t * 1.3) * m.ry;
+      for(let r = m.r; r > 0; r -= 2){ md.globalAlpha = .07; md.fillStyle = i % 2 ? "#8c8a99" : "#6e6c7c"; md.beginPath(); md.arc(Math.round(x), Math.round(y), r, 0, Math.PI * 2); md.fill(); } });
+    md.globalAlpha = 1; wd.drawImage(mistDoek, 0, 0, 1254, 1254);
+    if(!FABRIEKIMG) FABRIEKIMG = fabriekKnip(); if(FABRIEKIMG) wd.drawImage(FABRIEKIMG, 0, 0);
+  }
+  if(LVAAN.ogen){
+    const S = SPIN;
+    if(!S.aan && Math.random() < .03){ S.aan = 1; S.l = 0; S.max = 18 + Math.random() * 16; S.knip = 6 + Math.floor(Math.random() * 6); }
+    if(S.aan){ S.l++; const a = Math.min(1, S.l / 3, (S.max - S.l) / 3), dicht = S.l === S.knip || S.l === S.knip + 1;
+      if(!dicht){ wd.globalAlpha = a; wd.fillStyle = "#ff3a26"; [[-5, 0], [-2, -2], [1, -2], [4, 0], [-3, 3], [2, 3]].forEach(([dx, dy], i) => wd.fillRect(S.x + dx, S.y + dy, i < 4 ? 2 : 1, i < 4 ? 2 : 1)); wd.globalAlpha = 1; }
+      if(S.l > S.max) S.aan = 0; }
+  }
+}
+function wolkTeken(){
+  wd.clearRect(0, 0, 1254, 1254); fijnTeken(LEVEN.f); figTeken(LEVEN.f); if(!LVAAN.drijf) return;
+  DRIJF.forEach(d => { const im = WOLKEN[d.i]; if(!im) return; d.x += d.v; if(d.x > 1254 + 20) d.x = -im.width - 20;
+    wd.globalAlpha = .18; wd.drawImage(im, Math.round(d.x) + 14, Math.round(d.y) + 26);
+    wd.globalAlpha = .93; wd.drawImage(im, Math.round(d.x), Math.round(d.y)); });
+  wd.globalAlpha = 1;
+}
+
+/* ronde 32: de fabriek als eigen laagje (zoals de toonbank in de winkel), uit de kaart zelf geknipt; de mist loopt erachter */
+function fabriekKnip(){
+  const img = document.getElementById("bordkaart"); if(!img || !img.complete || !img.naturalWidth) return null;
+  const c = document.createElement("canvas"); c.width = c.height = 1254; const x = c.getContext("2d");
+  x.beginPath(); [[972,478],[969,449],[988,432],[1002,423],[1022,421],[1029,402],[1046,402],[1046,434],[1057,434],[1057,416],[1070,416],[1070,456],[1078,457],[1076,484],[1034,503],[1028,503],[998,487],[980,479]].forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b));
+  x.closePath(); x.clip(); x.drawImage(img, 0, 0, 1254, 1254); return c;
+}
+/* ronde 32: Knort in zijn deur: zijn eigen tekening (wat donkerder, tegenlicht) en de muur met deurpost als laagje ervoor */
+const KNORTBRON = (typeof Image !== "undefined") ? Object.assign(new Image(), {src:"art/knort.png"}) : null;
+function knortKlaar(){
+  if(KNORTIM && DEURVOOR) return true;
+  const kaart = document.getElementById("bordkaart");
+  if(!KNORTBRON || !KNORTBRON.complete || !KNORTBRON.naturalWidth || !kaart || !kaart.complete || !kaart.naturalWidth) return false;
+  const sx = KNORTBRON.naturalWidth / 1254, k = document.createElement("canvas"); k.width = 40; k.height = 48; const kx = k.getContext("2d");
+  kx.filter = "brightness(.66)"; kx.drawImage(KNORTBRON, 310 * sx, 40 * sx, 610 * sx, 720 * sx, 0, 0, 40, 48); KNORTIM = k;
+  const [x0, y0, x1, y1] = DEURBOX, d = document.createElement("canvas"); d.width = x1 - x0; d.height = y1 - y0; const dx = d.getContext("2d", {willReadFrequently:true});
+  dx.drawImage(kaart, x0 * kaart.naturalWidth / 1254, y0 * kaart.naturalHeight / 1254, d.width * kaart.naturalWidth / 1254, d.height * kaart.naturalHeight / 1254, 0, 0, d.width, d.height);
+  const p = dx.getImageData(0, 0, d.width, d.height);
+  for(let y = 0; y < d.height; y++) for(let x = 0; x < d.width; x++){ const i = (y * d.width + x) * 4, X = x + x0;
+    if(p.data[i] > 170 && p.data[i + 1] > 95 && p.data[i + 2] < 110 && X >= 451 && X <= 462) p.data[i + 3] = 0; }
+  dx.putImageData(p, 0, 0); DEURVOOR = d; return true;
+}
+
 function bordZee(){
   const cv = document.getElementById("bordzeeverf"), img = document.getElementById("bordkaart");
   if(!cv || !img) return;
@@ -35829,7 +36810,51 @@ function act(a){
   REC.log.push(a);
   if(NET.on) netAfterAction();
 }
+/* ⭕ ronde 32: een irisovergang tussen de grote schermen: hoofdmenu, kaart, level, winkel en terug.
+   Niet bij menuutjes, pop-ups en binnen een gevecht. De iris knijpt dicht op de plek waar je klikte
+   (bij een level op het medaillon), wisselt het scherm, en gaat in het midden weer open. */
+const IRIS_KNOP = new Set(["story", "storylevel", "winkel", "smid", "storyterug", "kaartterug", "tomain", "mpstart", "chalstart"]);
+let IRIS_BEZIG = false, IRIS_IN = false, IRIS_MUIS = null;
+document.addEventListener("pointerdown", e => { IRIS_MUIS = {x:e.clientX, y:e.clientY, t:performance.now()}; }, true);
+function irisMag(){
+  if(FAST || (typeof NET !== "undefined" && NET.on)) return false;
+  try{ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return false; }catch(e){}
+  return true;
+}
+function irisOvergang(fn, punt){
+  if(IRIS_BEZIG || !irisMag()){ fn(); return; }
+  IRIS_BEZIG = true;
+  let el = document.getElementById("iris");
+  if(!el){ el = document.createElement("div"); el.id = "iris"; el.setAttribute("aria-hidden", "true"); document.body.appendChild(el); }
+  const W = innerWidth, H = innerHeight;
+  const p = punt || (IRIS_MUIS && performance.now() - IRIS_MUIS.t < 1500 ? IRIS_MUIS : {x:W / 2, y:H / 2});
+  const zet = (r, q) => { el.style.setProperty("--ix", Math.round(q.x) + "px"); el.style.setProperty("--iy", Math.round(q.y) + "px");
+    el.style.setProperty("--ir", Math.max(0, Math.round(r / 6) * 6) + "px"); };   // in stapjes van 6 pixels: blijft pixelig
+  const loop = (dur, van, tot, q, klaar) => { const t0 = performance.now();
+    const stap = t => { const f = Math.min(1, (t - t0) / dur), e = f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+      zet(van + (tot - van) * e, q); if(f < 1) requestAnimationFrame(stap); else klaar(); };
+    requestAnimationFrame(stap); };
+  const R = Math.hypot(Math.max(p.x, W - p.x), Math.max(p.y, H - p.y)) + 8;
+  el.style.display = "block"; zet(R, p);
+  const wacht = setTimeout(() => { el.style.display = "none"; IRIS_BEZIG = false; }, 3000);   // vangnet: nooit blijven hangen
+  loop(300, R, 0, p, () => {
+    try{ fn(); }catch(e){ console.error(e); }
+    setTimeout(() => {
+      const q = {x:W / 2, y:H / 2};
+      loop(380, 0, Math.hypot(W / 2, H / 2) + 8, q, () => { clearTimeout(wacht); el.style.display = "none"; IRIS_BEZIG = false; });
+    }, 140);
+  });
+}
 function onBtn(btn, el, fromAction){
+  if(!fromAction && !IRIS_IN && !IRIS_BEZIG && (IRIS_KNOP.has(btn) || (btn === "closemodal" && M && M.type === "story")) && irisMag()){
+    let punt = null;
+    if(btn === "storylevel" && el && el.dataset && el.dataset.id){
+      const m = document.querySelector(`#bordvlak .bbord[data-id="${el.dataset.id}"] .bbmed`);
+      if(m){ const b = m.getBoundingClientRect(); if(b.width) punt = {x:b.x + b.width / 2, y:b.y + b.height / 2}; }
+    }
+    irisOvergang(() => { IRIS_IN = true; try{ onBtn(btn, el, fromAction); } finally { IRIS_IN = false; } }, punt);
+    return;
+  }
   const u = S.ui;
   /* Online is "opnieuw" geen zet in het potje maar een nieuwe partij voor allebei. */
   if(!fromAction && btn === "newgame" && NET.on){ M = null; netRestart(); return; }
@@ -35953,6 +36978,7 @@ function onBtn(btn, el, fromAction){
     case "menuback": M = (M && M.back === "lobby") ? null : {type:"menu"}; render(); break;
     case "sharefromlobby": M = {type:"share", back:"lobby"}; render(); break;
     case "askSurrender": M = {type:"menu", confirm:"sur"}; render(); break;
+    case "askWeg": M = {type:"menu", confirm:"weg", naar:(el && el.dataset.naar) || "tomain"}; render(); break;
     case "askLeave": M = {type:"menu", confirm:"leave"}; render(); break;
     case "surrender":
       M = null;
@@ -36636,7 +37662,8 @@ document.addEventListener("keydown", e => {
   }
   if(M && M.type === "praat"){
     if(e.key === "s" || e.key === "S" || e.key === "e" || e.key === "E"){ e.preventDefault(); praatSkip(); return; }   // E (of S): het hele gesprek overslaan
-    if(e.key === " " || e.key === "Enter" || e.key === "ArrowRight"){ e.preventDefault(); praatVerder(); }
+    /* ronde 32: een ingedrukt gehouden toets telt niet; anders vlieg je door de tekst */
+    if(e.key === " " || e.key === "Enter" || e.key === "ArrowRight"){ e.preventDefault(); if(!e.repeat) praatVerder(); }
     return;
   }
   /* Staat er een uitleg of een gesprek open, dan doet de E niks: die sloeg er anders een
