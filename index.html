@@ -31354,7 +31354,8 @@ function bordLevenStart(){
   const za = doek("zeebasis", 1254, "zeedoek"), zb = doek("zeebeweeg", 314, "zeedoek");   // 🌊 ronde 33: de pixelzee, onder alles
   let wdr = document.getElementById("wolkdrijf");
   if(!wdr){ wdr = document.createElement("canvas"); wdr.id = "wolkdrijf"; wdr.className = "wolkdrijf"; wdr.width = wdr.height = ZB.N; wdr.setAttribute("aria-hidden", "true"); }
-  img.after(za, zb, a, b, c, wdr);   // ☁ de drijvende wolken bovenop, maar nog onder het pad en de medaillons                           // vlak na de tekening: onder het pad en de medaillons
+  img.after(za, zb, a, b, c, wdr);
+  if(ZEE.onder){ za.style.display = "none"; img.before(zb); zb.style.zIndex = "0"; }   // kaart zonder zee: de zee ligt eronder   // ☁ de drijvende wolken bovenop, maar nog onder het pad en de medaillons                           // vlak na de tekening: onder het pad en de medaillons
   wd = b.getContext("2d"); wd.imageSmoothingEnabled = false; fd = c.getContext("2d");
   if(!LEVEN.data || LEVEN.src !== img.src){ try{ LEVEN.data = levenAnalyse(img); LEVEN.src = img.src; FIJN.klaar = false; DEIN.klaar = false; DEIN.half = null; FABRIEKIMG = null; TRAPVOOR = null; KNORTIM = DEURVOOR = null; }catch(e){ return; } }
   LEVEN.route = levenRoute();
@@ -31376,7 +31377,10 @@ const zFbm = (x, y) => zRuis(x, y) * .62 + zRuis(x * 2.1 + 17, y * 2.1 + 9) * .3
 /* Is de getekende kaart (op 1254 x 1254 in context x) overworld-schoon3? Een paar plekken waar hij duidelijk anders is dan de oude kaart. */
 const VINGER3 = [[1153, 708, 5, 15, 38], [719, 127, 0, 22, 64], [804, 847, 97, 163, 245], [1056, 956, 19, 24, 42], [566, 62, 1, 20, 56], [569, 26, 0, 18, 54],
   [1075, 951, 0, 35, 97], [1144, 730, 73, 33, 26], [1111, 705, 4, 39, 97], [1040, 651, 183, 166, 174], [1104, 952, 0, 27, 78], [910, 959, 97, 166, 239]];
+let ZEE_ZONDER = false;   // de kaart heeft al geen zee meer (doorzichtig), zie zeeLaad
 function isSchoon3(x){
+  if(ZEE_ZONDER) return true;
+  try { if([[60, 700], [120, 980], [1220, 420], [300, 1200]].every(([vx, vy]) => x.getImageData(vx, vy, 1, 1).data[3] < 20)) return true; } catch(e){}   // de kaart zonder zee
   try { return VINGER3.filter(([vx, vy, r, g, b]) => { const d = x.getImageData(vx, vy, 1, 1).data; return Math.abs(d[0] - r) + Math.abs(d[1] - g) + Math.abs(d[2] - b) < 60; }).length >= 9; }
   catch(e){ return false; }
 }
@@ -31393,10 +31397,16 @@ function zeeLaad(){
       /* past het masker op deze kaart? Op de plekken die het overschildert moet de tekening echt water zijn */
       x.clearRect(0, 0, W, W); x.drawImage(kaart, 0, 0, W, W);
       const k = x.getImageData(0, 0, W, W).data;
-      let n = 0, goed = 0;
-      for(let i = 0; i < N; i += 97){ if(al[i] < 250 || af[i] < 30) continue; n++; const R = k[i * 4], G = k[i * 4 + 1], B = k[i * 4 + 2]; if(B > R + 20 && B > 30) goed++; }
-      if(!n || goed / n < .9 || !isSchoon3(x)){ ZEE.mis = true; return; }
-      Object.assign(ZEE, {W, al, af, klaar:true, kaartSrc:kaart.src});
+      let n = 0, goed = 0, door = 0;
+      for(let i = 0; i < N; i += 97){ if(al[i] < 250 || af[i] < 30) continue; n++; const R = k[i * 4], G = k[i * 4 + 1], B = k[i * 4 + 2]; if(k[i * 4 + 3] < 20) door++; else if(B > R + 20 && B > 30) goed++; }
+      /* ronde 33: een kaart waar de zee al uit geknipt is (doorzichtig): dan ligt de zee gewoon onder de kaart */
+      const onder = n > 0 && door / n > .9;
+      if(!onder && (!n || goed / n < .9 || !isSchoon3(x))){ ZEE.mis = true; return; }
+      Object.assign(ZEE, {W, al, af, klaar:true, kaartSrc:kaart.src, onder});
+      ZEE_ZONDER = onder;
+      if(onder){ const zb = document.getElementById("zeebasis"), zw = document.getElementById("zeebeweeg");
+        if(zb) zb.style.display = "none";                       // de zee buiten de kaart (#bordzeeverf) loopt al onder de hele kaart door
+        if(zw){ kaart.before(zw); zw.style.zIndex = "0"; } }     // de golfstreepjes onder de kaart, zodat ze nooit over het land gaan
       zeeBouw();
     } catch(e) { ZEE.mis = true; }
   };
@@ -31571,7 +31581,7 @@ function levenAnalyse(img){
     const i = (y * G + x) * 4, R = d[i], Gc = d[i + 1], B = d[i + 2], lum = R * .3 + Gc * .59 + B * .11, k = y * G + x;
     if(x < 130 && y > 40 && y < 160 && lum < 26 && Gc >= R && levenHash(k + 7) < .25) uit.donker.push(k);
     const nx = (x - KOLK2.x) / KOLK2.rx, ny = (y - KOLK2.y) / KOLK2.ry;
-    if(nx * nx + ny * ny < 1 && lum < 105 && B > R + 10) uit.kolkW.push(k);
+    if(nx * nx + ny * ny < 1 && ((lum < 105 && B > R + 10) || d[i + 3] < 128)) uit.kolkW.push(k);   // (een kaart zonder zee: daar is het doorzichtig)
   }
   /* de kleur van de zee net buiten de kolk, zodat de rand naadloos overloopt */
   let zr = 0, zg = 0, zb = 0, zn = 0;
