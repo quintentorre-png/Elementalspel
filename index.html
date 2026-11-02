@@ -2978,6 +2978,16 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
   -webkit-mask:var(--masker) center bottom/contain no-repeat; mask:var(--masker) center bottom/contain no-repeat;
   mix-blend-mode:multiply; animation:regenboog 6s linear infinite}
 @media (prefers-reduced-motion:reduce){ #horizon .hzregenboog, .majestic-rand::before, .majbox .majmask{animation:none} }
+/* 🎵 ronde 34: de losse muzieknoten van de lofi-Waardin */
+.lofinoten{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:translateX(-50%) translateY(calc(var(--onder, 0) * 100%))}
+.lofinoten img{position:absolute; height:auto; max-width:none; image-rendering:pixelated; opacity:0; animation:lofinoot 5s ease-in-out infinite}
+.lofibox .lofinoten{width:auto; height:100%; aspect-ratio:var(--ar); transform:translateX(-50%)}
+@keyframes lofinoot{0%{opacity:0; transform:translate(0,40%) scale(.6) rotate(-10deg)}
+  14%{opacity:1; transform:translate(0,0) scale(1) rotate(0)}
+  45%{transform:translate(25%,-60%) rotate(8deg)}
+  75%{opacity:1; transform:translate(-15%,-120%) rotate(-6deg)}
+  100%{opacity:0; transform:translate(15%,-180%) scale(.85) rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){ .lofinoten img{animation:none; opacity:1} }
 #horizon[data-skinfx="donker"] .hz{filter:brightness(.6) saturate(.8) !important}
 body.skinzwart{background:#000 !important}
 /* ☁ Nimbus de Meervoudige: kleine Nimbussen die over het hele speelveld heen en weer vliegen */
@@ -7787,12 +7797,12 @@ function mulliganLus(G, K){
   for (const q of [G.tp, 1 - G.tp]){   // mulliganFase
     if (!isMens(G, q) || G.over >= 0) continue;
     let keer = 0; const sq = G.pl[q];
-    while (sq.life > 1 && G.over < 0){
+    while (sq.life > keer + 1 && G.over < 0){   // ronde 34: de eerste keer kost 1 leven, de tweede 2, de derde 3…
       if (K('mulligan', {p:q, keer}) !== 'opnieuw') break;
       const n = sq.hand.length;
       sq.deck.push(...sq.hand.splice(0)); schud(G, sq.deck);
       for (let i = 0; i < n; i++) if (sq.deck.length) sq.hand.push(sq.deck.pop());
-      sq.life -= 1; keer++;
+      sq.life -= keer + 1; keer++;
     }
   }
 }
@@ -9696,7 +9706,7 @@ const BEGRIPPEN = {
   spell:     {naam:"Ritueel", uitleg:"Een kaart op de ritueelplek van een kolom. Die doet het speel-effect bij het neerleggen, en opnieuw elke keer dat jij in die kolom een wezen speelt. Een nieuw ritueel op een bezette plek vervangt de oude."},
   snel:      {naam:"Altijd", uitleg:"Elke kaart mag je altijd spelen: in je eigen beurt, maar ook als reactie in de chain in de beurt van de ander. Als wezen of als ritueel."},
   kleurloos: {naam:"Kleurloos", uitleg:"Heeft geen element: de cirkel doet er niets mee. Geen instakill, nergens immuun voor."},
-  volleslag: {naam:"Volle slag", uitleg:"Valt aan met alle eigen levens in plaats van de helft."},
+  volleslag: {naam:"Volle slag", uitleg:"Valt aan met al zijn levens (zo slaat nu iedereen)."},
   bloesem:   {naam:"🌸 Bloesem", uitleg:"Een token op een wezen. De eerste keer dat een effect van de tegenstander dit wezen raakt, doet dat effect niets en valt de bloesem af. Een gewone aanval raakt wel."},
   onaantastbaar: {naam:"Onaantastbaar", uitleg:"Merkt niets van effecten van de tegenstander: geen schade van vuur, bliksem of andere effecten, niet verstrikt, niet over te nemen met IJs, niet vast in het Web, niet leeg te roven. Een gewone aanval raakt hem wel."},
   groei:     {naam:"Groei", uitleg:"Begin van de beurt van de eigenaar: +1 leven."},
@@ -9822,7 +9832,7 @@ const AETHER_TEKST = {
   ae_watercycle:"Je 💧 wezens komen binnen met <b>+3</b> levens. Elk wezen dat je 💧 raakt (oppakken en opnieuw neerzetten, of het water-ritueel) krijgt <b>+3</b> levens.",
   ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen wezen mee kiezen: {offer} die en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-ritueel.",
   ae_fire6:     "Je 🔥-effect doet <b>2</b> meer schade (dus <b>4</b>) en raakt ook 💧 Water. Ook ⚡ Bliksem. Niet de overslag van ☄️ Plasma.",
-  ae_stonefull: "Je 🪨 hebben {Volle slag}.",
+  ae_stonefull: "Het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel.",   // ronde 34: Volle slag is nu voor iedereen
   ae_grassx2:   "Je 🌿 {verstrikt} met een dubbele drain: <b>−2</b> in plaats van −1 (op 🪨 Steen <b>−4</b>), en verstrikt ook 🔥 Vuur.",
   ae_hp3:       "Kies bij de start een element. Je wezens van dat element komen binnen met <b>+3</b> levens, en raken ook waar ze zwak tegen zijn (gewone schade).",
   ae_oer_vuur:  "Je 🔥 wezens komen binnen met <b>+3</b> levens. Je 🔥 raakt ook 💧 Water, met gewone schade.",
@@ -9890,10 +9900,6 @@ const SPELL_REGEL = "Doet het speel-effect bij het neerleggen en bij elk wezen d
   });
   Object.entries(LICHT_TEKST).forEach(([k, t]) => { if(LIGHTS[k]) LIGHTS[k].txt = LIGHTS[k].kort = kwHTML(t); });
   Object.entries(AETHER_TEKST).forEach(([k, t]) => { if(AETHERS[k]) AETHERS[k].txt = AETHERS[k].kort = kwHTML(t); });
-  /* 💥 ronde 34: Lawine in Volle slag (in een potje telt het potje, daarbuiten de keuze op het homescreen) */
-  if(AETHERS.ae_stonefull){ const gewoon = AETHERS.ae_stonefull.txt, volle = "In Volle slag: het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel.";
-    const nu = () => { try{ return (typeof S !== "undefined" && S && S.story) ? !!S.volle : !!(typeof SET !== "undefined" && SET && SET.volleSlag); }catch(e){ return false; } };
-    ["txt", "kort"].forEach(k => Object.defineProperty(AETHERS.ae_stonefull, k, {get:() => nu() ? volle : gewoon, set:v => {}, configurable:true, enumerable:true})); }
 })();
 /* Een kaartuitleg in vaste vakjes: ▶ speel-effect, ◆ veld-effect, eigenschappen, en wat hij
    als ritueel doet. Gebruikt door de hover-uitleg, het infoscherm en het spelen-als-scherm. */
@@ -10148,8 +10154,11 @@ function addLights(p, key){
   addLog(`${pName(p)} schudt ${n}× ✦ <em>${LIGHTS[key].name}</em> door het deck.`, true);
 }
 /* ❤ ronde 26: buiten het verhaal (PvP, bots, Commander, challenges) begin je met 6 levens; het verhaal houdt 5. */
-const PARTIJ_LEVENS = 6;
-const startLevensStd = () => (S && S.levens6 && !S.story) ? PARTIJ_LEVENS : 5;
+/* 💥 ronde 34: Volle slag is de standaard, overal: elk wezen valt aan met al zijn levens, en daarom heeft iedereen
+   twee keer zoveel levens (6 werd 12, 5 werd 10). De keuze op het homescreen is weg. */
+const VOLLE_SLAG = true, LEVENS_X = 2;
+const PARTIJ_LEVENS = 6 * LEVENS_X;
+const startLevensStd = () => (S && S.levens6 && !S.story) ? PARTIJ_LEVENS : 5 * LEVENS_X;
 function resetBoard(){
   pending = null; busyFlag = false; botPlan = null; clearTimeout(botT);
   S.pl = [0,1].map(i => ({life:startLevensStd(), deck:[], hand:[], grave:[], cols:Array.from({length:NK()}, () => ({cre:null, spell:null}))}));
@@ -10209,7 +10218,7 @@ function newGame(keepSeed){
   S = { pl:null, tp:0, gTurn:1, phase:"upkeep", stack:[], over:null, actor:0, holder:0,
         set:prevSet, log:[], turnNo:[1,0], vsBot:prevBot, botPlays:0, trok3:false,
         mode:"classic", ae:[[],[]], lt:[[],[]], match:null,
-        test:null,
+        test:null, volle:VOLLE_SLAG,   // 💥 ronde 34: Volle slag overal
         genade:[-1,-1],
         klok:{aan:false, t:[KLOK_START, KLOK_START]} };
   resetBoard();
@@ -11039,16 +11048,16 @@ function mulliganPaneel(){
   }
   const app = document.getElementById("app"); if(!app) return;
   if(!el){ el = document.createElement("div"); el.id = "mullpaneel"; app.appendChild(el); }
-  const p = u.p, lev = P(p).life, n = P(p).hand.length, keer = u.keer || 0;
+  const p = u.p, lev = P(p).life, n = P(p).hand.length, keer = u.keer || 0, prijs = keer + 1;   // ronde 34: 1, 2, 3, … levens
   el.innerHTML = `<div class="mullbox">
     <div class="mullkop">🔄 Je starthand</div>
     <div class="mullsub">Dit zijn de ${n} kaarten waarmee je begint. Houden, of alles terugschudden en er ${n} nieuwe trekken?</div>
-    <div class="mullprijs">Opnieuw trekken kost <b>1 leven</b> — je hebt er ${lev}.</div>
+    <div class="mullprijs">Opnieuw trekken kost <b>${prijs} ${prijs === 1 ? "leven" : "levens"}</b>, en elke keer één meer. Je hebt er ${lev}.</div>
     ${keer ? `<div class="mulltel">Je hebt al ${keer}× opnieuw getrokken.</div>` : ""}
-    ${lev <= 2 ? `<div class="mulllaatste">Dit is de laatste keer dat het kan.</div>` : ""}
+    ${lev > prijs && lev - prijs <= prijs + 1 ? `<div class="mulllaatste">Dit is de laatste keer dat het kan.</div>` : ""}
     <div class="mullknop">
       <button class="abtn primary" data-act="btn" data-btn="mullhouden">✔ Houden <span class="toets" style="opacity:.6;font-size:.7rem">[spatie]</span></button>
-      ${lev > 1 ? `<button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw · −1 ❤ <span class="toets" style="opacity:.6;font-size:.7rem">[E]</span></button>` : ""}
+      ${lev > prijs ? `<button class="abtn ghost" data-act="btn" data-btn="mullopnieuw">🔄 Opnieuw · −${prijs} ❤ <span class="toets" style="opacity:.6;font-size:.7rem">[E]</span></button>` : ""}
     </div></div>`;
   document.body.classList.add("mulligaan");
   [0,1].forEach(q => { const h = document.getElementById("hand" + q); if(h) h.classList.toggle("mullhand", q === p); });
@@ -16202,7 +16211,7 @@ async function mulliganFase(){
   for(const p of [S.tp, opp(S.tp)]){
     if(isBot(p) || S.over) continue;
     let keer = 0;
-    while(P(p).life > 1 && !S.over){
+    while(P(p).life > keer + 1 && !S.over){   // ronde 34: de eerste keer kost 1 leven, de tweede 2, de derde 3…
       S.actor = p;
       const v = await waitUI("mulligan", {p, keer});
       if(v !== "opnieuw") break;
@@ -16210,10 +16219,11 @@ async function mulliganFase(){
       P(p).deck.push(...P(p).hand.splice(0));
       shuffle(P(p).deck);
       for(let i = 0; i < n; i++) if(P(p).deck.length) P(p).hand.push(P(p).deck.pop());
-      P(p).life -= 1; keer++;
+      const prijs = keer + 1;
+      P(p).life -= prijs; keer++;
       AU.play("draw");
-      addLog(`🔄 <em>${pName(p)}</em> schudt de hand terug en trekt ${n} nieuwe kaarten — dat kost 1 leven (nu ${P(p).life}).`, true);
-      if(!FAST){ pop(rectOf(`.pside[data-side="${p}"] .plife`), "-1", "dmg"); }
+      addLog(`🔄 <em>${pName(p)}</em> schudt de hand terug en trekt ${n} nieuwe kaarten: dat kost ${prijs} ${prijs === 1 ? "leven" : "levens"} (nu ${P(p).life}).`, true);
+      if(!FAST){ pop(rectOf(`.pside[data-side="${p}"] .plife`), "-" + prijs, "dmg"); }
       render();
       mulliganWaaier(p);
       if(!FAST) await sleep(260);
@@ -20342,7 +20352,7 @@ const TUT_ALL = [
   {t:"De vier kaarten", ic:"✦", live:"vier",
    b:`<b>🔥 Vuur</b> ${EL.vuur.tekst.speel}<br><br><b>💧 Water</b> ${EL.water.tekst.speel}<br><br><b>🪨 Steen</b> ${EL.steen.tekst.speel}<br><br><b>🌿 Gras</b> ${EL.gras.tekst.speel}`},
   {t:"Aanvallen", ic:"⚔️", img:"art/tut-aanval.jpg", v:"combat",
-   b:`Een groene rand: die kan aanvallen. Klik erop.<br><br>Hij slaat recht vooruit. Staat daar niks, dan raakt hij de speler.<br><br>Schade is de helft van zijn levens (⚔).`},
+   b:`Een groene rand: die kan aanvallen. Klik erop.<br><br>Hij slaat recht vooruit. Staat daar niks, dan raakt hij de speler.<br><br>Schade is al zijn levens (⚔).`},
   {t:"Reageren", ic:"⛓️", img:"art/tut-reageren.jpg", v:"chain",
    b:`Je mag ook in de beurt van de ander spelen, als reactie.<br><br>Wat het laatst gespeeld is, gebeurt eerst. Een effect mikt op een plek: staat daar dan niets meer, dan <span class="kw" data-kw="fizzelt">mist</span> het.`},
   {t:"Commander", ic:"🟣", img:"art/tut-draft.jpg", v:"stack",
@@ -20364,7 +20374,7 @@ const TUT_NIEUW = [
    b:`In Elementaal vecht je met <b>kaarten</b>.<br><br>Je speelt ze in een van de <b>vijf kolommen</b>.<br><br>Kaarten spelen mag in <b>allebei de beurten</b>. Vechten met je wezens doe je alleen in <b>je eigen beurt</b>.<br><br>Wie als eerste de <b>levens</b> van de ander op <b>nul</b> krijgt, wint!`,
    media:{soort:"een", vids:[{v:"1"}]}},
   {t:"Vechten",
-   b:`In <b>je eigen beurt</b> mag elk wezen één keer aanvallen. Het slaat recht vooruit.<br><br>Het doet schade: <b>de helft van zijn levens</b>.`,
+   b:`In <b>je eigen beurt</b> mag elk wezen één keer aanvallen. Het slaat recht vooruit.<br><br>Het doet schade: <b>al zijn levens</b>.`,
    regels:["<b>Sterk tegen:</b> meteen kapot.", "<b>Zwak tegen:</b> doet niets.", "<b>Neutraal:</b> gewone schade.", "<b>Geen verdediger:</b> recht op de levens."],
    cirkel:true,
    media:{soort:"rouleer", vids:[
@@ -20406,7 +20416,7 @@ const TUT_NIEUW = [
 ];
 /* Bij Brokko (1-2) komen er twee dingen bij: aethers, en kaarten als ritueel spelen. */
 const TUT_AETHER = {t:"Aethers",
-  b:`Brokko vecht met een <b>aether</b>: <b>Lawine</b>. Zijn Stenen slaan met al hun levens, niet met de helft.<br><br>Een aether is een kracht die het <b>hele gevecht</b> blijft. Je kunt hem niet weghalen.<br><br>Je ziet ze als <b>paarse ruitjes</b> op het veld. Ga erop staan om te lezen wat ze doen.`,
+  b:`Brokko vecht met een <b>aether</b>: <b>Lawine</b>. Het speel-effect van zijn Stenen gaat twee keer: twee keer +3.<br><br>Een aether is een kracht die het <b>hele gevecht</b> blijft. Je kunt hem niet weghalen.<br><br>Je ziet ze als <b>paarse ruitjes</b> op het veld. Ga erop staan om te lezen wat ze doen.`,
   media:{soort:"aether", ae:"ae_stonefull"}};
 const TUT_RITUEEL = {t:"Rituelen",
   b:`Vanaf nu kun je een kaart ook als <b>ritueel</b> spelen.<br><br>De kaart gaat dan onder de kolom liggen. Het effect gaat <b>nu</b> af, en <b>opnieuw</b> elke keer dat je in die kolom een wezen speelt.<br><br>Eén ritueel per kolom. Leg je er een nieuw neer, dan gaat het oude weg.`,
@@ -20461,7 +20471,7 @@ function tutVisual(v){
       <div style="position:relative;width:70px;height:98px">${cardFaceHTML("water")}
         <div class="atkgem" style="left:-8px;bottom:-8px">\u26941</div><div class="hpgem" style="right:-8px;bottom:-8px">2</div></div>
     </div>
-    <div style="text-align:center;color:var(--dim);font-size:.72rem">\u2694 links = aanval · \u2764 rechts = levens · aanval is de helft, minimaal 1</div>`;
+    <div style="text-align:center;color:var(--dim);font-size:.72rem">\u2694 links = aanval · \u2764 rechts = levens · aanval is al zijn levens</div>`;
   if(v === "ent") return `<div style="display:flex;justify-content:center;align-items:center;gap:20px;margin:16px 0 6px">
       <div style="position:relative;width:64px;height:90px">${cardFaceHTML("gras")}
         <div class="atkgem" style="left:-8px;bottom:-8px">\u26942</div><div class="hpgem buff" style="right:-8px;bottom:-8px">4</div></div>
@@ -20859,8 +20869,7 @@ function thuisDHTML(){
       if(src) chalFig = `<span class="tkfig"><img src="${src}" alt="" draggable="false" onerror="this.remove()"></span>`; } }catch(e){}
   return `<div class="tthuis">
     <div class="tlogo"><div><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
-      <div class="tkolkeuze" title="Proef: speel het verhaal met vier of vijf kolommen"><span>KOLOMMEN</span>${[4, 5].map(k => `<button class="tklein${(SET.kolVerhaal === 4 ? 4 : 5) === k ? " aan" : ""}" data-act="btn" data-btn="kolverhaal" data-k="${k}">${k}</button>`).join("")}
-        <span class="tvsl">VOLLE SLAG</span>${[["uit", false], ["aan", true]].map(([t, v]) => `<button class="tklein${!!SET.volleSlag === v ? " aan" : ""}" data-act="btn" data-btn="volleslag" data-v="${v ? 1 : 0}" title="Proef: elk wezen valt aan met al zijn levens">${t.toUpperCase()}</button>`).join("")}</div></div>
+      </div>
     <div class="tboven">${LIVE.resume ? `<button class="tklein" data-act="btn" data-btn="resumelive">TERUG NAAR ROOM ${LIVE.resume.code}</button>` : ""}
       ${toonInstall() ? `<button class="tklein" data-act="btn" data-btn="installeer">INSTALLEER</button>` : ""}</div>
     <button class="tkaart goud tverder" data-act="btn" data-btn="verhaalstart">
@@ -23818,7 +23827,7 @@ const STORY = {
       {doel:{p:0, el:"steen"}, hl:"+3 voor je Steen"},   // ronde 34: Steen geeft één wezen +3 (was twee keer +1)
       {op:"gespeeld:steen", zeg:"Hé. Dat is míjn truc."},
       {aanval:0, hl:"Val aan"},
-      {op:"aanval", bij:"leven:1", pop:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. Een aanval doet de <b>helft van zijn levens</b>, naar beneden afgerond: 6 wordt 3.",
+      {op:"aanval", bij:"leven:1", pop:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. Een aanval doet <b>al zijn levens</b> als schade: 6 is 6.",
         popVolle:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. In <b>Volle slag</b> doet een aanval <b>al zijn levens</b>: 6 is 6."},
       {op:"aanval", zeg:"AU. Daar stond niemand. Dat was mijn fout."},
       {beurtAf:true, hl:"Einde beurt"},
@@ -23894,7 +23903,7 @@ const STORY = {
       {s:"rocky", groot:true, t:"Wat een onverdeelde precies ís, staat er niet bij. Dat heb ik ook nooit gevraagd. Er staat wat ik moet doen, dat is genoeg."},
       {s:"rocky", groot:true, t:"Mijn broertje heeft dit van mij. Hij heeft er alleen één blaadje van. Ik daag u uit, waarde onverdeelde, tot een steenharde strijd."},
       {s:"rocky_boos", groot:true, t:"Maar verwacht niet dat ik zo makkelijk om te praten ben als hij."},
-      {s:"rocky_boos", groot:true, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant slaat voortaan met zijn volle gewicht."},
+      {s:"rocky_boos", groot:true, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant groeit voortaan dubbel zo hard."},
       {s:"rocky_boos", groot:true, t:"🟣 <b>ONWRIKBAARHEID.</b>"},
       {s:"rocky_boos", groot:true, t:"Vierhonderd stenen per ochtend, elf jaar lang. Reken maar uit."},
       {s:"rocky", groot:true, t:"Nee, doe maar niet. Ik heb het al uitgerekend."}
@@ -24952,7 +24961,7 @@ const STORY = {
       {s:"cultist_dichtbij", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Bij de meesten weet ik dat. Bij jou niet. Ik heb er vannacht wakker van gelegen."},
       {s:"cultist_wijd", bg:3, naam:"…", kleur:"#ff8a4a", t:"Ze doet twee stappen achteruit en spreidt haar armen."},
       {s:"cultist_wijd", bg:3, naam:"Zuster As", kleur:"#ff8a4a", t:"Nou. Kom op."},
-      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>Maatje</b> heeft <b>20 levens</b> en geen element: de elementcirkel doet hem niks, geen van beide kanten op. Hij slaat als iedereen, met de helft van zijn levens."},
+      {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🔥 <b>Maatje</b> heeft <b>20 levens</b> en geen element: de elementcirkel doet hem niks, geen van beide kanten op. Hij slaat als iedereen, met al zijn levens."},
       {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌿 Entangle-tokens zuigen hem wél leeg, maar ze houden hem niet thuis. En elke beurt van zijn baas komen er <b>2 levens</b> bij. Hij gaat niet dood. Je kunt hem op nul zetten, en verder komt hij niet en verder gaat hij niet."},
       {s:null, bg:3, naam:"…", kleur:"#ff6a2a", t:"🌋 <b>De grond aan jouw kant is lava.</b> Aan het begin van elke beurt van jou brandt de lava: het is vuur, dus 🌿 Gras verbrandt meteen, 💧 Water voelt niets, en de rest verliest <b>1 leven</b>. Haar kant staat op steen."},
       {s:null, bg:3, naam:"…", kleur:"#c684ff", paars:true, t:"🟣 Maatje en het meer zijn haar aethers: <b>Maatje</b> en <b>Lavameer</b>."},
@@ -27775,7 +27784,7 @@ const NIMBUS_STER_IDS = NIMBUS_CH.filter(c => c.sid !== "1-3").map(c => c.sid);
 const VELD = {
   "1-2": { regels:["Na Brokko's eerste beurt krijg je een 🔥 Vuur-ritueel in jouw kolom 3 en 4."] },
 
-  "1-3": { regels:["Allebei veertig keer 🪨 Steen, en allebei met 🟣 Lawine (Volle slag). Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
+  "1-3": { regels:["Allebei veertig keer 🪨 Steen, en allebei met 🟣 Lawine (Steen-effect twee keer). Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
                    "Nimbus begint met een 🪨 Steen-ritueel in de derde kolom."],
     varianten:{
       "b":["Jij speelt met tien van elk element, Nimbus met veertig keer 🪨 Steen.",
@@ -28525,9 +28534,9 @@ async function startStoryGevecht(id, variant, opts){
   MUT++;
   newGame();
   /* ▥ ronde 31: proef met vier of vijf kolommen in het verhaal (keuze op het homescreen, standaard 5) */
-  S.nk = SET.kolVerhaal === 4 ? 4 : 5;
+  S.nk = 5;   // ronde 34: altijd vijf kolommen (de keuze op het homescreen is weg)
   S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
-  S.volle = !!SET.volleSlag;   // 💥 ronde 33: spelvorm Volle slag (keuze op het homescreen)
+  S.volle = VOLLE_SLAG;   // 💥 ronde 34: Volle slag is de standaard (was een keuze op het homescreen)
   S.vsBot = true; S.set.handoff = false;
   S.mode = "classic"; S.story = {id, wereld:L.wereld, variant, schadeJij:0, mijnTijd:0};
   if(L.middenKies && !flintPlekHeb()) S.story.middenKiesNu = true;   // 🔥 1-5: Flint geeft midden in het gevecht een plek (ook voor de kern)
@@ -28559,7 +28568,7 @@ async function startStoryGevecht(id, variant, opts){
   if(L.startSchade) P(0).life = Math.max(1, P(0).life - L.startSchade);
   if(L.levensVij) P(1).life = L.levensVij;
   /* 💥 ronde 34: in Volle slag slaat alles twee keer zo hard, dus heeft iedereen twee keer zoveel levens */
-  const vx = S.volle ? 2 : 1;
+  const vx = S.volle ? LEVENS_X : 1;
   if(vx > 1){ P(0).life *= vx; P(1).life *= vx; }
   /* 🪨 Een ondergrens: één keer zakt hij niet onder dit getal, hoe hard de klap ook is.
      Dat gaat via de levens zelf, dan maakt het niet uit waar de schade vandaan komt. */
@@ -35875,7 +35884,7 @@ const SKINS = [
   {van:"2-1", naam:"Loof", file:"loof"},
   {van:"2-2", naam:"Bonsai", file:"bonsai", speciaal:"bonsai", na:"bonsairover"},
   {van:"knort", naam:"Drie kraaien in een trenchcoat", file:"kraaien"},
-  {van:"2-3", naam:"Waardin to chill and study to", file:"waardinlofi"},
+  {van:"2-3", naam:"Waardin to chill and study to", file:"waardinlofi", speciaal:"lofi"},   // ronde 34: de muzieknoten zweven los
   {van:"2-4", naam:"De Vervelling", file:"kaelidvervelling"},
   {van:"2-5", naam:"Xam", file:"xam"},
   {van:"3-1", naam:"Maatje", file:"maatje"},
@@ -36532,6 +36541,10 @@ function charKiesHTML(kop){
     const open = vrij.indexOf(c.id) >= 0, ch = mpChar(c.id);
     if(!open) return `<div class="chtegel dicht"><div class="chpt">?</div><div class="chnaam">${c.skin ? "challenge " + (c.skin === "knort" ? "Knort" : c.skin) : (c.lv || c.id)}</div></div>`;
     const inkt = isInktSkin(c);   // 🖤 helemaal zwart, alleen de oogjes en de naam
+    const lofi = (skinVan(c.id) || {}).speciaal === "lofi";   // 🎵 de noten zweven ook in de keuze
+    if(lofi){ const pad = SPRITE_BEELD[sprEcht(ch.spr)], L = lofiVerwerk(pad, lofiHerteken);
+      if(L.status === "klaar" && L.schoon) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt"><span class="majbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${lofiNotenHTML(L)}</span></div><div class="chnaam">${ch.naam}</div></div>`; }
     const maj = (skinVan(c.id) || {}).speciaal === "majestic";   // 🌈 Tang de Majestic: zijn eigen plaatje met het masker erover, en een regenboogrand
     if(maj){ const sk = skinVan(c.id);
       return `<div class="chtegel majestic-rand${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
@@ -36940,6 +36953,53 @@ function sprEcht(key){ let k = key, n = 0;
   return k; }
 /* Iets in de sprwrap zetten, zodat het precies met het plaatje meedeint. */
 const inWrap = (html, extra) => html.replace(/<\/span>\s*$/, extra + "</span>");
+/* 🎵 ronde 34: Waardin to chill and study to. De muzieknoten staan in de tekening; hier knippen we ze eruit
+   (losse stukjes naast de figuur met veel goud erin) en laten ze los zweven, verschijnen en vervagen. */
+const LOFI = {};
+function lofiVerwerk(pad, klaar){
+  if(!pad) return {status:"fout"};
+  if(LOFI[pad]) return LOFI[pad];
+  const L = LOFI[pad] = {status:"bezig", noten:[]};
+  const im = new Image();
+  im.onload = () => { try{
+    const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(im, 0, 0);
+    const id = x.getImageData(0, 0, W, H), d = id.data, N = W * H, lab = new Int32Array(N), st = new Int32Array(N);
+    const comps = [];
+    for(let i = 0; i < N; i++){ if(lab[i] || d[i * 4 + 3] <= 40) continue;
+      const k = comps.length + 1; let sp = 0, n = 0, goud = 0, x0 = W, y0 = H, x1 = 0, y1 = 0; st[sp++] = i; lab[i] = k;
+      while(sp){ const j = st[--sp], px = j % W, py = (j / W) | 0; n++;
+        if(d[j * 4] > 180 && d[j * 4 + 1] > 130 && d[j * 4 + 2] < 110) goud++;
+        if(px < x0) x0 = px; if(px > x1) x1 = px; if(py < y0) y0 = py; if(py > y1) y1 = py;
+        const bur = [px > 0 ? j - 1 : -1, px < W - 1 ? j + 1 : -1, py > 0 ? j - W : -1, py < H - 1 ? j + W : -1];
+        for(const q of bur) if(q >= 0 && !lab[q] && d[q * 4 + 3] > 40){ lab[q] = k; st[sp++] = q; } }
+      comps.push({k, n, goud:goud / n, x0, y0, x1, y1}); }
+    const groot = comps.reduce((a, b) => b.n > a.n ? b : a, {n:0});
+    const noten = comps.filter(q => q !== groot && q.n > 300 * (W / 1024) ** 2 && q.n < 30000 * (W / 1024) ** 2 && q.goud > .15);
+    noten.forEach(q => {
+      const m = 3, bx0 = Math.max(0, q.x0 - m), by0 = Math.max(0, q.y0 - m), bx1 = Math.min(W - 1, q.x1 + m), by1 = Math.min(H - 1, q.y1 + m), bw = bx1 - bx0 + 1, bh = by1 - by0 + 1;
+      const nc = document.createElement("canvas"); nc.width = bw; nc.height = bh; const nx = nc.getContext("2d"), nd = nx.createImageData(bw, bh);
+      for(let yy = by0; yy <= by1; yy++) for(let xx = bx0; xx <= bx1; xx++){ const j = yy * W + xx; if(lab[j] === groot.k) continue;
+        const o = ((yy - by0) * bw + (xx - bx0)) * 4; nd.data[o] = d[j * 4]; nd.data[o + 1] = d[j * 4 + 1]; nd.data[o + 2] = d[j * 4 + 2]; nd.data[o + 3] = d[j * 4 + 3];
+        d[j * 4 + 3] = 0; }   // uit de tekening
+      nx.putImageData(nd, 0, 0);
+      L.noten.push({u:nc.toDataURL("image/png"), x:bx0 / W * 100, y:by0 / H * 100, w:bw / W * 100});
+    });
+    if(L.noten.length){ x.putImageData(id, 0, 0); L.schoon = c.toDataURL("image/png"); }
+    L.ar = W / H; L.status = "klaar"; if(klaar) klaar();
+  }catch(e){ L.status = "fout"; } };
+  im.onerror = () => { L.status = "fout"; };
+  im.src = pad;
+  return L;
+}
+/* De noten zelf: elk zweeft omhoog, wiebelt en vervaagt, in zijn eigen tempo; van elke noot zijn er twee, zodat er steeds wel een verschijnt. */
+function lofiNotenHTML(L, p){
+  let i = 0;
+  const een = (n, extra) => { const dur = 4.2 + ((i * 1.37) % 2.4), del = -((i * 1.91) % dur); i++;
+    return `<img src="${n.u}" alt="" draggable="false" style="left:${(n.x + extra).toFixed(2)}%;top:${n.y.toFixed(2)}%;width:${n.w.toFixed(2)}%;animation-duration:${dur.toFixed(2)}s;animation-delay:${del.toFixed(2)}s">`; };
+  return `<span class="lofinoten"${p != null ? ` data-p="${p}"` : ""} data-ar="${L.ar}">` + L.noten.map(n => een(n, 0) + een(n, n.w * .6)).join("") + `</span>`;
+}
+function lofiHerteken(){ const v = document.getElementById("mpvak"); if(v) v.dataset.sig = ""; try{ mpBalkPaint(); }catch(e){} if(M && M.type === "mp") render(); }
 function skinFigHTML(p, sk, key, nu){
   const gewoon = `<div class="ptfig">${spriteSVG(key)}</div>`;
   if(!sk || !sk.speciaal || FAST) return gewoon;
@@ -36957,6 +37017,11 @@ function skinFigHTML(p, sk, key, nu){
     const st = skinStand(echt);
     const masker = `art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`;
     return `<div class="ptfig">${inWrap(spriteSVG(key), `<span class="majmask" style="--masker:url('${masker}')"></span>`)}</div>`;
+  }
+  if(sk.speciaal === "lofi"){
+    const pad = SPRITE_BEELD[sprEcht(key)], L = lofiVerwerk(pad, lofiHerteken);
+    if(L.status !== "klaar" || !L.schoon) return gewoon;
+    return `<div class="ptfig lofifig">${inWrap(spriteSVG(key).split(pad).join(L.schoon), lofiNotenHTML(L, p))}</div>`;
   }
   if(sk.speciaal === "inkt"){
     /* 🖤 Inkts inkt: Inkt, maar helemaal zwart, met twee witte oogjes */
@@ -36990,6 +37055,7 @@ function skinVoorladen(){
     const paden = [];
     sprs.forEach(spr => SKIN_STANDEN.forEach(st => { const k = sprEcht(spr + st); if(SPRITE_BEELD[k]) paden.push(SPRITE_BEELD[k]); }));
     if(sk.speciaal === "kees") paden.push("art/rocky-arm-kwast.png");
+    if(sk.speciaal === "lofi") SKIN_STANDEN.forEach(st => { const k = sprEcht(sk.spr + st); if(SPRITE_BEELD[k]) lofiVerwerk(SPRITE_BEELD[k]); });   // 🎵 de noten alvast loshalen
     if(sk.speciaal === "majestic") SKIN_STANDEN.filter(st => !(sk.zonder && sk.zonder[st])).forEach(st => paden.push(`art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`));
     [...new Set(paden)].forEach(pad => { const im = new Image(); im.onload = () => { if(typeof BEELD_KLAAR === "object" && BEELD_KLAAR[pad] !== "fout") BEELD_KLAAR[pad] = BEELD_KLAAR[pad] || true; }; im.src = pad; });
   });
@@ -36997,12 +37063,12 @@ function skinVoorladen(){
 /* Na het tekenen: het masker en de ogen precies op het plaatje leggen. */
 function skinNaTekenen(vak){
   if(!vak || FAST) return;
-  vak.querySelectorAll(".majmask, .inktogen").forEach(el => {
+  vak.querySelectorAll(".majmask, .inktogen, .lofinoten").forEach(el => {
     const img = el.parentNode && el.parentNode.querySelector("img.sprbeeld");
     if(!img) return;
     const sync = () => {
       el.style.setProperty("--onder", img.style.getPropertyValue("--onder") || 0);
-      if(el.classList.contains("inktogen")){
+      if(el.classList.contains("inktogen") || el.classList.contains("lofinoten")){
         /* zoals object-fit: contain, onderaan: hoe groot staat het plaatje er echt? */
         const W = img.clientWidth, H = img.clientHeight, ar = +el.dataset.ar || 1;
         if(!W || !H) return;
@@ -37396,7 +37462,7 @@ function onBtn(btn, el, fromAction){
     case "cancel": if(u.mode==="slot" && u.cancellable && !isBot(u.p)) feed("cancel"); break;
     /* Via act(), zodat de keuze online ook bij de ander aankomt (anders loopt het potje uiteen). */
     case "mullhouden": if(u.mode==="mulligan" && !isBot(u.p)) act({t:"f", v:"houden"}); break;
-    case "mullopnieuw": if(u.mode==="mulligan" && !isBot(u.p) && P(u.p).life > 1) act({t:"f", v:"opnieuw"}); break;
+    case "mullopnieuw": if(u.mode==="mulligan" && !isBot(u.p) && P(u.p).life > (u.keer || 0) + 1) act({t:"f", v:"opnieuw"}); break;
     case "skip": if(u.mode==="choice" && u.optional && !isBot(u.p)){ if(u.p === 0 && !tutMag("pass")) break; feed(null); } break;
     case "asCre": if(u.mode==="pickmode" && u.creOk && !isBot(u.p)) feed("cre"); break;
     case "asSpell": if(u.mode==="pickmode" && u.spOk && !isBot(u.p)) feed("spell"); break;
@@ -38067,7 +38133,7 @@ function sneltoets(e){
     return true;
   }
   if(u.mode === "mulligan"){
-    if(terug && P(u.p).life > 1){ doAct({t:"f", v:"opnieuw"}); return true; }
+    if(terug && P(u.p).life > (u.keer || 0) + 1){ doAct({t:"f", v:"opnieuw"}); return true; }
     return false;
   }
   if(pending || busyFlag) return false;
