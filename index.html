@@ -2954,6 +2954,13 @@ body.pvuitleg #ptbel{display:none !important}
 #horizon .hzbloed{position:absolute; inset:0; z-index:999; pointer-events:none; background:#a0101a; mix-blend-mode:multiply; opacity:.55}
 #horizon[data-skinfx="donker"] .hz{filter:brightness(.6) saturate(.8) !important}
 body.skinzwart{background:#000 !important}
+/* ☁ Nimbus de Meervoudige: kleine Nimbussen die over het hele speelveld heen en weer vliegen */
+#meerlucht{position:fixed; top:0; bottom:0; left:calc(var(--kg, 0px) + var(--kw, 0px)); right:calc(var(--kg, 0px) + var(--kw, 0px)); z-index:45; pointer-events:none; overflow:hidden}   /* alleen boven het speelveld, tussen de twee zwarte kolommen */
+#meerlucht .ml{position:absolute; left:0; animation:meerVlieg 10s linear infinite}
+#meerlucht .ml img{display:block; width:100%; height:auto; image-rendering:pixelated; filter:drop-shadow(0 3px 0 rgba(0,0,0,.35)); animation:meerDobber 1.4s ease-in-out infinite alternate}
+@keyframes meerVlieg{0%{left:-90px; transform:scaleX(1)} 49.9%{left:100%; transform:scaleX(1)} 50%{left:100%; transform:scaleX(-1)} 100%{left:-90px; transform:scaleX(-1)}}
+@keyframes meerDobber{to{transform:translateY(-14px) rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){#meerlucht{display:none}}
 body.skinzwart #horizon{display:none}
 @keyframes hzsway{
   from{transform:translate3d(calc(-50% - var(--hsw,6px)),0,0)}
@@ -4043,10 +4050,10 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
 @keyframes meerB{0%{transform:translate(0,0)} 33%{transform:translate(70%,30%)} 66%{transform:translate(30%,90%)} 100%{transform:translate(110%,60%)}}
 @keyframes meerC{0%{transform:translate(0,0)} 33%{transform:translate(-80%,40%)} 66%{transform:translate(-30%,110%)} 100%{transform:translate(-110%,50%)}}
 .mppt .majmask{position:absolute; inset:0; pointer-events:none; z-index:2;
-  background:linear-gradient(135deg,#f44,#fa3,#ff4,#4e6,#3cf,#66f,#c4f,#f44); background-size:300% 300%;
+  background:linear-gradient(135deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a); background-size:200% 200%;
   -webkit-mask:var(--masker) center bottom/contain no-repeat; mask:var(--masker) center bottom/contain no-repeat;
-  mix-blend-mode:multiply; animation:regenboog 4.3s linear infinite; transform:translateY(calc(var(--onder, 0) * 100%))}   /* color liet wit wit: multiply kleurt de witte rook echt */
-@keyframes regenboog{to{background-position:300% 300%}}
+  mix-blend-mode:multiply; animation:regenboog 6s linear infinite; transform:translateY(calc(var(--onder, 0) * 100%))}   /* ronde 33: de hele regenboog tegelijk over de rook (eerst zag je maar één kleur tegelijk), en hij schuift langzaam door */
+@keyframes regenboog{to{background-position:200% 200%}}
 .mppt.sk-inkt{background:#000}
 .mppt .inktfig .sprbeeld{filter:brightness(0)}
 .mppt .inktogen{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2;
@@ -22855,6 +22862,7 @@ function horizonVerf(id, variant, skin){
   const sk = skin ? (typeof skin === "string" ? SKINS.find(k => k.file === skin) : skin) : null;
   laag.dataset.skinfx = (sk && sk.fx) || "";
   document.body.classList.toggle("skinzwart", !!(sk && sk.fx === "zwart"));
+  meerLucht(!!(sk && sk.speciaal === "meer"));   // ☁ Nimbus de Meervoudige: overal kleine Nimbussen
   if(FAST || SET.horizon === false) return;
   laag.dataset.hz = id;
   if(sk && sk.fx === "zwart") return;
@@ -22948,7 +22956,25 @@ function horizonVerf(id, variant, skin){
   });
   laagPassen();
 }
-function horizonWeg(){ const l = document.getElementById("horizon"); if(l){ l.innerHTML = ""; l.dataset.hz = ""; l.dataset.skinfx = ""; } document.body.classList.remove("skinzwart"); }
+function horizonWeg(){ const l = document.getElementById("horizon"); if(l){ l.innerHTML = ""; l.dataset.hz = ""; l.dataset.skinfx = ""; } document.body.classList.remove("skinzwart"); meerLucht(false); }
+/* ☁ ronde 33: Nimbus de Meervoudige. In zijn domein vliegen er over het hele speelveld heel veel kleine Nimbussen
+   heen en weer, elk op zijn eigen hoogte en tempo, en ze kijken de kant op die ze vliegen. Expres irritant.
+   Ze zitten boven het veld maar je kunt er gewoon doorheen klikken. */
+function meerLucht(aan){
+  let l = document.getElementById("meerlucht");
+  if(!aan || FAST){ if(l) l.remove(); return; }
+  if(l) return;
+  l = document.createElement("div"); l.id = "meerlucht"; l.setAttribute("aria-hidden", "true");
+  const beeld = (typeof SPRITE_BEELD === "object" && SPRITE_BEELD.nimbus) || "art/nimbus.png";
+  let h = "";
+  for(let i = 0; i < 16; i++){
+    const r = k => { const x = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+    const maat = 34 + r(1) * 46, duur = 7 + r(2) * 9, top = 4 + r(3) * 82, start = -r(4) * duur;
+    h += `<div class="ml" style="top:${top.toFixed(1)}%;width:${maat.toFixed(0)}px;animation-duration:${duur.toFixed(1)}s;animation-delay:${start.toFixed(1)}s${i % 2 ? ";animation-direction:reverse" : ""}">`
+       + `<img src="${beeld}" alt="" draggable="false" style="animation-duration:${(1.1 + r(5)).toFixed(2)}s"></div>`;
+  }
+  l.innerHTML = h; document.body.appendChild(l);
+}
 /* Het portret achter een personage: het eigen plaatje van het level, over de oude lagen heen.
    Is het er niet, dan haalt het zichzelf weg en zie je de lagen zoals vroeger. */
 function ptPlaatje(id){
