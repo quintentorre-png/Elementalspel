@@ -2069,6 +2069,7 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
   background:#140d08 center/100% 100% no-repeat; box-shadow:inset 0 0 0 2px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.5);
   image-rendering:pixelated}
 .wkscene.voorbaas .wkitem{z-index:2}
+.wkscene .wkitem{z-index:3}   /* ronde 34: de waren en hun prijzen staan altijd vóór Knort, ook als de toonbank-laag (nog) niet geladen is */
 /* 🫧 De toonbank ligt over de verkoper heen; de koopwaar ligt daar weer bovenop. */
 .wkvoor{position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; image-rendering:pixelated}
 .wkscene.metvoor .wkitem{z-index:3}
@@ -2978,6 +2979,33 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
   -webkit-mask:var(--masker) center bottom/contain no-repeat; mask:var(--masker) center bottom/contain no-repeat;
   mix-blend-mode:multiply; animation:regenboog 6s linear infinite}
 @media (prefers-reduced-motion:reduce){ #horizon .hzregenboog, .majestic-rand::before, .majbox .majmask{animation:none} }
+/* ☁ ronde 34: de zwerm van Nimbus de Meervoudige (PvP-vak en karakterkeuze) */
+.zwerm{position:absolute; inset:0; overflow:hidden; pointer-events:none}
+.zwerm .zw{position:absolute; left:-30%; animation:zwDash 4s linear infinite}
+.zwerm .zw img{display:block; width:100%; height:auto; image-rendering:pixelated; filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)); animation:zwDobber 1s ease-in-out infinite alternate}
+.zwerm .zw.terug{animation-direction:reverse; transform:scaleX(-1)}
+@keyframes zwDobber{to{translate:0 -12%; rotate:7deg}}
+@keyframes zwDash{0%{left:-30%; translate:0 0} 22%{left:28%; translate:0 -18%} 34%{left:34%; translate:0 -14%} 58%{left:72%; translate:0 16%} 68%{left:76%; translate:0 12%} 100%{left:115%; translate:0 0}}
+.mppt .ptfig.ptzwerm{inset:0; height:auto; display:block}
+.chpt.chzwerm{position:relative; display:block}
+@media (prefers-reduced-motion:reduce){ .zwerm .zw, .zwerm .zw img{animation:none} .zwerm .zw{left:calc(var(--i, 0) * 8%)} }
+/* 🎄 ronde 34: de lampjes van Christ-bus: elk gloeit zacht, en heel soms flikkert er een, zoals echte kerstverlichting */
+.kerstlicht{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:translateX(-50%) translateY(calc(var(--onder, 0) * 100%))}
+.skinfxbox .kerstlicht, .skinfxbox .lofinoten{width:auto; height:100%; aspect-ratio:var(--ar); transform:translateX(-50%)}
+.kerstlicht .kl{position:absolute; width:11%; aspect-ratio:1; translate:-50% -50%; border-radius:50%; mix-blend-mode:screen;
+  background:radial-gradient(circle, var(--k) 0%, color-mix(in srgb, var(--k) 45%, transparent) 30%, transparent 68%);
+  animation:kerstGloei var(--gloei) ease-in-out var(--gdel) infinite alternate, kerstFlik var(--flik) linear var(--fdel) infinite}
+.kerstlicht .kl b{position:absolute; inset:30%; border-radius:50%; background:rgba(20,10,30,.85); mix-blend-mode:multiply; opacity:0;
+  animation:kerstUit var(--flik) linear var(--fdel) infinite}
+.kerstlicht .kl-r{--k:#ff4a4a} .kerstlicht .kl-y{--k:#ffd24a} .kerstlicht .kl-g{--k:#5cff7a}
+.kerstlicht .kl-R{--k:#ff2a2a; width:14%}
+.kerstlicht .kl-x{--k:#ffb060; width:8%; animation:kerstSputter var(--flik) linear var(--fdel) infinite}
+.kerstlicht .kl-x b{display:none}
+@keyframes kerstGloei{from{filter:brightness(.85)} to{filter:brightness(1.25)}}
+@keyframes kerstFlik{0%,90%{opacity:.85} 91%{opacity:.05} 92.5%{opacity:.9} 94%{opacity:.1} 95.5%{opacity:.85} 100%{opacity:.85}}
+@keyframes kerstUit{0%,90%{opacity:0} 91%{opacity:.8} 92.5%{opacity:0} 94%{opacity:.7} 95.5%{opacity:0} 100%{opacity:0}}
+@keyframes kerstSputter{0%,88%{opacity:0} 89%{opacity:.6} 90%{opacity:0} 91.5%{opacity:.45} 93%{opacity:0} 100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){ .kerstlicht .kl, .kerstlicht .kl b{animation:none} }
 /* 🎵 ronde 34: de losse muzieknoten van de lofi-Waardin */
 .lofinoten{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:translateX(-50%) translateY(calc(var(--onder, 0) * 100%))}
 .lofinoten img{position:absolute; height:auto; max-width:none; image-rendering:pixelated; opacity:0; animation:lofinoot 5s ease-in-out infinite}
@@ -20862,7 +20890,9 @@ function thuisDHTML(){
   const mijnFig = figSrc(kc), tegenFig = figSrc(tegen);
   /* ronde 23: jouw karakter in de PvP-kaart is de knop naar het karakterscherm (het aparte vak is weg) */
   const inktMijn = isInktSkin(kc);   // 🖤 Inkts inkt: alles zwart, alleen de oogjes en de tekst
-  const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">${inktMijn ? inktLos("") : ""}` : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
+  /* ronde 34: de effecten van sommige skins (noten, lampjes, zwerm) ook hier op de PvP-kaart */
+  const fxMijn = kc && !kc.wil && mijnFig ? skinFxBox(kc, mijnFig) : null;
+  const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? ((fxMijn || `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">`) + (inktMijn ? inktLos("") : "")) : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
   let chalFig = "", chalBg = "url('art/bg-1-1.png')";
   try{ const ids = CHAL_VOLGORDE(), v = ids.find(id => chalOpen(id) && !ladderVerslagen(id)) || ids.filter(chalOpen).pop();
     if(v){ const c = mpChar(v), src = ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);
@@ -30571,13 +30601,14 @@ function knortOnrustMag(){
 function knortNieuwDoel(t){
   const r = Math.random();
   let doel = r < 0.3 ? KN.x + (Math.random() < 0.5 ? -1 : 1) * (2 + Math.random() * 4)   // een schuifeltje
-                     : 26 + Math.random() * 48;                                          // ergens anders heen
-  doel = Math.max(26, Math.min(74, doel));
+                     : 35 + Math.random() * 26;                                          // ergens anders heen
+  /* ronde 34: niet verder dan tussen de hartenpot (links) en de kist (rechts): die staan vóór hem op de toonbank */
+  doel = Math.max(35, Math.min(61, doel));
   KN.van = KN.x; KN.naar = doel; KN.t0 = t;
   KN.dur = Math.max(280, Math.abs(doel - KN.x) * (Math.random() < 0.3 ? 20 : 42));      // soms schiet hij weg
   KN.rust = KN.t0 + KN.dur + (Math.random() < 0.2 ? 2200 + Math.random() * 2200 : 350 + Math.random() * 1300);
   /* Af en toe, als hij niks zegt, pakt hij iets: hij telt, hij doet zijn jas open, hij grijnst. */
-  if(!M.zin && !KN.terug && Math.random() < 0.22){
+  if(!M.zin && !KN.terug && Math.random() < 0.45){   // ronde 34: vaker een andere pose (was 0.22)
     const img = document.querySelector(".wkbaas.onrust .wkbaasimg");
     const opties = ["knorst_tel", "knorst_geheim", "knorst_blij"].map(sprBeeldPad).filter(Boolean);
     if(img && opties.length){
@@ -35879,7 +35910,7 @@ const SKINS = [
   {van:"1-1", naam:"Kees", file:"kees", speciaal:"kees", stil:true},
   {van:"1-2", naam:"James Bronk", file:"brokkobronk"},
   {van:"1-3", naam:"Nimbus de Meervoudige", file:"nimbusmeer", geenArt:true, speciaal:"meer"},
-  {van:"1-3", naam:"Christ-bus", file:"nimbuskerst"},          // later: van het Nimbus-level in wereld 4
+  {van:"1-3", naam:"Christ-bus", file:"nimbuskerst", speciaal:"kerst"},   // ronde 34: de lampjes branden en flikkeren soms          // later: van het Nimbus-level in wereld 4
   {van:"1-4", naam:"Rocky de Vergevende", file:"rockyridder"},
   {van:"2-1", naam:"Loof", file:"loof"},
   {van:"2-2", naam:"Bonsai", file:"bonsai", speciaal:"bonsai", na:"bonsairover"},
@@ -36541,6 +36572,14 @@ function charKiesHTML(kop){
     const open = vrij.indexOf(c.id) >= 0, ch = mpChar(c.id);
     if(!open) return `<div class="chtegel dicht"><div class="chpt">?</div><div class="chnaam">${c.skin ? "challenge " + (c.skin === "knort" ? "Knort" : c.skin) : (c.lv || c.id)}</div></div>`;
     const inkt = isInktSkin(c);   // 🖤 helemaal zwart, alleen de oogjes en de naam
+    if((skinVan(c.id) || {}).speciaal === "meer"){   // ☁ Nimbus de Meervoudige: ook in de keuze een zwerm
+      const src = SPRITE_BEELD[sprEcht(ch.spr)] || SPRITE_BEELD.nimbus || "art/nimbus.png";
+      return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt chzwerm">${zwermHTML(src, 12, 22, 34, Date.now())}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "kerst"){   // 🎄 Christ-bus: ook in de keuze branden de lampjes
+      const src = SPRITE_BEELD[sprEcht(ch.spr)] || "";
+      return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${skinFxBox(c, src) || charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
     const lofi = (skinVan(c.id) || {}).speciaal === "lofi";   // 🎵 de noten zweven ook in de keuze
     if(lofi){ const pad = SPRITE_BEELD[sprEcht(ch.spr)], L = lofiVerwerk(pad, lofiHerteken);
       if(L.status === "klaar" && L.schoon) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
@@ -36953,9 +36992,22 @@ function sprEcht(key){ let k = key, n = 0;
   return k; }
 /* Iets in de sprwrap zetten, zodat het precies met het plaatje meedeint. */
 const inWrap = (html, extra) => html.replace(/<\/span>\s*$/, extra + "</span>");
+/* ☁ ronde 34: Nimbus de Meervoudige als zwerm: heel veel kleine Nimbussen die door het vak heen schieten,
+   even stilhangen en weer verder dashen. Loopt door waar hij was als het vak opnieuw getekend wordt. */
+function zwermHTML(src, n, klein, groot, nu){
+  let h = "";
+  for(let i = 0; i < n; i++){
+    const r = k => { const x = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+    const maat = klein + r(1) * (groot - klein), duur = 2.6 + r(2) * 3.2, top = r(3) * (100 - maat * 1.1), terug = i % 2 === 1;
+    const del = -(((nu || 0) / 1000 + r(4) * duur) % duur);
+    h += `<div class="zw${terug ? " terug" : ""}" style="top:${top.toFixed(1)}%;width:${maat.toFixed(1)}%;animation-duration:${duur.toFixed(2)}s;animation-delay:${del.toFixed(2)}s">`
+       + `<img src="${src}" alt="" draggable="false" style="animation-duration:${(.7 + r(5) * .6).toFixed(2)}s"></div>`;
+  }
+  return `<div class="zwerm" aria-hidden="true">${h}</div>`;
+}
 /* 🎵 ronde 34: Waardin to chill and study to. De muzieknoten staan in de tekening; hier knippen we ze eruit
    (losse stukjes naast de figuur met veel goud erin) en laten ze los zweven, verschijnen en vervagen. */
-const LOFI = {};
+const LOFI = {}, LOFI_WACHT = [];
 function lofiVerwerk(pad, klaar){
   if(!pad) return {status:"fout"};
   if(LOFI[pad]) return LOFI[pad];
@@ -36985,8 +37037,13 @@ function lofiVerwerk(pad, klaar){
       nx.putImageData(nd, 0, 0);
       L.noten.push({u:nc.toDataURL("image/png"), x:bx0 / W * 100, y:by0 / H * 100, w:bw / W * 100});
     });
-    if(L.noten.length){ x.putImageData(id, 0, 0); L.schoon = c.toDataURL("image/png"); }
-    L.ar = W / H; L.status = "klaar"; if(klaar) klaar();
+    L.ar = W / H;
+    const af = () => { L.status = "klaar"; LOFI_WACHT.forEach(f => { try{ f(); }catch(e){} }); LOFI_WACHT.length = 0; if(klaar) klaar(); };
+    if(L.noten.length){ x.putImageData(id, 0, 0);
+      /* ronde 34: toBlob in plaats van toDataURL: veel sneller, en het blokkeert het spel niet */
+      if(c.toBlob) c.toBlob(bl => { try{ L.schoon = URL.createObjectURL(bl); }catch(e){ L.schoon = c.toDataURL("image/png"); } af(); }, "image/png");
+      else { L.schoon = c.toDataURL("image/png"); af(); } }
+    else af();
   }catch(e){ L.status = "fout"; } };
   im.onerror = () => { L.status = "fout"; };
   im.src = pad;
@@ -36999,16 +37056,48 @@ function lofiNotenHTML(L, p){
     return `<img src="${n.u}" alt="" draggable="false" style="left:${(n.x + extra).toFixed(2)}%;top:${n.y.toFixed(2)}%;width:${n.w.toFixed(2)}%;animation-duration:${dur.toFixed(2)}s;animation-delay:${del.toFixed(2)}s">`; };
   return `<span class="lofinoten"${p != null ? ` data-p="${p}"` : ""} data-ar="${L.ar}">` + L.noten.map(n => een(n, 0) + een(n, n.w * .6)).join("") + `</span>`;
 }
-function lofiHerteken(){ const v = document.getElementById("mpvak"); if(v) v.dataset.sig = ""; try{ mpBalkPaint(); }catch(e){} if(M && M.type === "mp") render(); }
+function lofiHerteken(){ const v = document.getElementById("mpvak"); if(v) v.dataset.sig = ""; try{ mpBalkPaint(); }catch(e){}
+  if((M && M.type === "mp") || !S || !S.ui || S.ui.mode === "start") render(); }   // ook het startscherm (de PvP-kaart)
+/* 🎄 ronde 34: Christ-bus. Waar de lampjes in elke stand zitten (in procenten van de tekening, met de hand opgemeten),
+   en welke kleur ze hebben: r rood, y geel, g groen. Boos branden ze allemaal fel rood; stuk zijn ze uit en sputteren er een paar. */
+const KERST_LAMPJES = {
+  "":      [[14.1,51.8,"g"],[17.3,56.1,"y"],[11.4,66.1,"r"],[11.4,78.8,"y"],[18.6,85.2,"y"],[38.6,79.7,"r"],[53.6,61.2,"y"],[63.6,84.5,"y"],
+            [77.7,73.9,"g"],[87.7,65.8,"y"],[85.9,56.1,"r"],[92.3,49.4,"y"],[83.2,43.0,"y"],[91.4,80.0,"r"],[79.5,90.9,"g"]],
+  "_taunt":[[14.1,52.6,"g"],[21.4,54.4,"r"],[44.5,58.6,"y"],[9.5,65.3,"r"],[17.3,74.1,"y"],[37.7,76.2,"r"],[63.6,82.0,"y"],[67.7,64.4,"g"],
+            [78.6,76.8,"g"],[91.8,80.5,"r"],[86.8,45.6,"y"],[94.1,52.3,"r"],[80.9,88.0,"g"]],
+  "_boos":  [[15.5,53.5,"R"],[51.4,59.5,"R"],[85.9,47.1,"R"],[85.5,57.7,"R"],[10.0,65.0,"R"],[90.0,66.2,"R"],[15.0,77.4,"R"],[40.0,77.4,"R"],
+            [78.2,74.4,"R"],[91.4,80.8,"R"],[22.7,84.4,"R"],[65.0,84.4,"R"],[80.0,89.8,"R"]],
+  "_stuk":  [[12.7,56.8,"x"],[48.2,63.5,"x"],[6.8,68.3,"x"],[11.4,77.7,"x"],[38.6,78.6,"x"],[20.9,87.4,"x"],[62.7,85.3,"x"],[90.0,82.3,"x"],
+            [94.5,50.5,"x"],[78.2,92.9,"x"]]
+};
+const KERST_AR = 1024 / 1536;
+function kerstLagHTML(stand, p){
+  const lijst = KERST_LAMPJES[stand]; if(!lijst) return "";
+  const h = lijst.map(([x, y, k], i) => {
+    const r = q => { const v = Math.sin((i + 1) * 12.9898 + q * 78.233 + stand.length * 3.1) * 43758.5453; return v - Math.floor(v); };
+    const flik = (9 + r(1) * 16).toFixed(1), del = (-r(2) * 25).toFixed(1), gloei = (1.8 + r(3) * 1.6).toFixed(2), gdel = (-r(4) * 3).toFixed(2);
+    return `<i class="kl kl-${k}" style="left:${x}%;top:${y}%;--flik:${flik}s;--fdel:${del}s;--gloei:${gloei}s;--gdel:${gdel}s"><b></b></i>`; }).join("");
+  return `<span class="kerstlicht"${p != null ? ` data-p="${p}"` : ""} data-ar="${KERST_AR}">${h}</span>`;
+}
+/* Een plaatje met zijn effect erover, voor de karakterkeuze en de PvP-kaart op het startscherm. */
+function skinFxBox(c, src){
+  const sk = skinVan(c.id); if(!sk || FAST) return null;
+  if(sk.speciaal === "kerst") return `<span class="majbox skinfxbox" style="--ar:${KERST_AR}"><img class="chmaj" src="${src}" alt="" draggable="false">${kerstLagHTML("")}</span>`;
+  if(sk.speciaal === "lofi"){ const L = lofiVerwerk(src, lofiHerteken);
+    if(L.status === "klaar" && L.schoon) return `<span class="majbox skinfxbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${lofiNotenHTML(L)}</span>`;
+    return null; }
+  if(sk.speciaal === "meer") return zwermHTML(src, 12, 22, 34, Date.now());
+  return null;
+}
 function skinFigHTML(p, sk, key, nu){
   const gewoon = `<div class="ptfig">${spriteSVG(key)}</div>`;
   if(!sk || !sk.speciaal || FAST) return gewoon;
   if(sk.speciaal === "meer"){
     /* ☁ Nimbus de Meervoudige: deint over het hele portret, en bij elke klap komt er een kleinere bij */
-    const n = Math.min(6, 1 + (MPPT.schade[p] || 0)), fig = spriteSVG(key);
-    const DUUR = [9.4, 7.1, 8.3, 6.2, 10.6, 7.7];
-    return `<div class="ptfig ptmeer">` + Array.from({length:n}, (_, i) =>
-      `<div class="meer m${i}" style="animation-duration:${DUUR[i]}s;animation-delay:-${((nu / 1000) % DUUR[i]).toFixed(2)}s">${fig}</div>`).join("") + `</div>`;
+    /* ronde 34: een zwerm van kleine Nimbussen die door het vak dashen; bij elke klap komen er twee bij */
+    const src = SPRITE_BEELD[sprEcht(key)] || SPRITE_BEELD.nimbus || "art/nimbus.png";
+    const n = Math.min(24, 10 + 2 * (MPPT.schade[p] || 0));
+    return `<div class="ptfig ptzwerm">${zwermHTML(src, n, 15, 26, nu)}</div>`;
   }
   if(sk.speciaal === "majestic"){
     /* 🌈 Tang de Majestic: een regenboog door een masker per stand, precies over de sprite */
@@ -37017,6 +37106,12 @@ function skinFigHTML(p, sk, key, nu){
     const st = skinStand(echt);
     const masker = `art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`;
     return `<div class="ptfig">${inWrap(spriteSVG(key), `<span class="majmask" style="--masker:url('${masker}')"></span>`)}</div>`;
+  }
+  if(sk.speciaal === "kerst"){
+    const echt = sprEcht(key);
+    if(!String(echt).startsWith(sk.spr)) return gewoon;
+    const st = skinStand(echt);
+    return `<div class="ptfig">${inWrap(spriteSVG(key), kerstLagHTML(KERST_LAMPJES[st] ? st : "", p))}</div>`;
   }
   if(sk.speciaal === "lofi"){
     const pad = SPRITE_BEELD[sprEcht(key)], L = lofiVerwerk(pad, lofiHerteken);
@@ -37063,12 +37158,12 @@ function skinVoorladen(){
 /* Na het tekenen: het masker en de ogen precies op het plaatje leggen. */
 function skinNaTekenen(vak){
   if(!vak || FAST) return;
-  vak.querySelectorAll(".majmask, .inktogen, .lofinoten").forEach(el => {
+  vak.querySelectorAll(".majmask, .inktogen, .lofinoten, .kerstlicht").forEach(el => {
     const img = el.parentNode && el.parentNode.querySelector("img.sprbeeld");
     if(!img) return;
     const sync = () => {
       el.style.setProperty("--onder", img.style.getPropertyValue("--onder") || 0);
-      if(el.classList.contains("inktogen") || el.classList.contains("lofinoten")){
+      if(el.classList.contains("inktogen") || el.classList.contains("lofinoten") || el.classList.contains("kerstlicht")){
         /* zoals object-fit: contain, onderaan: hoe groot staat het plaatje er echt? */
         const W = img.clientWidth, H = img.clientHeight, ar = +el.dataset.ar || 1;
         if(!W || !H) return;
@@ -38581,6 +38676,7 @@ function laadKlaar(){
   if(txt) txt.textContent = "klaar";
   LAAD_DAARNA.forEach(f => { try{ f(); }catch(e){} });
   setTimeout(() => { try{ medVoorlaad(); }catch(e){} }, 1200);   // ronde 34: de medaillons van de kaart alvast binnenhalen
+  setTimeout(() => { try{ const sk = SKINS.find(k => k.speciaal === "lofi"); if(sk && SPRITE_BEELD[sk.spr]) lofiVerwerk(SPRITE_BEELD[sk.spr], lofiHerteken); }catch(e){} }, 2600);   // 🎵 de noten van de lofi-Waardin alvast loshalen
   /* zat alles al in de cache, dan toch heel even de balk laten zien — anders flitst hij */
   const rest = Math.max(0, 450 - (Date.now() - LAAD.t0));
   const weg = () => {
