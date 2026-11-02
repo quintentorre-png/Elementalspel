@@ -403,16 +403,18 @@ body.tutdim .hcard:not(.tuthl), body.tutdim #actions .abtn:not(.tuthl){pointer-e
 .mullknop{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
 .mullknop .abtn{font-size:.62rem}
 body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brightness(.5) saturate(.65); transition:filter .25s ease}
-.hand.mullhand .card{animation:mullgloed 1.9s ease-in-out infinite;
-  box-shadow:0 0 0 2px rgba(255,212,71,.5), 0 0 18px rgba(255,212,71,.28)}
-.hand.mullhand .card:nth-child(2n){animation-delay:.25s}
-.hand.mullhand .card:nth-child(3n){animation-delay:.5s}
-@keyframes mullgloed{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hand.mullhand .card{box-shadow:0 0 0 2px rgba(255,212,71,.5), 0 0 18px rgba(255,212,71,.28)}
+/* ronde 34: de kaart en zijn getallen (aanval, levens, nummer) deinen samen: het deinen zit op een stukje translate
+   dat alleen voor de mulligan is, zodat het niet botst met wat de getallen zelf al aan transform hebben */
+.hand.mullhand .hcard > :is(.card, .hst, .hnr){animation:mullgloed 1.9s ease-in-out infinite}
+.hand.mullhand .hcard:nth-child(2n) > *{animation-delay:.25s}
+.hand.mullhand .hcard:nth-child(3n) > *{animation-delay:.5s}
+@keyframes mullgloed{0%,100%{translate:0 0}50%{translate:0 -5px}}
 .hand.mullnieuw .card{animation:mullkomt .42s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes mullkomt{from{opacity:0; transform:translateY(22px) rotate(-6deg)}to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){
   #mullpaneel .mullbox{transition:none; transform:none}
-  .hand.mullhand .card{animation:none}
+  .hand.mullhand .hcard > *{animation:none}
   .hand.mullnieuw .card{animation:none} }
 #glitchlaag{position:fixed; inset:0; z-index:4; pointer-events:none; display:none; mix-blend-mode:screen;
   background:repeating-linear-gradient(0deg, rgba(255,253,242,.05) 0 2px, rgba(0,0,0,0) 2px 4px)}
@@ -1857,6 +1859,10 @@ body.pvuitleg #ptbel{display:none !important}
   color:#fff; text-shadow:2px 2px 0 #000; width:100%; text-align:center; overflow-wrap:break-word}
 .lk.sym.op{background:#1a1622}
 .lk.sym.op .lksym img{filter:grayscale(1) brightness(.35)}
+/* ronde 34: met de tekening in plaats van het symbool: een vierkant uitsnedetje met een lijstje */
+.lk.sym.prent{gap:8%}
+.lk.sym.prent .lksym{width:52%; box-shadow:0 0 0 2px #000, 0 0 0 4px rgba(214,196,255,.35), 3px 4px 0 4px rgba(0,0,0,.45); overflow:hidden; background:#0b0912}
+.lk.sym.prent .lksym img{object-fit:cover; object-position:center 42%; image-rendering:pixelated}
 .libdetail .libdgroot .lk.sym .lknaam{font-size:.8rem}
 .vb2 .vbsec .lk.sym .lknaam{font-size:.38rem}
 /* op de aetherkaarten (draft, winkel, infoscherm) wordt het symbool een kleine strook en de naam groter */
@@ -4549,6 +4555,11 @@ body.pc #fieldwrap .slot.cr .hpgem.hurt{background:#7a140c !important; box-shado
 body.pc #fieldwrap .slot.cr .atkgem .icoic{display:none !important}
 body.pc #fieldwrap .slot.cr :is(.atkgem, .hpgem).tw, body.pc #pside0 .hcard .hst.tw, body.pc #sleepkaart .hst.tw{font-size:8px !important; letter-spacing:-1px}
 body.pc #pside0 .hcard .hst{pointer-events:none}
+/* ronde 34: in de mulligan deinen de getallen mee met hun kaart (de regel hierboven zet hun animatie anders uit) */
+body.pc #pside0 .hand.mullhand .hcard > .hst{animation:mullgloed 1.9s ease-in-out infinite}
+body.pc #pside0 .hand.mullhand .hcard:nth-child(2n) > .hst{animation-delay:.25s}
+body.pc #pside0 .hand.mullhand .hcard:nth-child(3n) > .hst{animation-delay:.5s}
+@media (prefers-reduced-motion:reduce){ body.pc #pside0 .hand.mullhand .hcard > .hst{animation:none} }
 /* oplichten volgt de lijst, geen rechthoek eromheen */
 body.pc #fieldwrap .spelgloed{display:none !important}
 body.pc #fieldwrap .slot.cr:has(> .card){background:none !important; border:0 !important; box-shadow:none !important; outline:0 !important}
@@ -5838,7 +5849,9 @@ body:not(.tel) .kaartbox.ks-bord .ksinfo{width:min(520px, calc(100vw - 48px))}
 .bordvlak .bordleven.fijn{image-rendering:auto}
 /* 🌊 ronde 33: de pixelzee vervaagt niet aan de rand van de kaart: daarbuiten loopt dezelfde zee door (#bordzeeverf) */
 /* ☁ ronde 33: de drijvende wolken, op hetzelfde raster als de zee buiten de kaart (één pixel = 4 kaartpixels) */
-.bordvlak .wolkdrijf{position:absolute; left:-100.1595%; top:-100.1595%; width:300.1595%; height:300.1595%; pointer-events:none; z-index:1; image-rendering:pixelated}
+.bordvlak .wolkdrijf{position:absolute; left:-100.1595%; top:-100.1595%; width:300.1595%; height:300.1595%; pointer-events:none; z-index:7; image-rendering:pixelated}
+/* ronde 34: wolken, mist, sneeuw en noorderlicht liggen over de medaillons heen (z-index 3 tot 6) */
+.bordvlak .bordleven.boven{z-index:7}
 .bordvlak .bordleven.zeedoek{-webkit-mask-image:none; mask-image:none; image-rendering:pixelated}
 /* de medaillons deinen heel langzaam, elk in zijn eigen tempo; je huidige level iets meer */
 .bordvlak .bbord.med .bbmed{animation:bbadem 7.5s ease-in-out infinite}
@@ -6676,7 +6689,7 @@ function effsVan0(G, id, origin){
 }
 const kloonE = e => Object.assign({}, e, e.keten ? {keten:e.keten.slice()} : null);
 function geplandeEffecten(G, p, id, asSpell, col, o){
-  const dub = (e, l) => trioKracht(G, p, e) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio: twee keer
+  const dub = (e, l) => (trioKracht(G, p, e) || (G.volle && e === STEEN && heeft(G, p, 'ae_stonefull'))) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
   if (asSpell) return dub(G.kEl[id], effsVan(G, id, 1)).map(e => (e.col = col, e));
   let eigen = o.skipOwn ? [] : effsVan(G, id, 0);
   if (o.dubbel) eigen = eigen.concat(eigen.map(e => kloonE(e)));
@@ -7066,6 +7079,7 @@ function losOp(G, K, it){
     }
     case E_BERG: {
       const w = it.src ? vindWezen(G, it.src) : -1;
+      if (it.src && w < 0) return;   // ronde 34: de Bergketen is in de keten al gesneuveld: dan rijst er ook geen Steen op
       const hp = w >= 0 ? G.pl[wP(w)].hp[wC(w)] : 3;
       const vrij = openKol(G, p).filter(c => !G.pl[p].cre[c]);
       if (!vrij.length) return;
@@ -8226,7 +8240,7 @@ function faseOmslag(G, K, F){
   if (F.stoelLos){ faseKeuzeK(G, F, F.keuzeStandaard || 'staan'); st.stoelOpen = true; }
   else if (F.keuzePraat) faseKeuzeK(G, F, F.keuzeStandaard);
   if (F.volReset){ st.omslagBezig = false; volResetK(G, K, F); return 'begin'; }
-  P1.life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0));
+  P1.life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0)) * (G.volle ? 2 : 1);
   st.omslagBezig = false;
   if (!F.houd){
     P1.deck = vijUpgradesK(G, deckUitK(G, F.deck || {steen:20}, 1));
@@ -8335,7 +8349,7 @@ const OMSLAG_AE_KRACHT = {ae_draw3:68, fu_stone:61, ae_graf:60, ae_grassx2:56, f
   ae_oer_water:44, ae_oer_gras:44, ae_oer_steen:44, ae_watercycle:43, ae_alziend:41, ae_offer:40, ae_stonefull:39, fu_fire:39, fu_grass:38};
 function moederBloeiK(G, K, B){
   const st = G.vh.st, P1 = G.pl[1];
-  P1.life = 5; st.omslagBezig = false;
+  P1.life = 5 * (G.volle ? 2 : 1); st.omslagBezig = false;
   for (let c = 0; c < 5; c++){
     const sp = P1.spell[c]; if (sp) grafSp(G, sp);
     P1.spell[c] = nieuweKaart(G, GRAS, 1, ROOS, 0);
@@ -9856,6 +9870,10 @@ const SPELL_REGEL = "Doet het speel-effect bij het neerleggen en bij elk wezen d
   });
   Object.entries(LICHT_TEKST).forEach(([k, t]) => { if(LIGHTS[k]) LIGHTS[k].txt = LIGHTS[k].kort = kwHTML(t); });
   Object.entries(AETHER_TEKST).forEach(([k, t]) => { if(AETHERS[k]) AETHERS[k].txt = AETHERS[k].kort = kwHTML(t); });
+  /* 💥 ronde 34: Lawine in Volle slag (in een potje telt het potje, daarbuiten de keuze op het homescreen) */
+  if(AETHERS.ae_stonefull){ const gewoon = AETHERS.ae_stonefull.txt, volle = "In Volle slag: het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel.";
+    const nu = () => { try{ return (typeof S !== "undefined" && S && S.story) ? !!S.volle : !!(typeof SET !== "undefined" && SET && SET.volleSlag); }catch(e){ return false; } };
+    ["txt", "kort"].forEach(k => Object.defineProperty(AETHERS.ae_stonefull, k, {get:() => nu() ? volle : gewoon, set:v => {}, configurable:true, enumerable:true})); }
 })();
 /* Een kaartuitleg in vaste vakjes: ▶ speel-effect, ◆ veld-effect, eigenschappen, en wat hij
    als ritueel doet. Gebruikt door de hover-uitleg, het infoscherm en het spelen-als-scherm. */
@@ -11984,6 +12002,12 @@ function turnCry(p){
   const kop = solo ? (mine ? "JOUW BEURT" : "TEGENSTANDER") : `SPELER ${p+1}`;
   const sub = solo && !mine ? `${pName(p)} is aan zet · beurt ${S.turnNo[p]}` : `aan zet · beurt ${S.turnNo[p]}`;
   d.innerHTML = `<div class="tcband"><div class="tc">${kop}<span class="sm">${sub}</span></div></div>`;
+  /* ronde 34: de band blijft tussen de twee zijkolommen, zodat je de levens links en rechts altijd blijft zien */
+  try{ if(document.body.classList.contains("pc")){
+    const kl = document.getElementById("lkolom"), kr = document.getElementById("right");
+    const a = kl && kl.offsetWidth ? kl.getBoundingClientRect().right + 8 : 0, z = kr && kr.offsetWidth ? kr.getBoundingClientRect().left - 8 : innerWidth;
+    if(z - a > 420){ d.style.left = Math.round(a) + "px"; d.style.right = Math.round(innerWidth - z) + "px"; }
+  } }catch(e){}
   document.body.appendChild(d);
   setTimeout(() => d.remove(), 1750);
   const side = document.querySelector(`.pside[data-side="${p}"]`);
@@ -13322,17 +13346,19 @@ async function tokenRitueel(p, c, bronId){
     render();
   }
 }
+/* 💥 ronde 34: in Volle slag heeft iedereen al volle slag, dus doet 🟣 Lawine daar iets anders: het 🪨-speel-effect gaat twee keer */
+const lawineTwee = (p, el) => !!(S && S.volle) && el === "steen" && hasAe(p, "ae_stonefull");
 function plannedEffects(p, card, asSpell, col, opts){
-  const trioDubbel = (el, lijst) => trioKracht(p, el) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
+  const trioDubbel = (el, lijst) => (trioKracht(p, el) || lawineTwee(p, el)) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
   if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card)).map(e => Object.assign(e, {col}));
   const o = opts || {};
   let own = o.forceEffs ? o.forceEffs.slice() : (o.skipOwn ? [] : effsOf(card.el, "creature", card));
   if(o.dubbel) own = own.concat(own.map(e => Object.assign({}, e)));   // 🟣 Getijdenstroom
   /* ✦ Echo en ✦ Kloon herhalen alleen het effect van het wezen zelf: een ritueel eronder
      gaat daar niet nog eens van af. */
-  if(o.geenSpell) return trioKracht(p, card.el) ? own.concat(own.map(e => Object.assign({}, e))) : own;
-  /* 🎪 Het trio: zolang de vonk van dit element brandt, gaat het speel-effect twee keer. */
-  if(trioKracht(p, card.el)) own = own.concat(own.map(e => Object.assign({}, e)));
+  if(o.geenSpell) return (trioKracht(p, card.el) || lawineTwee(p, card.el)) ? own.concat(own.map(e => Object.assign({}, e))) : own;
+  /* 🎪 Het trio: zolang de vonk van dit element brandt, gaat het speel-effect twee keer. Lawine in Volle slag ook (🪨). */
+  if(trioKracht(p, card.el) || lawineTwee(p, card.el)) own = own.concat(own.map(e => Object.assign({}, e)));
   const sp = P(p).cols[col] && P(p).cols[col].spell;
   if(sp && sp.card.el === "wolf" && card.el !== "wolf") return own;   // een wolvenspell reageert alleen op wolven
   /* ⛓ De knoop: het eigen speel-effect gaat er nog twee keer bij. */
@@ -14455,7 +14481,7 @@ async function moederBloei(B){
   clearTimeout(botT);
   await praatLosAwait(B.praat || []);
   busyFlag = false;
-  P(1).life = 5;
+  P(1).life = 5 * (S.volle ? 2 : 1);
   st.omslagBezig = false;
   let weg = 0;
   for(let c=0;c<NK();c++){
@@ -15698,6 +15724,8 @@ async function resolveEffect(it){
      de Bergketen nu heeft. Geen token: hij gaat gewoon naar je graf. En hij doet zijn speel-effect. */
   if(it.el === "bergketen"){
     const src = it.srcCard && findCre(it.srcCard.id);
+    /* ronde 34: is de Bergketen al gesneuveld voordat dit effect aan de beurt is (in de keten), dan komt er geen Steen */
+    if(it.srcCard && (!src || src.cr.hp <= 0)){ addLog("🏔 Bergketen: de Bergketen is er niet meer, dus er rijst geen Steen op."); return; }
     const hp = src ? src.cr.hp : (EL.steen.hp || 3);
     const vrij = openCols(p).filter(c => !P(p).cols[c].cre);
     if(!vrij.length){ addLog("🏔 Bergketen: geen vrije plek voor een Steen."); return; }
@@ -23668,35 +23696,29 @@ const STORY = {
     wereld:1, naam:"De kiezelwacht", vijand:"Rocky", sprite:"rock1", muziek:"w1_gespannen",   // het nummer van zijn intro loopt door, ook door de tutorial heen
     hzruim:true,
     intro:[
-      {s:null, bg:1, naam:"…", mu:"w1_rustig", t:"Bruin, stof, hitte. Een paaltje in de grond met een bordje eraan. De letters zijn er al jaren geleden afgewaaid."},
-      {s:"rock1_zit", bg:1, naam:"…", t:"Ernaast een krukje. Op het krukje zit iemand van steen met een kleinere steen op schoot."},
-      {s:"rock1_zit", t:"…en toen zei ik: niemand komt hier langs. Zó zei ik het. Met mijn arm erbij. Nee, jij hoeft niks te zeggen. Ik weet het al."},
-      {s:"rock1_zit", t:"Jij bent een goeie, Kees."},
-      {s:"rock1_zit", naam:"…", t:"Hij veegt het stof van Kees af. Kijkt over de vlakte. Er is geen vlakte, er is alleen stof."},
-      {s:"rock1_zit", t:"Zullen we tellen? Eén."},
-      {s:"rock1_zit", naam:"…", t:"Ergens ver weg komt iets aan."},
-      {s:"rock1_zit", t:"Twee."},
-      {s:"rock1_zit", naam:"…", t:"Het wordt groter."},
+      /* ronde 34: de intro zoals Q hem schreef */
+      {s:null, bg:1, naam:"…", mu:"w1_rustig", t:"Zand… Oneindig zand…"},
+      {s:null, bg:1, naam:"…", t:"De lucht zuigt alle zuurstof op."},
+      {s:"rock1_zit", bg:1, naam:"…", t:"In de verte doemt een afgebroken wegwijzer op. Ernaast zit een kind op een krukje met een steen te spelen."},
+      {s:"rock1_zit", t:"Is het een vogel? Is het een… ander vliegend ding? Nee! Het is Kees de kiezelwachter voor de rescue!"},
+      {s:"rock1_zit", t:"De bewaker van het hele rijk! En zijn beste vriend Rocky!"},
+      {s:"rock1_zit", naam:"…", t:"Hij valt stil."},
       {s:"rock1_zit", t:"…Kees. Kees, er komt iets aan."},
-      {s:"rock1", naam:"…", t:"Hij staat op. Zet Kees heel voorzichtig neer, alsof Kees anders schrikt. Veegt zijn handen af aan iets wat geen broek is. Haalt een verkreukeld papiertje tevoorschijn."},
-      {s:"rock1_papier", mu:"w1_gespannen", t:"Oké. Oké oké oké. Elf jaar. Elf jaar en nu is het zover. GIJ DIE HIER BETREEDT—"},
-      {s:"rock1_papier", t:"Zachter. Niet meteen alles eruit gooien. Gij die hier betreedt…"},
-      {s:"rock1_papier", naam:"…", t:"Je staat voor hem."},
+      {s:"rock1", naam:"…", t:"Hij springt op. Kees de steen rolt door het zand."},
+      {s:"rock1_boos", mu:"w1_gespannen", t:"HALT!"},
       {s:"rock1", t:"…"},
       {s:"rock1", t:"Hoi."},
-      {s:"rock1_boos", t:"Nee. Nee! Niet hoi. Vergeet hoi. Ga terug. Ga tien passen terug en kom dan nog een keer, dan doe ik het goed."},
-      {s:"rock1", naam:"…", t:"Je beweegt niet."},
-      {s:"rock1", t:"…Prima. Ook goed. Prima."},
+      {s:"rock1_boos", t:"Ik bedoel, niet hoi! Wacht even, ik kan het wel!"},
+      {s:"rock1_papier", naam:"…", t:"Hij haalt een papiertje tevoorschijn dat vaak is dubbelgevouwen en begint voor te lezen."},
+      {s:"rock1_papier", t:"Halt-In-de-naam-van-de-verenigde-rijken-gij-die-hier-komt-keer-om"},
+      {s:"rock1_papier", t:"Dat betekent: ga weg."},
       {s:"rock1", naam:"…", t:"Hij kijkt je nu pas echt aan."},
-      {s:"rock1", t:"Wacht even. Doe je hand eens omhoog. Vuur. Water. Gras. En steen."},
-      {s:"rock1", t:"Bij één iemand. Dat zijn er dus vier."},
-      {s:"rock1", t:"…Is dat veel? Ik weet niet of dat veel is. Ik heb er één."},
-      {s:"rock1", naam:"…", t:"Hij wijst naar het paaltje met het bordje."},
-      {s:"rock1", t:"Maar dit mag sowieso niet. Van die kant naar deze kant. Dat staat daar. Wat er precies staat weet ik niet. Dat was al weg toen ik kwam."},
-      {s:"rock1", t:"Waaróm het niet mag? …Hm. Dat heb ik nooit gevraagd."},
-      {s:"rock1", t:"Mijn grote broer weet dat wel. Mijn grote broer weet alles."},
-      {s:"rock1_papier", naam:"…", t:"Hij stopt het papiertje weg."},
-      {s:"rock1_boos", t:"Weet je wat, ik sla je eerst in elkaar en dan zeg ik hem daarna. Kom maar op, zachtei."}
+      {s:"rock1", t:"Wacht even. Doe je hand eens omhoog. Steen, vuur, water, gras."},
+      {s:"rock1", t:"Een… twee… drie… vier… Hoe kan dat??"},
+      {s:"rock1", t:"Zelfs mijn broers hebben er maar een."},
+      {s:"rock1_boos", t:"Ik ben niet bang hoor! Dus dit is je laatste kans…"},
+      {s:"rock1", t:"…"},
+      {s:"rock1_boos", t:"Kom maar op dan, zachtei!! Ik ben de kiezelwachter!"}
     ],
     win:[
       {s:"rock1_stuk", mu:"w1_rustig", t:"Au."},
@@ -28513,9 +28535,12 @@ async function startStoryGevecht(id, variant, opts){
   if(L.levensJij) P(0).life = L.levensJij;
   if(L.startSchade) P(0).life = Math.max(1, P(0).life - L.startSchade);
   if(L.levensVij) P(1).life = L.levensVij;
+  /* 💥 ronde 34: in Volle slag slaat alles twee keer zo hard, dus heeft iedereen twee keer zoveel levens */
+  const vx = S.volle ? 2 : 1;
+  if(vx > 1){ P(0).life *= vx; P(1).life *= vx; }
   /* 🪨 Een ondergrens: één keer zakt hij niet onder dit getal, hoe hard de klap ook is.
      Dat gaat via de levens zelf, dan maakt het niet uit waar de schade vandaan komt. */
-  if(L.grensVij){ grensZet(P(1), L.grensVij); S.story.grensVij = L.grensVij; }
+  if(L.grensVij){ grensZet(P(1), L.grensVij * vx); S.story.grensVij = L.grensVij * vx; }
   S.ae = [ (L.aeJij || []).slice(), (L.aeVij || []).slice() ];
   S.aeKeuze = [ L.keuzeJij || null, L.keuzeVij || null ];
   S.terug = [ L.terugJij || null, L.terugVij || null ];
@@ -29165,7 +29190,7 @@ async function storyFase2(F){
   busyFlag = false;
   /* 🔁 Een volledig nieuw potje (5-5): alles terug naar het begin, voor allebei. */
   if(F.volReset){ st.omslagBezig = false; return volReset(F); }
-  P(1).life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0));
+  P(1).life = Math.max(1, (F.levens || 5) + (st.fase2Extra || 0)) * (S.volle ? 2 : 1);
   st.omslagBezig = false;
   /* De Oceaan (4-5) houdt haar stapel, hand en bord: zij gaat gewoon door. */
   if(!F.houd){
@@ -29613,6 +29638,13 @@ function lkHTML(k, licht, o){
     <div class="lknaam">${naam}</div>
     ${o.badge ? `<div class="lkbadge">${o.badge}</div>` : ""}
     ${o.op ? KETEN_SVG : ""}</div>`;
+  /* ronde 34: de tekening terug, maar in de opzet van de symbolen: een klein plaatje met een lijstje, de naam groot eronder.
+     Alleen in de library (o.kort); in het detailvak en op het voorbereidingsscherm blijft de tekening groot. */
+  if(!licht && img && o.kort) return `<div class="lk ae sym prent${o.kl ? " " + o.kl : ""}" ${o.attr || ""} style="--aetint:${AE_TINT[k] || "#221a33"}">
+    <div class="lksym"><img src="${pad}" alt="" decoding="async" onerror="this.remove()"></div>
+    <div class="lknaam">${naam}</div>
+    ${o.badge ? `<div class="lkbadge">${o.badge}</div>` : ""}
+    ${o.op ? KETEN_SVG : ""}</div>`;
   return `<div class="lk ${licht ? "licht" : "ae"}${o.kl ? " " + o.kl : ""}" ${o.attr || ""}>
     <div class="lkbeeld${!licht && img && isVak(pad) ? " vakz" : ""}"><span class="lkic">${licht ? "✦" : aeIcon(k)}</span>${img}</div>
     <div class="lknaam">${naam}</div>
@@ -29820,7 +29852,7 @@ function libHTML(){
       const gek = u && i >= 0 && sel.indexOf(i) >= 0;
       const attr = pcAttr(k, false, vrij, u && vrij ? `data-act="voorae" data-i="${i}"` : (vrij ? `data-act="aeinfo" data-k="${k}"` : ""));
       const opd = u && u.opdracht && u.opdracht.ae === k;
-      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}${pcSel(k)}">${lkHTML(k, false, {kl:(gek ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("l", gek) + " " : "") + (gek ? "✓" : "")})}
+      return `<div class="libitem${vrij ? "" : " op"}${opd ? " opdrachtitem" : ""}${pcSel(k)}">${lkHTML(k, false, {kort:true, kl:(gek ? "chosen" : "") + (vrij ? "" : " op") + (opd ? " opdracht" : ""), attr, op:!vrij, badge:(opd ? halfSter("l", gek) + " " : "") + (gek ? "✓" : "")})}
         <div class="libtxt">${vrij ? AETHERS[k].txt : "<i>Nog niet gevonden.</i>"}</div>${u ? "" : toegangHTML(k, false, slot)}</div>`;
     }).join("");
   } else {
@@ -29851,7 +29883,7 @@ function libHTML(){
       const wie = vijAeBij(k);
       const vrij = alles || wie.some(w => storyOntmoetAl(w.id) || (SET.story.klaar || []).indexOf(w.id) >= 0);
       const bij = wie.map(w => `<span>${w.naam} <i>${w.id}</i></span>`).join("");
-      return `<div class="libitem${vrij ? "" : " op"}${pcSel(k)}">${lkHTML(k, false, {kl:vrij ? "" : " op", attr:pcAttr(k, false, vrij, vrij ? `data-act="aeinfo" data-k="${k}"` : ""), op:!vrij, badge:""})}
+      return `<div class="libitem${vrij ? "" : " op"}${pcSel(k)}">${lkHTML(k, false, {kort:true, kl:vrij ? "" : " op", attr:pcAttr(k, false, vrij, vrij ? `data-act="aeinfo" data-k="${k}"` : ""), op:!vrij, badge:""})}
         <div class="libtxt">${vrij ? AETHERS[k].txt : "<i>Nog niet tegengekomen.</i>"}</div>
         <div class="libwaar" title="Wie heeft deze aether">${vrij ? bij : "<span class=\"nee\" style=\"text-decoration:none\">???</span>"}</div></div>`;
     }).join("");
@@ -31192,6 +31224,23 @@ function bordMedaille(id){
   const ach = id === "start" ? "url('art/film/eieren.webp')" : id === "knort" ? "url('art/winkel-knort.png')" : id === "n4" ? "url('art/pt-1-3.png')" : `url('art/pt-${id}.png'), url('art/bg-${id}.png')`;
   return `<div class="bbmed"><i style="background-image:${ach}"></i><span><img src="${src}" alt="" draggable="false"${geheim ? ' class="sil"' : ""}></span></div>`;
 }
+/* ronde 34: de medaillons (en de kaart zelf) staan al klaar voordat de kaart opengaat, zodat niets erbij komt "ploppen".
+   Gaat bij het opstarten en op het startscherm al laden; de iris naar de kaart wacht er even op (hooguit 1,5 tel). */
+const MED_VOOR = new Map();
+function medVoorlaad(){
+  let urls = [];
+  try{
+    if(typeof OVERWORLD_BEELD === "string") urls.push(OVERWORLD_BEELD);
+    if(SET && SET.story) bordOpenPlekken().forEach(id => { const h = bordMedaille(id); (h.match(/(?:src="|url\(')([^"']+)/g) || []).forEach(m => urls.push(m.replace(/^(src="|url\(')/, ""))); });
+  }catch(e){}
+  urls = [...new Set(urls)];
+  return Promise.all(urls.map(u => {
+    if(MED_VOOR.has(u)) return MED_VOOR.get(u).p;
+    const im = new Image(); im.decoding = "async";
+    const pr = new Promise(r => { im.onload = () => { (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(r); }; im.onerror = r; });
+    im.src = u; MED_VOOR.set(u, {im, p:pr}); return pr;
+  }));
+}
 function bordHTML(huidigW){
   const open = bordOpenPlekken(), nieuw = bordNieuw(open), alles = !!SET.story.vrij;
   const el = Date.now() - nieuw.t0;
@@ -31381,11 +31430,12 @@ function bordLevenStart(){
   const doek = (id, n, kl) => { let c = document.getElementById(id); if(!c){ c = document.createElement("canvas"); c.id = id; c.className = "bordleven" + (kl ? " " + kl : ""); c.width = c.height = n; c.setAttribute("aria-hidden", "true"); } return c; };
   const a = doek("bordleven", LEVEN.G), b = doek("wolkdoek", 1254), c = doek("figdoek", 2508, "fijn");
   const za = doek("zeebasis", 1254, "zeedoek"), zb = doek("zeebeweeg", 314, "zeedoek");   // 🌊 ronde 33: de pixelzee, onder alles
+  const bv = doek("bovendoek", 1254, "boven");   // ronde 34: mist, sneeuw en noorderlicht, over de medaillons heen
   let wdr = document.getElementById("wolkdrijf");
   if(!wdr){ wdr = document.createElement("canvas"); wdr.id = "wolkdrijf"; wdr.className = "wolkdrijf"; wdr.width = wdr.height = ZB.N; wdr.setAttribute("aria-hidden", "true"); }
-  img.after(za, zb, a, b, c, wdr);
+  img.after(za, zb, a, b, c, wdr, bv);
   if(ZEE.onder){ za.style.display = "none"; img.before(zb); zb.style.zIndex = "0"; }   // kaart zonder zee: de zee ligt eronder   // ☁ de drijvende wolken bovenop, maar nog onder het pad en de medaillons                           // vlak na de tekening: onder het pad en de medaillons
-  wd = b.getContext("2d"); wd.imageSmoothingEnabled = false; fd = c.getContext("2d");
+  wd = b.getContext("2d"); wd.imageSmoothingEnabled = false; fd = c.getContext("2d"); bd = bv.getContext("2d"); bd.imageSmoothingEnabled = false;
   if(!LEVEN.data || LEVEN.src !== img.src){ try{ LEVEN.data = levenAnalyse(img); LEVEN.src = img.src; FIJN.klaar = false; DEIN.klaar = false; DEIN.half = null; FABRIEKIMG = null; TRAPVOOR = null; KNORTIM = DEURVOOR = null; }catch(e){ return; } }
   LEVEN.route = levenRoute();
   if(!LEVEN.t) LEVEN.t = setInterval(levenTik, 83);
@@ -31889,7 +31939,7 @@ function wolkKlaar(nr, bron, x, y, w, h){
 const WOLK_GEBIED = {x0:-900, x1:2150};
 const DRIJF = [[0, 30, .30], [3, 120, .2], [1, 205, .26], [5, 280, .32], [4, 380, .22], [2, 470, .3], [0, 560, .18], [1, 660, .25], [3, 760, .21], [5, 860, .28], [4, 960, .2],
   [2, -60, .24], [1, 1080, .2], [5, 1180, .27], [3, -140, .19], [0, 1260, .23]].map(([i, y, v], n) => ({i, y, v, x:WOLK_GEBIED.x0 + (n * 787) % (WOLK_GEBIED.x1 - WOLK_GEBIED.x0)}));
-let wd = null;
+let wd = null, bd = null;   // bd: de laag boven de medaillons
 /* 🌫 de fabriek als eigen laagje, zodat de mist er achterlangs gaat */
 /* 🏭 de fabriek als eigen laag ervoor (fabriek-voor.png, net als de toonbank van de winkel): de mist loopt erachter langs */
 let FABRIEKIMG = null;
@@ -32167,13 +32217,15 @@ function fijnTeken(f){
   if(LVAAN.zee && !ZEE.aan) deinTeken(f);   // de oude deining alleen als de pixelzee niet past (oude kaart)
   if(!FIJN.klaar) fijnAnalyse();
   if(FIJN.klaar){ if(LVAAN.water) rivierTeken(f); if(LVAAN.w1) kiezelTeken(f); }   // ronde 33: geen krabben meer
-  if(LVAAN.aurora) auroraTeken(f);
+  if(LVAAN.aurora) auroraTeken(f);   // het noorderlicht blijft onder de medaillons: het gloeit op de kaart, niet ervoor
+  const wd0 = wd; if(bd) wd = bd;   // ronde 34: mist en sneeuw komen over de medaillons heen
   if(LVAAN.mist){
     md.clearRect(0, 0, 314, 314);
     MIST.forEach((m, i) => { const t = f * m.s * 1.6 + m.a, x = 268 + Math.cos(t) * m.rx, y = 106 + Math.sin(t * 1.3) * m.ry;
       for(let r = m.r; r > 0; r -= 2){ md.globalAlpha = .07; md.fillStyle = i % 2 ? "#8c8a99" : "#6e6c7c"; md.beginPath(); md.arc(Math.round(x), Math.round(y), r, 0, Math.PI * 2); md.fill(); } });
     md.globalAlpha = 1; wd.drawImage(mistDoek, 0, 0, 1254, 1254);
-    if(!FABRIEKIMG) FABRIEKIMG = fabriekKnip(); if(FABRIEKIMG) wd.drawImage(FABRIEKIMG, 0, 0);
+    /* de fabriek staat vóór de mist: haal de mist daar weg (de tekening eronder blijft dan gewoon zichtbaar) */
+    if(!FABRIEKIMG) FABRIEKIMG = fabriekKnip(); if(FABRIEKIMG){ wd.globalCompositeOperation = "destination-out"; wd.drawImage(FABRIEKIMG, 0, 0); wd.globalCompositeOperation = "source-over"; }
   }
   if(LVAAN.ogen){
     const S = SPIN;
@@ -32186,8 +32238,10 @@ function fijnTeken(f){
   if(LVAAN.deeltjes && wd) for(const p of LEVEN.deel){ if(p.w !== 4 || !p.a) continue; const groot = p.s > 6.5;
     wd.globalAlpha = p.a * (groot ? 1 : .85); wd.fillStyle = groot ? "#ffffff" : "#eaf4ff"; wd.beginPath(); wd.arc(p.x * 4, p.y * 4, groot ? 2.6 : 1.7, 0, Math.PI * 2); wd.fill(); }
   if(wd) wd.globalAlpha = 1;
+  wd = wd0;
 }
 function wolkTeken(){
+  if(bd) bd.clearRect(0, 0, 1254, 1254);
   wd.clearRect(0, 0, 1254, 1254); fijnTeken(LEVEN.f); figTeken(LEVEN.f);
   const cv = document.getElementById("wolkdrijf"); if(!cv) return;
   const cx = cv.getContext("2d"); cx.clearRect(0, 0, cv.width, cv.height); if(!LVAAN.drijf) return;
@@ -37160,7 +37214,7 @@ function act(a){
 /* ⭕ ronde 32: een irisovergang tussen de grote schermen: hoofdmenu, kaart, level, winkel en terug.
    Niet bij menuutjes, pop-ups en binnen een gevecht. De iris knijpt dicht op de plek waar je klikte
    (bij een level op het medaillon), wisselt het scherm, en gaat in het midden weer open. */
-const IRIS_KNOP = new Set(["story", "storylevel", "winkel", "smid", "storyterug", "kaartterug", "tomain", "mpstart", "chalstart"]);
+const IRIS_KNOP = new Set(["verhaalstart", "thuisverder", "plekkies", "story", "storylevel", "winkel", "smid", "storyterug", "kaartterug", "tomain", "mpstart", "chalstart"]);
 let IRIS_BEZIG = false, IRIS_IN = false, IRIS_MUIS = null;
 document.addEventListener("pointerdown", e => { IRIS_MUIS = {x:e.clientX, y:e.clientY, t:performance.now()}; }, true);
 function irisMag(){
@@ -37168,7 +37222,7 @@ function irisMag(){
   try{ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return false; }catch(e){}
   return true;
 }
-function irisOvergang(fn, punt){
+function irisOvergang(fn, punt, wacht0){
   if(IRIS_BEZIG || !irisMag()){ fn(); return; }
   IRIS_BEZIG = true;
   let el = document.getElementById("iris");
@@ -37183,13 +37237,20 @@ function irisOvergang(fn, punt){
     requestAnimationFrame(stap); };
   const R = Math.hypot(Math.max(p.x, W - p.x), Math.max(p.y, H - p.y)) + 8;
   el.style.display = "block"; zet(R, p);
-  const wacht = setTimeout(() => { el.style.display = "none"; IRIS_BEZIG = false; }, 3000);   // vangnet: nooit blijven hangen
+  let wacht = setTimeout(() => { el.style.display = "none"; IRIS_BEZIG = false; }, 3000);   // vangnet: nooit blijven hangen
   loop(300, R, 0, p, () => {
     try{ fn(); }catch(e){ console.error(e); }
-    setTimeout(() => {
+    const open = () => {
       const q = {x:W / 2, y:H / 2};
       loop(380, 0, Math.hypot(W / 2, H / 2) + 8, q, () => { clearTimeout(wacht); el.style.display = "none"; IRIS_BEZIG = false; });
-    }, 140);
+    };
+    /* naar de kaart: pas opengaan als de medaillons er zijn (hooguit anderhalve tel) */
+    if(wacht0){ clearTimeout(wacht); wacht = setTimeout(() => { el.style.display = "none"; IRIS_BEZIG = false; }, 6000);
+      /* de kaart rekent bij het openen even flink (zee, wolken, leven): pas open als het weer soepel loopt, anders hapert de iris */
+      const rustig = () => new Promise(r => { let vorig = performance.now(), goed = 0; const t0 = vorig;
+        const k = t => { goed = t - vorig < 60 ? goed + 1 : 0; vorig = t; if(goed >= 2 || t - t0 > 900) r(); else requestAnimationFrame(k); }; requestAnimationFrame(k); });
+      Promise.race([Promise.all([wacht0(), new Promise(r => setTimeout(r, 140))]), new Promise(r => setTimeout(r, 1500))]).then(rustig).then(open); }
+    else setTimeout(open, 140);
   });
 }
 function onBtn(btn, el, fromAction){
@@ -37199,7 +37260,8 @@ function onBtn(btn, el, fromAction){
       const m = document.querySelector(`#bordvlak .bbord[data-id="${el.dataset.id}"] .bbmed`);
       if(m){ const b = m.getBoundingClientRect(); if(b.width) punt = {x:b.x + b.width / 2, y:b.y + b.height / 2}; }
     }
-    irisOvergang(() => { IRIS_IN = true; try{ onBtn(btn, el, fromAction); } finally { IRIS_IN = false; } }, punt);
+    const naarKaart = ["verhaalstart", "thuisverder", "plekkies", "slotkies", "storyterug", "kaartterug"].includes(btn) ? () => medVoorlaad() : null;
+    irisOvergang(() => { IRIS_IN = true; try{ onBtn(btn, el, fromAction); } finally { IRIS_IN = false; } }, punt, naarKaart);
     return;
   }
   const u = S.ui;
@@ -38408,6 +38470,7 @@ function laadKlaar(){
   if(vul) vul.style.width = "100%";
   if(txt) txt.textContent = "klaar";
   LAAD_DAARNA.forEach(f => { try{ f(); }catch(e){} });
+  setTimeout(() => { try{ medVoorlaad(); }catch(e){} }, 1200);   // ronde 34: de medaillons van de kaart alvast binnenhalen
   /* zat alles al in de cache, dan toch heel even de balk laten zien — anders flitst hij */
   const rest = Math.max(0, 450 - (Date.now() - LAAD.t0));
   const weg = () => {
