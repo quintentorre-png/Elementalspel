@@ -828,8 +828,9 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
 .pop.dmg{color:#ff7a63}.pop.heal{color:#7fe08f}.pop.imm{color:#bcd5ea; font-size:.95rem}.pop.kill{color:#ffb14d}
 .lunge-up{animation:lup .3s ease-in-out}
 .lunge-down{animation:ldn .3s ease-in-out}
-@keyframes lup{0%,100%{transform:translateY(0)}45%{transform:translateY(-26px) scale(1.07)}}
-@keyframes ldn{0%,100%{transform:translateY(0)}45%{transform:translateY(26px) scale(1.07)}}
+/* ronde 34: de plekken en kaarten bewegen niet meer bij een aanval (geen sprong naar voren): alleen een korte oplichting */
+@keyframes lup{0%,100%{filter:none}45%{filter:brightness(1.45) drop-shadow(0 0 10px rgba(255,236,170,.7))}}
+@keyframes ldn{0%,100%{filter:none}45%{filter:brightness(1.45) drop-shadow(0 0 10px rgba(255,170,150,.7))}}
 .atkline{position:fixed; z-index:79; height:3px; background:linear-gradient(90deg,rgba(213,80,60,.1),#ff8668,rgba(213,80,60,.1));
   transform-origin:0 50%; border-radius:2px; opacity:0; animation:lineflash .45s ease-out forwards; box-shadow:0 0 10px rgba(255,120,90,.8)}
 @keyframes lineflash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
@@ -968,7 +969,7 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
   animation:dustout .55s ease-out forwards}
 @keyframes dustout{0%{transform:scale(.2); opacity:0}25%{opacity:.85}100%{transform:scale(1.7); opacity:0}}
 .thud{animation:thudsq .3s ease-out}
-@keyframes thudsq{0%,100%{transform:scaleY(1)}35%{transform:scaleY(.9) translateY(4px)}}
+@keyframes thudsq{0%,100%{filter:none}35%{filter:brightness(.8)}}   /* ronde 34: niet meer indeuken (dat zag eruit als springen) */
 /* geluidsinstellingen */
 .ovbox .setrow{display:flex; align-items:center; gap:12px; margin:12px 0; text-align:left}
 .ovbox .setrow label{flex:0 0 116px; font-size:.82rem; color:var(--muted)}
@@ -2958,6 +2959,25 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 /* 🎭 ronde 31: filters van een skin, alleen zolang die skin het domein bepaalt */
 #horizon[data-skinfx="bloed"] .hz{filter:saturate(1.3) brightness(.85) !important}
 #horizon .hzbloed{position:absolute; inset:0; z-index:999; pointer-events:none; background:#a0101a; mix-blend-mode:multiply; opacity:.55}
+/* 🌈 ronde 34: Tang de Majestic kleurt de achtergrond van 3-2 in een langzaam bewegende regenboog (te druk: opacity .22, te zwak: .45) */
+#horizon .hzregenboog{position:absolute; inset:0; z-index:999; pointer-events:none;
+  background:linear-gradient(120deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a);
+  background-size:300% 300%; mix-blend-mode:color; opacity:.32; animation:hzregenboog 14s linear infinite}
+@keyframes hzregenboog{to{background-position:300% 300%}}
+/* 🌈 een bewegende regenboogrand rond het vak van Tang de Majestic in PvP */
+.majestic-rand{position:relative}
+.majestic-rand::before{content:""; position:absolute; inset:0; z-index:5; pointer-events:none; box-sizing:border-box;
+  border:3px solid #ff5a5a; border-image:linear-gradient(120deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a) 1;
+  animation:majrand 6s linear infinite}   /* binnen de rand van het vak (het portret knipt alles erbuiten af); hij draait door de kleuren */
+@keyframes majrand{to{filter:hue-rotate(360deg)}}
+/* in de skinkeuze: het plaatje met het regenboogmasker erover, net als in het gevecht */
+.majbox{position:relative; display:block; width:100%; height:100%}
+.majbox .chmaj{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated}
+.majbox .majmask{position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(135deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a); background-size:200% 200%;
+  -webkit-mask:var(--masker) center bottom/contain no-repeat; mask:var(--masker) center bottom/contain no-repeat;
+  mix-blend-mode:multiply; animation:regenboog 6s linear infinite}
+@media (prefers-reduced-motion:reduce){ #horizon .hzregenboog, .majestic-rand::before, .majbox .majmask{animation:none} }
 #horizon[data-skinfx="donker"] .hz{filter:brightness(.6) saturate(.8) !important}
 body.skinzwart{background:#000 !important}
 /* ☁ Nimbus de Meervoudige: kleine Nimbussen die over het hele speelveld heen en weer vliegen */
@@ -3246,7 +3266,7 @@ body.nbopen .nbvol{background:transparent}
   display:flex; flex-direction:column; align-items:center; gap:6px; padding:9px 10px; border-radius:10px; opacity:0;
   background:linear-gradient(180deg,rgba(28,36,44,.97),rgba(14,18,22,.97)); border:2px solid var(--gold);
   box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 26px rgba(201,168,106,.3)}
-#zetmelding.aan{animation:zetmeld 2.8s ease-out 1 both}
+#zetmelding.aan{animation:zetmeld 4.6s ease-out 1 both}   /* ronde 34: langer in beeld (was 2,8 s) */
 @keyframes zetmeld{0%{opacity:0; transform:translateX(14px)}
   8%{opacity:1; transform:translateX(0)}
   86%{opacity:1; transform:translateX(0)}
@@ -11225,7 +11245,7 @@ async function toonZet(p, faceHTML, kop, plan, wacht){
   el.classList.remove("aan"); void el.offsetWidth; el.classList.add("aan");
   if(!mist) doelFlits(plan);
   clearTimeout(toonZet._t);
-  toonZet._t = setTimeout(() => { const e2 = document.getElementById("zetmelding"); if(e2) e2.classList.remove("aan"); }, 2800);
+  toonZet._t = setTimeout(() => { const e2 = document.getElementById("zetmelding"); if(e2) e2.classList.remove("aan"); }, 4600);   // ronde 34: was 2,8 tel, ging te snel weg
   await sleep(Math.round((wacht == null ? (doelen.length ? 1200 : 750) : wacht) * TEMPO_ANDER));
 }
 /* Kiest de ander pas bij het afgaan een doelwit (Onweer, Kloon, Echo, herspelen…), dan
@@ -11241,7 +11261,7 @@ function toonDoel(p, id){
   el.classList.remove("aan"); void el.offsetWidth; el.classList.add("aan");
   doelFlits([{tid:id}]);
   clearTimeout(toonZet._t);
-  toonZet._t = setTimeout(() => { const e2 = document.getElementById("zetmelding"); if(e2) e2.classList.remove("aan"); }, 2800);
+  toonZet._t = setTimeout(() => { const e2 = document.getElementById("zetmelding"); if(e2) e2.classList.remove("aan"); }, 4600);   // ronde 34: was 2,8 tel, ging te snel weg
 }
 function regenVerf(aan){
   ["regenmist","regenlaag"].forEach(id => {
@@ -22898,6 +22918,7 @@ function horizonVerf(id, variant, skin){
   laag.dataset.hz = id;
   if(sk && sk.fx === "zwart") return;
   if(sk && sk.fx === "bloed"){ const r = document.createElement("div"); r.className = "hzbloed"; laag.appendChild(r); }   // 🩸 een rode laag erover
+  if(sk && sk.fx === "regenboog"){ const r = document.createElement("div"); r.className = "hzregenboog"; laag.appendChild(r); }   // 🌈 Tang de Majestic
   const skp = sk ? `art/bg-skin-${sk.file}.png` : null;
   if(skp && HZ_BG_OK[skp] === undefined){
     HZ_BG_OK[skp] = null;
@@ -23772,16 +23793,17 @@ const STORY = {
        wereld in elkaar zit). Zie tutPunt en tutHlPaint. */
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:9, vuur:5, gras:5, water:5},
-    /* Vijf levens (okt 2026): na de tutorial staat hij nog op 1. */
-    levensVij:5,
+    /* ronde 34: Steen geeft nu +3 aan één wezen (was twee keer +1), dus slaan de stenen in de tutorial harder.
+       Rocky 7 en jij 6: na de tutorial staat hij nog op 1 en heb jij er nog 3. */
+    levensVij:7, levensJij:6,
     /* Een vaste hand van vier, en vaste kaarten om te trekken, zodat het altijd hetzelfde loopt. */
     handJijVast:["steen","vuur","water","gras"],   // ronde 31: wel deze vier, maar een even grote starthand als overal
     trekJij:["gras","steen","water","vuur","steen"],
     vijZetten:{
-      1:[{el:"steen", col:2, doelen:["zelf","zelf"]}],
+      1:[{el:"steen", col:2, doelen:["zelf"]}],
       2:[{el:"gras",  col:0, doelen:[{p:0, el:"steen"}]}],
       3:[{el:"vuur",  col:1, doelen:[{p:0, el:"vuur"}]}],
-      4:[{el:"water", col:3, doelen:[]}]},
+      4:[{el:"water", col:4, doelen:[]}]},   // ronde 34: recht tegenover je Vuur (dat in kolom 5 terechtkomt)
     vijAanval:{2:[2]},
     tutRechtdoor:"Ho. Recht vooruit. Dat weet zelfs ik.",
     tut:[
@@ -23793,11 +23815,11 @@ const STORY = {
       {op:"rocky:steen", zeg:"Kijk. Hij wordt groter. Dat doet Steen."},
       /* beurt 2 · jij: neerzetten, het speel-effect, aanvallen */
       {kaart:"steen", col:0, mode:"cre", hl:"Speel Steen"},
-      {doel:{p:0, el:"steen"}, hl:"+1 voor je Steen"},
-      {doel:{p:0, el:"steen"}, hl:"Nog een keer"},
+      {doel:{p:0, el:"steen"}, hl:"+3 voor je Steen"},   // ronde 34: Steen geeft één wezen +3 (was twee keer +1)
       {op:"gespeeld:steen", zeg:"Hé. Dat is míjn truc."},
       {aanval:0, hl:"Val aan"},
-      {op:"aanval", bij:"leven:1", pop:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. Een aanval doet de <b>helft van zijn levens</b>, naar beneden afgerond: 5 wordt 2."},
+      {op:"aanval", bij:"leven:1", pop:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. Een aanval doet de <b>helft van zijn levens</b>, naar beneden afgerond: 6 wordt 3.",
+        popVolle:"Staat er niets tegenover je wezen, dan raakt het de speler zelf. In <b>Volle slag</b> doet een aanval <b>al zijn levens</b>: 6 is 6."},
       {op:"aanval", zeg:"AU. Daar stond niemand. Dat was mijn fout."},
       {beurtAf:true, hl:"Einde beurt"},
       /* beurt 3 · Rocky: verstrikken, en hij slaat terug */
@@ -23839,7 +23861,7 @@ const STORY = {
       {aanval:4, hl:"Probeer maar"},
       {op:"aanval", bij:"cre:1:4", waarom:"water-vuur", pop:"Water dooft vuur. <b>Zwak tegen</b>: er gebeurt niets."},
       {op:"aanval", zeg:"HA. Dat wist ik."},
-      {op:"aanval", bij:"cirkel", pop:"Vanaf hier speel je zelf. De cirkel staat hier linksboven, als je hem nog eens wilt zien. Hij staat nu op <b>4</b>: maak het af."}
+      {op:"aanval", bij:"cirkel", pop:"Vanaf hier speel je zelf. De cirkel staat hier linksboven, als je hem nog eens wilt zien. Rocky heeft nog <b>{levVij}</b> {levVijWoord}: maak het af."}
     ],
     /* Rituelen leer je pas bij Brokko (1-2). Hier speelt niemand iets als ritueel. */
     geenRitueel:true,
@@ -26902,7 +26924,7 @@ function tutSchermHTML(k){
     <p>Vuur. Water. Gras. Steen. Iedereen in deze wereld heeft er één.</p>
     <p><b>Jij hebt ze alle vier.</b></p>`;
   if(k === "zowin"){
-    const rij = (wie, kl) => `<div class="tsrij ${kl}"><span class="tslab">${wie}</span>${[1,2,3,4].map(n => `<span class="tsvak">${n}</span>`).join("")}</div>`;
+    const rij = (wie, kl) => `<div class="tsrij ${kl}"><span class="tslab">${wie}</span>${Array.from({length:NK()}, (_, i) => i + 1).map(n => `<span class="tsvak">${n}</span>`).join("")}</div>`;
     return `<div class="tskop">Zo win je</div>
       <div class="tsbord">
         <div class="tsleven boven"><span>zijn levens</span><i></i></div>
@@ -26910,7 +26932,7 @@ function tutSchermHTML(k){
         ${rij("jouw kant", "onder")}
         <div class="tsleven onder"><span>jouw levens</span><i></i></div>
       </div>
-      <p>Je zet kaarten neer in <b>vijf kolommen</b>. Ze vechten voor je.</p>
+      <p>Je zet kaarten neer in <b>${NK() === 4 ? "vier" : "vijf"} kolommen</b>. Ze vechten voor je.</p>
       <p><b>Haal zijn levens naar nul.</b></p>`;
   }
   if(k === "cirkel") return `<div class="tskop">De cirkel</div>
@@ -26958,7 +26980,8 @@ function tutPop(st){
     if(!el){ el = document.createElement("div"); el.id = "tutpop2"; document.body.appendChild(el); }
     const w = st.waarom ? TUT_WAAROM.find(x => x.a + "-" + x.b === st.waarom) : null;
     el.className = w ? "metbeeld" : "";
-    el.innerHTML = `${w ? `<div class="tpbeeld">${tutWaaromBeeld(w)}</div>` : ""}<div class="tptxt">${st.pop}</div>
+    const lv = Math.max(0, P(1).life), tekst = ((S.volle && st.popVolle) || st.pop).replace("{levVij}", lv).replace("{levVijWoord}", lv === 1 ? "leven" : "levens");   // ronde 34
+    el.innerHTML = `${w ? `<div class="tpbeeld">${tutWaaromBeeld(w)}</div>` : ""}<div class="tptxt">${tekst}</div>
       <button class="tpok" data-act="btn" data-btn="tutverder">OK</button>`;
     const anker = tutAnker(st.bij);
     document.querySelectorAll(".tutwijs").forEach(x => x.classList.remove("tutwijs"));
@@ -28631,6 +28654,14 @@ async function startStoryGevecht(id, variant, opts){
   if(L.tut && L.tut.length && !isBot(0)){
     S.story.tut = {i:0, stappen:L.tut.slice(), klaar:false};
     S.story.vijZetten = JSON.parse(JSON.stringify(L.vijZetten || {}));
+    /* ▥ ronde 34: met vier kolommen bestaat kolom 5 niet: wat daar zou gebeuren, gebeurt in kolom 4 */
+    if(NK() < 5){ const k = n => Math.min(NK() - 1, n);
+      S.story.tut.stappen = S.story.tut.stappen.map(x => { const y = Object.assign({}, x);
+        ["plek", "aanval", "col"].forEach(f => { if(typeof y[f] === "number") y[f] = k(y[f]); });
+        if(typeof y.bij === "string") y.bij = y.bij.replace(/^cre:(\d):(\d)$/, (m, a, b) => `cre:${a}:${k(+b)}`);
+        if(y.rood) y.rood = y.rood.map(r => r.replace(/^cre:(\d):(\d)$/, (m, a, b) => `cre:${a}:${k(+b)}`));
+        return y; });
+      Object.values(S.story.vijZetten).forEach(l => (l || []).forEach(z => { if(typeof z.col === "number") z.col = k(z.col); })); }
     S.story.vijAanval = JSON.parse(JSON.stringify(L.vijAanval || {}));
   }
   kzGevechtStart(id, L);
@@ -34915,8 +34946,7 @@ document.addEventListener("click", e => {
   const u = S.ui;
   if(act === "hand"){
     const id = +t.dataset.id;
-    /* 🖥 op de computer is een klik op een kaart in je hand: uitleg (spelen kan vanuit dat venster, of slepen) */
-    if(u.mode === "main" && pcAan() && !SLEEP_KLIK && pcKaartInfo(t)) return;
+    /* 🖥 ronde 34: op de computer speelt een linkerklik de kaart (of sleep hem); de uitleg zit onder de rechtermuisknop */
     if(u.mode === "main" && S.actor===S.tp && p === S.tp && mayAct(p)) doAct({t:"play", id});
     else if(u.mode === "battle" && p === S.tp && mayAct(p) && !isBot(p)
             && battleFlashOk(p, P(p).hand.find(cd => cd.id === id))) doAct({t:"bflash", id});
@@ -34926,7 +34956,7 @@ document.addEventListener("click", e => {
                   : ((EL[card.el].flash && (openCols(p).length || freeSpellCols(p).length)) || fuseOk(p, card.el, "flash")))) doAct({t:"f", v:id});
     }
     else if(u.mode === "choice" && u.kind === "hand" && p === u.p && !isBot(p) && u.valid.includes(id)) doAct({t:"f", v:id});
-    else if(!["choice", "mulligan", "priority"].includes(u.mode)) pcKaartInfo(t);
+    else if(!pcAan() && !["choice", "mulligan", "priority"].includes(u.mode)) pcKaartInfo(t);
     return;
   }
   if(act === "fuse"){
@@ -34957,7 +34987,7 @@ document.addEventListener("click", e => {
       const cr = P(p).cols[c].cre;
       if(cr && canAttack(cr, p)){ doAct({t:"atk", c}); return; }
     }
-    if(!["slot", "choice"].includes(u.mode) && pcKaartInfo(t)) return;
+    if(!pcAan() && !["slot", "choice"].includes(u.mode) && pcKaartInfo(t)) return;   // ronde 34: op de computer via de rechtermuisknop
     if(u.mode === "main" && act === "cre" && p !== S.tp && S.tp === 0 && tutAan() && P(p).cols[c].cre) tutMisKlik();
   }
 });
@@ -35849,7 +35879,7 @@ const SKINS = [
   {van:"2-4", naam:"De Vervelling", file:"kaelidvervelling"},
   {van:"2-5", naam:"Xam", file:"xam"},
   {van:"3-1", naam:"Maatje", file:"maatje"},
-  {van:"3-2", naam:"Tang de Majestic", file:"tangmajestic", speciaal:"majestic"},
+  {van:"3-2", naam:"Tang de Majestic", file:"tangmajestic", speciaal:"majestic", fx:"regenboog", zonder:{_wijd:"_taunt", _zuur:"_boos"}},   // ronde 34: wijd en zuur zijn nog de oude tekeningen: die vallen terug op de nieuwe taunt en boos
   {van:"3-3", naam:"Nim-puf", file:"nimpuf"},                    // 3-3 is Puf
   {van:"3-4", naam:"Het elektrische trio", file:"trioelektrisch"}, // 3-4 is het vlammende trio
   {van:"3-5", naam:"Klinknagel, nieuwe lak", file:"klinknagelnieuw"},
@@ -35870,8 +35900,9 @@ function skinBeeld(k){
   return (key && SPRITE_BEELD[key]) || null;
 }
 /* De skinsprites aanmelden: zijn eigen plaatje, of terug naar dezelfde stand van het personage. */
-function skinSprites(spr, file, bs, basis, geenArt){
+function skinSprites(spr, file, bs, basis, geenArt, zonder){
   SKIN_STANDEN.forEach(st => {
+    if(zonder && zonder[st]){ SPRITE_TERUG[spr + st] = spr + zonder[st]; return; }   // ronde 34: deze stand niet gebruiken, maar een andere eigen stand
     if(!geenArt) SPRITE_BEELD[spr + st] = `art/skin-${file}${st ? "-" + st.slice(1) : ""}.png`;
     const terug = geenArt ? (st ? (ptSprIs(bs + st) ? bs + st : (st === "_taunt" && basis.taunt ? basis.taunt : bs)) : bs)
       : (st === "_taunt" ? (basis.taunt || bs) : (st && ptSprIs(bs + st) ? bs + st : bs));
@@ -35881,7 +35912,7 @@ function skinSprites(spr, file, bs, basis, geenArt){
 function skinsInbouwen(){
   SKINS.forEach(k => {
     const basis = mpChar(k.char), bs = basis.spr || "";
-    skinSprites(k.spr, k.file, bs, basis, k.geenArt);
+    skinSprites(k.spr, k.file, bs, basis, k.geenArt, k.zonder);
     if(k.na) skinSprites("skin" + k.na, k.na, bs, basis, false);   // 🌳 Bonsai: wat eronder zit
     /* in de lijst direct na het personage zelf */
     const i = MP_CHARS.findIndex(c => c.id === k.char);
@@ -36501,6 +36532,10 @@ function charKiesHTML(kop){
     const open = vrij.indexOf(c.id) >= 0, ch = mpChar(c.id);
     if(!open) return `<div class="chtegel dicht"><div class="chpt">?</div><div class="chnaam">${c.skin ? "challenge " + (c.skin === "knort" ? "Knort" : c.skin) : (c.lv || c.id)}</div></div>`;
     const inkt = isInktSkin(c);   // 🖤 helemaal zwart, alleen de oogjes en de naam
+    const maj = (skinVan(c.id) || {}).speciaal === "majestic";   // 🌈 Tang de Majestic: zijn eigen plaatje met het masker erover, en een regenboogrand
+    if(maj){ const sk = skinVan(c.id);
+      return `<div class="chtegel majestic-rand${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt"><span class="majbox"><img class="chmaj" src="art/skin-${sk.file}.png" alt="" draggable="false"><span class="majmask" style="--masker:url('art/skin-${sk.file}-masker.png')"></span></span></div><div class="chnaam">${ch.naam}</div></div>`; }
     return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}${inkt ? " inkttegel" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt${inkt ? " inktzw" : ""}">${inkt ? `<img class="chsnij" src="${sprBeeldPad(ch.spr) || ""}" alt="" draggable="false">${inktLos("")}` : charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`;
   };
@@ -36955,7 +36990,7 @@ function skinVoorladen(){
     const paden = [];
     sprs.forEach(spr => SKIN_STANDEN.forEach(st => { const k = sprEcht(spr + st); if(SPRITE_BEELD[k]) paden.push(SPRITE_BEELD[k]); }));
     if(sk.speciaal === "kees") paden.push("art/rocky-arm-kwast.png");
-    if(sk.speciaal === "majestic") SKIN_STANDEN.forEach(st => paden.push(`art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`));
+    if(sk.speciaal === "majestic") SKIN_STANDEN.filter(st => !(sk.zonder && sk.zonder[st])).forEach(st => paden.push(`art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`));
     [...new Set(paden)].forEach(pad => { const im = new Image(); im.onload = () => { if(typeof BEELD_KLAAR === "object" && BEELD_KLAAR[pad] !== "fout") BEELD_KLAAR[pad] = BEELD_KLAAR[pad] || true; }; im.src = pad; });
   });
 }
@@ -37050,6 +37085,7 @@ function mpPtHTML(p, eigen){
   else if(zin && zin.spr && ptSprIs(zin.spr)){ key = zin.spr; if(zin.spr === c.taunt) cls.push("pt-taunt"); }
   if(bonsaiBoom){ key = spr; const i = cls.indexOf("pt-taunt"); if(i >= 0) cls.splice(i, 1); }
   if(sk && sk.speciaal) cls.push("sk-" + sk.speciaal);
+  if(sk && sk.speciaal === "majestic") cls.push("majestic-rand");   // 🌈 een bewegende regenboogrand
   if(sk && sk.stil) eigen = false;                  // 🖌 Kees zegt niets: geen menu
   if(eigen) cls.push("eigen");
   const [l1, l2] = PT_WERELD[c.wereld] || PT_WERELD[1];
@@ -37625,6 +37661,14 @@ function toonKaartInfo(cd, terug, extra){
 }
 /* 🖥 Klik op een kaart, ritueel of aether in een gevecht op de computer: het plaatje en de uitleg in
    een venster in het midden. Alleen als die klik verder niets doet in het spel. */
+/* 🖱 ronde 34: rechtermuisknop op een kaart (hand, wezen of ritueel) in een gevecht op de computer: wat doet hij? */
+document.addEventListener("contextmenu", e => {
+  if(!pcAan() || !S || !S.ui || (M && M.type)) return;
+  const t = e.target.closest && e.target.closest('[data-act="hand"], [data-act="cre"], [data-act="spell"]');
+  if(!t) return;
+  e.preventDefault();
+  try{ if(pcKaartInfo(t)) AU.play("click"); }catch(x){}
+});
 function pcKaartInfo(t){
   if(!pcAan() || !S || !S.ui || typeof inMist === "function" && inMist()) return false;
   const act = t.dataset.act, p = +t.dataset.p;
