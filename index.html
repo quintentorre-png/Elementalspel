@@ -1860,12 +1860,12 @@ body.pvuitleg #ptbel{display:none !important}
 .libdetail .libdgroot .lk.sym .lknaam{font-size:.8rem}
 .vb2 .vbsec .lk.sym .lknaam{font-size:.38rem}
 /* op de aetherkaarten (draft, winkel, infoscherm) wordt het symbool een kleine strook en de naam groter */
-.aecard .aei.beeld.vakz{height:62px}
-.aecard.klein .aei.beeld.vakz{height:50px}
-.draftbox .aecard .aei.beeld.vakz{height:62px}
-.aecard .aei.beeld.vakz .aebeeld{object-fit:contain}
-.aecard:has(.aei.vakz) .aet{font-size:1.15rem; letter-spacing:.05em; padding:9px 8px 7px; color:#fff}
-.draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
+html.aesym .aecard .aei.beeld.vakz{height:62px}
+html.aesym .aecard.klein .aei.beeld.vakz{height:50px}
+html.aesym .draftbox .aecard .aei.beeld.vakz{height:62px}
+html.aesym .aecard .aei.beeld.vakz .aebeeld{object-fit:contain}
+html.aesym .aecard:has(.aei.vakz) .aet{font-size:1.15rem; letter-spacing:.05em; padding:9px 8px 7px; color:#fff}
+html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 .ovbox .obtn.lbtn{padding:8px 16px; font-size:.72rem; margin:0}
 .ovbox.libbox{width:min(1100px,96vw); max-width:none; max-height:94vh; display:flex; flex-direction:column; box-sizing:border-box}
 .libtabs{display:flex; gap:8px; justify-content:center; margin:12px 0 10px}
@@ -12846,7 +12846,10 @@ const SYM = {
   }catch(e){ console.warn("aethersymbolen", e); }
   return uit;
 })();
-Object.keys(AE_SYMBOOL).forEach(k => { AETHER_BEELD[k] = AE_SYMBOOL[k]; });
+/* ronde 33: de symbolen staan op de plank. Terug naar de tekeningen (vak-*.png). Zet AE_SYMBOLEN_AAN op true om de
+   symbolen (harde schaduw, naam groot) weer te gebruiken; alles daarvoor staat er nog (AE_SYMBOOL, lk.sym, html.aesym). */
+const AE_SYMBOLEN_AAN = false;
+if(AE_SYMBOLEN_AAN){ Object.keys(AE_SYMBOOL).forEach(k => { AETHER_BEELD[k] = AE_SYMBOOL[k]; }); if(typeof document !== "undefined") document.documentElement.classList.add("aesym"); }
 const isVak = pad => typeof pad === "string" && (pad.indexOf("art/vak-") === 0 || pad.indexOf("data:image/png") === 0);
 let vakT = null;
 /* Een prent uit het lijstje is niet te vinden: dan de volgende proberen. */
