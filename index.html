@@ -3013,6 +3013,11 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 /* 🩸 ronde 34: het rode noorderlicht van Bloedmaan-Aurora */
 canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; pointer-events:none; mix-blend-mode:screen; z-index:1; filter:drop-shadow(0 0 4px rgba(255,40,60,.6))}
 .chtegel.chaurora canvas.rodeaurora{z-index:0}
+/* ronde 34: Max is een zwarte schaduwwolf: een paarse gloed achter hem en een lichtere achtergrond, zodat hij niet in het donker verdwijnt */
+.chtegel[data-i="2-5"] .chbgvak, .mppt.pt-max .ptbg{filter:brightness(1.7) saturate(1.1)}
+.chtegel[data-i="2-5"] .chbgvak::before, .mppt.pt-max .ptbg::before{content:""; position:absolute; inset:0; z-index:60; pointer-events:none;
+  background:radial-gradient(ellipse 55% 50% at 50% 58%, rgba(200,170,255,.55), rgba(140,100,230,.22) 55%, transparent 75%)}
+.chtegel[data-i="2-5"] .chpt img, .chtegel[data-i="2-5"] .chpt .sprbeeld, .mppt.pt-max .ptfig .sprbeeld{filter:drop-shadow(0 0 3px rgba(235,220,255,.95)) drop-shadow(0 0 10px rgba(180,140,255,.7))}
 .chtegel.chaurora .chpt, .chtegel.chaurora .chnaam{position:relative; z-index:1}
 .tkaart canvas.rodeaurora.tkaurora{z-index:0; opacity:.9}
 /* 🪞 ronde 34: het gebarsten glas van De Weerspiegeling */
@@ -4052,6 +4057,10 @@ body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; paddin
 .chtegel.kies .chnaam{color:var(--vng,#e8c67a)}
 /* ronde 34: de portretachtergrond over de hele tegel, de naambalk onderaan tegen de rand */
 .chtegel .chnaam{margin-top:auto}
+/* ronde 34: een zwarte naambalk van vaste hoogte, die precies tegen de onderrand van de tegel zit */
+.chgrid .chtegel{padding-bottom:34px; box-sizing:border-box}
+.chgrid .chtegel > .chnaam{position:absolute !important; left:0; right:0; bottom:0; height:34px; margin:0; padding:0 4px; box-sizing:border-box; z-index:2;
+  display:flex; align-items:center; justify-content:center; line-height:1.4; background:#050507; overflow:hidden}
 .chtegel > .chpt, .chtegel > .chnaam{position:relative; z-index:1}
 .chbgvak{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none}
 .chbgvak .ptbg{position:absolute; inset:0}
@@ -5468,6 +5477,10 @@ html body.pc #app #right #actions .abtn.primary{width:calc(var(--kw) * .46) !imp
   padding:0 12px !important; font:.62rem/1.5 "Press Start 2P",monospace !important; color:#1a1208 !important; text-shadow:none !important; filter:none !important; image-rendering:auto;
   background:radial-gradient(circle at 50% 40%, #f6dc8c, #e7bf55 60%, #c99a32) !important; border:6px solid #3a3122 !important;
   box-shadow:0 0 0 3px #f6dc8c, 0 8px 0 rgba(0,0,0,.45) !important; transition:transform .12s, filter .12s}
+/* ronde 34: de tekst altijd mooi in het midden van de munt, en nooit breder dan de munt (Doorlaten liep eruit) */
+html body.pc #app #right #actions .abtn.primary{display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important;
+  white-space:normal !important; overflow-wrap:normal; padding:0 6px !important; box-sizing:border-box !important;
+  font-size:min(.62rem, calc((var(--kw) * .46 - 26px) / 10)) !important}
 html body.pc #app #right #actions .abtn.primary:hover{filter:brightness(1.08) !important; transform:translateY(-2px); background:radial-gradient(circle at 50% 40%, #f6dc8c, #e7bf55 60%, #c99a32) !important}
 html body.pc #app #right #actions .abtn.primary:disabled{filter:grayscale(.85) brightness(.6) !important; transform:none}
 /* de vier knoppen: een rustig rijtje met tekst */
@@ -5808,6 +5821,8 @@ html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height
 .tkvraag{align-self:center; font:clamp(40px, 5vw, 96px)/1 "Press Start 2P",monospace; color:#ffd84a; text-shadow:0 6px 0 rgba(0,0,0,.5); margin-right:6%}
 .tverder{grid-column:1; grid-row:2; align-items:flex-end; padding:0; min-height:0}
 .tverderbg{position:absolute; inset:0; background-size:cover; background-position:center; image-rendering:pixelated}
+.tverder .tverderfig{width:44%; right:3%; height:90%; justify-content:center; z-index:0}   /* ronde 34: wie je in het verhaal tegenkomt, in zijn taunt */
+.tverder .tverderfig img{max-height:100%; max-width:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
 .tverder::after{content:""; position:absolute; left:0; right:0; bottom:0; height:55%; background:linear-gradient(rgba(40,32,14,0), rgba(40,32,14,.97) 62%)}
 .tverderin{position:relative; z-index:1; display:flex; align-items:center; gap:clamp(14px, 1.6vw, 28px); padding:clamp(16px, 3vh, 40px) clamp(18px, 2vw, 40px)}
 .tverder b{font-size:clamp(16px, 1.5vw, 30px)} .tverder em{font-size:clamp(20px, 1.9vw, 38px)} .tverder i{font-size:clamp(17px, 1.45vw, 30px)}
@@ -20971,11 +20986,19 @@ function thuisDHTML(){
   const infMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "inferno"); if(infMijn) infernoStart();   // 🔥 Maatje
   const lichtMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "licht");   // ✨ Xam
   const aurMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "bloedaurora"); if(aurMijn) infernoStart();   // 🩸 Bloedmaan-Aurora
-  const majMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "majestic");   // 🌈 Tang de Majestic: regenboogrand om de kaart
+  const majMijn = false;   // ronde 34: de regenboogrand van Tang is weg
   const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}${infMijn ? " vuurfig" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? ((fxMijn || `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">`) + (inktMijn ? inktLos("") : "")) : `<span class="tkvraag">?</span>`}${lichtMijn ? xamStofHTML(8) : ""}<span class="tkwijzig">${kc.naam}</span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
+  /* ronde 34: een bepaalde stand van een figuur, als die tekening er is (anders zijn gewone plaatje) */
+  const standPad = (key, st) => { if(!key) return null; try{ return (ptSprIs(key + st) && sprBeeldPad(key + st)) || sprBeeldPad(key); }catch(e){ return null; } };
+  /* het verhaal: wie je nu tegenkomt, in zijn taunt */
+  let verderFig = "";
+  try{ if(L && L.sprite){ const tk = (typeof mpChar === "function" && (mpChar(vg) || {}).taunt) || L.sprite + "_taunt";
+    const src = (ptSprIs(tk) && sprBeeldPad(tk)) || standPad(L.sprite, "_taunt") || ksPersSrc(vg);
+    if(src) verderFig = `<span class="tkfig tverderfig"><img src="${src}" alt="" draggable="false" onerror="this.remove()"></span>`; } }catch(e){}
   let chalFig = "", chalBg = "url('art/bg-1-1.png')";
   try{ const ids = CHAL_VOLGORDE(), v = ids.find(id => chalOpen(id) && !ladderVerslagen(id)) || ids.filter(chalOpen).pop();
-    if(v){ const c = mpChar(v), src = ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);
+    if(v){ const c = mpChar(v), sk0 = (STORY[v] && STORY[v].sprite) || c.spr;
+      const src = standPad(sk0, "_boos") || ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);   // ronde 34: hij staat er boos bij
       if(src) chalFig = `<span class="tkfig"><img src="${src}" alt="" draggable="false" onerror="this.remove()"></span>`; } }catch(e){}
   return `<div class="tthuis">
     <div class="tlogo"><div><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div></div>
@@ -20983,7 +21006,7 @@ function thuisDHTML(){
     <div class="tboven">${LIVE.resume ? `<button class="tklein" data-act="btn" data-btn="resumelive">TERUG NAAR ROOM ${LIVE.resume.code}</button>` : ""}
       ${toonInstall() ? `<button class="tklein" data-act="btn" data-btn="installeer">INSTALLEER</button>` : ""}</div>
     <button class="tkaart goud tverder" data-act="btn" data-btn="verhaalstart">
-      <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>
+      <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>${verderFig}
       <span class="tverderin"><span class="tic">&#9654;</span><span><b>${titel}</b><em>${regel}</em>${stand ? `<i>${stand}</i>` : ""}</span></span></button>
     <div class="trechts">
       <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${lvBg(kc && kc.lv)}`}"></span>${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
@@ -36648,8 +36671,10 @@ function charPortret(key){
 }
 /* ronde 34 (variant A): elke tegel in de karakterkeuze toont de portretachtergrond, over de hele tegel. Tegels met een
    eigen bewegende achtergrond (Maatje, Xam, Bloedmaan-Aurora) en dichte tegels blijven zoals ze zijn. */
+/* ronde 34: de naambalk is altijd even hoog; een lange naam krijgt kleinere letters */
+const chNaamMaat = t => { const n = String(t).replace(/&[a-z]+;/g, "x").length; return n <= 14 ? ".4rem" : n <= 22 ? ".34rem" : n <= 30 ? ".3rem" : ".26rem"; };
 function chMetBg(c, html){
-  if(FAST || /class="chtegel[^"]*\b(dicht|chinferno|chlicht|chaurora)\b/.test(html)) return html;
+  if(FAST || /class="chtegel[^"]*\b(dicht|chinferno|chlicht)\b/.test(html)) return html;   // Bloedmaan-Aurora krijgt wel haar achtergrond, met de aurora erover
   let bg = "";
   try{ const ch = mpChar(c.id), sk = skinVan(c.id); bg = sk && sk.speciaal === "inkt" ? "" : mpBg(ch.lv, ch.hz) + (sk ? skinPtBg(sk) : ""); }catch(e){ return html; }
   if(!bg) return html;
@@ -36690,14 +36715,14 @@ function charKiesHTML(kop){
       <div class="chpt"><span class="majbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${lofiNotenHTML(L)}</span></div><div class="chnaam">${ch.naam}</div></div>`; }
     const maj = (skinVan(c.id) || {}).speciaal === "majestic";   // 🌈 Tang de Majestic: zijn eigen plaatje met het masker erover, en een regenboogrand
     if(maj){ const sk = skinVan(c.id);
-      return `<div class="chtegel majestic-rand${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt"><span class="majbox"><img class="chmaj" src="art/skin-${sk.file}.png" alt="" draggable="false"><span class="majmask" style="--masker:url('art/skin-${sk.file}-masker.png')"></span></span></div><div class="chnaam">${ch.naam}</div></div>`; }
     return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}${inkt ? " inkttegel" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt${inkt ? " inktzw" : ""}">${inkt ? `<img class="chsnij" src="${sprBeeldPad(ch.spr) || ""}" alt="" draggable="false">${inktLos("")}` : charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`;
   };
   return `<div class="ovbox chbox"><h2>KIES JE KARAKTER</h2>${kop}
     <div class="sub mpnote">${vrij.length} van de ${MP_CHARS.length} vrijgespeeld (op je verste verhaalplek).</div>
-    <div class="chgrid">${MP_CHARS.map(c => chMetBg(c, tegel(c))).join("")}<div class="chtegel chwil${k.wil ? " kies" : ""}" data-act="btn" data-btn="mpcharwil">
+    <div class="chgrid">${MP_CHARS.map(c => chMetBg(c, tegel(c))).join("").replace(/<div class="chnaam">([^<]*)<\/div>/g, (m, t) => `<div class="chnaam" style="font-size:${chNaamMaat(t)}">${t}</div>`)}<div class="chtegel chwil${k.wil ? " kies" : ""}" data-act="btn" data-btn="mpcharwil">
       <div class="chpt"><span class="chvraag">?</span></div><div class="chnaam">Willekeurig</div></div></div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button>
       <button class="obtn" data-act="btn" data-btn="mpcharok">Verder met ${k.wil ? "een willekeurig karakter" : mpChar(mijnProfiel().char).naam}</button></div></div>`;
@@ -37505,7 +37530,7 @@ function mpPtHTML(p, eigen){
   else if(zin && zin.spr && ptSprIs(zin.spr)){ key = zin.spr; if(zin.spr === c.taunt) cls.push("pt-taunt"); }
   if(bonsaiBoom){ key = spr; const i = cls.indexOf("pt-taunt"); if(i >= 0) cls.splice(i, 1); }
   if(sk && sk.speciaal) cls.push("sk-" + sk.speciaal);
-  if(sk && sk.speciaal === "majestic") cls.push("majestic-rand");   // 🌈 een bewegende regenboogrand
+  if(!sk && c.lv === "2-5") cls.push("pt-max");   // ronde 34: Max is een zwarte schaduw: hij krijgt licht achter zich (de regenboogrand van Tang is weg)
   if(sk && sk.stil) eigen = false;                  // 🖌 Kees zegt niets: geen menu
   if(eigen) cls.push("eigen");
   const [l1, l2] = PT_WERELD[c.wereld] || PT_WERELD[1];
