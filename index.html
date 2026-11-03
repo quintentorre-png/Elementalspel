@@ -2971,6 +2971,8 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
   border:3px solid #ff5a5a; border-image:linear-gradient(120deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a) 1;
   animation:majrand 6s linear infinite}   /* binnen de rand van het vak (het portret knipt alles erbuiten af); hij draait door de kleuren */
 @keyframes majrand{to{filter:hue-rotate(360deg)}}
+.majrandlaag{position:absolute; inset:0; z-index:6; pointer-events:none; box-sizing:border-box; border:3px solid #ff5a5a;
+  border-image:linear-gradient(120deg,#ff5a5a,#ffb03a,#fff04a,#5ee36a,#3fd0ff,#6d7bff,#d25cff,#ff5a5a) 1; animation:majrand 6s linear infinite}
 /* in de skinkeuze: het plaatje met het regenboogmasker erover, net als in het gevecht */
 .majbox{position:relative; display:block; width:100%; height:100%}
 .majbox .chmaj{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated}
@@ -2981,14 +2983,75 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 @media (prefers-reduced-motion:reduce){ #horizon .hzregenboog, .majestic-rand::before, .majbox .majmask{animation:none} }
 /* ☁ ronde 34: de zwerm van Nimbus de Meervoudige (PvP-vak en karakterkeuze) */
 .zwerm{position:absolute; inset:0; overflow:hidden; pointer-events:none}
-.zwerm .zw{position:absolute; left:-30%; animation:zwDash 4s linear infinite}
+.zwerm .zw{position:absolute; left:1%; top:1%; animation-name:zwX, zwY, zwDraai; animation-timing-function:cubic-bezier(.55,0,.45,1), ease-in-out, steps(1, end);
+  animation-iteration-count:infinite; animation-direction:alternate, alternate, normal}
 .zwerm .zw img{display:block; width:100%; height:auto; image-rendering:pixelated; filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)); animation:zwDobber 1s ease-in-out infinite alternate}
-.zwerm .zw.terug{animation-direction:reverse; transform:scaleX(-1)}
+@keyframes zwX{from{left:1%} to{left:calc(99% - var(--w))}}
+@keyframes zwY{from{top:1%} to{top:calc(99% - var(--h))}}
+@keyframes zwDraai{0%{scale:1 1} 50%{scale:-1 1} 100%{scale:-1 1}}   /* kijkt de kant op waar hij heen vliegt */
 @keyframes zwDobber{to{translate:0 -12%; rotate:7deg}}
-@keyframes zwDash{0%{left:-30%; translate:0 0} 22%{left:28%; translate:0 -18%} 34%{left:34%; translate:0 -14%} 58%{left:72%; translate:0 16%} 68%{left:76%; translate:0 12%} 100%{left:115%; translate:0 0}}
 .mppt .ptfig.ptzwerm{inset:0; height:auto; display:block}
 .chpt.chzwerm{position:relative; display:block}
 @media (prefers-reduced-motion:reduce){ .zwerm .zw, .zwerm .zw img{animation:none} .zwerm .zw{left:calc(var(--i, 0) * 8%)} }
+/* 💍 ronde 34: de losse ringen van De Ofanim */
+.ofalagen{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:translateX(-50%) translateY(calc(var(--onder, 0) * 100%))}
+.ofabox .ofalagen{width:auto; height:100%; aspect-ratio:var(--ar); transform:translateX(-50%)}
+.ofafig .sprbeeld{opacity:0}
+.ofalagen .ofl{position:absolute; inset:0; transform-origin:50% 50%}
+.ofalagen .ofl img{display:block; width:100%; height:100%; image-rendering:pixelated}
+.ofl-veren{animation:ofaVeren 7s ease-in-out infinite alternate}
+.ofl-ring1{animation:ofaR1 5.2s ease-in-out infinite alternate}
+.ofl-ring2{animation:ofaR2 6.4s ease-in-out infinite alternate}
+.ofl-ring3{animation:ofaR3 4.6s linear infinite}
+.ofl-voor{animation:ofaVoor 3.1s ease-in-out infinite alternate}
+@keyframes ofaVeren{from{translate:0 0; scale:1} to{translate:0 -1.2%; scale:1.02}}
+@keyframes ofaR1{0%{translate:0 0; rotate:-6deg} 50%{translate:1.2% -2.2%} 100%{translate:-.8% -.6%; rotate:7deg}}
+@keyframes ofaR2{0%{translate:0 1.6%; rotate:4deg; scale:1 1} 100%{translate:0 -1.8%; rotate:-5deg; scale:1.04 .82}}
+@keyframes ofaR3{0%{scale:1 1; rotate:-3deg} 25%{scale:.1 1} 50%{scale:-1 1; rotate:3deg} 75%{scale:-.1 1} 100%{scale:1 1; rotate:-3deg}}   /* draait om zijn as, zodat hij achter de voorste ring tevoorschijn komt */
+@keyframes ofaVoor{from{opacity:.75; translate:0 .6%} to{opacity:1; translate:0 -1%}}
+@media (prefers-reduced-motion:reduce){ .ofalagen .ofl{animation:none} }
+/* 🩸 ronde 34: het rode noorderlicht van Bloedmaan-Aurora */
+canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; pointer-events:none; mix-blend-mode:screen; z-index:1; filter:drop-shadow(0 0 4px rgba(255,40,60,.6))}
+.chtegel.chaurora canvas.rodeaurora{z-index:0}
+.chtegel.chaurora .chpt, .chtegel.chaurora .chnaam{position:relative; z-index:1}
+.tkaart canvas.rodeaurora.tkaurora{z-index:0; opacity:.9}
+/* 🪞 ronde 34: het gebarsten glas van De Weerspiegeling */
+.spiegelglas{position:absolute; inset:0; z-index:4; pointer-events:none;
+  background:linear-gradient(125deg, rgba(255,255,255,.07) 0 22%, transparent 22.5% 48%, rgba(255,255,255,.05) 48.5% 56%, transparent 56.5%)}
+.spiegelglas .barstsvg{position:absolute; inset:0; width:100%; height:100%; display:block}
+.spiegelglas .barstnieuw{animation:barstNieuw .35s steps(3, end) both}
+@keyframes barstNieuw{0%{opacity:0; transform:scale(.4)} 60%{opacity:1; transform:scale(1.08)} 100%{opacity:1; transform:scale(1)}}
+.chtegel.chspiegel .chnaam{position:relative; z-index:5}
+/* ✨ ronde 34: Xam, lichtstralen en lichtvonkjes */
+.xamlicht{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1}
+.xamlicht::before{content:""; position:absolute; left:50%; top:46%; width:230%; aspect-ratio:1; translate:-50% -50%;
+  background:repeating-conic-gradient(from 0deg, rgba(255,242,180,.32) 0deg 6deg, rgba(255,242,180,0) 6deg 21deg);
+  -webkit-mask:radial-gradient(circle, #000 0 14%, rgba(0,0,0,.6) 30%, transparent 52%); mask:radial-gradient(circle, #000 0 14%, rgba(0,0,0,.6) 30%, transparent 52%);
+  animation:xamDraai 28s linear infinite}
+.xamlicht::after{content:""; position:absolute; left:50%; top:46%; width:95%; aspect-ratio:1; translate:-50% -50%; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,252,215,.6), rgba(255,222,120,.2) 45%, transparent 70%); mix-blend-mode:screen;
+  animation:xamPuls 3.2s ease-in-out infinite alternate}
+@keyframes xamDraai{to{rotate:360deg}}
+@keyframes xamPuls{from{opacity:.55; scale:.9} to{opacity:1; scale:1.07}}
+.xamstof{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:3}
+.xamstof i{position:absolute; bottom:-8%; width:var(--s); aspect-ratio:1; background:#fffbe0; opacity:0;
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%); filter:drop-shadow(0 0 3px #ffe58a);
+  animation:xamStof var(--d) linear var(--dl) infinite}
+@keyframes xamStof{0%{bottom:-8%; opacity:0; translate:0 0; rotate:0deg} 15%{opacity:1} 75%{opacity:.85} 100%{bottom:96%; opacity:0; translate:var(--x) 0; rotate:90deg}}
+.mppt .xamlicht{z-index:1}
+.chtegel.chlicht .xamlicht{z-index:0}
+.chtegel.chlicht .chpt, .chtegel.chlicht .chnaam{position:relative; z-index:1}
+.tkaart .xamlicht.tklicht{z-index:0}
+@media (prefers-reduced-motion:reduce){ .xamlicht::before, .xamlicht::after, .xamstof i{animation:none} .xamstof{display:none} }
+/* 🔥 ronde 34: het inferno van Maatje, en zijn golvende vlammen */
+canvas.inferno{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; display:block}
+.mppt .ptbg canvas.inferno{z-index:0}
+.chtegel.chinferno canvas.chbg{z-index:0; opacity:.95}
+.chtegel.chinferno .chpt, .chtegel.chinferno .chnaam{position:relative; z-index:1}
+.chtegel.chinferno .chnaam{text-shadow:0 1px 0 #000, 0 0 6px #000}
+canvas.tkinferno{z-index:0; filter:brightness(.6) saturate(.9)}
+.vuurfig img, .vuurfig .sprbeeld{filter:url(#vuurgolf) drop-shadow(0 0 6px rgba(255,120,30,.45))}
+@media (prefers-reduced-motion:reduce){ .vuurfig img, .vuurfig .sprbeeld{filter:none} }
 /* 🎄 ronde 34: de lampjes van Christ-bus: elk gloeit zacht, en heel soms flikkert er een, zoals echte kerstverlichting */
 .kerstlicht{position:absolute; left:50%; bottom:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:translateX(-50%) translateY(calc(var(--onder, 0) * 100%))}
 .skinfxbox .kerstlicht, .skinfxbox .lofinoten{width:auto; height:100%; aspect-ratio:var(--ar); transform:translateX(-50%)}
@@ -3001,9 +3064,9 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 .kerstlicht .kl-R{--k:#ff2a2a; width:14%}
 .kerstlicht .kl-x{--k:#ffb060; width:8%; animation:kerstSputter var(--flik) linear var(--fdel) infinite}
 .kerstlicht .kl-x b{display:none}
-@keyframes kerstGloei{from{filter:brightness(.85)} to{filter:brightness(1.25)}}
-@keyframes kerstFlik{0%,90%{opacity:.85} 91%{opacity:.05} 92.5%{opacity:.9} 94%{opacity:.1} 95.5%{opacity:.85} 100%{opacity:.85}}
-@keyframes kerstUit{0%,90%{opacity:0} 91%{opacity:.8} 92.5%{opacity:0} 94%{opacity:.7} 95.5%{opacity:0} 100%{opacity:0}}
+@keyframes kerstGloei{from{filter:brightness(.75)} to{filter:brightness(1.35)}}
+@keyframes kerstFlik{0%,78%{opacity:.9} 80%{opacity:.05} 83%{opacity:.9} 86%{opacity:.08} 89%{opacity:.9} 93%{opacity:.1} 96%{opacity:.9} 100%{opacity:.9}}
+@keyframes kerstUit{0%,78%{opacity:0} 80%{opacity:.8} 83%{opacity:0} 86%{opacity:.75} 89%{opacity:0} 93%{opacity:.7} 96%{opacity:0} 100%{opacity:0}}
 @keyframes kerstSputter{0%,88%{opacity:0} 89%{opacity:.6} 90%{opacity:0} 91.5%{opacity:.45} 93%{opacity:0} 100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){ .kerstlicht .kl, .kerstlicht .kl b{animation:none} }
 /* 🎵 ronde 34: de losse muzieknoten van de lofi-Waardin */
@@ -3972,7 +4035,7 @@ body.venster .chbox{width:min(900px,96vw); max-width:none !important; max-height
 body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; padding:2px}
 .chgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); grid-auto-rows:max-content; gap:10px}
 /* Een echte rand: de tekening blijft erbinnen en houdt er net voor op. */
-.chtegel{position:relative; cursor:pointer; border-radius:6px; overflow:hidden; border:2px solid rgba(230,233,255,.22);
+.chtegel{position:relative; cursor:pointer; border-radius:6px; overflow:hidden; border:2px solid rgba(230,233,255,.22); display:flex; flex-direction:column;
   background:linear-gradient(180deg,rgba(8,10,30,.1),rgba(8,10,30,.55))}
 .chtegel:hover{border-color:var(--vnl,#e6e9ff)}
 .chtegel.kies{border-color:var(--vng,#e8c67a); box-shadow:0 0 12px rgba(232,198,122,.4)}
@@ -3987,6 +4050,16 @@ body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; paddin
 .chnaam{font-family:"Press Start 2P",ui-monospace,monospace; font-size:.4rem; line-height:1.5; color:#fff; text-align:center;
   padding:6px 4px 7px; text-shadow:1px 1px 0 var(--vnd,#0b0d22); background:rgba(8,10,30,.55)}
 .chtegel.kies .chnaam{color:var(--vng,#e8c67a)}
+/* ronde 34: de portretachtergrond over de hele tegel, de naambalk onderaan tegen de rand */
+.chtegel .chnaam{margin-top:auto}
+.chtegel > .chpt, .chtegel > .chnaam{position:relative; z-index:1}
+.chbgvak{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none}
+.chbgvak .ptbg{position:absolute; inset:0}
+.chbgvak .pthz{position:absolute; left:50%; transform:translateX(-50%)}
+.chbgvak .pthz img{width:100%; height:auto; display:block; image-rendering:pixelated}
+.chbgvak .pthz.vul img{height:100%; object-fit:cover}
+.chbgvak::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(5,5,10,.05), rgba(5,5,10,.5))}
+.chtegel:has(.chbgvak) .chnaam{text-shadow:0 1px 0 #000, 0 0 6px #000}
 /* ⚔ de ladder: kies je tegenstander */
 body.venster .ladbox .ladscroll{flex:1 1 auto; min-height:0; overflow-y:auto; padding:2px}
 body.venster .ladbox .ladscroll .chgrid{overflow:visible}
@@ -20884,7 +20957,10 @@ function thuisDHTML(){
   /* ronde 21: plaatjes in de kaarten. PvP: jij tegenover een silhouet (vriend of bot), op de achtergrond van
      jouw karakter. Challenges: wie je als volgende kunt verslaan, op diens eigen plek. */
   const figSrc = c => { try{ return c && !c.wil && c.spr ? sprBeeldPad(c.spr) : null; }catch(e){ return null; } };
-  const lvBg = lv => lv && STORY[lv] ? `url('art/bg-${lv}.png')` : "url('art/bg-1-1.png')";
+  /* ronde 34: heeft een level geen bg-plaatje (zoals 3-2), dan de eerste laag van zijn horizon als reserve eronder */
+  const lvBg = lv => { if(!(lv && STORY[lv])) return "url('art/bg-1-1.png')";
+    const h = ((typeof HORIZON === "object" && HORIZON[lv]) || [])[0], res = h && typeof HORIZON_BEELD === "object" ? HORIZON_BEELD[h.b] : null;
+    return `url('art/bg-${lv}.png')` + (res ? `, url('${res}')` : ""); };
   let tegen = null;
   try{ const vrij = mpCharsVrij().filter(c => c && c.id !== (kc && kc.id)); if(vrij.length) tegen = mpChar(vrij[new Date().getDate() % vrij.length].id); }catch(e){}
   const mijnFig = figSrc(kc), tegenFig = figSrc(tegen);
@@ -20892,7 +20968,11 @@ function thuisDHTML(){
   const inktMijn = isInktSkin(kc);   // 🖤 Inkts inkt: alles zwart, alleen de oogjes en de tekst
   /* ronde 34: de effecten van sommige skins (noten, lampjes, zwerm) ook hier op de PvP-kaart */
   const fxMijn = kc && !kc.wil && mijnFig ? skinFxBox(kc, mijnFig) : null;
-  const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? ((fxMijn || `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">`) + (inktMijn ? inktLos("") : "")) : `<span class="tkvraag">?</span>`}<span class="tkwijzig">${kc.naam} <span class="tkw2">wijzig</span></span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
+  const infMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "inferno"); if(infMijn) infernoStart();   // 🔥 Maatje
+  const lichtMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "licht");   // ✨ Xam
+  const aurMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "bloedaurora"); if(aurMijn) infernoStart();   // 🩸 Bloedmaan-Aurora
+  const majMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "majestic");   // 🌈 Tang de Majestic: regenboogrand om de kaart
+  const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}${infMijn ? " vuurfig" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? ((fxMijn || `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">`) + (inktMijn ? inktLos("") : "")) : `<span class="tkvraag">?</span>`}${lichtMijn ? xamStofHTML(8) : ""}<span class="tkwijzig">${kc.naam}</span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
   let chalFig = "", chalBg = "url('art/bg-1-1.png')";
   try{ const ids = CHAL_VOLGORDE(), v = ids.find(id => chalOpen(id) && !ladderVerslagen(id)) || ids.filter(chalOpen).pop();
     if(v){ const c = mpChar(v), src = ksPersSrc(v) || figSrc(c); chalBg = lvBg(STORY[v] ? v : c.lv);
@@ -20906,7 +20986,7 @@ function thuisDHTML(){
       <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>
       <span class="tverderin"><span class="tic">&#9654;</span><span><b>${titel}</b><em>${regel}</em>${stand ? `<i>${stand}</i>` : ""}</span></span></button>
     <div class="trechts">
-      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${lvBg(kc && kc.lv)}`}"></span>${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
+      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${lvBg(kc && kc.lv)}`}"></span>${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
       <button class="tkaart rood tmetbeeld" data-act="btn" data-btn="mpmodus" data-m="chal" data-bot="1"><span class="tkbg" style="background-image:${chalBg}"></span>${chalFig}<span class="tic">&#9733;</span><span><b>CHALLENGES</b><em>${chal.n} van ${chal.tot} kroontjes</em>${chal.volg ? `<i>volgende: ${chal.volg}</i>` : `<i>versla eerst iemand in het verhaal</i>`}</span></button>
       <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
         <button class="tklein" data-act="btn" data-btn="decks">DECKS</button>
@@ -20986,7 +21066,7 @@ function startHTML(){
       <small>${klaar} van ${STORY_ORDER.length} levels · ${sterren} sterren</small></span></button>` : "";
   const kk = mpKeus(), kc = kk.wil ? {naam:"Willekeurig", wil:true} : mpChar(mijnProfiel().char);
   const karakter = `<button class="vkarakter" data-act="btn" data-btn="thuischar" title="Je karakter voor samen spelen en tegen de bot">
-      <span class="vkpt">${mpPt(kc)}</span><span class="vktx"><small>JOUW KARAKTER</small><b>${kc.naam}</b><em>samen spelen en bots · wijzig</em></span></button>`;
+      <span class="vkpt">${mpPt(kc)}</span><span class="vktx"><small>JOUW KARAKTER</small><b>${kc.naam}</b><em>samen spelen en bots</em></span></button>`;
   return `<div class="vhome">
     <div class="vlogo"><h1 class="vtitel">ELEMENTAAL</h1><div class="vtag">EEN DUEL IN VIER ELEMENTEN</div><div class="vversie">versie ${ELEMENTAAL_VERSIE}</div>${verder}${karakter}</div>
     <div class="vhrij">
@@ -35917,18 +35997,18 @@ const SKINS = [
   {van:"knort", naam:"Drie kraaien in een trenchcoat", file:"kraaien"},
   {van:"2-3", naam:"Waardin to chill and study to", file:"waardinlofi", speciaal:"lofi"},   // ronde 34: de muzieknoten zweven los
   {van:"2-4", naam:"De Vervelling", file:"kaelidvervelling"},
-  {van:"2-5", naam:"Xam", file:"xam"},
-  {van:"3-1", naam:"Maatje", file:"maatje"},
-  {van:"3-2", naam:"Tang de Majestic", file:"tangmajestic", speciaal:"majestic", fx:"regenboog", zonder:{_wijd:"_taunt", _zuur:"_boos"}},   // ronde 34: wijd en zuur zijn nog de oude tekeningen: die vallen terug op de nieuwe taunt en boos
+  {van:"2-5", naam:"Xam", file:"xam", speciaal:"licht"},   // ronde 34: lichtstralen achter hem en opstijgende lichtvonkjes
+  {van:"3-1", naam:"Maatje", file:"maatje", speciaal:"inferno"},   // ronde 34: een inferno achter hem, en zijn vlammen bewegen
+  {van:"3-2", naam:"Tang de Majestic", file:"tangmajestic", speciaal:"majestic", fx:"regenboog", zonder:{_wijd:"_taunt"}},   // ronde 34: wijd is nog de oude tekening en valt terug op de nieuwe taunt; zuur is nieuw (met masker)
   {van:"3-3", naam:"Nim-puf", file:"nimpuf"},                    // 3-3 is Puf
   {van:"3-4", naam:"Het elektrische trio", file:"trioelektrisch"}, // 3-4 is het vlammende trio
   {van:"3-5", naam:"Klinknagel, nieuwe lak", file:"klinknagelnieuw"},
   {van:"4-1", naam:"Veerman op vakantie", file:"veermanvakantie"},
   {van:"4-2", naam:"Inkts inkt", file:"inktsinkt", geenArt:true, speciaal:"inkt", fx:"zwart"},
-  {van:"4-3", naam:"Bloedmaan-Aurora", file:"aurorabloed", fx:"bloed"},
-  {van:"4-4", naam:"De Weerspiegeling", file:"weerspiegelingeng", fx:"donker"},
+  {van:"4-3", naam:"Bloedmaan-Aurora", file:"aurorabloed", fx:"bloed", speciaal:"bloedaurora"},   // ronde 34: een rood noorderlicht golft achter haar
+  {van:"4-4", naam:"De Weerspiegeling", file:"weerspiegelingeng", fx:"donker", speciaal:"spiegel"},   // ronde 34: zijn vak is een spiegel die barst, bij elke klap erger
   {van:"5-1", char:"2-1", naam:"De Serafijn", file:"serafijn"},
-  {van:"5-4", naam:"De Ofanim", file:"ofanim"}
+  {van:"5-4", naam:"De Ofanim", file:"ofanim", speciaal:"ofanim"}   // ronde 34: in de gewone stand zweven de drie ringen los (lagen)
 ].map(k => Object.assign(k, {id:"skin:" + k.file, spr:"skin" + k.file, char:k.char || k.van}));
 const SKIN_STANDEN = ["", "_taunt", "_boos", "_stuk", "_wijd", "_zuur"];
 const skinVan = id => SKINS.find(k => k.id === id) || null;
@@ -36566,6 +36646,15 @@ function charPortret(key){
   if(SPRITE_TERUG[key]) return charPortret(SPRITE_TERUG[key]);
   return spriteSVG(key);
 }
+/* ronde 34 (variant A): elke tegel in de karakterkeuze toont de portretachtergrond, over de hele tegel. Tegels met een
+   eigen bewegende achtergrond (Maatje, Xam, Bloedmaan-Aurora) en dichte tegels blijven zoals ze zijn. */
+function chMetBg(c, html){
+  if(FAST || /class="chtegel[^"]*\b(dicht|chinferno|chlicht|chaurora)\b/.test(html)) return html;
+  let bg = "";
+  try{ const ch = mpChar(c.id), sk = skinVan(c.id); bg = sk && sk.speciaal === "inkt" ? "" : mpBg(ch.lv, ch.hz) + (sk ? skinPtBg(sk) : ""); }catch(e){ return html; }
+  if(!bg) return html;
+  return html.replace(/^(\s*<div class="chtegel[^>]*>)/, `$1<div class="chbgvak" aria-hidden="true"><div class="ptbg">${bg}</div></div>`);
+}
 function charKiesHTML(kop){
   const vrij = mpCharsVrij(), k = mpKeus();
   const tegel = c => {
@@ -36576,6 +36665,21 @@ function charKiesHTML(kop){
       const src = SPRITE_BEELD[sprEcht(ch.spr)] || SPRITE_BEELD.nimbus || "art/nimbus.png";
       return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt chzwerm">${zwermHTML(src, 12, 22, 34, Date.now())}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "bloedaurora"){ infernoStart();   // 🩸 Bloedmaan-Aurora: ook in de keuze het rode noorderlicht
+      return `<div class="chtegel chaurora${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      ${RODE_AURORA("chbg")}<div class="chpt">${charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "spiegel")   // 🪞 De Weerspiegeling: in de keuze is zijn glas al gebarsten
+      return `<div class="chtegel chspiegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${charPortret(ch.spr)}</div><div class="spiegelglas">${barstSVG(2)}</div><div class="chnaam">${ch.naam}</div></div>`;
+    if((skinVan(c.id) || {}).speciaal === "licht")   // ✨ Xam: ook in de keuze stralen en lichtvonkjes
+      return `<div class="chtegel chlicht${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      ${XAM_STRALEN("chbg")}<div class="chpt">${charPortret(ch.spr)}</div>${xamStofHTML(8)}<div class="chnaam">${ch.naam}</div></div>`;
+    if((skinVan(c.id) || {}).speciaal === "inferno"){ infernoStart();   // 🔥 Maatje: ook in de keuze het inferno erachter
+      return `<div class="chtegel chinferno${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      ${INFERNO_DOEK("chbg")}<div class="chpt vuurfig">${charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "ofanim"){ const fx = skinFxBox(c, "");   // 💍 De Ofanim: ook in de keuze zweven de ringen
+      if(fx) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${fx}</div><div class="chnaam">${ch.naam}</div></div>`; }
     if((skinVan(c.id) || {}).speciaal === "kerst"){   // 🎄 Christ-bus: ook in de keuze branden de lampjes
       const src = SPRITE_BEELD[sprEcht(ch.spr)] || "";
       return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
@@ -36593,7 +36697,7 @@ function charKiesHTML(kop){
   };
   return `<div class="ovbox chbox"><h2>KIES JE KARAKTER</h2>${kop}
     <div class="sub mpnote">${vrij.length} van de ${MP_CHARS.length} vrijgespeeld (op je verste verhaalplek).</div>
-    <div class="chgrid">${MP_CHARS.map(tegel).join("")}<div class="chtegel chwil${k.wil ? " kies" : ""}" data-act="btn" data-btn="mpcharwil">
+    <div class="chgrid">${MP_CHARS.map(c => chMetBg(c, tegel(c))).join("")}<div class="chtegel chwil${k.wil ? " kies" : ""}" data-act="btn" data-btn="mpcharwil">
       <div class="chpt"><span class="chvraag">?</span></div><div class="chnaam">Willekeurig</div></div></div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="mpterug">Terug</button>
       <button class="obtn" data-act="btn" data-btn="mpcharok">Verder met ${k.wil ? "een willekeurig karakter" : mpChar(mijnProfiel().char).naam}</button></div></div>`;
@@ -36992,15 +37096,157 @@ function sprEcht(key){ let k = key, n = 0;
   return k; }
 /* Iets in de sprwrap zetten, zodat het precies met het plaatje meedeint. */
 const inWrap = (html, extra) => html.replace(/<\/span>\s*$/, extra + "</span>");
+/* 🔥 ronde 34: Maatje. Achter hem een inferno: een pixelvuur dat van onder het hele vak vult en steeds beweegt
+   (het oude vuur uit Doom: elke pixel geeft zijn hitte iets afgekoeld en iets opzij door naar boven). Eén vuur voor
+   alle vakken tegelijk; het loopt alleen zolang er ergens een .inferno-doek in beeld is. Zijn eigen vlammen golven
+   via een SVG-filter dat in harde stapjes verspringt, zoals pixelvuur. */
+const INF = {W:64, H:64, raf:0, t:0, vuur:null, img:null, pal:null, golfT:0};
+function infernoPalet(){
+  /* donkerder dan Maatje zelf, zodat hij er goed op afsteekt: diep rood naar oranje, geen geel of wit */
+  const stops = [[0, 5, 1, 6], [6, 30, 4, 8], [12, 70, 10, 6], [18, 112, 20, 6], [24, 150, 40, 8], [30, 178, 66, 14], [36, 196, 92, 24]];
+  const pal = [];
+  for(let i = 0; i <= 36; i++){ let a = stops[0], b = stops[stops.length - 1];
+    for(let k = 0; k < stops.length - 1; k++) if(i >= stops[k][0] && i <= stops[k + 1][0]){ a = stops[k]; b = stops[k + 1]; break; }
+    const f = b[0] === a[0] ? 0 : (i - a[0]) / (b[0] - a[0]); pal.push([0, 1, 2].map(j => Math.round(a[j + 1] + (b[j + 1] - a[j + 1]) * f))); }
+  return pal;
+}
+function infernoTik(t){
+  INF.raf = 0;
+  const doeken = document.querySelectorAll("canvas.inferno");
+  const golf = document.getElementById("vuurgolfturb");
+  const aur = document.querySelectorAll("canvas.rodeaurora");
+  if(!doeken.length && !aur.length && !document.querySelector(".vuurfig")) return;
+  if(aur.length && t - (INF.aurT || 0) > 70){ INF.aurT = t; rodeAuroraTeken(t); aur.forEach(cv => { const x = cv.getContext("2d"); if(x){ x.clearRect(0, 0, 96, 96); x.drawImage(INF.aurDoek, 0, 0); } }); }
+  if(t - INF.t > 55){
+    INF.t = t;
+    const W = INF.W, H = INF.H;
+    const eerste = !INF.vuur;
+    if(eerste){ INF.vuur = new Uint8Array(W * H); INF.pal = infernoPalet(); INF.img = new ImageData(W, H); }
+    const v = INF.vuur;
+    for(let stap = 0; stap < (eerste ? 90 : 1); stap++){   // de eerste keer meteen opwarmen: het vak is direct vol vuur
+    for(let x = 0; x < W; x++) v[(H - 1) * W + x] = 30 + ((Math.random() * 7) | 0);   // de gloed onderin, niet overal even fel
+    for(let x = 0; x < W; x++) for(let y = 1; y < H; y++){
+      const i = y * W + x, h = v[i];
+      if(!h){ v[i - W] = 0; continue; }
+      const r = (Math.random() * 3.2) | 0, d = i - W - r + 1;
+      v[d >= 0 ? d : 0] = Math.max(0, h - (r & 1) - (Math.random() < .12 ? 1 : 0));
+    }
+    }
+    const o = INF.img.data;
+    for(let i = 0; i < W * H; i++){ const c = INF.pal[v[i]]; o[i * 4] = c[0]; o[i * 4 + 1] = c[1]; o[i * 4 + 2] = c[2]; o[i * 4 + 3] = 255; }
+    doeken.forEach(cv => { const x = cv.getContext("2d"); if(x) x.putImageData(INF.img, 0, 0); });
+  }
+  if(golf && t - INF.golfT > 110){ INF.golfT = t; golf.setAttribute("seed", String((Math.random() * 999) | 0)); }   // de vlammen van Maatje verspringen
+  INF.raf = requestAnimationFrame(infernoTik);
+}
+/* 💍 ronde 34: De Ofanim in lagen: de veren, drie losse ringen en de vonken ervoor (art/skin-ofanim-veren, -ring1, -ring2,
+   -ring3, -voor). Elke ring zweeft en draait op zichzelf. Alleen de gewone stand heeft lagen; zolang ze er niet allemaal
+   zijn (of in de andere standen) blijft het gewone plaatje staan. */
+const OFA = {status:"", lagen:["veren", "ring3", "ring2", "ring1", "voor"], ar:1024 / 1536, wacht:[]};
+function ofaLaad(klaar){
+  if(OFA.status === "klaar" || OFA.status === "fout") return OFA.status;
+  if(klaar) OFA.wacht.push(klaar);
+  if(OFA.status === "bezig") return "bezig";
+  OFA.status = "bezig"; let n = 0, mis = false;
+  OFA.lagen.forEach(l => { const im = new Image();
+    im.onload = () => { if(++n === OFA.lagen.length && !mis){ OFA.status = "klaar"; OFA.wacht.splice(0).forEach(f => { try{ f(); }catch(e){} }); } };
+    im.onerror = () => { mis = true; OFA.status = "fout"; };
+    im.src = `art/skin-ofanim-${l}.png`; });
+  return "bezig";
+}
+function ofaLagenHTML(p){
+  return `<span class="ofalagen"${p != null ? ` data-p="${p}"` : ""} data-ar="${OFA.ar}">`
+    + OFA.lagen.map(l => `<span class="ofl ofl-${l}"><img src="art/skin-ofanim-${l}.png" alt="" draggable="false"></span>`).join("") + `</span>`;
+}
+/* 🩸 ronde 34: Bloedmaan-Aurora. Drie rode gordijnen van noorderlicht die golven, in harde pixels (96 x 96, opgeschaald). */
+function rodeAuroraTeken(t){
+  if(!INF.aurDoek){ INF.aurDoek = document.createElement("canvas"); INF.aurDoek.width = INF.aurDoek.height = 96; }
+  const c = INF.aurDoek.getContext("2d"), f = t / 16;
+  c.clearRect(0, 0, 96, 96);
+  [["#ff2a3c", 0, 1, 16], ["#c0124a", 1.9, .8, 30], ["#ff7a5a", 3.7, .6, 8]].forEach(([kl, fase, sterk, y0]) => {
+    for(let x = 0; x < 96; x++){
+      const u = x / 95, top = y0 + Math.sin(f * .03 + fase * 2 + u * 7) * 7 + Math.sin(f * .011 + u * 15 + fase) * 3;
+      const len = 30 + Math.sin(f * .025 + u * 10 + fase) * 12;
+      const a = (.7 + .3 * Math.sin(f * .05 + u * 13 + fase)) * Math.pow(Math.sin(u * Math.PI), .6) * sterk;
+      if(a <= .02) continue;
+      const g = c.createLinearGradient(0, top, 0, top + len);
+      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(.3, kl); g.addColorStop(1, "rgba(0,0,0,0)");
+      c.globalAlpha = Math.min(1, a); c.fillStyle = g; c.fillRect(x, Math.round(top), 1, Math.round(len));
+    }
+  });
+  c.globalAlpha = 1;
+}
+/* ronde 34: een skin met een eigen achtergrond (art/bg-skin-<file>.png) krijgt die ook in zijn portret, over die van
+   het level heen. Bestaat het plaatje (nog) niet, dan haalt hij zichzelf weg en blijft de levelachtergrond. */
+const skinPtBg = sk => `<div class="pthz vul ptskinbg" style="top:0;width:100%;height:100%;opacity:1;z-index:45"><img src="art/bg-skin-${sk.file}.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
+const RODE_AURORA = kl => `<canvas class="rodeaurora${kl ? " " + kl : ""}" width="96" height="96" aria-hidden="true"></canvas>`;
+function infernoStart(){
+  if(FAST || typeof document === "undefined") return;
+  if(!document.getElementById("vuurgolf")){
+    const d = document.createElement("div"); d.style.cssText = "position:absolute;width:0;height:0;overflow:hidden"; d.setAttribute("aria-hidden", "true");
+    d.innerHTML = `<svg width="0" height="0"><filter id="vuurgolf" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence id="vuurgolfturb" type="fractalNoise" baseFrequency="0.018 0.06" numOctaves="2" seed="3" result="ruis"/>
+      <feDisplacementMap in="SourceGraphic" in2="ruis" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`;
+    document.body.appendChild(d);
+  }
+  if(!INF.raf) INF.raf = requestAnimationFrame(infernoTik);
+}
+/* 🪞 ronde 34: De Weerspiegeling. Zijn vak is glas: het is al gebarsten, en bij elke klap komt er een nieuwe inslag
+   bij, met barsten die uitwaaieren en kringetjes eromheen. Altijd dezelfde barsten voor hetzelfde niveau (vaste
+   toevalsreeks), zodat er bij opnieuw tekenen niets verspringt; alleen de nieuwste inslag schiet even op. */
+function barstSVG(niveau, nieuw){
+  const rnd = (i, k) => { const x = Math.sin((i + 1) * 78.233 + k * 12.9898) * 43758.5453; return x - Math.floor(x); };
+  const PLEK = [[38, 34], [70, 62], [24, 72], [62, 22], [48, 84], [82, 38], [14, 40], [56, 50], [86, 82]];
+  let oud = "", vers = "";
+  const n = Math.max(1, Math.min(PLEK.length, niveau));
+  for(let m = 0; m < n; m++){
+    const [cx, cy] = PLEK[m], stralen = 5 + Math.floor(rnd(m, 1) * 4), lijnen = [];
+    for(let i = 0; i < stralen; i++){
+      let a = (i / stralen) * Math.PI * 2 + (rnd(m * 10 + i, 2) - .5) * .8, x = cx, y = cy, af = 0;
+      const lang = 14 + rnd(m * 10 + i, 3) * (22 + m * 4), pts = [[x, y]];
+      while(af < lang){ const st = 3 + rnd(m * 100 + i * 7 + af, 4) * 6; a += (rnd(m * 100 + i * 5 + af, 5) - .5) * .7;
+        x += Math.cos(a) * st; y += Math.sin(a) * st; af += st; pts.push([x, y]);
+        if(rnd(m * 99 + i + af, 6) < .22){ const b = a + (rnd(m + af, 7) < .5 ? -1 : 1) * (.7 + rnd(i + af, 8) * .6), l = 3 + rnd(m * 3 + af, 9) * 8;
+          lijnen.push(`M${x.toFixed(1)},${y.toFixed(1)} L${(x + Math.cos(b) * l).toFixed(1)},${(y + Math.sin(b) * l).toFixed(1)}`); } }
+      lijnen.push("M" + pts.map(q => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" L"));
+    }
+    /* een kringetje rond de inslag, in stukjes */
+    const r0 = 3 + rnd(m, 11) * 3;
+    for(let i = 0; i < stralen; i++){ const a1 = (i / stralen) * Math.PI * 2 + .2, a2 = a1 + (Math.PI * 2 / stralen) * (.55 + rnd(m + i, 12) * .3);
+      lijnen.push(`M${(cx + Math.cos(a1) * r0).toFixed(1)},${(cy + Math.sin(a1) * r0).toFixed(1)} L${(cx + Math.cos(a2) * r0).toFixed(1)},${(cy + Math.sin(a2) * r0).toFixed(1)}`); }
+    const d = lijnen.join(" ");
+    const g = `<path d="${d}" fill="none" stroke="rgba(0,0,0,.7)" stroke-width="3.2" vector-effect="non-scaling-stroke"/>`
+            + `<path d="${d}" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>`
+            + `<circle cx="${cx}" cy="${cy}" r="${(r0 * .55).toFixed(1)}" fill="rgba(220,235,255,.35)"/>`;
+    if(nieuw && m === n - 1) vers = g; else oud += g;
+  }
+  return `<svg class="barstsvg" viewBox="0 0 100 100" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true">${oud}${vers ? `<g class="barstnieuw" style="transform-origin:${PLEK[n - 1][0]}% ${PLEK[n - 1][1]}%">${vers}</g>` : ""}</svg>`;
+}
+const SPIEGEL_NIV = {};
+/* ✨ ronde 34: Xam, de hond van licht. Achter hem draaien lichtstralen langzaam rond met een zachte gloed die ademt,
+   en voor hem stijgen kleine lichtsterretjes op. */
+const XAM_STRALEN = kl => `<div class="xamlicht${kl ? " " + kl : ""}" aria-hidden="true"></div>`;
+function xamStofHTML(n){
+  let h = "";
+  for(let i = 0; i < (n || 10); i++){
+    const r = k => { const x = Math.sin((i + 1) * 91.17 + k * 47.31) * 43758.5453; return x - Math.floor(x); };
+    const d = 3.2 + r(1) * 3.4;
+    h += `<i style="left:${(6 + r(2) * 86).toFixed(1)}%;--s:${(3 + r(3) * 4).toFixed(1)}%;--d:${d.toFixed(2)}s;--dl:${(-r(4) * d).toFixed(2)}s;--x:${((r(5) - .5) * 60).toFixed(0)}%"></i>`;
+  }
+  return `<div class="xamstof" aria-hidden="true">${h}</div>`;
+}
+const INFERNO_DOEK = (kl) => `<canvas class="inferno${kl ? " " + kl : ""}" width="64" height="64" aria-hidden="true"></canvas>`;
 /* ☁ ronde 34: Nimbus de Meervoudige als zwerm: heel veel kleine Nimbussen die door het vak heen schieten,
    even stilhangen en weer verder dashen. Loopt door waar hij was als het vak opnieuw getekend wordt. */
 function zwermHTML(src, n, klein, groot, nu){
   let h = "";
   for(let i = 0; i < n; i++){
     const r = k => { const x = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
-    const maat = klein + r(1) * (groot - klein), duur = 2.6 + r(2) * 3.2, top = r(3) * (100 - maat * 1.1), terug = i % 2 === 1;
-    const del = -(((nu || 0) / 1000 + r(4) * duur) % duur);
-    h += `<div class="zw${terug ? " terug" : ""}" style="top:${top.toFixed(1)}%;width:${maat.toFixed(1)}%;animation-duration:${duur.toFixed(2)}s;animation-delay:${del.toFixed(2)}s">`
+    /* ronde 34: ze blijven binnen het vak en stuiteren tegen de randen terug (heen en weer, op en neer, elk in zijn eigen tempo) */
+    const maat = klein + r(1) * (groot - klein), dx = 1.4 + r(2) * 1.8, dy = 1.1 + r(3) * 1.6;
+    const t = (nu || 0) / 1000, delX = -((t + r(4) * 2 * dx) % (2 * dx)), delY = -((t + r(6) * 2 * dy) % (2 * dy));
+    h += `<div class="zw" style="--w:${maat.toFixed(1)}%;--h:${(maat * 1.25).toFixed(1)}%;width:${maat.toFixed(1)}%;`
+       + `animation-duration:${dx.toFixed(2)}s, ${dy.toFixed(2)}s, ${(2 * dx).toFixed(2)}s;animation-delay:${delX.toFixed(2)}s, ${delY.toFixed(2)}s, ${delX.toFixed(2)}s">`
        + `<img src="${src}" alt="" draggable="false" style="animation-duration:${(.7 + r(5) * .6).toFixed(2)}s"></div>`;
   }
   return `<div class="zwerm" aria-hidden="true">${h}</div>`;
@@ -37075,13 +37321,15 @@ function kerstLagHTML(stand, p){
   const lijst = KERST_LAMPJES[stand]; if(!lijst) return "";
   const h = lijst.map(([x, y, k], i) => {
     const r = q => { const v = Math.sin((i + 1) * 12.9898 + q * 78.233 + stand.length * 3.1) * 43758.5453; return v - Math.floor(v); };
-    const flik = (9 + r(1) * 16).toFixed(1), del = (-r(2) * 25).toFixed(1), gloei = (1.8 + r(3) * 1.6).toFixed(2), gdel = (-r(4) * 3).toFixed(2);
+    const flik = (3.5 + r(1) * 6).toFixed(1), del = (-r(2) * 10).toFixed(1), gloei = (.9 + r(3) * 1.1).toFixed(2), gdel = (-r(4) * 3).toFixed(2);   // ronde 34: vaker knipperen
     return `<i class="kl kl-${k}" style="left:${x}%;top:${y}%;--flik:${flik}s;--fdel:${del}s;--gloei:${gloei}s;--gdel:${gdel}s"><b></b></i>`; }).join("");
   return `<span class="kerstlicht"${p != null ? ` data-p="${p}"` : ""} data-ar="${KERST_AR}">${h}</span>`;
 }
 /* Een plaatje met zijn effect erover, voor de karakterkeuze en de PvP-kaart op het startscherm. */
 function skinFxBox(c, src){
   const sk = skinVan(c.id); if(!sk || FAST) return null;
+  if(sk.speciaal === "ofanim") return ofaLaad(lofiHerteken) === "klaar" ? `<span class="majbox skinfxbox ofabox" style="--ar:${OFA.ar}">${ofaLagenHTML()}</span>` : null;
+  if(sk.speciaal === "majestic") return `<span class="majbox skinfxbox"><img class="chmaj" src="${src}" alt="" draggable="false"><span class="majmask" style="--masker:url('art/skin-${sk.file}-masker.png')"></span></span>`;   // 🌈 Tang: de regenboog over zijn rook
   if(sk.speciaal === "kerst") return `<span class="majbox skinfxbox" style="--ar:${KERST_AR}"><img class="chmaj" src="${src}" alt="" draggable="false">${kerstLagHTML("")}</span>`;
   if(sk.speciaal === "lofi"){ const L = lofiVerwerk(src, lofiHerteken);
     if(L.status === "klaar" && L.schoon) return `<span class="majbox skinfxbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${lofiNotenHTML(L)}</span>`;
@@ -37106,6 +37354,17 @@ function skinFigHTML(p, sk, key, nu){
     const st = skinStand(echt);
     const masker = `art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`;
     return `<div class="ptfig">${inWrap(spriteSVG(key), `<span class="majmask" style="--masker:url('${masker}')"></span>`)}</div>`;
+  }
+  if(sk.speciaal === "inferno"){ infernoStart(); return `<div class="ptfig vuurfig">${spriteSVG(key)}</div>`; }   // 🔥 zijn vlammen golven
+  if(sk.speciaal === "ofanim"){   // 💍 de ringen los, in de gewone stand
+    const echt = sprEcht(key);
+    if(skinStand(echt) || !String(echt).startsWith(sk.spr) || ofaLaad(lofiHerteken) !== "klaar") return gewoon;
+    return `<div class="ptfig ofafig">${inWrap(spriteSVG(key), ofaLagenHTML(p))}</div>`;
+  }
+  if(sk.speciaal === "spiegel"){   // 🪞 het glas barst bij elke klap verder (al gebarsten bij de start)
+    const niv = 1 + (MPPT.schade[p] || 0), nieuw = SPIEGEL_NIV[p] != null && niv > SPIEGEL_NIV[p];
+    SPIEGEL_NIV[p] = niv;
+    return `<div class="ptfig">${spriteSVG(key)}</div><div class="spiegelglas">${barstSVG(niv, nieuw)}</div>`;
   }
   if(sk.speciaal === "kerst"){
     const echt = sprEcht(key);
@@ -37158,12 +37417,12 @@ function skinVoorladen(){
 /* Na het tekenen: het masker en de ogen precies op het plaatje leggen. */
 function skinNaTekenen(vak){
   if(!vak || FAST) return;
-  vak.querySelectorAll(".majmask, .inktogen, .lofinoten, .kerstlicht").forEach(el => {
+  vak.querySelectorAll(".majmask, .inktogen, .lofinoten, .kerstlicht, .ofalagen").forEach(el => {
     const img = el.parentNode && el.parentNode.querySelector("img.sprbeeld");
     if(!img) return;
     const sync = () => {
       el.style.setProperty("--onder", img.style.getPropertyValue("--onder") || 0);
-      if(el.classList.contains("inktogen") || el.classList.contains("lofinoten") || el.classList.contains("kerstlicht")){
+      if(el.classList.contains("inktogen") || el.classList.contains("lofinoten") || el.classList.contains("kerstlicht") || el.classList.contains("ofalagen")){
         /* zoals object-fit: contain, onderaan: hoe groot staat het plaatje er echt? */
         const W = img.clientWidth, H = img.clientHeight, ar = +el.dataset.ar || 1;
         if(!W || !H) return;
@@ -37262,7 +37521,7 @@ function mpPtHTML(p, eigen){
   }
   return `<div class="mpptvak">`
     + `<div class="${cls.join(" ")}"${eigen ? ` data-act="mptaunt"` : ""} style="--ptl1:${l1};--ptl2:${l2};--ptgloed:${/^#[0-9a-f]{6}$/i.test(rand) ? rand + "66" : "transparent"}">`
-    + `<div class="ptbg">${sk && sk.speciaal === "inkt" ? "" : mpBg(c.lv, c.hz)}</div>${skinFigHTML(p, sk, key, nu)}`
+    + `<div class="ptbg">${sk && sk.speciaal === "inkt" ? "" : (sk && sk.speciaal === "inferno" ? (infernoStart(), INFERNO_DOEK()) : mpBg(c.lv, c.hz) + (sk ? skinPtBg(sk) : ""))}</div>${sk && sk.speciaal === "licht" ? XAM_STRALEN() : ""}${sk && sk.speciaal === "bloedaurora" ? (infernoStart(), RODE_AURORA()) : ""}${skinFigHTML(p, sk, key, nu)}${sk && sk.speciaal === "licht" ? xamStofHTML(10) : ""}`
     + (eigen && !menu ? `<div class="mphint">klik om iets te zeggen</div>` : "") + menu + `</div>`
     + (zin && !menu ? `<div class="mpbel" style="${mpBelKleur(c.lv)}"><span class="pbnaam">${c.naam}</span>${zin.t}</div>` : "")
     + `</div>`;
