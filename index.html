@@ -2983,7 +2983,7 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 @media (prefers-reduced-motion:reduce){ #horizon .hzregenboog, .majestic-rand::before, .majbox .majmask{animation:none} }
 /* ☁ ronde 34: de zwerm van Nimbus de Meervoudige (PvP-vak en karakterkeuze) */
 .zwerm{position:absolute; inset:0; overflow:hidden; pointer-events:none}
-.zwerm .zw{position:absolute; left:1%; top:1%; animation-name:zwX, zwY, zwDraai; animation-timing-function:cubic-bezier(.55,0,.45,1), ease-in-out, steps(1, end);
+.zwerm .zw{position:absolute; left:1%; top:1%; transition:width .45s steps(4, end); animation-name:zwX, zwY, zwDraai; animation-timing-function:cubic-bezier(.55,0,.45,1), ease-in-out, steps(1, end);
   animation-iteration-count:infinite; animation-direction:alternate, alternate, normal}
 .zwerm .zw img{display:block; width:100%; height:auto; image-rendering:pixelated; filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)); animation:zwDobber 1s ease-in-out infinite alternate}
 @keyframes zwX{from{left:1%} to{left:calc(99% - var(--w))}}
@@ -2999,17 +2999,19 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 .ofafig .sprbeeld{opacity:0}
 .ofalagen .ofl{position:absolute; inset:0; transform-origin:50% 50%}
 .ofalagen .ofl img{display:block; width:100%; height:100%; image-rendering:pixelated}
-.ofl-veren{animation:ofaVeren 7s ease-in-out infinite alternate}
-.ofl-ring1{animation:ofaR1 5.2s ease-in-out infinite alternate}
-.ofl-ring2{animation:ofaR2 6.4s ease-in-out infinite alternate}
-.ofl-ring3{animation:ofaR3 4.6s linear infinite}
-.ofl-voor{animation:ofaVoor 3.1s ease-in-out infinite alternate}
-@keyframes ofaVeren{from{translate:0 0; scale:1} to{translate:0 -1.2%; scale:1.02}}
-@keyframes ofaR1{0%{translate:0 0; rotate:-6deg} 50%{translate:1.2% -2.2%} 100%{translate:-.8% -.6%; rotate:7deg}}
-@keyframes ofaR2{0%{translate:0 1.6%; rotate:4deg; scale:1 1} 100%{translate:0 -1.8%; rotate:-5deg; scale:1.04 .82}}
-@keyframes ofaR3{0%{scale:1 1; rotate:-3deg} 25%{scale:.1 1} 50%{scale:-1 1; rotate:3deg} 75%{scale:-.1 1} 100%{scale:1 1; rotate:-3deg}}   /* draait om zijn as, zodat hij achter de voorste ring tevoorschijn komt */
-@keyframes ofaVoor{from{opacity:.75; translate:0 .6%} to{opacity:1; translate:0 -1%}}
-@media (prefers-reduced-motion:reduce){ .ofalagen .ofl{animation:none} }
+.ofl-veren{animation:ofaVeren 6s ease-in-out infinite alternate}
+.ofl-r2grp{animation:ofaR2 6.4s ease-in-out infinite alternate}           /* ring 2 (beide helften) en ring 1 samen */
+.ofl-ring1{animation:ofaR1 5.2s ease-in-out infinite alternate}           /* ring 1 zweeft daarbinnen nog een beetje los */
+.ofl-r2voor{clip-path:inset(51.8% 0 0 0)}
+.ofl-draai{position:absolute; inset:0; background:url('art/skin-ofanim-ring1-draai.png') no-repeat 0 0 / 1600% 100%;
+  image-rendering:pixelated; animation:ofaDraai 1.8s steps(16, jump-none) infinite}
+.ofl-voor{animation:ofaVoor 4s ease-in-out infinite alternate}
+@keyframes ofaVeren{from{translate:0 0; scale:1} to{translate:0 -1.2%; scale:1.012}}
+@keyframes ofaR2{from{translate:0 -1%} to{translate:0 1.4%}}
+@keyframes ofaR1{from{translate:0 0} to{translate:0 -2.2%}}
+@keyframes ofaDraai{from{background-position:0% 0} to{background-position:100% 0}}
+@keyframes ofaVoor{from{opacity:.75; translate:0 .6%} to{opacity:1; translate:0 -1.8%}}
+@media (prefers-reduced-motion:reduce){ .ofalagen .ofl{animation:none} .ofl-draai{animation:none} }
 /* 🩸 ronde 34: het rode noorderlicht van Bloedmaan-Aurora */
 canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; pointer-events:none; mix-blend-mode:screen; z-index:1; filter:drop-shadow(0 0 4px rgba(255,40,60,.6))}
 .chtegel.chaurora canvas.rodeaurora{z-index:0}
@@ -4183,6 +4185,14 @@ body.venster .sbbox{width:min(880px,96vw); max-width:none !important; text-align
 .vkarakter .vkpt:has(.inktbox){background:#000}
 .tkaart.inktkaart{background:#000 !important} .tkaart.inktkaart .tkbg::before, .tkaart.inktkaart .tkbg::after{display:none}
 .inktogen.los{position:absolute; pointer-events:none; z-index:3}
+/* ronde 34: de ogen dwalen (--dx/--dy), verdwijnen even (inktweg) en er gaan soms extra ogen open (inktextra) */
+.inktogen{translate:var(--dx, 0) var(--dy, 0); transition:translate .38s cubic-bezier(.6,0,.2,1), opacity .2s}
+.inktogen.inktweg{opacity:0}
+.inktogen.inktextra{animation:inktExtra 2.4s ease-in-out both}
+.inktogen.inktextra i{animation:inktExtraOog 2.4s steps(1, end) both}
+@keyframes inktExtra{0%{opacity:0} 15%{opacity:1} 80%{opacity:1} 100%{opacity:0}}
+@keyframes inktExtraOog{0%{scale:1 .1} 12%{scale:1 1} 70%{scale:1 1} 74%{scale:1 .1} 78%{scale:1 1}}
+@media (prefers-reduced-motion:reduce){ .inktogen{transition:none} }
 .inktogen.los i{position:absolute; display:block; background:#fff; border-radius:50%; translate:-50% -50%; box-shadow:0 0 3px rgba(255,255,255,.7)}
 .mppt .ptfig.ptmeer{inset:0; height:auto; display:block}
 .mppt .ptmeer .meer{position:absolute; left:20%; top:16%; width:60%; height:60%; animation:meerA 9s ease-in-out infinite alternate}
@@ -5821,7 +5831,7 @@ html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height
 .tkvraag{align-self:center; font:clamp(40px, 5vw, 96px)/1 "Press Start 2P",monospace; color:#ffd84a; text-shadow:0 6px 0 rgba(0,0,0,.5); margin-right:6%}
 .tverder{grid-column:1; grid-row:2; align-items:flex-end; padding:0; min-height:0}
 .tverderbg{position:absolute; inset:0; background-size:cover; background-position:center; image-rendering:pixelated}
-.tverder .tverderfig{width:44%; right:3%; height:90%; justify-content:center; z-index:0}   /* ronde 34: wie je in het verhaal tegenkomt, in zijn taunt */
+.tverder .tverderfig{width:72%; right:1%; height:97%; justify-content:flex-end; z-index:0}   /* ronde 34: wie je in het verhaal tegenkomt, in zijn taunt, even groot als in de andere kaarten */
 .tverder .tverderfig img{max-height:100%; max-width:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
 .tverder::after{content:""; position:absolute; left:0; right:0; bottom:0; height:55%; background:linear-gradient(rgba(40,32,14,0), rgba(40,32,14,.97) 62%)}
 .tverderin{position:relative; z-index:1; display:flex; align-items:center; gap:clamp(14px, 1.6vw, 28px); padding:clamp(16px, 3vh, 40px) clamp(18px, 2vw, 40px)}
@@ -27697,7 +27707,9 @@ function vrijDecor(){
   if(!S || S.story || !S.ui || S.ui.mode === "start") return;
   const m = matchVan();
   const sleutel = m ? "c" + m.game : "g";
-  if(S.decor && S.decor.sleutel === sleutel) return;
+  /* ronde 34: in een challenge is het decor altijd dat van de skin waartegen je vecht (zijn eigen achtergrond) */
+  const chSk = S.ladder && !S.ladder.stil && S.ladder.skin && typeof skinVan === "function" ? skinVan(S.ladder.skin) : null;
+  if(S.decor && S.decor.sleutel === sleutel && !(chSk && S.decor.skin !== chSk.file && Array.isArray(S.char) && S.char.includes(chSk.id))) return;
   /* Online kiezen beide spelers hetzelfde decor (en dus dezelfde muziek): afgeleid van de
      gedeelde seed, zonder de spel-RNG aan te raken. */
   let ds = NET.on ? ((NET.seed ^ (sleutel.charCodeAt(0) * 7919 + (m ? m.game : 0) * 104729)) >>> 0) || 1 : 0;
@@ -27711,6 +27723,9 @@ function vrijDecor(){
   const dom = typeof mpDomeinen === "function" ? mpDomeinen() : [];
   if(dom.length){
     let pool = dom;
+    if(chSk){ const eigen = dom.filter(d => d.skin === chSk.file); if(eigen.length){ const d = eigen[0];
+      S.decor = {sleutel, id:d.id, variant:d.v || null, skin:d.skin, wereld:STORY[d.id].wereld, muziek:STORY[d.id].muziek};
+      horizonVerf(d.id, d.v || null, d.skin); return; } }
     if(m){ m.decorGehad = m.decorGehad || []; const vers = dom.filter(d => !m.decorGehad.includes(d.id + ":" + (d.v || "") + ":" + (d.skin || ""))); if(vers.length) pool = vers; }
     const d = kies(pool);
     if(m) m.decorGehad.push(d.id + ":" + (d.v || "") + ":" + (d.skin || ""));
@@ -36218,7 +36233,7 @@ function mijnProfiel(){
 function profielSchoon(v, p){
   v = v && typeof v === "object" ? v : {};
   /* ⚔ de gekozen tegenstander tegen de bot: zijn eigen deck (dat mag regels breken) */
-  if(v.ladder && S.ladder && p != null && isBot(p) && !NET.on && ladderZoek(v.char))
+  if(v.ladder && S.ladder && p != null && isBot(p) && !NET.on && (ladderZoek(v.char) || (S.ladder.skin && v.char === S.ladder.skin)))
     return {char:v.char, deck:ladderDeckSchoon(v.deck)};
   /* tegen de bot mag je eigen deck de aethers bevatten die je op de ladder verdiende; online niet */
   const extra = (p != null && S.vsBot && !NET.on && !isBot(p)) ? ladderAeVrij() : [];
@@ -36424,7 +36439,10 @@ function ladderHTML(kop){
    gekozen tegenstander: dat karakter en zijn deck. */
 function botProfiel(){
   const lad = S.mode === "basis" && LADDER_KEUS ? ladderZoek(LADDER_KEUS) : null;
-  if(lad && ladderSpeelbaar(lad)){ S.ladder = {id:lad.id}; return {char:lad.char || lad.id, deck:ladderDeckVan(lad), ladder:true}; }
+  /* ronde 34: in een challenge vecht je tegen de skin die je ermee wint: zijn plaatjes, zijn portret en zijn eigen achtergrond.
+     Heeft die challenge (nog) geen skin, dan gewoon het personage zelf. Het kiesscherm blijft zoals het is. */
+  if(lad && ladderSpeelbaar(lad)){ const sk = typeof SKINS === "object" ? SKINS.find(k => k.van === lad.id) : null;
+    S.ladder = {id:lad.id, skin:sk ? sk.id : null}; return {char:sk ? sk.id : (lad.char || lad.id), deck:ladderDeckVan(lad), ladder:true, ladId:lad.id}; }
   /* 🎲 Willekeurig: elk potje stiekem een van de challenge-tegenstanders die al speelbaar zijn.
      Telt niet mee voor de kroontjes en er staat niets over op het scherm. */
   if(S.mode === "basis" && LADDER_STIL){
@@ -36674,7 +36692,7 @@ function charPortret(key){
 /* ronde 34: de naambalk is altijd even hoog; een lange naam krijgt kleinere letters */
 const chNaamMaat = t => { const n = String(t).replace(/&[a-z]+;/g, "x").length; return n <= 14 ? ".4rem" : n <= 22 ? ".34rem" : n <= 30 ? ".3rem" : ".26rem"; };
 function chMetBg(c, html){
-  if(FAST || /class="chtegel[^"]*\b(dicht|chinferno|chlicht)\b/.test(html)) return html;   // Bloedmaan-Aurora krijgt wel haar achtergrond, met de aurora erover
+  if(FAST || /class="chtegel[^"]*\b(dicht|chinferno)\b/.test(html)) return html;   // Xam en Bloedmaan-Aurora krijgen hun achtergrond, met hun licht erover   // Bloedmaan-Aurora krijgt wel haar achtergrond, met de aurora erover
   let bg = "";
   try{ const ch = mpChar(c.id), sk = skinVan(c.id); bg = sk && sk.speciaal === "inkt" ? "" : mpBg(ch.lv, ch.hz) + (sk ? skinPtBg(sk) : ""); }catch(e){ return html; }
   if(!bg) return html;
@@ -37167,7 +37185,7 @@ function infernoTik(t){
 /* 💍 ronde 34: De Ofanim in lagen: de veren, drie losse ringen en de vonken ervoor (art/skin-ofanim-veren, -ring1, -ring2,
    -ring3, -voor). Elke ring zweeft en draait op zichzelf. Alleen de gewone stand heeft lagen; zolang ze er niet allemaal
    zijn (of in de andere standen) blijft het gewone plaatje staan. */
-const OFA = {status:"", lagen:["veren", "ring3", "ring2", "ring1", "voor"], ar:1024 / 1536, wacht:[]};
+const OFA = {status:"", lagen:["veren", "ring2", "ring1-draai", "voor"], ar:1024 / 1536, wacht:[]};   // ronde 34: ring 3 is geschrapt, ring 1 draait als strook
 function ofaLaad(klaar){
   if(OFA.status === "klaar" || OFA.status === "fout") return OFA.status;
   if(klaar) OFA.wacht.push(klaar);
@@ -37179,9 +37197,19 @@ function ofaLaad(klaar){
     im.src = `art/skin-ofanim-${l}.png`; });
   return "bezig";
 }
+/* Van achter naar voor: de veren, dan één zwevende groep met ring 2 heel, ring 1 (de draaiende strook) en nog eens de voorste
+   helft van ring 2 (zo grijpt ring 2 door ring 1 heen, zonder naad), en dan de vonken. */
 function ofaLagenHTML(p){
+  const img = l => `<img src="art/skin-ofanim-${l}.png" alt="" draggable="false">`;
   return `<span class="ofalagen"${p != null ? ` data-p="${p}"` : ""} data-ar="${OFA.ar}">`
-    + OFA.lagen.map(l => `<span class="ofl ofl-${l}"><img src="art/skin-ofanim-${l}.png" alt="" draggable="false"></span>`).join("") + `</span>`;
+    + `<span class="ofl ofl-veren">${img("veren")}</span>`
+    + `<span class="ofl ofl-r2grp">`
+    +   `<span class="ofl">${img("ring2")}</span>`
+    +   `<span class="ofl ofl-ring1"><span class="ofl-draai"></span></span>`
+    +   `<span class="ofl ofl-r2voor">${img("ring2")}</span>`
+    + `</span>`
+    + `<span class="ofl ofl-voor">${img("voor")}</span>`
+    + `</span>`;
 }
 /* 🩸 ronde 34: Bloedmaan-Aurora. Drie rode gordijnen van noorderlicht die golven, in harde pixels (96 x 96, opgeschaald). */
 function rodeAuroraTeken(t){
@@ -37274,6 +37302,28 @@ function zwermHTML(src, n, klein, groot, nu){
        + `animation-duration:${dx.toFixed(2)}s, ${dy.toFixed(2)}s, ${(2 * dx).toFixed(2)}s;animation-delay:${delX.toFixed(2)}s, ${delY.toFixed(2)}s, ${delX.toFixed(2)}s">`
        + `<img src="${src}" alt="" draggable="false" style="animation-duration:${(.7 + r(5) * .6).toFixed(2)}s"></div>`;
   }
+  return `<div class="zwerm" aria-hidden="true">${h}</div>`;
+}
+/* ☁ ronde 34: Nimbus de Meervoudige in het gevecht. Drie Nimbussen; bij elke klap splitst elke Nimbus in tweeën: het kind
+   begint precies waar zijn ouder op dat moment was en drijft er dan langzaam van weg (eigen tempo). Na elke splitsing zijn
+   ze allemaal een stukje kleiner. Hooguit 48. Tijdens de klap staan ze in hun boze stand (het gewone geraakt-plaatje). */
+function meerSplitHTML(src, p, nu){
+  const t = (nu || Date.now()) / 1000, T = ((MPPT.splitT || [[], []])[p] || []).slice(0, 4);
+  const rnd = (a, b) => { const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return x - Math.floor(x); };
+  let lijst = [0, 1, 2].map(i => ({dx:1.6 + rnd(i, 1) * 1.6, dy:1.2 + rnd(i, 2) * 1.4, ox:rnd(i, 3) * 6, oy:rnd(i, 4) * 6, d:(.7 + rnd(i, 5) * .6), k:i + 1}));
+  T.forEach((Tg, g) => {
+    const kids = lijst.map((s, i) => {
+      const k = s.k * 2 + 1, dx = s.dx * (.72 + rnd(k, 6) * .56), dy = s.dy * (.72 + rnd(k, 7) * .56);
+      const qx = (((Tg + s.ox) % (2 * s.dx)) + 2 * s.dx) % (2 * s.dx) / (2 * s.dx), qy = (((Tg + s.oy) % (2 * s.dy)) + 2 * s.dy) % (2 * s.dy) / (2 * s.dy);
+      return {dx, dy, ox:qx * 2 * dx - Tg, oy:qy * 2 * dy - Tg, d:s.d, k};   // zelfde plek op het moment van de klap
+    });
+    lijst = lijst.concat(kids);
+  });
+  const g = T.length, maat = 34 * Math.pow(.76, g);
+  const del = (o, per) => -((((t + o) % per) + per) % per);
+  const h = lijst.map(s => `<div class="zw" style="--w:${maat.toFixed(1)}%;--h:${(maat * 1.25).toFixed(1)}%;width:${maat.toFixed(1)}%;`
+      + `animation-duration:${s.dx.toFixed(3)}s, ${s.dy.toFixed(3)}s, ${(2 * s.dx).toFixed(3)}s;animation-delay:${del(s.ox, 2 * s.dx).toFixed(3)}s, ${del(s.oy, 2 * s.dy).toFixed(3)}s, ${del(s.ox, 2 * s.dx).toFixed(3)}s">`
+      + `<img src="${src}" alt="" draggable="false" style="animation-duration:${s.d.toFixed(2)}s"></div>`).join("");
   return `<div class="zwerm" aria-hidden="true">${h}</div>`;
 }
 /* 🎵 ronde 34: Waardin to chill and study to. De muzieknoten staan in de tekening; hier knippen we ze eruit
@@ -37369,8 +37419,8 @@ function skinFigHTML(p, sk, key, nu){
     /* ☁ Nimbus de Meervoudige: deint over het hele portret, en bij elke klap komt er een kleinere bij */
     /* ronde 34: een zwerm van kleine Nimbussen die door het vak dashen; bij elke klap komen er twee bij */
     const src = SPRITE_BEELD[sprEcht(key)] || SPRITE_BEELD.nimbus || "art/nimbus.png";
-    const n = Math.min(24, 10 + 2 * (MPPT.schade[p] || 0));
-    return `<div class="ptfig ptzwerm">${zwermHTML(src, n, 15, 26, nu)}</div>`;
+    /* ronde 34: in het gevecht begint hij met drie, en bij elke klap splitst elke Nimbus in tweeën (en worden ze kleiner) */
+    return `<div class="ptfig ptzwerm">${meerSplitHTML(src, p, nu)}</div>`;
   }
   if(sk.speciaal === "majestic"){
     /* 🌈 Tang de Majestic: een regenboog door een masker per stand, precies over de sprite */
@@ -37471,7 +37521,38 @@ function inktKnip(sel, soort){
     else o.animate([{transform:"scaleY(1)"}, {transform:"scaleY(.1)", offset:.5}, {transform:"scaleY(1)"}], {duration:240});
   });
 }
+/* 🖤 ronde 34: de oogjes van Inkts inkt dwalen door de inkt. Ze kijken rond, schieten naar een andere plek, verdwijnen
+   soms en duiken elders weer op, en heel af en toe gaat er ergens anders nog een paar ogen open. Alles is zwart, dus
+   ze mogen overal in het vak opduiken. */
+let INKT_DWAAL_T = null;
+function inktDwaal(){
+  INKT_DWAAL_T = null;
+  const ogen = [...document.querySelectorAll(".inktogen")];
+  if(!ogen.length) return;
+  ogen.forEach(el => {
+    if(el.dataset.extra) return;
+    const r = Math.random();
+    const zet = (dx, dy) => { el.style.setProperty("--dx", dx.toFixed(1) + "%"); el.style.setProperty("--dy", dy.toFixed(1) + "%"); };
+    const nieuw = () => [(Math.random() - .5) * 56, (Math.random() - .5) * 46];
+    if(r < .3){   // weg, en elders weer open
+      el.classList.add("inktweg");
+      setTimeout(() => { zet(...nieuw()); setTimeout(() => el.classList.remove("inktweg"), 120); }, 260);
+    } else if(r < .75){ zet(...nieuw()); }   // schiet naar een andere plek
+    else {   // kijkt even opzij en weer terug
+      const ox = parseFloat(el.style.getPropertyValue("--dx")) || 0, oy = parseFloat(el.style.getPropertyValue("--dy")) || 0;
+      zet(ox + (Math.random() < .5 ? -8 : 8), oy); setTimeout(() => zet(ox, oy), 600);
+    }
+    /* soms gaat er ergens anders in de inkt nog een paar ogen open */
+    if(Math.random() < .22 && el.parentNode){
+      const kop = el.cloneNode(true); kop.dataset.extra = "1"; kop.classList.add("inktextra");
+      const [dx, dy] = nieuw(); kop.style.setProperty("--dx", dx.toFixed(1) + "%"); kop.style.setProperty("--dy", dy.toFixed(1) + "%");
+      el.parentNode.appendChild(kop); setTimeout(() => kop.remove(), 1500 + Math.random() * 1200);
+    }
+  });
+  INKT_DWAAL_T = setTimeout(inktDwaal, 1100 + Math.random() * 1700);
+}
 function inktKnipperStart(){
+  if(!INKT_DWAAL_T && !FAST) INKT_DWAAL_T = setTimeout(inktDwaal, 700);
   if(INKT_KNIP_T) return;
   const lus = () => {
     INKT_KNIP_T = null;
@@ -37559,12 +37640,13 @@ function mpBalkPaint(){
   const cr = [0, 1].map(p => P(p).cols.filter(c => c.cre).length), nu = [P(0).life, P(1).life];
   if(MPPT.g !== GEN){
     MPPT.g = GEN; MPPT.leven = nu.slice(); MPPT.cre = cr.slice(); MPPT.em = [null, null]; MPPT.zin = [null, null];
-    MPPT.menu = false; MPPT.laag = [false, false]; MPPT.schade = [0, 0]; MPPT.kees = [null, null];
+    MPPT.menu = false; MPPT.laag = [false, false]; MPPT.schade = [0, 0]; MPPT.kees = [null, null]; MPPT.splitT = [[], []];
     skinVoorladen();
   }
   if(!FAST) [0, 1].forEach(p => {
     if(nu[p] < MPPT.leven[p]){
       MPPT.schade[p] = (MPPT.schade[p] || 0) + 1;      // 🎭 Nimbus splitst, Bonsai wordt de rover
+      (MPPT.splitT || (MPPT.splitT = [[], []]))[p].push(Date.now() / 1000);   // ☁ wanneer de Nimbussen splitsten
       mpEmote(p, "geraakt"); mpEmote(opp(p), "raak");
       if(isBot(opp(p)) && rndVrij() < .35) setTimeout(() => mpZegAuto(opp(p), "jij"), 500);
       if(isBot(p) && nu[p] <= 2 && !MPPT.laag[p]){ MPPT.laag[p] = true; setTimeout(() => mpZegAuto(p, "laag"), 700); }
