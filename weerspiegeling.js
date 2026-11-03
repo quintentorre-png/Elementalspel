@@ -19,7 +19,7 @@ const WSP = (() => {
     gewoon:{mot:{tus:[.9,2.2], n:[1,2], duur:[1.6,3], fel:.8, uit:[0,1,2,3,7,9,11,4]}, groot:{tus:[14,22], duur:[2.6,3.6], fel:.62}},
     taunt: {tint:"rgba(140,110,200,.45)", bij:"midden", mot:{tus:[.7,1.6], n:[1,3], duur:[2,3.4], fel:.85, uit:[4,5,8,1,3,11]}, groot:{tus:[11,18], duur:[3.4,4.6], fel:.72}},
     boos:  {tint:"rgba(200,30,45,.55)", mot:{tus:[.3,.9], n:[2,4], duur:[.6,1.4], fel:.95, uit:[6,2,4,10,3,8,0]}, groot:{tus:[9,15], duur:[1.6,2.4], fel:.82}},
-    stuk:  {mot:null, blijf:{fel:.74}}};   // stuk: de collage staat er de hele tijd, geen losse beelden
+    stuk:  {mot:null, groot:{tus:[8,11], duur:[5.5,7.5], fel:.74, spreid:1.4}}};   // stuk: geen losse beelden; de collage komt en gaat zoals bij de andere standen, maar veel langzamer
   const A = {status:"", wacht:[], glas:null, barst:null, tegels:null, col:{}, zones:[], paren:[]};
   const INST = {};
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -80,6 +80,7 @@ const WSP = (() => {
     const t = nu(); I.stand = s; I.glimpen = [];
     if(HOU[s]) I.tot = t + HOU[s] / 1000;
     if(HOU[s]){ verschijn(I); I.volgGroot = t + rnd(STAND[s].groot.tus[0], STAND[s].groot.tus[1]); }   // bij taunt en boos komt ze meteen
+    else if(s === "stuk"){ verschijn(I); I.volgGroot = t + rnd(STAND.stuk.groot.tus[0], STAND.stuk.groot.tus[1]); }   // stuk: meteen, en daarna steeds weer
     else if(STAND[s].groot) I.volgGroot = t + rnd(4, 8);
     if(s === "boos") schud(I);
   }
@@ -91,9 +92,10 @@ const WSP = (() => {
     const st = STAND[I.stand], gr = st.groot, t = nu();
     const duur = rnd(gr.duur[0], gr.duur[1]), fel = gr.fel * rnd(.9, 1.05);
     I.glimpen.forEach(x => { if(x.mot != null && x.uit == null) x.uit = t; });   // losse beelden zakken weg voordat zij komt
-    I.grootTot = t + .35 + .57 + duur;
+    const spreid = gr.spreid || .45;   // hoe ver de scherven na elkaar opkomen
+    I.grootTot = t + .35 + spreid + .12 + duur;
     A.zones.forEach(z => { const af = Math.hypot(z.cx - W * .5, z.cy - H * .4) / Math.hypot(W * .5, H * .6);
-      I.glimpen.push({z, t0:t + .35 + af * .45 + rnd(0, .12), duur, fel:fel * rnd(.8, 1), groot:true}); });
+      I.glimpen.push({z, t0:t + .35 + af * spreid + rnd(0, .12), duur, fel:fel * rnd(.8, 1), groot:true}); });
   }
   function glimp(I, extra){
     const st = STAND[I.stand], mo = st.mot, t = nu();
