@@ -6860,7 +6860,7 @@ function kopie(G){
     terug:G.terug && G.terug.slice(), smeedGedaan:G.smeedGedaan && G.smeedGedaan.slice(), trok3:G.trok3,
     mulliganGedaan:G.mulliganGedaan, aeKeuzeGedaan:G.aeKeuzeGedaan, stack:G.stack.length ? structuredClone(G.stack) : [],
     aeKeuze:G.aeKeuze, kernOp:G.kernOp && G.kernOp.slice(), dekenBeurt:Array.isArray(G.dekenBeurt) ? G.dekenBeurt.slice() : G.dekenBeurt, ziel:G.ziel.slice(), mens:G.mens,
-    roversbuit:G.roversbuit && [G.roversbuit[0].slice(), G.roversbuit[1].slice()], doorT:G.doorT, dubbelT:G.dubbelT && G.dubbelT.slice(), lenteT:G.lenteT && G.lenteT.slice(), slide:G.slide && G.slide.slice(), vier:G.vier, volle:G.volle, smokeEind:G.smokeEind || 0,
+    roversbuit:G.roversbuit && [G.roversbuit[0].slice(), G.roversbuit[1].slice()], doorT:G.doorT, dubbelT:G.dubbelT && G.dubbelT.slice(), lenteT:G.lenteT && G.lenteT.slice(), slide:G.slide && G.slide.slice(), vier:G.vier, volle:G.volle, stTel:G.stTel && G.stTel.slice(), st2:G.st2 && Object.assign({}, G.st2), smokeEind:G.smokeEind || 0,
     vh:G.vh && {id:G.vh.id, L:G.vh.L, st:structuredClone(G.vh.st), echt:G.vh.echt, omslag:G.vh.omslag && Object.assign({}, G.vh.omslag), beginNodig:G.vh.beginNodig}};
   if (H.vh) verhaalKlaar(H);          // de levensgrens van het verhaal er weer op
   return H;
@@ -7094,7 +7094,7 @@ function effsVan0(G, id, origin){
 }
 const kloonE = e => Object.assign({}, e, e.keten ? {keten:e.keten.slice()} : null);
 function geplandeEffecten(G, p, id, asSpell, col, o){
-  const dub = (e, l) => (trioKracht(G, p, e) || (G.volle && e === STEEN && heeft(G, p, 'ae_stonefull'))) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
+  const dub = (e, l) => (trioKracht(G, p, e) || (G.volle && e === STEEN && heeft(G, p, 'ae_stonefull') && !globalThis.LAW_PROEF)) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
   if (asSpell) return dub(G.kEl[id], effsVan(G, id, 1)).map(e => (e.col = col, e));
   let eigen = o.skipOwn ? [] : effsVan(G, id, 0);
   if (o.dubbel) eigen = eigen.concat(eigen.map(e => kloonE(e)));
@@ -7556,7 +7556,9 @@ function losOp(G, K, it){
       if (!ids.length) return;
       const id = effDoel(G, K, it, p, ids, true, {k:'steen'});
       if (id === 'fizzle' || id === null) return;
-      levenErbij(G, id); levenErbij(G, id); levenErbij(G, id);   // ronde 27: +3
+      { let n = 3;   // ronde 27: +3
+        if (globalThis.LAW_PROEF === 'a' && heeft(G, p, 'ae_stonefull')){ G.stTel = G.stTel ? G.stTel.slice() : [3, 3]; n = G.stTel[p]; G.stTel[p]++; }   // 🧪 Lawine A: de teller
+        for (let i = 0; i < n; i++) levenErbij(G, id); }
       return;
     }
     case E_WATER: {
@@ -7571,6 +7573,7 @@ function losOp(G, K, it){
       s.cre[van] = 0;
       const sl = kiesPlek(G, K, p, plekken.map(c => ({p:eig, c, kind:'cre'})), false, {el:ELNAAM[G.kEl[id]], kaartId:id});
       plaatsNu(G, eig, id, false, sl.c, {splash:true, keepHp});
+      if (globalThis.LAW_PROEF === 'b' && G.kEl[id] === STEEN){ G.st2 = Object.assign({}, G.st2 || {}); G.st2[id] = G.gTurn; }   // 🧪 Lawine B: water geeft één aanval terug, niet twee
       if (heeft(G, p, 'ae_watercycle') && G.pl[eig].cre[sl.c] === id) G.pl[eig].hp[sl.c] += 3;   // 🟣 Getijdenstroom
       const rplan = legPlan(G, K, eig, id, false, sl.c, {});
       pushPlay(G, eig, id, false, sl.c, rplan === 'cancel' ? [] : rplan);
@@ -8285,7 +8288,7 @@ function kanAanvallen(G, p, c){
   const id = s.cre[c]; if (!id) return false;
   const e = G.kEl[id];
   if (EL_STIL[e] || s.web[c]) return false;
-  if (!(p === G.tp && G.fase === F_BEURT && (G.gTurn > 1 || VARIANT.aanvalBeurt1 || s.pld[c] < G.gTurn) && s.att[c] !== G.gTurn && (s.ent[c] === 0 || EL_ENTVRIJ[e]))) return false;
+  if (!(p === G.tp && G.fase === F_BEURT && (G.gTurn > 1 || VARIANT.aanvalBeurt1 || s.pld[c] < G.gTurn) && (s.att[c] !== G.gTurn || (globalThis.LAW_PROEF === 'b' && e === STEEN && heeft(G, p, 'ae_stonefull') && !(G.st2 && G.st2[id] === G.gTurn))) && (s.ent[c] === 0 || EL_ENTVRIJ[e]))) return false;
   if (G.vh){ const st = G.vh.st;
     if (st.stilstand) return false;
     if (st.maxWeigert && isVlag(G, id, F_MAX)) return false;
@@ -8336,6 +8339,7 @@ function valAan(G, K, col){ bewaakt(G, K, K2 => valAan0(G, K2, col)); }
 function valAan0(G, K, col){
   const p = G.tp;
   if (!kanAanvallen(G, p, col)) return;
+  if (G.pl[p].att[col] === G.gTurn){ G.st2 = Object.assign({}, G.st2 || {}); G.st2[G.pl[p].cre[col]] = G.gTurn; }   // 🧪 Lawine B: de tweede aanval
   G.pl[p].att[col] = G.gTurn;
   G.stack.push({t:2, ctrl:p, col, creId:G.pl[p].cre[col]});
   ketenLus(G, K);
@@ -8364,6 +8368,7 @@ function vanS(S, rng, cid, lv){
     s.life = pl.life; s.deck = pl.deck.map(kaart); s.hand = pl.hand.map(kaart); s.grave = pl.grave.map(kaart);
     pl.cols.forEach((k, c) => {
       if (k.cre){ s.cre[c] = kaart(k.cre.card); s.hp[c] = k.cre.hp; s.ent[c] = k.cre.ent; s.att[c] = k.cre.attackedT; s.pld[c] = k.cre.played;
+        if (k.cre.card.lawB === S.gTurn){ G.st2 = G.st2 || {}; G.st2[s.cre[c]] = S.gTurn; }   // 🧪 Lawine B
         s.minAtk[c] = k.cre.minAtk || 0; s.web[c] = k.cre.web ? 1 : 0; s.eiB[c] = k.cre.eiBeurt || 0; s.hx[c] = k.cre.bloesem ? 1 : 0; s.hxT[c] = k.cre.hexTot || 0; }
       if (k.spell) s.spell[c] = kaart(k.spell.card);
     });
@@ -8389,6 +8394,7 @@ function vanS(S, rng, cid, lv){
   }
   G.ae = [S.ae[0].slice(), S.ae[1].slice()];
   G.aeM = G.ae.map(l => l.reduce((m, k) => m | (AE_BITS[k] || 0), 0));
+  if (S.lawTel) G.stTel = S.lawTel.slice();   // 🧪 Lawine A
   G.genade = S.genade ? S.genade.slice() : [-1, -1];
   G.hemelT = S.hemelT ? S.hemelT.slice() : null;
   G.terug = S.terug ? S.terug.slice() : null;
@@ -9917,11 +9923,11 @@ const AETHERS = {
   ae_pijn:   {el:null, name:"Loutering", kind:"passief", verhaal:true, uit:true},   // okt 2026: idem
   ae_alziend:{el:null, name:"Alziend", kind:"passief", ic:"👁"},   // ook in commander en te krijgen
   ae_genade: {el:null, name:"Laatste Adem", kind:"passief", verhaal:true, ic:"🕊"},
-  ae_leven:  {el:null, name:"Levenskracht", kind:"passief", verhaal:true, ic:"💚"},   // ronde 30: ook in het verhaal (Knort)
+  ae_leven:  {el:null, name:"Levenskracht", kind:"passief", verhaal:true, vijand:true, ic:"💚"},   // nov 2026: alleen nog van tegenstanders (niet in PvP, niet te koop)
   ae_zwerm:  {el:null, name:"Lichtzwerm", kind:"passief", verhaal:true, basis:true, ic:"✨"},   // ronde 30: ook in het verhaal (Seraf, 2-1)     // alleen Basis: niet in de commander-draft (okt 2026)
-  /* ronde 21: het Fusieportaal telt als alle vier de fusie-aethers en neemt alle drie de aether-plekken in.
+  /* ronde 21: het Fusieportaal telt als alle vier de fusie-aethers en neemt (nov 2026) twee aether-plekken in.
      Overal behalve in de commander-draft (basis:true). Voorlopig niet in het verhaal (pvp:true). */
-  fu_portaal:{el:null, name:"Fusieportaal", kind:"fusie", verhaal:true, basis:true, plekken:3, ic:"🌀"},   // ronde 30: ook in het verhaal (5-4)
+  fu_portaal:{el:null, name:"Fusieportaal", kind:"fusie", verhaal:true, basis:true, plekken:2, ic:"🌀"},   // nov 2026: neemt 2 plekken in (was 3)   // ronde 30: ook in het verhaal (5-4)
   fu_grass:  {el:"gras", name:"Woudhart", kind:"fusie", fuse:{speed:"flash"}},
   /* 🟣 Eigen krachten van tegenstanders in het verhaal. Wat eerst een veldregel was, is nu
      hun aether: je ziet hem als ruit naast hun levens. Nooit te vinden, nooit te kopen. */
@@ -10207,7 +10213,11 @@ const AETHER_TEKST = {
   ae_watercycle:"Je 💧 wezens komen binnen met <b>+3</b> levens. Elk wezen dat je 💧 raakt (oppakken en opnieuw neerzetten, of het water-ritueel) krijgt <b>+3</b> levens.",
   ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen wezen mee kiezen: {offer} die en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-ritueel.",
   ae_fire6:     "Je 🔥-effect doet <b>2</b> meer schade (dus <b>4</b>) en raakt ook 💧 Water. Ook ⚡ Bliksem. Niet de overslag van ☄️ Plasma.",
-  ae_stonefull: "Het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel.",   // ronde 34: Volle slag is nu voor iedereen
+  get ae_stonefull(){   // ronde 34: Volle slag is nu voor iedereen · nov 2026: twee proefversies (Opties)
+    const v = globalThis.LAW_PROEF || null;   // (geen lawProef hier: die bestaat bij het laden nog niet)
+    if(v === "a") return "🧪 <b>Proef A.</b> Een teller die op <b>3</b> begint. Elke keer dat een 🪨 Steen-effect van jou afgaat (speel-effect, ritueel, fusie of upgrade) komt er <b>1</b> bij. Je Steen geeft zoveel levens als de teller.";
+    if(v === "b") return "🧪 <b>Proef B.</b> Je 🪨 Steen mag <b>twee keer</b> per beurt aanvallen. Haal je hem met 💧 Water weg en zet je hem terug, dan krijgt hij er <b>één</b> terug, niet twee.";
+    return "Het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel."; },
   ae_grassx2:   "Je 🌿 {verstrikt} met een dubbele drain: <b>−2</b> in plaats van −1 (op 🪨 Steen <b>−4</b>), en verstrikt ook 🔥 Vuur.",
   ae_hp3:       "Kies bij de start een element. Je wezens van dat element komen binnen met <b>+3</b> levens, en raken ook waar ze zwak tegen zijn (gewone schade).",
   ae_oer_vuur:  "Je 🔥 wezens komen binnen met <b>+3</b> levens. Je 🔥 raakt ook 💧 Water, met gewone schade.",
@@ -10219,7 +10229,7 @@ const AETHER_TEKST = {
   fu_fire:      "{Fusie} 🔥 wordt ⚡ <b>Bliksem</b>. ▶ <b>2</b> 🔥 vuurschade aan elk wezen van de tegenstander.",
   fu_stone:     "{Fusie} 🪨 wordt 🏔️ <b>Bergketen</b>. ▶ Zet een Steen op een vrije plek, met evenveel levens. Die Steen doet zijn speel-effect.",
   fu_grass:     "{Fusie} 🌿 wordt 🌳 <b>Woud</b>. ▶ Drie keer het 🌿 Gras-effect.",
-  fu_portaal:   "Telt als alle vier de fusie-aethers: {Fusie} 💧 wordt 🌊 <b>Oceaan</b>, 🔥 wordt ⚡ <b>Bliksem</b>, 🪨 wordt 🏔️ <b>Bergketen</b> en 🌿 wordt 🌳 <b>Woud</b>. Neemt alle <b>3</b> aether-plekken in: het is dan je enige aether. Niet in Commander.",
+  fu_portaal:   "Telt als alle vier de fusie-aethers: {Fusie} 💧 wordt 🌊 <b>Oceaan</b>, 🔥 wordt ⚡ <b>Bliksem</b>, 🪨 wordt 🏔️ <b>Bergketen</b> en 🌿 wordt 🌳 <b>Woud</b>. Neemt <b>2</b> aether-plekken in.",
   ae_hemel:     "Je eerste ✦ van elke beurt: <b>+1</b> {leven|pluslevens} en trek <b>1</b>.",
   ae_lichtval:  "Verlies je leven, trek <b>1</b>. Ook door je eigen lichtkaarten.",
   ae_deken:     "De eerste keer per beurt dat je levens zou verliezen, verlies je niets: of het nou een aanval is of je eigen lichtkaart. Eén keer in jouw beurt en één keer in die van je tegenstander. Op wezens werkt hij niet.",
@@ -10397,7 +10407,7 @@ const FU_VIER = ["fu_water", "fu_fire", "fu_stone", "fu_grass"];
 const aeList = p => { const l = (S && S.ae && S.ae[p]) || [];
   return l.indexOf("fu_portaal") >= 0 ? l.concat(FU_VIER.filter(k => l.indexOf(k) < 0)) : l; };
 const aeRuw = p => (S && S.ae && S.ae[p]) || [];   // zoals ze er liggen, zonder de vier van het portaal
-/* hoeveel aether-plekken iets inneemt (het portaal: alle drie) */
+/* hoeveel aether-plekken iets inneemt (het portaal: twee) */
 const aePlek = k => (AETHERS[k] && AETHERS[k].plekken) || 1;
 const aePlekken = l => (l || []).reduce((a, k) => a + aePlek(k), 0);
 /* Typeloze aethers (el === null) tonen alle vier de symbolen en kleuren geen kaarten paars. */
@@ -10829,12 +10839,14 @@ function creSlotsFor(p, el, card){
     return Array.from(new Set(vrij.concat(waterVerdringbaar(p)))).sort((a,b)=>a-b).map(c => ({p, c, kind:"cre"}));
   return vrij.map(c => ({p, c, kind:"cre"}));
 }
+/* 🧪 Lawine B: een Steen mag een tweede keer aanvallen (water geeft er daarna maar één terug) */
+const lawTweede = (cr, p) => lawProef() === "b" && cr.card.el === "steen" && hasAe(p, "ae_stonefull") && cr.card.lawB !== S.gTurn;
 function canAttack(cr, p){
   if(EL[cr.card.el].stil) return false;              // meubilair valt niet aan
   if(cr.web) return false;                           // 🕸 zit vast in het web
   // ✦ Ontzag legt een heel bord een beurt lang stil
   // Summoning sickness bestaat alleen in de allereerste beurt van de startende speler
-  if(!(p === S.tp && (S.phase === "beurt" || S.phase === "battle") && (S.gTurn > 1 || cr.played < S.gTurn) && cr.attackedT !== S.gTurn
+  if(!(p === S.tp && (S.phase === "beurt" || S.phase === "battle") && (S.gTurn > 1 || cr.played < S.gTurn) && (cr.attackedT !== S.gTurn || lawTweede(cr, p))
        && (cr.ent === 0 || !!EL[cr.card.el].entVrij))) return false;
   const st = S && S.story;
   if(st){
@@ -14124,7 +14136,12 @@ async function tokenRitueel(p, c, bronId){
   }
 }
 /* 💥 ronde 34: in Volle slag heeft iedereen al volle slag, dus doet 🟣 Lawine daar iets anders: het 🪨-speel-effect gaat twee keer */
-const lawineTwee = (p, el) => !!(S && S.volle) && el === "steen" && hasAe(p, "ae_stonefull");
+const lawineTwee = (p, el) => !!(S && S.volle) && el === "steen" && hasAe(p, "ae_stonefull") && !lawProef();
+/* 🧪 nov 2026: twee proefversies van Lawine om te playtesten (Opties): A = een teller, B = twee keer aanvallen */
+const lawProef = () => (typeof SET === "object" && (SET.lawProef === "a" || SET.lawProef === "b")) ? SET.lawProef : null;
+function lawProefZet(v){ SET.lawProef = v || null; globalThis.LAW_PROEF = lawProef(); saveSet();
+  if(AETHERS.ae_stonefull) AETHERS.ae_stonefull.txt = AETHERS.ae_stonefull.kort = kwHTML(AETHER_TEKST.ae_stonefull); }   // de uitleg volgt de proef
+setTimeout(() => { globalThis.LAW_PROEF = lawProef(); if(AETHERS.ae_stonefull && typeof kwHTML === "function") AETHERS.ae_stonefull.txt = AETHERS.ae_stonefull.kort = kwHTML(AETHER_TEKST.ae_stonefull); }, 0);
 function plannedEffects(p, card, asSpell, col, opts){
   const trioDubbel = (el, lijst) => (trioKracht(p, el) || lawineTwee(p, el)) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
   if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card)).map(e => Object.assign(e, {col}));
@@ -15107,6 +15124,7 @@ async function waterVerdringt(p, card, col, cre, flash){
   const c2 = sl && sl !== "cancel" ? sl.c : vrij[0];
   addLog(`💧 ${kIcon(dc)} ${kNaam(dc)} wordt opnieuw gespeeld in kolom ${c2+1}.`, true);
   await placeNow(p, dc, false, c2, {splash:true, keepHp});
+  if(lawProef() === "b" && dc.el === "steen") dc.lawB = S.gTurn;   // 🧪 Lawine B: water geeft één aanval terug, niet twee
   await storyBrandstof(p, dc, false, "zet 🔥 Vuur met 💧 Water opnieuw neer");
   getijPlus(p, dc);
   const rplan = await declarePlan(p, dc, false, c2, {onField:true});
@@ -16695,10 +16713,14 @@ async function resolveEffect(it){
   if(it.el === "steen"){
     const ids = allCreIds((cr, pp) => !hexVan(cr, pp, p));
     if(!ids.length){ addLog("🪨 Geen wezen om +3 levens te geven."); return; }
-    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🪨 Steen: geef een wezen +3 levens (optioneel)`, true, {k:"steen"});
+    /* 🧪 Lawine A: de teller (begint op 3, en elk Steen-effect dat afgaat zet er 1 bij) */
+    const telA = lawProef() === "a" && hasAe(p, "ae_stonefull");
+    const n = telA ? ((S.lawTel || (S.lawTel = [3, 3]))[p]) : 3;
+    const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🪨 Steen: geef een wezen +${n} levens (optioneel)`, true, {k:"steen"});
     if(id === "fizzle") return;
-    if(id === null){ addLog("🪨 +3 overgeslagen."); return; }
-    gainLife(id, p, "🪨 Steen", "rock", 3); render();
+    if(telA) S.lawTel[p]++;
+    if(id === null){ addLog(`🪨 +${n} overgeslagen.`); return; }
+    gainLife(id, p, telA ? "🪨 Steen (🟣 Lawine " + n + ")" : "🪨 Steen", "rock", n); render();
     return;
   }
 
@@ -17194,6 +17216,7 @@ async function startTurnSequence(){
   if(S.over) return;
   S.phase = "beurt"; S.botStap = 0;
   if(S.story && S.story.opening) await storyOpening();
+  if(!S.over && S.story && S.story.ritAf) await storyRitueelAf();
   if(!S.over && S.tp === 1 && S.story && S.story.seraf) await serafSpeelt();
   if(!S.over && hasAe(S.tp, "ae_roedel")) await roedelWolf(S.tp);
   if(!S.over && hasAe(S.tp, "ae_vitrine")) await vitrineOproep(S.tp);
@@ -17718,6 +17741,7 @@ async function declareAttack(col){
     const p = S.tp, cr = P(p).cols[col].cre;
     if(!cr || !canAttack(cr, p)) return;
     if(p === 0 && !tutMag("aanval", col)) return;
+    if(cr.attackedT === S.gTurn){ cr.card.lawB = S.gTurn; addLog(`🟣 Lawine: ${kIcon(cr.card)} ${kNaam(cr.card)} valt een tweede keer aan.`, true); }   // 🧪 Lawine B
     cr.attackedT = S.gTurn;
     if(p === 0) tutKlaarStap("aanval", col);
     const onthuld = rookOnthul({p, c:col, cr}, "het valt aan");
@@ -21162,9 +21186,9 @@ const TUT_NIEUW = [
               [6.5, "Water gaat eerst: je Steen verhuist."], [10.1, "Het Vuur komt aan, maar de Steen is weg: het <b>mist</b>."]],
      links:[{naam:"Vuur", el:"vuur", van:0.6, tot:11.8, mis:10.3}, {naam:"Waterplons", el:"water", van:4.6, tot:6.5}]}}
 ];
-/* Bij Brokko (1-2) komen er twee dingen bij: aethers, en kaarten als ritueel spelen. */
+/* Bij Brokko (1-2) leer je rituelen, bij Nimbus (1-3) aethers. */
 const TUT_AETHER = {t:"Aethers",
-  b:`Brokko vecht met een <b>aether</b>: <b>Lawine</b>. Het speel-effect van zijn Stenen gaat twee keer: twee keer +3.<br><br>Een aether is een kracht die het <b>hele gevecht</b> blijft. Je kunt hem niet weghalen.<br><br>Je ziet ze als <b>paarse ruitjes</b> op het veld. Ga erop staan om te lezen wat ze doen.`,
+  b:`Jij en Nimbus vechten allebei met een <b>aether</b>: <b>Lawine</b>. ${AETHER_TEKST.ae_stonefull.replace(/<[^>]+>/g, "")}<br><br>Een aether is een kracht die het <b>hele gevecht</b> blijft. Je kunt hem niet weghalen.<br><br>Je ziet ze als <b>paarse ruitjes</b> op het veld. Ga erop staan om te lezen wat ze doen.`,
   media:{soort:"aether", ae:"ae_stonefull"}};
 const TUT_RITUEEL = {t:"Rituelen",
   b:`Vanaf nu kun je een kaart ook als <b>ritueel</b> spelen.<br><br>De kaart gaat dan onder de kolom liggen. Het effect gaat <b>nu</b> af, en <b>opnieuw</b> elke keer dat je in die kolom een wezen speelt.<br><br>Eén ritueel per kolom. Leg je er een nieuw neer, dan gaat het oude weg.`,
@@ -21175,7 +21199,8 @@ const TUTS = {
   commander: TUT_NIEUW.concat([TUT_RITUEEL, TUT_AETHER, TUT_OUD("Commander"), TUT_OUD("Bediening")]),
   /* Vóór Rocky: de zeven pagina's. Rituelen en aethers komen pas bij Brokko. */
   story: TUT_NIEUW,
-  brokko: [TUT_AETHER, TUT_RITUEEL]};
+  brokko: [TUT_RITUEEL],
+  nimbus: [TUT_AETHER]};   // nov 2026: aethers leer je bij Nimbus, met allebei Lawine
 /* Een level kan eisen dat je eerst de uitleg doorloopt (1-1: vóór Rocky). Alleen zolang
    je dat level nog niet gehaald hebt; daarna ga je meteen door naar het gevecht. */
 function tutVoorGevecht(id){
@@ -21836,6 +21861,9 @@ function audioHTML(){
     <div class="sub" style="font-size:.74rem;margin-top:14px;color:var(--dim)">
       ${muziekStand()}
     </div>
+    <div class="sub" style="margin-top:16px;margin-bottom:2px">🧪 Lawine-proef</div>
+    <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">Om te playtesten. A: een teller die op 3 begint en bij elk Steen-effect 1 hoger wordt. B: je Steen valt twee keer per beurt aan. Geldt voor iedereen met Lawine, ook de bots.</div>
+    <div class="segrow"><button class="seg${!lawProef() ? " on" : ""}" data-act="btn" data-btn="law_">Zoals nu</button><button class="seg${lawProef() === "a" ? " on" : ""}" data-act="btn" data-btn="law_a">A · teller</button><button class="seg${lawProef() === "b" ? " on" : ""}" data-act="btn" data-btn="law_b">B · 2× aanvallen</button></div>
     <div class="sub" style="margin-top:16px;margin-bottom:2px">Filmstudio</div>
     <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">De filmpjes afspelen met muziek naar keuze, om uit te proberen wat waar past.</div>
     <div class="segrow"><button class="seg" data-act="btn" data-btn="filmstudio">🎬 Open de filmstudio</button></div>
@@ -24649,8 +24677,10 @@ const STORY = {
   "1-2":{
     wereld:1, naam:"Steenhard", vijand:"Brokko", sprite:"rocky", muziek:"w1_gevecht",
     hzruim:true,
-    /* Vóór het gevecht twee uitlegschermen: aethers, en kaarten als ritueel spelen. */
-    tutVooraf:"Bij Brokko komen er twee dingen bij.", tutDeck:"brokko",
+    /* nov 2026: Brokko heeft geen aether meer. Dit level leert alleen rituelen: hij begint vals (vier Gras en een
+       Steen liggen er al), Flint legt twee Vuur-rituelen bij je neer die meteen afgaan, en met twee Gras op die
+       rituelen maak je zijn veld leeg. Aethers leer je bij Nimbus (1-3). */
+    tutVooraf:"Bij Brokko komt er iets bij.", tutDeck:"brokko",
     intro:[
       {plek:"bg-1-2-flint", s:"fireguy", naam:"…", kleur:"#ff8a4a", bg:3, mu:"w1_vuurguy", t:"Iemand staat er ineens. Je hebt hem niet horen komen. Zonnebril, in dit licht."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", bg:3, t:"Hey. Nice work back there, kid. Iemand moest die arrogante stenen ook een keer aanpakken."},
@@ -24673,21 +24703,19 @@ const STORY = {
       {s:"rocky", groot:true, t:"Wat een onverdeelde precies ís, staat er niet bij. Dat heb ik ook nooit gevraagd. Er staat wat ik moet doen, dat is genoeg."},
       {s:"rocky", groot:true, t:"Mijn broertje heeft dit van mij. Hij heeft er alleen één blaadje van. Ik daag u uit, waarde onverdeelde, tot een steenharde strijd."},
       {s:"rocky_boos", groot:true, t:"Maar verwacht niet dat ik zo makkelijk om te praten ben als hij."},
-      {s:"rocky_boos", groot:true, naam:"…", paars:true, t:"Hij duwt zijn vuist in de grond. Er slaat iets paars door de lucht en alles van steen aan zijn kant groeit voortaan dubbel zo hard."},
-      {s:"rocky_boos", groot:true, t:"🟣 <b>ONWRIKBAARHEID.</b>"},
-      {s:"rocky_boos", groot:true, t:"Vierhonderd stenen per ochtend, elf jaar lang. Reken maar uit."},
-      {s:"rocky", groot:true, t:"Nee, doe maar niet. Ik heb het al uitgerekend."}
+      {s:"rocky_boos", groot:true, naam:"…", t:"Voor je goed en wel staat, liggen er al vijf kaarten aan zijn kant. Vier keer gras, en een steen in het midden."},
+      {s:"rocky", groot:true, t:"Warming-up. Telt niet als beurt."}
     ],
     midden:[
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", mu:"w1_vuurguy", t:"Jeez. Dat is niet eerlijk."},
-      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Hier. Twee 🔥 van mij, als ritueel. Ze doen nu nog niks — maar alles wat jij daar straks neerzet gaat branden."},
+      {s:"fireguy_zwaai", naam:"Flint", kleur:"#ff8a4a", t:"Hier. Twee 🔥 van mij, als ritueel. Die gaan meteen af. En alles wat jij daar straks neerzet, laat ze nog een keer branden."},
       {s:"fireguy", naam:"Flint", kleur:"#ff8a4a", t:"Hou hem bezig, kid. Ik wil zien hoe ver je komt."},
       {s:"rocky_boos", groot:true, naam:"Brokko", mu:"w1_gevecht", t:"Hulp. Natuurlijk. Ik heb geen hulp. Ik heb een schema."}
     ],
     win:[
       {s:"rocky_stuk", groot:true, mu:"w1_rustig", t:"Verliezen blijkt een familiekwaal."},
       {s:"rocky_stuk", groot:true, naam:"…", t:"Hij kijkt beteuterd naar zijn eigen vuisten."},
-      {s:"rocky_stuk", groot:true, t:"Ga maar. Ik moet even zitten. …En die aether. Neem maar mee."},
+      {s:"rocky_stuk", groot:true, t:"Ga maar. Ik moet even zitten."},
       {s:"rocky_stuk", groot:true, t:"Zo'n onverdeelde staat niet in mijn boekje. Die kreeg ik erbij. Waar hij vandaan komt weet ik niet. Die vraag stond er ook niet in."},
       {s:"rocky", groot:true, kz:"kees=kees_terug", t:"Mijn broertje heeft een steen. Kees. Hij praat er de hele dag tegen. Ik heb hem nog nooit zo blij gezien met iets dat niet terugpraat."},
       {s:"rocky", groot:true, kz:"kees=kees_mee", t:"Mijn broertje zoekt iets. Hij zegt niet wat. Hij kijkt onder elke steen, en hier liggen veel stenen."}
@@ -24718,16 +24746,34 @@ const STORY = {
     deckJij:{steen:6, vuur:6, gras:6, water:6},
     deckVij:{steen:9, vuur:5, gras:5, water:5},   /* Brokko speelt gewoon steen */
     levensVij:5,
-    aeVij:["ae_stonefull"],
-    geeft:"ae_stonefull",
+    /* hij begint vals: dit ligt er al voor zijn eerste beurt (en hij heeft één kaart minder in zijn hand) */
+    beginBord:[{p:1, c:0, el:"gras"}, {p:1, c:1, el:"gras"}, {p:1, c:2, el:"steen"}, {p:1, c:3, el:"gras"}, {p:1, c:4, el:"gras"}],
+    beginHandMin:1,
+    handJijVast:["gras","gras"], handJijZeker:{gras:2},
     middenNa:1,
-    middenBord:[{p:0, c:2, spell:"vuur"}, {p:0, c:3, spell:"vuur"}],
+    middenBord:[{p:0, c:2, spell:"vuur", af:true}, {p:0, c:3, spell:"vuur", af:true}],   // ze gaan meteen af, aan het begin van jouw beurt
+    vijZetten:{1:[]},
+    tut:[
+      {op:"flint", bij:"cre:1:0", pop:"Flint legt twee 🔥 Vuur bij je neer, als <b>ritueel</b>. Een ritueel gaat <b>meteen</b> af. En daarna <b>opnieuw</b>, elke keer dat jij in die kolom een wezen neerzet."},
+      {doel:{p:1, el:"gras"}, hl:"Verbrand een Gras"},
+      {doel:{p:1, el:"gras"}, hl:"En nog een"},
+      {op:"flintklaar", bij:"cre:1:2", pop:"Twee weg. Zet nu je 🌿 Gras óp de rituelen. Dan brandt het vuur nog een keer, en je Gras verstrikt zijn Steen."},
+      {kaart:"gras", col:2, mode:"cre", hl:"Speel Gras", hlPlek:"Op het vuur"},
+      {doel:{p:1, el:"steen"}, hl:"Verstrik zijn Steen"},
+      {doel:{p:1, el:"gras"}, hl:"Verbrand een Gras"},
+      {kaart:"gras", col:3, mode:"cre", hl:"Speel Gras", hlPlek:"Op het andere vuur"},
+      {doel:{p:1, el:"steen"}, hl:"Verstrik zijn Steen"},
+      {doel:{p:1, el:"gras"}, hl:"Verbrand het laatste Gras"},
+      {aanval:2, hl:"Val aan"},
+      {op:"aanval", bij:"leven:1", pop:"Zijn veld is leeg. Vanaf hier speel je zelf."}
+    ],
     ban:10, begint:1
   },
   "1-3":{
     wereld:1, naam:"De ware heerser", vijand:"Nimbus", sprite:"nimbus", muziek:"w1_spiegel",
     sterNimbus:true,            // ★ zonder zijn uitdaging hooguit 1 ster; zie sterrenBereken
     hzruim:true,
+    tutVooraf:"Bij Nimbus komt er iets bij.", tutDeck:"nimbus",   // nov 2026: hier leer je aethers
     tauntSpr:"nimbus_taunt",
     intro:[
       {s:null, naam:"…", mu:"kaart", t:"Het pad loopt omhoog. Er hangt iets kleins en grijs stil in de lucht, precies op ooghoogte."},
@@ -24740,10 +24786,10 @@ const STORY = {
       {s:"nimbus", naam:"…", kleur:"#dfe8f2", t:"Nimbus komt dichterbij."},
       {s:"nimbus", kleur:"#dfe8f2", t:"En ik heb je bezig gezien. Vuur op je eigen bord, water dat je kaarten terughaalt, gras dat zich volzuigt. Heel knap."},
       {s:"nimbus_boos", kleur:"#dfe8f2", t:"En heel goedkoop. Met trucjes wint iedereen."},
-      {s:"nimbus", kleur:"#dfe8f2", t:"Dus. Mijn uitdaging. Geen trucjes. Allebei veertig 🪨 Steen en verder niks. Geen vuur, geen water, geen gras, geen bannen. Jij houdt je Lawine. En ik de mijne. Eerlijk is eerlijk."},
+      {s:"nimbus", kleur:"#dfe8f2", t:"Dus. Mijn uitdaging. Geen trucjes. Allebei veertig 🪨 Steen en verder niks. Geen vuur, geen water, geen gras, geen bannen. We krijgen allebei dezelfde aether: Lawine. Eerlijk is eerlijk."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Alleen jij, ik, en de vraag wie er echt kan spelen."},
       {s:"nimbus", kleur:"#dfe8f2", t:"Wat wordt het?",
-        keuze:[{label:"🤝 Afgesproken", ga:"ja"}, {label:"🚪 Nee, bedankt", ga:"nee1"}]}
+        keuze:[{label:"🤝 Afgesproken", ga:"ja"}]}   // nov 2026: alleen nog de steen-uitdaging (nee1/nee2 en variant b blijven in de code voor later)
     ],
     ja:[
       {s:"nimbus", kleur:"#dfe8f2", t:"Ha! Goed. Zeg dat je een onverdeelde bent, maar heb dan ook het lef van eentje."},
@@ -28587,7 +28633,7 @@ const NIMBUS_STER_IDS = NIMBUS_CH.filter(c => c.sid !== "1-3").map(c => c.sid);
   a.nimbusCh = "steen";
 })();
 const VELD = {
-  "1-2": { regels:["Na Brokko's eerste beurt krijg je een 🔥 Vuur-ritueel in jouw kolom 3 en 4."] },
+  "1-2": { regels:["Brokko begint met vier 🌿 Gras en een 🪨 Steen al op het veld.", "Na zijn eerste beurt legt Flint twee 🔥 Vuur-rituelen in jouw kolom 3 en 4. Die gaan meteen af."] },
 
   "1-3": { regels:["Allebei veertig keer 🪨 Steen, en allebei met 🟣 Lawine (Steen-effect twee keer). Verder geen aethers, geen ✦ lichtkaarten, niets bannen.",
                    "Nimbus begint met een 🪨 Steen-ritueel in de derde kolom."],
@@ -29531,6 +29577,7 @@ async function startStoryGevecht(id, variant, opts){
   }
   storyDeel(L);
   kzNaDeel(id, L);
+  storyBeginBord(L);
   render();
   startTurnSequence();
 }
@@ -29584,6 +29631,35 @@ function storySpiegel(L){
   if(S.terug && S.terug[0]) S.terug[1] = S.terug[0];
   shuffle(P(1).deck);
   addLog(`🪞 <em>De tegenstander speelt met jouw deck, jouw krachten en jouw licht.</em> Alles wat je hebt meegenomen staat ook aan de overkant.`, true);
+}
+/* 🎓 nov 2026 (Brokko): wat er al op het veld ligt voor de eerste beurt (zonder speel-effect), een hand met
+   een kaart minder, en kaarten die je zeker in je hand hebt (ook als je ze bij het bannen weggooide). */
+function storyBeginBord(L){
+  (L.beginBord || []).forEach(b => { if(!P(b.p).cols[b.c].cre) placeCre(b.p, b.c, {id:++cid, el:b.el, owner:b.p}); });
+  if(L.beginBord && L.beginBord.length) addLog(`⚠ <em>${L.vijand}</em> begint vals: er ligt al van alles aan zijn kant.`, true);
+  for(let i = 0; i < (L.beginHandMin || 0) && P(1).hand.length; i++) P(1).deck.unshift(P(1).hand.pop());
+  Object.entries(L.handJijZeker || {}).forEach(([el, n]) => {
+    let heb = P(0).hand.filter(c => c.el === el && !c.lk && !c.var).length;
+    while(heb < n){ const j = P(0).hand.findIndex(c => c.el !== el); const nieuw = {id:++cid, el, owner:0};
+      if(j >= 0) P(0).deck.unshift(P(0).hand.splice(j, 1, nieuw)[0]); else P(0).hand.push(nieuw); heb++; }
+  });
+}
+/* 🔥 Rituelen die iemand voor je neerlegt en die meteen afgaan (Flint bij Brokko): aan het begin van je beurt. */
+async function storyRitueelAf(){
+  const lijst = S.story && S.story.ritAf;
+  if(!lijst || !lijst.length || S.tp !== 0) return;
+  S.story.ritAf = null;
+  await tutPunt("flint");
+  for(const b of lijst){
+    if(S.over) return;
+    const kaart = {id:++cid, el:b.spell, owner:b.p};
+    addLog(`${icon(b.spell)} Flint legt een ${EL[b.spell].name}-ritueel in kolom ${b.c + 1}. Het gaat meteen af.`, true);
+    await announcePlay(b.p, kaart, true, b.c, false);
+    await chainLoop();
+  }
+  clearTimeout(botT);
+  if(!S.over){ S.phase = "beurt"; S.botStap = 0; S.ui = {mode:"busy"}; render(); }
+  await tutPunt("flintklaar");
 }
 /* Schudden en delen — gebeurt altijd ná het voorbereidingsscherm. */
 function storyDeel(L){
@@ -30785,16 +30861,22 @@ function voorKeus(u){
 }
 /* ✨💚🌀 ronde 30: aethers die je deck veranderen werken ook in het verhaal.
    Lichtzwerm: 4 lichtkaarten meer en van elk element 1 minder. Levenskracht: 3 lichtkaarten
-   minder. Het Fusieportaal neemt alle drie de plekken in (dus alleen met 3 plekken, en alleen). */
+   minder. Het Fusieportaal neemt twee plekken in (nov 2026). */
 const voorAeKeys = u => (Array.isArray(u.aeSel) ? u.aeSel : []).map(i => (u.aethers || [])[i]).filter(k => AETHERS[k]);
 function voorAeEffect(u){
   if(!u || u.vrij) return;
   if(u.ltMax0 == null) u.ltMax0 = u.ltMax || 0;
   if(u.basis && !u.basis0) u.basis0 = Object.assign({}, u.basis);
-  /* het portaal: alleen als er drie plekken zijn, en dan als enige */
-  const pi = (u.aethers || []).indexOf("fu_portaal");
-  if(pi >= 0 && (u.aeSel || []).includes(pi) && ((u.aeMax || 1) < 3 || u.aeSel.length > 1))
-    u.aeSel = (u.aeMax || 1) < 3 ? u.aeSel.filter(i => i !== pi) : (u.aeSel[u.aeSel.length - 1] === pi ? [pi] : u.aeSel.filter(i => i !== pi));
+  /* het portaal neemt 2 plekken in (nov 2026): past het niet, dan gaat het eruit (of wat er het langst in zat, als je het net koos) */
+  const pi = (u.aethers || []).indexOf("fu_portaal"), maxP = u.aeMax || 1;
+  if(pi >= 0 && (u.aeSel || []).includes(pi)){
+    const plekken = sel => sel.reduce((a, i) => a + aePlek((u.aethers || [])[i]), 0);
+    if(maxP < 2) u.aeSel = u.aeSel.filter(i => i !== pi);
+    else if(plekken(u.aeSel) > maxP){
+      if(u.aeSel[u.aeSel.length - 1] === pi){ const rest = u.aeSel.filter(i => i !== pi); while(rest.length && plekken(rest.concat([pi])) > maxP) rest.shift(); u.aeSel = rest.concat([pi]); }
+      else u.aeSel = u.aeSel.filter(i => i !== pi);
+    }
+  }
   const ks = voorAeKeys(u), zw = ks.includes("ae_zwerm"), lv = ks.includes("ae_leven");
   u.ltMax = Math.max(0, u.ltMax0 + (zw ? 4 : 0) - (lv ? 3 : 0));
   /* te veel licht gekozen? dan gaat er van achteren af */
@@ -30909,7 +30991,8 @@ async function storyVoorbereiding(L, id){
   const weg = (res && Array.isArray(res.ban)) ? res.ban : (Array.isArray(res) ? res : []);
   let gekozen = res && Array.isArray(res.ae) ? res.ae.filter(k => AETHERS[k]).slice(0, aeMax)
                 : (res && res.ae && AETHERS[res.ae] ? [res.ae] : []);
-  if(gekozen.includes("fu_portaal")) gekozen = aeMax >= 3 ? ["fu_portaal"] : gekozen.filter(k => k !== "fu_portaal");
+  if(gekozen.includes("fu_portaal")){ if(aeMax < 2) gekozen = gekozen.filter(k => k !== "fu_portaal");   // 🌀 neemt 2 plekken in
+    else while(aePlekken(gekozen) > aeMax){ const i = gekozen.findIndex(k => k !== "fu_portaal"); if(i < 0) break; gekozen.splice(i, 1); } }
   /* ✨💚 Lichtzwerm en Levenskracht veranderen je deck (ronde 30) */
   const zwN = (!vrijD && gekozen.includes("ae_zwerm")) ? 1 : 0;
   if(basis && !vrijD && zwN) ORDER.forEach(el => basis[el] = Math.max(0, basis[el] - zwN));
@@ -31083,6 +31166,7 @@ async function storyEindeBeurt(){
   }
   /* Iemand legt iets voor je neer; de rituelen triggeren daarbij niet. */
   (L.middenBord || []).forEach(b => {
+    if(b.spell && b.af){ (S.story.ritAf = S.story.ritAf || []).push(b); return; }   // 🔥 die gaan straks af, in jouw beurt
     if(b.spell){
       P(b.p).cols[b.c].spell = {card:{id:++cid, el:b.spell, owner:b.p}};
       addLog(`${icon(b.spell)} Er wordt een ${EL[b.spell].name}-ritueel in kolom ${b.c+1} van ${pName(b.p)} gelegd.`, true);
@@ -31170,13 +31254,13 @@ const OVERWORLD_N4 = {x:96, y:71};   // de smidse zit op de plek van het level z
    nog niet; de rest staat als lege plank in beeld. Zet er een sleutel neer zodra de kaart
    bestaat en hij ligt meteen in de winkel. */
 const KOOPWAAR = {
-  ae: ["ae_ziel", "ae_graf", "fu_grass", "ae_altaar", "ae_leven"],   // ronde 30: Levenskracht als vijfde
+  ae: ["ae_ziel", "ae_graf", "fu_grass", "ae_altaar"],   // nov 2026: Levenskracht is eruit (alleen nog van tegenstanders); het middelste lijstje is leeg
   lt: ["greed", "master", "darkhole", "bloedmaan"]   // nov 2026: Levensroof krijg je nu in 3-4 (Sterrenregen is uit het spel); Vitaliteit in 4-4
 };
 /* ⚔ Welke aethers er in PvP (commander, basis) meedoen: alles wat je in het verhaal kunt
    krijgen of kopen, plus wat er altijd al was. Niet de vier Oerkrachten (en de oude Oerkracht)
    en niet Kern van Maatje. */
-const PVP_AE_NIET = ["ae_hp3","ae_kern","ae_pijn","ae_hemel",   // Loutering en Hemelschoon niet in PvP (okt 2026)
+const PVP_AE_NIET = ["ae_hp3","ae_kern","ae_pijn","ae_hemel","ae_leven",   // nov 2026: Levenskracht alleen nog van tegenstanders   // Loutering en Hemelschoon niet in PvP (okt 2026)
   "ae_oer_vuur","ae_oer_water","ae_oer_gras","ae_oer_steen",   // de vier Oerkrachten ook niet meer (okt 2026)
   "ae_offer",    // Brandoffer ook niet (okt 2026)
   "ae_rouw", "ae_lente",   // ronde 30: Nagloed en Lentebloei voorlopig alleen in het verhaal
@@ -35743,7 +35827,7 @@ document.addEventListener("click", e => {
       ui[veld] = sel;
       if(veld === "aeSel"){
         const k = (ui.aethers || [])[i];
-        if(k === "fu_portaal" && at < 0 && (ui.aeMax || 1) < 3) addLog(`🌀 Het Fusieportaal neemt alle drie de aetherplekken in. Die heb je hier nog niet.`, true);
+        if(k === "fu_portaal" && at < 0 && (ui.aeMax || 1) < 2) addLog(`🌀 Het Fusieportaal neemt twee aetherplekken in. Die heb je hier nog niet.`, true);
         voorAeEffect(ui);
       }
       render();
@@ -37513,7 +37597,7 @@ function dbSamenHTML(d, eb, ok){
   const KL = {water:"#3d8fe0", steen:"#a0703d", vuur:"#e0553d", gras:"#4cb35a"};
   const tot = Math.max(1, mixTotaal(d.mix));
   const balk = ORDER.map(e => `<i style="width:${d.mix[e] / tot * 100}%;background:${KL[e] || "#888"}" title="${EL[e].name}: ${d.mix[e]}"></i>`).join("");
-  /* 🌀 het portaal neemt alle drie de vakken in: één met de prent, de andere twee bezet */
+  /* 🌀 het portaal neemt twee vakken in: één met de prent, de andere bezet */
   const aeVakL = []; d.ae.forEach(k => { aeVakL.push(k); for(let j = 1; j < aePlek(k); j++) aeVakL.push({bezet:k}); });
   const aeV = Array.from({length:BAS.AE}, (_, i) => { const k = aeVakL[i];
     if(k && k.bezet) return `<div class="dbsvak vol bezet" data-act="dbae" data-k="${k.bezet}" title="${AETHERS[k.bezet].name} neemt deze plek ook in"><span>${AETHERS[k.bezet].name}</span></div>`;
@@ -37563,7 +37647,7 @@ function mpKlik(act, t){
       if(zij && (k === "ae_zwerm" || k === "fu_portaal")) return true;     // ✨ Lichtzwerm en 🌀 het portaal mogen niet in het sideboard
       if(i >= 0) lijst.splice(i, 1);
       else if(ander.indexOf(k) < 0 && aePlekken(lijst) + aePlek(k) <= (zij ? BAS.ZIJ_AE : BAS.AE)) lijst.push(k);
-      else if(!zij && ander.indexOf(k) < 0 && aePlek(k) > 1){ lijst.length = 0; lijst.push(k); }   // 🌀 het portaal kiezen: dan gaan de andere eruit
+      else if(!zij && ander.indexOf(k) < 0 && aePlek(k) > 1){ while(lijst.length && aePlekken(lijst) + aePlek(k) > BAS.AE) lijst.shift(); lijst.push(k); }   // 🌀 het portaal kiezen: dan gaat er zoveel uit als nodig
       zwermMix(d.mix, oudAe, d.ae);
       ltKnip(d.ltN, ltMaxVan(d.ae));
       render(); return true; }
@@ -38993,6 +39077,7 @@ function onBtn(btn, el, fromAction){
     case "liveready":    liveSetReady(true);  break;
     case "livenotready": liveSetReady(false); break;
     case "liveretry":    LIVE.err = ""; LIVE.tries = 0; LIVE.bi = 0; openPeer(); render(); break;
+    case "law_": case "law_a": case "law_b": lawProefZet(btn.slice(4)); render(); break;   // 🧪
     case "fx_vol": case "fx_subtiel": case "fx_uit":
       SET.fx = btn.slice(3); saveSet(); render();
       if(SET.fx !== "uit"){ const rr = rectOf(".slot.cr"); if(rr) fxBurn(rr); }
