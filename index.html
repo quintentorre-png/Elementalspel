@@ -1874,6 +1874,8 @@ html.aesym .aecard .aei.beeld.vakz .aebeeld{object-fit:contain}
 html.aesym .aecard:has(.aei.vakz) .aet{font-size:1.15rem; letter-spacing:.05em; padding:9px 8px 7px; color:#fff}
 html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 .ovbox .obtn.lbtn{padding:8px 16px; font-size:.72rem; margin:0}
+.ovbox .obtn.lbtn.leegknop{margin-left:8px; color:#ff9a7a}
+.libleeg{margin:6px 0 8px} .libleeg .leegknop{margin-left:0 !important}
 .ovbox.libbox{width:min(1100px,96vw); max-width:none; max-height:94vh; display:flex; flex-direction:column; box-sizing:border-box}
 .libtabs{display:flex; gap:8px; justify-content:center; margin:12px 0 10px}
 .libtabs .seg{font-size:.6rem; padding:8px 14px}
@@ -2096,6 +2098,7 @@ html.aesym .draftbox .aecard:has(.aei.vakz) .aet{font-size:1rem}
 .wkitem.kan:hover img, .wkitem.kan:focus-visible img{transform:translateY(-6%) scale(1.06); border-color:var(--gold)}
 .wkitem.duur img{filter:saturate(.55) brightness(.75)}
 .wkitem.mijn{cursor:default}
+.wkitem.rijae img{aspect-ratio:1; object-fit:cover}   /* nov 2026: de aethers zijn vierkante tegeltjes, in vierkante lijstjes */
 .wkgeen{display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:3/4; font-size:clamp(1.2rem,2.4vw,2.2rem);
   background:#1a1410; border:2px solid #2a1a0c; border-radius:3px}
 .wkitem.mijn img{filter:grayscale(.6) brightness(.55)}
@@ -3018,8 +3021,8 @@ canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-ren
 /* ronde 34: Max is een zwarte schaduwwolf: een paarse gloed achter hem en een lichtere achtergrond, zodat hij niet in het donker verdwijnt */
 .chtegel[data-i="2-5"] .chbgvak, .mppt.pt-max .ptbg{filter:brightness(1.7) saturate(1.1)}
 .chtegel[data-i="2-5"] .chbgvak::before, .mppt.pt-max .ptbg::before{content:""; position:absolute; inset:0; z-index:60; pointer-events:none;
-  background:radial-gradient(ellipse 55% 50% at 50% 58%, rgba(200,170,255,.55), rgba(140,100,230,.22) 55%, transparent 75%)}
-.chtegel[data-i="2-5"] .chpt img, .chtegel[data-i="2-5"] .chpt .sprbeeld, .mppt.pt-max .ptfig .sprbeeld{filter:drop-shadow(0 0 3px rgba(235,220,255,.95)) drop-shadow(0 0 10px rgba(180,140,255,.7))}
+  background:radial-gradient(ellipse 55% 50% at 50% 58%, rgba(225,215,255,.34), rgba(160,135,220,.1) 55%, transparent 75%)}
+.chtegel[data-i="2-5"] .chpt img, .chtegel[data-i="2-5"] .chpt .sprbeeld, .mppt.pt-max .ptfig .sprbeeld{filter:drop-shadow(0 0 2px rgba(235,228,255,.6)) drop-shadow(0 0 6px rgba(170,145,235,.3))}   /* ronde 35: minder paars */
 .chtegel.chaurora .chpt, .chtegel.chaurora .chnaam{position:relative; z-index:1}
 .tkaart canvas.rodeaurora.tkaurora{z-index:0; opacity:.9}
 /* 🪞 ronde 34: het gebarsten glas van De Weerspiegeling */
@@ -3029,6 +3032,9 @@ canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-ren
 .spiegelglas .barstnieuw{animation:barstNieuw .35s steps(3, end) both}
 @keyframes barstNieuw{0%{opacity:0; transform:scale(.4)} 60%{opacity:1; transform:scale(1.08)} 100%{opacity:1; transform:scale(1)}}
 .chtegel.chspiegel .chnaam{position:relative; z-index:5}
+/* 🪞 nov 2026: het hele vak is de gebroken spiegel (WSP), boven de portretachtergrond */
+#portret .ptfig.wspfig, .mppt .ptfig.wspfig{position:absolute; inset:0; height:auto; width:auto; display:block; z-index:2; animation:none; filter:none; overflow:hidden}
+.chtegel.chspiegel .chpt.wspchpt{position:relative; display:block}
 /* ✨ ronde 34: Xam, lichtstralen en lichtvonkjes */
 .xamlicht{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1}
 .xamlicht::before{content:""; position:absolute; left:50%; top:46%; width:230%; aspect-ratio:1; translate:-50% -50%;
@@ -3047,6 +3053,7 @@ canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-ren
 @keyframes xamStof{0%{bottom:-8%; opacity:0; translate:0 0; rotate:0deg} 15%{opacity:1} 75%{opacity:.85} 100%{bottom:96%; opacity:0; translate:var(--x) 0; rotate:90deg}}
 .mppt .xamlicht{z-index:1}
 .chtegel.chlicht .xamlicht{z-index:0}
+.chgrid .chtegel.chlicht > .xamlicht, .chgrid .chtegel.chlicht > .xamstof{bottom:34px}   /* ronde 35: het licht van Xam blijft boven de zwarte naambalk */
 .chtegel.chlicht .chpt, .chtegel.chlicht .chnaam{position:relative; z-index:1}
 .tkaart .xamlicht.tklicht{z-index:0}
 @media (prefers-reduced-motion:reduce){ .xamlicht::before, .xamlicht::after, .xamstof i{animation:none} .xamstof{display:none} }
@@ -3086,6 +3093,18 @@ canvas.tkinferno{z-index:0; filter:brightness(.6) saturate(.9)}
   75%{opacity:1; transform:translate(-15%,-120%) rotate(-6deg)}
   100%{opacity:0; transform:translate(15%,-180%) scale(.85) rotate(6deg)}}
 @media (prefers-reduced-motion:reduce){ .lofinoten img{animation:none; opacity:1} }
+/* 🌳 ronde 35: de ogen van de bonsai knipperen vaak, soms twee keer kort */
+.lofinoten.bonsaiogen img{opacity:1; transform-origin:50% 55%; animation:bonsaiknip var(--bkd, 4s) linear infinite; animation-delay:var(--bkv, 0s)}
+@keyframes bonsaiknip{0%, 30%{transform:scaleY(1)} 32%{transform:scaleY(.08)} 34.5%, 60%{transform:scaleY(1)} 62%{transform:scaleY(.08)} 63.5%{transform:scaleY(1)} 65%{transform:scaleY(.08)} 67%, 86%{transform:scaleY(1)} 88%{transform:scaleY(.08)} 90%, 100%{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){ .lofinoten.bonsaiogen img{animation:none} }
+/* 👁 ronde 35: de oogleden van de Serafijn: meestal open (onzichtbaar), heel even dicht */
+.lofinoten.serafogen i{position:absolute; translate:-50% -50%; border-radius:50%; background:linear-gradient(transparent 44%, #6b4636 44% 60%, transparent 60%), radial-gradient(ellipse at 50% 30%, #fbf1df, #e6d4ba 70%);
+  box-shadow:0 0 0 .06em #5f3e30; transform-origin:50% 50%; transform:scaleY(0); animation:serafknip var(--sd, 5s) linear infinite; animation-delay:var(--sv, 0s)}
+@keyframes serafknip{0%, 93%{transform:scaleY(0)} 95%, 96.5%{transform:scaleY(1)} 98.5%, 100%{transform:scaleY(0)}}
+@media (prefers-reduced-motion:reduce){ .lofinoten.serafogen i{animation:none} }
+/* 👻 Nim-puf: zijn bewegingen komen uit spookStap(); hij mag over de rand van zijn eigen doos, het vak eromheen knipt hem af */
+.spook{will-change:transform; transform-origin:50% 80%}
+.tkaart.blauw .tkmijn:has(.spook), .chpt:has(.spook), .mppt .ptfig.spook{overflow:visible}
 #horizon[data-skinfx="donker"] .hz{filter:brightness(.6) saturate(.8) !important}
 body.skinzwart{background:#000 !important}
 /* ☁ Nimbus de Meervoudige: kleine Nimbussen die over het hele speelveld heen en weer vliegen */
@@ -3272,6 +3291,21 @@ body .ovbox h1.eindkop .spatie{width:.5em}
 .buitmelding .vmic{width:48px; height:48px; display:grid; place-items:center; background:rgba(0,0,0,.4); border-radius:4px; overflow:hidden;
   font:16px "Press Start 2P",monospace; color:var(--mk)}
 .buitmelding .vmic img{width:48px; height:48px; image-rendering:pixelated; object-fit:cover}
+.buitmelding.bm-chal .vmic img{object-fit:contain; object-position:center bottom}
+/* 🎵 nov 2026: een nieuw nummer: de hoes uit de jukebox, en de plaat schuift er rechts half uit en draait */
+.buitmelding.bm-nummer .vmic{width:62px; position:relative; background:none; overflow:visible; display:block}
+.buitmelding .nmhoes{position:absolute; left:0; top:0; width:48px; height:48px; z-index:2; overflow:hidden; background:#1a1622 center/cover no-repeat; box-shadow:0 0 0 2px #0a0608, 2px 3px 0 rgba(0,0,0,.45)}
+.buitmelding .nmhoes img{position:absolute; left:50%; bottom:0; width:auto !important; height:92% !important; translate:-50% 0; object-fit:contain !important; image-rendering:pixelated; filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.buitmelding .nmhoes i{position:absolute; right:2px; top:2px; font:6px/1 "Press Start 2P", monospace; font-style:normal; color:#1a0f08; background:var(--mk); padding:2px 2px 1px; rotate:6deg}
+.buitmelding .nmplaat{position:absolute; left:21px; top:3px; width:42px; height:42px; z-index:1; border-radius:50% !important;
+  background:conic-gradient(from 20deg, transparent 0 10%, rgba(255,255,255,.18) 14%, transparent 20% 60%, rgba(255,255,255,.1) 64%, transparent 70%), radial-gradient(circle, var(--mk) 0 19%, #0b0b0c 20% 22%, #1d1d21 23% 44%, #34343a 45% 46%, #18181b 47% 70%, #3a3a40 71% 72%, #141417 73%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.22);
+  animation:nmuit .7s .25s cubic-bezier(.3,.8,.3,1) both, nmdraai 1.6s linear infinite}
+@keyframes nmuit{from{translate:-17px 0} to{translate:0 0}}
+@keyframes nmdraai{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){ .buitmelding .nmplaat{animation:none} }
+.buitmelding.bm-nummer .vmic span{font-size:26px; animation:bmnoot 1.1s ease-in-out infinite alternate}
+@keyframes bmnoot{from{transform:translateY(2px) rotate(-8deg)} to{transform:translateY(-3px) rotate(8deg)}}
 .buitmelding .vmtxt{display:flex; flex-direction:column; text-align:left}
 .buitmelding small{font-size:.6rem; letter-spacing:.1em; color:var(--mk); text-transform:uppercase}
 .buitmelding b{font-size:.85rem}
@@ -4050,7 +4084,27 @@ body.venster .chbox .chgrid{flex:1 1 auto; min-height:0; overflow-y:auto; paddin
 .chpt{height:96px; margin:8px 7px 0; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; padding:0; box-sizing:border-box;
   font-family:"Press Start 2P",monospace; font-size:1.4rem; color:var(--vgrijs,#6f78b0)}
 .chtegel.dicht .chpt{align-items:center}
+.chpt .ofadein{display:flex; align-items:flex-end; justify-content:center; width:100%; height:100%; animation:ofadein 3.6s ease-in-out infinite}
+@keyframes ofadein{0%, 100%{transform:translateY(2%)} 50%{transform:translateY(-5%)}}
+@media (prefers-reduced-motion:reduce){ .chpt .ofadein{animation:none} }
+/* ronde 35: de Vervelling hangt aan een vast punt boven en zwaait langzaam heen en weer */
+.chtegel[data-i="skin:kaelidvervelling"] .chpt .chsnij, .mppt.pt-zwaai .ptfig .sprbeeld{transform-origin:50% 0; animation:vervzwaai 4.8s ease-in-out infinite alternate}
+@keyframes vervzwaai{from{rotate:-5deg} to{rotate:5deg}}
+@media (prefers-reduced-motion:reduce){ .chtegel[data-i="skin:kaelidvervelling"] .chpt .chsnij, .mppt.pt-zwaai .ptfig .sprbeeld{animation:none} }
+/* ✨ ronde 35: de sterren van James Bronk schitteren */
+.bronksterren{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; shape-rendering:crispEdges}
+.bronksterren rect{fill:#fff8e0}
+.bronksterren .bss, .bronksterren .bsk{transform-box:fill-box; transform-origin:center; animation:bronkglim var(--d, 3s) ease-in-out infinite; animation-delay:var(--v, 0s)}
+.bronksterren .bsk{animation-name:bronkglimk}
+@keyframes bronkglim{0%, 100%{opacity:.35} 45%{opacity:1} 55%{opacity:.85}}
+@keyframes bronkglimk{0%, 100%{opacity:.5; transform:scale(.6)} 45%{opacity:1; transform:scale(1.15)} 60%{opacity:.8; transform:scale(.85)}}
+@media (prefers-reduced-motion:reduce){ .bronksterren .bss, .bronksterren .bsk{animation:none} }
+/* 🐦‍⬛ ronde 35: de drie kraaien wiebelen onrustig heen en weer */
+.chtegel[data-i="skin:kraaien"] .chpt .chsnij, .mppt.pt-onrust .ptfig .sprbeeld{transform-origin:50% 100%; animation:kraaionrust 3.3s ease-in-out infinite}
+@keyframes kraaionrust{0%{translate:0 0; rotate:0deg} 12%{translate:-3% 0; rotate:-1.5deg} 22%{translate:-3% -1%; rotate:-1deg} 30%{translate:2% 0; rotate:1.5deg} 41%{translate:4% 0; rotate:2deg} 48%{translate:1% -1%; rotate:0deg} 60%{translate:-2% 0; rotate:-2deg} 67%{translate:-1% 0; rotate:-.5deg} 78%{translate:3% -1%; rotate:1deg} 88%{translate:0 0; rotate:0deg}}
+@media (prefers-reduced-motion:reduce){ .chtegel[data-i="skin:kraaien"] .chpt .chsnij, .mppt.pt-onrust .ptfig .sprbeeld{animation:none} }
 .chpt .chsnij{display:block; flex:0 0 auto; width:100%; height:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated}
+.chtegel[data-i="4-5"] .chpt .chsnij{object-fit:cover}   /* ronde 35: de Oceaan is breed: hij vult het vak tot de randen */
 .chpt .sprwrap{height:100%; width:auto; --sprgroei:1}
 .chpt .sprwrap .sprbeeld{height:100%; width:auto}
 .chpt svg{height:100%; width:auto}
@@ -5833,8 +5887,10 @@ html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height
 .tverderbg{position:absolute; inset:0; background-size:cover; background-position:center; image-rendering:pixelated}
 .tverder .tverderfig{width:72%; right:1%; height:97%; justify-content:flex-end; z-index:0}   /* ronde 34: wie je in het verhaal tegenkomt, in zijn taunt, even groot als in de andere kaarten */
 .tverder .tverderfig img{max-height:100%; max-width:100%; object-fit:contain; object-position:center bottom; image-rendering:pixelated; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
-.tverder::after{content:""; position:absolute; left:0; right:0; bottom:0; height:55%; background:linear-gradient(rgba(40,32,14,0), rgba(40,32,14,.97) 62%)}
+.tverder::after{content:""; position:absolute; left:0; right:0; bottom:0; height:62%; pointer-events:none;   /* ronde 35: de gloed alleen schuin linksonder, achter de tekst: de figuur rechts blijft vrij */
+  background:radial-gradient(ellipse 70% 78% at 0% 100%, rgba(40,32,14,.97) 0%, rgba(40,32,14,.9) 38%, rgba(40,32,14,.5) 62%, rgba(40,32,14,0) 82%)}
 .tverderin{position:relative; z-index:1; display:flex; align-items:center; gap:clamp(14px, 1.6vw, 28px); padding:clamp(16px, 3vh, 40px) clamp(18px, 2vw, 40px)}
+.tverderin b, .tverderin em, .tverderin i{text-shadow:0 2px 0 #000, 0 0 6px #000, 0 0 12px rgba(0,0,0,.8)}
 .tverder b{font-size:clamp(16px, 1.5vw, 30px)} .tverder em{font-size:clamp(20px, 1.9vw, 38px)} .tverder i{font-size:clamp(17px, 1.45vw, 30px)}
 .tverder .tic{flex-basis:clamp(56px, 5.2vw, 100px); height:clamp(56px, 5.2vw, 100px); font-size:clamp(20px, 1.8vw, 34px)}
 .trechts{grid-column:2; grid-row:2; display:grid; grid-template-rows:1fr 1fr auto; gap:clamp(12px, 2.2vh, 26px); min-height:0}
@@ -5842,6 +5898,7 @@ html body.tel .chalbox #bordhud .bknoppen .obtn{font-size:8px !important; height
 .trechts .tonder{grid-column:auto; grid-row:auto; display:flex; gap:clamp(8px, .9vw, 16px); justify-content:stretch; padding:0 0 5px}
 .trechts .tonder .tklein{flex:1 1 auto; justify-content:center; padding:0 clamp(8px, .8vw, 16px); font-size:clamp(9px, .62vw, 12px)}
 .trechts .tonder .tgeluid{flex:0 0 44px; padding:0} .tgeluid .pixic{width:18px; height:16px}
+.tmuziek .pixic{width:15px; height:17px}
 .tgeluid.uit{color:#6a6a72; box-shadow:0 0 0 2px #6a6a72, 0 0 0 5px #000}
 html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
 .tthuis:has(.trechts .tonder){grid-template-rows:auto minmax(0, 1fr)}
@@ -5853,6 +5910,8 @@ html body:has(.trechts .tgeluid) #geluidfab#geluidfab{display:none !important}
 .tkaart.blauw .tkfig{width:44%; right:2%; z-index:3}
 .tkaart.blauw .tkfig .tkmijn{flex:0 1 100%; min-width:0; height:88%; padding:0 2%; margin:0; align-self:flex-end}
 .tkaart.blauw .tkfig .tkmijn img{height:auto !important; width:auto; max-height:100%; max-width:100% !important; object-fit:contain; transition:filter .15s}
+/* ronde 35: een skin met lagen (masker, noten, lampjes, ogen): het plaatje vult zijn doos, zodat de lagen er precies op liggen */
+.tkaart.blauw .tkfig .tkmijn .majbox .chmaj{position:absolute; inset:0; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; object-fit:contain; object-position:center bottom}
 .tkaart.blauw .tkfig .tksil{max-width:40%}
 /* ronde 31: de figuur in de Challenges-kaart staat recht onder die van PvP (zelfde vak, gecentreerd) */
 .tkaart.rood .tkfig{width:44%; right:2%; justify-content:center}
@@ -5863,7 +5922,7 @@ body.tel .trechts .tonder{gap:6px; padding-bottom:3px} body.tel .trechts .tonder
 body.tel .trechts .tonder .tklein small{display:none} body.tel .trechts .tonder .tgeluid{flex-basis:30px}
 body.tel .tkwijzig{font-size:7px; padding:3px 4px; bottom:2px} body.tel .tkwijzig .tkw2{display:none}
 .tkmijn .tkvraag{margin:0 0 18% 0}
-.tkwijzig{position:absolute; left:50%; bottom:4px; transform:translateX(-50%); white-space:nowrap; font:clamp(9px, .62vw, 12px)/1 "Press Start 2P",monospace; font-style:normal;
+.tkwijzig{position:absolute; left:50%; bottom:4px; transform:translateX(-50%); white-space:normal; width:max-content; max-width:min(100%, 15em); box-sizing:border-box; text-align:center; font:clamp(9px, .62vw, 12px)/1.35 "Press Start 2P",monospace; font-style:normal;
   color:#efe9d8; background:rgba(5,5,7,.82); padding:5px 7px; border-radius:3px; box-shadow:0 0 0 2px rgba(110,176,240,.6); opacity:.85; transition:opacity .15s}
 .tkwijzig .tkw2{color:#a9a39a}
 .tkmijn:hover img, .tkmijn:focus-visible img{filter:drop-shadow(0 0 2px #ffd84a) drop-shadow(0 0 3px #ffd84a) drop-shadow(0 0 14px rgba(255,216,74,.65))}
@@ -6428,6 +6487,196 @@ html body.pc.tel .kaartbox .bordhud{bottom:calc(var(--sb, 0px) + 8px) !important
   font:8px/1.2 "Press Start 2P",monospace; color:#ffd84a; text-shadow:0 2px 0 rgba(0,0,0,.7); background:rgba(0,0,0,.28)}
 .slot.cr.fu{outline:3px dashed #b689ff !important; outline-offset:3px}
 html body.pc.tel .slot.cr .fuhelft{font-size:7px; gap:3px} html body.pc.tel .slot.cr .fuhelft small, html body.pc.tel .slot.cr .fuonder{font-size:6px}
+/* 🎵 nov 2026: de jukebox "Onderweg" (zie JUKE). Alles hangt onder #jukebox, dus niets lekt naar de rest. */
+#jukebox{position:fixed; inset:0; z-index:2147481000; display:none; background:#000; align-items:center; justify-content:center;
+  --pix:"Press Start 2P", ui-monospace, monospace; --vt:"VT323", ui-monospace, monospace; --goud:#e7bf55; --geel:#ffd84a; --tekst:#efe9d8; --zacht:#a9a39a;
+  font:20px/1.35 var(--vt); color:var(--tekst); -webkit-user-select:none; user-select:none}
+#jukebox.open{display:flex}
+#jukebox *{box-sizing:border-box}
+#jukebox button{font-family:inherit; letter-spacing:normal; text-transform:none; min-height:0; min-width:0; margin:0}
+/* het spel maakt alle hoeken vierkant (pixelstijl); de plaat en de knoppen moeten rond blijven */
+#jukebox :is(.vinyl, .vinyl::after, .vinyl .lbl, .vlak .as, .draaiknop, .lantaarn){border-radius:50% !important}
+#jukebox .jbpodium{width:min(100vw, calc(100vh * 16 / 9)); width:min(100vw, calc(100dvh * 16 / 9))}
+#jukebox .scene{position:relative; aspect-ratio:16/9; width:100%; container-type:inline-size; overflow:hidden; background:#07060a; outline:none; touch-action:none}
+#jukebox .lc .tafel .naald{background-image:url('art/jukebox-naald.png') !important}
+/* op een kleine telefoon: de knoppen op het bord alleen met hun icoontje */
+@container (max-width: 900px){ #jukebox .lc .info .tag .tagtt{display:none} #jukebox .lc .info .tag .tagic{width:1.5cqw; height:1.5cqw} }
+#jukebox .hoes{position:absolute; inset:0; overflow:hidden; background:#1a1622 center/cover no-repeat; border-radius:.25cqw; box-shadow:0 0 0 .14cqw #0a0608, inset 0 0 0 .1cqw rgba(255,255,255,.08)}
+#jukebox .hoes img.f{position:absolute; left:50%; bottom:0; height:94%; max-width:120%; translate:-50% 0; image-rendering:pixelated; filter:drop-shadow(0 .3cqw .3cqw rgba(0,0,0,.6))}
+#jukebox .hoes::after{content:""; position:absolute; inset:0; background:linear-gradient(120deg, rgba(255,255,255,.16), transparent 30% 70%, rgba(0,0,0,.25)); pointer-events:none}
+#jukebox .hoes .sticker{position:absolute; right:5%; top:5%; font:max(5px, .65em)/1 var(--pix); color:#1a0f08; background:rgb(var(--wk)); padding:.35em .45em; border-radius:.2em; rotate:6deg; box-shadow:0 .1em 0 rgba(0,0,0,.4)}
+#jukebox .hoes .logo{position:absolute; left:0; right:0; top:14%; text-align:center; font:1.3em/1 var(--pix); color:#f6d98a; text-shadow:.12em .12em 0 #000}
+#jukebox .hoes.schim img.f{filter:brightness(0) drop-shadow(0 0 .2cqw rgba(255,255,255,.25))}
+#jukebox .hoes.schim::before{content:"?"; position:absolute; inset:0; display:grid; place-items:center; font:2.4em var(--pix); color:rgba(255,255,255,.6); z-index:2; text-shadow:0 .1em 0 #000}
+#jukebox .hoes.papier{background:linear-gradient(135deg, #b48a5a, #8d6638);}
+#jukebox .hoes.papier::before{content:""; position:absolute; left:44%; top:0; bottom:0; width:9%; background:#e9dcc0; box-shadow:0 0 0 .08em #6b4a1e}
+#jukebox .hoes.papier .sticker{background:#e9dcc0}
+#jukebox .hoes.papier b{position:absolute; left:0; right:0; top:50%; translate:0 -50%; text-align:center; font:1.8em var(--pix); color:#3b2414}
+#jukebox .vinyl{position:absolute; border-radius:50%; background:radial-gradient(circle, #0b0b0c 0 3%, transparent 3.5%), radial-gradient(circle, transparent 0 31%, rgba(255,255,255,.05) 32% 32.5%, transparent 33% 44%, rgba(255,255,255,.05) 45% 45.5%, transparent 46% 58%, rgba(255,255,255,.06) 59% 59.5%, transparent 60%), #0d0d0f;
+  box-shadow:0 .4cqw 1cqw rgba(0,0,0,.6)}
+#jukebox .vinyl .lbl{position:absolute; left:33%; top:33%; width:34%; height:34%; border-radius:50%; overflow:hidden; background:rgb(var(--wk)) center/cover; box-shadow:0 0 0 .2cqw rgba(0,0,0,.5)}
+#jukebox .vinyl .lbl img{position:absolute; left:50%; bottom:-6%; height:100%; translate:-50% 0; image-rendering:pixelated}
+#jukebox .vinyl::after{content:""; position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 30deg, transparent 0 12%, rgba(255,255,255,.13) 16%, transparent 22% 62%, rgba(255,255,255,.08) 66%, transparent 72%)}
+#jukebox .vinyl.draait{animation:jbdraai 1.8s linear infinite}
+@keyframes jbdraai{to{rotate:360deg}}
+#jukebox .knop{font:max(6px, .62cqw)/1 var(--pix); color:var(--tekst); background:#050507; border:0; border-radius:.25cqw; padding:.8cqw 1cqw; cursor:pointer; box-shadow:0 0 0 .12cqw #ececec, 0 0 0 .3cqw #000}
+#jukebox .knop:hover, #jukebox .knop:focus-visible{color:var(--geel); box-shadow:0 0 0 .12cqw var(--geel), 0 0 0 .3cqw #000; outline:none}
+#jukebox .knop.th[aria-pressed="true"]{background:#c07a1c; color:#140a00}
+#jukebox .knop.gv[aria-pressed="true"]{background:#a0302a; color:#fff}
+#jukebox .terug{position:absolute; left:1.6%; top:2.6%; z-index:20}
+#jukebox .koptekst{position:absolute; left:50%; top:2.6%; translate:-50% 0; z-index:20; font:1.3cqw/1 var(--pix); color:var(--goud); text-shadow:.2cqw .2cqw 0 #000; letter-spacing:.08em; white-space:nowrap}
+#jukebox .wtabs{display:flex; gap:.5cqw}
+#jukebox .wtab{font:max(6px, .6cqw)/1 var(--pix); color:#e8dcc0; background:#2a170b; border:0; border-radius:.3cqw .3cqw 0 0; padding:.7cqw .8cqw .55cqw; cursor:pointer; box-shadow:inset 0 .15cqw 0 rgba(255,255,255,.1)}
+#jukebox .wtab[aria-pressed="true"]{background:rgb(var(--wk)); color:#1a0f08}
+#jukebox .wtab:focus-visible{outline:.15cqw solid #fff}
+#jukebox .info .titel{font:1.25cqw/1.35 var(--pix); color:#fff4d6; text-shadow:.15cqw .15cqw 0 #000}
+#jukebox .info .wie{font:1.8cqw/1.1 var(--vt); color:rgb(var(--wk))}
+#jukebox .info .slot{font:1.5cqw/1.15 var(--vt); color:#c9b9a0; margin-top:.4cqw}
+#jukebox .info .rij{display:flex; flex-wrap:wrap; gap:.9cqw; margin-top:1.2cqw}
+#jukebox .info .staat{font:max(6px, .52cqw)/1.6 var(--pix); color:#bdb3a0; margin-top:1.2cqw}
+#jukebox .info .staat em{font-style:normal; color:#ffc36a}
+#jukebox .info .staat em.g{color:#ff8a7a}
+#jukebox .balk{height:.4cqw; background:rgba(255,255,255,.12); border-radius:.2cqw; overflow:hidden; margin-top:1cqw; cursor:pointer}
+#jukebox .balk i{display:block; height:100%; width:0; background:rgb(var(--wk))}
+#jukebox .melding{position:absolute; z-index:30; left:50%; bottom:5%; translate:-50% 0; font:max(7px, .75cqw)/1.5 var(--pix); color:#fff1c8; background:rgba(12,10,16,.96); padding:.9cqw 1.3cqw; border-radius:.3cqw;
+  box-shadow:0 0 0 .15cqw #ff6a4a; opacity:0; transition:opacity .2s; pointer-events:none; max-width:60%; text-align:center}
+#jukebox .melding.aan{opacity:1}
+#jukebox .hint{position:absolute; z-index:5; font:max(6px, .5cqw)/1.5 var(--pix); color:rgba(232,220,192,.55)}
+#jukebox .ic{width:1em; height:1em; fill:currentColor; vertical-align:-.12em; shape-rendering:crispEdges}
+#jukebox .hoes .fav{position:absolute; left:5%; top:4%; width:1.9em; z-index:3; color:#ffd84a; filter:drop-shadow(.12em .12em 0 #000) drop-shadow(0 0 .3em rgba(255,216,74,.7))}
+#jukebox .hoes .fav .ic{width:100%; height:auto}
+#jukebox .hoes .logo{font-size:.8em !important; letter-spacing:-.03em}
+#jukebox .knop.aan{background:var(--goud); color:#1a1408; box-shadow:0 0 0 .12cqw var(--goud), 0 0 0 .3cqw #000}
+#jukebox .knop.favaan{background:#ffd84a; color:#2a1d00}
+#jukebox .melding{z-index:300; box-shadow:0 0 0 .15cqw var(--mk, #ff6a4a)}
+#jukebox .wereld{position:absolute; inset:0}
+#jukebox .balkboven{position:absolute; left:1.6%; top:2.4%; z-index:400; display:flex; gap:.8cqw}
+#jukebox .leeg{font:max(5px, .5cqw)/1.6 var(--pix); color:#8a7c6c}
+#jukebox .vlak{position:absolute; transform-origin:50% 100%}
+#jukebox .vlak .bord{position:absolute; left:5%; top:7%; height:86%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle, #2b2b30 0 60%, #18181c 61%); box-shadow:inset 0 0 0 .3cqw #0c0c0e}
+#jukebox .vlak .vinyl{left:5%; top:7%; height:86%; width:auto; aspect-ratio:1; cursor:grab; transition:opacity .3s}
+#jukebox .vlak .vinyl.weg{opacity:0; pointer-events:none}
+#jukebox .vlak .as{position:absolute; width:1.1cqw; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%, #f4f4f8, #8a8a92); translate:-50% -50%; z-index:3; pointer-events:none}
+#jukebox .vlak .arm{position:absolute; width:0; transform-origin:0 0; z-index:5; cursor:grab}
+#jukebox .vlak .arm .stang{position:absolute; left:-.32cqw; top:0; width:.64cqw; height:100%; background:linear-gradient(90deg, #8f8f96, #ececf2, #8f8f96); border-radius:.3cqw; box-shadow:.3cqw .5cqw .6cqw rgba(0,0,0,.45)}
+#jukebox .vlak .arm .kop{position:absolute; left:-1cqw; bottom:-2.4cqw; width:2cqw; height:3cqw; background:linear-gradient(#e4e4ea, #9a9aa2); border-radius:.3cqw .3cqw .5cqw .5cqw; box-shadow:.3cqw .5cqw .6cqw rgba(0,0,0,.45)}
+#jukebox .vlak .arm .grip{position:absolute; left:-1.2cqw; top:0; width:2.4cqw; height:100%}
+#jukebox .vlak .voet{position:absolute; width:3.2cqw; aspect-ratio:1; border-radius:50%; translate:-50% -50%; background:radial-gradient(circle at 40% 35%, #6a6a72, #2a2a2e 70%); box-shadow:0 0 0 .3cqw #18181c; z-index:4; pointer-events:none}
+#jukebox .bedien{position:absolute; display:flex; align-items:center; gap:.6cqw; z-index:6}
+#jukebox .bedien button{font:max(5px, .5cqw)/1 var(--pix); color:#ddd; background:#121216; border:0; border-radius:.2cqw; padding:.6cqw .65cqw; cursor:pointer; box-shadow:0 .15cqw 0 #000, inset 0 0 0 .1cqw #555}
+#jukebox .bedien button[aria-pressed="true"]{color:#1a1408; background:var(--goud)}
+#jukebox .bedien .lampje{width:.9cqw; aspect-ratio:1; border-radius:50%; background:#3a0d0d}
+#jukebox .motor .bedien .lampje{background:#ff4a3a; box-shadow:0 0 .8cqw #ff4a3a}
+#jukebox .motor .bedien [data-motor]{color:#ff8a7a}
+#jukebox .pitch{position:relative; z-index:6}
+#jukebox .pitch .rail{position:absolute; background:#0c0c0e; border-radius:.3cqw; box-shadow:inset 0 0 0 .1cqw #444}
+#jukebox .pitch .knop2{position:absolute; background:linear-gradient(#e4e4ea, #8a8a92); border-radius:.25cqw; box-shadow:0 .25cqw .3cqw rgba(0,0,0,.5)}
+#jukebox .pitch b{position:absolute; font:max(5px, .46cqw)/1 var(--pix); color:#e9e9ee; white-space:nowrap}
+#jukebox .pitch.v{width:2.4cqw}
+#jukebox .pitch.v .rail{left:50%; top:0; bottom:0; width:.5cqw; translate:-50% 0}
+#jukebox .pitch.v .knop2{left:0; right:0; height:1.5cqw; translate:0 -50%; cursor:ns-resize}
+#jukebox .pitch.v b{left:50%; top:-1.6cqw; translate:-50% 0}
+#jukebox .pitch.h{height:1.6cqw}
+#jukebox .pitch.h .rail{top:50%; left:0; right:0; height:.45cqw; translate:0 -50%}
+#jukebox .pitch.h .knop2{top:0; bottom:0; width:1.3cqw; translate:-50% 0; cursor:ew-resize}
+#jukebox .pitch.h b{right:calc(100% + .6cqw); top:50%; translate:0 -50%}
+#jukebox .info{position:absolute; display:flex; flex-direction:column; z-index:20}
+#jukebox .info .titel{font:1.05cqw/1.35 var(--pix)}
+#jukebox .info .wie{font:1.55cqw/1.1 var(--vt)}
+#jukebox .info .rij{display:flex; flex-wrap:wrap; gap:.7cqw; margin-top:.9cqw}
+#jukebox .info .knop{font-size:max(5px, .52cqw); padding:.65cqw .8cqw}
+#jukebox .info .balk{margin-top:.8cqw}
+#jukebox .keuzes{margin-top:auto; display:grid; grid-template-columns:auto 1fr auto; gap:.4cqw .7cqw; align-items:center; padding-top:.8cqw}
+#jukebox .keuzes span{font:max(5px, .46cqw)/1 var(--pix)}
+#jukebox .keuzes em{font:1.25cqw/1 var(--vt); font-style:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#jukebox .keuzes button{font:max(6px, .5cqw)/1 var(--pix); background:none; border:0; cursor:pointer; padding:.2cqw .3cqw; color:inherit}
+#jukebox .bak3d{position:absolute}
+#jukebox .bak3d .lp{position:absolute; left:50%; bottom:12%; aspect-ratio:1; transform-origin:50% 100%; transition:transform .34s cubic-bezier(.3,.8,.3,1), opacity .3s, filter .3s; cursor:pointer}
+#jukebox .bak3d .stapel{position:absolute; inset:0; z-index:2}
+#jukebox .bak3d .lp.om{visibility:hidden}
+#jukebox .lc{background:#070a1c}
+#jukebox .lc .achtergrond{position:absolute; inset:0; background:center/100% 100% no-repeat}
+#jukebox .lc .achtergrond::after{content:none}
+#jukebox .lc .kampscene{position:absolute; inset:0; background:var(--scene) center/100% 100% no-repeat; z-index:3; pointer-events:none}
+#jukebox .lc .kampvoor{position:absolute; inset:0; background:var(--voor) center/100% 100% no-repeat; z-index:30; pointer-events:none}
+#jukebox .lc .lantaarn{position:absolute; left:var(--lx); top:var(--ly); width:15cqw; aspect-ratio:1; translate:-50% -50%; border-radius:50%; background:radial-gradient(circle, rgba(255,200,110,.3), rgba(255,170,80,.08) 40%, transparent 64%); z-index:4; pointer-events:none; mix-blend-mode:screen; animation:jblampflik 2.3s steps(1) infinite}
+#jukebox .lc .lampglas{position:absolute; left:calc(var(--lx) - 1.35%); top:calc(var(--ly) - 4%); width:2.75%; height:6.7%; z-index:4; pointer-events:none; mix-blend-mode:screen; background:radial-gradient(ellipse 60% 55% at 50% 62%, rgba(255,214,130,.55), rgba(255,170,70,.15) 60%, transparent 75%); animation:jblampflik 2.3s steps(1) infinite}
+#jukebox .lc .vlam{position:absolute; left:var(--lx); top:calc(var(--ly) + .15%); width:1.5cqw; height:2.6cqw; translate:-50% -55%; z-index:5; pointer-events:none; mix-blend-mode:screen; transform-origin:50% 92%;
+  background:radial-gradient(ellipse 48% 58% at 50% 64%, #fffbe6 0 28%, #ffe08a 42%, rgba(255,150,50,.75) 62%, transparent 74%);
+  clip-path:polygon(50% 0, 62% 22%, 78% 46%, 84% 70%, 72% 90%, 50% 100%, 28% 90%, 16% 70%, 22% 46%, 38% 22%); animation:jbvlamflik 2.3s steps(1) infinite}
+@keyframes jbvlamflik{0%{transform:scale(1, 1)} 9%{transform:scale(.92, 1.1) skewX(4deg)} 21%{transform:scale(1.06, .92)} 30%{transform:scale(.95, 1.14) skewX(-4deg)} 44%{transform:scale(1, .88)} 52%{transform:scale(.9, 1.06) skewX(3deg)} 66%{transform:scale(1.05, 1.02)} 78%{transform:scale(.94, 1.12) skewX(-2deg)} 90%{transform:scale(1.02, .95)}}
+@keyframes jblampflik{0%{opacity:1} 9%{opacity:.86} 21%{opacity:.95} 30%{opacity:1} 44%{opacity:.78} 52%{opacity:.92} 66%{opacity:1} 78%{opacity:.88} 90%{opacity:.96}}
+#jukebox .lc .mot{position:absolute; left:var(--lx); top:calc(var(--ly) - 1.6%); width:.36cqw; height:.24cqw; z-index:6; pointer-events:none; background:#f0e2be; box-shadow:0 0 .3cqw rgba(255,230,170,.7); animation:jbmotvlucht 7s linear infinite, jbmotvleugel .12s steps(1) infinite}
+@keyframes jbmotvlucht{0%{translate:-2.2cqw -1cqw} 12%{translate:-.6cqw -2.6cqw} 25%{translate:1.6cqw -1.4cqw} 37%{translate:2.4cqw .6cqw} 50%{translate:.8cqw 2cqw} 62%{translate:-1.2cqw 1.4cqw} 75%{translate:-2.6cqw .2cqw} 87%{translate:-1.4cqw -1.8cqw} 100%{translate:-2.2cqw -1cqw}}
+@keyframes jbmotvleugel{50%{transform:scaleX(.4)}}
+#jukebox .lc .gloed{position:absolute; inset:0; background:radial-gradient(ellipse 22% 20% at 47.85% 85.5%, rgba(255,150,70,.32), transparent 70%); pointer-events:none; z-index:55; mix-blend-mode:screen; animation:jbflak 2.4s ease-in-out infinite alternate}
+@keyframes jbflak{50%{opacity:.72}}
+#jukebox .lc .vonken{position:absolute; left:46.2%; width:3.4%; top:84%; height:0; z-index:40; pointer-events:none}
+#jukebox .lc .vonken i{position:absolute; bottom:0; left:var(--x); width:var(--g); aspect-ratio:1; background:#ffe27a; opacity:0; animation:jbvonk var(--d) steps(12, end) var(--del) infinite}
+@keyframes jbvonk{0%{opacity:0; transform:translate(0, 0); background:#fff1a8} 8%{opacity:1} 45%{background:#ffb13a} 75%{opacity:1; background:#ff6a1a} 100%{opacity:0; transform:translate(var(--dx), var(--h)); background:#b8300c}}
+@media (prefers-reduced-motion:reduce){#jukebox .lc .vonken i, #jukebox .lc .lantaarn, #jukebox .lc .gloed, #jukebox .lc .vlam, #jukebox .lc .lampglas, #jukebox .lc .mot{animation:none}
+}
+#jukebox .lc .koffer.vb{position:absolute; inset:0; z-index:20; pointer-events:none; transition:opacity .4s}
+#jukebox .lc .vb .plaat{position:absolute; width:3.71cqw; height:6.7cqw; font-size:.42cqw; transform-origin:0 0; transform:skewY(59.9deg); pointer-events:auto; cursor:pointer; transition:transform .32s cubic-bezier(.3,.8,.3,1)}
+#jukebox .lc .vb .plaat .v{position:absolute; inset:0; box-shadow:inset 0 .12cqw 0 rgba(255,236,200,.35), .09cqw -.16cqw 0 #8a6c4a, .18cqw -.31cqw 0 #5e4630, .27cqw -.47cqw 0 #3a2a1c, .45cqw -.35cqw .5cqw rgba(0,0,0,.5)}
+#jukebox .lc .vb .plaat .v::after{content:""; position:absolute; inset:0; z-index:4; pointer-events:none; background:linear-gradient(90deg, rgba(255,240,210,.06), transparent 40%, rgba(0,0,0,.3)), rgba(8,4,2,var(--diep, 0))}
+#jukebox .lc .vb .plaat:hover .v{filter:brightness(1.15)}
+#jukebox .lc .vb .plaat.gekozen{transform:translateY(-2.2cqw) skewY(59.9deg)}
+#jukebox .lc .vb .plaat.gekozen .v{box-shadow:0 0 0 .16cqw #ffd84a, .09cqw -.16cqw 0 #ffe9a0, .18cqw -.31cqw 0 #c9a040, .27cqw -.47cqw 0 #8a6a20, 0 0 1cqw rgba(255,216,74,.45)}
+#jukebox .lc .vb .plaat.gekozen .v::after{background:linear-gradient(90deg, rgba(0,0,0,.1), transparent 30%)}
+#jukebox .lc .vb .plaat.weg .v::after{background:rgba(8,4,2,.72)}
+#jukebox .lc .vb .plaat.weg{pointer-events:none}
+#jukebox .lc .vb .plaat .hoes.papier{filter:brightness(.62) saturate(.9)}
+#jukebox .lc .uitgelicht{position:absolute; left:13.1%; top:40.3%; width:12.2%; aspect-ratio:1; z-index:15; rotate:-1.5deg; cursor:pointer; font-size:1.05cqw; filter:drop-shadow(.45cqw .6cqw .45cqw rgba(0,0,0,.6)); transition:opacity .4s}
+#jukebox .lc .uitgelicht .lp{position:absolute; inset:0}
+#jukebox .lc .uitgelicht.wissel{animation:jbuitwissel .32s cubic-bezier(.3,.8,.3,1)}
+@keyframes jbuitwissel{from{translate:0 1.5cqw; opacity:.3}}
+#jukebox .lc .info{left:37.6%; width:21.6%; top:24.6%; height:27.4%; padding:.2cqw .6cqw; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; color:#2a1d10; z-index:20}
+#jukebox .lc .info .kop{font:max(5px, .38cqw)/1 var(--pix); letter-spacing:.22em; color:#9a5a26}
+#jukebox .lc .info .titel{margin-top:.55cqw; min-height:2.5cqw; display:flex; align-items:center; justify-content:center; max-width:100%;
+  font:1.08cqw/1.25 var(--pix); text-transform:uppercase; letter-spacing:.04em; color:#2c1206; text-wrap:balance;
+  text-shadow:0 .11cqw 0 rgba(255,246,222,.85), .08cqw .08cqw 0 rgba(120,60,20,.25)}
+#jukebox .lc .info .titel.mid{font-size:.92cqw}
+#jukebox .lc .info .titel.lang{font-size:.78cqw}
+#jukebox .lc .info .sier{display:flex; align-items:center; gap:.35cqw; margin:.45cqw 0 .25cqw; color:#8a4a20}
+#jukebox .lc .info .sier i{width:3.2cqw; height:.14cqw; background:currentColor; opacity:.55}
+#jukebox .lc .info .sier b{width:.42cqw; aspect-ratio:1; background:currentColor; rotate:45deg}
+#jukebox .lc .info .wie{font:1.55cqw/1 var(--vt); color:#6e3414; letter-spacing:.02em}
+#jukebox .lc .info .tags{display:grid; grid-template-columns:repeat(4, 1fr); gap:.45cqw; width:100%; margin-top:.75cqw}
+#jukebox .lc .info .tag{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.35cqw; height:2.9cqw; padding:0; border:0; cursor:pointer;
+  background:rgba(58,36,18,.08); color:#4a2a12; box-shadow:inset 0 0 0 .12cqw rgba(74,42,18,.55); transition:background .15s, color .15s}
+#jukebox .lc .info .tag .tagic{display:block; width:1.05cqw; height:1.05cqw}
+#jukebox .lc .info .tag .tagic .ic{width:100%; height:100%; vertical-align:top}
+#jukebox .lc .info .tag .tagtt{font:max(5px, .34cqw)/1 var(--pix); letter-spacing:.06em; white-space:nowrap}
+#jukebox .lc .info .tag:hover, #jukebox .lc .info .tag:focus-visible{outline:none; background:rgba(58,36,18,.18); box-shadow:inset 0 0 0 .14cqw #4a2a12}
+#jukebox .lc .info .tag.aan{background:#3a2412; color:#ffd36a; box-shadow:inset 0 0 0 .12cqw #1e1208, 0 .12cqw 0 rgba(0,0,0,.25)}
+#jukebox .lc .info .tag[data-fav].aan{color:#ffd84a}
+#jukebox .lc .info .tag[data-zet="gv"].aan{color:#ff9a7a}
+#jukebox .lc .info .slot{margin-top:.7cqw; font:1.3cqw/1.1 var(--vt); color:#5a4030; max-width:94%}
+#jukebox .lc .info .nu{display:flex; align-items:flex-end; gap:.14cqw; height:.7cqw; margin-top:.6cqw; font:max(5px, .34cqw)/1 var(--pix); color:#8a4a20; letter-spacing:.12em}
+#jukebox .lc .info .nu.leeg{visibility:hidden}
+#jukebox .lc .info .nu i{width:.22cqw; height:.6cqw; background:#8a4a20; transform-origin:50% 100%; transform:scaleY(.35)}
+#jukebox .lc .info .nu span{margin-left:.4cqw}
+#jukebox .lc .info .nu.loopt i{animation:jbeq .62s steps(4) infinite alternate}
+#jukebox .lc .info .nu.loopt i:nth-of-type(2){animation-delay:-.3s}
+#jukebox .lc .info .nu.loopt i:nth-of-type(3){animation-delay:-.45s}
+@keyframes jbeq{from{transform:scaleY(.25)} to{transform:scaleY(1)}}
+#jukebox .lc .tafel{position:absolute; inset:0; z-index:12; pointer-events:none}
+#jukebox .lc .tafel .vlak{left:66.93%; width:26.08%; top:25.75%; aspect-ratio:1.5; transform:scaleY(.27); pointer-events:auto}
+#jukebox .lc .tafel .vlak .vinyl{left:21.33%; top:7%; height:86%}
+#jukebox .lc .tafel .naald{position:absolute; left:79.55%; top:48.57%; width:10.89%; height:9.14%; z-index:7; pointer-events:none; background:var(--arm) center/100% 100% no-repeat; filter:drop-shadow(.2cqw .3cqw .2cqw rgba(0,0,0,.45))}
+#jukebox .lc .draaiknop{position:absolute; top:63.76%; width:2.5cqw; aspect-ratio:1; translate:-50% -50%; border:0; padding:0; background:transparent; border-radius:50%; cursor:pointer; pointer-events:auto}
+#jukebox .lc .draaiknop i{position:absolute; left:50%; top:50%; width:.32cqw; height:1cqw; margin-left:-.16cqw; margin-top:-1cqw; background:#1a0c04; transform-origin:50% 100%; rotate:var(--hk, 0deg); transition:rotate .25s cubic-bezier(.3,.8,.3,1); box-shadow:0 0 0 .06cqw rgba(255,220,150,.35)}
+#jukebox .lc .draaiknop:hover, #jukebox .lc .draaiknop:focus-visible{outline:none; box-shadow:0 0 0 .18cqw rgba(255,216,74,.85), 0 0 .8cqw rgba(255,216,74,.5)}
+#jukebox .lc .draaiknop.k1{left:73.21%}
+#jukebox .lc .draaiknop.k2{left:78.05%}
+#jukebox .lc .draaiknop.k3{left:82.89%; cursor:ns-resize}
+#jukebox .lc .draaiknop.k1.aan{box-shadow:0 0 .9cqw rgba(255,90,60,.6)}
+#jukebox .lc .scherm{margin:0; border-radius:0; position:absolute; left:72.61%; width:10.77%; top:67.16%; height:2.76%; z-index:2; cursor:pointer; pointer-events:auto; background:#140904; box-shadow:inset 0 .25cqw .3cqw rgba(0,0,0,.8)}
+#jukebox .lc .scherm i{position:absolute; left:0; top:0; bottom:0; width:0; background:linear-gradient(#ffe08a, #ffa83a 45%, #d0661c); box-shadow:0 0 .7cqw rgba(255,170,70,.9); transition:opacity .2s}
+#jukebox .lc .scherm b{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding-top:.06cqw; font:max(5px, .5cqw)/1 var(--pix); color:#ffd27a; text-shadow:0 0 .35cqw rgba(255,160,60,.9); letter-spacing:.08em; white-space:nowrap; opacity:0; transition:opacity .2s}
+#jukebox .lc .scherm.flits i{opacity:.15}
+#jukebox .lc .scherm.flits b{opacity:1}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -11623,6 +11872,379 @@ try{
     Object.keys(MUZIEK_TERUG).forEach(k => fetch(MUZIEK[k], {method:"HEAD"}).then(rs => { if(!rs.ok) MUZIEK[k] = ""; }).catch(() => { MUZIEK[k] = ""; }));
   else Object.keys(MUZIEK_TERUG).forEach(k => { MUZIEK[k] = ""; });
 }catch(e){}
+
+/* 🎵 nov 2026: de jukebox "Onderweg". Je kampeert in de wereld waar je in het verhaal bent: links een platenkoffer,
+   in het midden een bord aan touwen met wat er draait, rechts een grammofoon op een kist. Elke plaat is het nummer
+   van iemand die je in het verhaal versloeg. Je opent hem met de ♪ op het homescreen (naast het geluidsknopje).
+   - De platen staan dwars in de koffer (de onderkant langs de zijrand), de gekozen hoes staat groot tegen het deksel.
+   - De plaat is echt: vastpakken zet hem stil, heen en weer is scratchen. Drie knoppen: aan/uit, 33/45 en tempo
+     (slepen). De voortgang gloeit in de gleuf eronder.
+   - THUIS en PVP kiezen welk nummer daar speelt (SET.jb.th / SET.jb.gv); de rest van het spel vraagt dat op via
+     JUKE.thuis() en JUKE.pvp(). Alles staat in SET.jb. */
+const JUKE = (() => {
+  const WK = ["255,216,74", "216,176,120", "127,209,140", "255,138,82", "143,208,255", "255,232,160"];
+  const WNAAM = ["Favorieten", "Steenrijk", "Rankenwoud", "Asgronden", "Diepstroom", "Hemelrand"];
+  const LETTER = "-ABCDE";
+  /* mk = de MUZIEK-sleutel van het nummer: per level het gevechtsnummer van die tegenstander */
+  const T = [
+    {id:"titel", w:1, t:"Elementaal", wie:"het homescreen", mk:"titel", logo:"ELEMENTAAL", bgId:"1-1"},
+    {id:"kaart", w:1, t:"De Kaart", wie:"de wereldkaart", mk:"kaart", logo:"DE KAART", bgId:"1-3"},
+    {id:"1-1", w:1, t:"Kiezel in je Schoen", wie:"Rocky", mk:"w1_gespannen"},
+    {id:"1-2", w:1, t:"Steenhard (Brokko's Rockballade)", wie:"Brokko", mk:"w1_brokko"},
+    {id:"1-3", w:1, t:"Wolk met een Kroon", wie:"Nimbus", mk:"w1_spiegel"},
+    {id:"1-4", w:1, t:"Wie Was Dat Nou?", wie:"Rocky de Wraakzuchtige", mk:"w1_wraak"},
+    {id:"1-5", w:1, t:"Onwrikbaar op Repeat", wie:"Magnus", mk:"w1_baasgevecht"},
+    {id:"2-1", w:2, t:"Halleluja, Maar Dan Boos", wie:"Seraf", mk:"w2_seraf_gevecht"},
+    {id:"winkel", w:2, t:"Knorts Kraam", wie:"Knort", mk:"winkel", na:"2-1", bgId:"2-1", spr:"knort"},
+    {id:"2-2", w:2, t:"Ritsel Ritsel", wie:"De Struik", mk:"w2_struik"},
+    {id:"2-3", w:2, t:"Slaap Zacht, Verlies Hard", wie:"De Waardin", mk:"w2_waardin_gevecht"},
+    {id:"2-4", w:2, t:"Acht Poten Vals", wie:"Kaelid", mk:"w2_web"},
+    {id:"2-5", w:2, t:"Goed Zo, Max (Niet)", wie:"Max", mk:"w2_gevecht"},
+    {id:"2-6", w:2, t:"Moeder Weet het Beter", wie:"Moeder Natuur", mk:"w2_baasgevecht"},
+    {id:"3-1", w:3, t:"As op je Hoofd", wie:"Zuster As", mk:"w3_gevecht"},
+    {id:"3-2", w:3, t:"Hamer, Tang en Tranen", wie:"Tang", mk:"w3_smid_gevecht"},
+    {id:"smidse", w:3, t:"Heet IJzer", wie:"de smidse van Tang", mk:"smidse", na:"3-2", bgId:"3-2", sprVan:"3-2"},
+    {id:"3-3", w:3, t:"Puf Puf Pas", wie:"Puf", mk:"w3_rook"},
+    {id:"3-4", w:3, t:"Drie Keer Vuur, Eén Keer Applaus", wie:"Het vlammende trio", mk:"w3_circus"},
+    {id:"3-5", w:3, t:"Overwerk in de Fabriek", wie:"Klinknagel", mk:"w3_fabriek"},
+    {id:"3-6", w:3, t:"Vonkje Wordt Vuurtje", wie:"Flint", mk:"w3_flintgevecht"},
+    {id:"4-1", w:4, t:"Zeeziek in Do Mineur", wie:"De Zee", mk:"w4_overtocht"},
+    {id:"4-2", w:4, t:"Vlekken op de Vloer", wie:"Inkt", mk:"w4_diep"},
+    {id:"4-3", w:4, t:"Glad IJs, Koude Beats", wie:"De IJsvlakte", mk:"w4_ijs"},
+    {id:"4-4", w:4, t:"Jij, Maar Dan Andersom", wie:"De Weerspiegeling", mk:"w4_spiegel"},
+    {id:"4-5", w:4, t:"Diep, Dieper, Oceaan", wie:"De Oceaan", mk:"w4_baas"},
+    {id:"5-1", w:5, t:"Halleluja, Tweede Ronde", wie:"Seraf", mk:"w5_seraf_nieuw"},
+    {id:"5-2", w:5, t:"Alles Moet in een Doosje", wie:"De Verzamelaar", mk:"w5_verzameling"},
+    {id:"5-3", w:5, t:"Draadjes Los", wie:"De Naad", mk:"w5_naad"},
+    {id:"5-4", w:5, t:"Gebroken Vleugels, Volle Bas", wie:"Seraf", mk:"w5_gebroken"},
+    {id:"5-5", w:5, t:"Het Allereerste Nummer", wie:"De Eerste", mk:"w5_eerste"}];
+  T.forEach(n => { n.code = LETTER[n.w] + (T.filter(m => m.w === n.w).indexOf(n) + 1); });
+  const pixSvg = rijen => { let r = ""; rijen.forEach((rij, y) => { for(let x = 0; x < rij.length; x++) if(rij[x] === "#") r += `<rect x="${x}" y="${y}" width="1" height="1"/>`; });
+    return `<svg class="ic" viewBox="0 0 ${rijen[0].length} ${rijen.length}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`; };
+  const IC = {
+    ster:'<svg class="ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M4 0h2v3h4v2H8v1h1v4H7V9H6V8H4v1H3v1H1V6h1V5H0V3h4z"/></svg>',
+    speel:'<svg class="ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1h2v1h2v1h2v1h1v2H8v1H6v1H4v1H2z"/></svg>',
+    pauze:'<svg class="ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1h2v8H2zM6 1h2v8H6z"/></svg>',
+    huis:pixSvg(["....##....", "...####...", "..######..", ".########.", "##########", ".##....##.", ".##.##.##.", ".##.##.##.", ".##.##.##.", ".########."]),
+    zwaard:pixSvg(["##......##", "###....###", ".###..###.", "..######..", "...####...", "...####...", "..######..", ".##.##.##.", "##......##", "#........#"])};
+
+  /* ---------- wat je al hebt: dat volgt de opslag die open staat ---------- */
+  let GEZIEN = new Set([1]), WERELD = 1;
+  const klaarSet = () => new Set(((SET.story && SET.story.klaar) || []).filter(Boolean));
+  const padVan = mk => { let k = mk, v = 0; while(k && !MUZIEK[k] && MUZIEK_TERUG[k] && v++ < 4) k = MUZIEK_TERUG[k]; return MUZIEK[k] || ""; };
+  const sprPad = (key, st) => { if(!key) return null; try{ return (st && ptSprIs(key + st) && sprBeeldPad(key + st)) || sprBeeldPad(key); }catch(e){ return null; } };
+  const bgVan = id => { if(!id) return ""; const h = ((typeof HORIZON === "object" && HORIZON[id]) || [])[0], res = h && typeof HORIZON_BEELD === "object" ? HORIZON_BEELD[h.b] : null;
+    return `url('art/bg-${id}.png')` + (res ? `, url('${res}')` : ""); };
+  function verversT(){
+    const k = klaarSet();
+    T.forEach(n => {
+      n.open = n.id === "titel" || n.id === "kaart" || k.has(n.na || n.id);
+      const L = typeof STORY === "object" ? STORY[n.sprVan || n.id] : null;
+      n.fig = n.logo ? null : (n.spr ? sprPad(n.spr, "") : (L && L.sprite ? sprPad(L.sprite, "_boos") : null));
+      n.bg = bgVan(n.bgId || n.id);
+    });
+    /* de wereld waar je in het verhaal bent: daar staat je kamp */
+    let w = 1;
+    try{ const sd = SET.story ? slotStand(SET.story) : null, vg = sd && sd.volgend; w = vg ? (+String(vg)[0] || 1) : (k.size ? 5 : 1); }catch(e){}
+    WERELD = Math.max(1, Math.min(5, w));
+    let tot = WERELD; T.forEach(n => { if(n.open) tot = Math.max(tot, n.w); });
+    GEZIEN = new Set([1, 2, 3, 4, 5].filter(x => x <= tot));
+  }
+  const wieVan = n => n.open ? n.wie : (GEZIEN.has(n.w) ? n.wie + " · nog niet verslagen" : "nog niet gezien");
+  const slotTekst = n => n.na ? `Kom eerst langs in ${n.na} en deze plaat is van jou.` : (GEZIEN.has(n.w) ? `Versla ${n.wie} in het verhaal (${n.id}) en deze plaat is van jou.` : "Deze plaat ligt nog ergens verderop in het verhaal.");
+  const track = id => T.find(n => n.id === id);
+
+  /* ---------- stand (bewaard in SET.jb) ---------- */
+  const ST = {i:0, alleenFav:false, fav:[], th:null, gv:null, nu:null, pitch:0, rpm45:false};
+  function laadStand(){
+    const s = (SET.jb && typeof SET.jb === "object") ? SET.jb : {};
+    ["alleenFav", "fav", "th", "gv", "pitch", "rpm45"].forEach(k => { if(s[k] !== undefined) ST[k] = s[k]; });
+    if(!Array.isArray(ST.fav)) ST.fav = [];
+  }
+  const bewaar = () => { SET.jb = {alleenFav:ST.alleenFav, fav:ST.fav, th:ST.th, gv:ST.gv, pitch:ST.pitch, rpm45:ST.rpm45}; try{ saveSet(); }catch(e){} };
+  const isFav = n => ST.fav.includes(n.id);
+  const zichtbaar = () => T.map((n, k) => k).filter(k => !ST.alleenFav || isFav(T[k]));
+
+  function hoesHTML(n){
+    const gezien = n.open || GEZIEN.has(n.w), st = `--wk:${WK[n.w]}`, fav = isFav(n) ? `<span class="fav">${IC.ster}</span>` : "";
+    if(!gezien) return `<div class="hoes papier" style="${st}"><b>?</b><span class="sticker">${n.code}</span></div>`;
+    return `<div class="hoes${n.open ? "" : " schim"}" style="${n.bg ? `background-image:${n.bg};` : ""}${st}">${n.fig ? `<img class="f" src="${n.fig}" alt="" draggable="false">` : ""}${n.logo ? `<span class="logo">${n.logo}</span>` : ""}${fav}<span class="sticker">${n.code}</span></div>`;
+  }
+  /* zonder tekst: de platen in de koffer */
+  function hoesKaal(n){
+    if(!(n.open || GEZIEN.has(n.w))) return `<div class="hoes papier"></div>`;
+    return `<div class="hoes${n.open ? "" : " schim"}" style="${n.bg ? `background-image:${n.bg}` : ""}">${n.fig ? `<img class="f" src="${n.fig}" alt="" draggable="false">` : ""}</div>`;
+  }
+  const vinylHTML = n => `<div class="vinyl${n ? "" : " weg"}" id="jbvinyl" style="--wk:${WK[n ? n.w : 1]}"><div class="lbl" style="${n && n.bg ? `background-image:${n.bg}` : ""}">${n && n.fig ? `<img src="${n.fig}" alt="" draggable="false">` : ""}</div></div>`;
+
+  /* ==========================================================================
+     De draaitafel: een eigen afspeler, zodat je met de plaat kunt doen wat je met een echte plaat doet.
+     ========================================================================== */
+  const SPIN = 200;   // graden per seconde bij 33 toeren
+  const JA = {ctx:null, node:null, gain:null, buf:null, sr:44100, pos:0, rate:0, naald:false, motor:false, scratch:false, scratchRate:0, einde:false, cache:{}};
+  function auStart(){
+    if(JA.ctx){ if(JA.ctx.state === "suspended") JA.ctx.resume(); return true; }
+    try{
+      const C = window.AudioContext || window.webkitAudioContext; JA.ctx = new C();
+      JA.node = JA.ctx.createScriptProcessor(1024, 1, 2);
+      JA.gain = JA.ctx.createGain(); JA.gain.gain.value = volM();
+      JA.node.onaudioprocess = e => {
+        const L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1), b = JA.buf, n = L.length, stap = JA.sr / JA.ctx.sampleRate;
+        const doel = JA.scratch ? JA.scratchRate : (JA.motor ? pitchRate() : 0);
+        const k = JA.scratch ? .02 : (Math.abs(doel) > Math.abs(JA.rate) ? .00016 : .00007);
+        for(let i = 0; i < n; i++){
+          JA.rate += (doel - JA.rate) * k;
+          let s = 0;
+          if(b && JA.naald){
+            const p = JA.pos, i0 = p | 0, f = p - i0;
+            s = (b[i0] || 0) * (1 - f) + (b[i0 + 1] || 0) * f;
+            if(Math.abs(JA.rate) > .03) s += (Math.random() - .5) * .006;   // een beetje plaatgeruis
+            JA.pos += JA.rate * stap;
+            if(JA.pos < 0) JA.pos = 0;
+            if(JA.pos >= b.length - 2){ JA.pos = b.length - 2; if(JA.rate > 0) JA.einde = true; }
+          }
+          L[i] = R[i] = s;
+        }
+      };
+      JA.node.connect(JA.gain); JA.gain.connect(JA.ctx.destination);
+      return true;
+    }catch(e){ return false; }
+  }
+  const pitchRate = () => (1 + ST.pitch / 100) * (ST.rpm45 ? 1.35 : 1);
+  function laad(n){
+    if(JA.cache[n.id]) return Promise.resolve(JA.cache[n.id]);
+    const pad = padVan(n.mk);
+    if(!pad) return Promise.reject(new Error("geen bestand"));
+    return fetch(pad).then(r => { if(!r.ok) throw new Error("niet gevonden"); return r.arrayBuffer(); })
+      .then(ab => new Promise((ok, mis) => JA.ctx.decodeAudioData(ab, ok, mis)))
+      .then(ab => (JA.cache[n.id] = {data:ab.getChannelData(0), sr:ab.sampleRate}));
+  }
+  const speelt = () => !!(ST.nu && JA.naald && JA.motor);
+  /* vanaf: seconden, om bij het openen verder te gaan waar de spelmuziek was */
+  function speel(n, vanaf){
+    if(!n.open){ melding(slotTekst(n)); return; }
+    if(!auStart()){ melding("Je browser laat het geluid hier niet toe."); return; }
+    if(ST.nu === n.id && JA.buf){ JA.motor = true; JA.naald = true; ververs(); return; }
+    ST.nu = n.id; JA.naald = false; JA.buf = null; JA.motor = true;
+    const v = byId("jbvinyl"); if(v) v.outerHTML = vinylHTML(n);
+    ververs();
+    laad(n).then(c => { if(ST.nu !== n.id || !OPEN) return; JA.buf = c.data; JA.sr = c.sr;
+      JA.pos = vanaf ? Math.min(c.data.length - 2, vanaf * c.sr) : 0; JA.motor = true; JA.naald = true; spelStil(); ververs(); })
+      .catch(() => { if(ST.nu !== n.id) return; JA.motor = false; spelStil(); melding("Dit nummer staat nog niet in het spel."); ververs(); });
+  }
+  function pauze(){ if(!ST.nu || !JA.buf){ speel(T[ST.i]); return; } JA.motor = !JA.motor; if(JA.motor) JA.naald = true; ververs(); }
+  /* de spelmuziek loopt door tot de plaat klaar is om te spelen, en is dan meteen stil */
+  let SPELSTIL = false;
+  function spelStil(){ if(SPELSTIL) return; SPELSTIL = true; try{ AU.alleStil(); }catch(e){} }
+
+  /* --- het midden van de plaat (voor scratchen) --- */
+  const G = {ok:false};
+  function meet(){
+    const vl = byId("jbvlak"), v = byId("jbvinyl"); if(!vl || !v || !vl.offsetWidth){ G.ok = false; return; }
+    G.cx = v.offsetLeft + v.offsetWidth / 2; G.cy = v.offsetTop + v.offsetHeight / 2; G.ok = true;
+    const as = byId("jbas"); if(as){ as.style.left = G.cx + "px"; as.style.top = G.cy + "px"; }
+  }
+  function lokaal(e){ const vl = byId("jbvlak"), r = vl.getBoundingClientRect(); return [(e.clientX - r.left) * vl.offsetWidth / r.width, (e.clientY - r.top) * vl.offsetHeight / r.height]; }
+
+  /* --- elke frame: de plaat draait mee met wat je hoort, de gleuf gloeit mee --- */
+  let HOEK = 0, LAATST = performance.now(), WASSPEELT = null, RAF = 0;
+  function frame(nu){
+    RAF = 0; if(!OPEN) return;
+    const dt = Math.min(.1, (nu - LAATST) / 1000); LAATST = nu;
+    if(!JA.scratch) HOEK += (JA.buf ? JA.rate : (JA.motor ? pitchRate() : 0)) * SPIN * dt;
+    const v = byId("jbvinyl"); if(v) v.style.transform = `rotate(${HOEK}deg)`;
+    if(SCR && nu - SCR.t > 45) JA.scratchRate *= .6;   // stil vasthouden = stilstaan
+    const p = JA.buf ? JA.pos / JA.buf.length * 100 : 0; const vul = byId("jbvul"); if(vul) vul.style.width = p + "%";
+    if(JA.gain) JA.gain.gain.value = volM();
+    if(JA.einde){ JA.einde = false; if(!JA.scratch && JA.motor) volgende(1); }
+    if(speelt() !== WASSPEELT){ WASSPEELT = speelt(); ververs(); }
+    RAF = requestAnimationFrame(frame);
+  }
+
+  /* --- vastpakken en scratchen --- */
+  let SCR = null;
+  function hoekVan(e){ const [x, y] = lokaal(e); return Math.atan2(y - G.cy, x - G.cx) * 180 / Math.PI; }
+  function deckDown(e){
+    if(!G.ok) meet();
+    if(e.target.closest("#jbvinyl") && ST.nu && JA.buf){ e.preventDefault(); auStart(); JA.scratch = true; JA.scratchRate = 0; SCR = {a:hoekVan(e), t:performance.now()}; byId("jbvinyl").setPointerCapture(e.pointerId); }
+  }
+  function deckMove(e){
+    if(!SCR) return;
+    const a = hoekVan(e), nu = performance.now(); let da = a - SCR.a; if(da > 180) da -= 360; if(da < -180) da += 360;
+    HOEK += da; JA.scratchRate = Math.max(-6, Math.min(6, (da / (Math.max(1, nu - SCR.t) / 1000)) / SPIN));
+    SCR.a = a; SCR.t = nu;
+  }
+  function deckUp(){ if(SCR){ SCR = null; JA.scratch = false; } }
+
+  /* --- de knoppen in het voorpaneel en het schermpje (de gleuf) --- */
+  let KNOP = null;
+  function tempoUit(e){ if(!KNOP) KNOP = {y:e.clientY, p:ST.pitch}; const r = SCENE.getBoundingClientRect();
+    ST.pitch = Math.round(Math.max(-50, Math.min(50, KNOP.p - (e.clientY - KNOP.y) / r.height * 220))); if(Math.abs(ST.pitch) < 3) ST.pitch = 0; knopTeken(); flits(tempoTekst()); }
+  const tempoTekst = () => "TEMPO " + (ST.pitch > 0 ? "+" : "") + ST.pitch + "%";
+  function knopTeken(){
+    const q = s => SC().querySelector(s), k1 = q(".draaiknop.k1"), k2 = q(".draaiknop.k2"), k3 = q(".draaiknop.k3");
+    if(k1){ k1.style.setProperty("--hk", JA.motor ? "40deg" : "-40deg"); k1.classList.toggle("aan", JA.motor); }
+    if(k2) k2.style.setProperty("--hk", ST.rpm45 ? "40deg" : "-40deg");
+    if(k3) k3.style.setProperty("--hk", (ST.pitch * 2.6) + "deg");
+    const w = q(".wereld"); if(w) w.classList.toggle("loopt", speelt());
+  }
+  let FLITS_T = null;
+  function flits(t){ const s = byId("jbscherm"); if(!s) return; s.querySelector("b").textContent = t; s.classList.add("flits"); clearTimeout(FLITS_T); FLITS_T = setTimeout(() => s.classList.remove("flits"), 1500); }
+
+  let mT = null;
+  function melding(t, kl){ const m = byId("jbmelding"); if(!m) return; m.textContent = t; m.style.setProperty("--mk", kl || "#ff6a4a"); m.classList.add("aan"); clearTimeout(mT); mT = setTimeout(() => m.classList.remove("aan"), 2600); }
+
+  /* ---------- kiezen ---------- */
+  function zet(slot){
+    const n = T[ST.i]; if(!n.open){ melding(slotTekst(n)); return; }
+    if(ST[slot] === n.id){ ST[slot] = null; melding(slot === "th" ? "Het homescreen speelt weer gewoon Elementaal." : "Je PvP-gevechten spelen weer hun eigen muziek.", "#8a8070"); }
+    else { ST[slot] = n.id; melding(slot === "th" ? `"${n.t}" speelt nu op het homescreen.` : `"${n.t}" speelt nu in je PvP-gevechten.`, slot === "th" ? "#ffc36a" : "#ff8a7a"); }
+    bewaar(); ververs();
+  }
+  function favoriet(){
+    const n = T[ST.i]; if(!n.open){ melding("Een plaat die je nog niet hebt kun je geen favoriet maken."); return; }
+    const k = ST.fav.indexOf(n.id); if(k >= 0) ST.fav.splice(k, 1); else ST.fav.push(n.id);
+    bewaar(); teken(); melding(k >= 0 ? `"${n.t}" is geen favoriet meer.` : `"${n.t}" is nu een favoriet.`, "#ffd84a");
+  }
+  function ga(k){ if(k == null || k === ST.i) return; ST.i = k; ververs(); }
+  function volgende(d){
+    const lijst = zichtbaar().filter(k => T[k].open); if(!lijst.length) return;
+    let pos = lijst.indexOf(ST.i);
+    if(pos < 0){ pos = d > 0 ? lijst.findIndex(k => k > ST.i) : lijst.length - 1 - [...lijst].reverse().findIndex(k => k < ST.i); if(pos < 0 || pos >= lijst.length) pos = d > 0 ? 0 : lijst.length - 1; }
+    else pos = (pos + d + lijst.length) % lijst.length;
+    ST.i = lijst[pos]; speel(T[ST.i]);
+  }
+
+  /* ---------- tekenen ---------- */
+  let SCENE = null, OPEN = false;
+  const SC = () => SCENE || document.createElement("div");
+  const byId = id => document.getElementById(id);
+  /* de lantaarn hangt in elke wereld net ergens anders (gemeten op de kampscène van 1672 x 941) */
+  const LAMP = {1:[246, 220], 2:[249, 221], 3:[254, 268], 4:[257, 228], 5:[257, 220]};
+  /* de platen in de koffer: van links naar rechts, de onderkant langs de zijrand van de koffer */
+  const PX = 1 / 16.72, KOF = {x0:174, x1:512, yb:668, h:112};
+  const plaatHTML = k => `<div class="plaat" data-k="${k}"><i class="v">${hoesKaal(T[k])}</i></div>`;
+  function infoHTML(){
+    const n = T[ST.i], deze = ST.nu === n.id, sp = deze && speelt(), th = ST.th === n.id, gv = ST.gv === n.id, fav = isFav(n);
+    const titel = n.open ? n.t : "???", lang = titel.length > 24 ? " lang" : titel.length > 16 ? " mid" : "";
+    const knop = (attr, aan, ic, tekst, uitleg) => `<button class="tag${aan ? " aan" : ""}" ${attr} aria-pressed="${aan}" title="${uitleg}"><span class="tagic">${ic}</span><span class="tagtt">${tekst}</span></button>`;
+    return `<div class="info" style="--wk:${WK[n.w]}">
+      <div class="kop">${n.code} · ${WNAAM[n.w].toUpperCase()}</div>
+      <div class="titel${lang}">${titel}</div>
+      <div class="sier"><i></i><b></b><i></i></div>
+      <div class="wie">${wieVan(n)}</div>
+      ${n.open ? `<div class="tags">${knop("data-speel", sp, sp ? IC.pauze : IC.speel, sp ? "PAUZE" : "SPEEL", sp ? "Pauze" : "Speel dit nummer")}${knop("data-fav", fav, IC.ster, "FAVORIET", "Favoriet")}${knop('data-zet="th"', th, IC.huis, "THUIS", "Speelt op het homescreen")}${knop('data-zet="gv"', gv, IC.zwaard, "PVP", "Speelt in je PvP-gevechten")}</div>`
+        : `<div class="slot">${slotTekst(n)}</div>`}
+      <div class="nu${sp ? " loopt" : ""}${deze ? "" : " leeg"}"><i></i><i></i><i></i><span>${sp ? "DRAAIT NU" : "OP DE DRAAITAFEL"}</span></div></div>`;
+  }
+  const balkBoven = () => `<div class="balkboven"><button class="knop" data-terug>‹ TERUG</button><button class="knop${ST.alleenFav ? " favaan" : ""}" data-alleenfav>${IC.ster} ALLEEN FAVORIETEN</button></div>`;
+  const VONKEN = Array.from({length:18}, (_, i) => { const r = k => ((Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1;
+    return `<i style="--x:${(r(1) * 90).toFixed(1)}%;--g:${r(2) < .3 ? ".5cqw" : ".3cqw"};--d:${(1.6 + r(3) * 1.6).toFixed(2)}s;--del:${(-r(4) * 3).toFixed(2)}s;--dx:${((r(5) - .5) * 6).toFixed(1)}cqw;--h:${-(8 + r(6) * 10).toFixed(1)}cqw"></i>`; }).join("");
+  function teken(){
+    const w = WERELD, [lx, ly] = LAMP[w];
+    const vars = `--scene:url('art/jukebox-kamp-w${w}.png');--voor:url('art/jukebox-kamp-w${w}-voor.png');--lx:${(lx / 16.72).toFixed(2)}%;--ly:${(ly / 9.41).toFixed(2)}%`;
+    SCENE.innerHTML = `<div class="wereld lc${speelt() ? " loopt" : ""}" style="${vars}"><div class="achtergrond" style="background-image:url('art/jukebox-lucht-w${w}.png')"></div>
+      <div class="scherm" id="jbscherm" title="Klik om ergens in het nummer te springen"><i id="jbvul"></i><b></b></div><div class="kampscene"></div>
+      <div class="lantaarn"></div><div class="lampglas"></div><div class="vlam"></div><i class="mot"></i>
+      <div class="uitgelicht" id="jbuit" data-k="${ST.i}"><div class="lp" data-k="${ST.i}">${hoesHTML(T[ST.i])}</div></div>
+      <div class="koffer vb">${T.map((n, k) => plaatHTML(k)).join("")}</div><div class="kampvoor"></div>
+      ${infoHTML()}
+      <div class="vonken">${VONKEN}</div>
+      <div class="tafel" id="jbdeck"><div class="vlak" id="jbvlak">${vinylHTML(ST.nu ? track(ST.nu) : null)}<span class="as" id="jbas"></span></div>
+        <button class="draaiknop k1" data-motor title="Aan / uit"><i></i></button><button class="draaiknop k2" data-toeren title="33 of 45 toeren"><i></i></button><button class="draaiknop k3" data-tempo title="Tempo: sleep omhoog of omlaag. Dubbelklik: terug naar 0"><i></i></button>
+        <div class="naald"></div></div>
+      <div class="gloed"></div></div>` + balkBoven() + `<div class="melding" id="jbmelding"></div>`;
+    leg(); meet(); knopTeken();
+  }
+  function leg(){
+    const zv = zichtbaar(), sel = ST.i;
+    SC().querySelectorAll(".koffer .plaat").forEach(el => { const k = +el.dataset.k;
+      const x = KOF.x0 + k * (KOF.x1 - KOF.x0) / (T.length - 1), y = KOF.yb - (x - KOF.x0) * 7 / 330;
+      el.style.left = (x * PX) + "cqw"; el.style.top = ((y - KOF.h) * PX) + "cqw"; el.style.zIndex = 100 - k;
+      el.style.setProperty("--diep", Math.min(.38, k * .012).toFixed(3));
+      el.classList.toggle("gekozen", k === sel); el.classList.toggle("weg", !zv.includes(k)); });
+    const uit = byId("jbuit");
+    if(uit && uit.dataset.k !== String(sel)){ uit.dataset.k = sel; uit.innerHTML = `<div class="lp" data-k="${sel}">${hoesHTML(T[sel])}</div>`; uit.classList.remove("wissel"); void uit.offsetWidth; uit.classList.add("wissel"); }
+  }
+  function ververs(){
+    if(!OPEN) return;
+    leg();
+    const info = SC().querySelector(".wereld .info"); if(info) info.outerHTML = infoHTML();
+    knopTeken();
+  }
+
+  /* ---------- invoer (alleen als de jukebox open is) ---------- */
+  let SCHUIF = false;
+  function koppel(){
+    SCENE.addEventListener("pointerdown", e => { if(e.target.closest("[data-tempo]")){ e.preventDefault(); SCHUIF = true; KNOP = null; tempoUit(e); return; } if(e.target.closest("#jbvlak")) deckDown(e); });
+    window.addEventListener("pointermove", e => { if(!OPEN) return; if(SCHUIF){ tempoUit(e); return; } deckMove(e); });
+    window.addEventListener("pointerup", () => { if(!OPEN) return; if(SCHUIF){ SCHUIF = false; KNOP = null; bewaar(); return; } deckUp(); });
+    SCENE.addEventListener("dblclick", e => { if(e.target.closest("[data-tempo]")){ ST.pitch = 0; knopTeken(); flits(tempoTekst()); bewaar(); } });
+    SCENE.addEventListener("click", e => {
+      const t = e.target; SCENE.focus({preventScroll:true});
+      if(t.closest("[data-terug]")){ sluitMetIris(); return; }
+      if(t.closest("[data-alleenfav]")){ ST.alleenFav = !ST.alleenFav; if(ST.alleenFav && !isFav(T[ST.i])){ const k = zichtbaar()[0]; if(k != null) ST.i = k; } bewaar(); teken(); return; }
+      const z = t.closest("[data-zet]"); if(z){ zet(z.dataset.zet); return; }
+      if(t.closest("[data-fav]")){ favoriet(); return; }
+      if(t.closest("[data-motor]")){ pauze(); flits(JA.motor ? "AAN" : "UIT"); return; }
+      if(t.closest("[data-toeren]")){ ST.rpm45 = !ST.rpm45; bewaar(); ververs(); flits(ST.rpm45 ? "45 TOEREN" : "33 TOEREN"); return; }
+      if(t.closest("[data-tempo]")) return;
+      if(t.closest("[data-speel]")){ const n = T[ST.i]; if(ST.nu === n.id && speelt()) pauze(); else speel(n); return; }
+      const s = t.closest("#jbscherm"); if(s && JA.buf){ const r = s.getBoundingClientRect(); JA.pos = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * JA.buf.length; JA.naald = true; return; }
+      const lp = t.closest(".lp, .plaat"); if(lp && lp.dataset.k != null){ const k = +lp.dataset.k; if(k === ST.i) speel(T[k]); else ga(k); }
+    });
+    SCENE.addEventListener("keydown", e => {
+      e.stopPropagation();
+      if(e.key === "Escape"){ e.preventDefault(); sluitMetIris(); }
+      else if(e.key === "ArrowRight" || e.key === "ArrowDown"){ e.preventDefault(); volgende(1); }
+      else if(e.key === "ArrowLeft" || e.key === "ArrowUp"){ e.preventDefault(); volgende(-1); }
+      else if(e.key === " "){ e.preventDefault(); pauze(); }
+      else if(e.key === "Enter"){ if(e.target.closest && e.target.closest("button")) return; e.preventDefault(); speel(T[ST.i]); }
+      else if(e.key === "f" || e.key === "F"){ favoriet(); }
+    });
+    let wielT = 0;
+    SCENE.addEventListener("wheel", e => { if(e.target.closest("#jbdeck .vlak") || e.target.closest(".info")) return; e.preventDefault(); const nu = performance.now(); if(nu - wielT < 90) return; wielT = nu;
+      const zv = zichtbaar(), pos = zv.indexOf(ST.i), d = e.deltaY > 0 || e.deltaX > 0 ? 1 : -1; ga(zv[Math.max(0, Math.min(zv.length - 1, pos + d))]); }, {passive:false});
+    window.addEventListener("resize", () => { if(OPEN) meet(); });
+  }
+
+  /* ---------- open en dicht ---------- */
+  function open(){
+    if(OPEN) return;
+    laadStand(); verversT();
+    let el = byId("jukebox");
+    if(!el){ el = document.createElement("div"); el.id = "jukebox"; el.innerHTML = `<div class="jbpodium"><div class="scene" id="jbscene" tabindex="0" aria-label="Jukebox"></div></div>`;
+      document.body.appendChild(el); SCENE = byId("jbscene"); koppel(); }
+    el.classList.add("open"); OPEN = true; document.body.classList.add("jukeboxopen");
+    /* er ligt altijd een plaat op: het nummer dat nu klinkt (of dat van het homescreen) */
+    const pad = AU.pad, laag = pad && AU.lagen ? AU.lagen[pad] : null;
+    const n = T.find(m => m.open && padVan(m.mk) && padVan(m.mk) === pad) || (ST.th && track(ST.th) && track(ST.th).open ? track(ST.th) : track("titel"));
+    ST.i = T.indexOf(n);
+    const vanaf = laag && !laag.paused && padVan(n.mk) === pad ? laag.currentTime : 0;
+    SPELSTIL = false;
+    if(ST.nu !== n.id){ ST.nu = n.id; JA.buf = null; JA.naald = false; }
+    JA.motor = true;
+    teken();
+    SCENE.focus({preventScroll:true});
+    LAATST = performance.now(); if(!RAF) RAF = requestAnimationFrame(frame);
+    if(JA.buf && ST.nu === n.id){ JA.naald = true; if(vanaf) JA.pos = Math.min(JA.buf.length - 2, vanaf * JA.sr); auStart(); spelStil(); }
+    else { JA.buf = null; ST.nu = null; speel(n, vanaf); }
+  }
+  function sluit(){
+    if(!OPEN) return;
+    OPEN = false; JA.motor = false; JA.naald = false; JA.rate = 0; SCR = null; JA.scratch = false;
+    try{ if(JA.ctx && JA.ctx.state === "running") JA.ctx.suspend(); }catch(e){}
+    const el = byId("jukebox"); if(el) el.classList.remove("open");
+    document.body.classList.remove("jukeboxopen");
+    try{ AU.wens = null; muziekScherm(); }catch(e){}
+  }
+  function sluitMetIris(){ if(typeof irisOvergang === "function") irisOvergang(sluit); else sluit(); }
+  /* voor de rest van het spel: welk nummer (MUZIEK-sleutel) op het homescreen en in PvP, of null */
+  const keus = slot => { const s = SET.jb && SET.jb[slot], n = s && track(s); if(!n) return null;
+    if(!(n.id === "titel" || n.id === "kaart" || klaarSet().has(n.na || n.id))) return null;
+    return padVan(n.mk) ? n.mk : null; };
+  return {open, sluit, isOpen:() => OPEN, thuis:() => keus("th"), pvp:() => keus("gv"), T};
+})();
 
 const SET = {music:0.5, sfx:0.75, mute:false, fx:"vol", autopass:[false, false], story:{klaar:[], vrij:false}};
 /* Alles wat geluid maakt vraagt zijn volume hier op. Zo hoeft de knop in de hoek alleen
@@ -20997,6 +21619,8 @@ function thuisDHTML(){
   const lichtMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "licht");   // ✨ Xam
   const aurMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "bloedaurora"); if(aurMijn) infernoStart();   // 🩸 Bloedmaan-Aurora
   const majMijn = false;   // ronde 34: de regenboogrand van Tang is weg
+  /* ronde 35: een skin heeft zijn eigen achtergrond (bg-skin-*), met de wereld eronder als reserve */
+  const pvpSk = kc && !kc.wil ? skinVan(kc.id) : null, pvpBg = (pvpSk ? `url('art/bg-skin-${pvpSk.file}.png'), ` : "") + lvBg(kc && kc.lv);
   const pvpFig = `<span class="tkfig"><span class="tkmijn${inktMijn ? " inktzw" : ""}${infMijn ? " vuurfig" : ""}" data-act="btn" data-btn="thuischar" title="Kies je karakter voor PvP en challenges">${mijnFig ? ((fxMijn || `<img src="${mijnFig}" alt="" draggable="false" onerror="this.remove()">`) + (inktMijn ? inktLos("") : "")) : `<span class="tkvraag">?</span>`}${lichtMijn ? xamStofHTML(8) : ""}<span class="tkwijzig">${kc.naam}</span></span></span>`;   // ronde 24: geen silhouet van een tegenstander meer
   /* ronde 34: een bepaalde stand van een figuur, als die tekening er is (anders zijn gewone plaatje) */
   const standPad = (key, st) => { if(!key) return null; try{ return (ptSprIs(key + st) && sprBeeldPad(key + st)) || sprBeeldPad(key); }catch(e){ return null; } };
@@ -21019,11 +21643,12 @@ function thuisDHTML(){
       <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>${verderFig}
       <span class="tverderin"><span class="tic">&#9654;</span><span><b>${titel}</b><em>${regel}</em>${stand ? `<i>${stand}</i>` : ""}</span></span></button>
     <div class="trechts">
-      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${lvBg(kc && kc.lv)}`}"></span>${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
+      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${pvpBg}`}"></span>${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
       <button class="tkaart rood tmetbeeld" data-act="btn" data-btn="mpmodus" data-m="chal" data-bot="1"><span class="tkbg" style="background-image:${chalBg}"></span>${chalFig}<span class="tic">&#9733;</span><span><b>CHALLENGES</b><em>${chal.n} van ${chal.tot} kroontjes</em>${chal.volg ? `<i>volgende: ${chal.volg}</i>` : `<i>versla eerst iemand in het verhaal</i>`}</span></button>
       <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
         <button class="tklein" data-act="btn" data-btn="decks">DECKS</button>
-        <button class="tklein" data-act="btn" data-btn="plekken" title="Een andere opslag kiezen">OPSLAG ${opPlek ? SET.slot + 1 : "?"} <small>wissel</small></button>
+        <button class="tklein" data-act="btn" data-btn="plekken" title="Een andere opslag kiezen">OPSLAG ${opPlek ? SET.slot + 1 : "?"}</button>
+        <button class="tklein tgeluid tmuziek" data-act="btn" data-btn="jukebox" title="De jukebox: kies je muziek">${pixIcoon("noot")}</button>
         <button class="tklein tgeluid${SET.mute ? " uit" : ""}" data-act="btn" data-btn="mute" title="${SET.mute ? "Geluid staat uit" : "Geluid staat aan"}">${pixIcoon(SET.mute ? "stil" : "luid")}</button></div>
     </div>
     <div class="tversie">versie ${ELEMENTAAL_VERSIE}</div></div>`;
@@ -23181,10 +23806,12 @@ function meerLucht(aan){
 }
 /* Het portret achter een personage: het eigen plaatje van het level, over de oude lagen heen.
    Is het er niet, dan haalt het zichzelf weg en zie je de lagen zoals vroeger. */
+/* ronde 35: levels zonder eigen portretplaatje, die een andere tekening als achtergrond krijgen (de Oceaan: de diepte, niet het wateroppervlak) */
+const PT_EIGEN = {"4-5":"art/bg-4-5.png", "1-1":"art/bg-1-1.png"};   // Rocky: zijn wachtpost, niet de grotrand
 function ptPlaatje(id){
   if(!id) return "";
   return `<div class="pthz vul ptvast" style="top:0;width:100%;height:100%;opacity:.85;z-index:40">`
-    + `<img src="${hzBestand("pt", id)}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
+    + `<img src="${PT_EIGEN[id] || hzBestand("pt", id)}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
 }
 
 /* (okt 2026: het getekende weer in het vergezicht, regen, as, sintels, bellen, veren, stof, is
@@ -27581,8 +28208,38 @@ function beloningMaak(id, extra){
   if(L.geeftHart) items.push({k:"hart", ic:"❤", naam:`${L.geeftHart} levens`, sub:"je begint elk gevecht met meer", oud:!eerste});
   if(L.opentSmid) items.push({k:"smid", ic:"⚒", naam:"De smidse van Tang", sub:"hier laat je je kaarten smeden", oud:!eerste});
   if(L.geeftAeSlot) items.push({k:"slot", ic:"🟣", naam:`${L.geeftAeSlot}e aether-slot`, sub:"nog een kracht tegelijk", oud:!eerste});
+  /* 🎵⚔ ronde 35: na wat je krijgt, nog twee meldingen: hun challenge staat open, en hun nummer zit in de jukebox */
+  if(eerste){
+    try{ if(typeof ladderZoek === "function" && ladderZoek(id)){
+      const nm = (typeof chalNaam === "function" && chalNaam(id)) || L.vijand || id, open = ladderSpeelbaar(ladderZoek(id)) && baasSterOk(id);   // je hebt ze net verslagen: dat telt al
+      let beeld = null; try{ beeld = ksPersSrc(id) || null; }catch(e){}
+      items.push({k:"chal", ic:"⚔", naam:open ? `${nm} wil een rematch` : `${nm}: eerst meer ★ in deze wereld`, sub:"bij Challenges", beeld, oud:false, chalOp:!open});
+    } }catch(e){}
+    if(NUMMER_TITEL[id]) items.push({k:"nummer", ic:"♪", naam:`“${NUMMER_TITEL[id]}”`, sub:"in de jukebox", oud:false, hoes:nummerHoesHTML(id)});
+  }
   return items;
 }
+/* 🎵 nov 2026: de melding van een nieuw nummer toont zijn hoes uit de jukebox (de tegenstander boos op zijn eigen
+   plek, met de code van de plaat), met de plaat die er half uit schuift. De codes volgen de jukebox: per wereld
+   A t/m E, en in wereld 1 staan het titelnummer en de kaart vooraan, in wereld 2 de kraam van Knort na 2-1,
+   in wereld 3 de smidse na 3-2. */
+const NUMMER_VOLGORDE = [["titel", "kaart", "1-1", "1-2", "1-3", "1-4", "1-5"], ["2-1", "winkel", "2-2", "2-3", "2-4", "2-5", "2-6"],
+  ["3-1", "3-2", "smidse", "3-3", "3-4", "3-5", "3-6"], ["4-1", "4-2", "4-3", "4-4", "4-5"], ["5-1", "5-2", "5-3", "5-4", "5-5"]];
+function nummerCode(id){ for(let w = 0; w < NUMMER_VOLGORDE.length; w++){ const i = NUMMER_VOLGORDE[w].indexOf(id); if(i >= 0) return "ABCDE"[w] + (i + 1); } return ""; }
+function nummerHoesHTML(id){
+  const L = STORY[id] || {}; let fig = null;
+  try{ if(L.sprite) fig = (ptSprIs(L.sprite + "_boos") && sprBeeldPad(L.sprite + "_boos")) || sprBeeldPad(L.sprite); }catch(e){}
+  const h = ((typeof HORIZON === "object" && HORIZON[id]) || [])[0], res = h && typeof HORIZON_BEELD === "object" ? HORIZON_BEELD[h.b] : null;
+  const bg = `url('art/bg-${id}.png')` + (res ? `, url('${res}')` : "");
+  return `<span class="nmplaat"></span><span class="nmhoes" style="background-image:${bg}">${fig ? `<img src="${fig}" alt="" onerror="this.remove()">` : ""}<i>${nummerCode(id)}</i></span>`;
+}
+/* 🎵 ronde 35: de titels van de nummers per tegenstander (voor de jukebox). Verzonnen, mag je allemaal hernoemen. */
+const NUMMER_TITEL = {
+  "1-1":"Kiezel in je Schoen", "1-2":"Steenhard (Brokko's Rockballade)", "1-3":"Wolk met een Kroon", "1-4":"Wie Was Dat Nou?", "1-5":"Onwrikbaar op Repeat",
+  "2-1":"Halleluja, Maar Dan Boos", "2-2":"Ritsel Ritsel", "2-3":"Slaap Zacht, Verlies Hard", "2-4":"Acht Poten Vals", "2-5":"Goed Zo, Max (Niet)", "2-6":"Moeder Weet het Beter",
+  "3-1":"As op je Hoofd", "3-2":"Hamer, Tang en Tranen", "3-3":"Puf Puf Pas", "3-4":"Drie Keer Vuur, Eén Keer Applaus", "3-5":"Overwerk in de Fabriek", "3-6":"Vonkje Wordt Vuurtje",
+  "4-1":"Zeeziek in Do Mineur", "4-2":"Vlekken op de Vloer", "4-3":"Glad IJs, Koude Beats", "4-4":"Jij, Maar Dan Andersom", "4-5":"Diep, Dieper, Oceaan",
+  "5-1":"Halleluja, Tweede Ronde", "5-2":"Alles Moet in een Doosje", "5-3":"Draadjes Los", "5-4":"Gebroken Vleugels, Volle Bas", "5-5":"Het Allereerste Nummer"};
 function beloningHTML(){
   const m = M, L = STORY[m.id] || {};
   const rij = (it, i) => {
@@ -27613,20 +28270,20 @@ function beloningToon(id, items, daarna){
   if(nieuw.length){ AU.play("win"); buitMelding(nieuw); }
   beloningKlaar();
 }
-const BUIT_KLEUR = {ae:"#b98cff", slot:"#b98cff", lt:"#f0d27a", hart:"#ec7a8a", smid:"#ff9a5a", skin:"#7fd8ff"};
-const BUIT_SOORT = {ae:"Nieuwe aether", slot:"Nieuw aether-slot", lt:"Nieuwe lichtkaart", hart:"Meer levens", smid:"Nieuw geopend", skin:"Nieuw PvP-karakter"};
+const BUIT_KLEUR = {ae:"#b98cff", slot:"#b98cff", lt:"#f0d27a", hart:"#ec7a8a", smid:"#ff9a5a", skin:"#7fd8ff", chal:"#ff6a4a", nummer:"#6fe3b4"};
+const BUIT_SOORT = {ae:"Nieuwe aether", slot:"Nieuw aether-slot", lt:"Nieuwe lichtkaart", hart:"Meer levens", smid:"Nieuw geopend", skin:"Nieuw PvP-karakter", chal:"Nieuwe challenge", nummer:"Nieuw nummer in de jukebox"};
 function buitMelding(lijst){
   if(FAST) return;
   lijst.forEach((it, i) => setTimeout(() => {
     const d = document.createElement("div");
-    d.className = "buitmelding";
+    d.className = "buitmelding bm-" + it.k;
     const kl = BUIT_KLEUR[it.k] || "#e8c67a";
     d.style.setProperty("--mk", kl);
     d.style.top = (64 + i * 78) + "px";
     const beeld = it.k === "ae" ? AETHER_BEELD[it.key] : (it.k === "lt" ? LICHT_BEELD[it.key] : (it.beeld || null));
     const pad = Array.isArray(beeld) ? beeld[0] : beeld;
-    d.innerHTML = `<div class="vmic">${pad ? `<img src="${pad}" alt="" onerror="this.remove()">` : `<span>${it.ic || "★"}</span>`}</div>
-      <div class="vmtxt"><small>${BUIT_SOORT[it.k] || "Nieuw"}</small><b>${it.naam}</b></div>`;
+    d.innerHTML = `<div class="vmic">${it.hoes ? it.hoes : pad ? `<img src="${pad}" alt="" onerror="this.remove()">` : `<span>${it.ic || "★"}</span>`}</div>
+      <div class="vmtxt"><small>${it.chalOp ? "Challenge gevonden" : (BUIT_SOORT[it.k] || "Nieuw")}</small><b>${it.naam}</b></div>`;
     document.body.appendChild(d);
     if(i) AU.play("light");
     requestAnimationFrame(() => d.classList.add("aan"));
@@ -29786,6 +30443,12 @@ function aeBlader(w, d){
   rij.scrollLeft += d * (rij.clientWidth + 10);
   setTimeout(aePijlen, 320);
 }
+/* 🧹 ronde 35: een knop om je aethers of lichtkaarten weer helemaal leeg te laten */
+function leegKnop(w){
+  const u = S && S.ui; if(!u || u.mode !== "banpick") return "";
+  const n = w === "lt" ? ltGebruikt(u.ltN || {}) : (Array.isArray(u.aeSel) ? u.aeSel.length : 0);
+  return n ? `<button class="obtn b-dim lbtn leegknop" data-act="voorleeg" data-w="${w}">✕ Leeg laten</button>` : "";
+}
 function aeGekozen(u){
   const a = u.aethers || [], sel = Array.isArray(u.aeSel) ? u.aeSel : (u.aeSel == null ? [] : [u.aeSel]);
   return sel.map(i => a[i]).filter(k => AETHERS[k]);
@@ -29877,12 +30540,12 @@ function voorB2HTML(u0){
       <div class="lrij">${aeKies.map(k => lkHTML(k, false, {kl:"chosen" + (k === o.ae ? " opdracht" : ""), badge:k === o.ae ? halfSter("l", true) : "", attr:`data-act="libopen" data-w="ae" title="${AETHERS[k].name}: ${String(AETHERS[k].kort || AETHERS[k].txt || "").replace(/<[^>]*>/g, "").replace(/"/g, "")}"`})).join("")}${
         Array.from({length:Math.max(0, aeMax - aeKies.length)}, () => `<div class="lk leeg" data-act="libopen" data-w="ae" title="Kies een aether"><span>+</span></div>`).join("")}${
         Array.from({length:Math.max(0, AE_SLOTS - aeMax)}, () => `<div class="lk dicht" title="Dit slot is nog dicht"><span>🔒</span></div>`).join("")}</div>
-      <button class="obtn b-dim lbtn" data-act="libopen" data-w="ae">📚 Library</button></div>` : "";
+      <button class="obtn b-dim lbtn" data-act="libopen" data-w="ae">📚 Library</button>${leegKnop("ae")}</div>` : "";
   const ltKies = lt.filter(k => (ltN[k] || 0) > 0);
   const ltPane = lt.length ? `<div class="lsec licht vbsec"><div class="lkop">✦ Licht <span>${ltOp} van ${ltMax} kopieën · hooguit ${per} per kaart</span></div>
       <div class="lrij">${ltKies.map(k => lkHTML(k, true, {kl:"chosen" + (k === o.lt ? " opdracht" : ""), badge:`${k === o.lt ? halfSter("r", ltN[k] >= 3) + " " : ""}${ltN[k]}×`, attr:`data-act="libopen" data-w="lt" title="${LIGHTS[k].name}"`})).join("")}${
         ltOp < ltMax ? `<div class="lk leeg" data-act="libopen" data-w="lt" title="Kies lichtkaarten"><span>+</span><small>nog ${ltMax - ltOp}</small></div>` : ""}</div>
-      <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button></div>` : "";
+      <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button>${leegKnop("lt")}</div>` : "";
   /* --- rechts: je deck --- */
   const mix = u0.basis ? u0.mix : null, basis = u0.basis, upg = u0.upg || {}, upgOpen = u0.upgVrij || [];
   const telDeck = el => P(0).deck.filter(c => c.el === el && !c.lk).length;
@@ -29946,7 +30609,7 @@ function voorLoadHTML(u0){
       + Array.from({length:Math.max(0, AE_SLOTS - aeMax)}, () => `<div class="lk dicht" title="Dit slot is nog dicht"><span>🔒</span></div>`).join("");
     out += `<div class="lsec"><div class="lkop">🟣 Aether <span>${sel.length} van ${aeMax}</span></div>
       <div class="lrij">${vakken}</div>
-      <button class="obtn b-dim lbtn" data-act="libopen" data-w="ae">📚 Library</button></div>`;
+      <button class="obtn b-dim lbtn" data-act="libopen" data-w="ae">📚 Library</button>${leegKnop("ae")}</div>`;
   }
   if(lt.length){
     const ltN = u0.ltN || {}, ltMax = u0.ltMax || 0, op = ltGebruikt(ltN);
@@ -29956,7 +30619,7 @@ function voorLoadHTML(u0){
         + `<div class="lk leeg" data-act="libopen" data-w="lt" title="Kies lichtkaarten"><span>+</span></div>`;
       out += `<div class="lsec licht"><div class="lkop">✦ Licht <span>${op} kaart${op === 1 ? "" : "en"} · zoveel als je wilt, hooguit ${VRIJ_LT_PER} per soort</span></div>
         <div class="lrij">${vk}</div>
-        <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button></div>`;
+        <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button>${leegKnop("lt")}</div>`;
       return opdrachtBalk(u0) + `<div class="lload">${out}</div>`;
     }
     const vakken = sel.map(k => lkHTML(k, true, {kl:"chosen" + (k === o.lt ? " opdracht" : ""), badge:`${k === o.lt ? halfSter("r", ltN[k] >= 3) + " " : ""}${ltN[k]}×`, attr:`data-act="libopen" data-w="lt" title="${LIGHTS[k].name}"`})).join("")
@@ -29964,7 +30627,7 @@ function voorLoadHTML(u0){
     out += `<div class="lsec licht"><div class="lkop">✦ Licht <span>${op} van ${ltMax} kopieën</span></div>
       <div class="vslotrij">${Array.from({length:LT_SLOTS}, (_, i) => `<div class="vslot licht${i < op ? " vol" : ""}${i >= ltMax ? " op" : ""}">${i < op ? "✦" : (i >= ltMax ? "🔒" : "·")}</div>`).join("")}</div>
       <div class="lrij">${vakken}</div>
-      <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button></div>`;
+      <button class="obtn b-dim lbtn" data-act="libopen" data-w="lt">📚 Library</button>${leegKnop("lt")}</div>`;
   }
   return out ? opdrachtBalk(u0) + `<div class="lload">${out}</div>` : opdrachtBalk(u0);
 }
@@ -30093,7 +30756,7 @@ function libHTML(){
       : `<div class="libdetail"><div class="libdtxt">Hier is nog niets gevonden.</div></div>`;
   }
   return `<div class="ovbox libbox${pcLib ? " pclib" : ""}">
-    <h2>${kop}</h2><div class="sub">${sub}</div>${u ? opdrachtBalk(u) : ""}${tabs}
+    <h2>${kop}</h2><div class="sub">${sub}</div>${u ? `<div class="libleeg">${leegKnop(tab === "lt" ? "lt" : "ae")}</div>` + opdrachtBalk(u) : ""}${tabs}
     ${pcLib ? `<div class="libmidden"><div class="libgrid" id="libgrid">${items}</div>${det}</div>` : `<div class="libgrid" id="libgrid">${items}</div>`}
     <div class="libvoet"><button class="obtn" data-act="btn" data-btn="closemodal">${u ? "✓ Klaar" : "Sluiten"}</button></div></div>`;
 }
@@ -30924,17 +31587,16 @@ function upgVak(el){
    vak, y het bovenvlak van de plank, w de breedte van wat erop staat (allemaal in procenten). */
 const WINKEL_DECOR = {
   knort:{beeld:"art/winkel-knort.png", ratio:"3/2",
-    /* Uitgemeten op de nieuwe winkel-knort.png (1536×1024, okt 2026). Twee kasten met elk twee rijen
-       vakken. De vakken in het midden vallen achter Knort, dus:
-       - de vier aethers staan bovenop de kasten (bovenvlak y 391 links, 404 rechts), op x 222, 418,
-         1103 en 1308;
-       - de vijf lichtkaarten staan in de bovenste rij vakken (bodem y 505), op x 222, 418, 908, 1103
-         en 1308. Het vak op x 608 blijft leeg: daar steekt Knort zijn hand met de ring op.
-       De vakken zijn maar zo'n 95 pixels hoog, dus de lichtkaarten zijn kleiner (4%).
+    /* Uitgemeten op de nieuwe winkel-knort.png (1536×1024, nov 2026), met vaste plekken voor alles:
+       - de vijf aethers (vierkante tegeltjes) staan in de gouden lijstjes met vierkant paars fluweel op de
+         kasten: midden op x 230, 459, 767, 1075 en 1299, fluweel van 117 px, onderkant y 331. De middelste
+         hangt hoger (onderkant y 302), op het plankje boven de deuropening;
+       - de vier lichtkaarten staan in de verlichte vitrinekastjes in de kasten (x 211, 418, 1118, 1327),
+         op de zijde onderin (y 545). In het midden van de toonbank staat niets meer.
        Het hartje is de pot met harten links op de toonbank, het slot de kist met het gloeiende vak rechts. */
-    ae:[{x:14.45,y:38.2},{x:27.2,y:38.2},{x:71.8,y:39.5},{x:85.2,y:39.5},{x:40.3,y:38.2}],   // ronde 30: de vijfde (Levenskracht) bovenop de linkerkast, naast de andere twee
-    lt:[{x:14.45,y:49.3},{x:27.2,y:49.3},{x:59.1,y:49.5},{x:71.8,y:49.5},{x:85.2,y:49.5}],
-    wAe:6, wLt:4,
+    ae:[{x:14.97,y:32.3},{x:29.88,y:32.3},{x:69.99,y:32.3},{x:84.57,y:32.3},{x:49.93,y:29.5}],   // de vijfde (Levenskracht) in het middelste lijstje
+    lt:[{x:13.74,y:53.2},{x:27.21,y:53.2},{x:72.79,y:53.2},{x:86.39,y:53.2}],
+    wAe:7.4, wLt:5.2,
     hart:{x:15.1,y:81.5,w:14,tag:100}, slot:{x:83.9,y:82.8,w:20.5,tag:60}, w:6, wPlek:13,   // tag: hoogte van het prijskaartje
     /* Knort staat achter de toonbank, in het midden. De achterrand van de toonbank ligt op y 793. */
     baas:{x:50, y:77.4, h:34.5},   // Knort 1,5× zo groot; de onderrand zakt achter de toonbank
@@ -34558,6 +35220,7 @@ function helpHTML(){
    of het nummer van het gevecht waar je in zit. */
 function muziekScherm(){
   if(!S || FAST) return;
+  if(JUKE.isOpen()) return;   // 🎵 in de jukebox draait de plaat, niet de spelmuziek
   if(typeof document !== "undefined" && document.getElementById("filmstudio")){ AU.zet(null); return; }   // in de filmstudio speelt alleen de filmmuziek
   if(!window.__laadOk){ if(S.ui && S.ui.mode === "start") AU.wens = M && M.type === "story" ? "kaart" : "titel"; return; }
   if(M && M.type === "praat") return;
@@ -34566,13 +35229,15 @@ function muziekScherm(){
   if(liveLobby()){ AU.zet("titel"); return; }
   /* De uitdagingen van Nimbus: zijn eigen deuntje, niet het titelnummer. */
   if(M && M.type === "nimbus"){ AU.zet(MUZIEK.w1_nimbus ? "w1_nimbus" : "kaart"); return; }
-  if(S.ui.mode === "start"){ AU.zet(M && M.type === "story" ? "kaart" : "titel"); return; }
+  if(S.ui.mode === "start"){ AU.zet(M && M.type === "story" ? "kaart" : (JUKE.thuis() || "titel")); return; }   // 🎵 het homescreen-nummer uit de jukebox
   /* Terug op de wereldkaart, ook vlak na een gevecht: het winstdeuntje zacht weg, de kaartmuziek aan. */
   if(M && M.type === "story"){ AU.stopLosseZacht(); AU.zet("kaart"); return; }
   if(S.over) return;                       // de winst- of verliesstinger uit laten spelen
   if(S.story){ AU.zet(S.story.muziek || "gevecht"); return; }
   /* Vrij spel: de gevechtsmuziek van het level waarvan je het decor ziet. */
-  AU.zet(S.decor && S.decor.muziek && MUZIEK[S.decor.muziek] ? S.decor.muziek : "gevecht");
+  /* 🎵 PvP (niet de challenges): het nummer dat je in de jukebox op PVP zette */
+  const jbPvp = S.ladder ? null : JUKE.pvp();
+  AU.zet(jbPvp || (S.decor && S.decor.muziek && MUZIEK[S.decor.muziek] ? S.decor.muziek : "gevecht"));
 }
 /* 🖥 Ronde 8: links één zwart venster over de volle hoogte. Boven de tegenstander (zijn portret is
    het echte #portretvak, dat precies op dit vak ligt), onder jij. In het verhaal staat op jouw plek de
@@ -35018,6 +35683,15 @@ document.addEventListener("click", e => {
   if(act === "libopen"){ M = {type:"lib", tab:t.dataset.w === "lt" ? "lt" : "ae", modus:"kies"}; render(); return; }
   if(act === "libsel"){ if(M && M.type === "lib"){ M.libSel = t.dataset.k; render(); } return; }
   if(act === "libtab"){ if(M && M.type === "lib"){ M.libSel = null; M.tab = t.dataset.w === "lt" ? "lt" : (t.dataset.w === "vij" ? "vij" : "ae"); render(); } return; }
+  if(act === "voorleeg"){
+    if(S.ui.mode === "banpick" && !isBot(S.ui.p)){
+      const ui = S.ui;
+      if(t.dataset.w === "lt") ui.ltN = {};
+      else { ui.aeSel = []; voorAeEffect(ui); }
+      render();
+    }
+    return;
+  }
   if(act === "voorltn"){
     if(S.ui.mode === "banpick" && !isBot(S.ui.p)){
       const k = t.dataset.k, d = +t.dataset.d, ui = S.ui;
@@ -36026,26 +36700,26 @@ const MP_CHARS = [
    speciaal: kees (de kwast), meer (Nimbus splitst), bonsai, majestic (regenboog), inkt (ogen) */
 const SKINS = [
   {van:"1-1", naam:"Kees", file:"kees", speciaal:"kees", stil:true},
-  {van:"1-2", naam:"James Bronk", file:"brokkobronk"},
+  {van:"1-2", naam:"James Bronk", file:"brokkobronk", sterren:true},   // ronde 35: de sterren in zijn lucht schitteren (de getekende zijn weggepoetst)
   {van:"1-3", naam:"Nimbus de Meervoudige", file:"nimbusmeer", geenArt:true, speciaal:"meer"},
   {van:"1-3", naam:"Christ-bus", file:"nimbuskerst", speciaal:"kerst"},   // ronde 34: de lampjes branden en flikkeren soms          // later: van het Nimbus-level in wereld 4
   {van:"1-4", naam:"Rocky de Vergevende", file:"rockyridder"},
   {van:"2-1", naam:"Loof", file:"loof"},
   {van:"2-2", naam:"Bonsai", file:"bonsai", speciaal:"bonsai", na:"bonsairover"},
-  {van:"knort", naam:"Drie kraaien in een trenchcoat", file:"kraaien"},
+  {van:"knort", naam:"Drie kraaien in een trenchcoat", file:"kraaien", onrust:true},   // ronde 35: wiebelt onrustig heen en weer, zoals Knort
   {van:"2-3", naam:"Waardin to chill and study to", file:"waardinlofi", speciaal:"lofi"},   // ronde 34: de muzieknoten zweven los
-  {van:"2-4", naam:"De Vervelling", file:"kaelidvervelling"},
+  {van:"2-4", naam:"De Vervelling", file:"kaelidvervelling", zwaai:true},   // ronde 35: hangt aan een draad en zwaait langzaam
   {van:"2-5", naam:"Xam", file:"xam", speciaal:"licht"},   // ronde 34: lichtstralen achter hem en opstijgende lichtvonkjes
   {van:"3-1", naam:"Maatje", file:"maatje", speciaal:"inferno"},   // ronde 34: een inferno achter hem, en zijn vlammen bewegen
   {van:"3-2", naam:"Tang de Majestic", file:"tangmajestic", speciaal:"majestic", fx:"regenboog", zonder:{_wijd:"_taunt"}},   // ronde 34: wijd is nog de oude tekening en valt terug op de nieuwe taunt; zuur is nieuw (met masker)
-  {van:"3-3", naam:"Nim-puf", file:"nimpuf"},                    // 3-3 is Puf
+  {van:"3-3", naam:"Nim-puf", file:"nimpuf", speciaal:"spook"},   // ronde 35: spookt rond als Casper, het vak in en uit, en wisselt vaak van stand                    // 3-3 is Puf
   {van:"3-4", naam:"Het elektrische trio", file:"trioelektrisch"}, // 3-4 is het vlammende trio
   {van:"3-5", naam:"Klinknagel, nieuwe lak", file:"klinknagelnieuw"},
   {van:"4-1", naam:"Veerman op vakantie", file:"veermanvakantie"},
   {van:"4-2", naam:"Inkts inkt", file:"inktsinkt", geenArt:true, speciaal:"inkt", fx:"zwart"},
   {van:"4-3", naam:"Bloedmaan-Aurora", file:"aurorabloed", fx:"bloed", speciaal:"bloedaurora"},   // ronde 34: een rood noorderlicht golft achter haar
   {van:"4-4", naam:"De Weerspiegeling", file:"weerspiegelingeng", fx:"donker", speciaal:"spiegel"},   // ronde 34: zijn vak is een spiegel die barst, bij elke klap erger
-  {van:"5-1", char:"2-1", naam:"De Serafijn", file:"serafijn"},
+  {van:"5-1", char:"2-1", naam:"De Serafijn", file:"serafijn", speciaal:"serafogen"},   // ronde 35: de oogjes op zijn vleugels knipperen elk op hun eigen moment
   {van:"5-4", naam:"De Ofanim", file:"ofanim", speciaal:"ofanim"}   // ronde 34: in de gewone stand zweven de drie ringen los (lagen)
 ].map(k => Object.assign(k, {id:"skin:" + k.file, spr:"skin" + k.file, char:k.char || k.van}));
 const SKIN_STANDEN = ["", "_taunt", "_boos", "_stuk", "_wijd", "_zuur"];
@@ -36713,20 +37387,29 @@ function charKiesHTML(kop){
       ${RODE_AURORA("chbg")}<div class="chpt">${charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
     if((skinVan(c.id) || {}).speciaal === "spiegel")   // 🪞 De Weerspiegeling: in de keuze is zijn glas al gebarsten
       return `<div class="chtegel chspiegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
-      <div class="chpt">${charPortret(ch.spr)}</div><div class="spiegelglas">${barstSVG(2)}</div><div class="chnaam">${ch.naam}</div></div>`;
+      ${WSP.laad(lofiHerteken) === "klaar" ? `<div class="chpt wspchpt">${WSP.html("keuze" + c.id, "")}</div>` : `<div class="chpt">${charPortret(ch.spr)}</div><div class="spiegelglas">${barstSVG(2)}</div>`}<div class="chnaam">${ch.naam}</div></div>`;
     if((skinVan(c.id) || {}).speciaal === "licht")   // ✨ Xam: ook in de keuze stralen en lichtvonkjes
       return `<div class="chtegel chlicht${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       ${XAM_STRALEN("chbg")}<div class="chpt">${charPortret(ch.spr)}</div>${xamStofHTML(8)}<div class="chnaam">${ch.naam}</div></div>`;
     if((skinVan(c.id) || {}).speciaal === "inferno"){ infernoStart();   // 🔥 Maatje: ook in de keuze het inferno erachter
       return `<div class="chtegel chinferno${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       ${INFERNO_DOEK("chbg")}<div class="chpt vuurfig">${charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
-    if((skinVan(c.id) || {}).speciaal === "ofanim"){ const fx = skinFxBox(c, "");   // 💍 De Ofanim: ook in de keuze zweven de ringen
+    if((skinVan(c.id) || {}).speciaal === "ofanim"){ const fx = `<span class="ofadein">${charPortret(ch.spr)}</span>`;   // 💍 ronde 35: De Ofanim deint in de keuze op en neer (de losse ringen zijn weg)
       if(fx) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt">${fx}</div><div class="chnaam">${ch.naam}</div></div>`; }
     if((skinVan(c.id) || {}).speciaal === "kerst"){   // 🎄 Christ-bus: ook in de keuze branden de lampjes
       const src = SPRITE_BEELD[sprEcht(ch.spr)] || "";
       return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
       <div class="chpt">${skinFxBox(c, src) || charPortret(ch.spr)}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "spook"){ const fx = skinFxBox(c, SPRITE_BEELD[sprEcht(ch.spr)] || "");   // 👻 ook in de keuze spookt hij rond
+      if(fx) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${fx}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "serafogen"){ const fx = skinFxBox(c, SPRITE_BEELD[sprEcht(ch.spr)] || "");   // 👁 ook in de keuze knipperen zijn oogjes
+      if(fx) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${fx}</div><div class="chnaam">${ch.naam}</div></div>`; }
+    if((skinVan(c.id) || {}).speciaal === "bonsai"){ const fx = skinFxBox(c, SPRITE_BEELD[sprEcht(ch.spr)] || "");   // 🌳 ook in de keuze knipperen de ogen
+      if(fx) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
+      <div class="chpt">${fx}</div><div class="chnaam">${ch.naam}</div></div>`; }
     const lofi = (skinVan(c.id) || {}).speciaal === "lofi";   // 🎵 de noten zweven ook in de keuze
     if(lofi){ const pad = SPRITE_BEELD[sprEcht(ch.spr)], L = lofiVerwerk(pad, lofiHerteken);
       if(L.status === "klaar" && L.schoon) return `<div class="chtegel${k.char === c.id && !k.wil ? " kies" : ""}" data-act="btn" data-btn="mpchar" data-i="${c.id}" style="--chk:${ch.kleur || "var(--vnl)"}">
@@ -37185,6 +37868,7 @@ function infernoTik(t){
 /* 💍 ronde 34: De Ofanim in lagen: de veren, drie losse ringen en de vonken ervoor (art/skin-ofanim-veren, -ring1, -ring2,
    -ring3, -voor). Elke ring zweeft en draait op zichzelf. Alleen de gewone stand heeft lagen; zolang ze er niet allemaal
    zijn (of in de andere standen) blijft het gewone plaatje staan. */
+const OFA_LAGEN = false;   // ronde 35: Q wil de oude Ofanim terug, in één stuk en zonder draaiende ring
 const OFA = {status:"", lagen:["veren", "ring2", "ring1-draai", "voor"], ar:1024 / 1536, wacht:[]};   // ronde 34: ring 3 is geschrapt, ring 1 draait als strook
 function ofaLaad(klaar){
   if(OFA.status === "klaar" || OFA.status === "fout") return OFA.status;
@@ -37231,7 +37915,19 @@ function rodeAuroraTeken(t){
 }
 /* ronde 34: een skin met een eigen achtergrond (art/bg-skin-<file>.png) krijgt die ook in zijn portret, over die van
    het level heen. Bestaat het plaatje (nog) niet, dan haalt hij zichzelf weg en blijft de levelachtergrond. */
-const skinPtBg = sk => `<div class="pthz vul ptskinbg" style="top:0;width:100%;height:100%;opacity:1;z-index:45"><img src="art/bg-skin-${sk.file}.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()"></div>`;
+const skinPtBg = sk => `<div class="pthz vul ptskinbg" style="top:0;width:100%;height:100%;opacity:1;z-index:45"><img src="art/bg-skin-${sk.file}.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.remove()">${sk.sterren ? bronkSterrenHTML() : ""}</div>`;
+/* ✨ ronde 35: James Bronk. Zijn eigen sterren, op dezelfde plek in de lucht als het plaatje (zoals object-fit: cover) */
+const BRONK_STERREN = [[1123,89,"s"],[585,114,"s"],[1160,19,"s"],[1546,74,"s"],[1649,187,"s"],[1014,99,"s"],[1016,17,"k"],[1732,96,"k"],[661,105,"s"],[1589,156,"s"],[934,132,"s"],[772,107,"s"],[531,153,"s"],[1258,161,"k"],[1661,17,"s"],[702,159,"m"],[1016,178,"k"],[1150,183,"k"],[817,57,"m"],[541,60,"s"],[1265,17,"s"],[741,21,"k"],[473,26,"s"],[614,172,"k"],[399,118,"m"],[953,51,"s"],[1622,76,"s"],[1218,98,"m"],[848,160,"k"],[334,178,"s"],[1081,145,"m"],[1351,15,"k"],[866,96,"m"],[1560,11,"k"],[1677,127,"k"],[1853,11,"s"],[766,171,"k"],[452,163,"s"],[15,91,"m"],[1292,94,"m"]];
+function bronkSterrenHTML(){
+  if(FAST) return "";
+  let i = 0;
+  const een = ([x, y, t]) => { const d = (2.2 + (i * 1.37) % 2.6).toFixed(2), v = (-((i * 2.11) % 4)).toFixed(2); i++;
+    const st = `style="--d:${d}s;--v:${v}s"`;
+    if(t === "k") return `<g class="bsk" ${st}><rect x="${x - 17}" y="${y - 3}" width="34" height="6"/><rect x="${x - 3}" y="${y - 17}" width="6" height="34"/><rect x="${x - 6}" y="${y - 6}" width="12" height="12"/></g>`;
+    const z = t === "m" ? 10 : 7;
+    return `<rect class="bss" ${st} x="${x - z / 2}" y="${y - z / 2}" width="${z}" height="${z}"/>`; };
+  return `<svg class="bronksterren" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${BRONK_STERREN.map(een).join("")}</svg>`;
+}
 const RODE_AURORA = kl => `<canvas class="rodeaurora${kl ? " " + kl : ""}" width="96" height="96" aria-hidden="true"></canvas>`;
 function infernoStart(){
   if(FAST || typeof document === "undefined") return;
@@ -37244,6 +37940,178 @@ function infernoStart(){
   }
   if(!INF.raf) INF.raf = requestAnimationFrame(infernoTik);
 }
+/* 🪞 De Weerspiegeling (skin "weerspiegelingeng", nov 2026).
+   Het hele vak is een donkere, gebroken spiegel van 12 scherven ("zones"). In losse scherven verschijnen
+   enge gezichten (een oog, een grijns, een schreeuw), elk vult zijn hele scherf en komt nooit twee keer
+   tegelijk in beeld. Af en toe doemt de Weerspiegeling zelf op: een collage van 12 losse stukken, precies in
+   de 12 scherven, en dan is er niets anders. Elke stand heeft een eigen collage en kleur.
+   Taunt en boos blijven na een wissel even staan (HOU), ook als het spel al terug is naar gewoon. Stuk blijft.
+
+   Gebruik:
+     WSP.laad(cb)          -> "laden" | "klaar" | "fout"; cb wordt één keer aangeroepen als alles binnen is
+     WSP.html(sleutel, stand)  -> een <span> die het hele vak vult; sleutel = 0/1 voor de spelers, of "keuze" enz.
+                              stand = "" / "_taunt" / "_boos" / "_stuk" (zoals skinStand) of "gewoon"/"taunt"/...
+     WSP.raak(sleutel)     -> het glas schudt even en er schieten meer gezichten op (bij een klap)
+   Het canvas per sleutel blijft bestaan als de HTML opnieuw getekend wordt: de lus hangt het
+   steeds terug in de nieuwe <span>, dus de animatie loopt gewoon door. */
+const WSP = (() => {
+  const W = 512, H = 768, ART = "art/skin-weerspiegelingeng-";
+  const HOU = {taunt:6000, boos:5000};   // zo lang blijft een taunt of boos staan (ms)
+  const STAND = {
+    gewoon:{mot:{tus:[.9,2.2], n:[1,2], duur:[1.6,3], fel:.8, uit:[0,1,2,3,7,9,11,4]}, groot:{tus:[14,22], duur:[2.6,3.6], fel:.62}},
+    taunt: {tint:"rgba(140,110,200,.45)", bij:"midden", mot:{tus:[.7,1.6], n:[1,3], duur:[2,3.4], fel:.85, uit:[4,5,8,1,3,11]}, groot:{tus:[11,18], duur:[3.4,4.6], fel:.72}},
+    boos:  {tint:"rgba(200,30,45,.55)", mot:{tus:[.3,.9], n:[2,4], duur:[.6,1.4], fel:.95, uit:[6,2,4,10,3,8,0]}, groot:{tus:[9,15], duur:[1.6,2.4], fel:.82}},
+    stuk:  {mot:null, groot:{tus:[8,11], duur:[5.5,7.5], fel:.74, spreid:1.4}}};   // stuk: geen losse beelden; de collage komt en gaat zoals bij de andere standen, maar veel langzamer
+  const A = {status:"", wacht:[], glas:null, barst:null, tegels:null, col:{}, zones:[], paren:[]};
+  const INST = {};
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const nu = () => performance.now() / 1000;
+  const doek = () => { const c = document.createElement("canvas"); c.width = W; c.height = H; return c; };
+  const standNaam = s => { s = String(s || "").replace(/^_/, ""); return STAND[s] ? s : "gewoon"; };
+
+  /* de 12 zones, als runs van (zone, lengte) over 512 x 768 pixels */
+  const ZONES = "AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/ABIIFwAPCZEADwqZAA8LhgAMCBgADwmQAA8KmAAPC4cADAgZAA8JjwAPCpgADwuHAAwIGgAPCY4ADwqYAA8LhwAMCBsADwmNAA8KmAAPC4cADAgcAA8JjAAPCpgADwuHAAwIHQAPCYwADwqXAA8LhwAMCB4ADwmLAA8KlgAPC4gADAgfAA8JigAPCpUADwuJAAwIIAAPCYoADwqTAA8LigAMCCEADwmKAA8KkgAPC4oADAghAA8JiwAPCpEADwuKAAwIIQAPCYwADwqPAA8LiwAMCCEADwmMAA8KjwAPC4sADAghAA8JjAAPCo8ADwuLAAwIIQAPCYwADwqPAA8LiwAMCCEADwmMAA8KjwAPC4sADAghAA8JjAAPCo8ADwuLAAwIIAAPCY0ADwqPAA8LiwAMCCAADwmNAA8KjwAPC4sADAggAA8JjQAPCo8ADwuLAAwIIAAPCY0ADwqPAA8LiwAMCCAADwmMAA8KkAAPC4sADAggAA8JiwAPCpEADwuLAAwIIAAPCYoADwqSAA8LiwAMCCAADwmJAA8KkwAPC4sADAggAA8JiAAPCpQADwuLAAwIIQAPCYcADwqUAA8LiwAMCCEADwmHAA8KkwAPC4wADAgiAA8JhwAPCpIADwuMAAwIIgAPCYgADwqRAA8LjAAMCCMADwmIAA8KkAAPC4wADAgkAA8JiAAPCo8ADwuMAAwIJQAPCYgADwqOAA8LjAAMCCYADwmIAA8KjQAPC4wADAgnAA8JiAAPCowADwuMAAwIKAAPCYgADwqLAA8LjAAMCCkADwmIAA8KigAPC4wADAgqAA8JhwAPCooADwuMAAwIKwAPCYYADwqJABALjAAMCCwADwmFAA8KiAARC4wADAgtAA8JhAAPCocAEQuNAAwILgAPCYMADwqHABALjgAMCC8ADwmCAA8KhwAPC48ADAgwAA8JgQAPCocADwuPAAwIMQAPCYAADwqHAA8LjwAMCDIADwmAAA8KhgAPC48ADAgzAA8JfwAPCoYADwuPAAwINAAPCX4ADwqGAA8LjwAMCDUADwl9AA8KhgAPC48ADAg2AA8JfAAPCoUADwuQAAwINgAPCXwADwqEAA8LkQAMCDcADwl7AA8KgwAPC5IADAg3AA8JewAPCoIADwuTAAwIOAAPCXoADwqCAA8LkwAMCDgADwl6AA8KgQAPC5QADAg5AA8JeQAPCoEADwuUAAwIOgAPCXgADwqAAA8LlQAMCDsADwl3AA8KgAAPC5UADAg8AA8JdgAPCoAADwuVAAwIPAAPCXYADwqAAA8LlQAMCD0ADwl1AA8KgAAPC5UADAg+AA8JdAAPCoAADwuVAAwIPwAPCXMADwqAAA8LlQAMCEAADwlyAA8KgAAPC5UADAhAAA8JcgAPCn8ADwuWAAwIQQAPCXIADwp+AA8LlgAMCEIADwlyAA8KfQAPC5YADAhDAA8JcQAPCn0ADwuWAAwIRAAPCXAADwp9AA8LlgAMCEUADwlvAA8KfQAPC5YADAhGAA8JbgAPCn0ADwuWAAwIRwAPCW0ADwp9AA8LlgAMCEgADwlsAA8KfQAPC5YADAhJAA8JawAPCn0ADwuWAAwISgAPCWoADwp9AA8LlgAMCEsADwlpAA8KfQAPC5YADAhMAA8JaAAPCn0ADwuWAAwITQAPCWcADwp9AA8LlgAMCE4ADwlmAA8KfQAPC5YADAhPAA8JZQAPCn0ADwuWAAwIUAAPCWQADwp9AA8LlgAMCFEADwljAA8KfQAPC5YADAhSAA8JYgAPCn0ADwuWAAwIUwAPCWEADwp9AA8LlgAMCFQADwlgAA8KfQAPC5YADAhVAA8JXwAPCn0ADwuWAAwIVgAPCV4ADwp+AA8LlQAMCFcADwldAA8KfwAPC5QADAhYAA8JXAAPCoAADwuTAAwIWQAPCVsADwqBAA8LkgAMCFoADwlaAA8KggAPC5EADAhbAA8JWQAPCoMADwuQAAwIXAAPCVkADwqCAA8LkAAMCF0ADwlZAA8KgQAPC5AADAheAA8JWQAPCoEADwuPAAwIXwAPCVkADwqAABALjgAMCGAADwlZAA8KfgARC44ADAhhAA8JWQAPCnsAEguPAAwIYQAPCVoADwp5ABILkAAMCGEADwlbAA8KdwASC5EADAhhAA8JWwAPCnYAEguSAAwIYQAPCVsADwp1ABILkwAMCGEADwlbAA8KdAASC5QADAhhAA8JWwAPCnIAEwuVAAwIYQAPCVsADwpxABMLlgAMCGIADwlaAA8KcAATC5cADAhiAA8JWgAPCm8AEwuYAAwIYgAPCVoADwpuABMLmQAMCGIADwlbAA8KbAATC5oADAhiAA8JWwAPCmsAEQudAAwIYgAPCVwADwppABELngAMCGMADwlbAA8KaAARC58ADAhjAA8JXAAPCmYAEAuhAAwIYwAPCVwADwplABALogAMCGMADwlcAA8KZAAQC6MADAhjAA8JXAAQCmIAEAukAAwIYwAPCV0AEApgABALpQAMCGQADwldABAKXgAQC6YADAhkAA8JXgAPCl0ADwuoAAwIZAAPCV4ADwpcAA8LqQAMCGQADwleAA8KWwAPC6oADAhkAA8JXgAPCloADwurAAwIZAAPCV4ADwpZAA8LrAAMCGQADwleAA8KWAAPC60ADAhkAA8JXgAPClcADwuuAAwIZAAPCV4ADwpWAA8LrwAQCGEADwldAA8KVQAPC7AAEghfAA8JXQAPClUADwuwABMIXgAPCV0ADwpUAA8LsQAUCF0ADwleAA8KUwAPC7EAFQhcAA8JXgAPClMADwuxABYIWwAPCV4ADwpSAA8LsgAXCFoADwleAA8KUQAPC7MAGAhZAA8JXwAPClAADwuzABkIWQAPCV8ADwpOAA8LtAAaCFgADwlgAA8KTAAPC7UAGwhYAA8JYAAPCksADwu1ABwIVwAPCWAADwpKAA8LtgAdCFcADwlfAA8KSgAPC7YAHghWAA8JXwAPCkkADwu3AB8IVQAPCV8ADwpJAA8LtwAMBwQAEAhVAA8JXgAPCkgADwu4AAwHBgAPCFUADwldAA8KRwAPC7kADAcGAA8IVgAPCVwADwpGAA8LugAMBwYADwhXAA8JWwAPCkYADwu6AAwHBgAPCFgADwlaAA8KRQAPC7sADAcHAA8IVwAPCVoADwpEAA8LvAAMBwgADwhXAA8JWQAPCkMADwu9AAwHCQAPCFYADwlZAA8KQgAPC74ADAcKAA8IVgAPCVgADwpCAA8LvgAMBwoADwhWAA8JWAAPCkEADwu/AAwHCgAPCFcADwlXAA8KQAAPC8AADAcKAA8IWAAPCVYADwo/AA8LwQAMBwoADwhZAA8JVQAPCj8ADwvBAAwHCgAPCFoADwlUAA8KPgAPC8IADAcKAA8IWgAPCVQADwo+AA8LwQANBwoAEAhaAA8JUwAPCj4ADwu+ABAHCwAQCFoADwlSAA8KPgAPC7wAEgcMABEIWAAPCVIADwo+AA8LuwATBw0AEQhYAA8JUQAPCj0ADwu7ABQHDgASCFYADwlRAA8KPQAPC7oAFQcPABcIUQAPCVAADwo9AA8LtAAbBxAAFwhRAA8JTwAPCjwADwuzAB0HEQAXCFAADwlPAA8KPAAPC7EAHwcSABcIUAAPCU4ADwo7AA8LrwAiBxMAHAhKAA8JTgAPCjsADwurACYHFAAdCEgAEAlOAA8KOgAPC6cAKgcVAB0IRwARCU0AEAo4AA8LpwArBxYAHQhHABEJTAARCjcADwumACwHGAAcCEcAEQlMABEKNQAPC6YALQcZABwIRwARCUwAEQo0AA8LpQAhDAEADAcaAB0IRgARCUwAEQoyAA8LpQAfDAQADAcbAB8IRAAQCU0AEQoxAA8LpAAeDAYADAcdAB8IQwAPCU4AEQovAA8LpAAeDAcADAceACAIQgAPCU4AEAovAA8LowAeDAgADAcgAB8IQgAPCU4ADwouAA8LowAeDAkADAclABsIQgAPCU0ADwouAA8LoQAaDA8ADAcmAB0IQAAPCUwADwotAA8LoQAZDBEADAcnACIIOgAPCU0ADwosAA8LnwAZDBMADAcpACMIOAAPCU0ADwoqAA8LngAYDBYADAcvACEINQAPCU0ADwopAA8LnQAVDBoADAcxACAINAAQCUwADwopAA8LmwATDB4ADAcyACIIMgAQCUsADwooAA8LmwATDB8ADAczACMIMQAQCUoADwooAA8LmQAUDCAADAc0ACUILwAPCUoADwooAA8LmAAUDCEADAc1ACYILgAPCUgADwopAA8LlwAUDCIADAc3AC0IJgAPCUcADwooAA8LlwAUDCMADAc6ACsIJgAPCUUADwopAA8LlgAUDCQADAc8ACoIJgAPCUQADwooAA8LkwAXDCUADAc+ACkIJgAPCUMADwooAA8LkAAZDCYADAc/ACkIJgAPCUIADwonAA8LjwAaDCcADAdAACkIJgAPCUEADwonAA8LjQAaDCkADAdDACcIJgAPCUAADwonAA8LjAAaDCoADAdJACIIJgAPCT8ADwomAA8LiwAaDCwADAdMACIIJAAPCT4ADwolAA8LigAaDC4ADAdQAB8IJAAPCT0ADwokAA8LiQAbDC8ADAdRAB8IJAAPCTwADwojAA8LdgADCw4AHAwxAAwHVAAdCCQADwk7AA8KIgAPC3UABgsMABwMMgAMB1YAHAgkAA8JOgAPCiEADwt0AAkLCQAcDDQADAdZABoIJAAPCTkADwohAA8LcgAMCwYAHQw1AAwHWwAZCCQADwk5AA8KHwAPC3EAMAw2AAwHZAARCCQADwk5AA8KHgAPC28AMQw3AAwHZQAQCCUADwk4AA8KHQAPC28AMQw4AAwHZgAQCCUADwk3AA8KHAAPC24ALww8AAwHZwAPCCYADwk2AA8KHAAPC20ALQw/AAwHaAAPCCUADwk2ABAKGgAPC2wALQxBAAwHaAAPCCUADwk3ABAKGAAPC2wALAxDAAwHaQAPCCUADwk3ABAKFgAPC2sALQxEAAwHaQAQCCQADwk4ABAKFAAPC2sALAxGAAwHagAQCCQADwk4AA8KEwAPC2oALAxIAAwHawAQCCQADwk4AA8KEQAPC1AARQxKAAwHbAAPCCQADwk5AA8KDwAPC1AAMgwCAA8MTQAMB2wADwglAA8JOQAPCg4ADwtPADEMBQANDE4ADAdsAA8IJgAPCTkADwoNAA8LTgAwDAgACgxQAAwHbAAPCCcADwk4AA8KDQAPC00ALwwLAAcMUgAMB2wADwgnABAJNwAPCg0ADwtMAC4MZgAMB2wADwgoABAJNgAPCg0ADwtLAC0MaAAMB2wADwgpABEJNAAPCg0ADwtKAC0MaQAMB2sADwgrABEJMwAPCg0ADwtJACwMawAMB2sADwgsABEJMgAPCg0ADwtIACwMbAAMB2wADwgsABEJCwACCSQADwoMAA8LSQAqDG4ADAdsAA8ILQASCQgABAkjAA8KDAAPC0oAKAxvAAwHbAAPCC4AHgkiAA8KDAAPC0oAJgxxAAwHbAAPCC8AHwkgAA8KCwAPC0sAJQxyAAwHbAAPCDAAHwkfAA8KCwAPC0wAIgx0AAwHbAASCC4AIgkbAA8KCgAPC00ADwyHAAwHbAATCCwAJAkaAA8KCgAPC00ADwyHAAwHbQATCCoAJgkZAA8KCgAPC00ADwyHAAwHbgAVCAUABQgcACgJGAAPCgkADwtPAA8MhgAMB28AHwgaACoJFwAPCggADwtRAA8MhQAMB3AAHwgYACwJFgAPCggADwtSAA8MhAAMB3EAHwgVAC8JFQAPCgcADwtTAA8MhAAMB3IAIAgSADEJFAAPCgcADwtTAA8MhAAMB3MAIQgPADIJFAAPCgYADwtUAA8MhAAMB3QAJAgKADQJEwAPCgUADwtVAA8MhAAMB3UAJQgHADYJEgAPCgUADwtV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ABcEiQAPA7MAEQKNABYEiQAPA7UAEQKMABUEiQAPA7cAEAKMABQEiQAPA7kADwKMABMEiQAQA7kADwKMABIEiQAQA7oADwKMABEEiQAQA7sADwKMABAEiQAQA70ADwKLAA8EiQAQA74ADwKLAA4EiQAQA78ADwKLAA0EigAPA8EADwKKAAwEiwAPA8EADwKKAAwEiwAPA8IADwKJAAwEiwAPA8IADwKJAAwEiwAPA8MADwKIAAwEiwAPA8MADwKIAAwEiwAPA8MADwKIAAwEiwAPA8MADwKIAAwEiwAPA8MADwKIAAwEiwAPA8MADwKIAAwEiwAPA8IADwKJAAwEiwAPA8EADwKKAAwEiwAPA8EADwKKAAwEiwAPA8EADwKKAAwEiwAPA8EADwKKAAwEiwAPA8EADwKKAAwEiwAPA8IADwKJAAwEiwAPA8MADwKIAAwEiwAPA8QADwKHAAwEiwAPA8QADwKHAAwEiwAPA8UADwKGAAwEiwAPA8YADwKFAAwEiwAPA8YADwKFAAwEiwAPA8cADwKEAAwEiwAPA8gADwKDAAwEiwAPA8kADwKCAAwEiwAPA8oADwKBAAwEiwAPA8oADwKBAAwEiwAPA8sADwKAAAwEigAPA80ADwJ/AAwEigAPA80ADwJ/AAwEigAPA84ADwJ+AAwEiQAPA88ADwJ+AAwEiQAPA9AADwJ9AAwEiQAPA9AADwJ9AAwEiQAPA9EADwJ8AAwEiAAPA9IADwJ8AAwEiAAPA9IADwJ8AAwEiAAPA9IADwJ8AAwEhwAPA9MADwJ8AAwEhwAPA9MADwJ8AAwEhwAPA9MADwJ8AAwEhgAPA9UADwJ7AAwEhgAPA9YADwJ6AAwEhgAPA9cADwJ5AAwEhQAPA9kADwJ4AAwEhQAPA9oADwJ3AAwEhQAPA9oADwJ3AAwEhAAPA9sADwJ3AAwEhAAPA9sADwJ3AAwEhAAPA9sADwJ3AAwEhAAPA9sADwJ3AAwEgwAPA9wADwJ3AAwEgwAPA9wADwJ3AAwEgwAPA9wADwJ3AAwEggAPA94ADwJ2AAwEggAPA98ADwJ1AAwEggAPA+AADwJ0AAwEgQAPA+EADwJ0AAwEgQAPA+IADwJzAAwEgAAPA+QADwJyAAwEgAAPA+QADwJyAAwEgAAPA+QADwJyAAwEgAAPA+QADwJyAAwEfwAPA+UADwJyAAwEfwAPA+UADwJyAAwEfwAPA+YADwJxAAwEfgAPA+cADwJxAAwEfgAPA+cADwJxAAwEfgAPA+cADwJxAAwEfgAPA+cADwJxAAwEfQAPA+gADwJxAAwEfQAPA+gADwJxAAwEfQAPA+gADwJxAAwEfQAPA+gADwJxAAwEfQAPA+gADwJxAAwEfAAPA+kADwJxAAwEfAAPA+oADwJwAAwEfAAPA+sADwJvAAwEfAAPA+sADwJvAAwEfAAPA+wADwJuAAwEewAPA+4ADwJtAAwEewAPA+4ADwJtAAwEegAPA+8ADwJtAAwEegAPA+8ADwJtAAwEegAPA+8ADwJtAAwEegAPA/AADwJsAAwEegAPA/EADwJrAAwEeQAPA/MADwJqAAwEeQAPA/MADwJqAAwEeQAPA/MADwJqAAwEeQAPA/MADwJqAAwEeQAPA/MADwJqAAwEeAAPA/UADwJpAAwEeAAPA/YADwJoAAwEeAAPA/cADwJnAAwEeAAPA/cADwJnAAwEdwAPA/kADwJmAAwEdwAPA/oADwJlAAwEdwAPA/oADwJlAAwEdwAPA/oAEAJkAAwEdwAPA/sAEQJiAAwEdgAPA/wAEwJgAAwEdgAPA/0AFAJeAAwEdgAPA/4AFAJdAAwEdgAPA/8AFAJcAAwEdgAPA/8DAQAUAlsADAR1AA8D/wMDABQCWgAMBHUADwP/AwQAFgJXAAwEdQAPA/8DBQAXAlUADAR0AA8D/wMIABcCUwAMBHQADwP/AwoAFgJSAAwEcwAPA/8DDAAWAlEADARzAA8D/wMNABYCUAAMBHMADwP/Aw4AFwJOAAwEcwAPA/8DDwAXAk0ADARzAA8D/wMRABYCTAAMBHMADwP/AxMAFQJLAAwEcgAPA/8DFgAUAkoADARyAA8D/wMXABQCSQAMBHEADwP/AxkAFAJIAAwEcQAPA/8DGgAUAkcADARxAA8D/wMbABQCRgAMBHAADwP/Ax8AEgJFAAwEcAAPA/8DIQARAkQADARwAA8D/wMjABACQwAMBHAADwP/AyQAEAJCAAwEcAAPA/8DJQAQAkEADARwAA8D/wMmABACQAAMBG8ADwP/AykADwI/AAwEbwAPA/8DKgAPAj4ADARuAA8D/wMsAA8CPQAMBG4ADwP/Ay0ADwI8AAwEbQAPA/8DLwAPAjsADARtAA8D/wMwAA8COgAMBGwADwP/AzIADwI5AAwEbAAPA/8DMwAPAjgADARrAA8D/wM1AA8CNwAMBGoADwP/AzcADwI2AAwEagAPA/8DOAAPAjUADARpAA8D/wM6AA8CNAAMBGkADwP/AzsADwIzAAwEaAAPA/8DPQAPAjIADARoAA8D/wM+AA8CMQAMBGcADwP/A0AADwIwAAwEZwAPA/8DQQAPAi8ADARmAA8D/wNCAA8CLwAMBGYADwP/A0IADwIvAAwEZQAPA/8DQwAPAi8ADARlAA8D/wNEAA8CLgAMBGQADwP/A0YADwItAAwEZAAPA/8DRwAPAiwADARjAA8D/wNJAA8CKwAMBGIADwP/A0sADwIqAAwEYgAPA/8DTAAPAikADARhAA8D/wNOAA8CKAAMBGEADwP/A04ADwIoAAwEYAAPA/8DUAAPAicADARgAA8D/wNQAA8CJwAMBGAADwP/A1EADwImAAwEXwAPA/8DUwAPAiUADARfAA8D/wNUAA8CJAAMBF4ADwP/A1UADwIkAAwEXQAPA/8DVwAPAiMADARcAA8D/wNYAA8CIwD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wAS";
+  function maakZones(){
+    const b = atob(ZONES), L = new Uint8Array(W * H); let i = 0;
+    for(let k = 0; k < b.length; k += 2){ const v = b.charCodeAt(k), n = b.charCodeAt(k + 1); L.fill(v, i, i + n); i += n; }
+    const zones = [];
+    for(let id = 1; id <= 12; id++){
+      const m = doek(), x = m.getContext("2d"), d = x.createImageData(W, H);
+      let x0 = W, x1 = 0, y0 = H, y1 = 0, sx = 0, sy = 0, n = 0;
+      for(let p = 0; p < W * H; p++) if(L[p] === id){ d.data[p * 4 + 3] = 255; const px = p % W, py = (p / W) | 0;
+        sx += px; sy += py; n++; if(px < x0) x0 = px; if(px > x1) x1 = px; if(py < y0) y0 = py; if(py > y1) y1 = py; }
+      if(!n) continue;
+      x.putImageData(d, 0, 0);
+      zones.push({id, mask:m, x0, x1, y0, y1, cx:sx / n, cy:sy / n, leden:[id]});
+    }
+    A.zones = zones;
+    A.paren = zones.map((a, i) => { const b = zones[(i + 1) % zones.length], m = doek(), x = m.getContext("2d");   // twee buurscherven samen
+      x.drawImage(a.mask, 0, 0); x.drawImage(b.mask, 0, 0);
+      return {id:a.id + "+" + b.id, leden:[a.id, b.id], mask:m, x0:Math.min(a.x0, b.x0), x1:Math.max(a.x1, b.x1), y0:Math.min(a.y0, b.y0), y1:Math.max(a.y1, b.y1),
+        cx:(a.cx + b.cx) / 2, cy:(a.cy + b.cy) / 2}; });
+  }
+  function laad(cb){
+    if(A.status === "klaar" || A.status === "fout") return A.status;
+    if(cb) A.wacht.push(cb);
+    if(A.status === "laden") return A.status;
+    A.status = "laden";
+    const img = n => new Promise((ok, mis) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mis; i.src = ART + n + ".png"; });
+    Promise.all([img("glas"), img("barst"), img("tegels"), img("col-gewoon"), img("col-taunt"), img("col-boos"), img("col-stuk")]).then(r => {
+      [A.glas, A.barst, A.tegels, A.col.gewoon, A.col.taunt, A.col.boos, A.col.stuk] = r;
+      maakZones(); A.status = "klaar";
+    }).catch(() => { A.status = "fout"; }).then(() => { const w = A.wacht; A.wacht = []; w.forEach(f => { try{ f(); }catch(e){} }); });
+    return A.status;
+  }
+  /* tegel i (0..11) uit het vel van 4 x 3 tegels van 300 x 262 */
+  const TEGEL = i => [(i % 4) * 300, Math.floor(i / 4) * 262, 300, 262];
+
+  function inst(sl){
+    if(INST[sl]) return INST[sl];
+    const cv = doek(); cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;display:block";
+    const tmp = doek();
+    return INST[sl] = {cv, g:cv.getContext("2d"), tmp, tg:tmp.getContext("2d"), stand:"gewoon", wil:"gewoon", tot:0,
+      glimpen:[], volgende:nu() + .6, volgGroot:nu() + 8, grootTot:0, gezien:0};
+  }
+  function zet(I, s){
+    const t = nu(); I.wil = s;
+    if(s === I.stand) { if(HOU[s]) I.tot = Math.max(I.tot, t + HOU[s] / 1000); return; }
+    if(s === "gewoon" && HOU[I.stand] && t < I.tot) return;   // taunt/boos blijft nog even staan
+    wissel(I, s);
+  }
+  function wissel(I, s){
+    const t = nu(); I.stand = s; I.glimpen = [];
+    if(HOU[s]) I.tot = t + HOU[s] / 1000;
+    if(HOU[s]){ verschijn(I); I.volgGroot = t + rnd(STAND[s].groot.tus[0], STAND[s].groot.tus[1]); }   // bij taunt en boos komt ze meteen
+    else if(s === "stuk"){ verschijn(I); I.volgGroot = t + rnd(STAND.stuk.groot.tus[0], STAND.stuk.groot.tus[1]); }   // stuk: meteen, en daarna steeds weer
+    else if(STAND[s].groot) I.volgGroot = t + rnd(4, 8);
+    if(s === "boos") schud(I);
+  }
+  function schud(I){
+    if(I.cv.animate) I.cv.animate([{transform:"translate(0,0)"}, {transform:"translate(-2%,1%)"}, {transform:"translate(1.5%,-1.5%)"},
+      {transform:"translate(-1%,-.5%)"}, {transform:"translate(1%,1%)"}, {transform:"translate(0,0)"}], {duration:320, easing:"steps(6)"});
+  }
+  function verschijn(I){
+    const st = STAND[I.stand], gr = st.groot, t = nu();
+    const duur = rnd(gr.duur[0], gr.duur[1]), fel = gr.fel * rnd(.9, 1.05);
+    I.glimpen.forEach(x => { if(x.mot != null && x.uit == null) x.uit = t; });   // losse beelden zakken weg voordat zij komt
+    const spreid = gr.spreid || .45;   // hoe ver de scherven na elkaar opkomen
+    I.grootTot = t + .35 + spreid + .12 + duur;
+    A.zones.forEach(z => { const af = Math.hypot(z.cx - W * .5, z.cy - H * .4) / Math.hypot(W * .5, H * .6);
+      I.glimpen.push({z, t0:t + .35 + af * spreid + rnd(0, .12), duur, fel:fel * rnd(.8, 1), groot:true}); });
+  }
+  function glimp(I, extra){
+    const st = STAND[I.stand], mo = st.mot, t = nu();
+    if(!mo || st.blijf || t < I.grootTot) return;   // als zij zelf in beeld is, geen andere beelden
+    const inGebruik = new Set(I.glimpen.filter(x => x.mot != null && x.uit == null).map(x => x.mot));   // nooit twee keer hetzelfde beeld
+    const bezet = new Set(I.glimpen.filter(x => x.mot != null).flatMap(x => x.z.leden));
+    const vrij = z => z.leden.every(id => !bezet.has(id));
+    const n = Math.round(rnd(mo.n[0], mo.n[1])) + (extra || 0);
+    for(let i = 0; i < n; i++){
+      const keus = [...new Set(mo.uit)].filter(m => !inGebruik.has(m)); if(!keus.length) break;
+      let pool = (Math.random() < .22 ? A.paren : A.zones).filter(vrij);
+      if(!pool.length) pool = A.zones.filter(vrij); if(!pool.length) break;
+      if(st.bij === "midden"){ pool.sort((a, b) => Math.hypot(a.cx - W * .5, a.cy - H * .3) - Math.hypot(b.cx - W * .5, b.cy - H * .3)); pool = pool.slice(0, 5); }
+      const z = pool[Math.floor(Math.random() * pool.length)], m = keus[Math.floor(Math.random() * keus.length)];
+      z.leden.forEach(id => bezet.add(id)); inGebruik.add(m);
+      I.glimpen.push({z, mot:m, t0:t + i * rnd(.1, .45), duur:rnd(mo.duur[0], mo.duur[1]), sc:rnd(1.04, 1.18), dx:rnd(-.5, .5), dy:rnd(-.5, .5), fel:mo.fel * rnd(.85, 1)});
+    }
+  }
+  const STIL = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function teken(I){
+    const t = nu(), g = I.g, tg = I.tg;
+    if(I.stand !== I.wil && !(HOU[I.stand] && t < I.tot)) wissel(I, I.wil);   // de taunt/boos is voorbij
+    const st = STAND[I.stand], col = A.col[I.stand] || A.col.gewoon;
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; g.drawImage(A.glas, 0, 0, W, H);
+    if(!STIL){
+      if(st.mot && t > I.volgende){ glimp(I); I.volgende = t + rnd(st.mot.tus[0], st.mot.tus[1]); }
+      if(st.groot && t > I.volgGroot){ verschijn(I); I.volgGroot = t + rnd(st.groot.tus[0], st.groot.tus[1]); }
+    }
+    const vast = (st.blijf || STIL) ? A.zones.map((z, i) => ({z, t0:-1e9, duur:2e9, vast:true, fel:(st.blijf ? st.blijf.fel : .6) * (.85 + ((i * 29) % 7) / 40), fase:i * 1.7})) : [];
+    for(const gl of vast.concat(I.glimpen)){
+      const u = (t - gl.t0) / gl.duur; if(u < 0 || u > 1) continue;
+      const env = gl.groot ? Math.min(1, u / .22, (1 - u) / .35) : Math.min(1, u / .25, (1 - u) / .3);
+      let a = gl.vast ? gl.fel * (STIL ? 1 : .9 + .1 * Math.sin(t * 1.3 + gl.fase)) : gl.fel * env;
+      if(gl.uit != null) a *= Math.max(0, 1 - (t - gl.uit) / .35);
+      if(a <= 0) continue;
+      const z = gl.z, bw = z.x1 - z.x0 + 1, bh = z.y1 - z.y0 + 1;
+      tg.globalCompositeOperation = "source-over"; tg.clearRect(z.x0, z.y0, bw, bh);
+      if(gl.mot != null){   // los beeld: vult de hele scherf, zoomt heel langzaam in
+        const [sx, sy, sw, sh] = TEGEL(gl.mot), k = Math.max(bw / sw, bh / sh) * gl.sc * (1 + u * .05);
+        const w = sw * k, h = sh * k, mx = (z.x0 + z.x1) / 2 + gl.dx * (w - bw) / 2, my = (z.y0 + z.y1) / 2 + gl.dy * (h - bh) / 2;
+        tg.drawImage(A.tegels, sx, sy, sw, sh, mx - w / 2, my - h / 2, w, h);
+        if(st.tint){ tg.globalCompositeOperation = "color"; tg.fillStyle = st.tint; tg.fillRect(z.x0, z.y0, bw, bh); }
+      } else {   // de collage: elk stuk ligt al precies in zijn scherf
+        tg.drawImage(col, z.x0 * col.width / W, z.y0 * col.height / H, bw * col.width / W, bh * col.height / H, z.x0, z.y0, bw, bh);
+      }
+      tg.globalCompositeOperation = "destination-in"; tg.drawImage(z.mask, z.x0, z.y0, bw, bh, z.x0, z.y0, bw, bh);
+      g.globalAlpha = a; g.globalCompositeOperation = "screen"; g.drawImage(I.tmp, z.x0, z.y0, bw, bh, z.x0, z.y0, bw, bh);
+      g.globalAlpha = a * .55; g.globalCompositeOperation = "source-over"; g.drawImage(I.tmp, z.x0, z.y0, bw, bh, z.x0, z.y0, bw, bh);
+    }
+    I.glimpen = I.glimpen.filter(gl => t < gl.t0 + gl.duur);
+    g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.drawImage(A.barst, 0, 0, W, H);   // de barsten liggen altijd bovenop
+  }
+  /* de lus: hangt elk canvas in zijn (nieuwe) plek en tekent alleen wat in beeld is; stopt vanzelf */
+  let raf = 0;
+  function lus(){
+    raf = 0; if(A.status !== "klaar") return;
+    let iets = false;
+    document.querySelectorAll("span.wspglas[data-wsp]").forEach(el => {
+      const I = inst(el.dataset.wsp);
+      if(I.cv.parentNode !== el) el.appendChild(I.cv);
+      zet(I, standNaam(el.dataset.stand));
+      I.gezien = nu(); teken(I); iets = true;
+    });
+    if(iets) raf = requestAnimationFrame(lus);
+  }
+  function start(){ if(!raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(lus); }
+  function html(sl, stand){
+    if(laad(start) !== "klaar") return "";
+    start();
+    return `<span class="wspglas" data-wsp="${sl == null ? "x" : sl}" data-stand="${standNaam(stand)}" style="position:absolute;inset:0;display:block;overflow:hidden;pointer-events:none"></span>`;
+  }
+  function raak(sl){ const I = INST[sl]; if(!I) return; schud(I); glimp(I, 2); }
+  return {laad, html, raak, HOU, STAND};
+})();
 /* 🪞 ronde 34: De Weerspiegeling. Zijn vak is glas: het is al gebarsten, en bij elke klap komt er een nieuwe inslag
    bij, met barsten die uitwaaieren en kringetjes eromheen. Altijd dezelfde barsten voor hetzelfde niveau (vaste
    toevalsreeks), zodat er bij opnieuw tekenen niets verspringt; alleen de nieuwste inslag schiet even op. */
@@ -37377,6 +38245,102 @@ function lofiNotenHTML(L, p){
     return `<img src="${n.u}" alt="" draggable="false" style="left:${(n.x + extra).toFixed(2)}%;top:${n.y.toFixed(2)}%;width:${n.w.toFixed(2)}%;animation-duration:${dur.toFixed(2)}s;animation-delay:${del.toFixed(2)}s">`; };
   return `<span class="lofinoten"${p != null ? ` data-p="${p}"` : ""} data-ar="${L.ar}">` + L.noten.map(n => een(n, 0) + een(n, n.w * .6)).join("") + `</span>`;
 }
+/* 🌳 ronde 35: de bonsai. De witte ogen gaan uit de tekening (het donker blijft), en komen er als losse laag weer op, zodat ze knipperen */
+const BONSAI = {};
+function bonsaiVerwerk(pad, klaar){
+  if(!pad) return {status:"fout"};
+  if(BONSAI[pad]) return BONSAI[pad];
+  const L = BONSAI[pad] = {status:"bezig", noten:[]};
+  const im = new Image();
+  im.onload = () => { try{
+    const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(im, 0, 0);
+    const id = x.getImageData(0, 0, W, H), d = id.data;
+    const rx0 = Math.round(W * .44), rx1 = Math.round(W * .66), ry0 = Math.round(H * .41), ry1 = Math.round(H * .50);
+    const oog = j => { const r = d[j * 4], g = d[j * 4 + 1], b = d[j * 4 + 2]; return d[j * 4 + 3] > 40 && r > 60 && b > 40 && Math.abs(r - g) < 35 && Math.abs(g - b) < 60; };
+    /* de kleur van het donker eromheen */
+    let dr = 0, dg = 0, db = 0, dn = 0;
+    for(let yy = ry0; yy < ry1; yy++) for(let xx = rx0; xx < rx1; xx++){ const j = yy * W + xx; if(d[j * 4 + 3] > 200 && d[j * 4] + d[j * 4 + 1] + d[j * 4 + 2] < 70){ dr += d[j * 4]; dg += d[j * 4 + 1]; db += d[j * 4 + 2]; dn++; } }
+    const donker = dn ? [dr / dn, dg / dn, db / dn] : [6, 10, 18];
+    const lab = new Int32Array(W * H), st = []; const comps = [];
+    for(let yy = ry0; yy < ry1; yy++) for(let xx = rx0; xx < rx1; xx++){ const i = yy * W + xx; if(lab[i] || !oog(i)) continue;
+      const k = comps.length + 1, q = {n:0, x0:W, y0:H, x1:0, y1:0, px:[]}; st.push(i); lab[i] = k;
+      while(st.length){ const j = st.pop(), px = j % W, py = (j / W) | 0; q.n++; q.px.push(j);
+        if(px < q.x0) q.x0 = px; if(px > q.x1) q.x1 = px; if(py < q.y0) q.y0 = py; if(py > q.y1) q.y1 = py;
+        for(const n of [j - 1, j + 1, j - W, j + W]){ const nx = n % W, ny = (n / W) | 0; if(nx >= rx0 && nx < rx1 && ny >= ry0 && ny < ry1 && !lab[n] && oog(n)){ lab[n] = k; st.push(n); } } }
+      comps.push(q); }
+    const ogen = comps.filter(q => q.n > 60 * (W / 1024) ** 2).sort((a, b) => b.n - a.n).slice(0, 2);
+    ogen.forEach(q => {
+      const m = 2, bx0 = q.x0 - m, by0 = q.y0 - m, bw = q.x1 - q.x0 + 1 + 2 * m, bh = q.y1 - q.y0 + 1 + 2 * m;
+      const nc = document.createElement("canvas"); nc.width = bw; nc.height = bh; const nx = nc.getContext("2d"), nd = nx.createImageData(bw, bh);
+      q.px.forEach(j => { const xx = j % W, yy = (j / W) | 0, o = ((yy - by0) * bw + (xx - bx0)) * 4;
+        nd.data[o] = d[j * 4]; nd.data[o + 1] = d[j * 4 + 1]; nd.data[o + 2] = d[j * 4 + 2]; nd.data[o + 3] = 255;
+        d[j * 4] = donker[0]; d[j * 4 + 1] = donker[1]; d[j * 4 + 2] = donker[2]; });   // uitgegumd
+      nx.putImageData(nd, 0, 0);
+      L.noten.push({u:nc.toDataURL("image/png"), x:bx0 / W * 100, y:by0 / H * 100, w:bw / W * 100});
+    });
+    L.ar = W / H;
+    const af = () => { L.status = "klaar"; if(klaar) klaar(); };
+    if(L.noten.length){ x.putImageData(id, 0, 0);
+      if(c.toBlob) c.toBlob(bl => { try{ L.schoon = URL.createObjectURL(bl); }catch(e){ L.schoon = c.toDataURL("image/png"); } af(); }, "image/png");
+      else { L.schoon = c.toDataURL("image/png"); af(); } }
+    else { L.schoon = pad; af(); }
+  }catch(e){ L.status = "fout"; } };
+  im.onerror = () => { L.status = "fout"; };
+  im.src = pad;
+  return L;
+}
+/* 👁 ronde 35: de Serafijn. Waar zijn oogjes zitten (in % van het plaatje): midden x, y, lengte, breedte (in % van de breedte), hoek */
+const SERAF_OGEN = [[16.0,15.2,9.3,4.9,71],[84.1,15.2,9.2,4.7,111],[16.8,23.1,8.2,4.3,57],[83.3,23.1,8.3,4.2,123],[43.3,28.8,5.6,3.1,69],[56.9,28.8,5.5,3.0,113],[19.5,29.9,12.0,5.9,53],[80.5,29.9,11.9,5.8,128],[42.5,39.0,12.0,6.0,108],[57.5,39.0,12.0,6.0,72],[33.0,50.7,15.1,7.6,114],[67.2,50.6,14.8,7.4,67],[11.7,57.7,12.6,6.3,103],[88.3,57.7,12.4,6.1,76],[52.8,58.2,10.0,5.4,58],[47.2,62.2,13.1,7.3,64],[40.8,68.3,12.9,7.2,115],[60.3,68.3,12.1,6.6,71],[65.8,79.6,14.8,7.5,77],[34.3,79.6,14.6,7.6,104]];
+const SERAF_AR = 1024 / 1536;
+function serafOgenHTML(p){
+  /* een ooglid per oog, dat heel kort dichtvalt; elk oog met zijn eigen ritme */
+  return `<span class="lofinoten serafogen"${p != null ? ` data-p="${p}"` : ""} data-ar="${SERAF_AR}">` + SERAF_OGEN.map(([x, y, l, b, a]) => {
+    const dur = (3.2 + Math.random() * 5.5).toFixed(2), del = (-Math.random() * 9).toFixed(2);
+    return `<i style="left:${x}%;top:${y}%;width:${l}%;height:${(b * .9 * SERAF_AR).toFixed(2)}%;rotate:${a}deg;--sd:${dur}s;--sv:${del}s"></i>`; }).join("") + `</span>`;
+}
+/* 👻 ronde 35: Nim-puf spookt. Hij schiet het vak uit en ergens anders weer in, komt soms heel groot
+   naar voren (schrik!), zweeft soms klein en langzaam achterin, en wisselt vaak van stand. */
+const spookStanden = sk => ["", "_boos", "_taunt"].map(st => SPRITE_BEELD[sprEcht(sk.spr + st)]).filter(Boolean);
+const SPOOK = new WeakMap(); let SPOOK_T = null;
+function spookStart(){ if(!SPOOK_T && !FAST && typeof document !== "undefined") SPOOK_T = setTimeout(spookStap, 200); }
+function spookStap(){
+  SPOOK_T = null;
+  const els = [...document.querySelectorAll(".spook")]; if(!els.length) return;
+  const nu = performance.now();
+  els.forEach(el => {
+    let st = SPOOK.get(el);
+    if(!st){ st = {tot:0, x:0, y:0, s:1, uit:false}; SPOOK.set(el, st); }
+    if(nu < st.tot) return;
+    const zet = (x, y, sc, ms, ease, op) => { el.style.transition = ms ? `transform ${ms}ms ${ease}, opacity ${ms}ms linear, filter ${ms}ms linear` : "none";
+      el.style.transform = `translate(${x}%, ${y}%) scale(${sc})`; el.style.opacity = op == null ? 1 : op; el.style.filter = sc < .7 ? "brightness(.8) blur(.5px)" : "";
+      Object.assign(st, {x, y, s:sc}); };
+    const R = Math.random;
+    /* van stand wisselen */
+    const img = el.matches("img") ? el : el.querySelector("img.sprbeeld, img.chmaj");
+    const poses = (el.dataset.poses || "").split("|").filter(Boolean);
+    if(img && poses.length > 1 && R() < .55 && !el.closest(".pt-geraakt, .pt-stuk, .pt-raak")){ const nw = poses[Math.floor(R() * poses.length)]; if(img.getAttribute("src") !== nw) img.setAttribute("src", nw); }
+    if(st.uit){   // hij was weg: aan de andere kant (of ergens anders) weer naar binnen
+      const kant = R() < .5 ? -1 : 1; zet(kant * 150, (R() - .5) * 60, .9, 0); void el.offsetWidth;
+      if(R() < .35){ zet((R() - .5) * 20, 6, 1.75, 260, "cubic-bezier(.2,1.4,.4,1)"); st.tot = nu + 900 + R() * 700; }   // BOE!
+      else { zet((R() - .5) * 50, (R() - .5) * 22, .85 + R() * .3, 320 + R() * 260, "cubic-bezier(.3,.9,.3,1)"); st.tot = nu + 500 + R() * 900; }
+      st.uit = false; return;
+    }
+    const w = R();
+    if(w < .26){ const kant = R() < .5 ? -1 : 1; zet(kant * (150 + R() * 40), (R() - .5) * 70, .9 + R() * .3, 230 + R() * 200, "cubic-bezier(.6,0,.9,.5)"); st.uit = true; st.tot = nu + 300 + R() * 1300; }   // zoef, weg
+    else if(w < .42){ zet((R() - .5) * 60, -4 - R() * 10, .42 + R() * .12, 1800 + R() * 1600, "ease-in-out", .85); st.tot = nu + 2000 + R() * 1800; }   // klein, achterin, langzaam
+    else if(w < .54){ zet((R() - .5) * 16, 8, 1.6 + R() * .3, 280, "cubic-bezier(.2,1.5,.4,1)"); st.tot = nu + 700 + R() * 600; }   // groot naar voren
+    else if(w < .8){ zet((R() - .5) * 70, (R() - .5) * 30, .8 + R() * .35, 260 + R() * 220, "cubic-bezier(.3,.9,.3,1)"); st.tot = nu + 300 + R() * 700; }   // snel een stukje
+    else { zet(st.x + (R() - .5) * 14, st.y + (R() - .5) * 8, st.s, 900 + R() * 700, "ease-in-out"); st.tot = nu + 900 + R() * 900; }   // even rustig zweven
+  });
+  SPOOK_T = setTimeout(spookStap, 120);
+}
+/* de ogen: dezelfde uitlijning als de noten van de lofi-Waardin, maar ze knipperen */
+function bonsaiOgenHTML(L, p){
+  const dur = 3.4 + Math.random() * 1.6, del = -(Math.random() * dur);
+  return `<span class="lofinoten bonsaiogen"${p != null ? ` data-p="${p}"` : ""} data-ar="${L.ar}" style="--bkd:${dur.toFixed(2)}s;--bkv:${del.toFixed(2)}s">`
+    + L.noten.map(n => `<img src="${n.u}" alt="" draggable="false" style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;width:${n.w.toFixed(2)}%">`).join("") + `</span>`;
+}
 function lofiHerteken(){ const v = document.getElementById("mpvak"); if(v) v.dataset.sig = ""; try{ mpBalkPaint(); }catch(e){}
   if((M && M.type === "mp") || !S || !S.ui || S.ui.mode === "start") render(); }   // ook het startscherm (de PvP-kaart)
 /* 🎄 ronde 34: Christ-bus. Waar de lampjes in elke stand zitten (in procenten van de tekening, met de hand opgemeten),
@@ -37403,11 +38367,17 @@ function kerstLagHTML(stand, p){
 /* Een plaatje met zijn effect erover, voor de karakterkeuze en de PvP-kaart op het startscherm. */
 function skinFxBox(c, src){
   const sk = skinVan(c.id); if(!sk || FAST) return null;
-  if(sk.speciaal === "ofanim") return ofaLaad(lofiHerteken) === "klaar" ? `<span class="majbox skinfxbox ofabox" style="--ar:${OFA.ar}">${ofaLagenHTML()}</span>` : null;
+  if(sk.speciaal === "ofanim" && OFA_LAGEN) return ofaLaad(lofiHerteken) === "klaar" ? `<span class="majbox skinfxbox ofabox" style="--ar:${OFA.ar}">${ofaLagenHTML()}</span>` : null;
+  if(sk.speciaal === "spiegel") return WSP.laad(lofiHerteken) === "klaar" ? `<span class="majbox skinfxbox" style="--ar:${512/768}">${WSP.html("fx", "")}</span>` : null;   // 🪞 het gebroken glas met gezichten
   if(sk.speciaal === "majestic") return `<span class="majbox skinfxbox"><img class="chmaj" src="${src}" alt="" draggable="false"><span class="majmask" style="--masker:url('art/skin-${sk.file}-masker.png')"></span></span>`;   // 🌈 Tang: de regenboog over zijn rook
   if(sk.speciaal === "kerst") return `<span class="majbox skinfxbox" style="--ar:${KERST_AR}"><img class="chmaj" src="${src}" alt="" draggable="false">${kerstLagHTML("")}</span>`;
   if(sk.speciaal === "lofi"){ const L = lofiVerwerk(src, lofiHerteken);
     if(L.status === "klaar" && L.schoon) return `<span class="majbox skinfxbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${lofiNotenHTML(L)}</span>`;
+    return null; }
+  if(sk.speciaal === "spook"){ spookStart(); return `<span class="majbox skinfxbox"><img class="chmaj spook" data-poses="${spookStanden(sk).join("|")}" src="${src}" alt="" draggable="false"></span>`; }   // 👻
+  if(sk.speciaal === "serafogen") return `<span class="majbox skinfxbox lofibox" style="--ar:${SERAF_AR}"><img class="chmaj" src="${src}" alt="" draggable="false">${serafOgenHTML()}</span>`;   // 👁
+  if(sk.speciaal === "bonsai"){ const L = bonsaiVerwerk(SPRITE_BEELD[sprEcht(sk.spr)] || src, lofiHerteken);   // 🌳 de ogen knipperen
+    if(L.status === "klaar" && L.schoon && L.noten.length) return `<span class="majbox skinfxbox lofibox" style="--ar:${L.ar}"><img class="chmaj" src="${L.schoon}" alt="" draggable="false">${bonsaiOgenHTML(L)}</span>`;
     return null; }
   if(sk.speciaal === "meer") return zwermHTML(src, 12, 22, 34, Date.now());
   return null;
@@ -37431,21 +38401,33 @@ function skinFigHTML(p, sk, key, nu){
     return `<div class="ptfig">${inWrap(spriteSVG(key), `<span class="majmask" style="--masker:url('${masker}')"></span>`)}</div>`;
   }
   if(sk.speciaal === "inferno"){ infernoStart(); return `<div class="ptfig vuurfig">${spriteSVG(key)}</div>`; }   // 🔥 zijn vlammen golven
-  if(sk.speciaal === "ofanim"){   // 💍 de ringen los, in de gewone stand
+  if(sk.speciaal === "ofanim" && OFA_LAGEN){   // 💍 de ringen los, in de gewone stand
     const echt = sprEcht(key);
     if(skinStand(echt) || !String(echt).startsWith(sk.spr) || ofaLaad(lofiHerteken) !== "klaar") return gewoon;
     return `<div class="ptfig ofafig">${inWrap(spriteSVG(key), ofaLagenHTML(p))}</div>`;
   }
-  if(sk.speciaal === "spiegel"){   // 🪞 het glas barst bij elke klap verder (al gebarsten bij de start)
-    const niv = 1 + (MPPT.schade[p] || 0), nieuw = SPIEGEL_NIV[p] != null && niv > SPIEGEL_NIV[p];
-    SPIEGEL_NIV[p] = niv;
-    return `<div class="ptfig">${spriteSVG(key)}</div><div class="spiegelglas">${barstSVG(niv, nieuw)}</div>`;
+  if(sk.speciaal === "spiegel"){   // 🪞 nov 2026: het hele vak is een gebroken spiegel, met de Weerspiegeling in de scherven
+    if(WSP.laad(lofiHerteken) !== "klaar") return gewoon;
+    return `<div class="ptfig wspfig">${WSP.html(p, skinStand(sprEcht(key)))}</div>`;
   }
   if(sk.speciaal === "kerst"){
     const echt = sprEcht(key);
     if(!String(echt).startsWith(sk.spr)) return gewoon;
     const st = skinStand(echt);
     return `<div class="ptfig">${inWrap(spriteSVG(key), kerstLagHTML(KERST_LAMPJES[st] ? st : "", p))}</div>`;
+  }
+  if(sk.speciaal === "spook"){   // 👻 in het gevecht spookt hij ook; bij een klap zie je gewoon zijn stand
+    spookStart(); const rust = !/_(boos|stuk|wijd)$/.test(sprEcht(key)) || sprEcht(key) === sk.spr;
+    return `<div class="ptfig${rust ? " spook" : ""}" data-poses="${spookStanden(sk).join("|")}">${spriteSVG(key)}</div>`;
+  }
+  if(sk.speciaal === "serafogen"){   // 👁 alleen in zijn gewone stand: de andere standen hebben de ogen ergens anders
+    if(sprEcht(key) !== sk.spr) return gewoon;
+    return `<div class="ptfig lofifig">${inWrap(spriteSVG(key), serafOgenHTML(p))}</div>`;
+  }
+  if(sk.speciaal === "bonsai" && sprEcht(key) === sk.spr){   // 🌳 het boompje, met knipperende ogen in het donker
+    const pad = SPRITE_BEELD[sprEcht(key)], L = bonsaiVerwerk(pad, lofiHerteken);
+    if(L.status !== "klaar" || !L.schoon || !L.noten.length) return gewoon;
+    return `<div class="ptfig lofifig">${inWrap(spriteSVG(key).split(pad).join(L.schoon), bonsaiOgenHTML(L, p))}</div>`;
   }
   if(sk.speciaal === "lofi"){
     const pad = SPRITE_BEELD[sprEcht(key)], L = lofiVerwerk(pad, lofiHerteken);
@@ -37484,6 +38466,8 @@ function skinVoorladen(){
     const paden = [];
     sprs.forEach(spr => SKIN_STANDEN.forEach(st => { const k = sprEcht(spr + st); if(SPRITE_BEELD[k]) paden.push(SPRITE_BEELD[k]); }));
     if(sk.speciaal === "kees") paden.push("art/rocky-arm-kwast.png");
+    if(sk.speciaal === "spiegel") WSP.laad();   // 🪞 het glas, de gezichten en de collages alvast binnenhalen
+    if(sk.speciaal === "bonsai" && SPRITE_BEELD[sprEcht(sk.spr)]) bonsaiVerwerk(SPRITE_BEELD[sprEcht(sk.spr)], lofiHerteken);   // 🌳 de ogen alvast loshalen
     if(sk.speciaal === "lofi") SKIN_STANDEN.forEach(st => { const k = sprEcht(sk.spr + st); if(SPRITE_BEELD[k]) lofiVerwerk(SPRITE_BEELD[k]); });   // 🎵 de noten alvast loshalen
     if(sk.speciaal === "majestic") SKIN_STANDEN.filter(st => !(sk.zonder && sk.zonder[st])).forEach(st => paden.push(`art/skin-${sk.file}${st ? "-" + st.slice(1) : ""}-masker.png`));
     [...new Set(paden)].forEach(pad => { const im = new Image(); im.onload = () => { if(typeof BEELD_KLAAR === "object" && BEELD_KLAAR[pad] !== "fout") BEELD_KLAAR[pad] = BEELD_KLAAR[pad] || true; }; im.src = pad; });
@@ -37534,7 +38518,7 @@ function inktDwaal(){
     const r = Math.random();
     const zet = (dx, dy) => { el.style.setProperty("--dx", dx.toFixed(1) + "%"); el.style.setProperty("--dy", dy.toFixed(1) + "%"); };
     const nieuw = () => [(Math.random() - .5) * 56, (Math.random() - .5) * 46];
-    if(r < .3){   // weg, en elders weer open
+    if(r < .42){   // weg, en elders weer open
       el.classList.add("inktweg");
       setTimeout(() => { zet(...nieuw()); setTimeout(() => el.classList.remove("inktweg"), 120); }, 260);
     } else if(r < .75){ zet(...nieuw()); }   // schiet naar een andere plek
@@ -37542,12 +38526,7 @@ function inktDwaal(){
       const ox = parseFloat(el.style.getPropertyValue("--dx")) || 0, oy = parseFloat(el.style.getPropertyValue("--dy")) || 0;
       zet(ox + (Math.random() < .5 ? -8 : 8), oy); setTimeout(() => zet(ox, oy), 600);
     }
-    /* soms gaat er ergens anders in de inkt nog een paar ogen open */
-    if(Math.random() < .22 && el.parentNode){
-      const kop = el.cloneNode(true); kop.dataset.extra = "1"; kop.classList.add("inktextra");
-      const [dx, dy] = nieuw(); kop.style.setProperty("--dx", dx.toFixed(1) + "%"); kop.style.setProperty("--dy", dy.toFixed(1) + "%");
-      el.parentNode.appendChild(kop); setTimeout(() => kop.remove(), 1500 + Math.random() * 1200);
-    }
+    /* ronde 35: nooit twee paar ogen tegelijk: het extra paar is weg, ze verdwijnen en verschijnen elders wat vaker */
   });
   INKT_DWAAL_T = setTimeout(inktDwaal, 1100 + Math.random() * 1700);
 }
@@ -37611,6 +38590,8 @@ function mpPtHTML(p, eigen){
   else if(zin && zin.spr && ptSprIs(zin.spr)){ key = zin.spr; if(zin.spr === c.taunt) cls.push("pt-taunt"); }
   if(bonsaiBoom){ key = spr; const i = cls.indexOf("pt-taunt"); if(i >= 0) cls.splice(i, 1); }
   if(sk && sk.speciaal) cls.push("sk-" + sk.speciaal);
+  if(sk && sk.zwaai) cls.push("pt-zwaai");
+  if(sk && sk.onrust) cls.push("pt-onrust");
   if(!sk && c.lv === "2-5") cls.push("pt-max");   // ronde 34: Max is een zwarte schaduw: hij krijgt licht achter zich (de regenboogrand van Tang is weg)
   if(sk && sk.stil) eigen = false;                  // 🖌 Kees zegt niets: geen menu
   if(eigen) cls.push("eigen");
@@ -37646,6 +38627,7 @@ function mpBalkPaint(){
   if(!FAST) [0, 1].forEach(p => {
     if(nu[p] < MPPT.leven[p]){
       MPPT.schade[p] = (MPPT.schade[p] || 0) + 1;      // 🎭 Nimbus splitst, Bonsai wordt de rover
+      if((skinVan(S.char[p]) || {}).speciaal === "spiegel") WSP.raak(p);   // 🪞 het glas schudt en er schieten gezichten op
       (MPPT.splitT || (MPPT.splitT = [[], []]))[p].push(Date.now() / 1000);   // ☁ wanneer de Nimbussen splitsten
       mpEmote(p, "geraakt"); mpEmote(opp(p), "raak");
       if(isBot(opp(p)) && rndVrij() < .35) setTimeout(() => mpZegAuto(opp(p), "jij"), 500);
@@ -37777,7 +38759,7 @@ function act(a){
 /* ⭕ ronde 32: een irisovergang tussen de grote schermen: hoofdmenu, kaart, level, winkel en terug.
    Niet bij menuutjes, pop-ups en binnen een gevecht. De iris knijpt dicht op de plek waar je klikte
    (bij een level op het medaillon), wisselt het scherm, en gaat in het midden weer open. */
-const IRIS_KNOP = new Set(["verhaalstart", "thuisverder", "plekkies", "story", "storylevel", "winkel", "smid", "storyterug", "kaartterug", "tomain", "mpstart", "chalstart"]);
+const IRIS_KNOP = new Set(["jukebox", "verhaalstart", "thuisverder", "plekkies", "story", "storylevel", "winkel", "smid", "storyterug", "kaartterug", "tomain", "mpstart", "chalstart"]);
 let IRIS_BEZIG = false, IRIS_IN = false, IRIS_MUIS = null;
 document.addEventListener("pointerdown", e => { IRIS_MUIS = {x:e.clientX, y:e.clientY, t:performance.now()}; }, true);
 function irisMag(){
@@ -37911,6 +38893,7 @@ function onBtn(btn, el, fromAction){
       else if(u.mode==="draft" && iControl(u.p)) act({t:"f", v:{a:u.selA, l:u.selL, e:u.selE || 0, b:u.selB || 0, ban:draftBanLijst(u)}});
       break;
     case "mute": AU.stil(!SET.mute); render(); break;
+    case "jukebox": JUKE.open(); break;   // 🎵
     case "praatskip": praatSkip(); break;
     case "aeuitlegok": if(u.mode==="aeuitleg") act({t:"f", v:true}); break;
     case "varuitlegok": if(u.mode==="varuitleg") act({t:"f", v:true}); break;
@@ -39042,6 +40025,7 @@ function laadKlaar(){
   if(txt) txt.textContent = "klaar";
   LAAD_DAARNA.forEach(f => { try{ f(); }catch(e){} });
   setTimeout(() => { try{ medVoorlaad(); }catch(e){} }, 1200);   // ronde 34: de medaillons van de kaart alvast binnenhalen
+  setTimeout(() => { try{ const sk = SKINS.find(k => k.speciaal === "bonsai"); if(sk && SPRITE_BEELD[sk.spr]) bonsaiVerwerk(SPRITE_BEELD[sk.spr], lofiHerteken); }catch(e){} }, 2900);   // 🌳
   setTimeout(() => { try{ const sk = SKINS.find(k => k.speciaal === "lofi"); if(sk && SPRITE_BEELD[sk.spr]) lofiVerwerk(SPRITE_BEELD[sk.spr], lofiHerteken); }catch(e){} }, 2600);   // 🎵 de noten van de lofi-Waardin alvast loshalen
   /* zat alles al in de cache, dan toch heel even de balk laten zien — anders flitst hij */
   const rest = Math.max(0, 450 - (Date.now() - LAAD.t0));
@@ -39114,6 +40098,7 @@ const PIXIC = {
   zand:["#######",".#...#.","..#.#..","...#...","..#.#..",".#.#.#.","#######"],
   web:["#...#...#",".#..#..#.","..#####..","..#.#.#..","#########","..#.#.#..","..#####..",".#..#..#.","#...#...#"],
   bliksem:["....####.","...####..","...###...","..###....",".#######.","..#####..","....###..","...###...","...##....","..##.....","..#......"],
+  noot:[".....##..",".....#.#.",".....#..#",".....#..#",".....#...",".....#...","..####...",".#####...",".#####...","..###...."],   // 🎵 de jukebox
   luid:["....#........","...##...#....","..###....#...","####...#..#..","####....#.#..","####....#.#..","####...#..#..","..###....#...","...##...#....","....#........"],
   stil:["....#........","...##........","..###..#...#.","####....#.#..","####.....#...","####....#.#..","..###..#...#.","...##........","....#........"],
   boek:[".####...####.","#....#.#....#","#.##.#.#.##.#","#....#.#....#","#.##.#.#.##.#","#....#.#....#","#.##.#.#.##.#","#....###....#",".#####.#####."],
