@@ -8108,7 +8108,7 @@ function losLichtOp(G, K, it){
       const sq = G.pl[wP(w)];
       const weg = Math.max(0, sq.hp[wC(w)]);
       sq.hp[wC(w)] = 0;
-      s.life += Math.floor(weg / 2);
+      s.life += weg;   // nov 2026: al zijn levens
       vernietig(G, wP(w), wC(w));
       return;
     }
@@ -10259,7 +10259,7 @@ const LICHT_TEKST = {
   doortast:"{Betaal} <b>2</b>: kies een kaart uit je deck en neem die in je hand.",
   vital:   "{Heel} <b>3</b>.",
   web:     "Trek <b>1</b>. Alle vijandelijke wezens zitten {Vast}.",
-  siphon:  "<b>5</b> {kleurloze|kleurloos} schade aan het wezen op een plek naar keuze. {Heel} zoveel als je schade doet.",
+  siphon:  "Kies een plek: het wezen dat daar staat sterft, en jij {heel} al zijn levens.",
   sterregen:"<b>1</b> {kleurloze|kleurloos} schade aan elk vijandelijk wezen. Trek <b>1</b>.",
   max:     "Zet 🐺 Max op een vrije eigen plek: <b>5</b> levens, {Kleurloos}, {Volle slag}. Al je andere wezens <b>+1</b> leven.",
   struik:  "Kies 🗡 Swipe, 🔪 Stab of 🛡 Schild en leg die als ritueel in een kolom naar keuze. Elk kan <b>één keer</b> per potje; daarna doet deze kaart niets meer.",
@@ -15995,7 +15995,7 @@ async function announceLight0(p, card, flash){
   let plan = bloedPlan || {};
   if(k === "siphon"){
     const ids = siphonDoelen(p).concat(isBot(p) ? [] : legePlekIds("siphon", p));
-    const id = await chooseCre(p, ids, `<b>${pName(p)}</b> — ✦ Levensroof: kies de plek die <b>5</b> schade krijgt`, true, {k:"siphon"});
+    const id = await chooseCre(p, ids, `<b>${pName(p)}</b> — ✦ Levensroof: kies een plek: wat daar staat sterft en jij krijgt zijn levens`, true, {k:"siphon"});
     if(id === "cancel"){ P(card.owner).grave.push(card); return true; }
     const f = id != null && !isPlekId(id) ? findCre(id) : null, pl = isPlekId(id) ? plekVanId(id) : null;
     plan = {tid:id, tp:pl ? pl.p : (f ? f.p : null), tc:pl ? pl.c : (f ? f.c : null)};
@@ -16437,11 +16437,12 @@ async function resolveLight(it){
     const f = findCre(id); if(!f) return;
     const voor = Math.max(0, f.cr.hp), naam = `${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}`;
     fxLight(creSel(f.p, f.c)); AU.play("light");
-    const r = applyDamage(id, "licht", LEVENSROOF_SCHADE, {ctrl:p}) || {};
+    /* nov 2026 (weer zoals vroeger): wat er op die plek staat sterft, en jij krijgt al zijn levens. */
+    destroyCre(f.p, f.c, "✦ Levensroof");
     const na = findCre(id);
-    const raak = r.destroyed ? Math.min(LEVENSROOF_SCHADE, voor) : Math.max(0, voor - (na ? na.cr.hp : voor));
+    const raak = na ? Math.max(0, voor - Math.max(0, na.cr.hp)) : voor;   // (blijft hij staan door Laatste Adem, dan wat hij kwijt is)
     if(raak > 0){ P(p).life += raak; levensPiek(p); pop(rectOf(`.pside[data-side="${p}"] .plife`), "+" + raak, "heal"); }
-    addLog(`✦ Levensroof doet ${raak} schade aan ${naam}: ${pName(p)} heelt ${raak} (nu ${P(p).life}).`, true);
+    addLog(`✦ Levensroof: ${naam} sterft en ${pName(p)} neemt ${raak} ${raak === 1 ? "leven" : "levens"} over (nu ${P(p).life}).`, true);
     render(); return;
   }
   /* ✦ Bloedmaan (okt 2026): 20 kleurloze schade op twee plekken. */
@@ -16523,7 +16524,7 @@ function stromanVangt(p){
 }
 const stromanKlaar = p => !!(S && hasAe(p, "ae_deken") && !(Array.isArray(S.dekenBeurt) && S.dekenBeurt[p] === S.gTurn));
 /* ✦ Levensroof: wie niet dood kan (de lavagolem), valt ook niet leeg te zuigen. */
-const LEVENSROOF_SCHADE = 5, BLOEDMAAN_SCHADE = 20;
+const LEVENSROOF_SCHADE = 999, BLOEDMAAN_SCHADE = 20;   // nov 2026: Levensroof doodt weer (alle levens)
 const siphonDoelen = p => allCreIds().filter(id => { const f = findCre(id); return f && !EL[f.cr.card.el].onsterfelijk && !hexVan(f.cr, f.p, p); });
 /* 🔥 Vuur is immuun voor entangle — en sommige verhaalbeesten ook. */
 const entBaar = (cr, pp) => {
