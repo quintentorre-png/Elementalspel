@@ -7373,6 +7373,7 @@ function ijsNeemtOver(G, K, p, id, asSpell, col){
     sp.minAtk[col] = sv.minAtk[col]; sp.web[col] = sv.web[col]; sp.eiB[col] = sv.eiB[col]; sp.hx[col] = sv.hx[col]; sp.hxT[col] = sv.hxT[col];
     sv.cre[col] = 0;
     G.kOwn[doel] = p;
+    if (heeft(G, p, 'ae_watercycle')) sp.hp[col] += 3;   // 🟣 nov 2026: wat het ijs pakt, telt ook voor Getijdenstroom
     const plan = legPlan(G, K, p, doel, false, col, {geenSpell:true});
     pushPlay(G, p, doel, false, col, plan === 'cancel' ? [] : plan, {geenSpell:true});
     return;
@@ -8038,7 +8039,8 @@ function losLichtOp(G, K, it){
       if (s.spell[c]) grafSp(G, s.spell[c]);
       const kaart = nieuweKaart(G, ELNAAM.indexOf(naam), p, 0, F_TOKEN);
       s.spell[c] = kaart;
-      for (const e of effsVan(G, kaart, 1)) G.stack.push(Object.assign(effItem(p, Object.assign({}, e, {col:c}), null), {dec:false}));
+      const rplan = legPlan(G, K, p, kaart, true, c, {});   // nov 2026: als gewone zet op de keten, de ander kan reageren
+      pushPlay(G, p, kaart, true, c, rplan === 'cancel' ? [] : rplan);
       return;
     }
     case L_SMOKE: {                                                // 🚬 Smoke break: de beurt van de ander stopt na deze keten
@@ -10273,7 +10275,7 @@ const AETHER_TEKST = {
   ae_kern:      "Je eerste 🔥 Vuur-wezen van het potje krijgt <b>+30</b> levens.",
   ae_ziel:      "Sterft er een wezen of token van jou, hoe dan ook (vernietigd, geofferd, of weg doordat je er iets overheen speelt), dan komt er een onzichtbaar token op deze aether. Bij het vierde gaan ze er alle vier af en trek je <b>1</b>.",
   ae_draw3:     "Begin van je beurt: {betaal} <b>1</b> en trek <b>2</b> in plaats van 1. Op 1 leven betaal je niets en trek je er gewoon 1.",
-  ae_watercycle:"Je 💧 wezens komen binnen met <b>+3</b> levens. Elk wezen dat je 💧 raakt (oppakken en opnieuw neerzetten, of het water-ritueel) krijgt <b>+3</b> levens.",
+  ae_watercycle:"Je 💧 wezens komen binnen met <b>+3</b> levens. Elk wezen dat je 💧 raakt (oppakken en opnieuw neerzetten, het water-ritueel, of overnemen met 🧊 IJs) krijgt <b>+3</b> levens.",
   ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen wezen mee kiezen: {offer} die en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-ritueel.",
   ae_fire6:     "Je 🔥-effect doet <b>2</b> meer schade (dus <b>4</b>) en raakt ook 💧 Water. Ook ⚡ Bliksem. Niet de overslag van ☄️ Plasma.",
   get ae_stonefull(){   // ronde 34: Volle slag is nu voor iedereen · nov 2026: twee proefversies (Opties)
@@ -15318,6 +15320,7 @@ async function ijsNeemtOver(p, card, asSpell, col){
     P(p).cols[col].cre = doel;
     ijsNaarGraf(p, card);
     addLog(`🧊 <em>IJs</em> smelt (💧 Water naar het graf). ${pName(p)} neemt ${kIcon(doel.card)} <em>${kNaam(doel.card)}</em> (${doel.hp} levens) over uit kolom ${col+1}. Hij krijgt een 🧊 ijs-token.`, true);
+    getijPlus(p, doel.card);   // 🟣 nov 2026: wat het ijs pakt, telt ook voor Getijdenstroom
     if(!FAST){ pop(creSel(p, col), "🧊 VAN JOU", "heal"); render(); await sleep(260); }
     render();
     /* (okt 2026) net als gewoon spelen: zijn speel-effect én het ritueel in die kolom gaan af */
@@ -16177,8 +16180,10 @@ async function resolveLight(it){
     sl.spell = {card:kaart};
     addLog(`✦ Roversbuit: ${pName(p)} legt ${EL[el].icon} <em>${EL[el].name}</em> als ritueel in kolom ${c+1}.${al.length >= 3 ? " Het arsenaal is nu leeg." : ""}`, true);
     render(); if(!FAST){ fxLight(spellSel(p, c)); await sleep(260); }
-    /* Een ritueel doet zijn effect bij het neerleggen, net als elk ander ritueel. */
-    effsOf(el, "spell", kaart).forEach(e => S.stack.push(Object.assign(effItem(p, Object.assign({}, e, {col:c}), null), {dec:false})));
+    /* Een ritueel doet zijn effect bij het neerleggen, net als elk ander ritueel. nov 2026: het gaat
+       als gewone zet op de keten, dus de ander kan erop reageren (ook met Volledige Negatie). */
+    const rplan = await declarePlan(p, kaart, true, c, {onField:true});
+    pushPlay(p, kaart, true, c, false, rplan === "cancel" ? [] : rplan);
     return;
   }
   if(k === "greed"){
