@@ -6838,7 +6838,7 @@ const EL_MINATK =    [0, 0, 0, 0, 0, 0, 0,   0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 const EL_VOL =       [0, 0, 0, 0, 0, 0, 1,   1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];   // volle slag
 const EL_ONST =      [0, 0, 0, 0, 0, 0, 0,   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];   // gaat niet dood
 const EL_GEENOFFER = [0, 0, 0, 0, 0, 0, 0,   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
-const EL_GEENENT =   [0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
+const EL_GEENENT =   [0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];   // nov 2026: 🌿 drained ook tokens (schildje, ei)
 const EL_ENTVRIJ =   [0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const EL_DIRECT =    [0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const EL_VIS =       [0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -7143,7 +7143,7 @@ function effsVan0(G, id, origin){
   if (e === STAB) return [{el:E_STAB, origin, src:id}];
   if (e === SCHILD) return [{el:E_SCHILD, origin, src:id}];
   if (e === STEEN) return [{el:E_STEEN, origin, vr}];   // ronde 27: één wezen +3
-  if (e === WATER) return isVlag(G, id, F_WS) ? (origin === 1 ? [{el:E_WS, origin, src:id, keten:[]}] : []) : [{el:E_WATER, origin, vr, src:id}];   // ronde 31: Water na de plons heeft als wezen geen effect
+  if (e === WATER) return origin === 1 ? [{el:E_WS, origin, src:id, keten:[]}] : (isVlag(G, id, F_WS) ? [] : [{el:E_WATER, origin, vr, src:id}]);   // nov 2026: als ritueel altijd alleen de Waterspiegel   // ronde 31: Water na de plons heeft als wezen geen effect
   if (e === GRAS && vr === ROOS) return [{el:e, origin, vr}, {el:e, origin, vr}];   // 🌹 Roos: twee keer het Gras-effect
   if (e === VUUR || e === GRAS) return [{el:e, origin, vr}];
   return [];
@@ -7201,7 +7201,7 @@ function rotsKiezel(G, K, p, bron, col){
   const opties = legeKol(G, p);
   const sl = kiesPlek(G, K, p, opties.map(c => ({p, c, kind:'cre'})), false, {el:'steen'});
   if (!sl || sl === 'cancel') return;
-  /* ronde 31: Rots blijft Rots (wordt niet meer meteen Steen) */
+  if (bron && G.kVar[bron] === ROTS){ G.kVar[bron] = 0; zetVlag(G, bron, F_WASROTS); }   // nov 2026 (weer): na één keer gewoon Steen
   const kz = nieuweKaart(G, STEEN, p, KIEZEL, F_TOKEN | F_OVERHEEN);
   plaatsWezen(G, p, sl.c, kz);
   G.pl[p].hp[sl.c] = 1 + (G.pl[p].hp[sl.c] - EL_HP[STEEN]); G.pl[p].pld[sl.c] = G.gTurn;   // ronde 31: 1, plus een bonus
@@ -7629,8 +7629,8 @@ function losOp(G, K, it){
       s.cre[van] = 0;
       const sl = kiesPlek(G, K, p, plekken.map(c => ({p:eig, c, kind:'cre'})), false, {el:ELNAAM[G.kEl[id]], kaartId:id});
       plaatsNu(G, eig, id, false, sl.c, {splash:true, keepHp});
-      if (globalThis.LAW_PROEF === 'b' && G.kEl[id] === STEEN){ G.st2 = Object.assign({}, G.st2 || {}); G.st2[id] = G.gTurn; }   // 🧪 Lawine B: water geeft één aanval terug, niet twee
       if (heeft(G, p, 'ae_watercycle') && G.pl[eig].cre[sl.c] === id) G.pl[eig].hp[sl.c] += 3;   // 🟣 Getijdenstroom
+      if (globalThis.LAW_PROEF === 'b' && G.kEl[id] === STEEN){ G.st2 = Object.assign({}, G.st2 || {}); G.st2[id] = G.gTurn; }   // 🧪 Lawine B: water geeft één aanval terug, niet twee
       const rplan = legPlan(G, K, eig, id, false, sl.c, {});
       pushPlay(G, eig, id, false, sl.c, rplan === 'cancel' ? [] : rplan);
       return;
@@ -10049,7 +10049,7 @@ EL.clown = {name:"Vaandelvis", icon:"🐠", strong:null, flash:false, hp:1, kaar
 EL.kogel = {name:"Kogelvis", icon:"🐡", strong:null, flash:false, hp:3, kaart:true, speciaal:true, vis:true, overheen:true};
 /* 🥚 Het ei van Shelob. Vier levens, valt nooit aan, en na twee van haar beurten komt het uit. */
 EL.ei = {name:"Ei", icon:"🥚", strong:null, flash:false, hp:4, token:true, speciaal:true, stil:true, vastAtk:0, geenOffer:true,
-  kaart:true, geenEnt:true};
+  kaart:true};   // nov 2026: 🌿 verstrikt en drained ook het ei
 /* 🕷 Wat er uit het ei komt. */
 EL.spin = {name:"Spin", icon:"🕷", strong:null, flash:false, hp:7, token:true, speciaal:true, vastAtk:7, kaart:true};
 /* De drie rituelen van de Struikrover. Ze triggeren niet als je er iets op speelt — ze gaan
@@ -10063,7 +10063,7 @@ EL.knoop = {name:"De knoop", icon:"⛓", strong:null, flash:false, hp:2, speciaa
 /* 🎣 Het lokaas (ronde 31): tien levens, geen element, valt nooit aan. Zolang het staat, gaat alles
    wat de tegenstander op deze kant richt naar het lokaas. */
 EL.lokaas = {name:"Het lokaas", icon:"🎣", strong:null, flash:false, hp:10, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true};
-EL.schildje = {name:"Schildje", icon:"🛡", strong:null, flash:false, hp:2, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true, overheen:true, geenEnt:true};
+EL.schildje = {name:"Schildje", icon:"🛡", strong:null, flash:false, hp:2, token:true, speciaal:true, stil:true, vastAtk:0, kaart:true, overheen:true};   // nov 2026: 🌿 drained ook het schildje
 /* 🕯 De Lichtbrenger. Geen element, vijf levens, en hij slaat met alles wat hij heeft —
    dus zo hard als hij nog leeft. Verder doet hij niets: geen speel-effect, geen trucje. */
 EL.brenger = {name:"Lichtbrenger", icon:"🕯", strong:null, flash:false, hp:6, token:true,
@@ -10198,7 +10198,7 @@ const kwChip = k => BEGRIPPEN[k] ? `<span class="kw" data-kw="${k}">${BEGRIPPEN[
    spell: wat er als ritueel nog bij komt (de vaste ritueelregel staat er altijd al). */
 const KAART_TEKST = {
   water:   {kw:[], speel:"{Plons}: {herspeel} een eigen wezen. Daarna heet deze kaart {Water|spiegel}.",
-            eig:"Speel je deze kaart óp een eigen wezen, dan herspeel je die."},
+            eig:"Speel je deze kaart óp een eigen wezen, dan herspeel je die. Als ritueel: het speel-effect van je eigen wezen in die kolom gaat nog een keer (niet als dat Water is)."},
   vuur:    {kw:[], speel:"<b>2</b> schade aan een vijandelijk wezen. Sterk tegen: <b>4</b>."},
   gras:    {kw:[], speel:"{Verstrik} een wezen."},
   steen:   {kw:[], speel:"<b>+3 levens</b> aan één wezen naar keuze. Mag zichzelf."},
@@ -10226,7 +10226,7 @@ const KAART_TEKST = {
   lavagolem:{kw:["kleurloos"]}
 };
 const VAR_TEKST = {
-  rots:   {speel:"Zet een 🪨 Kiezel (<b>1</b> leven) op een vrije eigen plek. Ook het Steen-effect."},
+  rots:   {speel:"De eerste keer: zet een 🪨 Kiezel (<b>1</b> leven) op een vrije eigen plek. Daarna is hij gewoon 🪨 Steen. Ook het Steen-effect."},
   bliksem:   {speel:"<b>2</b> 🔥 vuurschade aan elk wezen van de tegenstander (💧 Water is immuun, behalve met 🟣 Explosiegevaar)."},
   bergketen: {speel:"Zet een Steen op een vrije eigen plek, met evenveel levens als de Bergketen. Dat is een echte Steen (geen token) en hij doet zijn speel-effect."},
   oceaan:    {speel:"Al je andere wezens gaan terug naar je hand (tokens verdwijnen). Daarna rust de Oceaan tot het begin van je volgende beurt."},
@@ -10840,7 +10840,7 @@ function wsTargets(p, bron, keten){
   return uit;
 }
 /* 💧 Water als ritueel kiest niet vrij: het laat alleen het speel-effect gaan van het eigen
-   wezen in zijn eigen kolom. (Een Waterplons als ritueel kiest wel vrij; daarna is hij Water.) */
+   wezen in zijn eigen kolom. (nov 2026: ook een verse Waterplons als ritueel; geen plons naar keuze meer.) */
 function wsDoelen(p, e){
   const alle = wsTargets(p, e.srcCard, e.keten);
   if(e.origin !== "spell" || e.col == null) return alle;
@@ -11573,6 +11573,7 @@ function mpEindReactie(q, klaar){
 }
 /* Barsten over het hele scherm, vanuit het portret van wie verloor. Hard en pixelig. */
 function schermBarst(q){
+  return;   // nov 2026: de getekende barsten over het scherm zijn weg (niet mooi); de schok, de flits en de stuk-stand blijven
   if(FAST) return;
   const oud = document.getElementById("schermbarst"); if(oud) oud.remove();
   const W = innerWidth, H = innerHeight;
@@ -14214,7 +14215,9 @@ function effsOf0(el, origin, card){
   if(el === "steen") return [{el, origin, var:vr}];      // ronde 27: één wezen +3 (was tweemaal +1)
   /* 💧 ronde 31: Water dat zijn plons al gemaakt heeft, heeft als wezen geen speel-effect meer.
      Als ritueel laat het nog wel het wezen in zijn eigen kolom opnieuw gaan (geen Water). */
-  if(el === "water" && card && card.ws) return origin === "spell" ? [{el:"ws", origin, srcCard:card, keten:card.wsKeten || []}] : [];
+  /* nov 2026: 💧 als ritueel doet altijd alleen de Waterspiegel: het speel-effect van het eigen wezen in zijn kolom. Geen plons naar keuze. */
+  if(el === "water" && origin === "spell") return [{el:"ws", origin, srcCard:card, keten:(card && card.wsKeten) || []}];
+  if(el === "water" && card && card.ws) return [];
   if(el === "water") return [{el, origin, var:vr, cheat:!!(card && card.cheat), srcCard:card}];
   if(el === "gras" && vr === "roos") return [0, 1].map(() => ({el, origin, var:vr}));   // 🌹 Roos: twee keer het Gras-effect (okt 2026)
   if(el === "vuur" || el === "gras") return [{el, origin, var:vr, cheat:!!(card && card.cheat)}];
@@ -15257,7 +15260,7 @@ async function rotsKiezel(p, card, col){
   const sl = await chooseSlot(p, opties.map(c => ({p, c, kind:"cre"})),
     `⛰️ Rots: kies een plek voor de <b>kiezel</b> (1 leven, hoort bij 🪨 Steen)`, false, {el:"steen"});
   if(!sl || sl === "cancel") return;
-  /* ronde 31: Rots blijft Rots; hij wordt niet meer meteen gewone Steen */
+  if(card && card.var === "rots"){ delete card.var; card.wasRots = true; }    // nov 2026 (weer): na één keer gewoon 🪨 Steen
   const kz = {id:++cid, el:"steen", var:"kiezel", owner:p, token:true, overheen:true};
   placeCre(p, sl.c, kz);
   const cr = P(p).cols[sl.c].cre;
