@@ -3034,7 +3034,13 @@ canvas.rodeaurora{position:absolute; inset:0; width:100%; height:100%; image-ren
 .chtegel.chspiegel .chnaam{position:relative; z-index:5}
 /* 🪞 nov 2026: het hele vak is de gebroken spiegel (WSP), boven de portretachtergrond */
 #portret .ptfig.wspfig, .mppt .ptfig.wspfig{position:absolute; inset:0; height:auto; width:auto; display:block; z-index:2; animation:none; filter:none; overflow:hidden}
-.chtegel.chspiegel .chpt.wspchpt{position:relative; display:block}
+.chtegel.chspiegel .chpt.wspchpt{position:absolute; inset:0; height:auto; margin:0; display:block; z-index:1}   /* 🪞 het glas vult de hele tegel */
+.chtegel.chspiegel .chnaam{position:relative; z-index:5; background:linear-gradient(transparent, rgba(0,0,0,.75) 40%); padding-top:10px}
+/* 🪞 op de PvP-kaart: het glas gekanteld, zodat het de hele brede kaart vult */
+.tkaart.blauw.tmetbeeld > span.tkspiegel.tkspiegel, .tkspiegel{position:absolute; inset:0; max-width:none !important; overflow:hidden; container-type:size; pointer-events:none; z-index:0}
+.tkspiegel .wsprot{position:absolute; left:50%; top:50%; width:100cqh; height:100cqw; translate:-50% -50%; rotate:90deg}
+.tkspiegel::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(4,8,20,.88), rgba(4,8,20,.45) 45%, rgba(4,8,20,0) 75%)}
+.tkaart.blauw:has(.tkspiegel) .tkmijn{background:none !important; box-shadow:none !important; border-color:transparent !important}
 /* ✨ ronde 34: Xam, lichtstralen en lichtvonkjes */
 .xamlicht{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1}
 .xamlicht::before{content:""; position:absolute; left:50%; top:46%; width:230%; aspect-ratio:1; translate:-50% -50%;
@@ -6498,7 +6504,7 @@ html body.pc.tel .slot.cr .fuhelft{font-size:7px; gap:3px} html body.pc.tel .slo
 #jukebox :is(.vinyl, .vinyl::after, .vinyl .lbl, .vlak .as, .draaiknop, .lantaarn){border-radius:50% !important}
 #jukebox .jbpodium{width:min(100vw, calc(100vh * 16 / 9)); width:min(100vw, calc(100dvh * 16 / 9))}
 #jukebox .scene{position:relative; aspect-ratio:16/9; width:100%; container-type:inline-size; overflow:hidden; background:#07060a; outline:none; touch-action:none}
-#jukebox .lc .tafel .naald{background-image:url('art/jukebox-naald.png') !important}
+#jukebox .lc .tafel .naald{left:0 !important; top:0 !important; width:100% !important; height:100% !important; background:url('art/kamp-arm.png') center/100% 100% no-repeat !important}   /* kamp-arm.png is even groot als de scène */
 /* op een kleine telefoon: de knoppen op het bord alleen met hun icoontje */
 @container (max-width: 900px){ #jukebox .lc .info .tag .tagtt{display:none} #jukebox .lc .info .tag .tagic{width:1.5cqw; height:1.5cqw} }
 #jukebox .hoes{position:absolute; inset:0; overflow:hidden; background:#1a1622 center/cover no-repeat; border-radius:.25cqw; box-shadow:0 0 0 .14cqw #0a0608, inset 0 0 0 .1cqw rgba(255,255,255,.08)}
@@ -6677,6 +6683,54 @@ html body.pc.tel .slot.cr .fuhelft{font-size:7px; gap:3px} html body.pc.tel .slo
 #jukebox .lc .scherm b{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding-top:.06cqw; font:max(5px, .5cqw)/1 var(--pix); color:#ffd27a; text-shadow:0 0 .35cqw rgba(255,160,60,.9); letter-spacing:.08em; white-space:nowrap; opacity:0; transition:opacity .2s}
 #jukebox .lc .scherm.flits i{opacity:.15}
 #jukebox .lc .scherm.flits b{opacity:1}
+
+/* ⚔ nov 2026: het versus-scherm vóór een challenge (stijl A, schuine snede, zonder vuur) */
+#versus{position:fixed; inset:0; z-index:2147481500; background:#000; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  --pix:"Press Start 2P", ui-monospace, monospace}
+#versus .vspodium{width:min(100vw, calc(100vh * 16 / 9)); width:min(100vw, calc(100dvh * 16 / 9)); aspect-ratio:16/9; position:relative; container-type:inline-size; overflow:hidden}
+#versus .vslaag{position:absolute; inset:0; opacity:0; transition:opacity .35s}
+#versus .vslaag.aan{opacity:1}
+#versus .vszwart{display:grid; place-items:center; text-align:center; background:#000}
+#versus .vszwart .r1, #versus .vszwart .r2, #versus .vszwart .r3{font-family:var(--pix); opacity:0; letter-spacing:normal}
+#versus .vszwart .r1, #versus .vszwart .r2{font-size:1.5cqw; color:#d8d2c4; line-height:1.6}
+#versus .vszwart .r2{margin-top:2.4cqw}
+#versus .vszwart .r3{font-size:4.6cqw; color:var(--kl, #ff5a3c); margin-top:2.6cqw; text-shadow:0 .4cqw 0 #000, 0 0 3cqw color-mix(in srgb, var(--kl, #ff5a3c) 60%, transparent)}
+#versus .vszwart .aan{opacity:1; transition:opacity .6s}
+#versus .vszwart .r3.aan{animation:vsknal .5s cubic-bezier(.2,1.6,.4,1) both, vstril .09s steps(2) .5s 8}
+#versus .cursor{display:inline-block; width:.8cqw; height:1.5cqw; background:#d8d2c4; vertical-align:-.15cqw; margin-left:.3cqw; animation:vsknip .8s steps(1) infinite}
+@keyframes vsknal{from{scale:3; filter:blur(.4cqw)} to{scale:1; filter:none}}
+@keyframes vstril{50%{translate:.3cqw -.2cqw}}
+@keyframes vsknip{50%{opacity:0}}
+#versus .kant{position:absolute; inset:0; background:center/cover no-repeat}
+#versus .kant.l{clip-path:polygon(0 0, 58% 0, 42% 100%, 0 100%)}
+#versus .kant.r{clip-path:polygon(58% 0, 100% 0, 100% 100%, 42% 100%)}
+#versus .kant::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, color-mix(in srgb, var(--kl) 45%, transparent), transparent 60%)}
+#versus .kant.r::after{background:linear-gradient(270deg, color-mix(in srgb, var(--kl) 45%, transparent), transparent 60%)}
+#versus .naad{position:absolute; inset:0; width:100%; height:100%; z-index:4; pointer-events:none; overflow:visible}
+#versus .naad line{vector-effect:non-scaling-stroke; stroke-linecap:square}
+#versus .naad .gloei{stroke:#ff9a3a; stroke-width:14; opacity:.45; filter:blur(4px)}
+#versus .naad .kern{stroke:#fff4c8; stroke-width:4}
+#versus .fig{position:absolute; bottom:0; width:34%; height:78%; z-index:5; filter:drop-shadow(0 .8cqw 1cqw rgba(0,0,0,.7))}
+#versus .fig img{width:100%; height:100%; object-fit:contain; image-rendering:pixelated}
+#versus .fig.l{left:2%} #versus .fig.l img{object-position:left bottom}
+#versus .fig.r{right:2%} #versus .fig.r img{object-position:right bottom; scale:-1 1}
+#versus .naambord{position:absolute; top:9%; z-index:6; font:2cqw/1 var(--pix); color:#fff; text-shadow:0 .3cqw 0 #000; white-space:nowrap; letter-spacing:normal}
+#versus .naambord small{display:block; font:.8cqw/1 var(--pix); color:#bdb6a8; margin-bottom:.8cqw; letter-spacing:.12em}
+#versus .naambord.l{left:4%} #versus .naambord.r{right:4%; text-align:right}
+#versus .vsteken{position:absolute; left:50%; top:46%; translate:-50% -50%; font:7cqw/1 var(--pix); color:#ffd84a; z-index:7; text-shadow:0 .5cqw 0 #000, .5cqw 0 0 #000, -.5cqw 0 0 #000, 0 -.5cqw 0 #000, 0 0 3cqw rgba(255,160,40,.7)}
+#versus .flits{position:absolute; inset:0; background:#fff; opacity:0; z-index:8; pointer-events:none}
+#versus .vsvs.speelt .kant.l{animation:vsinL .45s cubic-bezier(.2,.9,.2,1) both} #versus .vsvs.speelt .kant.r{animation:vsinR .45s cubic-bezier(.2,.9,.2,1) .1s both}
+#versus .vsvs.speelt .fig.l{animation:vsfigL .55s cubic-bezier(.2,.9,.3,1.2) .35s both} #versus .vsvs.speelt .fig.r{animation:vsfigR .55s cubic-bezier(.2,.9,.3,1.2) .45s both}
+#versus .vsvs.speelt .naambord.l{animation:vsinL .4s ease-out .75s both} #versus .vsvs.speelt .naambord.r{animation:vsinR .4s ease-out .8s both}
+#versus .vsvs.speelt .vsteken{animation:vsslam .45s cubic-bezier(.2,1.5,.4,1) 1s both}
+#versus .vsvs.speelt .naad{animation:vsnaad .4s ease-out .2s both}
+#versus .vsvs.speelt .flits{animation:vsflits .5s ease-out 1s both}
+@keyframes vsinL{from{translate:-60% 0} to{translate:0 0}} @keyframes vsinR{from{translate:60% 0} to{translate:0 0}}
+@keyframes vsfigL{from{translate:-120% 0; opacity:0} to{translate:0 0; opacity:1}} @keyframes vsfigR{from{translate:120% 0; opacity:0} to{translate:0 0; opacity:1}}
+@keyframes vsslam{from{scale:4; opacity:0; rotate:-12deg} 60%{opacity:1} to{scale:1; opacity:1; rotate:-4deg}}
+@keyframes vsnaad{from{clip-path:inset(0 0 100% 0)} to{clip-path:inset(0 0 0 0)}}
+@keyframes vsflits{from{opacity:.9} to{opacity:0}}
+#versus .vsoverslaan{position:absolute; right:1.5cqw; bottom:1.5cqw; z-index:9; font:max(7px, .75cqw)/1 var(--pix); color:#bbb; background:rgba(0,0,0,.5); border:0; padding:.8cqw 1cqw; cursor:pointer}
 </style>
 <div id="laadscherm"><div class="ldbox">
   <div class="ldtitel">ELEMENTAAL</div>
@@ -6811,7 +6865,7 @@ const LK = ["", "greed", "darkhole", "kuriboh", "reborn", "master", "negate", "d
 const LKI = {}; LK.forEach((k, i) => { if (k) LKI[k] = i; });
 const L_GREED = 1, L_DARKHOLE = 2, L_KURIBOH = 3, L_REBORN = 4, L_MASTER = 5, L_NEGATE = 6, L_DFUSION = 7, L_GAMBLE = 8, L_BRENGER = 9,
   L_ECHO = 10, L_KLOON = 11, L_DOORTAST = 12, L_VITAL = 13, L_SIPHON = 14, L_STERREGEN = 15, L_WEB = 16, L_STRUIK = 17, L_MAX = 18, L_BLOED = 19, L_SLIDE = 20, L_MOEDER = 21, L_SMOKE = 22, L_LOKAAS = 23;
-const LK_KOST = [0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0];   // 22: Smoke break kost 2   // 19: Bloedmaan kost 2   // Web gratis sinds 17 okt 2026
+const LK_KOST = [0, 4, 0, 2, 0, 0, 3, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0];   // nov 2026: alle levenskosten x2, Volledige Negatie kost 3   // 22: Smoke break kost 2   // 19: Bloedmaan kost 2   // Web gratis sinds 17 okt 2026
 // aethers: bits
 const AE_BITS = {ae_draw3:1, ae_watercycle:2, ae_offer:4, ae_fire6:8, ae_stonefull:16, ae_grassx2:32, ae_graf:64, ae_hemel:128,
   ae_lichtval:256, ae_smeed:512, ae_pijn:1024, ae_alziend:2048, ae_genade:4096, fu_water:8192, fu_fire:16384, fu_stone:32768, fu_grass:65536, ae_leven:131072, ae_zwerm:262144,
@@ -7094,7 +7148,7 @@ function effsVan0(G, id, origin){
 }
 const kloonE = e => Object.assign({}, e, e.keten ? {keten:e.keten.slice()} : null);
 function geplandeEffecten(G, p, id, asSpell, col, o){
-  const dub = (e, l) => (trioKracht(G, p, e) || (G.volle && e === STEEN && heeft(G, p, 'ae_stonefull') && !globalThis.LAW_PROEF)) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
+  const dub = (e, l) => trioKracht(G, p, e) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
   if (asSpell) return dub(G.kEl[id], effsVan(G, id, 1)).map(e => (e.col = col, e));
   let eigen = o.skipOwn ? [] : effsVan(G, id, 0);
   if (o.dubbel) eigen = eigen.concat(eigen.map(e => kloonE(e)));
@@ -7557,7 +7611,7 @@ function losOp(G, K, it){
       const id = effDoel(G, K, it, p, ids, true, {k:'steen'});
       if (id === 'fizzle' || id === null) return;
       { let n = 3;   // ronde 27: +3
-        if (globalThis.LAW_PROEF === 'a' && heeft(G, p, 'ae_stonefull')){ G.stTel = G.stTel ? G.stTel.slice() : [3, 3]; n = G.stTel[p]; G.stTel[p]++; }   // 🧪 Lawine A: de teller
+        if (heeft(G, p, 'ae_stonefull')){ G.stTel = G.stTel ? G.stTel.slice() : [4, 4]; n = G.stTel[p]; G.stTel[p]++; }   // 🟣 Lawine: de teller (vanaf 4)
         for (let i = 0; i < n; i++) levenErbij(G, id); }
       return;
     }
@@ -7835,6 +7889,10 @@ function doeNegatie(G, p){
     else { const w = vindWezen(G, it.card); if (w >= 0){ G.pl[wP(w)].cre[wC(w)] = 0; weg = true; zp = wP(w); } }
     if (weg) G.pl[G.kOwn[it.card]].grave.push(it.card);   // alleen wat echt van het veld komt
     if (zp >= 0) ziel(G, zp);
+    /* ✦ nov 2026: een genegeerde fusie geeft zijn offer terug (er is niets geofferd) */
+    const ot = it.offerTerug, q = it.ctrl;
+    if (weg && ot && !G.pl[q].cre[ot.c]){ const gi = G.pl[q].grave.lastIndexOf(ot.id);
+      if (gi >= 0){ G.pl[q].grave.splice(gi, 1); plaatsWezen(G, q, ot.c, ot.id); ['hp','pld','att','ent','minAtk','web','eiB','hx','hxT'].forEach((k, i) => { G.pl[q][k][ot.c] = ot.v[i]; }); } }
     return true;
   }
   return false;
@@ -8058,11 +8116,12 @@ function losLichtOp(G, K, it){
 function kondigFusieAan(G, K, p, id, tributeId, fuseKey, o){
   o = o || {};
   const s = G.pl[p];
-  let col, offerHp = 0, oudId = null;
+  let col, offerHp = 0, oudId = null, offerTerug = null;
   if (tributeId != null){
     const w = vindWezen(G, tributeId);
     if (w < 0 || wP(w) !== p){ G.pl[G.kOwn[id]].grave.push(fusieLos(G, id)); return false; }
     offerHp = Math.max(0, s.hp[wC(w)]); oudId = tributeId;
+    { const oc = wC(w); offerTerug = {id:tributeId, c:oc, v:['hp','pld','att','ent','minAtk','web','eiB','hx','hxT'].map(k => s[k][oc])}; }   // ✦ voor Volledige Negatie
     vernietig(G, p, wC(w));
   }
   if (o.col != null && !s.cre[o.col]) col = o.col;
@@ -8078,7 +8137,7 @@ function kondigFusieAan(G, K, p, id, tributeId, fuseKey, o){
   s.hp[col] += offerHp; s.pld[col] = G.gTurn;
   if (oudId != null) mikOver(G, oudId, id, p, col);
   const plan = legPlan(G, K, p, id, false, col, {});
-  pushPlay(G, p, id, false, col, plan === 'cancel' ? [] : plan, {asFuse:true, fuseKey});
+  pushPlay(G, p, id, false, col, plan === 'cancel' ? [] : plan, {asFuse:true, fuseKey, offerTerug});
   return true;
 }
 function mikOver(G, oud, nieuw, np, nc){
@@ -10017,30 +10076,30 @@ function bloesemVang(cr, pp, c, baas){
 }
 /* ✦ Lichtkaarten (Commander) — wit, worden door je deck geschud */
 const LIGHTS = {
-  greed:   {cost:2, tribute:true, name:"Bron van Gulzigheid", n:3},
+  greed:   {cost:4, tribute:true, name:"Bron van Gulzigheid", n:3},
   darkhole:{name:"Zwart Gat", n:3},   // kost sinds okt 2026 geen leven meer
-  kuriboh: {cost:1, name:"Wolkenzwerm", n:3},   // okt 2026: kost weer 1 leven
+  kuriboh: {cost:2, name:"Wolkenzwerm", n:3},   // okt 2026: kost weer 1 leven
   reborn:  {name:"Zielenoproep", n:3},
   master:  {name:"Elementaal Meester", n:3},
-  negate:  {name:"Volledige Negatie", n:3},
+  negate:  {cost:3, name:"Volledige Negatie", n:3},
   dfusion: {name:"Directe Fusie", n:3},
-  gamble:  {cost:1, name:"Gokkersbrouwsel", n:3, verhaal:true, weg:true},   // okt 2026: uit het spel
+  gamble:  {cost:2, name:"Gokkersbrouwsel", n:3, verhaal:true, weg:true},   // okt 2026: uit het spel
   brenger: {name:"Lichtbrenger", n:3},
   echo:    {name:"Echo", n:3, verhaal:true, weg:true},   // okt 2026: uit het spel
   kloon:   {name:"Kloon", n:3},
-  doortast:{cost:1, name:"Doortastend", n:3},
+  doortast:{cost:2, name:"Doortastend", n:3},
   vital:   {name:"Vitaliteit", n:3},
   web:     {name:"Web", n:3, verhaal:true, pvp:true},   // okt 2026: ook in PvP; kost sinds 17 okt geen leven meer
   siphon:  {name:"Levensroof", n:3},
   sterregen:{name:"Sterrenregen", n:3, verhaal:true, weg:true},   // nov 2026: uit het spel (3-4 geeft nu Levensroof)
   struik:  {name:"Roversbuit", n:3, verhaal:true, pvp:true},  // okt 2026: ook in PvP · ✦ van de Struik (2-2): zijn drie rituelen, elk één keer
   max:     {name:"Max", n:1, verhaal:true},          // ✦ 2-5: als je hem ving
-  bloedmaan:{cost:2, name:"Bloedmaan", n:3},         // okt 2026: bij Knort, en in PvP
+  bloedmaan:{cost:4, name:"Bloedmaan", n:3},         // okt 2026: bij Knort, en in PvP
   /* ronde 31: de lichtkaarten van de bazen. Je krijgt ze door hun challenge te winnen.
      Magnus-slide mag altijd in commander, ook als je hem nog niet hebt. */
   slide:   {name:"Magnus-slide", n:3, verhaal:true, cmd:true, van:"1-5"},
   moeder:  {name:"Moeders bescherming", n:3, verhaal:true, van:"2-6"},
-  smoke:   {cost:2, name:"Smoke break", n:3, verhaal:true, van:"3-6"},   // ✦ ronde 31: van Flint
+  smoke:   {cost:4, name:"Smoke break", n:3, verhaal:true, van:"3-6"},   // ✦ ronde 31: van Flint
   lokaas:  {name:"Het lokaas", n:3, verhaal:true, van:"4-5"}             // ✦ ronde 31: van de Oceaan
 };
 const lName = cd => (cd && cd.lk) ? LIGHTS[cd.lk].name : null;
@@ -10182,28 +10241,28 @@ const VAR_TEKST = {
   kolos:    {eig:"<b>333</b> levens, slaat <b>111</b>."}
 };
 const LICHT_TEKST = {
-  greed:   "{Betaal} <b>2</b> en {offer} een eigen wezen: trek <b>2</b>.",
+  greed:   "{Betaal} <b>4</b> en {offer} een eigen wezen: trek <b>2</b>.",
   darkhole:"Vernietig al je eigen wezens. Trek <b>1</b>. Zijn er <b>3</b> of meer echt vernietigd, trek <b>2</b>.",
-  kuriboh: "{Betaal} <b>1</b>. Zet op elke vrije eigen plek een ☁️ Wolk: <b>1</b> leven, {Kleurloos}, {Wijkt}.",
+  kuriboh: "{Betaal} <b>2</b>. Zet op elke vrije eigen plek een ☁️ Wolk: <b>1</b> leven, {Kleurloos}, {Wijkt}.",
   reborn:  "Kies: pak een ✦ lichtkaart uit je graf terug in je hand, óf {roep|roepop} er een wezen uit meteen {op|roepop} het veld, met <b>+3</b> levens.",
   master:  "Kies ☄️ Plasma, 🧊 IJs, 🌹 Roos of ⛰️ Rots: de sterke versie van een element. Deze kaart wordt dat tot het eind van het potje en gaat terug naar je hand.",
-  negate:  "{Negeer} de kaart die je tegenstander net speelde, ook een ✦ lichtkaart: alles wat die kaart deed wordt teruggedraaid en hij gaat naar het graf.",
+  negate:  "{Betaal} <b>3</b>. {Negeer} de kaart die je tegenstander net speelde, ook een ✦ lichtkaart: alles wat die kaart deed wordt teruggedraaid en hij gaat naar het graf.",
   dfusion: "Speel deze kaart als je 🟣 {fusie}, zonder offer.",
-  gamble:  "{Betaal} <b>1</b>: noem een type en trek <b>3</b>. Gooi weg wat niet dat type is.",
+  gamble:  "{Betaal} <b>2</b>: noem een type en trek <b>3</b>. Gooi weg wat niet dat type is.",
   brenger: "Zet een 🕯 Lichtbrenger op een vrije eigen plek: <b>4</b> levens, {Kleurloos}, {Volle slag}, {Onaantastbaar}.",
   echo:    "Het speel-effect van een eigen wezen gaat nog <b>twee keer</b> af.",
   kloon:   "Kies een kaart op het veld: wezen of ritueel, van wie ook. Leg er een kopie van neer waar je wilt aan jouw kant, met dezelfde levens. Als wezen of als ritueel (dan zonder levens). Het speel-effect gaat af.",
-  doortast:"{Betaal} <b>1</b>: kies een kaart uit je deck en neem die in je hand.",
+  doortast:"{Betaal} <b>2</b>: kies een kaart uit je deck en neem die in je hand.",
   vital:   "{Heel} <b>2</b>. Trek <b>1</b>.",
   web:     "Trek <b>1</b>. Alle vijandelijke wezens zitten {Vast}.",
   siphon:  "<b>5</b> {kleurloze|kleurloos} schade aan het wezen op een plek naar keuze. {Heel} zoveel als je schade doet.",
   sterregen:"<b>1</b> {kleurloze|kleurloos} schade aan elk vijandelijk wezen. Trek <b>1</b>.",
   max:     "Zet 🐺 Max op een vrije eigen plek: <b>5</b> levens, {Kleurloos}, {Volle slag}. Al je andere wezens <b>+1</b> leven.",
   struik:  "Kies 🗡 Swipe, 🔪 Stab of 🛡 Schild en leg die als ritueel in een kolom naar keuze. Elk kan <b>één keer</b> per potje; daarna doet deze kaart niets meer.",
-  bloedmaan:"{betaal} <b>2</b>. <b>20</b> {kleurloze|kleurloos} schade aan de wezens op twee plekken naar keuze, in twee verschillende kolommen.",
+  bloedmaan:"{betaal} <b>4</b>. <b>20</b> {kleurloze|kleurloos} schade aan de wezens op twee plekken naar keuze, in twee verschillende kolommen.",
   slide:    "Gaat meteen af. Twee willekeurige plekken van je tegenstander krijgen de 🧱 rotsval: aan het eind van deze beurt wordt wat daar staat verpletterd, behalve 🪨 Steen. Trek <b>1</b>. Speel je er meer, dan nooit twee keer dezelfde plek.",
   moeder:   "Gaat meteen af. Kies een eigen wezen: <b>+6</b> levens en {Onaantastbaar} tot het eind van de ronde.",
-  smoke:    "Alleen als reactie, in de beurt van je tegenstander. {Betaal} <b>2</b>. Zijn beurt eindigt meteen: wat al op de keten ligt gaat nog af, daarna is het jouw beurt. Trek <b>1</b>.",
+  smoke:    "Alleen als reactie, in de beurt van je tegenstander. {Betaal} <b>4</b>. Zijn beurt eindigt meteen: wat al op de keten ligt gaat nog af, daarna is het jouw beurt. Trek <b>1</b>.",
   lokaas:   "Gaat meteen af. Zet 🎣 <b>Het lokaas</b> op een vrije eigen plek: <b>10</b> levens, {Kleurloos}, {Muur}. Zolang het staat, gaat alles wat je tegenstander op jouw kant richt naar het lokaas: aanvallen, speel-effecten en lichtkaarten. Willekeurige plekken niet."
 };
 const AETHER_TEKST = {
@@ -10214,8 +10273,8 @@ const AETHER_TEKST = {
   ae_offer:     "Je 🔥 doet <b>1</b> meer. Je mag er ook een eigen wezen mee kiezen: {offer} die en trek <b>1</b>. Niet: een eigen 🔥, of iets in een kolom met een eigen 🔥-ritueel.",
   ae_fire6:     "Je 🔥-effect doet <b>2</b> meer schade (dus <b>4</b>) en raakt ook 💧 Water. Ook ⚡ Bliksem. Niet de overslag van ☄️ Plasma.",
   get ae_stonefull(){   // ronde 34: Volle slag is nu voor iedereen · nov 2026: twee proefversies (Opties)
-    const v = globalThis.LAW_PROEF || null;   // (geen lawProef hier: die bestaat bij het laden nog niet)
-    if(v === "a") return "🧪 <b>Proef A.</b> Een teller die op <b>3</b> begint. Elke keer dat een 🪨 Steen-effect van jou afgaat (speel-effect, ritueel, fusie of upgrade) komt er <b>1</b> bij. Je Steen geeft zoveel levens als de teller.";
+    const v = globalThis.LAW_PROEF || "a";   // nov 2026: A is gekozen (teller vanaf 4)
+    if(v === "a") return "Een teller die op <b>4</b> begint. Elke keer dat een 🪨 Steen-effect van jou afgaat (speel-effect, ritueel, fusie of upgrade) komt er <b>1</b> bij. Je Steen geeft zoveel levens als de teller.";
     if(v === "b") return "🧪 <b>Proef B.</b> Je 🪨 Steen mag <b>twee keer</b> per beurt aanvallen. Haal je hem met 💧 Water weg en zet je hem terug, dan krijgt hij er <b>één</b> terug, niet twee.";
     return "Het 🪨-speel-effect gaat <b>twee keer</b> (dus twee keer <b>+3</b> levens), ook als ritueel."; },
   ae_grassx2:   "Je 🌿 {verstrikt} met een dubbele drain: <b>−2</b> in plaats van −1 (op 🪨 Steen <b>−4</b>), en verstrikt ook 🔥 Vuur.",
@@ -12154,8 +12213,10 @@ const JUKE = (() => {
     return `<i style="--x:${(r(1) * 90).toFixed(1)}%;--g:${r(2) < .3 ? ".5cqw" : ".3cqw"};--d:${(1.6 + r(3) * 1.6).toFixed(2)}s;--del:${(-r(4) * 3).toFixed(2)}s;--dx:${((r(5) - .5) * 6).toFixed(1)}cqw;--h:${-(8 + r(6) * 10).toFixed(1)}cqw"></i>`; }).join("");
   function teken(){
     const w = WERELD, [lx, ly] = LAMP[w];
-    const vars = `--scene:url('art/jukebox-kamp-w${w}.png');--voor:url('art/jukebox-kamp-w${w}-voor.png');--lx:${(lx / 16.72).toFixed(2)}%;--ly:${(ly / 9.41).toFixed(2)}%`;
-    SCENE.innerHTML = `<div class="wereld lc${speelt() ? " loopt" : ""}" style="${vars}"><div class="achtergrond" style="background-image:url('art/jukebox-lucht-w${w}.png')"></div>
+    const K = KAMP[w];
+    if(!K) kampBereid(w);   // de eerste keer: de scène klaarmaken (zie kampBereid), daarna tekenen we opnieuw
+    const vars = `--scene:url('${K ? K.scene : `art/kamp-scene-w${w}.png`}');--voor:url('${K ? K.voor : `art/kamp-scene-w${w}-voor.png`}');--lx:${(lx / 16.72).toFixed(2)}%;--ly:${(ly / 9.41).toFixed(2)}%`;
+    SCENE.innerHTML = `<div class="wereld lc${speelt() ? " loopt" : ""}" style="${vars}"><div class="achtergrond" style="background-image:url('art/kamp-achter-w${w}.png')"></div>
       <div class="scherm" id="jbscherm" title="Klik om ergens in het nummer te springen"><i id="jbvul"></i><b></b></div><div class="kampscene"></div>
       <div class="lantaarn"></div><div class="lampglas"></div><div class="vlam"></div><i class="mot"></i>
       <div class="uitgelicht" id="jbuit" data-k="${ST.i}"><div class="lp" data-k="${ST.i}">${hoesHTML(T[ST.i])}</div></div>
@@ -12167,6 +12228,46 @@ const JUKE = (() => {
         <div class="naald"></div></div>
       <div class="gloed"></div></div>` + balkBoven() + `<div class="melding" id="jbmelding"></div>`;
     leg(); meet(); knopTeken();
+  }
+  /* De kampscène uit de repo (art/kamp-scene-wN.png) maken we hier klaar, één keer per wereld:
+     de schotjes uit de koffer gummen, de gleuf onder de knoppen iets hoger maken en uitknippen (daar
+     schijnt de voortgang doorheen), en de voorkant met de linkerwand van de koffer als eigen laag. */
+  const KAMP = {};
+  let KAMP_BEZIG = {};
+  function kampBereid(w){
+    if(KAMP_BEZIG[w]) return; KAMP_BEZIG[w] = true;
+    const img = new Image();
+    img.onload = () => { try{
+      const W = img.naturalWidth, H = img.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+      const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0);
+      const sx = W / 1672, sy = H / 941, P = (x, y) => [x * sx, y * sy];
+      const pad = pts => { g.beginPath(); pts.forEach(([x, y], i) => { const [a, b] = P(x, y); i ? g.lineTo(a, b) : g.moveTo(a, b); }); g.closePath(); };
+      /* 1. de binnenkant van de koffer: achterwand en bodem, egaal donker leer met wat ruis */
+      g.save(); pad([[163, 609], [493, 602], [588, 694], [204, 707]]); g.clip();
+      let gr = g.createLinearGradient(0, 603 * sy, 0, 640 * sy); gr.addColorStop(0, "rgb(92,40,22)"); gr.addColorStop(1, "rgb(60,26,14)");
+      g.fillStyle = gr; g.fillRect(0, 590 * sy, W, 50 * sy);
+      gr = g.createLinearGradient(0, 636 * sy, 0, 707 * sy); gr.addColorStop(0, "rgb(39,16,9)"); gr.addColorStop(1, "rgb(22,9,5)");
+      g.fillStyle = gr; g.fillRect(0, 636 * sy, W, 80 * sy);
+      for(let i = 0; i < 2600; i++){ const x = (160 + Math.random() * 430) * sx, y = (600 + Math.random() * 110) * sy; g.fillStyle = Math.random() < .5 ? "rgba(255,200,150,.05)" : "rgba(0,0,0,.08)"; g.fillRect(Math.round(x / 2) * 2, Math.round(y / 2) * 2, 2, 2); }
+      g.strokeStyle = "rgb(20,8,4)"; g.lineWidth = 2 * sy; g.beginPath(); g.moveTo(...P(166, 640)); g.lineTo(...P(496, 633)); g.stroke();
+      g.restore();
+      /* 2. de gleuf: iets hoger, en de donkere binnenkant eruit */
+      const gc = document.createElement("canvas"); gc.width = Math.round(192 * sx); gc.height = Math.round(28 * sy);
+      gc.getContext("2d").drawImage(c, 1208 * sx, 632 * sy, 192 * sx, 28 * sy, 0, 0, gc.width, gc.height);
+      g.drawImage(gc, 0, 0, gc.width, gc.height, 1208 * sx, 626 * sy, 192 * sx, 40 * sy);
+      const x0 = Math.round(1219 * sx), y0 = Math.round(639 * sy), bw = Math.round(170 * sx), bh = Math.round(14 * sy);
+      const d = g.getImageData(x0, y0, bw, bh), q = d.data;
+      for(let i = 0; i < q.length; i += 4) if((q[i] + q[i + 1] + q[i + 2]) / 3 < 60) q[i + 3] = 0;
+      g.putImageData(d, x0, y0);
+      /* 3. de voorkant met de linkerwand, als eigen laag */
+      const v = document.createElement("canvas"); v.width = W; v.height = H; const gv = v.getContext("2d");
+      gv.beginPath(); [[118, 596], [167, 596], [206, 709], [592, 694], [625, 690], [625, 870], [118, 870]].forEach(([x, y], i) => i ? gv.lineTo(x * sx, y * sy) : gv.moveTo(x * sx, y * sy)); gv.closePath(); gv.clip();
+      gv.drawImage(c, 0, 0);
+      /* als blob-adres: een data-adres van een paar MB is te lang voor een CSS-variabele */
+      c.toBlob(b1 => v.toBlob(b2 => { KAMP[w] = {scene:URL.createObjectURL(b1), voor:URL.createObjectURL(b2)}; if(OPEN && WERELD === w) teken(); }, "image/png"), "image/png");
+    }catch(e){ KAMP_BEZIG[w] = false; } };
+    img.onerror = () => { KAMP_BEZIG[w] = false; };
+    img.src = `art/kamp-scene-w${w}.png`;
   }
   function leg(){
     const zv = zichtbaar(), sel = ST.i;
@@ -14138,7 +14239,8 @@ async function tokenRitueel(p, c, bronId){
 /* 💥 ronde 34: in Volle slag heeft iedereen al volle slag, dus doet 🟣 Lawine daar iets anders: het 🪨-speel-effect gaat twee keer */
 const lawineTwee = (p, el) => !!(S && S.volle) && el === "steen" && hasAe(p, "ae_stonefull") && !lawProef();
 /* 🧪 nov 2026: twee proefversies van Lawine om te playtesten (Opties): A = een teller, B = twee keer aanvallen */
-const lawProef = () => (typeof SET === "object" && (SET.lawProef === "a" || SET.lawProef === "b")) ? SET.lawProef : null;
+const lawProef = () => "a";   // nov 2026: versie A gekozen, teller begint op 4
+globalThis.LAW_PROEF = "a";
 function lawProefZet(v){ SET.lawProef = v || null; globalThis.LAW_PROEF = lawProef(); saveSet();
   if(AETHERS.ae_stonefull) AETHERS.ae_stonefull.txt = AETHERS.ae_stonefull.kort = kwHTML(AETHER_TEKST.ae_stonefull); }   // de uitleg volgt de proef
 setTimeout(() => { globalThis.LAW_PROEF = lawProef(); if(AETHERS.ae_stonefull && typeof kwHTML === "function") AETHERS.ae_stonefull.txt = AETHERS.ae_stonefull.kort = kwHTML(AETHER_TEKST.ae_stonefull); }, 0);
@@ -15738,7 +15840,12 @@ function fusieFlits(p, c){
 }
 /* Fusie: het offer gaat, het fusiewezen komt op een vrije plek naar keuze, met de levens van
    het offer erbij. Zijn speel-effect gaat de keten op zoals bij elk ander wezen. */
+/* ✦ nov 2026: een fusie krijgt ook een momentopname van vóór het offer. Negeert de ander hem
+   met Volledige Negatie, dan komt het offer gewoon terug: er is niets geofferd. */
 async function announceFusion(p, card, tributeId, fuseKey, opts){
+  return await metSnap(p, card, () => announceFusion0(p, card, tributeId, fuseKey, opts));
+}
+async function announceFusion0(p, card, tributeId, fuseKey, opts){
   if(typeof window !== "undefined" && window.__fuseN) window.__fuseN[p]++;   // testteller
   const o = opts || {};
   let col, offerHp = 0, oudId = null;
@@ -16713,9 +16820,9 @@ async function resolveEffect(it){
   if(it.el === "steen"){
     const ids = allCreIds((cr, pp) => !hexVan(cr, pp, p));
     if(!ids.length){ addLog("🪨 Geen wezen om +3 levens te geven."); return; }
-    /* 🧪 Lawine A: de teller (begint op 3, en elk Steen-effect dat afgaat zet er 1 bij) */
+    /* 🟣 Lawine: de teller (begint op 4, en elk Steen-effect dat afgaat zet er 1 bij) */
     const telA = lawProef() === "a" && hasAe(p, "ae_stonefull");
-    const n = telA ? ((S.lawTel || (S.lawTel = [3, 3]))[p]) : 3;
+    const n = telA ? ((S.lawTel || (S.lawTel = [4, 4]))[p]) : 3;
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🪨 Steen: geef een wezen +${n} levens (optioneel)`, true, {k:"steen"});
     if(id === "fizzle") return;
     if(telA) S.lawTel[p]++;
@@ -21639,7 +21746,8 @@ function thuisDHTML(){
   /* ronde 23: jouw karakter in de PvP-kaart is de knop naar het karakterscherm (het aparte vak is weg) */
   const inktMijn = isInktSkin(kc);   // 🖤 Inkts inkt: alles zwart, alleen de oogjes en de tekst
   /* ronde 34: de effecten van sommige skins (noten, lampjes, zwerm) ook hier op de PvP-kaart */
-  const fxMijn = kc && !kc.wil && mijnFig ? skinFxBox(kc, mijnFig) : null;
+  const spgMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "spiegel" && WSP.laad(lofiHerteken) === "klaar");   // 🪞 het glas vult de hele kaart
+  const fxMijn = spgMijn ? `<span class="tkleeg"></span>` : (kc && !kc.wil && mijnFig ? skinFxBox(kc, mijnFig) : null);
   const infMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "inferno"); if(infMijn) infernoStart();   // 🔥 Maatje
   const lichtMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "licht");   // ✨ Xam
   const aurMijn = !!(kc && !kc.wil && (skinVan(kc.id) || {}).speciaal === "bloedaurora"); if(aurMijn) infernoStart();   // 🩸 Bloedmaan-Aurora
@@ -21668,7 +21776,7 @@ function thuisDHTML(){
       <span class="tverderbg" style="background-image:${plekBg(vg)}"></span>${verderFig}
       <span class="tverderin"><span class="tic">&#9654;</span><span><b>${titel}</b><em>${regel}</em>${stand ? `<i>${stand}</i>` : ""}</span></span></button>
     <div class="trechts">
-      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${pvpBg}`}"></span>${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
+      <div class="tkaart blauw tmetbeeld${inktMijn ? " inktkaart" : ""}" role="button" tabindex="0" data-act="btn" data-btn="pvp"><span class="tkbg" style="${inktMijn ? "background:#000;filter:none" : `background-image:${pvpBg}`}"></span>${spgMijn ? `<span class="tkspiegel" aria-hidden="true"><span class="wsprot">${WSP.html("pvpkaart", "")}</span></span>` : ""}${infMijn ? INFERNO_DOEK("tkinferno") : ""}${lichtMijn ? XAM_STRALEN("tklicht") : ""}${aurMijn ? RODE_AURORA("tkaurora") : ""}${majMijn ? `<span class="majrandlaag" aria-hidden="true"></span>` : ""}${pvpFig}<span class="tic">VS</span><span><b>PVP</b><em>vriend of bots</em><i>commander · best of 1 · best of 3</i></span></div>
       <button class="tkaart rood tmetbeeld" data-act="btn" data-btn="mpmodus" data-m="chal" data-bot="1"><span class="tkbg" style="background-image:${chalBg}"></span>${chalFig}<span class="tic">&#9733;</span><span><b>CHALLENGES</b><em>${chal.n} van ${chal.tot} kroontjes</em>${chal.volg ? `<i>volgende: ${chal.volg}</i>` : `<i>versla eerst iemand in het verhaal</i>`}</span></button>
       <div class="tonder"><button class="tklein" data-act="btn" data-btn="audio">OPTIES</button><button class="tklein" data-act="btn" data-btn="aelib">LIBRARY</button>
         <button class="tklein" data-act="btn" data-btn="decks">DECKS</button>
@@ -21861,9 +21969,6 @@ function audioHTML(){
     <div class="sub" style="font-size:.74rem;margin-top:14px;color:var(--dim)">
       ${muziekStand()}
     </div>
-    <div class="sub" style="margin-top:16px;margin-bottom:2px">🧪 Lawine-proef</div>
-    <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">Om te playtesten. A: een teller die op 3 begint en bij elk Steen-effect 1 hoger wordt. B: je Steen valt twee keer per beurt aan. Geldt voor iedereen met Lawine, ook de bots.</div>
-    <div class="segrow"><button class="seg${!lawProef() ? " on" : ""}" data-act="btn" data-btn="law_">Zoals nu</button><button class="seg${lawProef() === "a" ? " on" : ""}" data-act="btn" data-btn="law_a">A · teller</button><button class="seg${lawProef() === "b" ? " on" : ""}" data-act="btn" data-btn="law_b">B · 2× aanvallen</button></div>
     <div class="sub" style="margin-top:16px;margin-bottom:2px">Filmstudio</div>
     <div class="sub" style="font-size:.74rem;color:var(--dim);margin-bottom:6px">De filmpjes afspelen met muziek naar keuze, om uit te proberen wat waar past.</div>
     <div class="segrow"><button class="seg" data-act="btn" data-btn="filmstudio">🎬 Open de filmstudio</button></div>
@@ -37035,6 +37140,27 @@ LADDER_KNORT.alleenBot = false;
 /* In het verhaal komt Knort net na Seraf (2-1), dus daar staat hij ook in de rij. */
 MP_CHARS.splice(MP_CHARS.findIndex(c => c.id === "2-1") + 1, 0, LADDER_KNORT);
 skinsInbouwen();   // 🎭 ronde 31: de skins, elk achter zijn personage
+/* 🪞 nov 2026: de oude tekeningen van De Weerspiegeling zijn eruit. Waar een stilstaand plaatje nodig is (een melding,
+   het versus-scherm, een tegel zonder canvas) maken we er een uit de nieuwe art: het gebroken glas met de collage
+   van die stand erin. Tot dat klaar is: alleen het glas. */
+(function wspStil(){
+  const W = "art/skin-weerspiegelingeng-", spr = "skinweerspiegelingeng", stand = st => ({_taunt:"taunt", _boos:"boos", _stuk:"stuk"})[st] || "gewoon";
+  SKIN_STANDEN.forEach(st => { SPRITE_BEELD[spr + st] = W + "glas.png"; delete SPRITE_TERUG[spr + st]; });
+  if(FAST || typeof document === "undefined") return;
+  const laad = n => new Promise((ok, mis) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mis; i.src = W + n + ".png"; });
+  setTimeout(() => Promise.all(["glas", "barst", "col-gewoon", "col-taunt", "col-boos", "col-stuk"].map(laad)).then(([glas, barst, ...col]) => {
+    const per = {gewoon:col[0], taunt:col[1], boos:col[2], stuk:col[3]}, klaar = {};
+    Object.entries(per).forEach(([k, c]) => {
+      const cv = document.createElement("canvas"); cv.width = 512; cv.height = 768; const g = cv.getContext("2d");
+      g.drawImage(glas, 0, 0, 512, 768);
+      g.globalAlpha = .7; g.globalCompositeOperation = "screen"; g.drawImage(c, 0, 0, 512, 768);
+      g.globalAlpha = .4; g.globalCompositeOperation = "source-over"; g.drawImage(c, 0, 0, 512, 768);
+      g.globalAlpha = 1; g.drawImage(barst, 0, 0, 512, 768);
+      cv.toBlob(b => { klaar[k] = URL.createObjectURL(b);
+        if(Object.keys(klaar).length === 4) SKIN_STANDEN.forEach(st => { SPRITE_BEELD[spr + st] = klaar[stand(st)]; }); }, "image/png");
+    });
+  }).catch(() => {}), 1500);
+})();
 const EL_BESCHERM = {steen:"vuur", water:"gras", vuur:"steen", gras:"water"};   // verslaat wat jou verslaat
 const EL_PROOI = {steen:"water", water:"vuur", vuur:"gras", gras:"steen"};      // wat jij verslaat
 const BAAS_AE = {steen:["ae_stonefull", "fu_stone"], water:["ae_watercycle", "fu_water"],   // ronde 30: zonder Oerkracht
@@ -37767,6 +37893,10 @@ function mpKnop(btn, el){
       const md = MP_MODUS[M.modus] || MP_MODUS.cmd, bot = btn === "mpstart";
       if(!bot && M.modus !== "cmd" && deckAlleenBot(mijnProfiel().deck)){ M.stap = "deck"; M.melding = "Dit deck gebruikt een aether die alleen tegen de bot mag (van de ladder of uit het verhaal)."; render(); return true; }
       { const k = mpKeus(), vrij = mpCharsVrij(); if(k.wil && vrij.length){ k.char = vrij[Math.floor(Math.random() * vrij.length)]; saveSet(); } }
+      /* ⚔ nov 2026: vóór een challenge eerst het versus-scherm, daarna pas het gevecht */
+      if(bot && M.modus === "chal" && M.tegen && !FAST && !M.vsGezien){ const M0 = M; M0.vsGezien = true;
+        versusToon(M0.tegen, mpKeus().char).then(() => { if(M === M0) mpKnop("mpstart", null); });
+        return true; }
       LADDER_KEUS = (bot && M.modus === "chal" && M.tegen) ? M.tegen : null;   // ⚔ tegen wie (Challenges)
       LADDER_STIL = bot && M.modus === "wil";   // 🎲 Willekeurig: stiekem een van de challenge-decks
       M = null; HOME.open = null;
@@ -37785,6 +37915,46 @@ function mpKnop(btn, el){
   return false;
 }
 
+/* ⚔ nov 2026: vóór een challenge eerst het versus-scherm. Zwart: "Je hebt X verslagen. Maar ben je ook klaar voor
+   Y?!", met X het verhaalpersonage dat de challenge opent en Y de skin waartegen je vecht (Rocky → Kees). Dan de
+   schuine snede (stijl A, zonder vuur): jij links, hij rechts. Klikken of een toets slaat het over. */
+let VS_BEZIG = false;
+function versusToon(ladId, mijnId){
+  return new Promise(klaar => {
+    if(FAST || VS_BEZIG){ klaar(); return; }
+    VS_BEZIG = true;
+    const L = STORY[ladId] || {}, sk = SKINS.find(k => k.van === ladId);
+    const van = String(L.vechtNaam || L.vijand || chalNaam(ladId)).replace(EMOJI_RE, "").trim();
+    const hij = mpChar(sk ? sk.id : ladId), jij = mpChar(mijnId);
+    const pad = (c, st) => { try{ return (st && ptSprIs(c.spr + st) && sprBeeldPad(c.spr + st)) || sprBeeldPad(c.spr); }catch(e){ return ""; } };
+    const bg = c => { const s2 = skinVan(c.id); return (s2 ? `url('art/bg-skin-${s2.file}.png'), ` : "") + `url('art/bg-${c.lv}.png')`; };
+    const naamY = sk ? sk.naam : hij.naam;
+    const klY = hij.kleur || "#ff5a3c", klJ = jij.kleur || "#7fd8ff";
+    const el = document.createElement("div"); el.id = "versus"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Versus");
+    el.innerHTML = `<div class="vspodium"><div class="vslaag vszwart aan"><div><div class="r1"></div><div class="r2"></div><div class="r3" style="--kl:${klY}"></div></div></div>
+      <div class="vslaag vsvs"><div class="kant l" style="background-image:${bg(jij)};--kl:${klJ}"></div><div class="kant r" style="background-image:${bg(hij)};--kl:${klY}"></div>
+        <svg class="naad" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="58" y1="0" x2="42" y2="100" class="gloei"/><line x1="58" y1="0" x2="42" y2="100" class="kern"/></svg>
+        <div class="fig l"><img src="${pad(jij, "_taunt")}" alt="" onerror="this.remove()"></div><div class="fig r"><img src="${pad(hij, "_boos")}" alt="" onerror="this.remove()"></div>
+        <div class="naambord l"><small>JIJ</small>${jij.naam}</div><div class="naambord r"><small>CHALLENGE</small>${naamY}</div><div class="vsteken">VS</div><div class="flits"></div></div>
+      <button class="vsoverslaan">OVERSLAAN ›</button></div>`;
+    document.body.appendChild(el);
+    const tijden = []; const later = (f, t) => tijden.push(setTimeout(f, t));
+    let weg = false;
+    const sluit = () => { if(weg) return; weg = true; tijden.forEach(clearTimeout); document.removeEventListener("keydown", toets, true);
+      el.style.transition = "opacity .25s"; el.style.opacity = "0"; setTimeout(() => { el.remove(); VS_BEZIG = false; klaar(); }, 260); };
+    const toets = e => { e.preventDefault(); e.stopPropagation(); sluit(); };
+    el.addEventListener("click", sluit); document.addEventListener("keydown", toets, true);
+    const [z1, z2, z3] = ["r1", "r2", "r3"].map(c => el.querySelector(".vszwart ." + c));
+    const typ = (z, tekst, t0, snel) => { later(() => z.classList.add("aan"), t0);
+      [...tekst].forEach((ch, i) => later(() => { z.innerHTML = tekst.slice(0, i + 1) + '<span class="cursor"></span>'; if(i % 2 === 0) AU.play("blip"); }, t0 + i * snel));
+      later(() => { z.textContent = tekst; }, t0 + tekst.length * snel + 400); return t0 + tekst.length * snel; };
+    let t = typ(z1, `Je hebt ${van} verslagen.`, 500, 42);
+    t = typ(z2, "Maar ben je ook klaar voor...", t + 900, 46);
+    later(() => { z3.textContent = naamY.toUpperCase() + "?!"; if(naamY.length > 16) z3.style.fontSize = "2.6cqw"; z3.classList.add("aan"); AU.play("thud"); }, t + 900);
+    later(() => { el.querySelector(".vszwart").classList.remove("aan"); const vs = el.querySelector(".vsvs"); vs.classList.add("aan", "speelt"); later(() => AU.play("win"), 1000); }, t + 3100);
+    later(sluit, t + 3100 + 2600);
+  });
+}
 /* Wat een karakter zegt, in vier soorten: uitdagen, bijna gewonnen, verliezen en begroeten.
    Alles komt uit het eigen gevecht van dat personage: de zinnen uit de balk (zeg) en wat het
    in de gesprekken ervoor en erna zegt. Elke zin heeft het plaatje dat erbij hoort. */
@@ -38883,7 +39053,8 @@ function irisOvergang(fn, punt, wacht0){
   });
 }
 function onBtn(btn, el, fromAction){
-  if(!fromAction && !IRIS_IN && !IRIS_BEZIG && (IRIS_KNOP.has(btn) || (btn === "closemodal" && M && M.type === "story")) && irisMag()){
+  if(!fromAction && !IRIS_IN && !IRIS_BEZIG && (IRIS_KNOP.has(btn) || (btn === "closemodal" && M && M.type === "story")) && irisMag()
+     && !(btn === "mpstart" && M && M.type === "mp" && M.modus === "chal")){   // ⚔ een challenge heeft zijn eigen overgang: het versus-scherm
     let punt = null;
     if(btn === "storylevel" && el && el.dataset && el.dataset.id){
       const m = document.querySelector(`#bordvlak .bbord[data-id="${el.dataset.id}"] .bbmed`);
