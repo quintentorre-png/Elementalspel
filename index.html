@@ -4847,6 +4847,7 @@ body.pc #fieldwrap .slot.sp.hl .zp{filter:drop-shadow(0 0 3px #f6dc8c) drop-shad
 
 body.pc #fieldwrap .slot.sp.tgt .zp{filter:drop-shadow(0 0 3px #ff9d4d) drop-shadow(0 0 12px rgba(255,140,60,.9))}
 body.pc #fieldwrap .slot.sp .zp.in{animation:zegelIn .5s ease both}
+.zp.wacht{visibility:hidden} .zp.wacht, .zp.wacht *{animation-play-state:paused !important}
 @keyframes zegelIn{from{transform:scale(.6); opacity:0}}
 .zgl{position:absolute; left:-30px; right:-30px; height:240px; z-index:0; pointer-events:none;
   background:radial-gradient(ellipse 50% 50% at 50% 50%, color-mix(in srgb, var(--ek) 34%, transparent), transparent 70%)}
@@ -13967,6 +13968,7 @@ async function wraakzucht(p, n){
   if(S.over || !(n > 0) || !hasAe(p, "ae_lichtval") || P(p).life <= 0) return;
   { const r = Math.ceil(S.gTurn / 2); if(!S.wraakR) S.wraakR = [-1, -1]; if(S.wraakR[p] === r) return; S.wraakR[p] = r; }   // nov 2026: één keer per ronde
   addLog(`🟣 <em>Wraakzucht</em>: ${pName(p)} verliest leven en trekt een kaart.`, true);
+  if(!FAST) await ANI_AE.wraak(p);   // ✨
   await drawN(p, 1);
 }
 /* ✋ Handlimiet (okt 2026): zes kaarten. Je mag er tijdens je beurt meer hebben, maar aan
@@ -14015,7 +14017,7 @@ function destroyCre(p, c, cause){
      && S.genade && S.genade[p] !== S.gTurn){
     S.genade[p] = S.gTurn;
     cr.hp = 1;
-    heiligLicht(creSel(p, c));
+    if(!ANI_AE.genade(p, c)) heiligLicht(creSel(p, c));   // ✨ half in as, dan redt het licht hem
     addLog(`🕊 <em>Laatste Adem</em>: ${icon(cr.card.el)} ${EL[cr.card.el].name} van ${pName(p)} blijft staan op <b>1 leven</b>.`, true);
     render();
     return;
@@ -14054,24 +14056,26 @@ function destroyCre(p, c, cause){
     addLog(`🕸 <em>Het web</em>: waar net iets van ${pName(p)} stierf, hangt meteen een 🥚 ei (kolom ${c+1}).`, true);
     if(!FAST){ setTimeout(() => { pop(creSel(p, c), "🥚", "imm"); AU.play("place"); }, 250); }
   }
-  zielDood(p);                            // 🟣 Zielenoffer
+  zielDood(p, c);                         // 🟣 Zielenoffer
 }
 /* 🟣 Zielenoffer (okt 2026): sterft er een wezen of token van p (vernietigd, geofferd, of weg
    doordat er iets overheen gespeeld wordt), dan komt er een onzichtbaar token op de aether. Bij
    het derde gaan ze er alle drie af en trekt p meteen een kaart. Zo ook in de kern (ziel). */
-function zielDood(p){
+function zielDood(p, c){
   if(S && !S.over && hasAe(p, "ae_rouw")){                 // 🌙 Nagloed (ronde 29): sterft er iets van jou, heel 1
     P(p).life += 1;
     addLog(`🌙 <em>Nagloed</em>: ${pName(p)} heelt <b>1</b>.`, true);
     if(typeof aeFlits === "function") aeFlits(p, "ae_rouw");
+    if(!FAST) ANI_AE.nagloed(p, c);   // ✨ een hartje naar je levens
   }
   if(!S || S.over || !hasAe(p, "ae_ziel")) return;
   if(!Array.isArray(S.ziel)) S.ziel = [0, 0];
   S.ziel[p]++;
-  if(S.ziel[p] < 4){ addLog(`🟣 <em>Zielenoffer</em>: ${S.ziel[p]} van 4 voor ${pName(p)}.`); aeFlits(p, "ae_ziel"); return; }
+  if(S.ziel[p] < 4){ addLog(`🟣 <em>Zielenoffer</em>: ${S.ziel[p]} van 4 voor ${pName(p)}.`); aeFlits(p, "ae_ziel"); if(!FAST) ANI_AE.ziel(p, c, S.ziel[p], false); return; }
   S.ziel[p] = 0;
   addLog(`🟣 <em>Zielenoffer</em>: de vierde ziel. ${pName(p)} trekt een kaart.`, true);
   aeFlits(p, "ae_ziel", `#deck${p}`, "de vierde ziel: trek een kaart");
+  if(!FAST) ANI_AE.ziel(p, c, 4, true);   // ✨
   if(P(p).deck.length === 0){
     addLog(`${pName(p)} moet trekken met een <em>leeg deck</em> en verliest!`, true);
     gameOver(opp(p), pName(p) + " moest een kaart trekken uit een leeg deck.");
@@ -14128,6 +14132,7 @@ function applyDamage(id, srcEl, base, o){
     const sc = o && o.srcSel ? o.srcSel : null;
     /* ✨ ⚡ Bliksem slaat van boven in, ☄️ Plasma als meteoor met drukgolf, de rest Vlammenzee */
     if(!(o && o.blik && ANI.onweer(sc, sel, f.p, f.c)) && !(o && o.plasma && ANI.plasma(sc, sel, f.p, f.c))) fxFire(sc, sel);
+    if(o && o.expl && !o.plasma && !o.blik && !FAST) ANI_AE.explosie(f.p, f.c, o.ctrl);   // ✨ Explosiegevaar
   }
   if(out === "immuun"){
     pop(sel, "IMMUUN", "imm");
@@ -15087,7 +15092,7 @@ async function placeNow(p, card, asSpell, col, opts){
     const kd = slot.cre.card;
     if(!kd.token && oudVar !== "kiezel" && !(EL[oud] && EL[oud].token)) P(kd.owner).grave.push(kd);
     slot.cre = null; render();
-    zielDood(p);                          // 🟣 Zielenoffer: wat onder een nieuwe kaart verdwijnt, telt
+    zielDood(p, col);                     // 🟣 Zielenoffer: wat onder een nieuwe kaart verdwijnt, telt
   }
   if(slot.cre){ P(p).hand.push(card); addLog(`Wezenplek bezet: ${icon(card.el)} keert terug naar de hand.`); return false; }
   if(o.keepHp == null) delete card.ws;                    // vers gespeeld: nog geen 🪞 spiegel
@@ -15097,6 +15102,7 @@ async function placeNow(p, card, asSpell, col, opts){
     if(S.lenteT[p] !== S.gTurn){
       S.lenteT[p] = S.gTurn; slot.cre.hp += 4; slot.cre.bloesem = 1;
       addLog(`💗 <em>Liefde</em>: ${kNaam(card)} komt binnen met +4 levens en een 🌸 bloesem.`, true);
+      if(!FAST) ANI_AE.liefde(p, col);   // ✨
     }
   }
   if(o.keepHp != null && slot.cre){                       // 💧 herspelen: levens blijven, tokens niet
@@ -15262,7 +15268,7 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
       if(card.var) kp.var = card.var;
       P(p).cols[col].spell = {card:kp};
       addLog(`🟣 <em>Altaar</em>: onder ${kIcon(card)} ${kNaam(card)} komt een kopie als ritueel in kolom ${col+1}${oud ? ` (in plaats van ${kIcon(oud.card)} ${kNaam(oud.card)})` : ""}. Dat ritueel gaat meteen mee af.`, true);
-      if(!FAST){ pop(spellSel(p, col), "ALTAAR", "heal"); render(); await sleep(220); }
+      if(!FAST){ render(); if(ANI.aan()) await ANI_AE.altaar(p, col); else await sleep(220); pop(spellSel(p, col), "ALTAAR", "heal"); }   // ✨
     }
   }
   const plan = await declarePlan(p, card, asSpell, col, {onField:true, waterVoor});
@@ -15347,7 +15353,7 @@ function getijPlus(p, card){
   let up = false;
   if(!card.var && !card.token && !card.fusie && GETIJ_UP[card.el]){ card.var = GETIJ_UP[card.el]; up = true; }
   f.cr.hp += 3;
-  if(up && !FAST) ANI.metamorfose(f.p, f.c, card.var);   // ✨ Metamorfose, alleen met licht
+  if(up && !FAST){ ANI.metamorfose(f.p, f.c, card.var); ANI_AE.tegel(p, "ae_watercycle", "#4aa8ff"); }   // ✨ Metamorfose, alleen met licht
   pop(creSel(f.p, f.c), up ? `⬆ ${VAR[card.var].name.toUpperCase()} +3` : "+3", "heal");
   addLog(`🟣 Getijdenstroom: ${up ? `${EL[card.el].icon} wordt ${VAR[card.var].icon} <em>${VAR[card.var].name}</em> en krijgt` : `${kIcon(card)} ${kNaam(card)} krijgt`} <b>+3</b> levens (nu ${f.cr.hp}).`, true);
   if(up) render();
@@ -16098,6 +16104,7 @@ async function announceLight0(p, card, flash){
   if(LIGHTS[k].cost && !stromanVangt(p)){
     if(S.story) S.story.naadEigen = true;
     P(p).life -= LIGHTS[k].cost;
+    if(!FAST) ANI.L.betaal(p, LIGHTS[k].cost);   // ✨ de hartjes vliegen naar de kaart
     if(S.story) S.story.naadEigen = false;
     addLog(`${pName(p)} betaalt ${LIGHTS[k].cost} leven voor ✦ ${LIGHTS[k].name} (nog ${P(p).life}).`);
     await wraakzucht(p, LIGHTS[k].cost);
@@ -16136,6 +16143,7 @@ async function announceLight0(p, card, flash){
     S.hemelT[p] = S.gTurn;
     P(p).life += 1; levensPiek(p);
     addLog(`🟣 <em>Hemelschoon</em>: ${pName(p)} heelt 1 leven (nu ${P(p).life}) en trekt een kaart.`, true);
+    if(!FAST) await ANI_AE.hemel(p);   // ✨
     pop(rectOf(`.pside[data-side="${p}"] .plife`), "+1", "heal");
     await drawN(p, 1);
     render();
@@ -16169,7 +16177,8 @@ async function announceDirectFusion(p, card, flash){
   const s = await chooseSlot(p, slots, `✦ Directe Fusie: kies een plek voor 🟣 ${AETHERS[fk].name} ${icon(el)}`, true, {el});
   if(s === "cancel") return "cancel";
   card.el = el; delete card.lk;                       // de lichtkaart wórdt de fusiecreature
-  fxLight(spellSel(p, s.c)); AU.play("light");
+  if(FAST || !ANI.aan()) fxLight(spellSel(p, s.c)); else await ANI.L.sterrenval(p, s.c);   // ✨ Sterrenval
+  AU.play("light");
   return await announceFusion(p, card, null, fk, {col:s.c, direct:true});
 }
 /* Volledige Negatie: haalt de bovenste kaart-link van de tegenstander volledig weg. */
@@ -16178,6 +16187,7 @@ function doNegate(p, negKaart){
   const top = S.stack[S.stack.length - 1];
   if(top && top.snap && top.snap.p === opp(p) && top.type !== "attack"){
     const sn = top.snap, card = sn.kaart;
+    const negG = FAST ? null : ANI.L.negVoor(card);   // ✨ Terugspoelen
     snapTerug(sn.staat);
     S.stack = S.stack.filter(it => it.snap !== sn);
     kaartNaarGraf(card);
@@ -16185,7 +16195,7 @@ function doNegate(p, negKaart){
     AU.play("light");
     const nm = card && card.lk ? "✦ " + ((LIGHTS[card.lk] || {}).name || "lichtkaart") : (card ? kNaam(card) : "de kaart");
     addLog(`✦ Volledige Negatie: <em>${nm}</em> van ${pName(sn.p)} wordt teruggedraaid. Alles wat hij deed is ongedaan en de kaart gaat naar het graf.`, true);
-    if(!FAST) witFlits();
+    if(!FAST && !ANI.L.negNa(negG)) witFlits();
     return true;
   }
   for(let i = S.stack.length - 1; i >= 0; i--){
@@ -16201,10 +16211,10 @@ function doNegate(p, negKaart){
     let weg = false, zielP = null;
     if(it.asSpell){
       const sl = P(it.ctrl).cols[it.col];
-      if(sl.spell && sl.spell.card.id === it.card.id){ sl.spell = null; weg = true; }
+      if(sl.spell && sl.spell.card.id === it.card.id){ if(!FAST) ANI.L.negNa(ANI.L.negVoor(it.card)); sl.spell = null; weg = true; }
     } else {
       const f = findCre(it.card.id);
-      if(f){ fxLight(creSel(f.p, f.c)); P(f.p).cols[f.c].cre = null; weg = true; zielP = f.p; }
+      if(f){ if(FAST || !ANI.L.negNa(ANI.L.negVoor(it.card))) fxLight(creSel(f.p, f.c)); P(f.p).cols[f.c].cre = null; weg = true; zielP = f.p; }
     }
     /* Alleen wat echt van het veld komt gaat naar het graf (anders lag hij er soms twee keer). */
     if(weg) P(it.card.owner).grave.push(it.card);
@@ -16244,6 +16254,7 @@ async function resolveLight(it){
   /* 🚬 Smoke break (ronde 31): de beurt van de ander stopt zodra de keten af is. */
   if(k === "smoke"){
     S.smokeEind = true;
+    if(!FAST) ANI.L.rook();   // ✨ Rookgordijn
     addLog(`🚬 <em>Smoke break</em>: zodra de keten af is, stopt de beurt van ${pName(opp(p))}.`, true);
     await drawN(p, 1);
     render();
@@ -16282,6 +16293,7 @@ async function resolveLight(it){
                   {v:"stab", label:"Stab · 6 recht tegenover", ic:"🔪"},
                   {v:"schild", label:"Schild · een schildje van 0/2", ic:"🛡"}].filter(o => al.indexOf(o.v) < 0);
     if(!opts.length){ addLog(`✦ Roversbuit: het arsenaal is leeg. Er gebeurt niets.`, true); return; }
+    if(!FAST) await ANI.L.truc(p, al.slice());   // ✨ Kaartentruc
     const keus = opts.length === 1 ? opts[0].v
       : await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Roversbuit: welk ritueel leg je${it.col != null ? ` in kolom ${it.col + 1}` : ""}?`, opts);
     const el = ["swipe","stab","schild"].indexOf(keus) >= 0 ? keus : opts[0].v;
@@ -16305,7 +16317,7 @@ async function resolveLight(it){
     const kaart = {id:++cid, el, owner:p, token:true};
     sl.spell = {card:kaart};
     addLog(`✦ Roversbuit: ${pName(p)} legt ${EL[el].icon} <em>${EL[el].name}</em> als ritueel in kolom ${c+1}.${al.length >= 3 ? " Het arsenaal is nu leeg." : ""}`, true);
-    render(); if(!FAST){ fxLight(spellSel(p, c)); await sleep(260); }
+    render(); if(!FAST){ if(!ANI.L.naarKolom(p, c, el)) fxLight(spellSel(p, c)); await sleep(ANI.aan() ? 480 : 260); }
     /* Een ritueel doet zijn effect bij het neerleggen, net als elk ander ritueel. nov 2026: het gaat
        als gewone zet op de keten, dus de ander kan erop reageren (ook met Volledige Negatie). */
     const rplan = await declarePlan(p, kaart, true, c, {onField:true});
@@ -16317,6 +16329,7 @@ async function resolveLight(it){
     await drawN(p, 2, "✦ Bron van Gulzigheid"); return;
   }
   if(k === "darkhole"){
+    if(!FAST) await ANI.L.eclips(p);   // ✨ Eclips
     let n = 0;
     /* alleen wat echt verdwijnt telt mee: een wezen dat door 🕊 Laatste Adem blijft staan niet */
     for(let c=0;c<NK();c++){ const voor = P(p).cols[c].cre; if(voor){ destroyCre(p, c, "✦ Zwart Gat"); if(P(p).cols[c].cre !== voor) n++; } }
@@ -16333,7 +16346,7 @@ async function resolveLight(it){
     if(!free.length){ addLog("✦ Wolkenzwerm: geen vrije plek over."); return; }
     for(const c of free){
       placeCre(p, c, {id:++cid, el:"wolk", owner:p, token:true});
-      render(); fxLight(creSel(p, c)); await sleep(FAST ? 0 : 90);
+      render(); if(FAST || !ANI.L.wolk(p, c, free.indexOf(c))) fxLight(creSel(p, c)); await sleep(FAST ? 0 : 90);   // ✨ Wolkenpuf
     }
     for(const c of free){ if(P(p).cols[c].cre) await tokenRitueel(p, c); }
     AU.play("light");
@@ -16343,9 +16356,11 @@ async function resolveLight(it){
   if(k === "master"){
     /* Altijd de sterke versie: ☄️ Plasma, 🧊 IJs, 🌹 Roos of ⛰️ Rots. */
     const sterk = el => Object.keys(VAR).find(v => VAR[v].basis === el && !VAR[v].token && !VAR[v].monster && !VAR[v].fusie);
+    if(!FAST) await ANI.L.meesterOpen(p);   // ✨ Vier kaarten
     let el = await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Elementaal Meester: welke kaart wordt dit?`,
       ORDER.map(e => { const v = sterk(e); return {v:e, label:v ? VAR[v].name : EL[e].name, ic:v ? VAR[v].icon : EL[e].icon}; }));
     if(!ORDER.includes(el)) el = ORDER[Math.floor(rnd() * ORDER.length)] || "vuur";
+    if(!FAST) ANI.L.meesterKies(el);
     const card = it.card;
     card.el = el; delete card.lk;
     const v = sterk(el); if(v) card.var = v;
@@ -16371,7 +16386,7 @@ async function resolveLight(it){
       : await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `✦ Lichtbrenger: waar zet je de 🕯 neer?`, false, {el:"brenger"});
     if(!sl) return;
     placeCre(p, sl.c, {id:++cid, el:"brenger", owner:p, token:true});
-    fxLight(creSel(p, sl.c)); AU.play("light");
+    if(FAST || !ANI.L.zon(p, sl.c)) fxLight(creSel(p, sl.c)); AU.play("light");   // ✨ Zonsopgang
     addLog(`✦ <em>Lichtbrenger</em>: ${pName(p)} zet een 🕯 met 6 levens neer in kolom ${sl.c+1}. Hij slaat met alles wat hij heeft, en niets van de ander kan hem iets doen.`, true);
     render(); await tokenRitueel(p, sl.c); render(); return;
   }
@@ -16435,6 +16450,7 @@ async function resolveLight(it){
       await announcePlay(p, kopie, true, sl.c, false);
       return;
     }
+    ANI.L.zet({soort:"kloon", sel:bron.kind === "spell" ? spellSel(bron.p, bron.c) : creSel(bron.p, bron.c)});   // ✨ Spiegelbeeld
     const ok = await placeNow(p, kopie, false, sl.c, {});
     if(!ok) return;
     const nu = P(p).cols[sl.c].cre;
@@ -16489,6 +16505,7 @@ async function resolveLight(it){
     const voor = P(p).life;
     P(p).life = P(p).life + 3; levensPiek(p);   // nov 2026: heel 3, geen kaart meer
     const bij = P(p).life - voor;
+    if(!FAST && bij > 0) ANI.L.fontein(p, bij);   // ✨ Bron
     if(bij > 0) pop(rectOf(`.pside[data-side="${p}"] .plife`), "+" + bij, "heal");
     addLog(`✦ <em>Vitaliteit</em>: ${pName(p)} krijgt ${bij} ${bij===1?"leven":"levens"} terug (nu ${P(p).life}).`, true);
     if(!FAST){ AU.play("light"); await sleep(220); }
@@ -16543,6 +16560,7 @@ async function resolveLight(it){
     const slots = openCols(p).map(c => ({p, c, kind:"cre"}));
     if(!slots.length){ g.push(card); addLog("✦ Zielenoproep: geen vrije plek — de kaart blijft in het graf."); return; }
     const sl = await chooseSlot(p, slots, `✦ Zielenoproep: kies een plek voor ${icon(card.el)} ${kNaam(card)} (+3 levens)`, false, {el:card.el});
+    ANI.L.zet({soort:"op"});   // ✨ Opstanding in plaats van de klap
     const ok = await placeNow(p, card, false, sl.c, {});
     if(!ok) return;
     P(p).cols[sl.c].cre.hp += 3;
@@ -16556,7 +16574,7 @@ async function resolveLight(it){
     let n = 0;
     eachCre((cr, pp, cc) => { if(pp === opp(p) && !cr.web && !hexVan(cr, pp, p) && !bloesemVang(cr, pp, cc, p)){ cr.web = true; n++; pop(creSel(pp, cc), "🕸", "imm"); } });
     addLog(`✦ Web: ${n ? n + " wezen" + (n === 1 ? "" : "s") + " van " + pName(opp(p)) + " zit" + (n === 1 ? "" : "ten") + " vast in het web" : "er staat niets om in te spinnen"}.`, true);
-    render();
+    render(); if(!FAST) ANI.L.web(p);   // ✨ Grijs en traag
     await drawN(p, 1, "✦ Web");
     return;
   }
@@ -16567,7 +16585,8 @@ async function resolveLight(it){
     if(id === "fizzle" || id == null){ if(id == null) addLog("✦ Levensroof overgeslagen."); return; }
     const f = findCre(id); if(!f) return;
     const voor = Math.max(0, f.cr.hp), naam = `${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}`;
-    fxLight(creSel(f.p, f.c)); AU.play("light");
+    if(FAST || !ANI.aan()) fxLight(creSel(f.p, f.c)); else await ANI.L.zuiger(p, f.p, f.c, it.card);   // ✨ Zuiger
+    AU.play("light");
     /* nov 2026 (weer zoals vroeger): wat er op die plek staat sterft, en jij krijgt al zijn levens. */
     destroyCre(f.p, f.c, "✦ Levensroof");
     const na = findCre(id);
@@ -16622,6 +16641,7 @@ function kernBonus(p, card){
   if(S.kernOp[p]) return 0;
   S.kernOp[p] = true;
   addLog(`🌋 <em>Kern van Maatje</em>: het hart van Maatje klopt in je eerste 🔥 vuur. +30 levens.`, true);
+  if(!FAST && typeof ANI_AE !== "undefined") ANI_AE.kern(card);   // ✨
   return 30;
 }
 function placeCre(p, col, card){
@@ -16652,7 +16672,7 @@ function stromanVangt(p){
   if(S.dekenBeurt[p] === S.gTurn) return false;
   S.dekenBeurt[p] = S.gTurn;
   addLog(`🟣 <em>Stroman</em>: ${pName(p)} verliest deze keer niets. Deze beurt is hij nu op.`, true);
-  if(!FAST) pop(rectOf(`.pside[data-side="${p}"] .plife`), "STROMAN", "imm");
+  if(!FAST){ pop(rectOf(`.pside[data-side="${p}"] .plife`), "STROMAN", "imm"); ANI_AE.stroman(p); }   // ✨
   return true;
 }
 const stromanKlaar = p => !!(S && hasAe(p, "ae_deken") && !(Array.isArray(S.dekenBeurt) && S.dekenBeurt[p] === S.gTurn));
@@ -16748,7 +16768,7 @@ async function effTarget(it, p, ids, prompt, optional, meta){
 }
 async function resolveEffect(it){
   const p = it.ctrl;
-  if(it.origin === "spell" && it.col != null && !FAST) await ANI.rune(p, it.col);   // ✨ Rune: het ritueel gaat af
+  if(it.origin === "spell" && it.col != null && !FAST) await ANI.rune(p, it.col);   // ✨ Lichtzuil: het ritueel gaat af
   /* 🧊 IJs: staat het doelwit er nog? Anders is het ontweken en smelt het ijs voor niets. */
   if(it.el === "ijs"){
     const c = it.tc, vij = opp(p);
@@ -16857,7 +16877,7 @@ async function resolveEffect(it){
   /* 🗡 De drie dingen van de Struikrover. Ze liggen als ritueel op het bord en gaan af op het
      moment dat er iets bovenop komt — precies zoals elk ander ritueel. */
   if(it.el === "swipe"){
-    zwaardSlag();
+    if(FAST || !ANI.L.veeg(p)) zwaardSlag();   // ✨ Veeg
     addLog(`🗡 <em>Swipe</em>: 1 schade aan elk wezen van ${pName(opp(p))}.`, true);
     await sleep(FAST ? 0 : 380);
     for(let k=0;k<NK();k++){ const cr = P(opp(p)).cols[k].cre; if(cr) applyDamage(cr.card.id, "swipe", 1, {noFx:true, ctrl:p}); }
@@ -16869,7 +16889,7 @@ async function resolveEffect(it){
     const kol = c >= 0 ? c : 2;
     const doel = P(opp(p)).cols[kol].cre;
     addLog(`🔪 <em>Stab</em>: 6 kleurloze schade recht tegenover kolom ${kol+1}${doel ? "" : ": daar staat niets"}.`, true);
-    if(doel){ fxLight(creSel(opp(p), kol)); applyDamage(doel.card.id, "stab", 6, {noFx:true, ctrl:p}); }
+    if(doel){ if(FAST || !ANI.aan()) fxLight(creSel(opp(p), kol)); else await ANI.L.steek(p, kol); applyDamage(doel.card.id, "stab", 6, {noFx:true, ctrl:p}); }   // ✨ Steek
     /* Sinds 17 okt 2026 geen klap meer op de speler zelf. */
     if(!FAST){ AU.play("attack"); const app = document.getElementById("app");
       if(app){ app.classList.remove("beeft"); void app.offsetWidth; app.classList.add("beeft"); setTimeout(() => app.classList.remove("beeft"), 600); } }
@@ -16890,7 +16910,7 @@ async function resolveEffect(it){
     if(k != null){
       placeCre(p, k, {id:++cid, el:"schildje", owner:p, token:true});
       const x = P(p).cols[k].cre; if(x){ x.hp = 2; x.played = S.gTurn; }
-      render();
+      render(); if(!FAST) await ANI.L.neerzetten(p, k);   // ✨ Neerzetten
       await tokenRitueel(p, k);   // (okt 2026) mag ook zijn eigen Schild weer triggeren: dan komt er een schildje bij, tot het vol staat
     }
     addLog(k != null ? `🛡 <em>Schild</em>: een schildje (0/2) in kolom ${k + 1}.` : `🛡 <em>Schild</em>: geen plek voor een schildje.`, true);
@@ -16983,6 +17003,7 @@ async function resolveEffect(it){
     const id = await effTarget(it, p, ids, `<b>${pName(p)}</b> — 🪨 Steen: geef een wezen +${n} levens (optioneel)`, true, {k:"steen"});
     if(id === "fizzle") return;
     if(telA) S.lawTel[p]++;
+    if(telA && id !== null && !FAST) ANI_AE.tegel(p, "ae_stonefull", "#cdb894");   // ✨
     if(id === null){ addLog(`🪨 +${n} overgeslagen.`); return; }
     gainLife(id, p, telA ? "🪨 Steen (🟣 Lawine " + n + ")" : "🪨 Steen", "rock", n); render();
     return;
@@ -17117,7 +17138,7 @@ async function resolveAttack(it){
   const defCol = lok ? lok.c : col;
   let power = atkOf(att, p);
   /* ✨ Slag: inademen, uithalen, een veeg van licht (5 nov 2026) */
-  const slagP = FAST ? null : ANI.slag(creSel(p, col), def ? creSel(opp(p), defCol) : `.pside[data-side="${opp(p)}"] .plife`, att.card, p);
+  const slagP = FAST ? null : ANI.slag(creSel(p, col), creSel(opp(p), def ? defCol : col), att.card, p, !!def);   // ✨ Duik; direct duikt hij gewoon naar de plek tegenover
   if(slagP){ AU.play("attack"); await slagP; } else {
   const el = document.querySelector(creSel(p, col));
   if(el) el.classList.add(p === 0 ? "lunge-up" : "lunge-down");
@@ -17380,6 +17401,7 @@ async function grafOproep(p, soort, aeK){
   if(!FAST){
     const van = rectOf(`#grave${p}`), naar = rectOf(creSel(p, sl.c));
     aeFlits(p, aeK || "ae_graf", creSel(p, sl.c), `${kNaam(card)} komt terug uit het graf`);
+    ANI_AE.terugkeer(p, sl.c, aeK);   // ✨
     if(van && naar) await flyCard(van, naar, cardFaceHTML(card), 520);
   }
   /* 💀 nov 2026: wat Eeuwige Terugkeer terughaalt krijgt een doodshoofd. Dat blijft liggen; gaat
@@ -17418,6 +17440,7 @@ async function startTurnSequence(){
   if(S.over) return;
   S.phase = "upkeep"; render();
   turnCry(S.tp);
+  if(!FAST) ANI_AE.potjeBegin();   // ✨ Aambeeld, Lichtzwerm
   await sleep(FAST ? 0 : 800);   // ronde 32: was 1250
   await upkeepEntangle(S.tp);
   if(S.over) return;
@@ -20375,8 +20398,22 @@ function zegelEl(card){ return card.lk || card.el === "licht" ? "licht" : (["vuu
    knoop). Zolang er geen is, staat er een uitsnede van de kaart. */
 const RITUEEL_ART = new Set();
 ["vuur","water","gras","steen","rots","plasma","roos","wolf","vis","clown","kogel","swipe","stab","schild","knoop"].forEach(k => {
-  const im = new Image(); im.onload = () => { RITUEEL_ART.add(k); if(typeof render === "function" && S && !M) try{ render(); }catch(e){} }; im.src = `art/ritueel-${k}.png`; });
+  const im = new Image(); im.onload = () => { RITUEEL_ART.add(k); zartKlaar(`art/ritueel-${k}.png`); if(typeof render === "function" && S && !M) try{ render(); }catch(e){} }; im.src = `art/ritueel-${k}.png`; });
 const ZEGEL_GEZIEN = new Set();
+/* 🔘 Ring en prent van een ritueel komen tegelijk (5 nov 2026). Een prent als achtergrond moet de
+   eerste keer nog uitgepakt worden, en dan stond de ring er al terwijl het plaatje pas later kwam.
+   Nu pakken we elke prent één keer uit, houden hem vast, en tot hij klaar is blijft het hele zegel
+   (ring, prent en lint) nog even onzichtbaar. */
+const ZART = new Map();
+function zartKlaar(src){
+  let z = ZART.get(src); if(z) return z;
+  z = {klaar:false, id:"z" + ZART.size, im:new Image()}; ZART.set(src, z);
+  const los = () => { if(z.klaar) return; z.klaar = true; document.querySelectorAll(`.zp.wacht[data-zid="${z.id}"]`).forEach(e => e.classList.remove("wacht")); };
+  z.im.src = src;
+  (z.im.decode ? z.im.decode() : new Promise(r => { z.im.onload = r; })).then(los, los);
+  setTimeout(los, 700);                                   // nooit langer wachten dan dit
+  return z;
+}
 function zegelHTML(card){
   if(!card || inMist()) return "";
   const el = zegelEl(card), f = cardFaceHTML(card, true), m = f.match(/src="([^"]+)"/);
@@ -20387,7 +20424,8 @@ function zegelHTML(card){
   /* Alleen de eerste keer dat dit ritueel getekend wordt, komt het binnen met een animatie. Daarna
      ligt het er gewoon: bij elke nieuwe tekening opnieuw beginnen liet het steeds even wegflitsen. */
   const nieuw = card.id != null && !ZEGEL_GEZIEN.has(card.id); if(nieuw) ZEGEL_GEZIEN.add(card.id);
-  return `<div class="zp ${el}${nieuw && !FAST ? " in" : ""}" style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart${soort ? " eigen" : ""}"${stijl}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
+  const zsrc = soort ? `art/ritueel-${soort}.png` : (m ? m[1] : null), zk = zsrc && !FAST ? zartKlaar(zsrc) : null;
+  return `<div class="zp ${el}${nieuw && !FAST ? " in" : ""}${zk && !zk.klaar ? " wacht" : ""}"${zk ? ` data-zid="${zk.id}"` : ""} style="--ek:${ZEGEL_KLEUR[el]}"><div class="zart${soort ? " eigen" : ""}"${stijl}></div><div class="zrand"></div><div class="zlint">${naam.toUpperCase()}</div></div>`;
 }
 const ZEGEL_KLEUR = {vuur:"#ff7a3c", water:"#4fb3ff", gras:"#6fd27a", steen:"#c9a06a", licht:"#ffe08a"};
 function zegelGloed(col){
@@ -42681,6 +42719,8 @@ const ANI = (() => {
     dom = document.createElement("div"); dom.id = "anidom"; fw.appendChild(dom); return dom; };
 
   /* ---------- klok ---------- */
+  /* alle animaties net iets sneller dan in het lab (5 nov 2026: 1,1×) */
+  const SNEL = 1.1;
   let T = 0, laatst = 0, stopTot = 0, raf = 0, bezigTot = 0;
   const tws = [], dl = [], lagen = [], kaarten = new Set();
   const cam = {schud:0, donker:0, gaten:[], flits:0, flitsK:"#fff", donkerTot:0};
@@ -42695,9 +42735,9 @@ const ANI = (() => {
   const weg = (...ls) => ls.forEach(l => l && (l.aan = false));
   /* de spelcode mag hierop wachten, maar nooit langer dan 1,6 s */
   const veilig = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms || 1600))]);
-  const bezig = ms => { bezigTot = Math.max(bezigTot, nu() + ms); };
+  const bezig = ms => { bezigTot = Math.max(bezigTot, nu() + ms / SNEL); };
   const rust = () => { const d = Math.min(1600, bezigTot - nu()); return d > 10 ? new Promise(r => setTimeout(r, d)) : Promise.resolve(); };
-  const hou = ms => { try{ fxHold = Math.max(fxHold, nu() + ms); }catch(e){} };
+  const hou = ms => { try{ fxHold = Math.max(fxHold, nu() + ms / SNEL); }catch(e){} };
 
   /* ---------- vormen ---------- */
   const GL = new Map();
@@ -42802,7 +42842,7 @@ const ANI = (() => {
   /* ---------- de hoofdlus ---------- */
   const start = () => { if(!raf && typeof requestAnimationFrame === "function"){ laatst = nu(); raf = requestAnimationFrame(lus); } };
   const lus = t0 => { raf = -1; let door = true; try{ door = lus0(t0); }catch(e){ console.error(e); } raf = door ? requestAnimationFrame(lus) : 0; };
-  const lus0 = t0 => { let dt = Math.max(0, Math.min(50, t0 - laatst)); laatst = t0; if(t0 < stopTot) dt = 0; dt /= (window.ANI_TRAAG || 1); T += dt;
+  const lus0 = t0 => { let dt = Math.max(0, Math.min(50, t0 - laatst)); laatst = t0; if(t0 < stopTot) dt = 0; dt *= SNEL / (window.ANI_TRAAG || 1); T += dt;
     if(!doek()) return false; if(W !== innerWidth || H !== innerHeight) maat();
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if(cam.donker > 0 && nu() > cam.donkerTot) cam.donker = Math.max(0, cam.donker - dt / 400);
@@ -42859,12 +42899,24 @@ const ANI = (() => {
   const boeiLijst = () => { const l = []; try{ if(!S || !S.pl || S.over || !aan()) return l;
       [0, 1].forEach(p => (P(p).cols || []).forEach((col, c) => { const cr = col && col.cre; if(!cr) return;
         const n = (cr.ent || 0) - (cr.ijsT || 0); if(n > 0) l.push({p, c, woeker:typeof hasAe === "function" && hasAe(opp(p), "ae_grassx2")}); })); }catch(e){} return l; };
-  const boeiTeken = (q, ringen, g) => { const hs = ringen === 4 ? [.14, .38, .62, .86] : [.3, .7];
-    hs.forEach((h, i) => { const u = Math.max(0, Math.min(1, g * 1.4 - i * .15)); if(u <= 0) return; const r = lerp(q.w * 1.3, q.w * .56, E.uit(u)), y = q.y + q.h * h, pl = .5 + .5 * Math.sin(T / 160 + i);
-      ctx.save(); ctx.globalAlpha = .4 * u; ctx.strokeStyle = "#2f8a35"; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(q.cx, y, r, r * .2, 0, Math.PI, Math.PI * 2); ctx.stroke(); ctx.restore();
-      ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = u * (.6 + .3 * pl); ctx.strokeStyle = "#7ddc5a"; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(q.cx, y, r, r * .2, 0, 0, Math.PI); ctx.stroke(); ctx.strokeStyle = "#e9ffd8"; ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore();
-      if(Math.random() < .05 * u) deeltje({x:q.cx + rnd(-r, r), y:y + rnd(-3, 3), vy:-rnd(.2, .5), life:.6, kleur:"#c8ff9e", soort:"plus", s:2}); });
-    gloed(q.cx, q.y + q.h, q.w * .7, "#3f9e3a", .22 * g); };
+  /* Takkenboei (gekozen 5 nov): de ringen van de boei, maar als takken van licht met uitlopers; 2 ringen, 4 met Woekergroei */
+  const lichtLijn = (pts, a, dik, voor) => { if(pts.length < 2 || a <= 0) return; ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    if(voor){ ctx.globalCompositeOperation = "lighter";
+      for(const [w, kl, al] of [[dik * 3.2, "#2f8a35", .3], [dik * 1.6, "#7ddc5a", .85], [dik * .55, "#e9ffd8", 1]]){ ctx.strokeStyle = kl; ctx.lineWidth = w; ctx.globalAlpha = a * al; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); } }
+    else { ctx.strokeStyle = "#2f8a35"; ctx.lineWidth = dik * 1.2; ctx.globalAlpha = a * .4; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); }
+    ctx.restore(); };
+  const lichtPad = (pts, a, dik) => { let stuk = [], vk = null; const klaar = () => { if(stuk.length > 1) lichtLijn(stuk, a, dik, vk); };
+    pts.forEach((p, i) => { const v = p.d > 0; if(vk !== null && v !== vk){ stuk.push(p); klaar(); stuk = [pts[i - 1]]; } vk = v; stuk.push(p); }); klaar(); };
+  const takje = (x, y, hoek, L, a, gr) => { const e = Math.max(0, Math.min(1, gr)); if(e <= 0) return; const L2 = L * e, x2 = x + Math.cos(hoek) * L2, y2 = y + Math.sin(hoek) * L2;
+    lichtLijn([{x, y}, {x:x2, y:y2}], a, 1.6, true);
+    if(e > .6){ const f = (e - .6) / .4; [-.6, .6].forEach(dh => lichtLijn([{x:x2, y:y2}, {x:x2 + Math.cos(hoek + dh) * L * .45 * f, y:y2 + Math.sin(hoek + dh) * L * .45 * f}], a, 1.1, true)); gloed(x2, y2, 6, "#c8ff9e", a * .5 * f); } };
+  const boeiTeken = (q, ringen, g) => { const hs = ringen === 4 ? [.14, .38, .62, .86] : [.3, .7], sc = q.w / 130;
+    hs.forEach((h, i) => { const u = Math.max(0, Math.min(1, g * 1.4 - i * .15)); if(u <= 0) return; const r = lerp(q.w * 1.3, q.w * .56, E.uit(u)), y0 = q.y + q.h * h, a = u * (.78 + .22 * Math.sin(T / 160 + i));
+      const pts = []; for(let j = 0; j <= 40; j++){ const hk = j / 40 * Math.PI * 2 + i * 1.3 + T / 900; pts.push({x:q.cx + Math.cos(hk) * r, y:y0 + Math.sin(hk) * r * .2 + Math.sin(j * .9 + i) * 2.5 * sc, d:Math.sin(hk)}); }
+      lichtPad(pts, a, 2.6 * Math.max(.7, sc));
+      for(let j = 3; j < 40; j += 6){ const p = pts[j]; if(p.d <= .2) continue; takje(p.x, p.y, (j % 12 < 6 ? -1 : 1) * Math.PI / 2 + (j % 4 ? .35 : -.35), (9 + (j % 3) * 3) * Math.max(.7, sc), a, u * 1.3 - .3); }
+      if(Math.random() < .05 * u) deeltje({x:q.cx + rnd(-r, r), y:y0 + rnd(-3, 3), vy:-rnd(.2, .5), life:.6, kleur:"#c8ff9e", soort:"plus", s:2}); });
+    gloed(q.cx, q.y + q.h, q.w * .7, "#3f9e3a", .25 * g); };
   const VERS = new Map();   // pas verstrikt: de ringen komen binnen
   const blijvend = () => { handFx(); BOEI = boeiLijst();
     BOEI.forEach(b => { const q = rc(creSel(b.p, b.c)); if(!q) return; const bo = document.elementFromPoint(q.cx, q.cy); if(!bo || !bo.closest("#fieldwrap")) return;   /* niet over een menu heen */ const key = b.p + ":" + b.c; let g = 1; const v = VERS.get(key); if(v){ g = Math.min(1, (T - v) / 800); if(g >= 1) VERS.delete(key); }
@@ -42884,7 +42936,7 @@ const ANI = (() => {
           g.style.width = w + "px"; g.style.height = h + "px"; g.style.transform = `translate(${x}px, ${y}px)`; }, E.in2);
         g.remove(); k.a = 1;
       } else { k.z = 56; k.sx = k.sy = 1.08; await tw(150, t => { k.z = lerp(56, 0, t); k.sx = k.sy = lerp(1.08, 1.02, t); }, E.in2); }
-      k.z = 0; schud(4); stof(q.cx, q.y + q.h - 4, 14, s === "vuur" || s === "plasma" ? KL.steen.concat(kl.slice(0, 2)) : KL.steen.concat(kl.slice(0, 1)), 5);
+      k.z = 0; schud(4);   /* geen brokjes meer onder de kaart (5 nov 2026) */
       k.voet = true;
       tw(260, t => { k.sy = lerp(.86, 1, E.terug(t)); k.sx = lerp(1.12, 1, E.terug(t)); }).then(() => los(k)); };
     return veilig(run(), 700); };
@@ -42924,36 +42976,39 @@ const ANI = (() => {
   const soortFz = card => card && card.var === "oceaanrust" ? "oceaan" : card && card.var;
 
   /* ================= AANVAL · Slag ================= */
-  const slag = (fromSel, toSel, att, p) => { if(!aan()) return null; const a = rc(fromSel), b = rc(toSel); if(!a || !b) return null;
-    const s = soort(att), kl = HK[s] || "#fff", ka = kaart(fromSel), kb = typeof toSel === "string" && /\.slot/.test(toSel) ? kaart(toSel) : null; ka.boven = true;
-    const vx = b.cx - a.cx, vy = b.cy - a.cy, L = Math.hypot(vx, vy) || 1, ux = vx / L, uy = vy / L, dir = vy < 0 ? -1 : 1;
-    const eind = {x:vx - ux * a.h * .5, y:vy - uy * a.h * .5}, spoor = [];
-    const sp = laag(() => { spoor.forEach(([x, y], i) => gloed(a.cx + x, a.cy + y, a.w * .45 * (i + 1) / spoor.length, kl, .22 * (i + 1) / spoor.length)); });
+  /* AANVAL · Duik (5 nov 2026, was Slag): even terug, recht naar voren, platgedrukt bij de klap, terugveren.
+     Een directe aanval duikt net zo naar de plek tegenover; het doel tikt dan niet weg. */
+  const AV = 1.2;   /* de aanval nog 1,2× sneller dan de rest (5 nov 2026) */
+  const slag = (fromSel, toSel, att, p, heeftDoel) => { if(!aan()) return null; const a = rc(fromSel), b = rc(toSel); if(!a || !b) return null;
+    const ka = kaart(fromSel), kb = heeftDoel ? kaart(toSel) : null; ka.boven = true;
+    const dir = b.cy < a.cy ? -1 : 1;                                   /* -1: van onder naar boven */
+    const eindY = dir < 0 ? (b.y + b.h * .55) - a.y : (b.y + b.h * .45) - (a.y + a.h), eindX = b.cx - a.cx;
+    const raak = {x:b.cx, y:dir < 0 ? b.y + b.h : b.y};
     const inslag = (async () => {
-      await tw(260, t => { ka.dx = -ux * 22 * t; ka.dy = -uy * 22 * t; ka.rot = -.06 * t * dir; ka.sx = ka.sy = 1 + t * .04; }, E.uit);
-      await tw(150, t => { ka.dx = lerp(-ux * 22, eind.x, t); ka.dy = lerp(-uy * 22, eind.y, t); ka.rot = lerp(-.06, .05, t) * dir; spoor.push([ka.dx, ka.dy]); if(spoor.length > 6) spoor.shift(); }, E.in2); })();
+      await tw(110 / AV, t => { ka.dy = -dir * 14 * t; }, E.uit);
+      await tw(140 / AV, t => { ka.dy = lerp(-dir * 14, eindY, t); ka.dx = eindX * t; ka.z = t * 20; }, E.in2); })();
     inslag.then(async () => {
-      schud(5); if(kb){ kb.wit = .8; tw(220, t => kb.wit = .8 * (1 - t)).then(() => los(kb)); }
-      tw(320, t => { ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.strokeStyle = kl; ctx.lineCap = "round"; const R = b.w * 1.05, cx = b.cx - b.w * .35, cy = b.cy + b.h * .25 * -dir;
-        for(const [w, a0] of [[16, .25], [6, .9]]){ ctx.lineWidth = w; ctx.globalAlpha = a0 * (1 - t); ctx.beginPath(); ctx.arc(cx, cy, R, -1.6 + t * .4, -.1 + t * 1.2); ctx.stroke(); } ctx.restore(); });
-      burst(b.cx, b.cy, 16, ["#fff", kl], 5);
-      await tw(380, t => { ka.dx = lerp(eind.x, 0, t); ka.dy = lerp(eind.y, 0, t); ka.rot = lerp(.05, 0, t) * dir; ka.sx = ka.sy = lerp(1.04, 1, t); }, E.uit);
-      spoor.length = 0; weg(sp); los(ka); });
+      schud(6); burst(raak.x, raak.y, 22, ["#fff", "#ffd36b"], 6);
+      if(kb){ kb.wit = 1; tw(180 / AV, t => kb.wit = 1 - t); tw(200 / AV, t => kb.dy = dir * 14 * Math.sin(t * Math.PI)).then(() => los(kb)); }
+      await tw(300 / AV, t => { ka.dy = lerp(eindY, 0, t); ka.dx = lerp(eindX, 0, t); ka.z = lerp(20, 0, t); ka.sy = lerp(.88, 1, E.terug(t)); }, E.uit);
+      los(ka); });
     return veilig(inslag, 700); };
 
   /* ================= RITUEEL · Rune ================= */
-  const rune = (p, col) => { if(!aan()) return Promise.resolve(); const sel = spellSel(p, col), q = rc(sel); if(!q) return Promise.resolve();
+  /* RITUEEL · Lichtzuil (5 nov 2026, was Rune): het medaillon gloeit op en zet een zuil van zacht licht door de kolom */
+  const rune = (p, col) => { if(!aan()) return Promise.resolve(); const m = rc(spellSel(p, col)); if(!m) return Promise.resolve();
+    const csel = creSel(p, col), q = rc(csel);
     let el = "neutraal"; try{ const sp = P(p).cols[col].spell; if(sp) el = soort(sp.card); }catch(e){}
-    const k1 = HK[el] || "#7fc4ff", k2 = (klVan(el)[2]) || "#ffffff", kp = kaart(sel); kp.kleur = k1;
-    let a0 = 0, r = 0;
-    const l = laag(() => { if(a0 <= 0) return; ctx.save(); ctx.translate(q.cx, q.cy + q.h * .18); ctx.scale(1, .34); ctx.rotate(T / 400); ctx.globalAlpha = a0; ctx.strokeStyle = k1; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, r * .72, 0, Math.PI * 2); ctx.stroke();
-      for(let i = 0; i < 8; i++){ ctx.rotate(Math.PI / 4); ctx.fillStyle = k2; ctx.fillRect(r * .8, -6, 10, 12); } ctx.restore();
-      gloed(q.cx, q.cy, q.w * .9, k1, a0 * .25); });
-    const R = Math.max(q.w, q.h) * .85;
-    const run = async () => { await tw(300, t => { a0 = t; r = R * (.3 + t * .7); });
-      tw(600, t => { kp.kleurA = .5 * Math.sin(t * Math.PI); if(Math.random() < .7) deeltje({x:q.cx + rnd(-R, R), y:q.cy + q.h * .18, vy:-rnd(1, 3), life:.8, kleur:k2, soort:"plus", s:3}); })
-        .then(() => tw(300, t => a0 = 1 - t)).then(() => { weg(l); los(kp); }); };
+    const k1 = HK[el] || "#4aa8ff", kl = klVan(el), kp = q ? kaart(csel) : null; if(kp) kp.kleur = k1;
+    const mx = m.cx, my = m.cy, op = !q || q.cy < my, eind = q ? (op ? q.y - 40 : q.y + q.h + 40) : (op ? my - 220 : my + 220), bw = q ? q.w * .9 : 120;
+    const rgb = (() => { const h = k1.replace("#", ""); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)).join(","); })();
+    const run = async () => { let a0 = 0;
+      const l = laag(() => { if(a0 <= 0) return; ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createLinearGradient(0, my, 0, eind);
+        g.addColorStop(0, `rgba(${rgb},${.42 * a0})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; ctx.fillRect(mx - bw / 2, Math.min(my, eind), bw, Math.abs(eind - my)); ctx.restore();
+        stralen(mx, my, m.w * 1.2, .8 * a0, "#ffffff"); gloed(mx, my, m.w * .9, k1, a0); });
+      const t0 = tw(700, t => { a0 = Math.sin(t * Math.PI); if(kp) kp.kleurA = .3 * a0; if(Math.random() < .6) deeltje({x:mx + rnd(-bw * .42, bw * .42), y:my, vy:(op ? -1 : 1) * rnd(2, 4), life:.7, kleur:kies(kl), soort:"gloed", s:4}); })
+        .then(() => { weg(l); if(kp) los(kp); });
+      await wacht(330); };
     return veilig(run(), 600); };
 
   /* ================= STEEN · Brokken (en Lawine: één steen per leven van de teller) ================= */
@@ -43094,5 +43149,402 @@ const ANI = (() => {
   const render0 = render;
   render = function(){ const v = render0.apply(this, arguments); try{ ANI.naRender(); }catch(e){} return v; };
 }
+
+
+/* ================= ✨ LICHTKAARTEN (5 nov 2026) =================
+   Het spelen van een lichtkaart (de kaart komt groot in beeld, je betaalt met hartjes), en per
+   lichtkaart de animatie die gekozen is in het animatielab. Plus de Roversbuit-rituelen. */
+ANI.L = (() => {
+  const A = ANI, E = A.E, lerp = A.lerp, rnd = A.rnd, kies = A.kies;
+  const aan = () => !FAST && A.aan();
+  try{ const st = document.createElement("style"); st.textContent =
+    ".anilf .lfkaart,.anilf .lfnaam{animation:none!important}.anilf{transform-origin:0 0}.anilf .lfkaart .card{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}" +
+    ".anirb{position:fixed;z-index:90;pointer-events:none;left:0;top:0}.anirb .rbk{position:absolute;transform-origin:50% 50%}.anirb .rbk>*{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}" +
+    ".anirb .rbk .card,.anirb .rbk .cardback{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important}";
+    document.head.appendChild(st); }catch(e){}
+  const veld = () => { const r = A.rc("#fieldwrap"); return r ? {x:r.cx, y:r.cy} : {x:innerWidth / 2, y:innerHeight / 2}; };
+  const kaartMaat = () => { const s = A.rc('#fieldwrap .slot.cr'); const w = Math.max(104, Math.min(180, (s ? s.w : 120) * 1.15)); return {w, h:w * 1.39}; };
+  const levenR = p => { try{ const r = rectOf(`.pside[data-side="${p}"] .plife`); if(r && r.width) return {x:r.left + r.width / 2, y:r.top + r.height / 2}; }catch(e){} return {x:60, y:p === 0 ? innerHeight - 40 : 40}; };
+  const HART = ["0110110", "1111111", "1111111", "0111110", "0011100", "0001000"];
+  const hartje = (x, y, s, kl) => { const c = A.ctx, p = 2 * s; c.save(); c.fillStyle = kl || "#ff5a6a"; HART.forEach((r, j) => [...r].forEach((ch, i) => ch === "1" && c.fillRect(x + (i - 3.5) * p, y + (j - 3) * p, p, p))); c.restore(); };
+  /* een kaart als los DOM-ding boven alles (de echte kaartopmaak) */
+  const zweef = (html, w, h, z) => { const d = document.createElement("div"); d.className = "lichtflits anilf"; d.style.zIndex = String(z || 480);
+    d.innerHTML = `<div class="lfkaart" style="left:${-w / 2}px;top:${-h / 2}px;width:${w}px;height:${h}px">${html}</div>`; document.body.appendChild(d);
+    const o = {d, x:0, y:0, s:1, a:1, rot:0, filter:"", zet(){ d.style.transform = `translate(${o.x}px,${o.y}px) rotate(${o.rot}rad) scale(${o.s})`; d.style.opacity = String(o.a); d.style.filter = o.filter; }}; return o; };
+
+  /* ---------- het spelen zelf: de kaart rijst op naar het midden, met stralen, en verdwijnt dan naar waar hij iets doet ---------- */
+  let NU = null;
+  const lichtIn = (card, p) => { if(!aan() || !card) return false; if(NU) NU.klaar();
+    const m = kaartMaat(), c = veld(), kz = zweef(cardFaceHTML(card), m.w, m.h), wie = String(pName(p)).replace(EMOJI_RE, "").trim();
+    kz.d.insertAdjacentHTML("beforeend", `<div class="lfnaam" style="top:${m.h / 2 + 10}px"><small>${wie.toUpperCase()} SPEELT</small>${(LIGHTS[card.lk] || {}).name || "Licht"}</div>`);
+    const h = {kz, c, naar:null, tot:performance.now() + 1250, st:1, weg:false, klaar(){ if(h.weg) return; h.weg = true; kz.d.remove(); A.weg(l); if(NU === h) NU = null; }};
+    kz.x = c.x; kz.y = innerHeight + m.h; kz.zet(); NU = h; try{ AU.play("light"); }catch(e){}
+    const l = A.laag(() => { if(h.weg) return false; const k = Math.max(0, kz.a) * h.st; A.stralen(kz.x, kz.y, m.w * 1.9 * kz.s, .75 * k, "#fff2b0"); A.gloed(kz.x, kz.y, m.w * 1.1 * kz.s, "#fff8de", .35 * k); });
+    (async () => { await A.tw(420, t => { kz.y = lerp(innerHeight + m.h, c.y, t); kz.zet(); }, E.uit);
+      while(performance.now() < h.tot && !h.weg) await A.wacht(40);
+      if(h.weg) return; const naar = h.naar || c, x0 = kz.x, y0 = kz.y;
+      await A.tw(300, t => { kz.s = 1 - t * .85; kz.x = lerp(x0, naar.x, t); kz.y = lerp(y0, naar.y, t); h.st = 1 - t; kz.zet(); }, E.in2);
+      h.klaar(); A.tw(250, t => A.gloed(naar.x, naar.y, 30, "#fff2b0", 1 - t)); A.burst(naar.x, naar.y, 16, A.KL.licht, 4, {soort:"gloed", s:4}); })().catch(e => { console.error(e); h.klaar(); });
+    return true; };
+  /* waar de lichtkaart nu hangt (of het midden van het veld als hij al weg is) */
+  const bron = () => NU && !NU.weg ? {x:NU.kz.x, y:NU.kz.y} : veld();
+  const stuurNaar = (pt, ms) => { if(NU && !NU.weg){ NU.naar = pt; NU.tot = Math.min(NU.tot, performance.now() + (ms || 0)); } };
+  /* betalen: de hartjes vliegen van je levens naar de kaart */
+  const betaal = (p, n) => { if(!aan() || !n) return; const van = levenR(p); n = Math.min(12, n); if(NU) NU.tot = Math.max(NU.tot, performance.now() + 450 + n * 90 + 150);
+    for(let i = 0; i < n; i++) setTimeout(() => { const naar = bron(); A.tw(450, t => { const x = lerp(van.x, naar.x, t), y = lerp(van.y, naar.y, t) - Math.sin(t * Math.PI) * 60; hartje(x, y, 1.4); A.gloed(x, y, 12, "#ff5a6a", .7); }, E.inuit)
+      .then(() => { if(i === n - 1) A.burst(naar.x, naar.y, 12, ["#ff5a6a", "#ffb3bf"], 3); }); }, i * 90); };
+
+  /* ---------- ✦ Zwart Gat · Eclips ---------- */
+  let ECLIPS = null;
+  const eclips = p => { if(!aan()) return Promise.resolve(); const rij = A.rc(`#row${p}`) || A.rc("#fieldwrap"); if(!rij) return Promise.resolve();
+    const mid = {x:rij.cx, y:p === 0 ? rij.y - 46 : rij.y + rij.h + 46}; stuurNaar(mid); let a = 0; ECLIPS = {mid, tot:performance.now() + 4000};
+    const l = A.laag(() => { if(a <= 0) return; A.gloed(mid.x, mid.y, 120, "#ffffff", .5 * a); A.gloed(mid.x, mid.y, 70, "#fff2b0", .6 * a); A.stralen(mid.x, mid.y, 170, .5 * a, "#ffffff");
+      const c = A.ctx; c.save(); c.globalAlpha = a; c.fillStyle = "#050308"; c.beginPath(); c.arc(mid.x, mid.y, 40, 0, Math.PI * 2); c.fill(); c.restore(); });
+    const eigen = []; for(let c = 0; c < NK(); c++) if(P(p).cols[c].cre) eigen.push(A.kaart(creSel(p, c)));
+    const run = async () => { A.donker(.55, [], 600); await A.tw(600, t => a = t);
+      await A.tw(400, t => eigen.forEach(k => k.filter = `brightness(${1 - t})`)); };
+    const p0 = run();
+    p0.then(async () => { await A.wacht(1700); eigen.forEach(A.los); await A.tw(500, t => a = 1 - t); A.weg(l); A.donker(0, [], 500); ECLIPS = null; });
+    return A.veilig(p0, 1300); };
+
+  /* ---------- ✦ Wolkenzwerm · Wolkenpuf ---------- */
+  const wolk = (p, c, i) => { if(!aan()) return false; const sel = creSel(p, c), q = A.rc(sel); if(!q) return false; const van = bron(), k = A.kaart(sel); k.a = 0;
+    (async () => { await A.wacht(i * 120); await A.tw(600, t => { const x = lerp(van.x, q.cx, t), y = lerp(van.y, q.cy, t) - Math.sin(t * Math.PI) * 60;
+        for(let j = 0; j < 3; j++) A.deeltje({x:x + rnd(-10, 10), y:y + rnd(-8, 8), life:.25, kleur:"rgba(240,246,255,.8)", soort:"rook", s:rnd(8, 14)}); }, E.inuit);
+      k.a = 1; k.sx = k.sy = .3; A.wolkjes(q.cx, q.cy, 10, "rgba(240,246,255,.85)", 40); await A.tw(350, t => k.sx = k.sy = lerp(.3, 1, E.veer(t)));
+      await A.tw(900, t => k.dy = Math.sin(t * Math.PI * 2) * 4); A.los(k); })().catch(e => { console.error(e); A.los(k); });
+    return true; };
+
+  /* ---------- ✦ Zielenoproep · Opstanding (en Kloon · Spiegelbeeld): ze komen niet met de gewone klap binnen ---------- */
+  let MODUS = null;
+  const opstanding = (p, col) => { const sel = creSel(p, col), q = A.rc(sel); if(!q) return Promise.resolve(); stuurNaar({x:q.cx, y:q.y - 60});
+    const y0 = q.y + q.h - 4, k = A.kaart(sel); k.a = .4; k.kleur = "#cfe0ff"; k.kleurA = 1; k.dy = q.h; k.clip = `inset(0 0 ${q.h}px 0)`;
+    A.tw(1600, t => A.stralen(q.cx, q.y - 70, q.w * 1.6, Math.sin(t * Math.PI), "#e9f2ff"));
+    const run = async () => { await A.tw(1000, t => { const d = lerp(q.h, 0, E.uit(t)); k.dy = d; k.clip = `inset(0 0 ${d.toFixed(1)}px 0)`; k.a = .4 + .6 * t; A.gloed(q.cx, y0, 70, "#cfe0ff", .6);
+        if(Math.random() < .6) A.deeltje({x:q.x + rnd(0, q.w), y:y0, vy:-rnd(1, 2.5), life:.7, kleur:"#e9f2ff", soort:"gloed", s:4}); });
+      k.clip = null; k.dy = 0; A.tw(400, t => k.kleurA = 1 - t).then(() => A.los(k)); };
+    return A.veilig(run(), 1400); };
+  const glans = (q, t, kl) => { const c = A.ctx, x = q.x + (q.w + 60) * t - 30; c.save(); c.beginPath(); c.rect(q.x, q.y, q.w, q.h); c.clip(); c.globalCompositeOperation = "lighter";
+    const g = c.createLinearGradient(x - 30, 0, x + 30, 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(.5, kl); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.translate(x, q.cy); c.rotate(.35); c.fillRect(-30, -q.h, 60, q.h * 2); c.restore(); };
+  const spiegel = (p, col, bronSel) => { const sel = creSel(p, col), b = A.rc(sel), a = A.rc(bronSel); if(!b || !a) return Promise.resolve(); stuurNaar({x:a.cx, y:a.cy});
+    const kn = A.kaart(sel); kn.a = 0;
+    const run = async () => { await A.tw(500, t => glans(a, t * 1.2 - .1, "rgba(220,240,255,.7)"));
+      const g = A.geest(bronSel); if(g){ A.geestStand(g, {a:.5, filter:"brightness(1.3) saturate(.6)"});
+        const l = A.laag(() => A.gloed(a.cx + (g.dx || 0), a.cy + (g.dy || 0), a.w * .7, "#cfe8ff", .35));
+        await A.tw(900, t => { g.dx = lerp(0, b.x - a.x, E.inuit(t)); g.dy = lerp(0, b.y - a.y, E.inuit(t)); A.geestStand(g, {dx:g.dx, dy:g.dy, z:Math.sin(t * Math.PI) * 50, rot:Math.sin(t * Math.PI) * .1, a:.5, filter:"brightness(1.3) saturate(.6)"}); });
+        A.weg(l); A.geestWeg(g); }
+      kn.a = .5; kn.kleur = "#cfe8ff"; kn.kleurA = .8; await A.tw(400, t => { kn.a = .5 + t * .5; kn.kleurA = .8 * (1 - t); }); A.los(kn); A.burst(b.cx, b.cy, 20, ["#cfe8ff", "#fff"], 4, {soort:"gloed", s:4}); };
+    return A.veilig(run(), 1600); };
+  { const klap0 = A.klap; A.klap = (p, col, card) => { const m = MODUS; MODUS = null;
+      if(m && aan() && performance.now() - m.t < 4000){ if(m.soort === "op") return opstanding(p, col); if(m.soort === "kloon") return spiegel(p, col, m.sel); }
+      return klap0(p, col, card); }; }
+  const zet = m => { MODUS = aan() ? Object.assign({t:performance.now()}, m) : null; };
+
+  /* ---------- ✦ Volledige Negatie · Terugspoelen (zonder kruis) ---------- */
+  const negVoor = card => { if(!aan() || !card) return null; const f = findKaart(card.id); if(!f) return null;
+    const sel = f.kind === "spell" ? spellSel(f.p, f.c) : creSel(f.p, f.c), g = A.geest(sel); if(!g) return null; g.eig = card.owner; return g; };
+  const negNa = g => { if(!g || !aan()) return false; const q = g.r, graf = A.rc(`#grave${g.eig}`) || {cx:30, cy:innerHeight / 2};
+    stuurNaar({x:q.cx, y:q.cy}); try{ AU.play("light"); }catch(e){}
+    const lijn = A.laag(() => { const c = A.ctx; c.save(); c.globalAlpha = .16; c.fillStyle = "#000"; for(let y = (A.T / 8) % 6; y < innerHeight; y += 6) c.fillRect(0, y, innerWidth, 2); c.restore(); });
+    (async () => { await A.tw(700, t => { A.schud(3); A.geestStand(g, {z:E.in2(t) * 160, rot:-t * .3, dx:Math.random() < .3 ? rnd(-8, 8) : 0,
+        filter:`grayscale(${t}) drop-shadow(${3 + t * 3}px 0 0 rgba(255,40,60,.55)) drop-shadow(${-3 - t * 3}px 0 0 rgba(40,190,255,.55))`}); });
+      A.weg(lijn); await A.tw(500, t => { const x = lerp(q.cx, graf.cx, E.inuit(t)), y = lerp(q.cy - 160, graf.cy, E.inuit(t)) - Math.sin(t * Math.PI) * 40;
+        A.geestStand(g, {dx:x - q.cx, dy:y - q.cy, sx:1 - t * .7, sy:1 - t * .7, a:1 - t * .5, filter:"grayscale(1)"}); });
+      A.geestWeg(g); A.burst(graf.cx, graf.cy, 10, ["#9a9aa6", "#ffffff"], 3); })().catch(e => { console.error(e); A.weg(lijn); A.geestWeg(g); });
+    return true; };
+
+  /* ---------- ✦ Directe Fusie · Sterrenval ---------- */
+  let DIRECT = false;
+  const sterrenval = (p, col) => { if(!aan()) return Promise.resolve(); const q = A.rc(creSel(p, col)); if(!q) return Promise.resolve(); const c = bron(); stuurNaar(c);
+    const st = Array.from({length:120}, () => ({x:c.x + rnd(-60, 60), y:c.y + rnd(-90, 90), tx:q.x + rnd(0, q.w), ty:q.y + rnd(0, q.h), f:rnd(0, 6)})); DIRECT = performance.now();
+    return A.veilig(A.tw(1200, t => { const e = E.inuit(t), cx = A.ctx; st.forEach(s => { const x = lerp(s.x, s.tx, e) + Math.sin(t * 8 + s.f) * 30 * (1 - e), y = lerp(s.y, s.ty, e) + Math.cos(t * 6 + s.f) * 20 * (1 - e);
+      cx.fillStyle = (A.T / 80 + s.f) % 2 < 1 ? "#ffffff" : "#ffe7a0"; cx.fillRect(x, y, 3, 3); }); A.gloed(q.cx, q.cy, q.w * e, "#fff2b0", .4 * e); }), 1500); };
+  { const fk0 = A.fusieKomt; A.fusieKomt = (p, col, v) => { if(!DIRECT || performance.now() - DIRECT > 6000){ DIRECT = false; return fk0(p, col, v); } DIRECT = false; if(!aan()) return Promise.resolve();
+      const k = A.kaart(creSel(p, col)); A.flits(.5, "#fff6d8"); k.wit = 1; return A.veilig(A.tw(500, t => k.wit = 1 - t).then(() => A.los(k)), 800); }; }
+
+  /* ---------- ✦ Lichtbrenger · Zonsopgang (en zonsondergang als hij sterft) ---------- */
+  const warm = (kl, a) => { if(a <= 0) return; const c = A.ctx; c.save(); c.globalAlpha = a; c.fillStyle = kl; c.fillRect(0, 0, innerWidth, innerHeight); c.restore(); };
+  const zon = (p, col) => { if(!aan()) return false; const sel = creSel(p, col), q = A.rc(sel); if(!q) return false; const y0 = q.y + q.h - 4; stuurNaar({x:q.cx, y:y0});
+    const k = A.kaart(sel); k.a = 0; let z = 0, w = 0;
+    const l = A.laag(() => { warm("#ffd08a", w); if(z <= 0) return; A.gloed(q.cx, y0 - z * 60, 120 * z, "#ffb347", .5 * z); A.gloed(q.cx, y0 - z * 60, 50 * z, "#fff2b0", .8 * z); A.stralen(q.cx, y0 - 40, q.w * 1.6, .7 * z, "#fff2b0"); });
+    (async () => { await A.tw(600, t => { z = t; w = .14 * t; }); k.dy = 60; await A.tw(600, t => { k.a = t; k.dy = lerp(60, 0, E.uit(t)); }); A.los(k);
+      await A.tw(500, t => { w = .14 * (1 - t); z = 1 - t * .6; }); await A.tw(500, t => z = .4 * (1 - t)); A.weg(l); })().catch(e => { console.error(e); A.los(k); A.weg(l); });
+    return true; };
+  { const dood0 = A.dood; A.dood = (sel, card, cause) => {
+      if(!aan()) return false;
+      if(card && card.el === "brenger"){ const g = A.geest(sel); if(!g) return false; const q = g.r; let z = 1;   /* de zon gaat onder */
+        const l = A.laag(() => { warm("#ff8a4a", .18 * Math.sin(Math.min(1, 1 - z) * Math.PI)); A.gloed(q.cx, q.y + q.h - 4 + (1 - z) * 40, 110 * z, "#ff8a4a", .55 * z); });
+        A.tw(1000, t => { z = 1 - t; A.geestStand(g, {dy:E.in2(t) * 80, a:1 - t}); }).then(() => { A.geestWeg(g); A.weg(l); }); return true; }
+      if(cause === "✦ Levensroof" && ZUIG){ ZUIG = false; return true; }      /* al leeggezogen */
+      if(cause === "✦ Zwart Gat" && ECLIPS){ const g = A.geest(sel); if(!g) return false; const mid = ECLIPS.mid; A.geestStand(g, {filter:"brightness(0)"});
+        A.oplos(g, {ms:900, richting:"op", rand1:"rgb(255,255,255)", rand2:"rgb(60,40,80)", n:4, deeltje:(x, y) => A.deeltje({x, y, vx:(mid.x - x) / 30, vy:(mid.y - y) / 30, life:.9, kleur:"#140c1e", s:3, wr:1})}); return true; }
+      return dood0(sel, card, cause); }; }
+
+  /* ---------- ✦ Vitaliteit · Bron ---------- */
+  const fontein = (p, n) => { if(!aan()) return; const v = levenR(p); stuurNaar(v); A.hou(700);
+    for(let i = 0; i < 26; i++) A.deeltje({x:v.x + rnd(-20, 20), y:v.y - 10, vx:rnd(-1, 1), vy:-rnd(3, 6), g:.2, life:.8, kleur:kies(["#ffe08a", "#9dff86", "#ffffff"]), soort:"gloed", s:4});
+    for(let i = 0; i < Math.min(6, n || 3); i++) setTimeout(() => A.tw(500, t => { const x = lerp(v.x + 60, v.x, t), y = lerp(v.y - 100, v.y, t) - Math.sin(t * Math.PI) * 50; hartje(x, y, 1.4); }, E.inuit).then(() => A.burst(v.x, v.y, 8, ["#ff5a6a", "#ffe08a"], 3)), 250 + i * 160); };
+
+  /* ---------- ✦ Levensroof · Zuiger ---------- */
+  let ZUIG = false;
+  const zuiger = (p, tp, tc, lk) => { if(!aan()) return Promise.resolve(); const sel = creSel(tp, tc), b = A.rc(sel); if(!b) return Promise.resolve();
+    stuurNaar({x:b.cx, y:b.cy}, 0); ZUIG = true; setTimeout(() => { ZUIG = false; }, 4000); const ky = tp === 1 ? b.y + b.h + 80 : b.y - 80, kx = b.cx, kz = zweef(cardFaceHTML(lk || {lk:"siphon"}), 80, 112, 90); kz.x = kx; kz.y = ky; kz.a = 0; kz.zet();
+    const doel = A.kaart(sel); doel.kleur = "#ff3b4f"; let zuig = 0, w = 0;
+    const s = A.laag(() => { warm("#ff6060", w); if(zuig <= 0) return; for(let i = 0; i < 24; i++){ const t = ((A.T / 700) + i / 24) % 1, r = (1 - t) * b.w * .5, h = t * 12 + i; A.gloed(b.cx + Math.cos(h) * r, lerp(b.cy, ky, t) + Math.sin(h) * r * .3, 10, "#ff3b4f", zuig * .9 * (1 - t)); } });
+    const run = async () => { await A.tw(400, t => { kz.a = t; kz.zet(); w = .14 * t; });
+      await A.tw(900, t => { zuig = Math.min(1, t * 3); doel.sx = doel.sy = 1 - t * .3; doel.a = 1 - t * .9; doel.kleurA = .4 * t; }, E.in2); ZUIG = true; };
+    const p0 = run();
+    p0.then(async () => { zuig = 0; doel.a = 0; setTimeout(() => A.los(doel), 400); const v = levenR(p);
+      for(let i = 0; i < 5; i++) setTimeout(() => A.tw(600, t => { const x = lerp(kx, v.x, E.inuit(t)), y = lerp(ky, v.y, E.inuit(t)) - Math.sin(t * Math.PI) * 60; A.gloed(x, y, 12, "#ff3b4f", 1); }), i * 90);
+      await A.tw(500, t => { kz.a = 1 - t; kz.zet(); w = .14 * (1 - t); }); kz.d.remove(); A.weg(s); }).catch(e => { console.error(e); kz.d.remove(); A.weg(s); A.los(doel); });
+    return A.veilig(p0, 1500); };
+
+  /* ---------- ✦ Roversbuit · Kaartentruc ---------- */
+  const RB = ["swipe", "stab", "schild"];
+  const truc = (p, gebruikt) => { if(!aan()) return Promise.resolve(); stuurNaar(veld()); const c = veld(), m = kaartMaat(), w = m.w * .72, h = m.h * .72;
+    const d = document.createElement("div"); d.className = "anirb"; document.body.appendChild(d);
+    const ks = RB.map((el, i) => { const k = document.createElement("div"); k.className = "rbk"; k.style.cssText = `width:${w}px;height:${h}px;left:${-w / 2}px;top:${-h / 2}px`;
+      k.innerHTML = `<div class="rbv">${cardFaceHTML({id:0, el, owner:p})}</div><div class="rbr">${backHTML(p)}</div>`; d.appendChild(k); return k; });
+    const f = [1, 1, 1]; let a = 0;
+    const zetK = () => ks.forEach((k, i) => { const u = i - 1, x = c.x + u * (w + 18) * a, y = c.y + Math.abs(u) * 12 * a, r = u * .18 * a;
+      k.style.transform = `translate(${x}px,${y}px) rotate(${r}rad) scaleX(${Math.max(.02, Math.abs(f[i]))})`; k.style.opacity = String(Math.min(1, a * 1.5));
+      k.querySelector(".rbv").style.visibility = f[i] > 0 ? "hidden" : "visible"; k.querySelector(".rbr").style.visibility = f[i] > 0 ? "visible" : "hidden";
+      k.style.filter = f[i] <= 0 && (gebruikt || []).includes(RB[i]) ? "grayscale(1) brightness(.5)" : ""; });
+    const run = async () => { await A.tw(300, t => { a = t; zetK(); }, E.uit); for(let i = 0; i < 3; i++) await A.tw(300, t => { f[i] = Math.cos(t * Math.PI); zetK(); });
+      await A.wacht(450); await A.tw(200, t => { d.style.opacity = String(1 - t); }); d.remove(); };
+    return A.veilig(run().catch(e => { console.error(e); }), 2300).then(() => d.remove()); };
+  const naarKolom = (p, col, el) => { if(!aan()) return false; const q = A.rc(spellSel(p, col)); if(!q) return false; const van = veld(), m = kaartMaat(),
+      kz = zweef(cardFaceHTML({id:0, el, owner:p}), m.w * .72, m.h * .72, 90); kz.x = van.x; kz.y = van.y; kz.zet(); const kl = {swipe:"#ff6a5c", stab:"#e7e7f0", schild:"#5fb6ff"}[el] || "#fff2b0";
+    A.tw(450, t => { kz.x = lerp(van.x, q.cx, E.inuit(t)); kz.y = lerp(van.y, q.cy, E.inuit(t)) - Math.sin(t * Math.PI) * 50; kz.s = 1 - t * .6; kz.zet(); }).then(() => { kz.d.remove(); A.burst(q.cx, q.cy, 16, [kl, "#ffffff"], 4, {soort:"gloed", s:4}); A.tw(300, t => A.gloed(q.cx, q.cy, q.w, kl, 1 - t)); });
+    return true; };
+  /* de rituelen: Veeg, Steek, Neerzetten */
+  A.HK.swipe = "#ff6a5c"; A.HK.stab = "#e7e7f0"; A.HK.schild = "#5fb6ff"; A.KL.swipe = ["#ff6a5c", "#ffb3a8", "#ffffff"]; A.KL.stab = ["#ffffff", "#c8c8d6", "#e7e7f0"]; A.KL.schild = ["#5fb6ff", "#cfe8ff", "#ffffff"];
+  const veeg = p => { if(!aan()) return false; const q = opp(p), rij = A.rc(`#row${q}`); if(!rij) return false; const y = rij.cy, ks = [];
+    for(let c = 0; c < NK(); c++) if(P(q).cols[c].cre){ const r = A.rc(creSel(q, c)); if(r) ks.push({r, sel:creSel(q, c)}); }
+    A.hou(460); const hit = new Set(); try{ AU.play("attack"); }catch(e){}
+    A.tw(450, t => { const x = lerp(rij.x - 40, rij.x + rij.w + 40, E.inuit(t)); for(let i = 0; i < 8; i++) A.gloed(x - i * 28, y + Math.sin(i) * 6, 30 - i * 3, i ? "#ff6a5c" : "#ffffff", .9 - i * .1);
+      ks.forEach(o => { if(!hit.has(o) && x > o.r.cx){ hit.add(o); const k = A.kaart(o.sel); k.wit = .5; A.tw(200, u => { k.wit = .5 * (1 - u); k.dx = Math.sin(u * 30) * 1.5; }).then(() => A.los(k)); A.burst(o.r.cx, y, 8, ["#ff6a5c", "#fff"], 4, {soort:"vonk", s:3}); } }); });
+    return true; };
+  const steek = (p, kol) => { if(!aan()) return Promise.resolve(); const a = A.rc(spellSel(p, kol)) || A.rc(creSel(p, kol)), bsel = creSel(opp(p), kol), b = A.rc(bsel); if(!a || !b) return Promise.resolve();
+    const run = async () => { await A.tw(250, t => A.gloed(a.cx, a.cy, 50, "#e7e7f0", t)); await A.wacht(150);
+      await A.tw(90, t => { const c = A.ctx; c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = "#ffffff"; const y1 = lerp(a.cy, b.cy, t); c.fillRect(b.cx - 3, Math.min(a.cy, y1), 6, Math.abs(y1 - a.cy)); c.restore(); }, E.in);
+      A.hitstop(110); A.schud(10); const k = A.kaart(bsel); k.wit = .4; A.tw(300, t => { k.wit = .4 * (1 - t); k.dy = (p === 0 ? -1 : 1) * Math.sin(t * Math.PI) * 20; }).then(() => A.los(k));
+      A.burst(b.cx, b.cy, 30, ["#ffffff", "#c8c8d6"], 7, {soort:"vonk", s:3}); };
+    return A.veilig(run(), 900); };
+  const neerzetten = (p, col) => { if(!aan()) return Promise.resolve(); const sel = creSel(p, col), q = A.rc(sel); if(!q) return Promise.resolve(); const k = A.kaart(sel); k.z = 120;
+    const run = async () => { await A.tw(200, t => k.z = lerp(120, 0, t), E.in); k.z = 0; A.schud(5); A.burst(q.cx, q.y + q.h - 4, 14, ["#ffffff", "#c8d8ff"], 5, {soort:"vonk", s:3}); try{ AU.play("place"); }catch(e){}
+      k.voet = true; A.tw(280, t => { k.sy = lerp(.89, 1, E.terug(t)); k.sx = lerp(1.08, 1, E.terug(t)); }).then(() => A.los(k)); };
+    return A.veilig(run(), 600); };
+
+  /* ---------- ✦ Rookgordijn ---------- */
+  const rook = () => { if(!aan()) return; for(let i = 0; i < 120; i++) setTimeout(() => A.deeltje({x:rnd(0, innerWidth), y:innerHeight + 20, vx:rnd(-.5, .5), vy:-rnd(2, 4), life:rnd(1.4, 2), kleur:kies(["rgba(140,140,150,.9)", "rgba(100,100,110,.9)", "rgba(180,180,190,.8)"]), soort:"rook", s:rnd(40, 70), groei:.4, wr:.99, a:.85}), i * 8); };
+
+  /* ---------- ✦ Web · Grijs en traag (blijft grijs zolang hij vastzit) ---------- */
+  let WEBL = null;
+  const webGrijs = (sel, t) => { const el = document.querySelector(sel); if(el) el.style.filter = `grayscale(${t * .8}) brightness(${1 - t * .2}) hue-rotate(${t * 20}deg)`; };
+  const webLijst = () => { const l = []; try{ if(!S || !S.pl || S.over) return l; [0, 1].forEach(p => P(p).cols.forEach((col, c) => { if(col && col.cre && col.cre.web) l.push(creSel(p, c)); })); }catch(e){} return l; };
+  const webBlijf = () => { if(WEBL) return; WEBL = A.laag(() => { const l = webLijst(); if(!l.length || !aan()){ WEBL = null; return false; }
+      l.forEach(sel => { webGrijs(sel, 1); if(Math.random() < .015){ const r = A.rc(sel); if(r) A.deeltje({x:r.x + rnd(0, r.w), y:r.y + rnd(0, r.h), life:.6, kleur:"#ffffff", soort:"plus", s:2}); } }); }); };
+  const web = p => { if(!aan()) return false; const q = opp(p), sels = []; for(let c = 0; c < NK(); c++){ const cr = P(q).cols[c].cre; if(cr && cr.web) sels.push(creSel(q, c)); } if(!sels.length) return false;
+    stuurNaar(veld()); const ks = sels.map(s => A.kaart(s));
+    A.tw(700, t => ks.forEach(k => { k.filter = `grayscale(${t * .8}) brightness(${1 - t * .2}) hue-rotate(${t * 20}deg)`; k.dy = t * 4; const r = A.rc(k.sel); if(r && Math.random() < .25) A.deeltje({x:r.x + rnd(0, r.w), y:r.y + rnd(0, r.h), vx:rnd(-.2, .2), life:.6, kleur:"#ffffff", soort:"plus", s:2}); }))
+      .then(() => A.tw(300, t => ks.forEach(k => k.dy = 4 * (1 - t)))).then(() => { ks.forEach(A.los); webBlijf(); });
+    return true; };
+  { const nr0 = A.naRender; A.naRender = () => { nr0(); if(aan() && !WEBL && webLijst().length) webBlijf(); }; }
+
+  /* ---------- ✦ Elementaal Meester · Vier kaarten ---------- */
+  const VAR4 = [["vuur", "plasma"], ["water", "ijs"], ["gras", "roos"], ["steen", "rots"]];
+  let MEESTER = null;
+  const meesterOpen = p => { if(!aan()) return Promise.resolve(); const c = bron(), m = kaartMaat(), w = m.w * .8, h = m.h * .8; if(NU) NU.klaar();
+    const d = document.createElement("div"); d.className = "anirb"; document.body.appendChild(d);
+    const ks = VAR4.map(([el, v]) => { const k = document.createElement("div"); k.className = "rbk"; k.style.cssText = `width:${w}px;height:${h}px;left:${-w / 2}px;top:${-h / 2}px`;
+      k.innerHTML = cardFaceHTML({id:0, el, var:v, owner:p}); d.appendChild(k); return k; });
+    const st = {a:0, kies:-1, k2:0}; const zetK = () => ks.forEach((k, i) => { const u = i - 1.5; let x = c.x + u * (w + 14) * st.a, y = c.y + Math.abs(u) * 14 * st.a, r = u * .12 * st.a, o = Math.min(1, st.a * 1.5), s = 1;
+      if(i === st.kies){ x = lerp(x, c.x, st.k2); y = lerp(y, c.y, st.k2); r = lerp(r, 0, st.k2); o = 1; s = 1 + .15 * st.k2; }
+      k.style.transform = `translate(${x}px,${y}px) rotate(${r}rad) scale(${s})`; k.style.opacity = String(o); k.style.zIndex = i === st.kies ? "2" : "1"; });
+    MEESTER = {d, ks, st, zetK, p}; zetK();
+    return A.veilig(A.tw(500, t => { st.a = t; zetK(); }, E.uit), 800); };
+  const meesterKies = (el) => { const M0 = MEESTER; MEESTER = null; if(!M0) return; const i = VAR4.findIndex(x => x[0] === el), st = M0.st; st.kies = i;
+    (async () => { await A.tw(300, t => { st.a = 1 - t * .6; M0.zetK(); }); await A.tw(400, t => { st.k2 = t; M0.zetK(); }, E.inuit);
+      const c = veld(), kl = A.HK[VAR4[i] ? VAR4[i][1] : "licht"] || "#fff"; A.burst(c.x, c.y, 20, [kl, "#fff"], 4, {soort:"gloed", s:4});
+      M0.ks.forEach((k, j) => { if(j !== i) k.remove(); }); await A.wacht(300);
+      const hand = A.rc(`#hand${M0.p}`), k = M0.ks[i], y0 = c.y; if(k) await A.tw(500, t => { const y = lerp(y0, hand ? hand.cy : innerHeight + 80, E.in2(t)); k.style.transform = `translate(${c.x}px,${y}px) scale(${1.15 - t * .5})`; k.style.opacity = String(1 - t * .6); });
+      M0.d.remove(); })().catch(e => { console.error(e); M0.d.remove(); }); };
+
+  return {lichtIn, betaal, bron, eclips, wolk, zet, negVoor, negNa, sterrenval, zon, fontein, zuiger, truc, naarKolom, veeg, steek, neerzetten, rook, web, meesterOpen, meesterKies, aan};
+})();
+/* het oude flitsje in het midden wordt het nieuwe spelen van een lichtkaart */
+{ const lf0 = lichtFlits; lichtFlits = function(card, p){ if(FAST || !card) return; if(!ANI.L.lichtIn(card, p)) lf0(card, p); }; }
+
+
+/* ================= ✨ AETHERS (5 nov 2026): de goedgekeurde aether-animaties uit het lab =================
+   Alleen licht, deeltjes en de echte kaarten. Het aether-tegeltje van de speler pulseert mee. */
+const ANI_AE = (() => {
+  const A = ANI, {tw, wacht, kaart, los, geest, geestStand, geestWeg, rc, deeltje, burst, gloed, ring, flits, schud, hitstop, laag, weg, veilig, hou, bezig, stralen, schokgolf, bliksem, E, lerp, rnd, kies, KL} = A;
+  const aan = () => !FAST && A.aan();
+  const ctx = () => A.ctx;
+  const rcR = r => r && r.width ? {x:r.left, y:r.top, w:r.width, h:r.height, cx:r.left + r.width / 2, cy:r.top + r.height / 2} : null;
+  const leven = p => rcR(rectOf(`.pside[data-side="${p}"] .plife`));
+  const stapel = p => rc(`#deck${p}`) || leven(p);
+  const graf = p => rc(`#grave${p}`);
+  const tegelSel = (p, key) => { const s = `.pside[data-side="${p}"] [data-pvae="${key}"]`; return rc(s) ? s : null; };
+  const boog = (a, b, t, h) => ({x:lerp(a.x, b.x, t), y:lerp(a.y, b.y, t) - Math.sin(t * Math.PI) * h});
+  const pt = q => ({x:q.cx, y:q.cy});
+  const HART = ["0110110", "1111111", "1111111", "0111110", "0011100", "0001000"];
+  const hartje = (x, y, s, kl, a) => { const c = ctx(), p = 2 * s; c.save(); c.globalAlpha = a == null ? 1 : a; c.fillStyle = kl || "#ff5a6a"; HART.forEach((r, j) => [...r].forEach((ch, i) => ch === "1" && c.fillRect(x + (i - 3.5) * p, y + (j - 3) * p, p, p))); c.restore(); };
+  /* het tegeltje van de aether pulseert en geeft licht */
+  const tegel = (p, key, kleur, sterk) => { const s = tegelSel(p, key); if(!s) return Promise.resolve(null); const q = rc(s), k = kaart(s); k.boven = true; k.kleur = kleur;
+    burst(q.cx, q.cy, 14, [kleur, "#ffffff"], 4);
+    return tw(380, t => { const v = Math.sin(t * Math.PI); k.sx = k.sy = 1 + v * .3 * (sterk || 1); k.kleurA = .6 * v; gloed(q.cx, q.cy, q.w * 1.2, kleur, v); }).then(() => { los(k); return q; }); };
+  /* een lichtbolletje van a naar b */
+  const bol = (a, b, ms, kleur, h, kern) => tw(ms, t => { const q = boog(a, b, t, h); gloed(q.x, q.y, 16, kleur, 1); gloed(q.x, q.y, 7, kern || "#fff", 1);
+    if(Math.random() < .6) deeltje({x:q.x, y:q.y, life:.35, kleur, soort:"gloed", s:4}); }, E.inuit);
+
+  /* 💗 Liefde: je eerste wezen landt, roze hartjes stijgen op, +4 */
+  const liefde = (p, col) => { if(!aan()) return; setTimeout(async () => { const sel = creSel(p, col), q = rc(sel); if(!q) return;
+      tegel(p, "ae_lente", "#ff6a9a"); const k = kaart(sel); k.kleur = "#ff6a9a";
+      const hz = Array.from({length:16}, (_, i) => ({x:q.x + rnd(-20, q.w + 20), d:i * 55, f:rnd(0, 6), s:rnd(1.4, 2.2)})); let t = 0;
+      const l = laag(() => hz.forEach(h => { const u = Math.max(0, Math.min(1, (t * 1400 - h.d) / 900)); if(u <= 0 || u >= 1) return;
+        hartje(h.x + Math.sin(u * 8 + h.f) * 10, q.y + q.h - u * (q.h + 60), h.s, u < .5 ? "#ff6a9a" : "#ffb3cf", 1 - u); }));
+      setTimeout(() => { try{ pop(sel, "+4", "heal"); }catch(e){} }, 450);
+      await tw(1300, v => { t = v; k.kleurA = .3 * Math.sin(v * Math.PI); gloed(q.cx, q.cy, q.w * .9, "#ff6a9a", .35 * Math.sin(v * Math.PI)); });
+      los(k); weg(l); }, 320); };
+
+  /* 🌋 Kern van Maatje: magma onder je eerste Vuur, +30 */
+  const kern = card => { if(!aan()) return; setTimeout(async () => { const f = findCre(card.id); if(!f) return; const sel = creSel(f.p, f.c), q = rc(sel); if(!q) return;
+      const y0 = q.y + q.h - 4; await tegel(f.p, "ae_kern", "#ff5a1a", 1.4); let lt = 0;
+      const l = laag(() => { gloed(q.cx, y0, q.w * 1.3 * lt, "#ff5a1a", .55 * lt); gloed(q.cx, y0, q.w * .6 * lt, "#ffd36b", .5 * lt); });
+      const k = kaart(sel); k.kleur = "#ff6a2b";
+      await tw(400, t => { lt = t; schud(2 + t * 3); if(Math.random() < .6) deeltje({x:q.cx + rnd(-q.w * .5, q.w * .5), y:y0, vx:rnd(-.6, .6), vy:-rnd(1, 3), g:.15, life:.6, kleur:kies(KL.vuur), soort:"gloed", s:rnd(3, 6)}); });
+      hitstop(80); schud(12); flits(.3, "#ffb347"); tw(650, t => schokgolf(q.cx, y0, 20 + t * 420, 14, 1 - t));
+      for(let i = 0; i < 50; i++) deeltje({x:q.cx + rnd(-30, 30), y:y0, vx:rnd(-3, 3), vy:-rnd(4, 9), g:.25, life:rnd(.8, 1.3), kleur:kies(["#ff5a1a", "#ffb347", "#ffd36b", "#c8281a"]), s:rnd(3, 6)});
+      try{ pop(sel, "+30", "heal"); }catch(e){}
+      await tw(900, t => k.kleurA = .6 * (1 - t)); los(k); await tw(400, t => lt = 1 - t); weg(l); }, 360); };
+
+  /* ✨ Lichtzwerm: een zwerm lichtjes vliegt over het bord je stapel in (begin van het potje) */
+  const zwerm = p => { const s = tegelSel(p, "ae_zwerm"), st = stapel(p); if(!aan() || !st) return; const o = s ? rc(s) : leven(p) || st;
+    tegel(p, "ae_zwerm", "#fff2b0"); const W = innerWidth, H = innerHeight;
+    const zw = Array.from({length:40}, (_, i) => ({f:rnd(0, 6), r:rnd(.6, 1.2), d:i * 12})); let t = 0;
+    const l = laag(() => { zw.forEach(z => { const u = Math.max(0, Math.min(1, (t * 2400 - z.d) / 2000)); if(u <= 0 || u >= 1) return;
+      const bx = lerp(o.cx, st.cx, u), by = lerp(o.cy, st.cy, u) - Math.sin(u * Math.PI) * H * .45 * z.r, x = bx + Math.sin(u * 9 + z.f) * W * .1 * Math.sin(u * Math.PI), y = by + Math.cos(u * 7 + z.f) * 50 * Math.sin(u * Math.PI);
+      const k = .6 + .4 * Math.sin(A.T / 80 + z.f); gloed(x, y, 10 * k, "#fff2b0", .9); const c = ctx(); c.fillStyle = "#fff"; c.fillRect(x - 1, y - 1, 3, 3); }); });
+    tw(2000, v => t = v).then(() => { weg(l); burst(st.cx, st.cy, 30, KL.licht, 5, {soort:"gloed", s:4}); tw(600, t => gloed(st.cx, st.cy, st.w * 1.2, "#fff2b0", .7 * (1 - t))); }); };
+
+  /* ⚒ Aambeeld: drie slagen van licht op je hand, alles is gesmeed (begin van het potje) */
+  const aambeeld = p => { if(!aan()) return; const h = rc(`#hand${p}`) || rc(`.pside[data-side="${p}"] .hand`); if(!h) return;
+    (async () => { await tegel(p, "ae_smeed", "#ff9a3b");
+      for(let i = 0; i < 3; i++){ const x = h.x + h.w * (.3 + i * .2), y = h.y + h.h * .3;
+        await tw(140, t => gloed(x, y - 40 * (1 - t), 30, "#ffd36b", t));
+        hitstop(50); schud(4); burst(x, y, 26, ["#ffd36b", "#ff9a3b", "#ffffff"], 6, {soort:"vonk", s:3});
+        document.querySelectorAll(`.pside[data-side="${p}"] .hcard, #hand${p} .hcard`).forEach(e => { e.style.filter = "brightness(1.6) sepia(.5)"; setTimeout(() => e.style.filter = "", 180); });
+        await tw(220, t => gloed(x, y, 60, "#ff9a3b", 1 - t)); }
+      try{ pop({left:h.x, top:h.y, width:h.w, height:h.h}, "⚒ GESMEED", "heal"); }catch(e){} })(); };
+  /* bij de eerste beurt: wat er bij het begin van het potje al gebeurde */
+  let BEGIN = -1;
+  const potjeBegin = () => { if(!aan() || !S || S.gTurn !== 1 || BEGIN === GEN) return; BEGIN = GEN;
+    setTimeout(() => { [0, 1].forEach(p => { try{ if(hasAe(p, "ae_smeed") && handVisible(p)) aambeeld(p); if(hasAe(p, "ae_zwerm")) zwerm(p); }catch(e){} }); }, 900); };
+
+  /* ✦ Hemelschoon: een gouden halo, een lichtje naar je levens (+1), dan trek je */
+  const hemel = p => { if(!aan()) return Promise.resolve(); const fw = rc("#fieldwrap"), lv = leven(p); if(!fw) return Promise.resolve();
+    const m = {x:fw.cx, y:fw.cy - fw.h * .12};
+    const run = async () => { tegel(p, "ae_hemel", "#ffe08a"); let hal = 0;
+      const l = laag(() => { stralen(m.x, m.y + 40, fw.w * .25, .5 * hal, "#fff2b0"); if(hal <= 0) return; const c = ctx(); c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = hal; c.strokeStyle = "#ffe08a"; c.lineWidth = 5;
+        c.beginPath(); c.ellipse(m.x, m.y, 44, 11, 0, 0, Math.PI * 2); c.stroke(); c.strokeStyle = "#fff8de"; c.lineWidth = 2; c.stroke(); c.restore(); gloed(m.x, m.y, 60, "#ffe08a", hal * .6); });
+      await tw(350, t => hal = E.terug(t));
+      if(lv){ hou(700); await bol(m, pt(lv), 650, "#ffe08a", 80); burst(lv.cx, lv.cy, 16, KL.goud, 3, {soort:"gloed", s:4}); }
+      await tw(300, t => hal = 1 - t); weg(l); };
+    return veilig(run(), 1500); };
+
+  /* 💥 Explosiegevaar: na de inslag rolt een vuurring naar de buren; op water sist het tot stoom */
+  const explosie = (tp, tc, baas) => { if(!aan()) return; const b = rc(creSel(tp, tc)); if(!b) return; tegel(baas == null ? 1 - tp : baas, "ae_fire6", "#ff6a2b");
+    setTimeout(() => { hitstop(70); flits(.25, "#ffb347"); schud(6); tw(650, t => schokgolf(b.cx, b.cy, 20 + t * 340, 12, 1 - t));
+      const buren = [-1, 1].map(s => ({s, sel:creSel(tp, tc + s)})).map(x => Object.assign(x, {q:rc(x.sel)})).filter(x => x.q);
+      tw(420, t => [-1, 1].forEach(s => { const n = buren.find(x => x.s === s), x = n ? lerp(b.cx, n.q.cx, t) : b.cx + s * t * b.w * 1.4; gloed(x, b.cy, 50, "#ff8a2b", .9 * (1 - t * .5)); gloed(x, b.cy, 22, "#ffd36b", 1 - t * .5); }))
+        .then(() => buren.forEach(n => { let water = false; try{ const cr = P(tp).cols[tc + n.s].cre; water = !!(cr && cr.card.el === "water"); }catch(e){}
+          if(water) for(let i = 0; i < 18; i++) deeltje({x:n.q.cx + rnd(-n.q.w * .4, n.q.w * .4), y:n.q.cy + rnd(-n.q.h * .3, n.q.h * .3), vx:rnd(-.4, .4), vy:-rnd(.8, 1.8), life:rnd(.8, 1.3), kleur:"rgba(235,245,255,.75)", soort:"rook", s:rnd(10, 16), groei:.2, wr:.98, a:.6});
+          else { const k = kaart(n.sel); k.kleur = "#ff6a2b"; tw(400, t => k.kleurA = .6 * (1 - t)).then(() => los(k)); burst(n.q.cx, n.q.cy, 24, KL.vuur, 5); } }));
+    }, 520); };
+
+  /* 💀 Eeuwige Terugkeer: een paarse kolk boven het graf, de kaart komt eruit, met een doodshoofd */
+  const terugkeer = (p, col, key) => { if(!aan()) return; const g = graf(p), q = rc(creSel(p, col)); tegel(p, key || "ae_graf", "#b77cff"); if(!g) return;
+    let ka = 0; const kolk = laag(() => { if(ka <= 0) return; const c = ctx(); c.save(); c.globalCompositeOperation = "lighter"; c.translate(g.cx, g.cy); c.scale(1, .55);
+      for(let i = 0; i < 5; i++){ c.strokeStyle = i % 2 ? "#7d3fd1" : "#b77cff"; c.globalAlpha = ka * (1 - i * .15); c.lineWidth = 3; c.beginPath(); c.arc(0, 0, 10 + i * 9, -A.T / 150 + i, -A.T / 150 + i + 3.8); c.stroke(); } c.restore(); gloed(g.cx, g.cy, 50, "#7d3fd1", ka * .6); });
+    tw(300, t => ka = t).then(() => tw(560, t => { if(q){ const pp = boog(pt(g), pt(q), E.inuit(t), 120); if(Math.random() < .7) deeltje({x:pp.x + rnd(-20, 20), y:pp.y + rnd(-25, 25), vy:-rnd(.3, .8), life:.7, kleur:kies(KL.paars), soort:"gloed", s:5}); } }))
+      .then(() => { if(q){ burst(q.cx, q.cy, 22, KL.paars, 4); try{ pop(creSel(p, col), "💀", "imm"); }catch(e){} } return tw(300, t => ka = 1 - t); }).then(() => weg(kolk)); };
+
+  /* ⚡ Wraakzucht: de pijn springt als rode bliksem van je levens naar je stapel */
+  const wraak = p => { if(!aan()) return Promise.resolve(); const lv = leven(p), st = stapel(p); if(!lv || !st) return Promise.resolve();
+    const run = async () => { flits(.18, "#ff3b4f"); const k = kaart(`.pside[data-side="${p}"] .plife`); k.kleur = "#ff3b4f"; tw(500, t => k.kleurA = .7 * (1 - t)).then(() => los(k));
+      await tegel(p, "ae_lichtval", "#ff3b4f");
+      await tw(260, t => bliksem(lv.cx, lv.cy, lerp(lv.cx, st.cx, t), lerp(lv.cy, st.cy, t), "#ff3b4f", 3, 12, 1));
+      tw(220, t => bliksem(lv.cx, lv.cy, st.cx, st.cy, "#ff3b4f", 3 * (1 - t), 12, 1 - t)); flits(.12, "#ff3b4f"); burst(st.cx, st.cy, 18, ["#ff3b4f", "#fff"], 4, {soort:"vonk", s:3}); };
+    return veilig(run(), 900); };
+
+  /* 🧺 Stroman: de klap op je levens wordt opgevangen: een flits van goud, stro waait weg */
+  const stroman = p => { if(!aan()) return; const lv = leven(p); if(!lv) return; tegel(p, "ae_deken", "#e0c060");
+    hitstop(60); schud(5); tw(500, t => { ring(lv.cx, lv.cy, 20 + t * 70, "#ffe08a", (1 - t) * .9, 4); gloed(lv.cx, lv.cy, 60 * (1 - t * .5), "#e0c060", 1 - t); });
+    burst(lv.cx, lv.cy, 50, ["#e0c060", "#c8a040", "#a0702a"], 6, {soort:"blad", spin:.2, g:.06, s:3}); };
+
+  /* 🕯 Altaar: een gouden kopie zakt in het ritueelplekje, een runecirkel draait, een zuil van licht */
+  const altaar = (p, col) => { if(!aan()) return Promise.resolve(); const cs = creSel(p, col), ss = spellSel(p, col), q = rc(cs), m = rc(ss); if(!q || !m) return Promise.resolve();
+    const run = async () => { tegel(p, "ae_altaar", "#f0c75a"); const g = geest(cs);
+      if(g){ g.w.style.mixBlendMode = "screen"; await tw(500, t => geestStand(g, {dy:(m.cy - q.cy) * t, sx:lerp(1, .35, t), sy:lerp(1, .35, t), a:.8 * (1 - t * .6), filter:`sepia(1) saturate(3) brightness(${1.3 + t})`}), E.in2); geestWeg(g); }
+      let a0 = 0; const l = laag(() => { if(a0 <= 0) return; const c = ctx(); c.save(); c.translate(m.cx, m.cy); c.scale(1, .35); c.rotate(A.T / 400); c.globalAlpha = a0; c.strokeStyle = "#f0c75a"; c.lineWidth = 4;
+        c.beginPath(); c.arc(0, 0, m.w * .9, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(0, 0, m.w * .66, 0, Math.PI * 2); c.stroke();
+        for(let i = 0; i < 8; i++){ c.rotate(Math.PI / 4); c.fillStyle = "#ffe7a0"; c.fillRect(m.w * .72, -5, 8, 10); } c.restore(); gloed(m.cx, m.cy, m.w, "#ffe08a", a0 * .4); });
+      await tw(250, t => a0 = t);
+      const kk = kaart(cs); kk.kleur = "#f0c75a";
+      await tw(450, t => { const s = Math.sin(t * Math.PI), c = ctx(); c.save(); c.globalCompositeOperation = "lighter"; const top = Math.min(q.y, m.y) - 40, bot = Math.max(q.y + q.h, m.y + m.h);
+        const gr = c.createLinearGradient(0, m.cy, 0, top); gr.addColorStop(0, `rgba(240,199,90,${.55 * s})`); gr.addColorStop(1, "rgba(240,199,90,0)"); c.fillStyle = gr; c.fillRect(q.cx - q.w * .45, top, q.w * .9, bot - top); c.restore(); kk.kleurA = .5 * s; });
+      los(kk); tw(300, t => a0 = 1 - t).then(() => weg(l)); };
+    return veilig(run(), 1400); };
+
+  /* 🟣 Zielenoffer: een zieltje vliegt van waar het stierf naar het tegeltje; bij de vierde trek je */
+  const ziel = (p, c, n, vol) => { if(!aan()) return; const s = tegelSel(p, "ae_ziel"), o = s ? rc(s) : null, q = c != null ? rc(creSel(p, c)) : null;
+    const tot = o || stapel(p); if(!tot) return;
+    (async () => { if(q) await bol(pt(q), pt(tot), 700, "#b8a6ff", 120, "#ffffff");
+      await tegel(p, "ae_ziel", "#b8a6ff", vol ? 1.4 : 1);
+      if(vol){ burst(tot.cx, tot.cy, 30, ["#e5ccff", "#ffffff"], 5); flits(.12, "#e5ccff"); } })(); };
+
+  /* 💗 Nagloed: een gloeiend hartje drijft van het wezen naar je levens, +1 */
+  const nagloed = (p, c) => { if(!aan()) return; const q = c != null ? rc(creSel(p, c)) : null, lv = leven(p); if(!lv) return;
+    (async () => { tegel(p, "ae_rouw", "#ff6a9a"); if(q){ await wacht(300);
+        await tw(1000, t => { const pp = boog(pt(q), pt(lv), E.inuit(t), 120), s = 1.6 + .25 * Math.sin(A.T / 120); gloed(pp.x, pp.y, 26, "#ff6a9a", .7); hartje(pp.x, pp.y, s, "#ff5a7a");
+          if(Math.random() < .4) deeltje({x:pp.x, y:pp.y, life:.6, kleur:"#ffd1e6", soort:"plus", s:2}); }); }
+      burst(lv.cx, lv.cy, 14, ["#ff6a9a", "#ffd1e6"], 3, {soort:"gloed", s:4}); try{ pop(rectOf(`.pside[data-side="${p}"] .plife`), "+1", "heal"); }catch(e){} })(); };
+
+  /* 🕊 Laatste Adem: hij vergaat al half tot as, dan stopt het en redt het licht hem. Hij blijft staan. */
+  const genade = (p, c) => { if(!aan()) return false; const sel = creSel(p, c), g = geest(sel); if(!g) return false;
+    const r = g.r, B = 3, nx = Math.max(2, Math.ceil(r.w / B)), ny = Math.max(2, Math.ceil(r.h / B)), ruis = new Float32Array(nx * ny);
+    const rooster = (gx, gy) => { const a = []; for(let i = 0; i <= gx; i++){ a.push([]); for(let j = 0; j <= gy; j++) a[i].push(Math.random()); } return a; };
+    const vn = (gr, gx, gy, u, v) => { const fx = u * gx, fy = v * gy, i = Math.min(gx - 1, fx | 0), j = Math.min(gy - 1, fy | 0), a = fx - i, b = fy - j, sa = a * a * (3 - 2 * a), sb = b * b * (3 - 2 * b);
+      return lerp(lerp(gr[i][j], gr[i + 1][j], sa), lerp(gr[i][j + 1], gr[i + 1][j + 1], sa), sb); };
+    const g1 = rooster(4, 5), g2 = rooster(11, 14);
+    for(let i = 0; i < nx; i++) for(let j = 0; j < ny; j++){ const u = i / nx, v = j / ny; ruis[j * nx + i] = .5 * (1 - v) + .32 * vn(g1, 4, 5, u, v) + .18 * vn(g2, 11, 14, u, v); }
+    const mc = document.createElement("canvas"); mc.width = nx; mc.height = ny; const mx = mc.getContext("2d"), md = mx.createImageData(nx, ny), ws = g.w.style;
+    ws.webkitMaskSize = ws.maskSize = "100% 100%"; ws.webkitMaskRepeat = ws.maskRepeat = "no-repeat";
+    let pv = -.05, r1 = "rgb(255,244,214)", r2 = "rgb(255,150,60)"; const rand = [];
+    const zet = () => { for(let k = 0, n = nx * ny; k < n; k++){ md.data[k * 4] = md.data[k * 4 + 1] = md.data[k * 4 + 2] = 255; md.data[k * 4 + 3] = ruis[k] >= pv ? 255 : 0; } mx.putImageData(md, 0, 0); ws.webkitMaskImage = ws.maskImage = `url(${mc.toDataURL()})`; };
+    const sx = r.w / nx, sy = r.h / ny;
+    const rl = laag(() => { const cx = ctx(); rand.length = 0; cx.save(); cx.translate(r.x, r.y);
+      for(let j = 0; j < ny; j++) for(let i = 0; i < nx; i++){ const n = ruis[j * nx + i]; if(n < pv || n > pv + .09) continue;
+        if(n < pv + .035){ cx.globalAlpha = 1; cx.fillStyle = r1; if((i + j) % 3 === 0) rand.push([i, j]); } else { cx.globalAlpha = (1 - (n - pv - .035) / .055) * .75; cx.fillStyle = r2; }
+        cx.fillRect(i * sx, j * sy, sx + .5, sy + .5); } cx.restore(); });
+    const kr = kaart(sel); kr.a = 0;            // de echte kaart (met 1 leven) blijft verborgen tot hij gered is
+    zet(); let stap = 0;
+    (async () => { const w0 = (() => { try{ return fxWait(); }catch(e){ return 0; } })(); if(w0 > 12) await new Promise(res => setTimeout(res, w0));
+      await tw(700, t => { pv = lerp(-.05, .5, t); if((stap++ & 1) === 0 || t >= 1) zet();
+        for(let i = 0; i < 3 && rand.length; i++){ const [ix, iy] = kies(rand); deeltje({x:r.x + ix * sx, y:r.y + iy * sy, vy:-rnd(.5, 1.4), life:1, kleur:kies(["#ffb347", "#8a7a6a"]), s:3}); } });
+      hitstop(250); tegel(p, "ae_genade", "#ffffff"); try{ AU.play("light"); }catch(e){}
+      let st = 1; const sl = laag(() => stralen(r.cx, r.y - 30, r.w * 1.8, st, "#fff6d8"));
+      for(let i = 0; i < 22; i++) deeltje({x:r.cx + rnd(-r.w * .7, r.w * .7), y:r.y - rnd(0, 60), vx:rnd(-.6, .6), vy:rnd(.4, 1), life:1.4, kleur:"#ffffff", soort:"blad", spin:rnd(-.1, .1), s:3, wr:.99});
+      r1 = "rgb(255,255,255)"; r2 = "rgb(255,236,160)";
+      await tw(900, t => { pv = lerp(.5, -.06, E.inuit(t)); zet(); gloed(r.cx, r.cy, r.w * .8, "#fff6d8", .5 * Math.sin(t * Math.PI)); st = 1 - t * .7; });
+      weg(rl); geestWeg(g); kr.a = 1; kr.kleur = "#ffffff"; await tw(400, t => { kr.kleurA = .6 * (1 - t); st = .3 * (1 - t); }); weg(sl); los(kr);
+      try{ pop(sel, "1 ♥", "heal"); }catch(e){} })().catch(e => { console.error(e); weg(rl); geestWeg(g); los(kr); });
+    return true; };
+
+  return {tegel, liefde, kern, zwerm, aambeeld, potjeBegin, hemel, explosie, terugkeer, wraak, stroman, altaar, ziel, nagloed, genade};
+})();
 
 </script>
