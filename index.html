@@ -14473,8 +14473,11 @@ async function declarePlan0(p, card, asSpell, col, opts){
      het ritueel en pas daarna wie het water verplaatst. */
   const volg = plan.map((_, i) => i);
   if(!asSpell && card.el === "water") volg.sort((a, b) => (plan[a].origin === "spell" ? 0 : 1) - (plan[b].origin === "spell" ? 0 : 1));
+  const runeGezien = new Set();
   for(const i of volg){
     const e = plan[i];
+    /* ✨ De Lichtzuil van een ritueel komt op het moment dat het ritueel afgaat en je mikt, niet pas als de keten hem uitvoert (5 nov 2026) */
+    if(e.origin === "spell" && !FAST){ const rk = e.col != null ? e.col : col; if(!runeGezien.has(rk)){ runeGezien.add(rk); ANI.rune(p, rk); } e.rune = true; }
     const ids = targetsForEff(p, e, selfId, card.el, o.excl).concat(isBot(p) ? [] : legePlekIds(e.el, p, e));
     if(!ids.length){ e.tid = null; continue; }
     const bron = e.origin === "spell" ? " <span style='opacity:.7'>(ritueel-trigger)</span>" : "";
@@ -14517,7 +14520,7 @@ async function declarePlan0(p, card, asSpell, col, opts){
 /* Bouwt het stack-item voor één gepland effect. */
 function effItem(p, e, selfId){
   const it = {type:"eff", el:e.el, ctrl:p, origin:e.origin, tid:e.tid, tp:e.tp, tc:e.tc, dec:true, var:e.var,
-              col:e.col, cheat:e.cheat, srcCard:e.srcCard, spell:e.spell, bronId:e.origin === "creature" ? selfId : null};
+              col:e.col, cheat:e.cheat, srcCard:e.srcCard, spell:e.spell, bronId:e.origin === "creature" ? selfId : null, rune:!!e.rune};
   if(e.el === "vuur"){
     it.excl = (e.origin === "creature" && selfId != null) ? [selfId] : [];
     it.srcId = e.origin === "creature" ? selfId : null;
@@ -16768,7 +16771,7 @@ async function effTarget(it, p, ids, prompt, optional, meta){
 }
 async function resolveEffect(it){
   const p = it.ctrl;
-  if(it.origin === "spell" && it.col != null && !FAST) await ANI.rune(p, it.col);   // ✨ Lichtzuil: het ritueel gaat af
+  if(it.origin === "spell" && it.col != null && !it.rune && !FAST) await ANI.rune(p, it.col);   /* alleen als hij bij het mikken nog niet te zien was */   // ✨ Lichtzuil: het ritueel gaat af
   /* 🧊 IJs: staat het doelwit er nog? Anders is het ontweken en smelt het ijs voor niets. */
   if(it.el === "ijs"){
     const c = it.tc, vij = opp(p);
@@ -42759,6 +42762,8 @@ const ANI = (() => {
   const boog = (a, b, t, h) => ({x:lerp(a.x, b.x, t), y:lerp(a.y, b.y, t) - Math.sin(t * Math.PI) * h});
   const projectiel = (van, naar, ms, o) => { o = o || {}; const h = o.boog == null ? 80 : o.boog, spoor = [];
     return tw(ms, t => { const q = boog(van, naar, t, h); spoor.push([q.x, q.y]); if(spoor.length > (o.spoor || 14)) spoor.shift();
+      if(o.stijl === "A"){ const P3 = v => Math.round(v / 3) * 3; spoor.forEach(([x, y], i) => { const s = 3 + i * .7; ctx.fillStyle = kies(o.kl); ctx.fillRect(P3(x) - s / 2, P3(y) - s / 2, s, s); });
+        ctx.fillStyle = o.kern || "#fff4c2"; ctx.fillRect(P3(q.x) - 7, P3(q.y) - 7, 14, 14); ctx.fillStyle = o.kl[0]; ctx.fillRect(P3(q.x) - 7, P3(q.y) + 4, 14, 3); if(o.deeltjes) o.deeltjes(q.x, q.y, t); return; }
       spoor.forEach(([x, y], i) => gloed(x, y, (o.r || 14) * (i / spoor.length) * 1.6, o.kl[i % o.kl.length], .5 * i / spoor.length));
       gloed(q.x, q.y, (o.r || 14) * 2.6, o.kl[0], .9); gloed(q.x, q.y, (o.r || 14), o.kern || "#fff", 1);
       if(o.deeltjes) o.deeltjes(q.x, q.y, t); }, o.e || E.inuit); };
@@ -43027,13 +43032,15 @@ const ANI = (() => {
     return true; };
 
   /* ================= VUUR · Vlammenzee ================= */
-  const vuurVoor = o => { if(!aan()) return; hou(o && o.blik ? 820 : (o && o.plasma) ? 960 : 520); };
+  const vuurVoor = o => { if(!aan()) return; hou(o && o.blik ? 820 : (o && o.plasma) ? 960 : 460); };
+  /* VUUR · Pixelbal (5 nov 2026, was Vlammenzee): een blokkerige vuurbal met een pixelstaart, een ster van pixelvonken */
   const vlam = (fromSel, toSel) => { if(!aan()) return false; const b = rc(toSel); if(!b) return false; const a0 = fromSel ? rc(fromSel) : null, a = a0 ? {x:a0.cx, y:a0.cy} : {x:b.cx, y:b.cy - 190};
-    try{ AU.play("fire"); }catch(e){} hou(520); bezig(700); const kb = kaart(toSel); kb.kleur = "#ff7a2b";
-    projectiel(a, {x:b.cx, y:b.cy}, 520, {kl:KL.vuur, r:13, boog:70, spoor:22, deeltjes:(x, y) => { if(Math.random() < .8) deeltje({x, y, vx:rnd(-1, 1), vy:rnd(-1.5, .2), life:.5, kleur:kies(KL.vuur), soort:"gloed", s:rnd(5, 10)}); }}).then(() => {
-      try{ AU.play("burn"); }catch(e){} schud(4); tw(500, t => { kb.kleurA = .7 * (1 - t); }).then(() => los(kb)); hitte(toSel, 1400, 5);
-      tw(500, t => { for(let i = 0; i < 7; i++){ const h = i / 7 * Math.PI * 2 + t; gloed(b.cx + Math.cos(h) * 40 * E.uit(t), b.cy + Math.sin(h) * 40 * E.uit(t), 30 * (1 - t), "#ff8a2b", 1 - t); } gloed(b.cx, b.cy, 90 * (1 - t * .5), "#ffb347", 1 - t); });
-      for(let i = 0; i < nN(26); i++) deeltje({x:b.cx + rnd(-b.w * .55, b.w * .55), y:b.cy + rnd(-b.h * .3, b.h * .4), vx:rnd(-.4, .4), vy:rnd(-1.8, -.6), life:rnd(.8, 1.6), kleur:kies(KL.vuur), soort:"gloed", s:rnd(3, 6), wr:.995}); });
+    try{ AU.play("fire"); }catch(e){} hou(460); bezig(700); const kb = kaart(toSel), ka = fromSel ? kaart(fromSel) : null;
+    if(ka) tw(180, t => { ka.sy = 1 - .06 * Math.sin(t * Math.PI); }).then(() => los(ka));
+    projectiel(a, {x:b.cx, y:b.cy}, 460, {stijl:"A", kl:KL.vuur, boog:90}).then(() => {
+      try{ AU.play("burn"); }catch(e){} schud(5); kb.wit = 1; tw(220, t => kb.wit = 1 - t).then(() => los(kb));
+      for(let i = 0; i < 8; i++){ const h = i / 8 * Math.PI * 2; for(let j = 0; j < 5; j++) deeltje({x:b.cx, y:b.cy, vx:Math.cos(h) * (3 + j), vy:Math.sin(h) * (3 + j), life:.35, kleur:KL.vuur[j % 4], wr:.9}); }
+      burst(b.cx, b.cy, 30, KL.vuur, 4, {g:.15}); });
     return true; };
   /* hittetrilling op de kaart zelf (een SVG-filter, zodat de echte kaart golft) */
   let HF = null;
