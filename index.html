@@ -5773,6 +5773,17 @@ html .bordvlak .bordzee .bzmist{-webkit-mask-image:radial-gradient(circle at 50%
 /* het knopje om de kaartstijl te kiezen, met een lijstje eronder */
 #bordbak{transition:opacity .22s ease-out} #bordbak.laadt{opacity:0 !important; transition:none}
 #bordbak.laadt *{animation-play-state:paused !important}
+html body .ovbox.rbkeus, html body.pc.venster .ovbox.rbkeus, html body.venster .ovbox.rbkeus{background:none !important; border:0 !important; border-image:none !important; box-shadow:none !important; outline:0 !important; max-width:none !important; text-align:center}
+html body .ovbox.rbkeus::before, html body .ovbox.rbkeus::after{display:none !important}
+.ovbox.rbkeus h2{font:12px/1.4 "Press Start 2P",monospace; color:#f0c75a; text-shadow:0 2px 0 #000; margin:0 0 18px}
+.rbrij{display:flex; gap:26px; justify-content:center; align-items:flex-start}
+.rbkaart{position:relative; background:none; border:0; padding:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; transition:transform .12s steps(3)}
+.rbkaart .infokaart{width:150px; height:208px; position:relative}
+.rbkaart:hover, .rbkaart:focus-visible{transform:translateY(-10px); outline:none}
+.rbkaart:hover .infokaart, .rbkaart:focus-visible .infokaart{filter:drop-shadow(0 0 10px rgba(240,199,90,.8))}
+.rbkaart .rbuitleg{font:9px/1.5 "Press Start 2P",monospace; color:#ececec; background:#0b0a0e; border:2px solid #ececec; padding:6px 8px; max-width:170px; opacity:0; transition:opacity .1s}
+.rbkaart:hover .rbuitleg, .rbkaart:focus-visible .rbuitleg{opacity:1}
+.rbkaart.weg{cursor:default; filter:grayscale(1) brightness(.45)}
 .kaartbox .ksknop{display:inline-flex; flex-direction:column; align-items:flex-start; gap:3px; font:9px/1 "Press Start 2P",monospace !important; padding:8px 12px !important;
   background:#050507 !important; color:#ffd84a !important; border:0 !important; border-radius:4px !important; box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000 !important}
 .kaartbox .ksknop small{font:7px/1 "Press Start 2P",monospace; color:#8a8698; letter-spacing:.1em}
@@ -7202,7 +7213,8 @@ function effsVan0(G, id, origin){
 const kloonE = e => Object.assign({}, e, e.keten ? {keten:e.keten.slice()} : null);
 function geplandeEffecten(G, p, id, asSpell, col, o){
   const dub = (e, l) => trioKracht(G, p, e) ? l.concat(l.map(kloonE)) : l;   // 🎪 het trio, en 🟣 Lawine in Volle slag: twee keer
-  if (asSpell) return dub(G.kEl[id], effsVan(G, id, 1)).map(e => (e.col = col, e));
+  if (asSpell){ const rit = dub(G.kEl[id], effsVan(G, id, 1)).map(e => (e.col = col, e));   // 💧 nov 2026: Water als ritueel plonst eerst
+    return (G.kEl[id] === WATER && !G.kVar[id] && !(o && o.geenPlons)) ? effsVan(G, id, 0).concat(rit) : rit; }
   let eigen = o.skipOwn ? [] : effsVan(G, id, 0);
   if (o.dubbel) eigen = eigen.concat(eigen.map(e => kloonE(e)));
   if (o.geenSpell) return dub(G.kEl[id], eigen);
@@ -14305,9 +14317,9 @@ function lightPlayable(p, card){
   if(k === "kloon")    return kloonBronnen().length > 0 && (openCols(p).length > 0 || freeSpellCols(p).length > 0);
   return true;
 }
-async function chooseOpt(p, prompt, opts){
+async function chooseOpt(p, prompt, opts, meta){
   await ensureHolder(p);
-  return await waitUI("opt", {p, prompt, opts});
+  return await waitUI("opt", Object.assign({p, prompt, opts}, meta && meta.kaarten ? {kaarten:meta.kaarten} : {}));
 }
 async function chooseSlot(p, slots, prompt, cancellable, meta){
   if(!slots || !slots.length){ addLog("Geen geldige plek — die stap vervalt."); return null; }
@@ -14388,7 +14400,10 @@ function lawProefZet(v){ SET.lawProef = v || null; globalThis.LAW_PROEF = lawPro
 setTimeout(() => { globalThis.LAW_PROEF = lawProef(); if(AETHERS.ae_stonefull && typeof kwHTML === "function") AETHERS.ae_stonefull.txt = AETHERS.ae_stonefull.kort = kwHTML(AETHER_TEKST.ae_stonefull); }, 0);
 function plannedEffects(p, card, asSpell, col, opts){
   const trioDubbel = (el, lijst) => (trioKracht(p, el) || lawineTwee(p, el)) ? lijst.concat(lijst.map(e => Object.assign({}, e))) : lijst;
-  if(asSpell) return trioDubbel(card.el, effsOf(card.el, "spell", card)).map(e => Object.assign(e, {col}));
+  /* 💧 nov 2026: leg je een Waterplons als ritueel, dan plonst hij eerst (een eigen wezen verplaatsen), en daarna
+     gaat het wezen in zijn kolom opnieuw. Alleen bij het neerleggen; latere triggers doen alleen dat laatste. */
+  if(asSpell){ const rit = trioDubbel(card.el, effsOf(card.el, "spell", card)).map(e => Object.assign(e, {col}));
+    return (card.el === "water" && !card.var && !card.ws && !(opts && opts.geenPlons)) ? effsOf("water", "creature", card).concat(rit) : rit; }
   const o = opts || {};
   let own = o.forceEffs ? o.forceEffs.slice() : (o.skipOwn ? [] : effsOf(card.el, "creature", card));
   if(o.dubbel) own = own.concat(own.map(e => Object.assign({}, e)));   // 🟣 Getijdenstroom
@@ -16340,7 +16355,7 @@ async function resolveLight(it){
     if(!opts.length){ addLog(`✦ Roversbuit: het arsenaal is leeg. Er gebeurt niets.`, true); return; }
     if(!FAST) await ANI.L.truc(p, al.slice());   // ✨ Kaartentruc
     const keus = opts.length === 1 ? opts[0].v
-      : await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Roversbuit: welk ritueel leg je${it.col != null ? ` in kolom ${it.col + 1}` : ""}?`, opts);
+      : await chooseOpt(p, `✦ Roversbuit: welk ritueel leg je${it.col != null ? ` in kolom ${it.col + 1}` : ""}?`, opts, {kaarten:["swipe","stab","schild"]});   // nov 2026: kies op de drie kaarten zelf
     const el = ["swipe","stab","schild"].indexOf(keus) >= 0 ? keus : opts[0].v;
     al.push(el);
     /* Sinds een lichtkaart geen eigen plek meer heeft: kies nu in welke kolom het ritueel komt. */
@@ -20338,7 +20353,7 @@ function intentVan(it, e, tp, tc){
       if(del && EL.vuur.strong === del) d *= 2;
       return {s:"schade", v:String(d)}; }
     case "gras": { const per = (del === "steen" ? 2 : 1) * (hasAe(p, "ae_grassx2") ? 2 : 1); return {s:"verstrik", v:"-" + per}; }
-    case "steen": return {s:"heal", v:"+" + (hasAe(p, "ae_stonefull") ? ((S.lawTel || [4, 4])[p]) + (e.__lawVoor || 0) : 3)};
+    case "steen": return {s:"steen", v:"+" + (hasAe(p, "ae_stonefull") ? ((S.lawTel || [4, 4])[p]) + (e.__lawVoor || 0) : 3)};
     case "water": case "ws": return {s:"water", v:""};
     case "ijs": return {s:"ijs", v:""};
     case "bliksem": return {s:"schade", v:"2"};
@@ -20346,11 +20361,12 @@ function intentVan(it, e, tp, tc){
     default: return {s:"mik", v:""};
   }
 }
-const INTENT_KLEUR = {schade:"#ff4d3d", verstrik:"#7ddc5a", heal:"#5fe3c0", dood:"#b77cff", water:"#4aa8ff", ijs:"#9be7ff", mik:"#f0c75a"};
+const INTENT_KLEUR = {schade:"#ff4d3d", verstrik:"#7ddc5a", heal:"#5fe3c0", steen:"#d8b27a",   /* nov 2026: Steen +3 in de kleur van steen */ dood:"#b77cff", water:"#4aa8ff", ijs:"#9be7ff", mik:"#f0c75a"};
 const INTENT_ICO = {
   schade:  ["...o....","..o#o...","..o##o.o",".o####o#","o######o","o##oo##o",".o#oo#o.","..oooo.."],
   verstrik:["....oo..","...o##o.","..o##o..",".o#o.o#o","o#o.o##o",".o.o##o.","..o#oo..",".o#o...."],
   heal:    ["..oooo..","..o##o..","ooo##ooo","o######o","o######o","ooo##ooo","..o##o..","..oooo.."],
+  steen:   ["..oooo..","..o##o..","ooo##ooo","o######o","o######o","ooo##ooo","..o##o..","..oooo.."],
   dood:    [".oooooo.","o######o","o#oo#oo#","o#oo#oo#","o######o",".o#oo#o.",".o####o.","..o##o.."],
   water:   ["...oo...","..o##o..","..o##o..",".o####o.","o######o","o##o###o",".o####o.","..oooo.."],
   ijs:     ["o..o..o.",".o.o.o..","..o#o...","oo###oo.","..o#o...",".o.o.o..","o..o..o.","........"],
@@ -20407,9 +20423,10 @@ function chainDoelen(){
         if(e.el === "vuur" && it.type !== "light"){
           const baas = it.ctrl, plasma = e.var === "plasma" || it.var === "plasma" || (typeof trioKracht === "function" && trioKracht(baas, "plasma")), expl = hasAe(baas, "ae_fire6");
           const nv = (plasma ? 2 : 0) + (expl ? 1 : 0);
-          if(nv) [tc - 1, tc + 1].forEach(c => { if(c < 0 || c > NK() - 1) return; const cr = P(tp) && P(tp).cols[c] && P(tp).cols[c].cre; if(!cr) return;
-            if(cr.card.el === "water" && !(typeof oerkrachtOp === "function" && oerkrachtOp(baas, "vuur"))) return;   // 💧 voelt de overslag niet
-            if(hexVan(cr, tp, baas)) return;
+          /* nov 2026: het gaat om de kolommen, niet om de wezens: ook een lege buurplek krijgt het vuur-bolletje */
+          if(nv) [tc - 1, tc + 1].forEach(c => { if(c < 0 || c > NK() - 1) return; const cr = P(tp) && P(tp).cols[c] && P(tp).cols[c].cre;
+            if(cr && cr.card.el === "water" && !(typeof oerkrachtOp === "function" && oerkrachtOp(baas, "vuur"))) return;   // 💧 voelt de overslag niet
+            if(cr && hexVan(cr, tp, baas)) return;
             zet0(tp, c, {s:"schade", v:String(nv)}); });
         } };
       if(e.tp != null && e.tc != null){ zet(e.tp, e.tc); if(it.type === "light" && it.lk === "bloedmaan" && e.t2 && e.t2.tp != null) zet(e.t2.tp, e.t2.tc); return; }
@@ -21530,6 +21547,14 @@ function overlayHTML(){
     <div class="winbig">🔄</div>
     <div class="sub"><b>${pName(u.p)}</b> is aan zet.</div>
     <button class="obtn" data-act="btn" data-btn="handoffok">Ik ben ${pName(u.p)}</button></div>`;
+  /* ✦ nov 2026: Roversbuit kies je op de drie kaarten zelf; wat een kaart doet zie je als je erover hovert */
+  if(u.mode==="opt" && u.kaarten && iControl(u.p)){
+    return `<div class="ovbox rbkeus"><h2>${u.prompt}</h2><div class="rbrij">${u.kaarten.map(el => {
+      const i = u.opts.findIndex(o => o.v === el), o = u.opts[i];
+      const kaart = `<div class="infokaart">${cardFaceHTML({id:0, el, owner:u.p})}</div>`;
+      return i >= 0 ? `<button class="rbkaart" data-act="optpick" data-i="${i}" title="${String(o.label).replace(/"/g, "&quot;")}">${kaart}<span class="rbuitleg">${o.label}</span></button>`
+                    : `<div class="rbkaart weg" title="al gebruikt">${kaart}<span class="rbuitleg">al gebruikt</span></div>`; }).join("")}</div></div>`;
+  }
   if(u.mode==="opt"){
     return `<div class="ovbox" style="max-width:min(620px,94vw)"><h2 style="font-size:1.05rem">${u.prompt}</h2>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px">
@@ -44380,6 +44405,10 @@ ANI.V = (() => {
     "@keyframes vknip{50%{opacity:0}}",
     "#ptbel.vboos,#praatbel .pbbel.vboos{border-color:#ff4a3c!important;background:#1a0806!important;color:#ffd0c8!important;border-width:4px!important}",
     "#praatbel .pbbel.vboos::after{border-top-color:#ff4a3c!important}",
+    /* nov 2026: de rand van voorstel A (Q miste hem): goudbruin, 3 px, rechte hoeken */
+    "#ptbel.show:not(.vboos):not(.hard){border:3px solid #c9a06a!important;border-radius:0!important;background:#0d1119!important}",
+    "body.pc #portretvak #ptbel.show:not(.vboos):not(.hard)::after{border-right-color:#c9a06a!important}",
+    "#praatbel .pbbel:not(.vboos){border-color:#c9a06a!important;border-radius:0!important}",
     ".vtril{animation:vtril .09s steps(2,end) infinite!important}",
     "@keyframes vtril{0%{translate:-1.5px .5px}50%{translate:1.5px -1px}100%{translate:0 0}}",
     ""
@@ -44889,12 +44918,12 @@ ANI.V = (() => {
     (async () => {
       if(hard){ try{ const e = document.querySelector("#portret .ptfig"); if(e) e.animate([{scale:"1", translate:"0 0"}, {scale:"1.1", translate:"0 -6px"}, {scale:"1", translate:"0 0"}], {duration:280, easing:"ease-out"}); }catch(x){}
         const q = rc("#portret"); if(q) tw(500, t => gloed(q.cx, q.y + q.h * .9, q.w * .55, "#ff3020", .28 * Math.sin(t * Math.PI))); schud(4); }
-      for(const [sx, sy] of [[.18, .1], [.6, .55], [1, 1]]){ if(B.gen !== gen) return; stap(sx, sy); await new Promise(r => setTimeout(r, hard ? 45 : 65)); }
+      for(const [sx, sy] of [[.18, .1], [.6, .55], [1, 1]]){ if(B.gen !== gen) return; stap(sx, sy); await new Promise(r => setTimeout(r, hard ? 40 : 45)); }
       doel.style.scale = ""; if(hard) doel.classList.add("vtril");
-      const per = spans.length > 70 ? 2 : 1;
+      const per = spans.length > 70 ? 3 : 2;   // nov 2026: sneller typen
       for(let i = 0; i < spans.length; i++){ if(B.gen !== gen) return; const s = spans[i]; s.classList.add("vzie", "vwit"); setTimeout(() => s.classList.remove("vwit"), 70);
         s.after(cur); if(hard && s.textContent.trim() && i % 2 === 0) schud(2); if(hard && i % 6 === 0) hitstop(25);
-        if(i % per === per - 1 || i === spans.length - 1) await new Promise(r => setTimeout(r, hard ? 55 : 32)); }
+        if(i % per === per - 1 || i === spans.length - 1) await new Promise(r => setTimeout(r, hard ? 40 : 26)); }
       doel.classList.remove("vtril");
       await new Promise(r => setTimeout(r, 1300)); if(B.gen === gen) cur.remove();
     })().catch(fout); };
@@ -45006,12 +45035,18 @@ ANI.V = (() => {
       burst(ix, iy, 26, ["#c9a24a", "#3a2f4d", "#0b0807", hk], 6, {soort:"brok", g:.22, s:4, spin:.3});
       for(let j = 0; j < 18; j++) deeltje({x:ix + rnd(-20, 20), y:iy + rnd(-10, 10), vx:rnd(-2.2, 2.2), vy:rnd(-2.2, 1.2), wr:.95, life:rnd(1, 1.7), kleur:"rgba(80,70,90,.55)", soort:"rook", s:rnd(16, 26), groei:.35, a:.8});
       tw(900, t => { gloed(ix, iy, lerp(30, 260, E.uit(t)), "#ffffff", (1 - t) * 1.1); gloed(ix, iy, lerp(20, 190, E.uit(t)), kl[2] || hk, 1 - t); schokgolf(ix, iy, 20 + E.uit(t) * 460, 14, 1 - t, 1, hk); });
-      raak();
+      raak(); KLAP_T = nu();
       tw(650, t => { z = lerp(1.28, 1, E.uit(t)); zetZ(); }).then(() => { z = 1; zetZ(); });
       await tw(300, t => { ka.dy = lerp(eindY, 0, E.uit(t)); ka.dx = lerp(eindX, 0, E.uit(t)); ka.sy = lerp(.88, 1, E.terug(t)); });
       los(ka); await wacht(400);
     })().catch(e => { fout(e); raak(); }).finally(() => { raak(); los(ka); opruimen(); });
     return Promise.race([inslag, lim]); };
+  /* nov 2026: na de kogeltijd even laten nazinderen (2 s) voordat de tegenstander iets zegt */
+  let KLAP_T = -1e9;
+  { const er0 = eindReactie;
+    eindReactie = function(klaar){ const self = this, args = arguments;
+      if(!FAST && nu() - KLAP_T < 3000){ KLAP_T = -1e9; setTimeout(() => er0.apply(self, args), 2000); return; }
+      return er0.apply(this, arguments); }; }
   { const ra0 = resolveAttack;
     resolveAttack = async function(it){ try{ eindKlap = aan() ? eindVoorspel(it) : null; }catch(e){ eindKlap = null; }
       try{ return await ra0.apply(this, arguments); } finally { eindKlap = null; } };
@@ -45611,8 +45646,10 @@ ANI.S = (() => {
 /* ---- module d ---- */
 /* ================= 🃏 DE DRAFT IN TWEE RONDES, UIT DE STAPEL (nov 2026, keuze a4-draft-a) =================
    Eerst ronde 1: aether (bovenste rij) en lichtkaart (onderste rij), eerst de eerste kiezer, dan de ander.
-   Dan ronde 2: opwaarderen en bannen, weer in dezelfde volgorde. Wie wat mag kiezen en hoeveel is niet
-   veranderd: de tweede kiest uit wat de eerste liet liggen, wat de ander nam staat er grijs bij.
+   Dan ronde 2 (6 nov 2026, nieuwe regel): een pakketje van drie sterke kaarten (2 van het ene element, 1 van
+   een ander), weer in dezelfde volgorde. De tweede kiest uit wat de eerste liet liggen, wat de ander nam staat
+   er grijs bij. Commander begint met 4 kaarten per element (16); geen bans en geen apart opwaarderen meer.
+   Wat je kiest (pakketje en lichtkaarten) blijft de rest van de match in je deck.
    Het beeld: rechts ligt een stapel; de kaarten worden in een boog gedeeld en draaien om als ze landen.
    Een gekozen kaart vliegt klein naar het vak van de speler, een lichtstreep loopt naar wie nu kiest,
    en voor ronde 2 gaat alles terug op de stapel en wordt opnieuw gedeeld.
@@ -45622,6 +45659,11 @@ ANI.D = (() => {
   const mag = () => { try{ return !FAST && A.aan(); }catch(e){ return false; } };
   const st = {teDelen:0, verborgen:new Set(), deal:null, stapelIn:false, hoog:0};
   const RUG = "art/kaart-achterkant.png";
+  /* 🃏 commander (6 nov 2026): 4 kaarten per element om mee te beginnen, en in ronde 2 een pakketje van drie
+     sterke kaarten: 2 van element A en 1 van element B (A en B verschillend) */
+  const CMD_PER_EL = 4;
+  const pakNaam = o => `2× ${VAR[STERK_VAN[o.els[0]]].name} · 1× ${VAR[STERK_VAN[o.els[2]]].name}`;
+  const isCmd = () => !!(S && S.mode === "commander" && S.match);
 
   (function(){ const s = document.createElement("style"); s.textContent = `
 .dr2 .drrijen.drronde{position:relative; display:grid; grid-template-columns:minmax(0,1fr) 96px; gap:10px}
@@ -45641,7 +45683,14 @@ ANI.D = (() => {
 .dr2 .drslot .drtxt{-webkit-line-clamp:5}
 .dr2 .drslot .drtxt.drbanels{align-items:center}
 .dr2 .drslot.drverb{pointer-events:none; outline:none; box-shadow:none}
-.dr2 .drslot.drverb .drkaart{visibility:hidden}
+.dr2 .drslot .drkaart.drverbk{visibility:hidden}
+.dr2 .drpak{display:flex; justify-content:center}
+.dr2 .drpak .drkaart + .drkaart{margin-left:-10px}
+.dr2 .drpak div.drkaart, .dr2 .drpak div.drkaart .gc{width:84px; height:118px}
+.dr2 .drrijen.drronde.dr-r2 .drvelden{justify-content:center}
+.dr2 .drrijen.drronde.dr-r2 .drpane{flex:0 0 auto}
+.dr2 .drrijen.drronde.dr-r2 .drtile.drslot{padding:14px 8px 12px}
+.dr2 .drpak .drkaart:nth-child(2){translate:0 -4px}
 .dr2 .drslot.drverb .drtt, .dr2 .drslot.drverb .drweg, .dr2 .drslot.drverb .drvink{opacity:0}
 .dr2 .drslot.sel .drkaart{translate:0 -3px}
 .dr2 .drslot.weg .drkaart .lk, .dr2 .drslot.weg .drkaart .gc{box-shadow:none}
@@ -45668,13 +45717,15 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
   /* de vakken van een ronde: [sleutel, keuze, index in wat er nog ligt, soort] */
   const vakken = u => u.ronde === 1
     ? (u.alleA || []).map((k, s) => ["a" + s, k, u.aethers.indexOf(k), "a"]).concat((u.alleL || []).map((k, s) => ["l" + s, k, u.lights.indexOf(k), "l"]))
-    : (u.alleE || []).map((k, s) => ["e" + s, k, (u.elementen || []).indexOf(k), "e"]).concat((u.alleB || []).map((o, s) => ["b" + s, o, (u.banOpts || []).indexOf(o), "b"]));
+    : (u.allePak || []).map((o, s) => ["k" + s, o, (u.elementen || []).indexOf(o), "k"]);
+  /* de kaarten in een vak: een pakketje heeft er drie, de rest één (sleutel "vak/j") */
+  const kaartKeys = v => Array.from({length:v[3] === "k" ? v[1].els.length : 1}, (_, j) => v[0] + "/" + j);
   const draftHTML0 = draftHTML;
   draftHTML = function(u){
     if(!u || !u.ronde) return draftHTML0.apply(this, arguments);
     /* het delen begint zodra dit scherm er de eerste keer staat */
     if(st.teDelen && st.teDelen === u.ronde && mag()){
-      st.teDelen = 0; st.verborgen = new Set(vakken(u).map(v => v[0])); st.stapelIn = u.ronde === 1;
+      st.teDelen = 0; st.verborgen = new Set(vakken(u).flatMap(kaartKeys)); st.stapelIn = u.ronde === 1;
       const g = GEN; st.deal = new Promise(res => setTimeout(() => { delen(u.ronde, g).catch(e => console.error(e)).then(res); }, 0));
     }
     const m = S.match, act = u.p, klaar = !!u.klaar;
@@ -45692,11 +45743,11 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
     const tg = u.tegen || {};
     const nuVan = x => x === opp(act) ? tg : {};
     const bezit = x => {
-      const nu = nuVan(x), up = (m.upg && m.upg[x]) || [0,0,0,0];
+      const nu = nuVan(x), pk = (m.pak && m.pak[x]) || [], up = ORDER.map(el => pk.filter(c => c.el === el).length), nuEls = (nu.nuPak && nu.nuPak.els) || [];
       const ae = (S.ae[x] || []).filter(k => AETHERS[k]), lt = (S.lt[x] || []).filter(k => LIGHTS[k]);
       const chips = ae.map(k => `<span class="drchip${k === nu.nuAe ? " nu" : ""}">${img(k)}${AETHERS[k].name}${k === nu.nuAe ? " <em>net gekozen</em>" : ""}</span>`)
         .concat(lt.map(k => `<span class="drchip${k === nu.nuLt ? " nu" : ""}">${img(k, true)}✦ ${LIGHTS[k].name} ×${LIGHTS[k].n}${k === nu.nuLt ? " <em>net gekozen</em>" : ""}</span>`))
-        .concat(ORDER.map((el, i) => up[i] ? `<span class="drchip${el === nu.nuEl ? " nu" : ""}" style="padding-left:7px">⬆ ${VAR[STERK_VAN[el]].name} ×${up[i]}${el === nu.nuEl ? " <em>net gekozen</em>" : ""}</span>` : "").filter(Boolean));
+        .concat(ORDER.map((el, i) => up[i] ? `<span class="drchip${nuEls.includes(el) ? " nu" : ""}" style="padding-left:7px">⬆ ${VAR[STERK_VAN[el]].name} ×${up[i]}${nuEls.includes(el) ? " <em>net gekozen</em>" : ""}</span>` : "").filter(Boolean));
       return chips.length ? chips.join("") : `<span class="drchip leeg">nog niets gekozen</span>`;
     };
     /* wie hierna kiest: in ronde 1 kiest de eerste kiezer straks weer, in ronde 2 is de tweede de laatste */
@@ -45708,7 +45759,7 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
       return `<img src="${src}" alt=""${s && s.u ? ` class="drgesneden${inkt ? " inktzw" : ""}" style="width:${breed}%"` : (inkt ? ` class="inktzw"` : "")}>${inkt ? inktLos("") : ""}`; };
     const speler = x => `<div class="drsp${x === act ? " aan" : ""}" data-p="${x}"><div class="drpt">${spr(x)}</div><div style="flex:1; min-width:0">
         <div class="drwie">${naam(x)}<span class="drstatus">${status(x)}</span></div><div class="drbezit">${bezit(x)}</div></div></div>`;
-    const daarna = u.ronde === 1 ? "daarna: opwaarderen en bannen" : "daarna begint het potje";
+    const daarna = u.ronde === 1 ? "daarna: een pakketje sterke kaarten" : "daarna begint het potje";
     const beurt = wachtS
       ? `<div class="drbeurt"><div class="pot">POTJE ${m.game} · RONDE ${u.ronde}/2</div><div class="pijl">${naam(act).toUpperCase()}<br>KIEST ▶</div><small>${u.first ? `${knaam(ik)} kiest daarna uit wat er over is` : daarna}</small></div>`
       : `<div class="drbeurt"><div class="pot">POTJE ${m.game} · RONDE ${u.ronde}/2</div><div class="pijl">◀ ${samen ? naam(act).toUpperCase() : "JIJ"}<br>KIEST NU</div><small>${u.first ? `${naam(opp(act))} kiest daarna uit wat er over is` : `uit wat ${naam(opp(act))} heeft laten liggen`}</small></div>`;
@@ -45716,44 +45767,38 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
     /* links: de rijen van deze ronde, elke keuze een kaart in een vak. Wat de ander nam, blijft grijs op zijn plek. */
     const door = u.door || {}, selK = new Set(u.selKeys || []);
     const leven = u.ronde === 1 && u.aethers[u.selA] === "ae_leven";
-    const isSel = (soort, i) => !wacht && i >= 0 && (soort === "a" ? u.selA === i : soort === "l" ? !leven && u.selL === i : soort === "e" ? (u.selE || 0) === i : (u.selB || 0) === i);
-    const ACT = {a:"aepick", l:"lpick", e:"epick", b:"bpick"};
-    const banIn = o => { const t = banTelling(o);
-      const blok = ORDER.filter(el => t[el]).map(el => `<span class="drbanel"><i style="background:${DR_KLEUR[el]}"></i><b>−${t[el]}</b>${EL[el].name}</span>`).join("");
-      return [`<div class="drbanvak">${ORDER.map(el => Array(t[el]).fill(`<b style="background:${DR_KLEUR[el]}"></b>`).join("")).join("")}</div>`,
-        `<div class="drnaam">${o.vast ? "Van elk één" : "Twee keer twee"}</div><div class="drtxt drbanels">${blok}</div>`]; };
-    const inhoud = (soort, k) => soort === "a" ? [lkHTML(k, false), `<div class="drtxt">${AETHERS[k].txt}</div>`]
-      : soort === "l" ? [lkHTML(k, true), `<div class="drtxt"><b>${LIGHTS[k].n}×</b> in je deck. ${LIGHTS[k].txt}</div>`]
-      : soort === "e" ? [face(k, STERK_VAN[k]), `<div class="drtxt">${u.upgN} gewone ${EL[k].name} in je deck worden ${VAR[STERK_VAN[k]].name}, de rest van de match.</div>`]
-      : banIn(k);
-    const tegel = ([key, k, i, soort]) => {
+    const isSel = (soort, i) => !wacht && i >= 0 && (soort === "a" ? u.selA === i : soort === "l" ? !leven && u.selL === i : (u.selE || 0) === i);
+    const ACT = {a:"aepick", l:"lpick", k:"epick"};
+    const inhoud = (soort, k) => soort === "a" ? [[lkHTML(k, false)], `<div class="drtxt">${AETHERS[k].txt}</div>`]
+      : soort === "l" ? [[lkHTML(k, true)], `<div class="drtxt"><b>${LIGHTS[k].n}×</b> in je deck. ${LIGHTS[k].txt}</div>`]
+      : [k.els.map(el => face(el, STERK_VAN[el])), `<div class="drnaam">${pakNaam(k)}</div><div class="drtxt">blijven de rest van de match in je deck</div>`];
+    const tegel = v => { const [key, k, i, soort] = v;
       const dp = door[key], weg = dp != null || i < 0, sel = !weg && (selK.has(key) || isSel(soort, i));
-      const verb = st.verborgen.has(key) || u.allesWeg;
-      const [kaart, tt] = inhoud(soort, k);
+      const ks = kaartKeys(v), verb = u.allesWeg || ks.some(x => st.verborgen.has(x));
+      const [kaarten, tt] = inhoud(soort, k);
+      const kHTML = kaarten.map((h, j) => `<div class="drkaart${u.allesWeg || st.verborgen.has(ks[j]) ? " drverbk" : ""}" data-j="${j}">${h}</div>`).join("");
       const wie = dp == null ? naam(opp(act)) : (dp === ik && !samen ? "jou" : naam(dp));
-      return `<div class="drtile drslot${sel ? " sel" : ""}${weg ? " weg" : ""}${verb ? " drverb" : ""}" data-dk="${key}"${weg || wacht ? "" : ` data-act="${ACT[soort]}" data-i="${i}"`}>${sel ? `<div class="drvink">✓</div>` : ""}<div class="drkaart">${kaart}</div><div class="drtt">${tt}</div>${weg ? `<span class="drweg">gekozen door ${wie}</span>` : ""}</div>`;
+      return `<div class="drtile drslot${sel ? " sel" : ""}${weg ? " weg" : ""}${verb ? " drverb" : ""}" data-dk="${key}"${weg || wacht ? "" : ` data-act="${ACT[soort]}" data-i="${i}"`}>${sel ? `<div class="drvink">✓</div>` : ""}${soort === "k" ? `<div class="drpak">${kHTML}</div>` : kHTML}<div class="drtt">${tt}</div>${weg ? `<span class="drweg">gekozen door ${wie}</span>` : ""}</div>`;
     };
     const vv = vakken(u), rij = s => vv.filter(v => v[3] === s).map(tegel).join("");
     const panes = u.ronde === 1
       ? `<div class="drpane"><div class="drlab">🟣 AETHER <small>kies er één · passief, de hele match</small></div><div class="drtiles">${rij("a")}</div></div>
          ${(u.alleL || []).length ? `<div class="drpane${leven ? " geenlicht" : ""}"><div class="drlab">✦ LICHTKAART <small>${leven ? "met Levenskracht krijg je in deze draft geen lichtkaart" : "kies er één · alle exemplaren gaan je deck in"}</small></div><div class="drtiles">${rij("l")}</div></div>` : ""}`
-      : `<div class="drpane"><div class="drlab">⬆ OPWAARDEREN <small>kies er één · ${u.upgN} kaarten van dat element worden sterk</small></div><div class="drtiles">${rij("e")}</div></div>
-         <div class="drpane"><div class="drlab">🚫 BANNEN <small>kies er één · die kaarten gaan de rest van de match uit je deck</small></div><div class="drtiles drbantiles">${rij("b")}</div></div>`;
+      : `<div class="drpane"><div class="drlab">⬆ PAKKETJE <small>kies er één · drie sterke kaarten, ze blijven de rest van de match in je deck</small></div><div class="drtiles">${rij("k")}</div></div>`;
     const stapel = `<div class="drstapel${st.stapelIn ? " drin" : ""}"><div class="drstapelk"><div class="drrug"></div><div class="drrug"></div><div class="drrug"></div><div class="drrug"></div></div>
         <div class="drstapellab">RONDE<b>${u.ronde} VAN 2</b></div></div>`;
-    const rijen = `<div class="drrijen drronde${wacht ? " drwachtk" : ""}"><div class="drvelden">${panes}</div>${stapel}</div>`;
+    const rijen = `<div class="drrijen drronde dr-r${u.ronde}${wacht ? " drwachtk" : ""}"><div class="drvelden">${panes}</div>${stapel}</div>`;
 
-    /* rechts: je deck na deze draft (in ronde 1 met je nieuwe aether en lichtkaart, in ronde 2 met bans en opwaardering) */
+    /* rechts: je deck per element (in ronde 1 met je nieuwe aether en lichtkaart, in ronde 2 met het pakketje dat je aanwijst) */
     const deck = P(ik).deck, mijnBeurt = !wachtS && act === ik, r2 = u.ronde === 2;
-    const ban = mijnBeurt && r2 ? (u.ban || {}) : {};
-    const opNu = mijnBeurt && r2 && (u.elementen || []).length ? u.elementen[u.selE || 0] : null;
+    const pakNu = mijnBeurt && r2 && !klaar && (u.elementen || []).length ? u.elementen[u.selE || 0] : null;
     let elTot = 0;
     const rijD = el => {
       const norm = deck.filter(c => c.el === el && !c.var && !c.lk).length, op = deck.filter(c => c.el === el && c.var).length;
-      const b = Math.min(ban[el] || 0, norm), extra = el === opNu ? Math.min(u.upgN, norm - b) : 0, totOp = op + extra, rest = norm - b - extra;
-      elTot += norm + op - b;
-      const vak = Array(totOp).fill(`<b class="op" style="background:${DR_KLEUR_OP[el]}"></b>`).concat(Array(rest).fill(`<b style="background:${DR_KLEUR[el]}"></b>`), Array(b).fill(`<b class="ban"></b>`)).join("");
-      return `<div class="drrij">${face(el, totOp ? STERK_VAN[el] : null)}<div class="drwat">${EL[el].name}<small>${norm + op - b} kaarten${totOp ? ` · ${totOp} ${VAR[STERK_VAN[el]].name}` : ""}</small></div>
+      const extra = pakNu ? pakNu.els.filter(x => x === el).length : 0, totOp = op + extra;
+      elTot += norm + totOp;
+      const vak = Array(op).fill(`<b class="op" style="background:${DR_KLEUR_OP[el]}"></b>`).concat(Array(extra).fill(`<b class="op" style="background:${DR_KLEUR_OP[el]}; outline:2px dashed #e6c46a; outline-offset:1px"></b>`), Array(norm).fill(`<b style="background:${DR_KLEUR[el]}"></b>`)).join("");
+      return `<div class="drrij">${face(el, totOp ? STERK_VAN[el] : null)}<div class="drwat">${EL[el].name}<small>${norm + totOp} kaarten${totOp ? ` · ${totOp} ${VAR[STERK_VAN[el]].name}` : ""}</small></div>
         <div class="drvakjes">${vak}</div><div></div></div>`;
     };
     const elRijen = ORDER.map(rijD).join("");
@@ -45770,9 +45815,9 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
     const knop = klaar ? `<button class="obtn dim drknop" disabled>${wachtS ? naam(act) + " heeft gekozen" : "Gekozen"}</button>`
       : wachtS ? `<button class="obtn dim drknop" disabled>Wachten op ${naam(act)}…</button>`
       : `<button class="obtn drknop" id="draftbtn" data-act="btn" data-btn="draftconfirm">Bevestig <span class="toets" style="opacity:.6">[spatie]</span></button>`;
-    const rechts = `<div class="drpane drrechts"><div class="drlab">📖 ${samen ? "DECK VAN " + naam(ik).toUpperCase() : "JE DECK"} NA DEZE DRAFT <small>${tot} kaarten</small></div>
+    const rechts = `<div class="drpane drrechts"><div class="drlab">📖 ${samen ? "DECK VAN " + naam(ik).toUpperCase() : "JE DECK"} PER ELEMENT <small>${tot} kaarten</small></div>
         ${elRijen}${krachten}
-        <div class="drtotaal">${ORDER.map(el => { const k = deck.filter(c => c.el === el).length - (ban[el] || 0); return `<div style="flex:${k}; background:${DR_KLEUR[el]}"></div>`; }).join("")}<div style="flex:${ltTot}; background:linear-gradient(#fff6d0,#d9b45a)"></div></div>
+        <div class="drtotaal">${ORDER.map(el => { const k = deck.filter(c => c.el === el).length + (pakNu ? pakNu.els.filter(x => x === el).length : 0); return `<div style="flex:${k}; background:${DR_KLEUR[el]}"></div>`; }).join("")}<div style="flex:${ltTot}; background:linear-gradient(#fff6d0,#d9b45a)"></div></div>
         <div class="drtotaaltxt"><span>elementen <b>${elTot}</b></span><span>licht <b>${ltTot}</b> (${pct}%)</span></div>
         <div class="dronder">${knop}</div></div>`;
     return `<div class="ovbox draftbox dr2">
@@ -45781,24 +45826,25 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
   };
 
   /* ---------------- de bot ---------------- */
-  /* Ronde 1: hij rekent zoals altijd alles in één keer uit (met het hele aanbod van ronde 2) en neemt
-     daar zijn aether en lichtkaart van. Ronde 2: opnieuw, met wat er dan nog ligt, alsof de aether en
-     lichtkaart van deze draft nog gekozen moesten worden (zo telt hij ze niet dubbel). */
+  /* Ronde 1: aether en lichtkaart zoals altijd (het draftbrein of de vaste smaak), alleen zonder bans en
+     opwaardering erbij (één neppe keuze van 0 kaarten, zodat de oude rekensom blijft werken).
+     Ronde 2: het pakketje dat het best bij zijn aethers past. Per kaart: 100 punten als zijn aethers dat
+     element hebben, plus hoeveel kaarten van dat element hij al heeft. Gelijk? Dan de eerste. */
+  const botPakket = (p, lijst) => {
+    const aeEl = aeList(p).map(k => AETHERS[k] && AETHERS[k].el).filter(Boolean);
+    const tel = el => P(p).deck.filter(c => c.el === el).length;
+    let best = 0, bs = -1e9;
+    lijst.forEach((o, i) => { const sc = o.els.reduce((n, el) => n + aeEl.filter(x => x === el).length * 100 + tel(el), 0); if(sc > bs){ bs = sc; best = i; } });
+    return best;
+  };
   const botDraft0 = botDraft;
   botDraft = function(u){
     if(!u || !u.ronde) return botDraft0.apply(this, arguments);
     if(u.ronde === 1){
-      const l8 = u.later || {}, bo = l8.banOpts || [];
-      const r = botDraft0(Object.assign({}, u, {elementen:(l8.elementen || []).slice(), banOpts:bo.slice(), selB:0, ban:banTelling(bo[0])}));
+      const r = botDraft0(Object.assign({}, u, {elementen:[ORDER[0]], upgN:0, banMax:0, banOpts:undefined, ban:{}}));
       return {a:r.a, l:r.l, e:0, b:0, ban:[]};
     }
-    const p = u.p, ae = S.ae[p], lt = S.lt[p], ae0 = ae.slice(), lt0 = lt.slice();
-    try{
-      const ka = u.aethers[0], i = ae.lastIndexOf(ka); if(i >= 0) ae.splice(i, 1);
-      (u.dezeLt || []).forEach(k => { const j = lt.lastIndexOf(k); if(j >= 0) lt.splice(j, 1); });
-      const r = botDraft0(u);
-      return {a:0, l:0, e:r.e, b:r.b, ban:r.ban};
-    } finally { ae.splice(0, ae.length, ...ae0); lt.splice(0, lt.length, ...lt0); }
+    return {a:0, l:0, e:botPakket(u.p, u.elementen || []), b:0, ban:[]};
   };
   /* de bot wacht tot er gedeeld is */
   const botDecide0 = botDecide;
@@ -45817,16 +45863,19 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
   const laagEl = () => { if(LAAG && LAAG.isConnected) return LAAG; LAAG = document.createElement("div"); LAAG.className = "dr2 drgeesten"; LAAG.setAttribute("aria-hidden", "true"); document.body.appendChild(LAAG); return LAAG; };
   const box = () => document.querySelector("#overlay .draftbox.dr2");
   const tegelEl = key => { const b = box(); return b ? b.querySelector(`.drslot[data-dk="${key}"]`) : null; };
-  const kaartEl = key => { const t = tegelEl(key); return t ? t.querySelector(".drkaart") : null; };
+  /* een kaart in een vak: sleutel "vak/j" */
+  const kaartEl = ck => { const [key, j] = ck.split("/"); const t = tegelEl(key); return t ? t.querySelector(`.drkaart[data-j="${j || 0}"]`) : null; };
   const rect = el => { const r = el && el.getBoundingClientRect(); return r && r.width ? {x:r.left, y:r.top, w:r.width, h:r.height, cx:r.left + r.width / 2, cy:r.top + r.height / 2} : null; };
   const stapelR = () => { const b = box(); const r = b && rect(b.querySelector(".drstapelk .drrug:last-child"));
     if(r) return r; const rr = b && rect(b.querySelector(".drvelden")); return rr ? {x:rr.cx - 38, y:rr.y - 120, w:76, h:106, cx:rr.cx, cy:rr.y - 67} : null; };
-  const toon = key => { st.verborgen.delete(key); const t = tegelEl(key); if(t) t.classList.remove("drverb"); };
+  const toon = ck => { st.verborgen.delete(ck); const key = ck.split("/")[0], el = kaartEl(ck); if(el) el.classList.remove("drverbk");
+    if(![...st.verborgen].some(x => x.split("/")[0] === key)){ const t = tegelEl(key); if(t) t.classList.remove("drverb"); } };
   /* een losse kopie van een kaart boven alles, met de kaartrug als tweede vlak om om te draaien */
   const geest = (el, r) => {
     const g = document.createElement("div"); g.className = "drgeest";
     g.style.cssText = `left:${r.x}px; top:${r.y}px; width:${r.w}px; height:${r.h}px`;
     const voor = document.createElement("div"); voor.className = "drkaart drgvoor"; voor.innerHTML = el.innerHTML;
+    voor.querySelectorAll(":scope > .gc, :scope > .lk").forEach(x => { x.style.width = r.w + "px"; if(x.classList.contains("gc")) x.style.height = r.h + "px"; });
     const rug = document.createElement("div"); rug.className = "drrug";
     const bh = r.h, bw = Math.min(r.w, r.h * 5 / 7); rug.style.cssText = `left:${(r.w - bw) / 2}px; top:0; width:${bw}px; height:${bh}px`;
     g.append(voor, rug); laagEl().appendChild(g);
@@ -45854,7 +45903,7 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
         await tw(260, t => { k.a = t; k.dx = 70 * (1 - t); }, E.uit); A.los(k); }
       st.stapelIn = false;
       const bron = stapelR(); const keys = [...st.verborgen];
-      await Promise.all(keys.map((key, i) => wacht(i * 85).then(() => GEN === g ? kaartIn(key, bron) : toon(key))));
+      await Promise.all(keys.map((key, i) => wacht(i * (keys.length > 6 ? 70 : 85)).then(() => GEN === g ? kaartIn(key, bron) : toon(key))));
     } finally { st.verborgen.forEach(toon); st.verborgen.clear(); st.stapelIn = false; hoog(-1); }
   }
   async function kaartIn(key, bron){
@@ -45877,11 +45926,11 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
     try{
       const bron = stapelR(); if(!bron) return;
       const tegels = [...b.querySelectorAll(".drslot")].reverse();
-      const vl = tegels.map(t => { const el = t.querySelector(".drkaart"), r = rect(el); return r ? {el, r, grijs:t.classList.contains("weg") ? 1 : 0} : null; }).filter(Boolean);
+      const vl = tegels.flatMap(t => [...t.querySelectorAll(".drkaart")].reverse().map(el => { const r = rect(el); return r ? {el, r, grijs:t.classList.contains("weg") ? 1 : 0} : null; })).filter(Boolean);
       const gs = vl.map(v => { const G = geest(v.el, v.r); zet(G, {grijs:v.grijs}); return G; });
       if(S.ui && S.ui.mode === "draft") S.ui.allesWeg = true;
-      tegels.forEach(t => t.classList.add("drverb"));
-      await Promise.all(gs.map((G, i) => wacht(i * 50).then(() => {
+      tegels.forEach(t => { t.classList.add("drverb"); t.querySelectorAll(".drkaart").forEach(k => k.classList.add("drverbk")); });
+      await Promise.all(gs.map((G, i) => wacht(i * 45).then(() => {
         const r = G.r, s1 = Math.max(.3, bron.h / G.bh), dx1 = bron.cx - r.cx, dy1 = bron.cy - r.cy, gr = vl[i].grijs;
         return tw(330, (e, t) => zet(G, {dx:lerp(0, dx1, e), dy:lerp(0, dy1, e) - Math.sin(t * Math.PI) * 40, s:lerp(1, s1, e), rot:Math.sin(t * Math.PI) * .12,
           flip:Math.max(0, 1 - t / .45), grijs:gr * Math.max(0, 1 - t / .45)}), E.inuit).then(() => G.g.remove()); })));
@@ -45931,7 +45980,7 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
       if(GEN !== g) return;
       S.ui = Object.assign({}, uNu, {mode:"draft", klaar:true, selKeys:keys}); render();
       await wacht(eigen ? 60 : 300); if(GEN !== g) return;
-      const vl = keys.map(key => { const el = kaartEl(key), r = rect(el); return el && r ? {el, r} : null; }).filter(Boolean);
+      const vl = keys.flatMap(key => { const t = tegelEl(key); return t ? [...t.querySelectorAll(".drkaart")] : []; }).map(el => { const r = rect(el); return r ? {el, r} : null; }).filter(Boolean);
       grijs.forEach(k => { if(uNu.door) uNu.door[k] = p; });
       S.ui.selKeys = []; draftSync();
       await Promise.all(vl.map((v, j) => wacht(j * 90).then(() => naarVak(v, p))));
@@ -45943,8 +45992,8 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
   const voorRonde = (ronde, eerste) => { if(eerste && mag()){ st.teDelen = ronde; st.verborgen.clear(); } };
 
   /* ---------------- de draft zelf ---------------- */
-  /* Zoals commanderSetup hiervoor, maar in twee rondes. Volgorde van kiezen, aanbod, wat er exclusief is,
-     Levenskracht, Lichtzwerm en wat er na de draft gebeurt zijn gelijk gebleven. */
+  /* In twee rondes. Volgorde van kiezen, aethers en licht, wat er exclusief is, Levenskracht en wat er na de
+     draft gebeurt zijn als voorheen; ronde 2 is het pakketje (in plaats van bannen en opwaarderen). */
   commanderSetup = async function(){
     const m = S.match, starter = m.firstPicker, g0 = GEN;
     if(m.game === 1 || m.eersteKiezer == null) m.eersteKiezer = starter;
@@ -45952,33 +46001,32 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
     addLog(`— 🟣 Potje ${m.game} · stand ${m.wins[0]}–${m.wins[1]} — ${pName(kiest)} kiest eerst${kiest === starter ? " en begint" : `, ${pName(starter)} begint`}.`, true);
     if(!m.gone) m.gone = [];
     if(!m.goneL) m.goneL = [];
+    if(!m.pak) m.pak = [[], []];
+    if(!m.upg) m.upg = [[0,0,0,0],[0,0,0,0]];          // (niet meer gebruikt in commander, wel nog gelezen door oude schermen)
     if(!S.lt) S.lt = [[],[]];
+    /* het startdeck van commander: 4 per element, plus wat je eerder in de match koos (pakketjes en licht) */
+    P(0).deck = buildDeck(0); P(1).deck = buildDeck(1);
     const takenA = [].concat(S.ae[0], S.ae[1], m.gone);
     const offerA = shuffle(pvpAePool().filter(k => !takenA.includes(k) && (!AETHERS[k].basis || k === "ae_zwerm"))).slice(0,3);
     const metLicht = m.lights !== false;
     const takenL = [].concat(S.lt[0], S.lt[1], m.goneL);
     const offerL = metLicht ? shuffle(Object.keys(LIGHTS).filter(k => !takenL.includes(k) && !LIGHTS[k].weg && !LIGHTS[k].geenPvp && (!LIGHTS[k].verhaal || LIGHTS[k].pvp || LIGHTS[k].cmd))).slice(0,3) : [];
-    if(!m.upg) m.upg = [[0,0,0,0],[0,0,0,0]];
-    const upgN = UPG_PER_POTJE[Math.min(m.game, 3) - 1];
-    const offerE = shuffle(ORDER.slice()).slice(0, 3);
-    const nBan = 4;
-    const BAN_PAREN = [["water","steen"],["water","vuur"],["water","gras"],["steen","vuur"],["steen","gras"],["vuur","gras"]];
-    const banOpts = shuffle(BAN_PAREN.map(x => x.slice())).slice(0, 3).map(([x, y]) => ({els:[x, x, y, y]}))
-      .concat([{els:ORDER.slice(), vast:true}]);
+    /* ⬆ drie pakketjes: elk 2 sterke van element A en 1 sterke van element B, drie verschillende paren */
+    const PAREN = []; ORDER.forEach(a => ORDER.forEach(b => { if(a !== b) PAREN.push([a, b]); }));
+    const pakketten = shuffle(PAREN).slice(0, 3).map(([a, b]) => ({els:[a, a, b]}));
     /* het hele aanbod blijft op zijn plek staan; wat er gekozen is, staat er grijs bij */
-    const alleA = offerA.slice(), alleL = offerL.slice(), alleE = offerE.slice(), alleB = banOpts.slice(), door = {};
+    const alleA = offerA.slice(), alleL = offerL.slice(), allePak = pakketten.slice(), pakNu = pakketten.slice(), door = {};
     const volg = [kiest, opp(kiest)], gekozenL = [];
     const tegenVan = p => { const t = gekozenL.find(x => x.p === opp(p)) || {};
-      return {ae:S.ae[opp(p)].slice(), lt:S.lt[opp(p)].slice(), nuAe:t.ka || null, nuLt:t.kl || null, nuEl:t.ke || null, nuBan:t.kb || null}; };
-    const basis = p => ({p, upgN, banMax:nBan, first:p === kiest, alleA, alleL, alleE, alleB, door, tegen:tegenVan(p)});
+      return {ae:S.ae[opp(p)].slice(), lt:S.lt[opp(p)].slice(), nuAe:t.ka || null, nuLt:t.kl || null, nuPak:t.pak || null}; };
+    const basis = p => ({p, upgN:0, banMax:0, first:p === kiest, alleA, alleL, allePak, door, tegen:tegenVan(p)});
     const vraag = data => { const pr = waitUI("draft", data); return {pr, u:S.ui}; };
 
     /* ---- ronde 1: aether en lichtkaart ---- */
     for(const p of volg){
       if(!isBot(p)) await ensureHolder(p);
       voorRonde(1, p === kiest);
-      const q = vraag(Object.assign(basis(p), {ronde:1, aethers:offerA.slice(), lights:offerL.slice(), elementen:[], banOpts:[],
-        selA:0, selL:0, selE:0, selB:0, ban:{}, later:{elementen:offerE.slice(), banOpts:banOpts.slice()}}));
+      const q = vraag(Object.assign(basis(p), {ronde:1, aethers:offerA.slice(), lights:offerL.slice(), elementen:[], banOpts:[], selA:0, selL:0, selE:0, selB:0, ban:{}}));
       const res = await q.pr;
       const r = res && typeof res === "object" ? res : {a:0, l:0};
       let ka = offerA[Math.min(r.a || 0, offerA.length-1)];
@@ -45997,7 +46045,7 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
       if(kl){ S.lt[p].push(kl); if(offerL.indexOf(kl) >= 0) offerL.splice(offerL.indexOf(kl), 1); }
       addLog(`${pName(p)} kiest 🟣 <em>${AETHERS[ka].name}</em>${kl ? ` en ✦ <em>${LIGHTS[kl].name}</em>` : ""}.`, true);
       if(kl) addLights(p, kl);
-      /* ✨ Lichtzwerm: meteen nog een tweede lichtkaart (de tweede ban komt in ronde 2) */
+      /* ✨ Lichtzwerm: meteen nog een tweede lichtkaart (in commander voorlopig alleen dat) */
       let kl2 = null;
       if(ka === "ae_zwerm"){
         const restL = offerL.filter(k => !S.lt[p].includes(k));
@@ -46015,66 +46063,85 @@ body.tel .dr2 .drslot .drtxt{-webkit-line-clamp:3}
       if(S.ui && S.ui.mode === "draft" && S.ui.klaar) draftSync();   // het nieuwe staat nu in zijn vak
     }
 
-    /* ---- ronde 2: opwaarderen en bannen; eerst gaat alles terug op de stapel ---- */
+    /* ---- ronde 2: een pakketje sterke kaarten; eerst gaat alles terug op de stapel ---- */
     await veilig(terug(), 1400);
     if(GEN !== g0) return;
     for(const p of volg){
       if(!isBot(p)) await ensureHolder(p);
       const gk = gekozenL.find(x => x.p === p);
       voorRonde(2, p === kiest);
-      const q = vraag(Object.assign(basis(p), {ronde:2, aethers:[gk.ka], lights:gk.kl ? [gk.kl] : [], dezeLt:[gk.kl, gk.kl2].filter(Boolean),
-        elementen:offerE.slice(), banOpts:banOpts.slice(), selA:0, selL:0, selE:0, selB:0, ban:banTelling(banOpts[0])}));
+      const q = vraag(Object.assign(basis(p), {ronde:2, aethers:[gk.ka], lights:gk.kl ? [gk.kl] : [], elementen:pakNu.slice(), banOpts:[], selA:0, selL:0, selE:0, selB:0, ban:{}}));
       const res = await q.pr;
-      const r = res && typeof res === "object" ? res : {e:0, b:0, ban:[]};
-      let ke = offerE[Math.min(r.e || 0, offerE.length-1)];
-      let banLijst = null;
-      if(DRAFTFORCE){                                    // testmodus: vaste keuzes
-        if(DRAFTFORCE.ae && DRAFTFORCE.ae[p]){                // bans passend bij de opgelegde aether (zoals hiervoor: de oude lijst plus de nieuwe)
-          const oud = S.ae[p].slice(), i = oud.lastIndexOf(gk.ka); if(i >= 0) oud.splice(i, 1);
-          banLijst = botBans(p, (oud.indexOf("fu_portaal") >= 0 ? oud.concat(FU_VIER.filter(k => oud.indexOf(k) < 0)) : oud).concat([gk.ka]), null, nBan); }
-        if(DRAFTFORCE.el && DRAFTFORCE.el[p] && offerE.includes(DRAFTFORCE.el[p])) ke = DRAFTFORCE.el[p];
-      }
-      const bo = banOpts[Math.max(0, Math.min(+r.b || 0, banOpts.length - 1))];
-      const se = alleE.indexOf(ke), sb = alleB.indexOf(bo);
-      const keys = (se >= 0 ? ["e" + se] : []).concat(sb >= 0 ? ["b" + sb] : []);
-      await gekozen(q.u, p, keys, keys.filter(k => k !== "b" + sb || !bo.vast), p === kiest ? opp(p) : null);
+      const r = res && typeof res === "object" ? res : {e:0};
+      let pk = pakNu[Math.max(0, Math.min(+r.e || 0, pakNu.length - 1))];
+      if(DRAFTFORCE && DRAFTFORCE.el && DRAFTFORCE.el[p]){ const f = pakNu.find(o => o.els[0] === DRAFTFORCE.el[p]); if(f) pk = f; }   // testmodus
+      const sk = allePak.indexOf(pk), keys = sk >= 0 ? ["k" + sk] : [];
+      await gekozen(q.u, p, keys, keys, p === kiest ? opp(p) : null);
       if(GEN !== g0) return;
-      if(se >= 0) door["e" + se] = p;
-      if(sb >= 0 && !bo.vast) door["b" + sb] = p;
-      offerE.splice(offerE.indexOf(ke), 1);
-      const bans = draftBansToepassen(p, banLijst || bo.els, nBan);
-      if(!bo.vast) banOpts.splice(banOpts.indexOf(bo), 1);   // een paar is exclusief; de vaste optie blijft
-      bans.forEach(el => m.bannedEl[p].push(el));
-      /* ⬆ Opwaarderen, ná de bans: zoveel kaarten van dat element als er nog gewone zijn. */
-      m.upg[p][ORDER.indexOf(ke)] += upgN;
-      let nUp = 0;
-      for(const c of P(p).deck){ if(nUp >= upgN) break; if(c.el === ke && !c.var && !c.lk){ c.var = STERK_VAN[ke]; nUp++; } }
-      addLog(`${pName(p)} waardeert ${nUp}× ${icon(ke)} ${EL[ke].name} op tot ${VAR[STERK_VAN[ke]].icon} ${VAR[STERK_VAN[ke]].name}.`, true);
-      addLog(`${pName(p)} bant ${bans.length} kaart${bans.length===1?"":"en"}${bans.length?" ("+bans.map(el=>icon(el)).join(" ")+")":""} voor de rest van de match.`, true);
-      /* ✨ Lichtzwerm: de tweede ban */
-      if(gk.ka === "ae_zwerm"){
-        const banNaam = o => o.vast ? "−1 van elk element" : [...new Set(o.els)].map(el => `−2 ${icon(el)} ${EL[el].name}`).join(", ");
-        const bo2 = (isBot(p) || banOpts.length === 1) ? banOpts[banOpts.length - 1]
-          : banOpts[Math.max(0, +(await chooseOpt(p, `<b>${pName(p)}</b> · ✨ Lichtzwerm: kies een tweede ban`, banOpts.map((o, i) => ({v:String(i), label:banNaam(o), ic:"🚫"})))) || 0)] || banOpts[banOpts.length - 1];
-        if(GEN !== g0) return;
-        const bans2 = draftBansToepassen(p, bo2.els, nBan);
-        if(!bo2.vast){ banOpts.splice(banOpts.indexOf(bo2), 1); const s2 = alleB.indexOf(bo2); if(s2 >= 0) door["b" + s2] = p; }
-        bans2.forEach(el => m.bannedEl[p].push(el));
-        addLog(`✨ <em>Lichtzwerm</em>: ${pName(p)} bant nog ${bans2.length} kaart${bans2.length === 1 ? "" : "en"}${bans2.length ? " (" + bans2.map(el => icon(el)).join(" ") + ")" : ""}.`, true);
-      }
-      Object.assign(gk, {ke, nUp, kb:bo});
+      keys.forEach(k => door[k] = p);
+      pakNu.splice(pakNu.indexOf(pk), 1);
+      /* de kaarten gaan nu je deck in en blijven de rest van de match (zoals de lichtkaarten) */
+      pk.els.forEach(el => { const c = {el, var:STERK_VAN[el]}; m.pak[p].push(c); P(p).deck.push({id:++cid, el, var:c.var, owner:p}); });
+      addLog(`${pName(p)} kiest het pakketje ⬆ ${pakNaam(pk)}: die kaarten blijven de rest van de match in het deck.`, true);
+      gk.pak = pk;
       if(S.ui && S.ui.mode === "draft" && S.ui.klaar) draftSync();
     }
     const gekozen2 = volg.map(p => gekozenL.find(x => x.p === p));
     if(offerA[0]) m.gone.push(offerA[0]);
     if(metLicht && offerL[0]) m.goneL.push(offerL[0]);
     addLog(`Weggelegd en voorgoed uit de pool: ${offerA[0] ? "🟣 " + AETHERS[offerA[0]].name : "—"}${metLicht && offerL[0] ? " en ✦ " + LIGHTS[offerL[0]].name : ""}.`, true);
-    shuffle(P(0).deck); shuffle(P(1).deck);   // eerst bannen en kiezen, dán pas schudden en delen
+    shuffle(P(0).deck); shuffle(P(1).deck);   // eerst kiezen, dán pas schudden en delen
     draftUitslag(gekozen2);
     dealHands(starter);
     await ensureHolder(starter);
     await startTurnSequence();
   };
+
+  /* ---------------- het deck van commander ----------------
+     4 per element (16), plus alle pakketjes en lichtkaarten die je eerder in de match koos. Geen bans en
+     geen opwaarderingen meer. Andere spelvormen bouwen hun deck zoals altijd. */
+  const buildDeck0 = buildDeck;
+  buildDeck = function(p){
+    if(!isCmd()) return buildDeck0.apply(this, arguments);
+    const base = ORDER.flatMap(el => Array.from({length:CMD_PER_EL}, () => ({id:++cid, el, owner:p})));
+    const pak = ((S.match.pak || [])[p] || []).map(c => ({id:++cid, el:c.el, var:c.var, owner:p}));
+    const lts = (S.lt ? S.lt[p] : []) || [];
+    const licht = lts.filter(k => LIGHTS[k]).flatMap(k => Array.from({length:LIGHTS[k].n}, () => ({id:++cid, el:"licht", lk:k, owner:p})));
+    return shuffle(base.concat(pak, licht));
+  };
+
+  /* na de draft: het pakketje in plaats van de opwaardering */
+  const draftUitslag0 = draftUitslag;
+  draftUitslag = function(gekozen){
+    if(!isCmd() || !gekozen || !gekozen.some(g => g && g.pak)) return draftUitslag0.apply(this, arguments);
+    if(FAST) return;
+    const ik = kijkerStoel();
+    const kaart = (k, licht) => `<div class="duitk">${aeVak(k, licht)}<div><b class="dn">${licht ? LIGHTS[k].name : AETHERS[k].name}</b>
+      <span>${licht ? "lichtkaart" : "aether"} · ${licht ? LIGHTS[k].txt : AETHERS[k].txt}</span></div></div>`;
+    const pakKaart = g => g.pak ? `<div class="duitk"><div class="gc">${cardFaceHTML({id:-4, el:g.pak.els[0], var:STERK_VAN[g.pak.els[0]], owner:g.p})}</div><div><b class="dn">⬆ ${pakNaam(g.pak)}</b>
+      <span>pakketje · deze drie sterke kaarten blijven de rest van de match in het deck</span></div></div>` : "";
+    const rij = g => `<div class="duit"><div class="duitwie">${g.p === ik ? "Jij" : pName(g.p)}</div>${kaart(g.ka)}${g.kl ? kaart(g.kl, true) : ""}${g.kl2 ? kaart(g.kl2, true) : ""}${pakKaart(g)}</div>`;
+    const volg = ik >= 0 ? gekozen.slice().sort((a, b) => (a.p === ik) - (b.p === ik)) : gekozen;
+    M = {type:"info", titel:`De draft · potje ${S.match.game}`, ic:"🟣", kleur:"#c9a2ff",
+      sub:"Wat er gekozen is. In het spel zie je het ook als ruiten naast de levens.", tekst:volg.map(rij).join("")};
+    render();
+  };
+
+  /* ---------------- uitleg ---------------- */
+  try{
+    const tut = TUT_ALL.find(t => t && t.t === "Commander");
+    if(tut) tut.b = `Best of 3. Je begint met <b>4</b> kaarten van elk element. Elk potje kies je om de beurt een <span class="kw" data-kw="aether">🟣 aether</span> en een <span class="kw" data-kw="licht">✦ lichtkaart</span>, en daarna een pakketje van drie sterke kaarten. Alles wat je kiest blijft.<br><br>Na een potje kiest de verliezer eerst.`;
+  }catch(e){}
+  try{
+    if(AETHER_TEKST.ae_zwerm){ AETHER_TEKST.ae_zwerm = AETHER_TEKST.ae_zwerm.replace(/In commander:.*$/, "In commander: in de draft waarin je hem kiest, kies je ook een <b>tweede</b> lichtkaart.");
+      if(AETHERS.ae_zwerm) AETHERS.ae_zwerm.txt = AETHERS.ae_zwerm.kort = kwHTML(AETHER_TEKST.ae_zwerm); }
+  }catch(e){}
+  try{
+    const helpHTML0 = helpHTML;
+    helpHTML = function(){ const h = String(helpHTML0.apply(this, arguments)), a = h.indexOf("<b>Commander</b> is best of 3."), z = a >= 0 ? h.indexOf("en je bans.", a) : -1;
+      if(a < 0 || z < 0) return h;
+      return h.slice(0, a) + `<b>Commander</b> is best of 3. Je begint met <b>4</b> kaarten van elk element (16). Voor elk potje kies je om de beurt een <span class="kw" data-kw="aether">🟣 aether</span> en een <span class="kw" data-kw="licht">✦ lichtkaart</span> (daarvan gaan er 3 door je deck), en daarna een pakketje van drie sterke kaarten (2 van het ene element, 1 van een ander). Wat je kiest blijft de rest van de match in je deck.` + h.slice(z + "en je bans.".length); };
+  }catch(e){}
 
   return {st, delen, terug, gekozen, streep, voorRonde};
 })();
