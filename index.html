@@ -821,7 +821,8 @@ body.mulligaan #fieldwrap,body.mulligaan #left,body.mulligaan #right{filter:brig
 .chitem .first{margin-left:auto; font-size:.6rem; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; flex:0 0 auto}
 /* ---------- fx ---------- */
 #fx{position:fixed; inset:0; pointer-events:none; z-index:80; isolation:isolate; contain:layout paint style}
-#anidom{position:absolute; inset:0; pointer-events:none; z-index:40; overflow:visible} .anigeest{z-index:40}
+#anidom{position:absolute; inset:0; pointer-events:none; z-index:40; overflow:visible}
+#anidonker{position:absolute; inset:-150vmax; background:rgba(4,3,8,.9); opacity:0; pointer-events:none; z-index:1} .anigeest{z-index:40}
 .hcard.anipak{filter:drop-shadow(0 0 6px var(--ag)) drop-shadow(0 0 14px var(--ag))}
 #sleepkaart.anipak{filter:drop-shadow(0 10px 14px rgba(0,0,0,.6)) drop-shadow(0 0 10px var(--ag)) drop-shadow(0 0 22px var(--ag)) !important}
 .fly{position:fixed; z-index:81; transition:transform .45s cubic-bezier(.4,.1,.3,1), opacity .45s; will-change:transform}
@@ -16014,7 +16015,7 @@ async function announceFusion0(p, card, tributeId, fuseKey, opts){
     fusieFlits(p, t.c);
     if(!FAST){ AU.play("light"); }
     destroyCre(p, t.c, "🟣 fusie-offer");
-    render(); await sleep(FAST ? 0 : 420);
+    render(); await sleep(FAST ? 0 : 300);   // ✨ het offer zakt in 0,3 s weg
   }
   /* De plek: elke vrije plek (ook die van het offer). Bij Directe Fusie is hij al gekozen. */
   if(o.col != null && !P(p).cols[o.col].cre) col = o.col;
@@ -39920,7 +39921,10 @@ async function sleepLos(e){
   document.querySelectorAll(".sleepboven").forEach(x => x.classList.remove("sleepboven"));
   let doel = sleepDoel(e.clientX, e.clientY);
   /* ✨ laat je hem op een wezenplek vallen, dan blijft hij hangen tot hij recht naar zijn plek klapt */
-  if(s.g){ const opCre = doel && doel.closest && doel.closest(".slot.cr"); if(!(opCre && ANI.houdVast(s.g, s.id))) s.g.remove(); }
+  /* alleen op een LEGE wezenplek: bij een fusie (op een wezen) of iets anders gaat de sleepkaart meteen weg */
+  if(s.g){ const opCre = doel && doel.closest && doel.closest(".slot.cr"), dp = opCre && opCre.dataset;
+    const leeg = !!(dp && dp.p != null && dp.col != null && P(+dp.p) && P(+dp.p).cols[+dp.col] && !P(+dp.p).cols[+dp.col].cre) && !(doel.closest && doel.closest(".fuhelft, [data-btn='slotfuse']"));
+    if(!(leeg && ANI.houdVast(s.g, s.id))) s.g.remove(); }
   /* de kaart is net aangeklikt; even wachten tot het spel om een vak vraagt */
   for(let i = 0; i < 30 && S && S.ui && S.ui.mode !== "slot" && busyFlag; i++) await sleep(30);
   if(!S || !S.ui) return;
@@ -42726,14 +42730,26 @@ const ANI = (() => {
   const SNEL = 1.1;
   let T = 0, laatst = 0, stopTot = 0, raf = 0, bezigTot = 0;
   const tws = [], dl = [], lagen = [], kaarten = new Set();
-  const cam = {schud:0, donker:0, gaten:[], flits:0, flitsK:"#fff", donkerTot:0};
+  const cam = {schud:0, donker:0, gaten:[], flits:0, flitsK:"#fff", donkerTot:0, z:1, punch:0, fx:0, fy:0, zTot:0, inslag:null, fwBase:null};
+  /* camera (5 nov 2026): het veld en de tekenlaag zoomen samen in rond één punt. S = de schaal nu. */
+  const camS = () => cam.z * (1 + cam.punch);
+  const camNaar = (x, y, z, ms) => { if(RM) return Promise.resolve(); const z0 = cam.z; if(z0 === 1){ cam.fx = x; cam.fy = y; } cam.zTot = nu() + 2600;
+    const x0 = cam.fx, y0 = cam.fy; return tw(ms || 350, t => { cam.z = lerp(z0, z, t); cam.fx = lerp(x0, x, t); cam.fy = lerp(y0, y, t); }, E.inuit); };
+  const camTerug = ms => { const z0 = cam.z; return tw(ms || 400, t => { cam.z = lerp(z0, 1, t); }, E.inuit).then(() => { cam.z = 1; }); };
   const nu = () => performance.now();
   const tw = (ms, f, e) => new Promise(res => { tws.push({t0:T, ms:Math.max(1, ms), f, e:e || E.lin, res}); start(); });
   const wacht = ms => tw(ms, () => {});
-  const hitstop = ms => { if(!RM) stopTot = Math.max(stopTot, nu() + ms); };
+  const hitstop = (ms, x, y) => { if(RM) return; stopTot = Math.max(stopTot, nu() + ms);
+    /* bij een klap even een tikje inzoomen op de inslag, zoals in het lab */
+    if(cam.z === 1 && cam.punch < .005){ const p = x != null ? {x, y} : (cam.inslag && nu() - cam.inslag.t < 400 ? cam.inslag : null); if(p){ cam.fx = p.x; cam.fy = p.y; } else { const fw = document.getElementById("fieldwrap"), r = fw && fw.getBoundingClientRect(); if(r){ cam.fx = r.left + r.width / 2; cam.fy = r.top + r.height / 2; } } }
+    cam.punch = Math.max(cam.punch, Math.min(.06, ms / 1800)); start(); };
   const schud = s => { if(RM) return; cam.schud = Math.max(cam.schud, s * (vol() ? 1 : .55)); start(); };
   const flits = (a, k) => { cam.flits = Math.max(cam.flits, a * (RM ? .4 : 1)); cam.flitsK = k || "#fff"; start(); };
-  const donker = (a, gaten, ms) => { const a0 = cam.donker; cam.gaten = gaten || []; cam.donkerTot = nu() + 3000; return tw(ms || 300, t => cam.donker = lerp(a0, a, t)); };
+  /* het donker valt achter de kaarten (een laag in het veld onder de kaartplekken), zodat de kaarten oplichten */
+  const donker = (a, gaten, ms) => { const a0 = cam.donker; cam.donkerTot = nu() + 3000; return tw(ms || 300, t => cam.donker = lerp(a0, a, t)); };
+  let DK = null;
+  const donkerLaag = a => { const fw = document.getElementById("fieldwrap"); if(!fw) return; if(!DK || DK.parentNode !== fw){ DK = document.createElement("div"); DK.id = "anidonker"; fw.insertBefore(DK, fw.firstChild); }
+    DK.style.opacity = a > .005 ? String(Math.min(1, a / .9)) : "0"; };
   const laag = f => { const l = {f, aan:true}; lagen.push(l); start(); return l; };
   const weg = (...ls) => ls.forEach(l => l && (l.aan = false));
   /* de spelcode mag hierop wachten, maar nooit langer dan 1,6 s */
@@ -42770,7 +42786,7 @@ const ANI = (() => {
 
   /* ---------- deeltjes ---------- */
   const deeltje = o => { if(dl.length > 900) return; dl.push(Object.assign({x:0, y:0, vx:0, vy:0, g:0, wr:.985, life:1, s:3, kleur:"#fff", soort:"pix", spin:0, rot:0, groei:0, a:1}, o, {max:o.life || 1})); start(); };
-  const burst = (x, y, n, kl, kracht, o) => { n = nN(n); for(let i = 0; i < n; i++){ const a = (o && o.hoek != null) ? o.hoek + rnd(-(o.spreid || 1), (o.spreid || 1)) : rnd(0, Math.PI * 2), v = kracht * rnd(.25, 1);
+  const burst = (x, y, n, kl, kracht, o) => { cam.inslag = {x, y, t:nu()}; n = nN(n); for(let i = 0; i < n; i++){ const a = (o && o.hoek != null) ? o.hoek + rnd(-(o.spreid || 1), (o.spreid || 1)) : rnd(0, Math.PI * 2), v = kracht * rnd(.25, 1);
     deeltje(Object.assign({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:rnd(.35, 1), kleur:kies(kl), s:3 * (1 + (Math.random() * 2 | 0))}, o || {})); } };
   const stof = (x, y, n, kl, kr) => { burst(x, y, n, kl, kr || 5, {g:.12, hoek:Math.PI, spreid:.5}); burst(x, y, n, kl, kr || 5, {g:.12, hoek:0, spreid:.5}); };
   const wolkjes = (x, y, n, kl, br) => { n = nN(n); for(let i = 0; i < n; i++) deeltje({x:x + rnd(-(br || 60), br || 60), y:y + rnd(-6, 6), vx:rnd(-1.2, 1.2), vy:-rnd(.2, .9), life:rnd(.7, 1.3), kleur:kl || "rgba(150,135,115,.7)", soort:"rook", s:rnd(10, 18), groei:.25, wr:.97, a:.55}); };
@@ -42790,6 +42806,7 @@ const ANI = (() => {
      Elke render bouwt het veld opnieuw op, dus we zoeken de kaart elk beeldje opnieuw op en zetten
      zijn stand er weer op. Zo raakt hij nooit zijn beweging kwijt. */
   const rc = sel => { const e = typeof sel === "string" ? document.querySelector(sel) : sel; if(!e) return null; const r = e.getBoundingClientRect(); if(!r.width) return null;
+    const S0 = camS(); if(Math.abs(S0 - 1) > .001){ const x = cam.fx + (r.left - cam.fx) / S0, y = cam.fy + (r.top - cam.fy) / S0, w = r.width / S0, h = r.height / S0; return {x, y, w, h, cx:x + w / 2, cy:y + h / 2}; }
     return {x:r.left, y:r.top, w:r.width, h:r.height, cx:r.left + r.width / 2, cy:r.top + r.height / 2}; };
   const kaart = sel => { const k = {sel, dx:0, dy:0, z:0, sx:1, sy:1, rot:0, a:1, wit:0, kleur:"#fff", kleurA:0, voet:false, clip:null, filter:null, boven:false}; kaarten.add(k); start(); return k; };
   const STIJL = ["translate", "scale", "rotate", "opacity", "filter", "transformOrigin", "zIndex", "clipPath"];
@@ -42797,17 +42814,19 @@ const ANI = (() => {
   const los = k => { if(!k) return; kaarten.delete(k); schoon(document.querySelector(k.sel)); };
   const pasToe = k => { const el = document.querySelector(k.sel); if(!el) return;
     el.style.translate = `${k.dx}px ${k.dy - k.z}px`; el.style.scale = `${k.sx} ${k.sy}`; el.style.rotate = `${k.rot}rad`; el.style.opacity = String(k.a);
-    el.style.filter = k.filter ? k.filter : (k.wit > 0 ? `brightness(${1 + k.wit * 1.4}) saturate(${1 - k.wit * .5})` : "");
+    { const f = []; if(k.filter) f.push(k.filter); if(k.wit > 0) f.push(`brightness(${1 + k.wit * 1.4}) saturate(${1 - k.wit * .5})`);
+      if(k.kleurA > .01 && k.a > .05){ let kk = k.kleur || "#ffffff"; if(/^#[0-9a-f]{3}$/i.test(kk)) kk = "#" + kk.slice(1).split("").map(c => c + c).join("");
+        const hx = /^#[0-9a-f]{6}$/i.test(kk) ? Math.round(Math.min(1, k.kleurA * 1.7) * 255).toString(16).padStart(2, "0") : "";
+        f.push(`brightness(${(1 + k.kleurA * .55).toFixed(3)}) drop-shadow(0 0 ${(3 + 6 * k.kleurA).toFixed(1)}px ${kk}${hx}) drop-shadow(0 0 ${(8 + 18 * k.kleurA).toFixed(1)}px ${kk}${hx})`); }
+      el.style.filter = f.join(" "); }
     el.style.transformOrigin = k.voet ? "50% 100%" : ""; el.style.zIndex = (k.z > 0 || k.boven) ? "30" : ""; el.style.clipPath = k.clip || "";
-    if(k.kleurA > 0 && k.a > .05){ const r = el.getBoundingClientRect(); ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = Math.min(1, k.kleurA * .55);
-      ctx.fillStyle = k.kleur; ctx.beginPath(); (ctx.roundRect ? ctx.roundRect(r.left + 3, r.top + 3, r.width - 6, r.height - 6, 6) : ctx.rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6)); ctx.fill(); ctx.restore();
-      gloed(r.left + r.width / 2, r.top + r.height / 2, r.width * .9, k.kleur, k.kleurA * .5); } };
+    if(k.kleurA > 0 && k.a > .05){ const r = rc(el); if(r) gloed(r.cx, r.cy, r.w * .9, k.kleur, k.kleurA * .35); } };
   /* een kopie van een kaart die even blijft staan terwijl het spel al verder is (sterven, metamorfose) */
   const geest = (sel, r0) => { const el = typeof sel === "string" ? document.querySelector(sel) : sel, L = domLaag(); if(!el || !L) return null;
     const r = r0 || rc(el); if(!r) return null;
     /* binnen het veld (dat mee kan schudden) rekenen we vanaf de laag zelf */
-    const o = L.getBoundingClientRect();
-    const w = document.createElement("div"); w.className = "anigeest"; w.style.cssText = `position:absolute;left:${r.x - o.left}px;top:${r.y - o.top}px;width:${r.w}px;height:${r.h}px;pointer-events:none`;
+    const o = L.getBoundingClientRect(), rr = el.getBoundingClientRect(), S0 = camS();
+    const w = document.createElement("div"); w.className = "anigeest"; w.style.cssText = `position:absolute;left:${(rr.left - o.left) / S0}px;top:${(rr.top - o.top) / S0}px;width:${rr.width / S0}px;height:${rr.height / S0}px;pointer-events:none`;
     const kl = el.cloneNode(true); kl.removeAttribute("data-act"); kl.removeAttribute("id"); kl.classList.remove("hl", "tgt", "sleepboven", "lunge-up", "lunge-down", "shake");
     STIJL.forEach(p => kl.style[p] = "");
     [["position", "absolute"], ["left", "0"], ["top", "0"], ["right", "auto"], ["bottom", "auto"], ["width", "100%"], ["height", "100%"], ["animation", "none"], ["transition", "none"], ["margin", "0"]].forEach(([p, v]) => kl.style.setProperty(p, v, "important"));
@@ -42851,8 +42870,9 @@ const ANI = (() => {
     if(!doek()) return false; if(W !== innerWidth || H !== innerHeight) maat();
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if(cam.donker > 0 && nu() > cam.donkerTot) cam.donker = Math.max(0, cam.donker - dt / 400);
-    if(cam.donker > .01){ ctx.save(); ctx.fillStyle = `rgba(4,3,8,${cam.donker})`; ctx.beginPath(); ctx.rect(0, 0, W, H);
-      cam.gaten.forEach(s => { const r = rc(s); if(r) ctx.rect(r.x + r.w, r.y - 6, -(r.w), r.h + 12); }); ctx.fill("evenodd"); ctx.restore(); }
+    donkerLaag(cam.donker);
+    if(cam.punch > .0005) cam.punch *= Math.pow(.86, dt / 16.7 || 1); else cam.punch = 0;
+    if(cam.z !== 1 && nu() > cam.zTot && !tws.length) cam.z = Math.max(1, cam.z - dt / 600);
     try{ blijvend(dt); }catch(e){ console.error(e); }
     for(const w of tws.slice()){ const t = Math.min(1, (T - w.t0) / w.ms); ctx.save(); try{ w.f(w.e(t), t); }catch(e){ console.error(e); } ctx.restore(); if(t >= 1){ tws.splice(tws.indexOf(w), 1); w.res(); } }
     for(let i = lagen.length - 1; i >= 0; i--){ const l = lagen[i]; if(!l.aan){ lagen.splice(i, 1); continue; } ctx.save(); try{ if(l.f() === false) l.aan = false; }catch(e){ console.error(e); l.aan = false; } ctx.restore(); }
@@ -42860,10 +42880,23 @@ const ANI = (() => {
     tekenDeeltjes(dt / 1000);
     const fw = document.getElementById("fieldwrap");
     if(fw){ if(cam.schud > .3){ fw.style.translate = `${rnd(-cam.schud, cam.schud).toFixed(1)}px ${rnd(-cam.schud, cam.schud).toFixed(1)}px`; cam.schud *= Math.pow(.88, dt / 16.7 || 1); }
-            else if(fw.style.translate){ fw.style.translate = ""; cam.schud = 0; } }
+            else if(fw.style.translate){ fw.style.translate = ""; cam.schud = 0; }
+      const S0 = camS();
+      if(Math.abs(S0 - 1) > .001){ if(!cam.fwBase){ const r = fw.getBoundingClientRect(); cam.fwBase = {x:r.left - (parseFloat((fw.style.translate || "0").split(" ")[0]) || 0), y:r.top - (parseFloat((fw.style.translate || "0 0").split(" ")[1]) || 0)}; }
+        fw.style.transformOrigin = `${(cam.fx - cam.fwBase.x).toFixed(1)}px ${(cam.fy - cam.fwBase.y).toFixed(1)}px`; fw.style.scale = S0.toFixed(4);
+        cv.style.transformOrigin = `${cam.fx.toFixed(1)}px ${cam.fy.toFixed(1)}px`; cv.style.scale = S0.toFixed(4); if(BL){ BL.style.transformOrigin = cv.style.transformOrigin; BL.style.scale = cv.style.scale; } }
+      else if(fw.style.scale){ fw.style.scale = ""; fw.style.transformOrigin = ""; cv.style.scale = ""; if(BL) BL.style.scale = ""; cam.fwBase = null; } }
     if(cam.flits > 0){ ctx.save(); ctx.globalAlpha = cam.flits * .45; ctx.fillStyle = cam.flitsK; ctx.fillRect(0, 0, W, H); ctx.restore(); cam.flits = Math.max(0, cam.flits - dt / 1000 * 3.2); }
-    if(tws.length || dl.length || lagen.length || kaarten.size || cam.schud > .3 || cam.flits > 0 || cam.donker > .01 || blijftNodig()) return true;
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); return false; };
+    bloei();
+    if(tws.length || dl.length || lagen.length || kaarten.size || cam.schud > .3 || cam.flits > 0 || cam.donker > .01 || cam.punch > 0 || cam.z !== 1 || blijftNodig()) return true;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); bloei(true); donkerLaag(0); return false; };
+  /* gloed zoals de bloom in het lab: een kopie van de tekenlaag, wazig en 'screen' eroverheen (alleen bij effecten op vol) */
+  let BL = null, BLX = null;
+  const bloei = leeg => { if(leeg || !vol() || RM){ if(BL && BL.isConnected){ BLX.clearRect(0, 0, BL.width, BL.height); BL.style.display = "none"; } return; }
+    if(!BL || !BL.isConnected){ BL = document.createElement("canvas"); BL.id = "anibloei"; BL.setAttribute("aria-hidden", "true");
+      BL.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:79;mix-blend-mode:screen;filter:blur(7px) brightness(1.35)"; cv.after(BL); BLX = BL.getContext("2d"); }
+    const bw = Math.max(1, Math.round(W / 3)), bh = Math.max(1, Math.round(H / 3)); if(BL.width !== bw || BL.height !== bh){ BL.width = bw; BL.height = bh; }
+    BL.style.display = ""; BLX.clearRect(0, 0, bw, bh); BLX.drawImage(cv, 0, 0, bw, bh); };
 
   /* ================= KAART PAKKEN · HOVER IN JE HAND =================
      Gloed in de kleur van het element en wat er van de kaart afvalt, zowel als je eroverheen gaat
@@ -42915,7 +42948,7 @@ const ANI = (() => {
   const takje = (x, y, hoek, L, a, gr) => { const e = Math.max(0, Math.min(1, gr)); if(e <= 0) return; const L2 = L * e, x2 = x + Math.cos(hoek) * L2, y2 = y + Math.sin(hoek) * L2;
     lichtLijn([{x, y}, {x:x2, y:y2}], a, 1.6, true);
     if(e > .6){ const f = (e - .6) / .4; [-.6, .6].forEach(dh => lichtLijn([{x:x2, y:y2}, {x:x2 + Math.cos(hoek + dh) * L * .45 * f, y:y2 + Math.sin(hoek + dh) * L * .45 * f}], a, 1.1, true)); gloed(x2, y2, 6, "#c8ff9e", a * .5 * f); } };
-  const boeiTeken = (q, ringen, g) => { const hs = ringen === 4 ? [.14, .38, .62, .86] : [.3, .7], sc = q.w / 130;
+  const boeiTeken = (q, ringen, g) => { const hs = ringen === 4 ? [.13, .3, .47, .64] : [.24, .52], sc = q.w / 130;   /* hoger en dichter op elkaar: de onderste blijft boven het naambordje */
     hs.forEach((h, i) => { const u = Math.max(0, Math.min(1, g * 1.4 - i * .15)); if(u <= 0) return; const r = lerp(q.w * 1.3, q.w * .56, E.uit(u)), y0 = q.y + q.h * h, a = u * (.78 + .22 * Math.sin(T / 160 + i));
       const pts = []; for(let j = 0; j <= 40; j++){ const hk = j / 40 * Math.PI * 2 + i * 1.3 + T / 900; pts.push({x:q.cx + Math.cos(hk) * r, y:y0 + Math.sin(hk) * r * .2 + Math.sin(j * .9 + i) * 2.5 * sc, d:Math.sin(hk)}); }
       lichtPad(pts, a, 2.6 * Math.max(.7, sc));
@@ -42931,11 +42964,11 @@ const ANI = (() => {
   /* ================= KAART SPELEN · de klap ================= */
   let LOS = null;   // de sleepkaart die je net losliet: die vliegt recht naar zijn plek
   const houdVast = (g, id) => { if(!g || !aan()) return false; if(LOS && LOS.g && LOS.g !== g) LOS.g.remove(); LOS = {g, id, t:nu()};
-    setTimeout(() => { if(LOS && LOS.g === g){ g.style.transition = "opacity .18s"; g.style.opacity = "0"; setTimeout(() => g.remove(), 200); LOS = null; } }, 2600); return true; };
+    setTimeout(() => { if(LOS && LOS.g === g){ g.style.transition = "opacity .15s"; g.style.opacity = "0"; setTimeout(() => g.remove(), 160); LOS = null; } }, 1200); return true; };
   const klap = (p, col, card) => { if(!aan()) return Promise.resolve(); const sel = creSel(p, col), q = rc(sel); if(!q) return Promise.resolve();
     const s = soort(card), k = kaart(sel); k.boven = true; const kl = klVan(s);
     const run = async () => {
-      if(LOS && LOS.id === card.id && LOS.g && LOS.g.isConnected && nu() - LOS.t < 2600){
+      if(LOS && LOS.id === card.id && LOS.g && LOS.g.isConnected && nu() - LOS.t < 1200){
         const g = LOS.g; LOS = null; const r0 = g.getBoundingClientRect(); k.a = 0;
         await tw(150, t => { const x = lerp(r0.left, q.x, t), y = lerp(r0.top, q.y, t), w = lerp(r0.width, q.w, t), h = lerp(r0.height, q.h, t);
           g.style.width = w + "px"; g.style.height = h + "px"; g.style.transform = `translate(${x}px, ${y}px)`; }, E.in2);
@@ -42960,7 +42993,7 @@ const ANI = (() => {
       if(nog > 12) await new Promise(r => setTimeout(r, nog));
       if(cause && /fusie-offer/.test(cause)){       /* het offer zakt de grond in (Titanenslag, rustig) */
         const f = FZ[soortFz(card)] || null; donker(.35, [], 300);
-        await tw(450, t => { schud(1 + t * 3); g.w.style.clipPath = `inset(0 0 ${t * 100}% 0)`; geestStand(g, {dy:t * 20});
+        await tw(300, t => { schud(1 + t * 3); g.w.style.clipPath = `inset(0 0 ${t * 100}% 0)`; geestStand(g, {dy:t * 20});
           if(Math.random() < .35) valVan(s)(g.r.x + rnd(0, g.r.w), g.r.y + g.r.h); }, E.in2);
         geestWeg(g); return; }
       if(v === "roos") return oplos(g, {ms:1200, richting:"op", rand1:"rgb(255,220,235)", rand2:"rgb(255,90,140)", n:4,
@@ -43057,7 +43090,7 @@ const ANI = (() => {
     const buren = [-1, 1].map(s => ({s, sel:creSel(tp, tc + s)})).filter(x => document.querySelector(x.sel)).map(x => Object.assign(x, {q:rc(x.sel), k:kaart(x.sel)}));
     (async () => { try{ AU.play("fire"); }catch(e){}
       if(kp) await tw(260, t => kp.kleurA = .6 * Math.sin(t * Math.PI));
-      await donker(.5, [toSel], 300);
+      await Promise.all([donker(.5, [toSel], 300), camNaar(b.cx, b.cy, 1.15, 350)]);
       await projectiel({x:b.cx + 220, y:b.cy - 420}, {x:b.cx, y:b.cy}, 380, {kl:KL.plasma, r:20, boog:0, spoor:26, e:E.in2, deeltjes:(x, y) => deeltje({x, y, vx:rnd(-1, 1), vy:rnd(-2, 0), life:.4, kleur:kies(KL.plasma), soort:"gloed", s:rnd(6, 12)})});
       try{ AU.play("burn"); }catch(e){} hitstop(110); flits(.5, "#cfeaff"); schud(14); km.wit = 1;
       tw(700, t => { schokgolf(b.cx, b.cy, 20 + t * 360, 16, 1 - t); km.wit = Math.max(0, 1 - t * 3); km.kleurA = .6 * (1 - t); }).then(() => los(km));
@@ -43067,7 +43100,7 @@ const ANI = (() => {
         [-1, 1].forEach(s => { const x = b.cx + s * r; gloed(x, b.cy, 70, "#5fb6ff", (1 - t) * .9); ctx.fillStyle = `rgba(191,232,255,${(1 - t) * .6})`; ctx.fillRect(x - 3, b.y + 10, 6, b.h - 20); }); ctx.restore();
         buren.forEach(n => { if(hit.has(n) || !n.q) return; if(Math.abs(b.cx + n.s * r - n.q.cx) < 30){ hit.add(n); n.k.wit = .9; tw(200, q => n.k.wit = .9 * (1 - q)); tw(300, q => n.k.dy = -Math.sin(q * Math.PI) * 18).then(() => los(n.k)); burst(n.q.cx, n.q.cy, 20, KL.plasma, 4, {soort:"vonk"}); } }); });
       buren.forEach(n => { if(!hit.has(n)) los(n.k); }); if(kp) los(kp);
-      await donker(0, [], 400); })().catch(e => { console.error(e); [kp, km].forEach(los); buren.forEach(n => los(n.k)); cam.donker = 0; });
+      await Promise.all([donker(0, [], 400), camTerug(400)]); })().catch(e => { console.error(e); [kp, km].forEach(los); buren.forEach(n => los(n.k)); cam.donker = 0; cam.z = 1; });
     return true; };
 
   /* ================= BLIKSEM · Onweer: van boven, met de overslag ================= */
@@ -43093,10 +43126,10 @@ const ANI = (() => {
     const l = laag(() => { if(b <= 0) return; const pl = 1 + .12 * Math.sin(T / 45) * b; stralen(q.cx, q.cy, q.w * (1 + b), .55 * b, "#e9f6ff");
       gloed(q.cx, q.cy, q.w * (.5 + b * .9) * pl, "#4aa8ff", .5 * b); gloed(q.cx, q.cy, q.w * (.25 + b * .45) * pl, "#ffffff", .8 * b);
       if(Math.random() < .5 * b){ const h = rnd(0, Math.PI * 2), r = rnd(q.w * .9, q.w * 1.4); deeltje({x:q.cx + Math.cos(h) * r, y:q.cy + Math.sin(h) * r, vx:-Math.cos(h) * 2.2, vy:-Math.sin(h) * 2.2, life:.45, kleur:kies(["#ffffff", "#bfe4ff", "#4aa8ff"]), soort:"gloed", s:4}); } });
-    (async () => { await tw(750, t => { b = t; geestStand(g, {dx:rnd(-1, 1) * t * 2, filter:`brightness(${1 + t * t * .9}) saturate(${1 - t * .4})`}); }, E.inuit);
+    (async () => { camNaar(q.cx, q.cy, 1.2, 300); await tw(750, t => { b = t; geestStand(g, {dx:rnd(-1, 1) * t * 2, filter:`brightness(${1 + t * t * .9}) saturate(${1 - t * .4})`}); }, E.inuit);
       weg(l); geestWeg(g); hitstop(80); flits(.7, "#e1f2ff"); schud(8); tw(500, t => { schokgolf(q.cx, q.cy, 20 + t * 300, 10, 1 - t); stralen(q.cx, q.cy, q.w * 2, 1 - t, "#bfe4ff"); });
       kn.a = 1; kn.sx = kn.sy = 1.3; burst(q.cx, q.cy, 60, brst.kl, 8, {soort:brst.soort, spin:brst.spin || 0, s:brst.s, g:brst.g || 0});
-      await tw(380, t => { kn.sx = kn.sy = lerp(1.3, 1, E.veer(t)); }); los(kn); })().catch(e => { console.error(e); geestWeg(g); los(kn); });
+      await tw(380, t => { kn.sx = kn.sy = lerp(1.3, 1, E.veer(t)); }); los(kn); camTerug(300); })().catch(e => { console.error(e); geestWeg(g); los(kn); });
     return true; };
 
   /* ================= FUSIE komt · Titanenslag (rustig) ================= */
