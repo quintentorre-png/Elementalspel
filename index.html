@@ -7086,7 +7086,7 @@ function lichtSpeelbaar(G, p, id){
 const handLicht = (G, p) => G.pl[p].hand.some(id => G.kEl[id] === LICHT && lichtSpeelbaar(G, p, id));
 const magFlash = (G, p) => handFlash(G, p) || flashFuseOk(G, p) || handLicht(G, p);   // freeSpellCols is altijd vol
 const ijsEigenVrij = (G, p, c) => { const id = G.pl[p].cre[c]; return !id || (overheenOk(G, id) && isVlag(G, id, F_TOKEN)); };   // nov 2026: IJs mag op een eigen token
-function ijsOverCre(G, p){ const o = openKol(G, p); return o.filter(c => { const id = G.pl[1 - p].cre[c]; return !!id && !EL_STIL[G.kEl[id]] && (!ONST(G, G.kEl[id]) || (G.kEl[id] === BALROG && !(G.vh && G.vh.st && G.vh.st.balrogHeal))) && G.kEl[id] !== BRENGER; }); }   // 🧊 8 nov 2026: ook Maatje
+function ijsOverCre(G, p){ const o = openKol(G, p); return o.filter(c => { const id = G.pl[1 - p].cre[c]; return !!id && !EL_STIL[G.kEl[id]] && (!ONST(G, G.kEl[id]) || (G.kEl[id] === BALROG && !(G.vh && G.vh.st && G.vh.st.balrogHeal))) && G.kEl[id] !== BRENGER && !(G.pl[1 - p].hxT[c] >= G.gTurn); }); }   // 🛡 zr: onaantastbaar, ook voor IJs   // 🧊 8 nov 2026: ook Maatje
 function ijsOverSpell(G, p){ return vrijeRituelen(G, p).filter(c => { const sp = G.pl[1 - p].spell[c]; return !!sp && G.kEl[sp] !== KNOOP; }); }
 function roosKracht(G, p, c){ const id = G.pl[p].cre[c]; if (G.kVar[id] === ROOS) return true; const sp = G.pl[p].spell[c]; return !!sp && G.kVar[sp] === ROOS; }
 /* 🌊 4-5: bij eb slaat water +3, bovenop alles */
@@ -7132,11 +7132,14 @@ function kiesPlekMens(G, K, p, id, o){
   if (!valid.length && !fu) return 'cancel';
   const v = K('slot', {p, valid, cancellable:true, fuseKnop:fu, meta:{el:ELNAAM[G.kEl[id]]}});
   if (v === 'fuse') return {mode:'fuse'};
+  if (v && v.kind === 'fuse') return {mode:'fuse', col:v.c};   // 🟣 zr: paars vak
   if (v === 'cancel' || !v) return 'cancel';
   const kind = v.kind || (valid.find(x => x.c === v.c) || {}).kind || 'cre';
   return {mode:kind === 'spell' ? 'spell' : 'cre', col:v.c};
 }
 function kiesPlek(G, K, p, slots, cancellable, meta){ if (!slots.length) return null; return K('slot', {p, valid:slots, cancellable, meta}); }
+/* 🟣 zr: welk wezen offer je voor een fusie op een paars vak (fusieOffer in het spel) */
+function fusieOfferK(G, K, p, col){ const ids = offerIds(G, p), hier = G.pl[p].cre[col]; if (hier) return ids.includes(hier) ? hier : null; if (ids.length === 1) return ids[0]; return kiesWezen(G, K, p, ids, true, {k:'tribute'}); }
 function kiesOpt(G, K, p, opts){ return K('opt', {p, opts}); }
 
 /* ---------- trekken ---------- */
@@ -7281,6 +7284,8 @@ function doelenVoor0(G, p, e, selfId){
     case E_WATER: return alleWezens(G, (id, pp) => pp === p && id !== selfId);
     case E_WS: return wsDoelen(G, p, e);
     case E_KOGEL: return alleWezens(G, (id, pp) => pp !== p);
+    case E_BASI: { const ids = basiliskDoelen(G, p, e.src != null ? e.src : selfId);   // 🦎 zr
+      return isMens(G, p) ? ids : ids.filter(x => { const w = vindWezen(G, x); return w >= 0 && wP(w) !== p; }); }
   }
   return [];
 }
@@ -7626,7 +7631,7 @@ function losOp(G, K, it){
     case E_EKSTER: { const s = it.src; if (s != null && G.kEl[s] === EKSTER){ if (isVlag(G, s, F_LEEG)) return; zetVlag(G, s, F_LEEG); } trek(G, K, p, 1); return; }   // 🐦 één keer per keten
     case E_VLEER: G.pl[p].life += 2; return;
     case E_MINO: minoAanval(G, p, it.src); return;
-    case E_BASI: basilisk(G, K, p, it.src); return;
+    case E_BASI: basilisk(G, K, p, it.src, it.tid); return;
     case E_CLOWN: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c] && EL_VIS[G.kEl[s.cre[c]]]) s.hp[c] += 2; return; }
     case E_KOGEL: {
       const ids = alleWezens(G, (x, pp) => pp !== p && !HEX(G, x, pp, p));
@@ -7671,9 +7676,10 @@ function losOp(G, K, it){
       const kp = nieuweKaart(G, STEEN, p, 0, 0);
       plaatsWezen(G, p, c2, kp);
       G.pl[p].hp[c2] = Math.max(1, Math.ceil(hp)); G.pl[p].pld[c2] = G.gTurn;
-      for (const e of effsVan(G, kp, 'creature')){
+      for (const e of geplandeEffecten(G, p, kp, false, c2, {})){   // 🏔 zr: ook het ritueel in die kolom, zoals het spel
         if (G.over >= 0) break;
-        losOp(G, K, {type:'eff', el:e.el, ctrl:p, origin:'creature', vr:e.vr});
+        const it2 = effItem(p, e, kp); it2.dec = false; if (e.origin === 1) it2.col = c2;
+        losOp(G, K, it2);
       }
       return;
     }
@@ -7770,7 +7776,7 @@ function losOp(G, K, it){
         if (!nid || !ids.includes(nid)) return;
         id = nid; zelfde = nid === it.tid;
       } else {
-        id = effDoel(G, K, it, p, ids, true, {k:'ws'});
+        id = (it.origin === 1 && it.col != null && ids.length === 1) ? ids[0] : effDoel(G, K, it, p, ids, true, {k:'ws'});   // 💧 zr
         if (id === 'fizzle' || id === null) return;
       }
       const w = vindKaart(G, id); if (w < 0) return;
@@ -7868,6 +7874,7 @@ function vraagReactie(G, K, p, keten){
     if (isMens(G, p)){
       const plek = kiesPlekMens(G, K, p, r, {creOk:canCre, spOk:canSp, fuseOk:canFuse});
       if (plek === 'cancel') continue;
+      if (plek.mode === 'fuse' && plek.col != null){ const fk = aeFuseKey(G, p, el); const tid = fusieOfferK(G, K, p, plek.col); if (tid == null || tid === 'cancel') continue; return {cardId:r, fuse:true, tributeId:tid, fuseKey:fk, col:plek.col}; }   // 🟣 zr
       if (plek.mode !== 'fuse') return {cardId:r, col:plek.col, spell:plek.mode === 'spell'};
       mode = 'fuse';
     } else if (n > 1){
@@ -7910,7 +7917,7 @@ function reageer(G, K, wie, r){
     if (kondigLichtAan(G, K, wie, r.cardId, true) === 'cancel'){ G.pl[wie].hand.push(r.cardId); return false; }   // afgebroken: terug in de hand
     return true;
   }
-  if (r.fuse) kondigFusieAan(G, K, wie, r.cardId, r.tributeId, r.fuseKey);
+  if (r.fuse) kondigFusieAan(G, K, wie, r.cardId, r.tributeId, r.fuseKey, r.col != null ? {col:r.col} : undefined);
   else kondigAan(G, K, wie, r.cardId, !!r.spell, r.col);
   return true;
 }
@@ -7943,6 +7950,7 @@ const zgNegatie = (G, wie) => G.pl[wie].hand.some(id => G.kEl[id] === LICHT && G
 const zgEigenPlek = (G, actor, nieuw) => nieuw.some(it => it.t === 1 && planPlat(it.plan).some(e => e && e.el === E_STEEN && e.tid != null && isPlekId(e.tid) && e.tp === actor));
 function zgZelfMag(G, actor, top, nieuw){
   if (top.t === 2 || !magFlash(G, actor)) return false;
+  if (nieuw.some(it => it.t === 1 && it.asFuse && G.kVar[it.card] === BERGKETEN)) return false;   // 🏔 zr: Tweelingtop, alleen de ander
   if (zgEigenPlek(G, actor, nieuw)) return true;
   return isMens(G, actor) && !!(G.zm && G.zm[actor]);
 }
@@ -8354,10 +8362,10 @@ function spinWeb(G, K, p){
 /* 🐍 de Basilisk: wat in de gekozen kolom bij de ander staat, wordt een 🪨 Steen van 3/3 (een token) */
 /* 🦎 9 nov 2026 (Q): ook eigen wezens (niet de Basilisk zelf). Een bot versteent alleen de grootste vijand. */
 function basiliskDoelen(G, p, src){ const uit = []; for (const q of [1 - p, p]){ const sq = G.pl[q]; for (let c = 0; c < 5; c++){ const id = sq.cre[c]; if (id && id !== src && !ONST(G, G.kEl[id]) && !HEX(G, id, q, p)) uit.push(id); } } return uit; }
-function basilisk(G, K, p, src){
+function basilisk(G, K, p, src, tid){
   const ids = basiliskDoelen(G, p, src); if (!ids.length) return;
   const vij = ids.filter(x => { const w = vindWezen(G, x); return w >= 0 && wP(w) !== p; });
-  const id = isMens(G, p) && K ? kiesWezen(G, K, p, ids, false, {k:'basilisk'}) : (vij.length ? grootste(G, vij) : null);
+  const id = tid !== undefined ? tid : isMens(G, p) && K ? kiesWezen(G, K, p, ids, false, {k:'basilisk'}) : (vij.length ? grootste(G, vij) : null);   // 🦎 zr: al gekozen bij het spelen
   const w = id != null && id !== 'cancel' && ids.includes(id) ? vindWezen(G, id) : -1; if (w < 0) return;
   const q = wP(w), c = wC(w), sq = G.pl[q];
   if (bloesemK(G, q, c, p)) return;                                // 🌸 Bloesem
@@ -8375,7 +8383,7 @@ function minoAanval(G, p, src){
 }
 /* upkeep van p: eerst komen zijn eigen eieren uit, dan deelt elk 🟢 Slijm zich (op de dichtstbijzijnde vrije plek) */
 /* 🛡 8 nov 2026: Beschutting (+6) en de 🦋 vlinder (+3): levens erbij en onaantastbaar tot het eind van de ronde (beschutOp in het spel) */
-function beschut(G, p, w, n){ const s = G.pl[wP(w)], c = wC(w); s.hp[c] += n; s.hxT[c] = Math.max(s.hxT[c], G.gTurn + (G.tp === p ? 1 : 0)); }
+function beschut(G, p, w, n){ const s = G.pl[wP(w)], c = wC(w); s.hp[c] += n; s.hxT[c] = Math.max(s.hxT[c], G.gTurn); }   // 🛡 zr: een beurt
 /* 🟢 8 nov 2026: einde van de beurt van p: elk slijm deelt zich (de kopie is 1/1, haar speel-effect gaat ook af: zo, 9 nov 2026); slijmDeelt in het spel */
 function slijmSplits(G, p){
   const s = G.pl[p], slijm = []; for (let c = 0; c < 5; c++) if (s.cre[c] && G.kEl[s.cre[c]] === SLIJM) slijm.push(c);
@@ -8558,8 +8566,11 @@ function terugOffer(G, K, p){
   const o = opties.find(x => x.k === keus);
   const card = s.grave.splice(o.i, 1)[0];
   zetVlag(G, card, F_SCHEDEL);                                       // 💀 en dat blijft
-  if (o.fk) kondigFusieAan(G, K, p, card, null, o.fk, {col});
-  else kondigAan(G, K, p, card, false, col);
+  const vrij = legeKol(G, p); let pc = col;   // 🟣 zr: een vrije plek naar keuze
+  if (vrij.length === 1) pc = vrij[0];
+  else if (vrij.length > 1){ const sl = kiesPlek(G, K, p, vrij.map(c => ({p, c, kind:'cre'})), false, {el:ELNAAM[G.kEl[card]]}); if (sl && sl !== 'cancel' && vrij.includes(sl.c)) pc = sl.c; }
+  if (o.fk) kondigFusieAan(G, K, p, card, null, o.fk, {col:pc});
+  else kondigAan(G, K, p, card, false, pc);
   ketenLus(G, K);
   if (G.over < 0) G.fase = 3;
 }
@@ -8755,10 +8766,11 @@ function speel0(G, K, id){
   if (mode === 'fuse'){
     const fk = aeFuseKey(G, p, G.kEl[id]);
     if (!fk) throw new Fout('fuse zonder fusie-aether');
-    const tid = kiesWezen(G, K, p, offerIds(G, p), true, {k:'tribute'});
-    if (tid === null) return;
+    const fcol = plek && plek.col != null ? plek.col : null;   // 🟣 zr: paars vak
+    const tid = fcol != null ? fusieOfferK(G, K, p, fcol) : kiesWezen(G, K, p, offerIds(G, p), true, {k:'tribute'});
+    if (tid == null || tid === 'cancel') return;
     neemUitHand(G, p, id);
-    kondigFusieAan(G, K, p, id, tid, fk);
+    kondigFusieAan(G, K, p, id, tid, fk, fcol != null ? {col:fcol} : undefined);
     ketenLus(G, K);
     return;
   }
@@ -10720,7 +10732,7 @@ const LICHT_TEKST = {
   struik:  "Kies 🗡 Swipe, 🔪 Stab of 🛡 Schild en leg die als ritueel in een kolom naar keuze. Elk kan <b>één keer</b> per potje; daarna doet deze kaart niets meer.",
   bloedmaan:"{betaal} <b>4</b>. <b>20</b> {kleurloze|kleurloos} schade aan de wezens op twee plekken naar keuze, in twee verschillende kolommen.",
   slide:    "Gaat meteen af. Twee willekeurige plekken van je tegenstander krijgen de 🧱 rotsval: aan het eind van deze beurt wordt wat daar staat verpletterd, behalve 🪨 Steen. Trek <b>1</b>. Speel je er meer, dan nooit twee keer dezelfde plek.",
-  moeder:   "Gaat meteen af. Kies een eigen wezen: <b>+6</b> levens en {Onaantastbaar} tot het eind van de ronde.",
+  moeder:   "Gaat meteen af. Kies een eigen wezen: <b>+6</b> levens en {Onaantastbaar} tot het eind van de beurt.",
   smoke:    "Alleen als reactie, in de beurt van je tegenstander. {Betaal} <b>5</b>. Zijn beurt eindigt meteen: wat al op de keten ligt gaat nog af, daarna is het jouw beurt. Trek <b>1</b>.",
   lokaas:   "Gaat meteen af. Zet 🎣 <b>Het lokaas</b> op een vrije eigen plek: <b>10</b> levens, {Kleurloos}, {Muur}. Zolang het staat, gaat alles wat je tegenstander op jouw kant richt naar het lokaas: aanvallen, speel-effecten en lichtkaarten. Willekeurige plekken niet."
 };
@@ -16589,7 +16601,7 @@ async function resolveLight(it){
     const f = id != null && id !== "cancel" ? findCre(id) : null; if(!f) return;
     beschutOp(p, f, 6);   // 🛡 8 nov 2026: zelfde effect als de 🦋 vlinder (+3)
     if(!FAST) pop(creSel(f.p, f.c), "+6", "heal");
-    addLog(`🌿 <em>${LIGHTS.moeder.name}</em>: ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} krijgt +6 levens en is onaantastbaar tot het eind van de ronde.`, true);
+    addLog(`🌿 <em>${LIGHTS.moeder.name}</em>: ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} krijgt +6 levens en is onaantastbaar tot het eind van de beurt.`, true);
     render();
     return;
   }
@@ -47745,7 +47757,7 @@ voorAeEffect = function(u){
 
 /* ---- module b ---- */
 /* 🛡 8 nov 2026 (Q): Beschutting (+6) en de 🦋 vlinder (+3) doen hetzelfde: een eigen wezen krijgt levens erbij en is
-   onaantastbaar tot het eind van de ronde (in je eigen beurt dus ook de beurt van de ander). In de kern: beschut(G, p, w, n). */
+   onaantastbaar tot het eind van de beurt (in je eigen beurt dus ook de beurt van de ander). In de kern: beschut(G, p, w, n). */
 function beschutOp(p, f, n){ f.cr.hp += n; f.cr.hexTot = Math.max(f.cr.hexTot || 0, S.gTurn + (S.tp === p ? 1 : 0)); }
 /* ================= 🎒 DE MONSTERBUIDEL EN DE BEESTEN (Q, 7 nov 2026; zie proef/redesign/BEESTEN.md) =================
    De lichtkaart De monsterbuidel zit op de plek van Magnus-slide (sleutel "slide", kern L_SLIDE): opgeslagen decks en
@@ -47782,10 +47794,10 @@ ANI.B = (() => {
   tekst("buidelwolf", {kw:["kleurloos","volleslag"], speel:"Al je wezens <b>+2</b> levens, ook deze."});
   tekst("ekster",     {kw:["kleurloos","volleslag"], eig:"Speel-effect: trek meteen <b>1</b>. Maar één keer per keten: wordt zijn speel-effect in dezelfde keten nog eens opgeroepen (Water, Echo, Kloon), dan is hij leeg. In een volgende keten trekt hij weer."});
   tekst("vleermuis",  {kw:["kleurloos","volleslag","direct"], speel:"{Heel} <b>2</b>.", eig:"Wat hij direct slaat, {heel} jij."});
-  tekst("vlinder",    {kw:["kleurloos"], speel:"Werkt als Beschutting: een eigen wezen krijgt <b>+3</b> levens en is {Onaantastbaar} tot het eind van de ronde. De vlinder komt niet op het bord, hij gaat naar je graf."});
+  tekst("vlinder",    {kw:["kleurloos"], speel:"Werkt als Beschutting: een eigen wezen krijgt <b>+3</b> levens en is {Onaantastbaar} tot het eind van de beurt. De vlinder komt niet op het bord, hij gaat naar je graf."});
   tekst("minotaurus", {kw:["kleurloos","volleslag"], speel:"Valt meteen aan. De ander mag reageren, zoals bij elke aanval."});
   tekst("slijm",      {kw:["kleurloos","volleslag"], speel:"Elk 🟢 Slijm aan jouw kant krijgt <b>+2</b> levens, ook dit.", veld:"Einde van je beurt: er komt een kopie van dit Slijm bij (kopie 1/1, haar speel-effect gaat ook af), op de dichtstbijzijnde vrije eigen plek."});
-  tekst("basilisk",   {kw:["kleurloos","volleslag"], speel:"Kies een kolom, bij jou of bij je tegenstander: wat daar staat, wordt een 🪨 Steen van <b>3/3</b> (een token)."});   // 9 nov 2026: ook eigen wezens
+  tekst("basilisk",   {kw:["kleurloos","volleslag"], speel:"Kies bij het spelen een kolom, bij jou of bij je tegenstander: wat daar staat, wordt een 🪨 Steen van <b>3/3</b> (een token)."});   // 9 nov 2026: ook eigen wezens
   tekst("spin",       {kw:["kleurloos","volleslag"], speel:"Spin een vijandelijk wezen in: het zit {Vast} en kan zijn eerstvolgende beurt niet aanvallen (is het nu zijn beurt, dan de rest van deze)."});
   tekst("ei",         {kw:["kleurloos","muur"], veld:"Na <b>2</b> beurten van de eigenaar komt er een 🕷 Spin uit (een ei van 🕊 Tweede leven: na <b>3</b>). De klok op het ei telt af."});
 
@@ -48024,7 +48036,7 @@ ANI.B = (() => {
   const UITLEG = {buidelwolf:"4 levens · al je wezens +2", draak:"199 levens · 🔥 2 schade", leviathan:"260 levens · 💧 herspeel een eigen wezen",
     kolos:"333 levens · 🪨 +3 levens", woud:"150 levens · 🌿 verstrik", ekster:"1 leven · trek 1", vleermuis:"2 levens · heel 2, slaat direct",
     brenger:"6 levens · onaantastbaar", ei:"2 eieren van 0/2 · na 2 beurten elk een 🕷 spin", balrog:"10 levens · heelt zichzelf 5",
-    vlinder:"+3 en onaantastbaar deze ronde op een eigen wezen", minotaurus:"8 levens · valt meteen aan", slijm:"1/1 · elk slijm +2, deelt zich elke beurt (kopie 1/1, haar speel-effect gaat ook af)", basilisk:"6 levens · maakt een wezen steen"};
+    vlinder:"+3 en onaantastbaar deze beurt op een eigen wezen", minotaurus:"8 levens · valt meteen aan", slijm:"1/1 · elk slijm +2, deelt zich elke beurt (kopie 1/1, haar speel-effect gaat ook af)", basilisk:"6 levens · maakt een wezen steen"};
   const kaartVan = (k, p) => MON[k] ? {id:0, el:MON[k], var:k, owner:p, jacht:true} : Object.assign({id:0, el:k, owner:p, jacht:true}, k === "balrog" ? {beest:true} : {});   // 8 nov 2026: echte beestkaarten, geen tokens   // 🌋 8 nov 2026: Maatje als beest (10 levens, deel w)
   const naamVan = k => MON[k] ? `${VAR[k].icon} ${VAR[k].name}` : `${EL[k].icon} ${k === "ei" ? "Spinnenei" : EL[k].name}`;
   /* de oude bot (zonder de nieuwe bot): een vuistregel */
@@ -48069,13 +48081,13 @@ ANI.B = (() => {
       if(k === "vlinder"){
         const ids = allCreIds((cr, pp) => pp === p);
         if(!ids.length){ addLog(`🦋 De vlinder vindt geen eigen wezen en fladdert weg.`, true); return; }
-        const id = ids.length === 1 ? ids[0] : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦋 Vlinder: op welk eigen wezen landt hij? (+3 en onaantastbaar deze ronde)`, false, {k:"vlinder"});
+        const id = ids.length === 1 ? ids[0] : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦋 Vlinder: op welk eigen wezen landt hij? (+3 en onaantastbaar deze beurt)`, false, {k:"vlinder"});
         const f = id != null && id !== "cancel" ? findCre(id) : null; if(!f || f.p !== p) return;
         const doe = () => { beschutOp(p, f, 3); render(); if(!FAST){ pop(creSel(f.p, f.c), "+3", "heal"); try{ AU.play("light"); }catch(e){} } };
         let gedaan = false; const doeEens = () => { if(!gedaan){ gedaan = true; doe(); } };
         if(aan()){ const gg = g; g = null; await A.veilig(vlinderVlucht(p, f, gg, doeEens), 3200); }
         doeEens();
-        addLog(`🦋 <em>Vlinder</em>: hij lost op op ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} van ${pName(p)}: <b>+3</b> en onaantastbaar tot het eind van de ronde.`, true);
+        addLog(`🦋 <em>Vlinder</em>: hij lost op op ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} van ${pName(p)}: <b>+3</b> en onaantastbaar tot het eind van de beurt.`, true);
         return;
       }
       const vrij = emptyCols(p);
@@ -48199,13 +48211,13 @@ ANI.B = (() => {
     const kp = A.kaart(doelSel); kp.wit = .8; kp.voet = true; A.hitstop(90, d.cx, d.cy); A.schud(7); A.burst(d.cx, d.cy, 22, A.KL.steen, 4, {soort:"brok", g:.25, s:4, spin:.25}); A.stof(d.cx, d.y + d.h, 6);
     try{ AU.play("thud"); }catch(e){}
     await A.tw(300, t => { kp.wit = .8 * (1 - t); kp.sy = lerp(.86, 1, E.terug(t)); kp.sx = lerp(1.1, 1, E.terug(t)); }); A.los(kp); };
-  async function basilisk(p, bronId){
+  async function basilisk(p, bronId, tid){
     if(!S || S.over) return;
     /* 🦎 9 nov 2026 (Q): ook een eigen wezen (niet de Basilisk zelf). Een bot versteent alleen de grootste vijand (zoals basilisk() in de kern). */
     const ids = [], vijIds = [];
     for(const qq of [opp(p), p]) for(let c = 0; c < NK(); c++){ const cr = P(qq).cols[c].cre; if(cr && cr.card.id !== bronId && !EL[cr.card.el].onsterfelijk && !hexVan(cr, qq, p)){ ids.push(cr.card.id); if(qq !== p) vijIds.push(cr.card.id); } }
     if(!ids.length || (isBot(p) && !vijIds.length)){ addLog(`🦎 De Basilisk kijkt rond: er staat niets om te versteenen.`, true); return; }
-    const id = isBot(p) ? grootste(vijIds) : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦎 Basilisk: kies een kolom, bij jou of bij je tegenstander. Wat daar staat, wordt een 🪨 Steen van 3/3.`, false, {k:"basilisk"});
+    const id = tid !== undefined ? tid : isBot(p) ? grootste(vijIds) : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦎 Basilisk: kies een kolom, bij jou of bij je tegenstander. Wat daar staat, wordt een 🪨 Steen van 3/3.`, false, {k:"basilisk"});
     if(!ids.includes(id)) return;
     const f = findCre(id); if(!f) return;
     const {cr, c} = f, q = f.p;
@@ -48464,7 +48476,7 @@ ANI.B = (() => {
       const p = it && it.ctrl;
       switch(it && it.el){
         case "spinweb": { const b = bronVan(it); await spinWeb(p, b ? b.c : null); return; }
-        case "basilisk": await basilisk(p, it.bronId); return;
+        case "basilisk": await basilisk(p, it.bronId, it.tid); return;
         case "minotaurus": await mino(p, it.bronId); render(); return;
         case "ekster": { const b = bronVan(it), kc = b && P(b.p).cols[b.c].cre ? P(b.p).cols[b.c].cre.card : null;
           if(kc && kc.leeg){ addLog(`🐦 <em>Ekster</em> is leeg: in deze keten heeft hij al getrokken.`); return; }
@@ -48845,14 +48857,14 @@ ANI.W = (() => {
   };
 
   /* 🦋 8 nov 2026 (Q): de vlinder uit je hand (ook als reactie) werkt als Beschutting met +3: zelfde keuze, meteen,
-     onaantastbaar tot het eind van de ronde (beschutOp in b.js; in de kern jachtVlinder met beschut). Daarna naar je graf. */
+     onaantastbaar tot het eind van de beurt (beschutOp in b.js; in de kern jachtVlinder met beschut). Daarna naar je graf. */
   vlinderLand = async function(p, card){
     const ids = allCreIds((cr, pp) => pp === p); if(!ids.length) return false;
-    const id = ids.length === 1 ? ids[0] : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦋 Vlinder: op welk eigen wezen landt hij? (+3 en onaantastbaar deze ronde)`, true, {k:"vlinder"});
+    const id = ids.length === 1 ? ids[0] : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦋 Vlinder: op welk eigen wezen landt hij? (+3 en onaantastbaar deze beurt)`, true, {k:"vlinder"});
     const f = id != null && id !== "cancel" ? findCre(id) : null;
     if(!f || f.p !== p) return false;
     beschutOp(p, f, 3); P(p).grave.push(card);
-    addLog(`🦋 <em>Vlinder</em>: ${pName(p)} laat hem landen op ${kIcon(f.cr.card)} ${kNaam(f.cr.card)}: <b>+3</b> en onaantastbaar tot het eind van de ronde.`, true);
+    addLog(`🦋 <em>Vlinder</em>: ${pName(p)} laat hem landen op ${kIcon(f.cr.card)} ${kNaam(f.cr.card)}: <b>+3</b> en onaantastbaar tot het eind van de beurt.`, true);
     if(!FAST){ try{ pop(creSel(f.p, f.c), "+3", "heal"); AU.play("light"); }catch(e){} }
     render(); return true;
   };
@@ -49824,6 +49836,7 @@ const ZG = (() => {
   const eigenPlek = (actor, nieuw) => nieuw.some(it => it.type === "play" && planPlat(it.plan || []).some(e => e && e.el === "steen" && e.tid != null && isPlekId(e.tid) && e.tp === actor));
   function zelfMag(actor, top, nieuw){
     if(top.type === "attack" || dicht(actor) || !hasLegalFlash(actor)) return false;
+    if(nieuw.some(it => it.type === "play" && it.asFuse && it.card && it.card.var === "bergketen")) return false;   // 🏔 zr: Tweelingtop, alleen de ander
     if(eigenPlek(actor, nieuw)) return true;
     if(online()) return true;
     return !isBot(actor) && timerAan();
@@ -49879,17 +49892,29 @@ const ZG = (() => {
       T.rest -= dt;
       if(T.rest <= 0){
         const p = T.p; T.rest = Infinity;
-        verloop(p);
+        try{ verloop(p); }catch(e){ console.error(e); }
       }
     }
     ring(T);
     raf = requestAnimationFrame(tik);
   }
-  function verloop(p){
-    if(!S || !pending || S.ui.mode !== "priority" || S.ui.p !== p) return;
-    if(online() && NET.chan === "live" && applyingRemote){ setTimeout(() => verloop(p), 150); return; }
-    addLog(`⏱ De tijd is om: ${pName(p)} laat door.`);
-    act({t:"f", v:"pass"});
+  /* ⏱ zr (9 nov 2026): vanzelf doorgeven mag nooit stranden. Weigert act() (online: nog niet aangesloten, zetten van
+     de ander die nog binnenkomen), dan opnieuw proberen; offline desnoods meteen feed. Een fout breekt de ring niet. */
+  function verloop(p, n){
+    n = n || 0;
+    try{
+      if(!S || S.over || !pending || S.ui.mode !== "priority" || S.ui.p !== p) return;
+      if(online() && NET.chan === "live" && (applyingRemote || !netMayAct({t:"f", v:"pass"}))){ if(n < 400) setTimeout(() => verloop(p, n + 1), 150); return; }
+      if(!n) addLog(`⏱ De tijd is om: ${pName(p)} laat door.`);
+      const pd = pending;
+      act({t:"f", v:"pass"});
+      if(pending && pending === pd && S.ui.mode === "priority" && S.ui.p === p){
+        if(!online()) feed("pass"); else if(n < 400) setTimeout(() => verloop(p, n + 1), 150);
+      }
+    }catch(e){
+      console.error(e);
+      try{ if(!online() && pending && S.ui.mode === "priority" && S.ui.p === p) feed("pass"); }catch(e2){}
+    }
   }
   function ring(t){
     const b = document.querySelector('#actions [data-btn="pass"], .abtn[data-btn="pass"]');
@@ -50553,54 +50578,53 @@ ANI.ZI = (() => {
       deel t, chooseCre met k:"terugOffer"), de zwarte vlam, en dan kies je in hetzelfde venster wat terugkomt (zelfde
       opties en volgorde als deel t en de kern). De bot en de online tegenstander gaan de oude weg van deel t. */
 ANI.Ronde = (() => {
+  /* 10 nov 2026, herbouwd naar de demo a20-A met Q's aanpassingen: het medaillon staat LINKS op de naad, tegen de
+     portretten aan, groot genoeg om te lezen. Over de helft van wie aan zet is ligt warm licht vanaf de buitenrand,
+     de andere helft is maar een beetje donkerder. Elke rij heeft een gekleurde kantstreep (paars boven, goud onder) die
+     oplicht als die speler aan zet is. Bij een nieuwe beurt vult de helft van wie klaar is de ring, veegt er een streep
+     licht over het veld, en is de ring rond dan draait het medaillon naar de volgende ronde. Alles ligt ONDER de
+     pop-ups (#overlay) en verdwijnt zolang er een keuzescherm open staat. */
   const A = ANI;
-  const KL = {onder:"#ffd27a", boven:"#c8a0ff"}, KLRGB = {onder:"255,210,122", boven:"200,160,255"};
+  const KL = {onder:"#f0c75a", boven:"#b77cff"}, KLRGB = {onder:"240,199,90", boven:"183,124,255"};
   const st = {n:0, g:0, tp:-1, fill:{onder:0, boven:0}, adem:null, sx:1, gl:0, anim:false, zicht:false, r:24};
-  let el = null, cv = null, lb = null, lichtB = null, lichtO = null, loopAan = false;
+  let el = null, cv = null, L = null, loopAan = false;
   const fxAan = () => { try{ return A.aan(); }catch(e){ return false; } };
   const actief = () => { try{ return !FAST && !SIM && S && S.pl && !S.over; }catch(e){ return false; } };
-  /* welke speler zit onder (op #row0) en welke boven */
   const onderP = () => { const s = document.querySelector('#row0 .slot[data-p]'); return s ? +s.dataset.p : ((NET.on && NET.seat === 1) ? 1 : 0); };
   const kant = p => p === onderP() ? "onder" : "boven";
+  /* een keuzescherm of pop-up open: dan niets van ons erbovenop of ertussen */
+  const popOpen = () => { try{
+    const m = S.ui && S.ui.mode; if(/^(start|draft|mulligan|profiel|handoff)$/.test(m || "")) return true;
+    const ov = document.getElementById("overlay"); if(ov && ov.firstElementChild && ov.offsetWidth !== undefined && ov.innerHTML.trim()) return true;
+    return [...document.querySelectorAll("#zjTerug, #versus")].some(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; }); }catch(e){ return false; } };
 
   function maak(){
     if(el && el.isConnected) return;
     const s = document.createElement("style");
     s.textContent = `
-#zjRonde{position:fixed; z-index:3; pointer-events:auto; display:none; flex-direction:column; align-items:center; gap:2px; cursor:help}
+#zjRonde{position:fixed; z-index:6; pointer-events:auto; display:none; cursor:help}
 #zjRonde canvas{display:block}
-#zjRonde .zjrl{font:7px/1 "Press Start 2P",monospace; color:#a99fb8; letter-spacing:.12em; text-shadow:0 1px 0 #000}
-body.tel #zjRonde .zjrl{font-size:5px}
-.zjlicht{position:absolute; left:-4px; right:-4px; pointer-events:none; opacity:0; transition:opacity .45s ease}
-.zjlicht.licht{z-index:0}
-.zjlicht.dim{z-index:3; background:rgba(4,3,8,.2)}
-body.zjgeenfx .zjlicht{transition:none}`;
+.zjL{position:fixed; pointer-events:none; opacity:0; transition:opacity .45s ease, background .45s ease; z-index:4}
+.zjL.dim{background:rgba(4,3,8,.26)}
+.zjL.licht{mix-blend-mode:screen}
+.zjL.streep{width:3px; border-radius:2px; transition:opacity .45s ease, box-shadow .45s ease}
+body.zjgeenfx .zjL{transition:none}`;
     document.head.appendChild(s);
     el = document.createElement("div"); el.id = "zjRonde";
     el.title = "De ronde. Hij begint bij wie het potje begon; is die weer aan de beurt, dan is het de volgende ronde. Ook alles wat \"één keer per ronde\" mag, telt zo.";
     cv = document.createElement("canvas"); el.appendChild(cv); document.body.appendChild(el);
+    L = {};
+    ["boven", "onder"].forEach(w => { L[w] = {};
+      ["licht", "dim", "streep"].forEach(k => { const d = document.createElement("div"); d.className = "zjL " + k; document.body.appendChild(d); L[w][k] = d; }); });
   }
-  /* het licht en de schaduw liggen in #fieldwrap (dat wordt soms opnieuw gemaakt, dan hangen we ze er weer in) */
-  function lagen(){
-    const fw = document.getElementById("fieldwrap"); if(!fw) return null;
-    if(!lichtO || lichtO.licht.parentNode !== fw){
-      [lichtO, lichtB].forEach(l => { if(l){ l.licht.remove(); l.dim.remove(); } });
-      lichtO = {licht:document.createElement("div"), dim:document.createElement("div")};
-      lichtB = {licht:document.createElement("div"), dim:document.createElement("div")};
-      [lichtO, lichtB].forEach(o => { o.licht.className = "zjlicht licht"; o.dim.className = "zjlicht dim"; });
-      fw.insertBefore(lichtO.licht, fw.firstChild); fw.insertBefore(lichtB.licht, fw.firstChild);
-      fw.appendChild(lichtO.dim); fw.appendChild(lichtB.dim);
-    }
-    return fw;
-  }
-  function naad(){
+  function geo(){
     const r1 = document.getElementById("row1"), r0 = document.getElementById("row0");
     if(!r1 || !r0 || !r0.offsetParent) return null;
-    const a = r1.getBoundingClientRect(), b = r0.getBoundingClientRect();
-    if(!a.height || !b.height) return null;
-    return {y:(a.bottom + b.top) / 2, top:a.top, bot:b.bottom, links:Math.min(a.left, b.left)};
+    const a = r1.getBoundingClientRect(), b = r0.getBoundingClientRect(); if(!a.height || !b.height) return null;
+    const lk = document.getElementById("lkolom"), lr = lk && lk.offsetWidth ? lk.getBoundingClientRect() : null;
+    const links = Math.max(a.left, lr ? lr.right : 0), rechts = Math.min(a.right, b.right);
+    return {y:(a.bottom + b.top) / 2, boven:a, onder:b, links, rechts, lr};
   }
-  /* de stand volgt uit het spel: wie begon deze ronde, wie is klaar, wie is aan zet */
   function stand(){
     const g = S.gTurn || 1, n = Math.ceil(g / 2), start = g % 2 ? S.tp : opp(S.tp);
     const f = {onder:0, boven:0}; if(g % 2 === 0) f[kant(start)] = 1;
@@ -50608,137 +50632,119 @@ body.zjgeenfx .zjlicht{transition:none}`;
   }
   function teken(){
     if(!cv) return;
-    const r = st.r, pad = Math.ceil(r * .9), D = 2 * (r + pad), dpr = Math.min(2, devicePixelRatio || 1);
+    const r = st.r, pad = Math.ceil(r * .8), D = 2 * (r + pad), dpr = Math.min(2, devicePixelRatio || 1);
     if(cv.width !== Math.round(D * dpr)){ cv.width = Math.round(D * dpr); cv.height = Math.round(D * dpr); cv.style.width = D + "px"; cv.style.height = D + "px"; }
     const x = cv.getContext("2d"), m = D / 2, t = performance.now() / 1000;
     x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, D, D);
-    /* gouden gloed eromheen, sterker als de ronde net omslaat */
-    const gl = x.createRadialGradient(m, m, r * .6, m, m, r + pad);
-    gl.addColorStop(0, `rgba(240,199,90,${(.16 + .5 * st.gl).toFixed(3)})`); gl.addColorStop(1, "rgba(240,199,90,0)");
+    const gl = x.createRadialGradient(m, m, r * .7, m, m, r + pad);
+    gl.addColorStop(0, `rgba(240,199,90,${(.28 + .55 * st.gl).toFixed(3)})`); gl.addColorStop(1, "rgba(240,199,90,0)");
     x.fillStyle = gl; x.fillRect(0, 0, D, D);
     x.save(); x.translate(m, m); x.scale(Math.max(.02, st.sx), 1);
-    /* de schijf: donker brons met een rand */
     const sch = x.createRadialGradient(-r * .3, -r * .35, r * .1, 0, 0, r);
-    sch.addColorStop(0, "#2e2112"); sch.addColorStop(1, "#110b06");
+    sch.addColorStop(0, "#2e2112"); sch.addColorStop(1, "#0f0a05");
     x.beginPath(); x.arc(0, 0, r, 0, Math.PI * 2); x.fillStyle = sch; x.fill();
-    x.lineWidth = Math.max(2, r * .1); x.strokeStyle = "#6b5532"; x.stroke();
-    x.beginPath(); x.arc(0, 0, r - Math.max(2, r * .1), 0, Math.PI * 2); x.lineWidth = 1; x.strokeStyle = "rgba(0,0,0,.6)"; x.stroke();
-    /* de ring: boven de bovenste speler, onder de onderste */
-    const rr = r * .78, dik = Math.max(2.5, r * .16), gap = .16;
-    x.beginPath(); x.arc(0, 0, rr, 0, Math.PI * 2); x.lineWidth = dik; x.strokeStyle = "rgba(255,255,255,.07)"; x.stroke();
+    x.lineWidth = Math.max(2, r * .1); x.strokeStyle = "#7a6238"; x.stroke();
+    const rr = r * .76, dik = Math.max(3, r * .17), gap = .14;
+    x.beginPath(); x.arc(0, 0, rr, 0, Math.PI * 2); x.lineWidth = dik; x.strokeStyle = "rgba(255,255,255,.08)"; x.stroke();
     [["boven", Math.PI], ["onder", 0]].forEach(([w, a0]) => {
-      const vol = st.fill[w], adem = st.adem === w && vol < 1 ? (fxAan() ? .3 + .22 * Math.sin(t * 4) : .4) : 0;
+      const vol = st.fill[w], adem = st.adem === w && vol < 1 ? (fxAan() ? .35 + .3 * Math.sin(t * 4.5) : .5) : 0;
       const boog = (a, v) => { if(v <= 0) return; x.save(); x.beginPath(); x.arc(0, 0, rr, a0 + gap, a0 + gap + (Math.PI - 2 * gap) * Math.min(1, v));
-        x.lineWidth = dik; x.lineCap = "round"; x.strokeStyle = KL[w]; x.globalAlpha = a; x.shadowColor = KL[w]; x.shadowBlur = r * .5; x.stroke(); x.restore(); };
+        x.lineWidth = dik; x.lineCap = "round"; x.strokeStyle = KL[w]; x.globalAlpha = a; x.shadowColor = KL[w]; x.shadowBlur = r * .6; x.stroke(); x.restore(); };
       if(adem > 0) boog(adem, 1);
       boog(1, vol);
     });
-    x.restore();
-    /* het getal */
-    const fs = Math.round(r * (st.n > 9 ? .62 : .78));
-    x.save(); x.translate(m, m); x.scale(Math.max(.02, st.sx), 1);
+    const fs = Math.round(r * (st.n > 9 ? .62 : .8));
     x.font = `${fs}px "Press Start 2P", monospace`; x.textAlign = "center"; x.textBaseline = "middle";
-    x.fillStyle = "#000"; x.fillText(String(st.n || 1), 1, 3);
-    x.fillStyle = "#ffe7b0"; x.fillText(String(st.n || 1), 0, 2);
+    x.fillStyle = "#000"; x.fillText(String(st.n || 1), 1.5, 3.5); x.fillStyle = "#ffe7b0"; x.fillText(String(st.n || 1), 0, 2);
     x.restore();
-    /* het woord eronder */
-    const ls = Math.max(5, Math.round(r * .24));
-    x.font = `${ls}px "Press Start 2P", monospace`; x.textAlign = "center"; x.textBaseline = "top";
-    x.fillStyle = "#000"; x.fillText("RONDE", m + 1, m + r + 6); x.fillStyle = "#a99fb8"; x.fillText("RONDE", m, m + r + 5);
   }
-  function lus(){
-    if(!st.zicht || !(fxAan() || st.anim)){ loopAan = false; return; }
-    teken(); requestAnimationFrame(lus);
-  }
+  function lus(){ if(!st.zicht || !(fxAan() || st.anim)){ loopAan = false; return; } teken(); requestAnimationFrame(lus); }
   function startLus(){ if(!loopAan && st.zicht){ loopAan = true; requestAnimationFrame(lus); } }
-  /* het licht: warm (onder) of paars (boven) vanaf de buitenrand, de andere helft een beetje donker */
-  function zetLicht(fw, nd, wie){
-    const f = fw.getBoundingClientRect(), y = nd.y - f.top;
+  const box = (d, l, t, w, h) => { d.style.left = Math.round(l) + "px"; d.style.top = Math.round(t) + "px"; d.style.width = Math.max(0, Math.round(w)) + "px"; d.style.height = Math.max(0, Math.round(h)) + "px"; };
+  function zetLicht(g, wie){
     document.body.classList.toggle("zjgeenfx", !fxAan());
-    const zet = (o, top, h, w, aanZet) => {
-      [o.licht, o.dim].forEach(d => { d.style.top = top + "px"; d.style.height = Math.max(0, h) + "px"; });
-      const k = KLRGB[w], r = w === "onder" ? "to top" : "to bottom";
-      o.licht.style.background = `linear-gradient(${r}, rgba(${k},0), rgba(${k},.2) 22%, rgba(${k},.09) 62%, rgba(${k},0))`;
-      const m = `linear-gradient(${r}, transparent, #000 18%), linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)`;
-      [o.licht, o.dim].forEach(d => { d.style.webkitMaskImage = d.style.maskImage = m; d.style.webkitMaskComposite = "source-in"; d.style.maskComposite = "intersect"; });
-      o.licht.style.opacity = aanZet ? 1 : 0; o.dim.style.opacity = aanZet ? 0 : 1;
-    };
-    zet(lichtB, nd.top - f.top - 30, y - (nd.top - f.top - 30), "boven", wie === "boven");
-    zet(lichtO, y, nd.bot - f.top + 30 - y, "onder", wie === "onder");
+    ["boven", "onder"].forEach(w => {
+      const o = L[w], rij = g[w], aan = w === wie, k = KLRGB[w];
+      const top = w === "boven" ? rij.top - 10 : g.y, h = w === "boven" ? g.y - top : rij.bottom + 10 - g.y;
+      box(o.licht, g.links, top, g.rechts - g.links, h); box(o.dim, g.links, top, g.rechts - g.links, h);
+      o.licht.style.background = `linear-gradient(${w === "onder" ? "to top" : "to bottom"}, rgba(${k},.26), rgba(${k},.1) 45%, rgba(${k},0))`;
+      o.licht.style.opacity = aan ? 1 : 0; o.dim.style.opacity = aan ? 0 : 1;
+      /* de kantstreep links langs de rij */
+      box(o.streep, g.links + 2, rij.top + 6, 3, rij.height - 12);
+      o.streep.style.background = KL[w];
+      o.streep.style.boxShadow = aan ? `0 0 10px 2px rgba(${k},.75)` : "none";
+      o.streep.style.opacity = aan ? 1 : .35;
+    });
   }
   function verberg(){
     st.zicht = false; if(el) el.style.display = "none";
-    [lichtO, lichtB].forEach(o => { if(o){ o.licht.style.opacity = 0; o.dim.style.opacity = 0; } });
+    if(L) ["boven", "onder"].forEach(w => ["licht", "dim", "streep"].forEach(k => { L[w][k].style.opacity = 0; }));
   }
-  /* elke paar honderd ms en na elke render: plek en stand bijwerken */
   function sync(){
     try{
-      if(!actief()) return verberg();
-      const nd = naad(); if(!nd) return verberg();
-      maak(); const fw = lagen(); if(!fw) return verberg();
+      if(!actief() || document.body.classList.contains("zp-buiten")) return verberg();
+      const g = geo(); if(!g) return verberg();
+      maak();
+      if(popOpen()) return verberg();
       const tel = document.body.classList.contains("tel");
-      const lk = document.getElementById("lkolom"), lr = lk && lk.offsetWidth ? lk.getBoundingClientRect() : null;
-      st.r = tel ? 15 : (lr && lr.width < 200 ? 22 : 30);
-      const pad = Math.ceil(st.r * .9), D = 2 * (st.r + pad);
-      const cx = lr ? lr.left + lr.width / 2 : nd.links - st.r - 6;
-      el.style.left = Math.round(cx - D / 2) + "px"; el.style.top = Math.round(nd.y - D / 2) + "px";
-      el.style.display = "flex";
+      st.r = tel ? 14 : 26;
+      const pad = Math.ceil(st.r * .8), D = 2 * (st.r + pad);
+      /* links op de naad, tegen de portretten aan (is er ruimte tussen kolom en veld, dan precies daartussen) */
+      const cx = g.lr ? (g.boven.left > g.lr.right + 2 * st.r ? (g.lr.right + g.boven.left) / 2 : g.lr.right) : g.links - st.r - 4;
+      el.style.left = Math.round(cx - D / 2) + "px"; el.style.top = Math.round(g.y - D / 2) + "px"; el.style.display = "block";
       if(!st.anim){
         const s = stand();
         if(s.g !== st.g || S.tp !== st.tp){ st.g = s.g; st.tp = S.tp; st.n = s.n; st.fill = s.f; st.adem = s.adem; st.sx = 1; st.gl = 0; }
-        zetLicht(fw, nd, s.adem);
-      }
+        zetLicht(g, s.adem);
+      } else zetLicht(g, st.adem);
       const was = st.zicht; st.zicht = true;
       if(!was || !fxAan()) teken();
       startLus();
     }catch(e){ console.error(e); }
   }
-  /* 🌅 een nieuwe beurt: de helft van wie klaar is vult zich, een streep licht veegt naar de ander;
-     is de ring rond, dan draait het medaillon naar de nieuwe ronde */
+  /* 🌅 een nieuwe beurt (zoals de demo): de helft van wie klaar is vult de ring, een streep licht veegt naar de ander,
+     het licht wisselt mee; is de ring rond, dan draait het medaillon naar de nieuwe ronde met een gouden ring */
   async function wissel(){
     if(!actief()) return;
     const s = stand(), van = kant(opp(S.tp)), naar = s.adem, nieuw = s.g > 1 && s.g % 2 === 1;
-    if(s.g <= 1 || !st.zicht || !fxAan()){ st.anim = false; sync(); return; }
-    /* begin bij de stand van de vorige beurt: de vorige ronde, en de helft van wie toen al klaar was */
+    if(s.g <= 1 || !fxAan()){ st.anim = false; sync(); return; }
     st.anim = true; st.g = s.g; st.tp = S.tp;
     st.n = Math.ceil((s.g - 1) / 2); st.fill = {onder:0, boven:0};
-    if((s.g - 1) % 2 === 0) st.fill[naar] = 1;   // de vorige beurt was de tweede van zijn ronde: wie nu speelt, begon die ronde
-    sync(); startLus();
+    if((s.g - 1) % 2 === 0) st.fill[naar] = 1;
+    st.adem = van; sync(); if(!st.zicht){ st.anim = false; sync(); return; }
+    startLus();
     try{
-      st.adem = null;
-      const F = st.fill; await A.veilig(A.tw(300, e => { F[van] = Math.max(F[van], A.E.uit ? A.E.uit(e) : e); }), 1200);
-      st.adem = naar; st.tp = S.tp;
-      const nd = naad(), fw = lagen();
-      if(nd && fw) zetLicht(fw, nd, naar);
+      const F = st.fill; st.adem = null;
+      await A.veilig(A.tw(320, e => { F[van] = Math.max(F[van], A.E.uit ? A.E.uit(e) : e); }), 1200);
+      st.adem = naar; sync();
       veeg(van, naar);
       if(nieuw){
-        await A.wacht(260);
-        st.gl = 1; await A.veilig(A.tw(180, e => { st.sx = 1 - e; }), 400);
+        await A.wacht(380);
+        st.gl = 1; await A.veilig(A.tw(200, e => { st.sx = 1 - e; }), 600);
         st.n = s.n; st.fill = {onder:0, boven:0};
-        await A.veilig(A.tw(220, e => { st.sx = e; }), 450); st.sx = 1;
-        const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + (r.height - 10) / 2;
-        let a = 1; const l = A.laag(() => { const k = 1 - a; A.ring(cx, cy, st.r * (1 + 2.2 * k), "#f0c75a", .8 * a, 3); A.gloed(cx, cy, st.r * 3, "#f0c75a", .45 * a); return a > 0; });
-        A.burst(cx, cy, 14, ["#ffe7a0", "#f0c75a"], 2.4, {soort:"plus", s:2});
-        await A.veilig(A.tw(620, e => { a = 1 - e; st.gl = 1 - e; }), 1000); A.weg(l); st.gl = 0;
+        await A.veilig(A.tw(240, e => { st.sx = e; }), 600); st.sx = 1;
+        const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        let a = 1; const l = A.laag(() => { const k = 1 - a; A.ring(cx, cy, st.r * (1 + 2.6 * k), "#f0c75a", .9 * a, 3); A.gloed(cx, cy, st.r * 3.4, "#f0c75a", .5 * a); return a > 0; });
+        A.burst(cx, cy, 16, ["#ffe7a0", "#f0c75a"], 2.6, {soort:"plus", s:2});
+        await A.veilig(A.tw(700, e => { a = 1 - e; st.gl = 1 - e; }), 1200); A.weg(l); st.gl = 0;
       }
     }catch(e){ console.error(e); }
     st.anim = false; st.g = -1; sync();
   }
-  /* de streep licht over het veld, van de helft van wie klaar is naar die van wie nu aan zet is */
+  /* de streep licht: een heldere lijn met gloed die van de ene rij naar de andere schuift, vanaf het medaillon */
   function veeg(van, naar){
-    const r1 = A.rc("#row1"), r0 = A.rc("#row0"); if(!r1 || !r0) return;
-    const yB = r1.cy, yO = r0.cy, y0 = van === "onder" ? yO : yB, y1 = naar === "onder" ? yO : yB;
-    const x0 = Math.min(r1.x, r0.x) - 10, x1 = Math.max(r1.x + r1.w, r0.x + r0.w) + 10, k = KLRGB[naar];
-    let e = 0; const ctx = A.ctx;
-    const l = A.laag(() => { const y = A.lerp(y0, y1, e), a = Math.sin(e * Math.PI), c = ANI.ctx || ctx; if(!c || a <= 0) return e < 1;
+    const g = geo(); if(!g) return;
+    const yB = g.boven.top + g.boven.height / 2, yO = g.onder.top + g.onder.height / 2;
+    const y0 = van === "onder" ? yO : yB, y1 = naar === "onder" ? yO : yB, x0 = g.links, x1 = g.rechts, k = KLRGB[naar];
+    let e = 0;
+    const l = A.laag(() => { const c = ANI.ctx; const y = A.lerp(y0, y1, A.E.inuit ? A.E.inuit(e) : e), a = Math.sin(e * Math.PI); if(!c || a <= 0) return e < 1;
       c.save(); c.globalCompositeOperation = "lighter";
-      const g = c.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, `rgba(${k},0)`); g.addColorStop(.5, `rgba(${k},${(.55 * a).toFixed(3)})`); g.addColorStop(1, `rgba(${k},0)`);
-      c.fillStyle = g; c.fillRect(x0, y - 2, x1 - x0, 4);
-      const h = c.createLinearGradient(0, y - 40, 0, y + 40); h.addColorStop(0, `rgba(${k},0)`); h.addColorStop(.5, `rgba(${k},${(.12 * a).toFixed(3)})`); h.addColorStop(1, `rgba(${k},0)`);
-      c.fillStyle = h; c.fillRect(x0, y - 40, x1 - x0, 80); c.restore(); return e < 1; });
-    A.veilig(A.tw(560, t => { e = t; }), 900).then(() => A.weg(l));
+      const h = c.createLinearGradient(0, y - 46, 0, y + 46); h.addColorStop(0, `rgba(${k},0)`); h.addColorStop(.5, `rgba(${k},${(.22 * a).toFixed(3)})`); h.addColorStop(1, `rgba(${k},0)`);
+      c.fillStyle = h; c.fillRect(x0, y - 46, x1 - x0, 92);
+      const gr = c.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, `rgba(255,248,230,${(.95 * a).toFixed(3)})`); gr.addColorStop(.7, `rgba(${k},${(.7 * a).toFixed(3)})`); gr.addColorStop(1, `rgba(${k},0)`);
+      c.fillStyle = gr; c.fillRect(x0, y - 1.5, x1 - x0, 3); c.restore(); return e < 1; });
+    A.veilig(A.tw(620, t => { e = t; }), 1000).then(() => A.weg(l));
   }
-  /* de haken: na een nieuwe beurt het medaillon laten draaien, en na elke render de plek bijwerken */
   (() => {
     const sts = startTurnSequence;
     startTurnSequence = async function(){ try{ if(actief()) wissel(); }catch(e){ console.error(e); } return await sts.apply(this, arguments); };
@@ -50746,7 +50752,6 @@ body.zjgeenfx .zjlicht{transition:none}`;
     let rq = 0;
     render = function(){ const v = r0.apply(this, arguments);
       try{ if(!FAST && !SIM){
-        /* in het paneel rechts: de ronde in plaats van de beurt van één speler */
         const tb = document.getElementById("turnbadge");
         if(tb && S && S.pl && /Beurt \d+/.test(tb.innerHTML)) tb.innerHTML = tb.innerHTML.replace(/Beurt \d+/, "Ronde " + Math.ceil((S.gTurn || 1) / 2));
         if(!rq) rq = requestAnimationFrame(() => { rq = 0; sync(); });
@@ -50757,7 +50762,7 @@ body.zjgeenfx .zjlicht{transition:none}`;
       try{ const sm = document.querySelector("#turncry .sm"); if(sm && S){ const g = S.gTurn || 1, n = Math.ceil(g / 2);
         sm.textContent = sm.textContent.replace(/beurt \d+/, g > 1 && g % 2 === 1 ? `ronde ${n} begint` : `ronde ${n}`); } }catch(e){}
       return v; };
-    setInterval(() => { if(!document.hidden) sync(); }, 400);
+    setInterval(() => { if(!document.hidden) sync(); }, 250);
     addEventListener("resize", () => sync());
   })();
   return {sync, wissel, stand, st, teken};
@@ -52174,6 +52179,264 @@ ANI.ZP = (() => {
   }catch(e){ fout(e); }
 
   return {doelVan, stil, inGevecht};
+})();
+
+/* ---- module zr ---- */
+/* ================= zr (9 nov 2026): Basilisk mikt bij het spelen · Beschutting en vlinder een beurt · Eeuwige Terugkeer nieuw =================
+   1. 🦎 Basilisk: de kolom kies je bij het spelen, zoals bij Vuur (ook een eigen wezen; niet de Basilisk zelf). Een bot
+      mikt alleen op een vijand. Bij het afgaan gebeurt het op dat doel (is het er niet meer, dan gebeurt er niets).
+      In de kern: doelenVoor0 (E_BASI) en basilisk(.., tid) in zr-hooks.py.
+   2. 🛡 Beschutting (+6) en de 🦋 vlinder (+3): onaantastbaar tot het eind van DEZE beurt (niet meer de ronde), en een
+      onaantastbaar wezen neemt IJs niet over (ijsOverCre). In de kern: beschut en ijsOverCre in zr-hooks.py.
+   3. 🟣 Eeuwige Terugkeer (het offer gaat naar het graf, zoals deel za): eerst de vraag "Wat wil je offeren?" (op het veld kiezen, of overslaan), pas daarna het graf
+      (het venster van zj, per soort met aantallen) om te kiezen wat terugkomt, en dan een vrije plek aan jouw kant
+      (ook de plek van het offer). Een bot kiest offer en kaart zoals deel t, de plek via de beslisser (waitUI "slot").
+      Zelfde volgorde van vragen als terugOffer in de kern (choice, opt, slot). */
+ANI.ZR = (() => {
+  /* ---------- 🦎 Basilisk ---------- */
+  { const t0 = targetsForEff0;
+    targetsForEff0 = function(p, e, selfId, cardEl, exclIds){
+      if(!e || e.el !== "basilisk") return t0.apply(this, arguments);
+      const skip = id => exclIds && exclIds.includes(id);
+      const bron = e.srcCard ? e.srcCard.id : selfId;
+      return allCreIds((cr, pp) => cr.card.id !== bron && !skip(cr.card.id) && !EL[cr.card.el].onsterfelijk && !hexVan(cr, pp, p) && (!isBot(p) || pp !== p));
+    }; }
+  try{ effPrompt.basilisk = "🦎 Basilisk: kies een kolom, bij jou of bij je tegenstander. Wat daar staat, wordt een 🪨 Steen van 3/3"; }catch(e){}
+
+  /* ---------- 🛡 Beschutting en de vlinder: een beurt, en ook geen IJs ---------- */
+  beschutOp = function(p, f, n){ f.cr.hp += n; f.cr.hexTot = Math.max(f.cr.hexTot || 0, S.gTurn); };
+  { const io0 = ijsOverCre;
+    ijsOverCre = function(p){
+      return io0.apply(this, arguments).filter(c => { const cr = P(opp(p)).cols[c] && P(opp(p)).cols[c].cre; return !(cr && (cr.hexTot || 0) >= S.gTurn); });
+    }; }
+
+  /* ---------- 🟣 Eeuwige Terugkeer ---------- */
+  const NM = () => (AETHERS.ae_graf && AETHERS.ae_graf.name) || "Eeuwige Terugkeer";
+  const naamVan = o => o.fk ? VAR[FUSIE_VAR[o.fk]].name : (o.k[0] === "v" ? VAR[o.k.slice(2)].name : EL[o.el].name);
+  const alsKaart = (p, o, c) => o.fk ? Object.assign({}, c || P(p).grave[o.i], {var:FUSIE_VAR[o.fk], fusie:true}) : (c || P(p).grave[o.i]);
+  async function terugkeer(p){
+    const T = ANI.Terug, V = ANI.TerugVenster, nm = NM();
+    const ops = T.opties(p); if(!ops.length) return;
+    const ids = T.offerIds(p); if(!ids.length) return;
+    let off = null, keus = null;
+    /* 1. wat offer je? (een bot zoals deel t: een token of zijn zwakste, alleen als er iets duidelijk beters ligt) */
+    if(isBot(p)){ const b = T.botKeus(p, ids, ops); if(!b) return; off = b.off; keus = b.k; }
+    else {
+      const fx0 = FXNU;
+      FXNU = {p, kop:String(nm).toUpperCase() + " \u00b7 KIES", zin:"Wat wil je offeren? Kies een eigen wezen of token op het veld (het gaat naar je graf), of sla over.", beeld:{zrAe:"ae_graf"}, kies:true};
+      let v;
+      try{ v = await chooseCre(p, ids, `🟣 <b>${nm}</b>: wat wil je offeren? Kies een eigen wezen of token (het gaat naar je graf), of sla over.`, true, {k:"terugOffer"}); }
+      finally{ FXNU = fx0; }
+      if(v == null || v === "cancel" || !ids.includes(v)) return;
+      off = v;
+    }
+    if(S.over) return;
+    const f = findCre(off); if(!f || f.p !== p) return;
+    const col = f.c, cr = f.cr;
+    const ani = FAST ? null : ANI_AE.offerTerug(p, col);
+    P(p).cols[col].cre = null;
+    /* 💀 zoals deel za (en naarGraf in de kern): geofferd = naar het graf, zonder sterf-effecten; met een doodshoofd verbannen */
+    const ban = !!cr.card.doodshoofd;
+    if(ban){ delete cr.card.doodshoofd; fusieLos(cr.card); } else P(cr.card.owner).grave.push(fusieLos(cr.card));
+    addLog(`🟣 <em>${nm}</em>: ${pName(p)} offert ${kIcon(cr.card)} ${kNaam(cr.card)} uit kolom ${col + 1}. ${ban ? "Die had een 💀 doodshoofd en is verbannen." : "Die gaat naar het graf."}`, true);
+    render();
+    if(ani) await ANI.veilig(ani, 1500);
+    if(S.over) return;
+    /* 2. pas nu het graf: wat komt er terug? */
+    let van = null;
+    if(!isBot(p)){
+      if(ops.length === 1) keus = ops[0].k;
+      else {
+        const ik = !FAST && !SIM && iControl(p);
+        try{
+          if(ik && V){ V.toon(p, ops); V.kies(); }
+          await ensureHolder(p);
+          keus = await waitUI("opt", {p, prompt:`${nm}: welk wezen komt terug uit je graf?`, zjTerug:true,
+            opts:ops.map(o => ({v:o.k, label:`${naamVan(o)}${o.fk ? " (fusie)" : ""} (${o.n}×)`})),
+            kaarten:ops.map(o => ({v:o.k, n:o.n, card:alsKaart(p, o)}))});
+          const s = document.querySelector(`#zjTerug .zjst[data-k="${keus}"] .zjk`); if(s) van = s.getBoundingClientRect();
+        } finally { try{ V && V.weg(); }catch(e){} }
+      }
+      if(!ops.some(o => o.k === keus)) keus = ops[0].k;
+    }
+    const o = ops.find(x => x.k === keus);
+    const card = P(p).grave.splice(o.i, 1)[0];
+    card.doodshoofd = true;
+    /* 3. waar? elke vrije plek aan jouw kant (ook die van het offer); een bot kiest via de beslisser */
+    const vrij = emptyCols(p);
+    let pc = col;
+    if(vrij.length === 1) pc = vrij[0];
+    else if(vrij.length > 1){
+      const fx0 = FXNU;
+      if(!isBot(p)) FXNU = {p, kop:String(nm).toUpperCase() + " \u00b7 KIES", zin:`Waar komt ${o.fk ? naamVan(o) : kNaam(card)} terug? Kies een vrije plek aan jouw kant.`, beeld:alsKaart(p, o, card), kies:true};
+      render();
+      let sl;
+      try{ sl = await waitUI("slot", {p, valid:vrij.map(c => ({p, c, kind:"cre"})), cancellable:false, meta:{el:card.el},
+        prompt:`🟣 ${nm}: waar komt ${kIcon(o.fk ? alsKaart(p, o, card) : card)} ${o.fk ? naamVan(o) : kNaam(card)} terug? Kies een vrije plek aan jouw kant.`});
+      } finally { FXNU = fx0; }
+      if(sl && sl.c != null && vrij.includes(sl.c)) pc = sl.c;
+    }
+    if(S.over) return;
+    addLog(`🟣 <em>${nm}</em>: ${kIcon(card)} ${kNaam(card)} komt terug uit het graf${o.fk ? " als " + naamVan(o) : ""} in kolom ${pc + 1}, met een 💀 doodshoofd: sterft hij nog eens, dan is hij verbannen.`, true);
+    if(!FAST){
+      const bron = van || rectOf(`#grave${p}`), naar = rectOf(creSel(p, pc));
+      try{ aeFlits(p, "ae_graf", creSel(p, pc), `${kNaam(card)} komt terug uit het graf`); }catch(e){}
+      try{ ANI_AE.terugkeer(p, pc); }catch(e){}
+      if(bron && naar) await ANI.veilig(flyCard(bron, naar, cardFaceHTML(alsKaart(p, o, card)), 520), 1200);
+    }
+    if(o.fk) await announceFusion(p, card, null, o.fk, {col:pc});
+    else await announcePlay(p, card, false, pc, false);
+    await chainLoop();
+    clearTimeout(botT);
+    if(!S.over){ S.phase = "end"; S.ui = {mode:"busy"}; render(); }
+  }
+  /* het venster bovenin (pc) mag het beeld van de aether tonen */
+  { const fb0 = fxBeeldStijl;
+    fxBeeldStijl = function(card){
+      if(card && card.zrAe){ try{ const m = String(aeBeeldHTML(card.zrAe) || "").match(/src="([^"]+)"/); return m ? `background-image:url('${m[1]}'); background-size:cover; background-position:center` : ""; }catch(e){ return ""; } }
+      return fb0.apply(this, arguments);
+    }; }
+  { const g0 = grafOproep;
+    grafOproep = async function(p, soort, aeK){
+      if(soort) return await g0.apply(this, arguments);           // 🐟 School van de Zee: de oude weg
+      try{ return await terugkeer(p); } finally { try{ ANI.TerugVenster && ANI.TerugVenster.weg(); }catch(e){} }
+    }; }
+  try{
+    AETHER_TEKST.ae_graf = "Einde van je beurt: je mag een eigen wezen of token <b>offeren</b>. Dat gaat naar je graf. "
+      + "Kies dan een wezen uit je graf (ook als fusie) en speel het op een vrije plek aan jouw kant. Dat krijgt een 💀 doodshoofd: sterft hij nog eens, dan is hij verbannen (niet naar je graf).";
+    AETHERS.ae_graf.txt = AETHERS.ae_graf.kort = kwHTML(AETHER_TEKST.ae_graf);
+  }catch(e){ console.error(e); }
+
+  return {terugkeer};
+})();
+
+/* ---- module zs ---- */
+/* ================= deel zs · randen, meeveren, dubbeltik en de lichtlaag op de telefoon (9 nov 2026, Q) =================
+   1) Beesten als kaart in een keuze (De jacht in de commander-draft, de deckbuilder, de bibliotheek, het overzicht, het
+      graf: alles in een .gc) krijgen dezelfde rand als op het veld en in de buidel. We nemen de regels voor
+      ".lfkaart > .card" over voor ".gc > .card", alleen voor wezens zonder element (de elementkaarten in de draft
+      houden hun eigen uiterlijk).
+   2) Klaar om aan te vallen (zh): de kaart wipt, en nu veert alles wat bij de kaart hoort mee (levens, schade, de
+      intentie-bolletjes en -rand, de status, het stille water). Zelfde ritme en hetzelfde draaipunt als de kaart, met
+      Web Animations bovenop wat er al is (composite add), dus niets verspringt en de plekken blijven waar ze zijn.
+   3) Telefoon: dubbeltik op het veld (niet op een kaart, knop of keuze) is hetzelfde als spatie op het Zegel:
+      Doorlaten of Einde beurt. Alleen echte tikjes (geen slepen, geen twee vingers), niet als er een venster open is.
+   4) De lichtlaag (#anidoek, #anibloei) stond op 100vw x 100vh, maar tekent in innerWidth x innerHeight. Op een
+      echte telefoon is 100vh hoger dan het zichtbare stuk (de adresbalk), dus alles op de laag werd uitgerekt naar
+      beneden: zichtbaar bij het opengaan van de zijbalken na de draft (de lichtjes liepen naast de lijnen). Nu krijgt
+      de laag precies de maat van het venster. */
+ANI.ZS = (() => {
+  const A = ANI;
+  const fout = e => { try{ console.error(e); }catch(x){} };
+
+  /* ================= 1) de rand om beesten in een keuze ================= */
+  let nRand = 0;
+  const GEEN_EL = ":not(.el-vuur):not(.el-water):not(.el-gras):not(.el-steen):not(.el-licht)";
+  const randen = () => {
+    try{
+      const oud = document.getElementById("zs-rand"); if(oud) oud.remove();
+      const uit = [];
+      for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; }
+        for(const r of rs){ if(!r.selectorText || r.selectorText.indexOf(".lfkaart > .card") < 0) continue;
+          uit.push(r.cssText.split(".lfkaart > .card").join(".gc > .card" + GEEN_EL)); } }
+      /* kleine kaartjes (deckbuilder, bibliotheek): de naam op het bordje krimpt mee, anders valt hij eraf */
+      uit.push(`.gc:has(> .card${GEEN_EL}){container-type:inline-size}`, `body.pc :is(.gc, #zs-nooit) > .card${GEEN_EL} .cn{font-size:clamp(6px, 11cqw, 12px) !important}`);
+      const st = document.createElement("style"); st.id = "zs-rand"; st.textContent = uit.join("\n"); document.head.appendChild(st); nRand = uit.length;
+    }catch(e){ fout(e); } };
+  /* nu, en nog een keer als alles geladen is (andere delen voegen hun regels soms later toe) */
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", randen); else randen();
+  try{ window.addEventListener("load", () => setTimeout(randen, 0)); }catch(e){}
+
+  /* ================= 2) alles wat bij de kaart hoort veert mee ================= */
+  const PER = 3000;   // zelfde ronde als deel zh
+  /* de sleutelmomenten van zhklaar: [moment, schaal x, schaal y, omhoog] */
+  const KF = [[0, 1, 1, 0], [.22, 1.006, 1.014, 0], [.46, 1, 1, 0], [.58, 1.022, .968, 0], [.66, .992, 1.024, -7], [.74, 1.018, .978, 0], [.84, 1, 1, 0], [1, 1, 1, 0]];
+  const NIET = ".card, .zhvoet, .zmzw, .spelgloed, .ph";
+  const KLAAR = new WeakSet();
+  const veer = (sl) => {
+    const card = sl.querySelector(":scope > .card"); if(!card || !card.getAnimations) return;
+    const ca = card.getAnimations().find(a => a.animationName === "zhklaar"); if(!ca) return;
+    if(ca.startTime == null){ ca.ready.then(() => { if(sl.isConnected) veer(sl); }).catch(() => {}); return; }
+    const del = (ca.effect && ca.effect.getTiming().delay) || 0;
+    /* het draaipunt van de kaart (midden onder), in de maat van de plek (offset: zonder transform) */
+    const pos = el => { if(el.offsetParent === sl) return [el.offsetLeft, el.offsetTop]; const a = el.getBoundingClientRect(), b = sl.getBoundingClientRect(); return [a.left - b.left, a.top - b.top]; };
+    const [kx, ky] = pos(card), ox = kx + card.offsetWidth / 2, oy = ky + card.offsetHeight;
+    for(const ch of sl.children){
+      if(KLAAR.has(ch) || ch.matches(NIET)) continue;
+      KLAAR.add(ch);
+      if(!ch.offsetParent && getComputedStyle(ch).display === "none") continue;
+      /* het eigen draaipunt van het kind, en het draaipunt van de kaart gezien vanuit het kind */
+      let cx = ch.offsetWidth / 2, cy = ch.offsetHeight / 2;
+      try{ const to = getComputedStyle(ch).transformOrigin.split(" ").map(parseFloat); if(isFinite(to[0]) && isFinite(to[1])){ cx = to[0]; cy = to[1]; } }catch(e){}
+      const [px, py] = pos(ch);
+      const dx = ox - (px + cx), dy = oy - (py + cy);
+      const kf = KF.map(([t, sx, sy, ty]) => ({offset:t, easing:"ease-in-out", composite:"add",
+        transform:`translate(${((1 - sx) * dx).toFixed(2)}px, ${((1 - sy) * dy + ty).toFixed(2)}px) scale(${sx}, ${sy})`}));
+      try{ const an = ch.animate(kf, {duration:PER, iterations:Infinity, easing:"linear"}); an.startTime = ca.startTime + del; }catch(e){ fout(e); }
+    }
+  };
+  let vraag = 0;
+  const kijk = () => { vraag = 0;
+    try{ if(FAST) return; document.querySelectorAll("#fieldwrap .slot.cr.zhklaar:not(.valtaan)").forEach(veer); }catch(e){ fout(e); } };
+  const later = () => { if(!vraag) vraag = requestAnimationFrame(kijk); };
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); later(); return v; }; }catch(e){ fout(e); }
+  try{ const mo = new MutationObserver(later); const zet = () => { const fw = document.getElementById("fieldwrap"); if(fw) mo.observe(fw, {childList:true, subtree:true}); else setTimeout(zet, 500); }; zet(); }catch(e){ fout(e); }
+
+  /* ================= 3) dubbeltik = spatie (telefoon) ================= */
+  try{ const st = document.createElement("style"); st.id = "zs-stijl";
+    st.textContent = "#app, #fieldwrap, #board{touch-action:manipulation; -webkit-tap-highlight-color:transparent}\n"
+      + "body.tel #fieldwrap{-webkit-user-select:none; user-select:none}";
+    document.head.appendChild(st); }catch(e){ fout(e); }
+  const VAST = "button, input, textarea, select, a, label, .hcard, .gc, .aecard, .card, #overlay, .ovbox, #tutpop, .tutdoos, #hand0, #hand1, #actions, #lkolom, #right, .pside, [data-drkies]";
+  /* een tik op een plek telt alleen als die plek zelf niets doet: leeg, niet aangewezen */
+  const losseTik = t => {
+    if(!t || !t.closest) return false;
+    if(!t.closest("#fieldwrap")) return false;
+    if(t.closest(VAST)) return false;
+    const sl = t.closest(".slot");
+    if(sl && (sl.querySelector(":scope > .card") || /\b(hl|tgt|atk|mik|intentie|leegdoel|sleepboven)\b/.test(sl.className))) return false;
+    const da = t.closest("[data-act]"); if(da && !da.classList.contains("slot")) return false;
+    return true;
+  };
+  const zegel = () => { const b = document.querySelector("#actions button.zl[data-btn]"); if(!b || b.disabled || b.dataset.zl === "wacht") return null;
+    return /^(pass|endturn)$/.test(b.dataset.btn) ? b : null; };
+  const mag = () => { try{
+    if(M || S.over || (typeof tutOpen === "function" && tutOpen()) || pending && isBot(S.ui.p)) return false;
+    const m = S.ui && S.ui.mode; return m === "main" || m === "battle" || m === "priority";
+  }catch(e){ return false; } };
+  const vingers = new Map();
+  let vorige = null, n2 = 0, waarom = "";
+  try{
+    document.addEventListener("pointerdown", e => { if(e.pointerType !== "touch") return; if(e.isPrimary) vingers.clear(); vingers.set(e.pointerId, {x:e.clientX, y:e.clientY, t:performance.now(), t0:e.target, n:vingers.size + 1}); }, true);
+    const los = e => { if(e.pointerType !== "touch") return; const v = vingers.get(e.pointerId); vingers.delete(e.pointerId); if(!v) return;
+      if(e.type === "pointercancel" || v.n > 1 || vingers.size){ vorige = null; return; }
+      const nu = performance.now(), weg = Math.hypot(e.clientX - v.x, e.clientY - v.y);
+      if(weg > 12 || nu - v.t > 320 || !losseTik(v.t0) || !losseTik(e.target) || !mag()){ waarom = [weg > 12, nu - v.t > 320, !losseTik(v.t0), !losseTik(e.target), !mag()].map(Number).join(""); vorige = null; return; }
+      const sleutel = (S.ui && S.ui.mode) + ":" + (S.gTurn || 0);
+      if(vorige && nu - vorige.t < 420 && Math.hypot(e.clientX - vorige.x, e.clientY - vorige.y) < 40 && vorige.k === sleutel){
+        vorige = null;
+        const b = zegel(); if(!b) return;
+        e.preventDefault();
+        try{ LAATSTE_TIK = 0; }catch(x){}   // de oude dubbelklik (op een leeg stuk scherm) mag dit niet nog eens doen
+        n2++; b.click();
+        return; }
+      if(vorige) waarom = "t" + Math.round(nu - vorige.t) + (vorige.k === sleutel ? "" : "k");
+      vorige = {t:nu, x:e.clientX, y:e.clientY, k:sleutel}; };
+    document.addEventListener("pointerup", los, true);
+    document.addEventListener("pointercancel", los, true);
+  }catch(e){ fout(e); }
+
+  /* ================= 4) de lichtlaag precies zo groot als het venster ================= */
+  const maat = () => { try{ ["anidoek", "anibloei"].forEach(id => { const c = document.getElementById(id); if(!c) return;
+      const w = innerWidth + "px", h = innerHeight + "px"; if(c.style.width !== w) c.style.width = w; if(c.style.height !== h) c.style.height = h; }); }catch(e){} };
+  try{
+    window.addEventListener("resize", maat);
+    if(window.visualViewport) visualViewport.addEventListener("resize", maat);
+    const mo = new MutationObserver(ms => { for(const m of ms) for(const n of m.addedNodes) if(n.id === "anidoek" || n.id === "anibloei"){ maat(); return; } });
+    const zet = () => { if(document.body){ mo.observe(document.body, {childList:true}); maat(); } else setTimeout(zet, 50); }; zet();
+  }catch(e){ fout(e); }
+
+  return {randen, n:() => nRand, kijk, dubbel:() => n2, waarom:() => waarom, maat};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
