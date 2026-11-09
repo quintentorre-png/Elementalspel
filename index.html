@@ -52038,6 +52038,144 @@ ANI.ZO = (() => {
   return {kopieEff};
 })();
 
+/* ---- module zp ---- */
+/* ================= deel zp · na een unlock vanzelf naar het nieuwe level (9 nov 2026, Q) =================
+   1. Gaat er op de wereldkaart een nieuw level open, dan wacht dit tot alles klaar is: de unlock-animaties van s
+      (sterren, wereld, pad, medaillons), de overgang uit het ei (zk) en de beloningsmeldingen rechtsboven (x, zb).
+      Daarna, na een korte rustpauze, wordt het nieuwe level gekozen zoals wanneer je het zelf aanklikt (bordLoop:
+      het gouden portret en de camera gaan er op hun gewone tempo heen, het venster gaat open). Het start niet.
+      Meerdere nieuwe levels tegelijk: het eerste in de verhaallijn (STORY_ORDER). Klikt of loopt de speler zelf al
+      tijdens het wachten, dan gebeurt er niets. Effecten uit: dezelfde volgorde, zonder te wachten op animaties.
+      Na het ei zet zk het portret al op 1-1: hier begint het dan bij het ei (0-0) en gaat het na de overgang naar 1-1.
+      Dit vervangt de oude "n.loop" (alleen bij precies een nieuw buurlevel, meteen na de tegels).
+   2. Het ronde-medaillon van zj (#zjRonde) hoort alleen in een gevecht: buiten een potje (wereldkaart, ei, schermen)
+      is het verborgen. */
+ANI.ZP = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const fx = () => { try{ return !FAST && ANI.aan(); }catch(e){ return false; } };
+  const RUST = 900;        // zo lang moet alles stil zijn voordat het portret gaat lopen
+  const VANGNET = 60000;   // daarna geven we het op
+  let zelf = false;
+
+  const volgorde = id => { const i = (typeof STORY_ORDER !== "undefined" ? STORY_ORDER : []).indexOf(id); return i < 0 ? 1e6 : i; };
+  const doelVan = n => {
+    const lv = [...((n && n.plekken) || [])].filter(id => /^\d/.test(id) && STORY[id] && !storyKlaar(id));
+    lv.sort((a, b) => volgorde(a) - volgorde(b));
+    return lv[0] || null;
+  };
+
+  /* is alles op de kaart klaar? */
+  const stil = n => {
+    if(!M || M.bordNieuw !== n || M.type !== "story") return false;
+    const bak = document.getElementById("bordbak"); if(!bak || bak.classList.contains("laadt")) return false;
+    if(n.anis && !n.anis.klaar) return false;
+    if(document.getElementById("eisluier") || document.getElementById("eilevel")) return false;
+    if(fx()){
+      if(document.querySelector(".buitmelding:not(.handmelding)")) return false;
+      if(document.body.classList.contains("anis-nwacht")) return false;
+    }
+    return true;
+  };
+
+  const plan = n => {
+    const z = n.zp, t0 = Date.now(); let rustig = 0, vorig = Date.now();
+    const iv = setInterval(() => { try{
+      const nu = Date.now(), dt = nu - vorig; vorig = nu;
+      if(z.user || !M || M.bordNieuw !== n || nu - t0 > VANGNET){ clearInterval(iv); return; }
+      if(!stil(n)){ rustig = 0; return; }
+      rustig += dt;
+      if(fx() && rustig < RUST) return;
+      clearInterval(iv);
+      if(bordPionPlek() !== z.van) return;   // iemand anders koos al
+      zelf = true; try{ bordLoop(z.doel); } finally { zelf = false; }
+      /* de tekst van het level hoort erbij, ook op de telefoon (daar haalt bordLoop het venster anders weg) */
+      z.klaar = true;
+      setTimeout(() => { try{ if(!z.user && M && M.type === "story" && M.bordNieuw === n && bordPionPlek() === z.doel && !document.querySelector(".kaartbox.ks-bord .ksinfo")){ M.infoDicht = false; bordInfoToon(z.doel); } }catch(e){ fout(e); } }, fx() ? 900 : 0);   // eerst zie je het medaillon gekozen worden
+    }catch(e){ clearInterval(iv); fout(e); } }, 120);
+  };
+
+  try{
+    const bn0 = bordNieuw;
+    bordNieuw = function(open){
+      const was = M && M.bordNieuw;
+      const n = bn0.apply(this, arguments);
+      try{
+        if(!was && n && !n.zp && !FAST){
+          n.zp = {};
+          const doel = doelVan(n);
+          n.loop = undefined;   // de oude loop (bordNa en s) doet niets meer: dit neemt het over
+          if(doel){
+            /* staat het portret al op het nieuwe level (zk zette het na het ei op 1-1), dan begint het bij een buur die er al was */
+            if(bordPionPlek() === doel){
+              const van = bordBuren(doel).find(b => !n.plekken.has(b) && bordOpenPlekken().has(b)) || (bordOpenPlekken().has("start") && !n.plekken.has("start") ? "start" : null);
+              if(van) SET.story.bordBij = van;
+            }
+            n.zp = {doel, van:bordPionPlek()};
+            if(n.zp.van !== doel) plan(n);
+          }
+        }
+      }catch(e){ fout(e); }
+      return n;
+    };
+  }catch(e){ fout(e); }
+
+  /* zelf kiezen tijdens het wachten: dan blijft het zo */
+  const zelfGekozen = () => { try{ const n = M && M.bordNieuw; if(n && n.zp && n.zp.doel) n.zp.user = true; }catch(e){} };
+  try{ const bl0 = bordLoop; bordLoop = function(){ if(!zelf) zelfGekozen(); return bl0.apply(this, arguments); }; }catch(e){ fout(e); }
+  try{
+    addEventListener("pointerdown", e => { const t = e.target && e.target.closest && e.target.closest('.bbord, .bplek, #bknoppen button, .bpad button, .ksinfo button'); if(t) zelfGekozen(); }, true);
+    addEventListener("keydown", e => { if(/^(Arrow|Enter$| $)/.test(e.key) && M && M.type === "story") zelfGekozen(); }, true);
+  }catch(e){ fout(e); }
+
+  /* 2 · het ronde-medaillon alleen in een gevecht */
+  const inGevecht = () => { try{
+    if(FAST || !S || !S.pl || S.over) return false;
+    if(S.ui && S.ui.mode === "start") return false;   // het startscherm (opslag kiezen)
+    if(document.getElementById("eilevel") || document.querySelector(".kaartbox")) return false;
+    if(M && /^(story|beloning|slots|plekken|thuis|mp|chal|pvp|join|lib|winkel|trio|nimbus|decks|deckbouw|deck|installeer)$/.test(M.type || "")) return false;
+    return true; }catch(e){ return false; } };
+  try{
+    const st = document.createElement("style"); st.id = "zpStijl";
+    st.textContent = "body.zp-buiten #zjRonde{display:none !important}";
+    document.head.appendChild(st);
+    const zet = () => { try{ document.body.classList.toggle("zp-buiten", !inGevecht()); }catch(e){} };
+    const r0 = render; render = function(){ const v = r0.apply(this, arguments); zet(); return v; };
+    setInterval(zet, 200); zet();
+  }catch(e){ fout(e); }
+
+  /* 3 · 🪞 het versus-scherm: de Weerspiegeling uit het verhaal (4-4, met de skin-art uit u) vult zijn hele kant,
+     net als de skin met zijn spiegel dat al deed. Geen figuurtje meer, de tekening zelf is de kant. */
+  try{
+    const vst = document.createElement("style"); vst.id = "zpVsStijl";
+    vst.textContent = "#versus .vsspiegel.zpvol{overflow:hidden; background:#05070c}"
+      + "#versus .vsspiegel.zpvol img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 22%; image-rendering:pixelated}"
+      + "#versus .kant.r .vsspiegel.zpvol img{scale:-1 1}";
+    document.head.appendChild(vst);
+    const isSpiegelVerhaal = c => { try{ return !!(c && c.spr === "spiegelbeeld" && !(typeof skinVan === "function" && skinVan(c.id))); }catch(e){ return false; } };
+    const v0 = versusToon;
+    versusToon = function(ladId, mijnId){
+      const pr = v0.apply(this, arguments);
+      try{
+        const el = document.getElementById("versus");
+        if(el && !el.dataset.zp){ el.dataset.zp = "1";
+          const sk = SKINS.find(k => k.van === ladId);
+          [["l", mpChar(mijnId)], ["r", mpChar(sk ? sk.id : ladId)]].forEach(([k, c]) => {
+            if(!isSpiegelVerhaal(c)) return;
+            const kant = el.querySelector(".vsvs .kant." + k), fig = el.querySelector(".vsvs .fig." + k), img = fig && fig.querySelector("img");
+            if(!kant || !img || kant.querySelector(".vsspiegel")) return;
+            const sp = document.createElement("span"); sp.className = "vsspiegel zpvol";
+            const im = document.createElement("img"); im.src = img.getAttribute("src"); im.alt = ""; im.draggable = false; im.onerror = () => im.remove();
+            sp.appendChild(im); kant.appendChild(sp); fig.remove();
+          });
+        }
+      }catch(e){ fout(e); }
+      return pr;
+    };
+  }catch(e){ fout(e); }
+
+  return {doelVan, stil, inGevecht};
+})();
+
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
 /* 🛡 nov 2026: een animatie mag het spel nooit laten vastlopen of de keten afbreken. Elke aanroep
    van buitenaf vangt fouten af, en een animatie die blijft hangen telt na 4 s als klaar. */
