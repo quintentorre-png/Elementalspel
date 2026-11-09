@@ -25439,7 +25439,7 @@ const STORY = {
       {aanval:4, hl:"Val aan"},
       {op:"aanval", bij:"cre:1:4", waarom:"water-vuur", pop:"Rocky <b>reageert</b>: hij zet Water voor je Vuur. Water dooft vuur. <b>Zwak tegen</b>: er gebeurt niets."},
       {op:"aanval", zeg:"HA. Dat wist ik."},
-      {op:"aanval", bij:"cirkel", pop:"Vanaf hier speel je zelf. De cirkel staat hier linksboven, als je hem nog eens wilt zien. Rocky heeft nog <b>{levVij}</b> {levVijWoord}: maak het af."}
+      {op:"aanval", bij:"cirkel", pop:"Vanaf hier speel je zelf. De cirkel staat op je knop rechts, als je hem nog eens wilt zien. Rocky heeft nog <b>{levVij}</b> {levVijWoord}: maak het af."}
     ],
     /* Rituelen leer je pas bij Brokko (1-2). Hier speelt niemand iets als ritueel. */
     geenRitueel:true,
@@ -51651,6 +51651,123 @@ body.tel:not(.pc) #actions .zl.zl{--zlw:64px}
   }catch(e){}
 
   return {verpak, ST, basis, licht, frame:nuTekenen};
+})();
+
+/* ---- module zm ---- */
+/* ================= deel zm · het zwaard op de lijst en geen cirkel meer bij je portret (9 nov 2026, Q) =================
+   1) De elementcirkel bij je eigen portret (het vakje linksboven, en de cirkelstand) is weg: het Zegel rechts laat de
+      kring Water > Vuur > Gras > Steen nu zien. De tutorial wijst voor de cirkel naar het Zegel.
+   2) Klaar om aan te vallen: de beweging blijft zoals in deel zh (a25 voorstel A), maar zonder het label
+      "AL AANGEVALLEN". Daarbij het zwaard van a27 voorstel B: een pilletje midden onderaan op het naambordje,
+      groen en zacht gloeiend als het wezen nog kan aanvallen, rood en in twee stukken als het niet meer kan.
+      Valt een wezen aan, dan breekt zijn zwaard: het trilt, een witte flits, splinters en rode vonken, de stukken
+      springen uiteen. Effecten uit: het pilletje staat stil, groen of rood en gebroken. */
+ANI.ZM = (() => {
+  const A = ANI;
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const effAan = () => { try{ return !FAST && A.aan(); }catch(e){ return false; } };
+
+  /* ================= 1) geen elementcirkel bij je portret ================= */
+  try{
+    const jp0 = jijPtHTML;
+    jijPtHTML = function(){
+      try{ JIJ_CIRKEL = false; }catch(e){}
+      const s = jp0.apply(this, arguments);
+      try{ return typeof s === "string" ? s.replace(/<button class="jijwissel"[\s\S]*?<\/button>/g, "") : s; }catch(e){ return s; }
+    };
+  }catch(e){ fout(e); }
+  try{
+    const ta0 = tutAnker;
+    tutAnker = function(spec){
+      try{ if(String(spec) === "cirkel"){ const k = document.querySelector("#actions .zl"); if(k && k.getBoundingClientRect().width > 0) return k; } }catch(e){}
+      return ta0.apply(this, arguments);
+    };
+  }catch(e){ fout(e); }
+
+  /* ================= 2) het zwaard op de lijst ================= */
+  try{ const st = document.createElement("style"); st.id = "zm-stijl";
+    st.textContent = [
+      "#lkolom .lkpt .jijwissel{display:none !important}",
+      /* geen label meer bij wie niet meer kan (de beweging zegt genoeg) */
+      ".slot.cr .zcmoelab{display:none !important}",
+      /* het pilletje: midden onderaan, over het naambordje */
+      ".slot.cr > .zmzw{position:absolute; left:50%; top:90.3%; translate:-50% -50%; z-index:7; pointer-events:none; box-sizing:border-box;",
+      "  height:clamp(15px, 9.2%, 22px); aspect-ratio:1.75; border-radius:999px; border:2px solid #4ee06a; background:#1d5a28;",
+      "  box-shadow:0 0 6px rgba(78,224,106,.45), 0 2px 0 rgba(0,0,0,.55)}",
+      ".slot.cr > .zmzw > i{position:absolute; left:50%; top:50%; width:80%; aspect-ratio:1; translate:-50% -50%; background:var(--ico-zwaard, none) center/contain no-repeat;",
+      "  image-rendering:pixelated}",
+      /* groen: zacht gloeien, en meeveren met het opwippen van zh */
+      ".slot.cr.zhklaar:not(.valtaan) > .zmzw.kan{animation:zmveer 3000ms ease-in-out infinite, zmgloei 2600ms ease-in-out infinite; animation-delay:var(--zhd, 0ms), 0ms}",
+      "@keyframes zmveer{0%,100%,46%{transform:none} 58%{transform:translateY(1px)} 66%{transform:translateY(-7px)} 74%{transform:none}}",
+      "@keyframes zmgloei{0%,100%{box-shadow:0 0 4px rgba(78,224,106,.35), 0 2px 0 rgba(0,0,0,.55)} 50%{box-shadow:0 0 11px rgba(78,224,106,.75), 0 2px 0 rgba(0,0,0,.55)}}",
+      /* rood en gebroken */
+      ".slot.cr > .zmzw.moe{border-color:#e04e4e; background:#3a1212; box-shadow:0 2px 0 rgba(0,0,0,.55)}",
+      ".slot.cr > .zmzw.moe > i{background-image:var(--zm-rood, var(--ico-zwaard, none))}",
+      ".slot.cr > .zmzw.moe > i.z1{clip-path:polygon(21.9% 9.4%, 125% 112.5%, 125% -25%, 21.9% -25%); transform-origin:53% 40.6%; transform:translate(.8px,-.6px) rotate(9deg)}",
+      ".slot.cr > .zmzw.moe > i.z2{clip-path:polygon(21.9% 9.4%, 125% 112.5%, -25% 125%, -25% -25%, 21.9% -25%); transform-origin:53% 40.6%; transform:translate(-.8px,.6px) rotate(-9deg)}",
+      /* het breken: eerst trillen (nog heel), dan springen de stukken uiteen en veren terug */
+      ".slot.cr > .zmzw.moe.breek{animation:zmtril 300ms linear 1; animation-delay:var(--zmb, 0ms)}",
+      "@keyframes zmtril{0%{transform:none} 20%{transform:translateX(-1.5px)} 40%{transform:translateX(1.5px)} 60%{transform:translateX(-1.5px)} 80%{transform:translateX(1px)} 100%{transform:none}}",
+      ".slot.cr > .zmzw.moe.breek > i.z1{animation:zmb1 620ms cubic-bezier(.2,.8,.3,1) 1 both; animation-delay:var(--zmb, 0ms)}",
+      ".slot.cr > .zmzw.moe.breek > i.z2{animation:zmb2 620ms cubic-bezier(.2,.8,.3,1) 1 both; animation-delay:var(--zmb, 0ms)}",
+      "@keyframes zmb1{0%,45%{transform:none; filter:brightness(1)} 48%{filter:brightness(3)} 70%{transform:translate(3px,-2.6px) rotate(26deg)} 100%{transform:translate(.8px,-.6px) rotate(9deg)}}",
+      "@keyframes zmb2{0%,45%{transform:none; filter:brightness(1)} 48%{filter:brightness(3)} 70%{transform:translate(-3px,2.6px) rotate(-26deg)} 100%{transform:translate(-.8px,.6px) rotate(-9deg)}}",
+      "@media (prefers-reduced-motion:reduce){ .slot.cr > .zmzw, .slot.cr > .zmzw > i{animation:none !important} }",
+      "body.zmstil .slot.cr > .zmzw, body.zmstil .slot.cr > .zmzw > i{animation:none !important}",
+    ].join("\n");
+    document.head.appendChild(st); }catch(e){ fout(e); }
+
+  /* het rode zwaard: het echte icoon, rood gekleurd (eenmalig, zodra het icoon er is) */
+  let rood = false;
+  const maakRood = () => { if(rood) return; rood = true;
+    try{ const im = new Image(); im.onload = () => { try{ const c = document.createElement("canvas"); c.width = im.naturalWidth || 32; c.height = im.naturalHeight || 32;
+        const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0); x.globalCompositeOperation = "source-atop"; x.fillStyle = "rgba(220,44,44,.72)"; x.fillRect(0, 0, c.width, c.height);
+        document.documentElement.style.setProperty("--zm-rood", `url("${c.toDataURL()}")`); }catch(e){ fout(e); } };
+      im.src = ICOON.zwaard; }catch(e){ rood = false; } };
+
+  /* per wezen: stond hij deze beurt al klaar? Dan breekt zijn zwaard als hij niet meer kan */
+  const STAND = new Map();
+  let beurt = null;
+  const sleutel = (p, cr) => p + ":" + (cr.card && cr.card.id);
+  const naTag = (h, k, x) => { const j = h.indexOf(">", k); return h.slice(0, j + 1) + x + h.slice(j + 1); };
+  const sh0 = slotHTML;
+  slotHTML = function(p, c){
+    let s = sh0.apply(this, arguments);
+    try{
+      if(typeof s !== "string") return s;
+      const k = s.indexOf('<div class="slot cr'); if(k < 0) return s;
+      const kop = s.slice(k, s.indexOf(">", k));
+      const kan = /\bzcklaar\b/.test(kop), moe = /\bzcmoe\b/.test(kop);
+      if(!kan && !moe) return s;
+      const kol = P(p).cols[c], cr = kol && kol.cre; if(!cr) return s;
+      maakRood();
+      if(beurt !== S.gTurn){ beurt = S.gTurn; STAND.clear(); }
+      const sl = sleutel(p, cr), was = STAND.get(sl) || {}, nu = performance.now();
+      let tb = was.tb || 0;
+      if(moe && was.st === "kan" && effAan()){ tb = nu; vonk(p, c); }
+      STAND.set(sl, {st:kan ? "kan" : "moe", tb});
+      /* nog bezig met breken: een nieuwe render gaat verder waar de vorige was */
+      const sinds = nu - tb, breek = moe && tb && sinds < 700;
+      const titel = kan ? "Kan nog aanvallen" : "Kan niet meer aanvallen";
+      s = naTag(s, k, `<div class="zmzw ${kan ? "kan" : "moe"}${breek ? " breek" : ""}"${breek ? ` style="--zmb:-${sinds.toFixed(0)}ms"` : ""} title="${titel}">${kan ? "<i></i>" : '<i class="z1"></i><i class="z2"></i>'}</div>`);
+    }catch(e){ fout(e); }
+    return s;
+  };
+  /* effecten aan of uit: het pilletje beweegt alleen als de effecten aan staan */
+  const stil = () => { try{ document.body.classList.toggle("zmstil", !effAan()); }catch(e){} };
+  try{ const r0 = render; render = function(){ stil(); return r0.apply(this, arguments); }; }catch(e){ fout(e); }
+
+  /* de breuk: een witte flits, splinters en rode vonken op de plek van het pilletje */
+  function vonk(p, c){
+    setTimeout(() => { try{
+      if(!effAan()) return;
+      const q = A.rc(creSel(p, c) + " > .zmzw"); if(!q || !q.w) return;
+      A.tw(260, e => A.gloed(q.cx, q.cy, q.h * 2.4, "#ffffff", .95 * (1 - e)));
+      for(let i = 0; i < 10; i++) A.deeltje({x:q.cx, y:q.cy, vx:A.rnd(-2, 2), vy:-A.rnd(.5, 2.2), g:.12, life:A.rnd(.4, .7), kleur:A.kies(["#cfd6e0", "#8a94a4", "#ffffff"]), soort:"brok", s:A.rnd(1.5, 2.5), spin:.3});
+      A.burst(q.cx, q.cy, 10, ["#ff5a4a", "#ffb0a0", "#e04e4e"], 2, {soort:"vonk", s:2});
+    }catch(e){ fout(e); } }, 290);
+  }
+  return {stand:() => [...STAND.entries()]};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
