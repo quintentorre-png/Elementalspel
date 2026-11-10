@@ -6991,7 +6991,7 @@ function kopie(G){
     terug:G.terug && G.terug.slice(), smeedGedaan:G.smeedGedaan && G.smeedGedaan.slice(), trok3:G.trok3,
     mulliganGedaan:G.mulliganGedaan, aeKeuzeGedaan:G.aeKeuzeGedaan, stack:G.stack.length ? structuredClone(G.stack) : [],
     aeKeuze:G.aeKeuze, kernOp:G.kernOp && G.kernOp.slice(), dekenBeurt:Array.isArray(G.dekenBeurt) ? G.dekenBeurt.slice() : G.dekenBeurt, ziel:G.ziel.slice(), mens:G.mens, zm:G.zm,
-    roversbuit:G.roversbuit && [G.roversbuit[0].slice(), G.roversbuit[1].slice()], doorT:G.doorT, dubbelT:G.dubbelT && G.dubbelT.slice(), lenteT:G.lenteT && G.lenteT.slice(), slide:G.slide && G.slide.slice(), vier:G.vier, volle:G.volle, stTel:G.stTel && G.stTel.slice(), wraakR:G.wraakR && G.wraakR.slice(), altaarT:G.altaarT && G.altaarT.slice(), st2:G.st2 && Object.assign({}, G.st2), smokeEind:G.smokeEind || 0,
+    roversbuit:G.roversbuit && [G.roversbuit[0].slice(), G.roversbuit[1].slice()], doorT:G.doorT, dubbelT:G.dubbelT && G.dubbelT.slice(), lenteT:G.lenteT && G.lenteT.slice(), slide:G.slide && G.slide.slice(), vier:G.vier, volle:G.volle, stTel:G.stTel && G.stTel.slice(), wraakR:G.wraakR && G.wraakR.slice(), altaarT:G.altaarT && G.altaarT.slice(), eksterR:G.eksterR && G.eksterR.slice(), st2:G.st2 && Object.assign({}, G.st2), smokeEind:G.smokeEind || 0,
     vh:G.vh && {id:G.vh.id, L:G.vh.L, st:structuredClone(G.vh.st), echt:G.vh.echt, omslag:G.vh.omslag && Object.assign({}, G.vh.omslag), beginNodig:G.vh.beginNodig}};
   if (H.vh) verhaalKlaar(H);          // de levensgrens van het verhaal er weer op
   return H;
@@ -7177,7 +7177,7 @@ function plaatsWezen(G, p, col, id){
   s.minAtk[col] = 0; s.web[col] = 0; s.eiB[col] = 0;
   s.hx[col] = heeft(G, p, 'ae_bloei') ? 1 : 0;                     // 🌸 Volle bloei: alles komt binnen met een bloesem
   s.hxT[col] = 0;
-  if (G.kEl[id] === EKSTER && !isVlag(G, id, F_LEEG)){ zetVlag(G, id, F_LEEG); trek(G, null, p, 1); }   // 🐦 meteen, één keer per keten
+  if (G.kEl[id] === EKSTER){ const mag = eksterMag(G, p); zetVlag(G, id, F_LEEG); if (mag){ eksterNu(G, p); trek(G, null, p, 1); } }   // 🐦 ya: één keer per ronde per eigenaar   // 🐦 meteen, één keer per keten
   if (G.kEl[id] === BALROG && isVlag(G, id, F_JACHT)) s.hp[col] += 5 - (EL_HP[BALROG] - 10);   // 8 nov 2026: een beest-Maatje heeft 10 levens   // 🌋 Maatje uit De jacht: +5 bij binnenkomst
 }
 /* placeNow */
@@ -7223,7 +7223,7 @@ function effsVan0(G, id, origin){
   if (e === SPIN) return [{el:E_SPINWEB, origin}];              // 🕷 web iemand
   if (e === BWOLF) return [{el:E_BWOLF, origin}];
   if (e === SLIJM) return [{el:E_SLIJM, origin}];   // 🟢 8 nov 2026
-  if (e === EKSTER) return (origin === 0 && !isVlag(G, id, F_LEEG)) ? [{el:E_EKSTER, origin, src:id}] : [];   // 🐦 binnenkomen trekt al (plaatsWezen); dit is voor Water, Echo, Kloon
+  if (e === EKSTER) return (origin === 0 && eksterMag(G, G.kOwn[id])) ? [{el:E_EKSTER, origin, src:id}] : [];   // 🐦 ya   // 🐦 binnenkomen trekt al (plaatsWezen); dit is voor Water, Echo, Kloon
   if (e === VLEERMUIS) return [{el:E_VLEER, origin}];
   if (e === MINOTAURUS) return [{el:E_MINO, origin, src:id}];
   if (e === BASILISK) return [{el:E_BASI, origin, src:id}];
@@ -7413,7 +7413,7 @@ function kondigAan0(G, K, p, id, asSpell, col){
   if (verdrongen){ waterVerdringt(G, K, p, id, col, verdrongen, vHp); return true; }
   /* 🟣 Altaar (nov 2026): je eerste wezen per beurt legt een kopie van zichzelf als ritueel in zijn kolom
      (ook als daar al een ritueel lag), en dat ritueel gaat meteen mee af. */
-  if (!asSpell && G.over < 0 && heeft(G, p, 'ae_altaar') && G.pl[p].cre[col] === id && !isVlag(G, id, F_TOKEN)){
+  if (!asSpell && G.over < 0 && heeft(G, p, 'ae_altaar') && G.pl[p].cre[col] === id && !isVlag(G, id, F_TOKEN) && [WATER, STEEN, VUUR, GRAS].includes(G.kEl[id]) && !isVlag(G, id, F_JACHT)){   // 🟣 zw: alleen een elementkaart, geen beest
     G.altaarT = G.altaarT ? G.altaarT.slice() : [-1, -1];
     if (G.altaarT[p] !== G.gTurn){
       G.altaarT[p] = G.gTurn;
@@ -7628,7 +7628,7 @@ function losOp(G, K, it){
     case E_SPINWEB: spinWeb(G, K, p); return;
     case E_SLIJM: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c] && G.kEl[s.cre[c]] === SLIJM) s.hp[c] += 2; return; }   // 🟢 elk eigen slijm +2
     case E_BWOLF: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c]) s.hp[c] += 2; return; }   // 🐺 al je wezens +2
-    case E_EKSTER: { const s = it.src; if (s != null && G.kEl[s] === EKSTER){ if (isVlag(G, s, F_LEEG)) return; zetVlag(G, s, F_LEEG); } trek(G, K, p, 1); return; }   // 🐦 één keer per keten
+    case E_EKSTER: { const s = it.src; if (!eksterMag(G, p)){ if (s != null && G.kEl[s] === EKSTER) zetVlag(G, s, F_LEEG); return; } eksterNu(G, p); if (s != null && G.kEl[s] === EKSTER) zetVlag(G, s, F_LEEG); trek(G, K, p, 1); return; }   // 🐦 ya   // 🐦 één keer per keten
     case E_VLEER: G.pl[p].life += 2; return;
     case E_MINO: minoAanval(G, p, it.src); return;
     case E_BASI: basilisk(G, K, p, it.src, it.tid); return;
@@ -7976,13 +7976,35 @@ function zgWaterNu(G, K, it){
 }
 let KETEN_DIEP = 0;
 function ketenLus(G, K){ KETEN_DIEP++; try { return ketenLus0(G, K); } finally { KETEN_DIEP--; if (!KETEN_DIEP && !G.stack.length) eksterWeer(G); } }
-function eksterWeer(G){ for (let i = 0; i < G.kVlag.length; i++) if (G.kVlag[i] & F_LEEG) G.kVlag[i] &= ~F_LEEG; }   // 🐦 8 nov 2026
+function eksterWeer(G){ for (let i = 0; i < G.kVlag.length; i++) if ((G.kVlag[i] & F_LEEG) && eksterMag(G, G.kOwn[i])) G.kVlag[i] &= ~F_LEEG; }   // 🐦 ya: pas weer vol als de eigenaar weer mag
+/* 🐦 ya (9 nov 2026): de Ekster trekt één kaart per ronde per eigenaar (ronde = ceil(gTurn / 2)) */
+function eksterMag(G, p){ return p == null || !G.eksterR || G.eksterR[p] !== Math.ceil(G.gTurn / 2); }
+function eksterNu(G, p){ G.eksterR = G.eksterR ? G.eksterR.slice() : [-1, -1]; G.eksterR[p] = Math.ceil(G.gTurn / 2); }   // 🐦 8 nov 2026
 function ketenLus0(G, K){
-  /* ⛓ zg (9 nov 2026): één zet is één link; eerst een eigen moment (alleen een mens met timer, of Steen op een
-     lege eigen plek), dan alleen de ander als het hem raakt (of met Negatie); slotmoment alleen als de verdediger weg is. */
+  /* ⛓ zg + zt (9 nov 2026): één zet is één link; eerst een eigen moment, dan de ander als het hem raakt (of met
+     Negatie). Heeft de ander gereageerd (keten), dan krijgt elke kant na elke nieuwe actie van de ander een moment,
+     ook na iets dat meteen afging (direct), tot allebei doorlaten. Slotmoment alleen als de verdediger weg is. */
+  let keten = false, direct = -1;
+  const nieuweLink = oud => G.stack.some(it => it.t !== 3 && oud.indexOf(it) < 0);
+  const los = () => { keten = false; losBovensteOp(G, K); };
   while (G.stack.length && G.over < 0){
     const top = G.stack[G.stack.length - 1];
     if (top.t === 3){ losBovensteOp(G, K); continue; }
+    if (direct >= 0 && top.zgG){
+      const x = direct, y = 1 - x; direct = -1;
+      if (zgZelfMag(G, x, {t:4}, [])){
+        const oud = G.stack.slice(), r = vraagReactie(G, K, x, false);
+        if (G.over >= 0) return;
+        if (r !== 'pass' && reageer(G, K, x, r)){ if (!nieuweLink(oud)) direct = x; continue; }
+      }
+      if (magFlash(G, y)){
+        const oud = G.stack.slice(), r = vraagReactie(G, K, y, false);
+        if (G.over >= 0) return;
+        if (r !== 'pass' && reageer(G, K, y, r)){ keten = true; if (!nieuweLink(oud)) direct = y; continue; }
+      }
+      los(); continue;
+    }
+    direct = -1;
     if (!top.zgG){
       const nieuw = [];
       for (let i = G.stack.length - 1; i >= 0; i--){ const it = G.stack[i]; if (it.zgG || it.t === 3) break; nieuw.push(it); }
@@ -7995,29 +8017,29 @@ function ketenLus0(G, K){
       if (!top.zgZ){
         top.zgZ = 1;
         if (zgZelfMag(G, actor, top, nieuw)){
-          const r = vraagReactie(G, K, actor, false);
+          const oud = G.stack.slice(), r = vraagReactie(G, K, actor, false);
           if (G.over >= 0) return;
-          if (r !== 'pass' && reageer(G, K, actor, r)) continue;
+          if (r !== 'pass' && reageer(G, K, actor, r)){ if (!nieuweLink(oud)) top.zgZ = 0; continue; }
         }
       }
       for (const it of nieuw) it.zgG = 1;
-      if ((nieuw.some(it => zgRaakt(G, ander, it)) && magFlash(G, ander)) || zgNegatie(G, ander)){
-        const r = vraagReactie(G, K, ander, false);
+      if (keten ? magFlash(G, ander) : ((nieuw.some(it => zgRaakt(G, ander, it)) && magFlash(G, ander)) || zgNegatie(G, ander))){
+        const oud = G.stack.slice(), r = vraagReactie(G, K, ander, false);
         if (G.over >= 0) return;
-        if (r !== 'pass' && reageer(G, K, ander, r)) continue;
+        if (r !== 'pass' && reageer(G, K, ander, r)){ keten = true; if (!nieuweLink(oud)) direct = ander; continue; }
       }
-      losBovensteOp(G, K); continue;
+      los(); continue;
     }
     if (top.t === 2 && !top.zgSlot){
       top.zgSlot = 1;
       const wie = 1 - top.ctrl;
       if (zgSlotNodig(G, top) && magFlash(G, wie)){
-        const r = vraagReactie(G, K, wie, false);
+        const oud = G.stack.slice(), r = vraagReactie(G, K, wie, false);
         if (G.over >= 0) return;
-        if (r !== 'pass' && reageer(G, K, wie, r)) continue;
+        if (r !== 'pass' && reageer(G, K, wie, r)){ keten = true; if (!nieuweLink(oud)) direct = wie; continue; }
       }
     }
-    losBovensteOp(G, K);
+    los();
   }
   if (G.vh) verhaalNaKeten(G, K);
   if (G.over < 0 && G.vh && G.vh.st.band) bandSchuif(G);
@@ -8265,17 +8287,23 @@ function losLichtOp(G, K, it){
     }
     case L_REBORN: {
       const g = s.grave, zelf = it.card;
-      const kanSummon = openKol(G, p).length > 0 && g.some(x => IS_ELEMENT(G.kEl[x]) && !isVlag(G, x, F_TOKEN));   // 9 nov 2026: geen tokens
-      const opts = [];
-      if (g.some(x => G.kLk[x] && x !== zelf)) opts.push('hand');
-      if (kanSummon) opts.push('summon');
-      if (!opts.length) return;
-      const m = opts.length === 1 ? opts[0] : kiesOpt(G, K, p, opts);
-      const mag = m === 'summon' ? x => IS_ELEMENT(G.kEl[x]) && !isVlag(G, x, F_TOKEN) : x => !!G.kLk[x] && x !== zelf;
-      const kand = g.map((x, i) => ({x, i})).filter(o => mag(o.x)).slice(-24);
-      if (!kand.length) return;
-      const idx = kiesOpt(G, K, p, kand.map(o => o.i));
-      const card = g.splice(idx === undefined ? 0 : idx, 1)[0];
+      /* ✦ ya (9 nov 2026): één lijst per soort, zoals het spel: een lichtkaart terug in de hand, of een element
+         (de sterke versie als die er ligt) op het veld met +3 */
+      const kanSummon = openKol(G, p).length > 0;
+      const NIETSTERK = ['kiezel', 'bliksem', 'bergketen', 'oceaan', 'oceaanrust', 'fwoud'];
+      const soorten = new Map();
+      g.forEach((x, i) => {
+        if (x === zelf) return;
+        if (G.kLk[x]){ const k = 'l:' + G.kLk[x]; if (!soorten.has(k)) soorten.set(k, {v:i, m:'hand'}); return; }
+        if (!kanSummon || !IS_ELEMENT(G.kEl[x]) || isVlag(G, x, F_TOKEN)) return;
+        const k = 'e:' + G.kEl[x], al = soorten.get(k), vr = G.kVar[x], sterk = !!(vr && NIETSTERK.indexOf(VARNAAM[vr]) < 0);
+        if (!al || (sterk && !al.sterk)) soorten.set(k, {v:i, m:'summon', sterk});
+      });
+      const lijst = [...soorten.values()];
+      if (!lijst.length) return;
+      const idx = lijst.length === 1 ? lijst[0].v : kiesOpt(G, K, p, lijst.map(o => o.v));
+      const m = (lijst.find(o => o.v === idx) || lijst[0]).m;
+      const card = g.splice(lijst.some(o => o.v === idx) ? idx : lijst[0].v, 1)[0];
       if (!card) return;
       if (m === 'hand'){ s.hand.push(card); return; }
       const slots = openKol(G, p).map(c => ({p, c, kind:'cre'}));
@@ -8526,7 +8554,7 @@ function terugOpties(G, p){
     const o = uit[idx[k]]; o.i = i; o.n++;
   });
   const met = [];
-  uit.forEach(o => { met.push(o); const fk = aeFuseKey(G, p, o.e), fkk = 'f:' + ELNAAM[o.e];
+  uit.forEach(o => { met.push(o); const fk = null, fkk = 'f:' + ELNAAM[o.e];   // 🟣 zu: geen fusie die niet in het graf ligt
     if (fk && idx[fkk] == null){ idx[fkk] = -1; met.push({k:fkk, fk, e:o.e, i:-1, n:0}); } });
   met.forEach(o => { if (o.fk) g.forEach((id, i) => { if (terugGrafOk(G, id) && G.kEl[id] === o.e){ o.i = i; o.n++; } }); });
   return met;
@@ -8846,6 +8874,7 @@ function vanS(S, rng, cid, lv){
   G.aeM = G.ae.map(l => l.reduce((m, k) => m | (AE_BITS[k] || 0), 0));
   if (S.lawTel) G.stTel = S.lawTel.slice();   // 🟣 Lawine
   if (S.wraakR) G.wraakR = S.wraakR.slice();
+  if (S.eksterR) G.eksterR = S.eksterR.slice();   // 🐦 ya
   if (S.altaarT) G.altaarT = S.altaarT.slice();   // 🟣 Altaar: één keer per beurt   // 🟣 Wraakzucht: één keer per ronde
   G.genade = S.genade ? S.genade.slice() : [-1, -1];
   G.hemelT = S.hemelT ? S.hemelT.slice() : null;
@@ -10763,7 +10792,7 @@ const AETHER_TEKST = {
   ae_hemel:     "Je eerste ✦ van elke beurt: <b>+1</b> {leven|pluslevens} en trek <b>1</b>.",
   ae_lichtval:  "Verlies je leven, trek <b>1</b>. Ook door je eigen lichtkaarten. Hooguit <b>één keer</b> per ronde.",
   ae_deken:     "De eerste keer per beurt dat je levens zou verliezen, verlies je niets: of het nou een aanval is of je eigen lichtkaart. Eén keer in jouw beurt en één keer in die van je tegenstander. Op wezens werkt hij niet.",
-  ae_altaar:    "Je eerste wezen per beurt legt een kopie van zichzelf als ritueel in zijn kolom, ook als daar al een ritueel lag. Dat ritueel gaat meteen mee af. Gaat het later weg, dan verdwijnt het (niet naar je graf).",
+  ae_altaar:    "De eerste elementkaart die je per beurt als wezen speelt, legt een kopie van zichzelf als ritueel in zijn kolom (beesten niet), ook als daar al een ritueel lag. Dat ritueel gaat meteen mee af. Gaat het later weg, dan verdwijnt het (niet naar je graf).",
   ae_smeed:     "Al je kaarten zijn gesmeed: ⛰️ Rots, ☄️ Plasma, 🌹 Roos en 🧊 IJs.",
   ae_pijn:      "Begin van je beurt, na het trekken: je mag een kaart uit je hand wegleggen. Doe je dat, trek er <b>2</b>.",
   ae_alziend:   "Je ziet de hand van de tegenstander. Trek je in je beurt een kaart, trek er dan nog <b>1</b> bij en leg er daarna <b>1</b> uit je hand weg.",
@@ -14676,7 +14705,7 @@ function lightPlayable(p, card){
 }
 async function chooseOpt(p, prompt, opts, meta){
   await ensureHolder(p);
-  return await waitUI("opt", Object.assign({p, prompt, opts}, meta && meta.kaarten ? {kaarten:meta.kaarten} : {}));
+  return await waitUI("opt", Object.assign({p, prompt, opts}, meta && meta.kaarten ? {kaarten:meta.kaarten} : {}, meta && meta.yaMeester ? {yaMeester:true} : {}));
 }
 async function chooseSlot(p, slots, prompt, cancellable, meta){
   if(!slots || !slots.length){ addLog("Geen geldige plek — die stap vervalt."); return null; }
@@ -15572,7 +15601,7 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
   /* 🟣 Altaar (nov 2026): je eerste wezen per beurt legt een kopie van zichzelf als ritueel in zijn
      kolom, ook als daar al een ritueel lag (dat gaat naar je graf). Dat nieuwe ritueel gaat meteen
      mee af met deze zet. */
-  if(!asSpell && !S.over && hasAe(p, "ae_altaar") && !card.token && P(p).cols[col].cre && P(p).cols[col].cre.card.id === card.id){
+  if(!asSpell && !S.over && hasAe(p, "ae_altaar") && !card.token && ORDER.includes(card.el) && !card.jacht && P(p).cols[col].cre && P(p).cols[col].cre.card.id === card.id){
     if(!S.altaarT) S.altaarT = [-1, -1];
     if(S.altaarT[p] !== S.gTurn){
       S.altaarT[p] = S.gTurn;
@@ -16689,7 +16718,8 @@ async function resolveLight(it){
     const sterk = el => Object.keys(VAR).find(v => VAR[v].basis === el && !VAR[v].token && !VAR[v].monster && !VAR[v].fusie);
     if(!FAST) await ANI.L.meesterOpen(p);   // ✨ Vier kaarten
     let el = await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Elementaal Meester: welke kaart wordt dit?`,
-      ORDER.map(e => { const v = sterk(e); return {v:e, label:v ? VAR[v].name : EL[e].name, ic:v ? VAR[v].icon : EL[e].icon}; }));
+      ORDER.map(e => { const v = sterk(e); return {v:e, label:v ? VAR[v].name : EL[e].name, ic:v ? VAR[v].icon : EL[e].icon}; }),
+      {kaarten:ORDER.map(e => { const v = sterk(e); return {v:e, card:Object.assign({id:0, el:e, owner:p}, v ? {var:v} : {})}; }), yaMeester:true});   // ✦ ya: kies op de kaarten
     if(!ORDER.includes(el)) el = ORDER[Math.floor(rnd() * ORDER.length)] || "vuur";
     if(!FAST) ANI.L.meesterKies(el);
     const card = it.card;
@@ -16883,7 +16913,8 @@ async function resolveLight(it){
     const opts = [...soorten.values()];
     if(!opts.length){ addLog("✦ Zielenoproep: je graf biedt niets. Het effect verdampt."); return; }
     const idx = opts.length === 1 ? opts[0].v
-      : await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Zielenoproep: wat haal je terug?`, opts.map(o => ({v:o.v, label:o.label, ic:o.ic})));
+      : await chooseOpt(p, `<b>${pName(p)}</b> · ✦ Zielenoproep: wat haal je terug?`, opts.map(o => ({v:o.v, label:o.label, ic:o.ic})),
+          {kaarten:opts.map(o => ({v:o.v, card:g[o.v]}))});   // ✦ ya: kies op de kaarten uit je graf
     const m = (opts.find(o => o.v === idx) || opts[0]).m;
     const card = g.splice(idx, 1)[0];
     if(!card){ addLog("✦ Zielenoproep: die kaart ligt er niet meer."); return; }
@@ -47792,7 +47823,7 @@ ANI.B = (() => {
     E.cre = [o.speel && "▶ " + o.speel, o.eig, o.veld && "◆ " + o.veld].filter(Boolean).join(" ") || E.kort;
     E.sp = E.alleenSpell ? o.veld : SPELL_REGEL + (o.spell ? " " + o.spell : ""); };
   tekst("buidelwolf", {kw:["kleurloos","volleslag"], speel:"Al je wezens <b>+2</b> levens, ook deze."});
-  tekst("ekster",     {kw:["kleurloos","volleslag"], eig:"Speel-effect: trek meteen <b>1</b>. Maar één keer per keten: wordt zijn speel-effect in dezelfde keten nog eens opgeroepen (Water, Echo, Kloon), dan is hij leeg. In een volgende keten trekt hij weer."});
+  tekst("ekster",     {kw:["kleurloos","volleslag"], eig:"Speel-effect: trek meteen <b>1</b>. Maar één keer per ronde: heb je deze ronde al met een Ekster getrokken (ook via Water, Echo of Kloon), dan is hij leeg. De volgende ronde trekt hij weer."});
   tekst("vleermuis",  {kw:["kleurloos","volleslag","direct"], speel:"{Heel} <b>2</b>.", eig:"Wat hij direct slaat, {heel} jij."});
   tekst("vlinder",    {kw:["kleurloos"], speel:"Werkt als Beschutting: een eigen wezen krijgt <b>+3</b> levens en is {Onaantastbaar} tot het eind van de beurt. De vlinder komt niet op het bord, hij gaat naar je graf."});
   tekst("minotaurus", {kw:["kleurloos","volleslag"], speel:"Valt meteen aan. De ander mag reageren, zoals bij elke aanval."});
@@ -48034,7 +48065,7 @@ ANI.B = (() => {
 
   /* ================= de buidel zelf ================= */
   const UITLEG = {buidelwolf:"4 levens · al je wezens +2", draak:"199 levens · 🔥 2 schade", leviathan:"260 levens · 💧 herspeel een eigen wezen",
-    kolos:"333 levens · 🪨 +3 levens", woud:"150 levens · 🌿 verstrik", ekster:"1 leven · trek 1", vleermuis:"2 levens · heel 2, slaat direct",
+    kolos:"333 levens · 🪨 +3 levens", woud:"150 levens · 🌿 verstrik", ekster:"1 leven · trek 1 per ronde", vleermuis:"2 levens · heel 2, slaat direct",
     brenger:"6 levens · onaantastbaar", ei:"2 eieren van 0/2 · na 2 beurten elk een 🕷 spin", balrog:"10 levens · heelt zichzelf 5",
     vlinder:"+3 en onaantastbaar deze beurt op een eigen wezen", minotaurus:"8 levens · valt meteen aan", slijm:"1/1 · elk slijm +2, deelt zich elke beurt (kopie 1/1, haar speel-effect gaat ook af)", basilisk:"6 levens · maakt een wezen steen"};
   const kaartVan = (k, p) => MON[k] ? {id:0, el:MON[k], var:k, owner:p, jacht:true} : Object.assign({id:0, el:k, owner:p, jacht:true}, k === "balrog" ? {beest:true} : {});   // 8 nov 2026: echte beestkaarten, geen tokens   // 🌋 8 nov 2026: Maatje als beest (10 levens, deel w)
@@ -48315,16 +48346,17 @@ ANI.B = (() => {
     const k = pl.deck.pop(); pl.hand.push(k); if(S.story){ if(!S.story.getrokken) S.story.getrokken = [0, 0]; S.story.getrokken[p]++; } return k; };
   { const pc0 = placeCre;
     placeCre = function(p, col, card){ const r = pc0.apply(this, arguments);
-      try{ if(card && card.el === "ekster" && !card.leeg){ card.leeg = true;
-        const k = trekNu(p);
-        if(k){ addLog(`🐦 <em>Ekster</em>: ${pName(p)} trekt meteen een kaart. In deze keten trekt hij niet nog eens.`, true); trekBeeld(p, k); } } }catch(e){ console.error(e); }
+      try{ if(card && card.el === "ekster"){ const mag = ANI.YA.mag(p); card.leeg = true;   // 🐦 ya: één keer per ronde per eigenaar
+        const k = mag ? (ANI.YA.nu(p), trekNu(p)) : null;
+        if(!mag) addLog(`🐦 <em>Ekster</em>: ${pName(p)} heeft deze ronde al een kaart getrokken met een Ekster.`);
+        if(k){ addLog(`🐦 <em>Ekster</em>: ${pName(p)} trekt meteen een kaart. Deze ronde trekt een Ekster van ${pName(p)} niet nog eens.`, true); trekBeeld(p, k); } } }catch(e){ console.error(e); }
       return r; }; }
   /* ⛓ is de buitenste keten helemaal uit, dan mag elke ekster weer */
   const eksterWeer = () => { let om = false;
     for(const p of [0, 1]){ const pl = P(p); if(!pl) continue;
       const kn = [].concat(pl.hand || [], pl.deck || [], pl.grave || []);
       (pl.cols || []).forEach(k => { if(k.cre) kn.push(k.cre.card); if(k.spell) kn.push(k.spell.card); });
-      kn.forEach(c => { if(c && c.leeg){ c.leeg = false; om = true; } }); }
+      kn.forEach(c => { if(c && c.leeg && ANI.YA.mag(c.owner)){ c.leeg = false; om = true; } }); }   // 🐦 ya
     if(om && !FAST) try{ render(); }catch(e){} };
   { const cl0 = chainLoop; let diep = 0;
     chainLoop = async function(){ diep++; try{ return await cl0.apply(this, arguments); }
@@ -48469,7 +48501,7 @@ ANI.B = (() => {
   { const lp0 = lightPlayable; lightPlayable = function(p, card){ const ok = lp0.apply(this, arguments); return ok && card && card.lk === "slide" ? emptyCols(p).length > 0 : ok; }; }
   /* de speel-effecten van de beesten */
   const BEEST_EFF = {spin:"spinweb", buidelwolf:"buidelwolf", vleermuis:"vleermuis", minotaurus:"minotaurus", basilisk:"basilisk", slijm:"slijm"};   // 🟢 8 nov 2026: het slijm
-  { const eo0 = effsOf0; effsOf0 = function(el, origin, card){ if(el === "ekster") return (origin === "creature" && !(card && card.leeg)) ? [{el:"ekster", origin, srcCard:card}] : [];   /* 🐦 binnenkomen trekt al in placeCre (dan is hij leeg); dit is voor Water, Echo, Kloon */ if(BEEST_EFF[el]) return [{el:BEEST_EFF[el], origin, srcCard:card}]; return eo0.apply(this, arguments); }; }
+  { const eo0 = effsOf0; effsOf0 = function(el, origin, card){ if(el === "ekster") return (origin === "creature" && ANI.YA.mag(card ? card.owner : null)) ? [{el:"ekster", origin, srcCard:card}] : [];   /* 🐦 ya */   /* 🐦 binnenkomen trekt al in placeCre (dan is hij leeg); dit is voor Water, Echo, Kloon */ if(BEEST_EFF[el]) return [{el:BEEST_EFF[el], origin, srcCard:card}]; return eo0.apply(this, arguments); }; }
   const bronVan = it => { const f = it && it.bronId != null ? findCre(it.bronId) : null; return f && f.p === it.ctrl ? f : null; };
   { const re0 = resolveEffect;
     resolveEffect = async function(it){
@@ -48479,8 +48511,8 @@ ANI.B = (() => {
         case "basilisk": await basilisk(p, it.bronId, it.tid); return;
         case "minotaurus": await mino(p, it.bronId); render(); return;
         case "ekster": { const b = bronVan(it), kc = b && P(b.p).cols[b.c].cre ? P(b.p).cols[b.c].cre.card : null;
-          if(kc && kc.leeg){ addLog(`🐦 <em>Ekster</em> is leeg: in deze keten heeft hij al getrokken.`); return; }
-          if(kc) kc.leeg = true;
+          if(!ANI.YA.mag(p)){ if(kc) kc.leeg = true; addLog(`🐦 <em>Ekster</em> is leeg: ${pName(p)} heeft deze ronde al getrokken.`); render(); return; }   // 🐦 ya
+          ANI.YA.nu(p); if(kc) kc.leeg = true;
           addLog(`🐦 <em>Ekster</em>: ${pName(p)} trekt een kaart.`, true);
           await drawN(p, 1, "🐦 Ekster"); render(); return; }   // 8 nov 2026: de gewone trek-animatie
         case "vleermuis": { const b = bronVan(it); let gedaan = false;
@@ -49787,7 +49819,7 @@ ANI.ZC = (() => {
 const ZG = (() => {
   const TEMPO = {snel:.6, normaal:1, rustig:1.6, uit:Infinity};
   const TEMPO_NAAM = {snel:"Snel", normaal:"Normaal", rustig:"Rustig", uit:"Uit"};
-  const BASIS = {zelf:5000, raak:12000, negatie:4000, slot:8000};
+  const BASIS = {zelf:5000, raak:20000, negatie:6000, slot:12000};   // zv: royaler (was raak 12, negatie 4, slot 8)
   const tempo = () => { try{ return SET && TEMPO[SET.zgTempo] != null ? SET.zgTempo : "normaal"; }catch(e){ return "normaal"; } };
   const tutNu = () => typeof tutAan === "function" && tutAan();
   const wereld1 = () => !!(S && S.story && /^1-/.test(String(S.story.id || "")));
@@ -49882,6 +49914,7 @@ const ZG = (() => {
     return BASIS[soort] * TEMPO[tempo()];
   }
   const lopend = () => !!(T && S && S.ui && S.ui.mode === "priority" && S.ui.p === T.p && pending && !SLEEP && !M
+    && !T.wacht && performance.now() >= (T.vanaf || 0)   // zv: pas na de animatie en een korte rust
     && !(typeof TUTWACHT !== "undefined" && TUTWACHT) && !(typeof document !== "undefined" && document.hidden));
   let raf = 0, laatst = 0;
   function tik(t){
@@ -49929,6 +49962,10 @@ const ZG = (() => {
     const ms = msVoor(p, soort);
     T = {p, soort, tot:ms, rest:ms};
     laatst = 0;
+    /* zv: eerst de animatie van wat er net gebeurde laten uitspelen, dan nog 0,7 s om te kijken waar het op mikt */
+    if(isFinite(ms)){ const t = T; t.wacht = true; t.vanaf = performance.now() + 700;
+      const klaar = () => { if(T === t){ t.wacht = false; t.vanaf = performance.now() + 700; } };
+      try{ if(typeof ANI !== "undefined" && ANI.aan && ANI.aan() && ANI.rust) Promise.race([ANI.rust(), new Promise(r => setTimeout(r, 2500))]).then(klaar, klaar); else klaar(); }catch(e){ klaar(); } }
     if(isFinite(ms) && !raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(tik);
   }
   async function vraag(wie, soort){
@@ -49942,7 +49979,17 @@ const ZG = (() => {
 
   /* ---------- de keten zelf (vervangt het oude chainLoop) ---------- */
   async function keten(){
-    let gelogd = false;
+    /* zt (9 nov 2026): `inKeten` = de ander heeft gereageerd; dan krijgt elke kant na elke nieuwe actie van de
+       ander een moment. `direct` = wie net iets deed dat meteen afging (geen nieuwe link): dan eerst zijn eigen
+       moment, daarna de ander, zoals bij een gewone link. */
+    let gelogd = false, direct = null;
+    const nieuweLink = oud => S.stack.some(it => it.type !== "eff" && oud.indexOf(it) < 0);
+    const kanMoment = wie => !dicht(wie) && (online() || hasLegalFlash(wie));
+    const los = async () => {
+      if(gelogd){ addLog(`⛓ <em>De keten eindigt.</em> Alles gaat af, van boven naar beneden.`, true); gelogd = false; }
+      await resolveTop();
+    };
+    const begin = () => { if(!gelogd){ gelogd = true; addLog(`⛓ <em>De keten begint.</em>`, true); } };
     while(S.stack.length && !S.over){
       const top = S.stack[S.stack.length - 1];
       /* 🛡 een schildje is er meteen, net als een wezen */
@@ -49956,6 +50003,22 @@ const ZG = (() => {
         if(S.over) return;
       }
       if(top.type === "eff"){ await resolveTop(); continue; }
+      if(direct != null && top.zgG){
+        const x = direct, y = opp(x); direct = null;
+        if(zelfMag(x, {type:"light"}, [])){
+          const oud = S.stack.slice(); const r = await vraag(x, "zelf");
+          if(S.over) return;
+          if(r){ if(!nieuweLink(oud)) direct = x; continue; }
+        }
+        if(kanMoment(y)){
+          const oud = S.stack.slice(); const r = await vraag(y, "raak");
+          if(S.over) return;
+          if(r){ begin(); if(!nieuweLink(oud)) direct = y; continue; }
+          addLog(`${pName(y)} laat door.`);
+        }
+        await los(); continue;
+      }
+      direct = null;
       if(!top.zgG){
         const nieuw = [];
         for(let i = S.stack.length - 1; i >= 0; i--){ const it = S.stack[i]; if(it.zgG || it.type === "eff") break; nieuw.push(it); }
@@ -49968,37 +50031,32 @@ const ZG = (() => {
         if(!top.zgZ){
           top.zgZ = true;
           if(zelfMag(actor, top, nieuw)){
-            const r = await vraag(actor, "zelf");
+            const oud = S.stack.slice(); const r = await vraag(actor, "zelf");
             if(S.over) return;
-            if(r) continue;                      // er ligt iets nieuws bovenop: dat krijgt weer een eigen moment
+            if(r){ if(!nieuweLink(oud)) top.zgZ = false; continue; }   // iets dat meteen afging: nog een eigen moment
           }
         }
         for(const it of nieuw) it.zgG = true;
-        const soort = anderSoort(ander, nieuw);
+        const soort = gelogd ? (kanMoment(ander) ? "raak" : null) : anderSoort(ander, nieuw);
         if(soort){
-          const r = await vraag(ander, soort);
+          const oud = S.stack.slice(); const r = await vraag(ander, soort);
           if(S.over) return;
-          if(r){
-            const nope = r.light && !S.stack.some(it => !it.zgG && it.type !== "eff");
-            if(!gelogd && !nope){ gelogd = true; addLog(`⛓ <em>De keten begint.</em>`, true); }
-            continue;
-          }
+          if(r){ begin(); if(!nieuweLink(oud)) direct = ander; continue; }
           addLog(`${pName(ander)} laat door.`);
         }
-        if(gelogd){ addLog(`⛓ <em>De keten eindigt.</em> Alles gaat af, van boven naar beneden.`, true); gelogd = false; }
-        await resolveTop(); continue;
+        await los(); continue;
       }
       if(top.type === "attack" && !top.zgSlot){
         top.zgSlot = true;
         const wie = opp(top.ctrl);
         if(slotNodig(top) && !dicht(wie) && (online() || hasLegalFlash(wie))){
           addLog(`⛓ De verdediger is weg. Voordat de aanval toeslaat, mag ${pName(wie)} nog één keer reageren.`, true);
-          const r = await vraag(wie, "slot");
+          const oud = S.stack.slice(); const r = await vraag(wie, "slot");
           if(S.over) return;
-          if(r) continue;
+          if(r){ begin(); if(!nieuweLink(oud)) direct = wie; continue; }
         }
       }
-      await resolveTop();
+      await los();
     }
     if(S.story && S.story.grensWacht) await grensNa();
     if(S.story && S.story.naadWacht) await naadNa();
@@ -51691,7 +51749,7 @@ ANI.ZL = (() => {
   /* het zegel zelf (variant 1): vier vakken met kaartart, scheidingen, gouden rand met pijltjes, plaat met tekst */
   function zegel(x, k, mid, s){
     const acc = ACC[s.mode] || ACC.kies;
-    if(s.hover) gloed(x, 0, 0, 54, acc, .25); else if(s.mode === "kies") gloed(x, 0, 0, 48, "#f0c75a", .08);
+    if(s.zonder){} else if(s.hover) gloed(x, 0, 0, 54, acc, .25); else if(s.mode === "kies") gloed(x, 0, 0, 48, "#f0c75a", .08);
     E4.forEach((el, i) => { const [cx, cy] = pos(i, 15); x.save(); kwadrant(x, i, 31); x.clip();
       x.fillStyle = "#0b0910"; x.fillRect(-32, -32, 64, 64);
       if(PLAAT[el]) x.drawImage(PLAAT[el], cx - 23, cy - 23, 46, 46);
@@ -51709,6 +51767,7 @@ ANI.ZL = (() => {
     [0, 1, 2, 3].forEach(i => { const a = -Math.PI / 2 + i * Math.PI / 2, kl = KL[E4[i]], px = Math.cos(a) * R, py = Math.sin(a) * R, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a);
       x.fillStyle = "#120c06"; x.beginPath(); x.arc(px, py, 4.6, 0, Math.PI * 2); x.fill(); x.strokeStyle = acc; x.lineWidth = .8; x.stroke();
       x.fillStyle = kl; x.beginPath(); x.moveTo(px + tx * 3.4, py + ty * 3.4); x.lineTo(px - tx * 2.2 + nx * 2.6, py - ty * 2.2 + ny * 2.6); x.lineTo(px - tx * 2.2 - nx * 2.6, py - ty * 2.2 - ny * 2.6); x.closePath(); x.fill(); });
+    if(s.zonder) return;               /* alleen de kring (yb: de tikhint), zonder plaat en tekst */
     /* de plaat */
     const w = 62; x.fillStyle = "#0b0910"; x.fillRect(-w / 2, -9, w, 18); x.strokeStyle = acc; x.lineWidth = 1; x.strokeRect(-w / 2 + .5, -8.5, w - 1, 17);
     x.fillStyle = "rgba(255,240,200,.12)"; x.fillRect(-w / 2 + 1, -8, w - 2, 1);
@@ -51884,7 +51943,10 @@ body.tel:not(.pc) #actions .zl.zl{--zlw:64px}
     document.head.appendChild(st);
   }catch(e){}
 
-  return {verpak, ST, basis, licht, frame:nuTekenen};
+  /* alleen de kring, voor elders (yb: de tikhint); px is de breedte van het hele canvas (het zegel zelf is 74/112 daarvan) */
+  const beeld = (px, mode) => { const sl = `z|${versie}|${px}|${mode || "kies"}`; if(CACHE.has(sl)) return CACHE.get(sl);
+    const c = metEenheden(nieuwCanvas(px), (x, k, mid) => zegel(x, k, mid, {mode:mode || "kies", label:"", hover:false, zonder:true})); CACHE.set(sl, c); return c; };
+  return {verpak, ST, basis, licht, frame:nuTekenen, beeld, get versie(){ return versie; }, HALF};
 })();
 
 /* ---- module zm ---- */
@@ -52438,7 +52500,681 @@ ANI.ZS = (() => {
     const zet = () => { if(document.body){ mo.observe(document.body, {childList:true}); maat(); } else setTimeout(zet, 50); }; zet();
   }catch(e){ fout(e); }
 
-  return {randen, n:() => nRand, kijk, dubbel:() => n2, waarom:() => waarom, maat};
+
+  /* ================= 5) de deckbuilder op de telefoon (9 nov 2026, Q) =================
+     Het lijf van de deckbuilder (banen, onderste plekken, bibliotheek) groeide tot zijn volle hoogte en viel onder het
+     scherm weg, zonder te kunnen scrollen. Op de telefoon scrollt nu het lijf zelf; de kop met Annuleren en Opslaan
+     blijft altijd staan. Vegen over kaarten scrollt (verticaal); slepen gaat aan het greepje of zijwaarts. */
+  try{ const st = document.createElement("style"); st.id = "zs-deck";
+    st.textContent = [
+      "html body.tel #overlay .ovbox.dkbox{overflow:hidden !important; display:flex !important; flex-direction:column !important}",
+      "body.tel .ovbox.dkbox > .dktop{flex:0 0 auto !important}",
+      "html body.tel #overlay .ovbox.dkbox > .dklijf{flex:1 1 auto !important; min-height:0 !important; height:auto !important; max-height:none !important; overflow-y:auto !important; overflow-x:hidden !important;",
+      "  overscroll-behavior:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y}",
+      /* de kop op één regel, zodat er meer plek overblijft voor het lijf */
+      "html body.tel #overlay .ovbox.dkbox > .dktop{flex-wrap:nowrap !important; gap:8px !important; padding-bottom:6px !important}",
+      "html body.tel #overlay .ovbox.dkbox > .dktop .dknaam{min-width:0 !important; width:auto !important; flex:0 1 150px !important}",
+      "html body.tel #overlay .ovbox.dkbox > .dktop .dksamen{flex:1 1 90px !important; min-width:0 !important; overflow:hidden !important}",
+      "html body.tel #overlay .ovbox.dkbox > .dktop .dkknoppen{flex:0 0 auto !important; margin-left:auto}",
+      "html body.tel #overlay .ovbox.dkbox > .dktop .dkbtn{padding-left:10px !important; padding-right:10px !important}",
+      "body.tel .ovbox.dkbox .dkslot.vol, body.tel .ovbox.dkbox .dklk, body.tel .ovbox.dkbox .dkbaan{touch-action:pan-y}",
+    ].join("\n");
+    /* staand (zonder body.tel): dezelfde regels voor elk aanraakscherm */
+    st.textContent += "\n@media (pointer:coarse){\n" + st.textContent.split("body.tel").join("body") + "\n}";
+    document.head.appendChild(st); }catch(e){ fout(e); }
+  /* een veeg omhoog of omlaag is scrollen, geen slepen: een slepen dat nog niet begonnen is, gaat dan niet door */
+  try{
+    let p0 = null;
+    window.addEventListener("pointerdown", e => { p0 = e.pointerType === "touch" ? {x:e.clientX, y:e.clientY, grip:!!(e.target.closest && e.target.closest(".dkgrip"))} : null; }, true);
+    window.addEventListener("pointermove", e => { if(!p0 || e.pointerType !== "touch") return;
+      const dx = Math.abs(e.clientX - p0.x), dy = Math.abs(e.clientY - p0.y); if(dy < 4 || dy < dx) return;
+      try{ if(typeof DK_SLEEP !== "undefined" && DK_SLEEP && !DK_SLEEP.bezig) DK_SLEEP = null; }catch(x){}
+      try{ if(!p0.grip && typeof RANG_SLEEP !== "undefined" && RANG_SLEEP && !RANG_SLEEP.bezig) RANG_SLEEP = null; }catch(x){}
+    }, true);
+  }catch(e){ fout(e); }
+
+
+  /* ================= 6) kleine portretvakjes: het personage in het midden (9 nov 2026, Q) =================
+     In de kleine vierkante vakjes (de commander-draft "kiest hierna / kiest nu", het stempel op een gekozen kaart) stond
+     de tekening op 150% breedte vast aan de bovenkant: lange figuren hielden hun hoofd, maar brede of lage figuren
+     (Maatje, Kaelid, Max, Xam, de trio's) kwamen met hun vlammen of rug in beeld en hun gezicht viel eraf. Nu meten
+     we per plaatje waar de figuur echt staat (de niet-doorzichtige pixels) en snijden we daar een vierkant uit:
+     compacte figuren helemaal, lange figuren van het hoofd tot ongeveer het middel, horizontaal op het zwaartepunt. */
+  const PT_SEL = ".drport img, .drmed img";
+  const PT = new Map();   // src -> {W, H, x0, y0, x1, y1, vol, rij:[[som x*a, som a] per rij], k}
+  let ptAan = true;
+  const ptMeet = src => { let m = PT.get(src); if(m) return m; m = {bezig:true, wacht:[]}; PT.set(src, m);
+    const im = new Image();
+    im.onload = () => { try{
+      const W = im.naturalWidth, H = im.naturalHeight, k = Math.min(1, 160 / Math.max(W, H)), w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+      const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(im, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data; let x0 = w, y0 = h, x1 = -1, y1 = -1, n = 0; const rij = [];
+      for(let yy = 0; yy < h; yy++){ let sx = 0, sa = 0; for(let xx = 0; xx < w; xx++){ const a = d[(yy * w + xx) * 4 + 3]; if(a > 40){ n++; sx += xx; sa++; if(xx < x0) x0 = xx; if(xx > x1) x1 = xx; if(yy < y0) y0 = yy; if(yy > y1) y1 = yy; } } rij.push([sx, sa]); }
+      Object.assign(m, {bezig:false, W, H, k, w, h, x0, y0, x1, y1, vol:n / (w * h), rij, ok:x1 >= 0});
+    }catch(e){ m.bezig = false; m.ok = false; }
+    m.wacht.splice(0).forEach(f => { try{ f(); }catch(e){} }); };
+    im.onerror = () => { m.bezig = false; m.ok = false; m.wacht.splice(0); };
+    im.src = src; return m; };
+  /* het vierkant (in pixels van het meetplaatje) dat in het vakje moet */
+  const ptSnede = m => {
+    const bw = m.x1 - m.x0 + 1, bh = m.y1 - m.y0 + 1;
+    if(m.vol > .85) { const s = Math.min(m.w, m.h); return {l:(m.w - s) / 2, t:0, s}; }   // een plaatje met eigen achtergrond: vullen, bovenkant houden
+    let s = Math.min(Math.max(bw, bh * .62), Math.max(bw, bh)) * 1.04, t;
+    if(s >= bh) t = m.y0 + bh / 2 - s / 2; else t = m.y0 - s * .04;
+    /* horizontaal: het zwaartepunt van wat er in dat stuk staat */
+    let sx = 0, sa = 0; for(let y = Math.max(0, Math.floor(t)); y < Math.min(m.h, Math.ceil(t + s)); y++){ sx += m.rij[y][0]; sa += m.rij[y][1]; }
+    const cx = sa ? sx / sa : (m.x0 + m.x1) / 2;
+    /* niet verder naar opzij dan nodig: de figuur blijft binnen beeld waar het kan */
+    let l = cx - s / 2; if(bw <= s) l = Math.min(Math.max(l, m.x1 + 1 - s), m.x0);
+    return {l, t, s}; };
+  const ptZet = im => { try{
+    if(!ptAan || !im.isConnected) return; const src = im.currentSrc || im.getAttribute("src"); if(!src) return;
+    const box = im.parentElement; const B = box.clientWidth, Bh = box.clientHeight; if(!B || !Bh) return;
+    const m = ptMeet(src); if(m.bezig){ m.wacht.push(() => ptZet(im)); return; } if(!m.ok) return;
+    if(im.dataset.zspt === src + "|" + B + "x" + Bh) return;
+    const c = ptSnede(m), k = Math.max(B, Bh) / c.s;   // k: meetpixels -> schermpixels
+    const zet = (p, v) => im.style.setProperty(p, v, "important");
+    if(getComputedStyle(box).position === "static") box.style.position = "relative";
+    box.style.overflow = "hidden";
+    zet("position", "absolute"); zet("max-width", "none"); zet("max-height", "none"); zet("transform", "none"); zet("translate", "none"); zet("right", "auto"); zet("bottom", "auto"); zet("margin", "0");
+    zet("width", (m.w * k).toFixed(1) + "px"); zet("height", (m.h * k).toFixed(1) + "px");
+    zet("left", (B / 2 - (c.l + c.s / 2) * k).toFixed(1) + "px"); zet("top", (Bh / 2 - (c.t + c.s / 2) * k).toFixed(1) + "px");
+    im.dataset.zspt = src + "|" + B + "x" + Bh;
+  }catch(e){ fout(e); } };
+  const ptAlles = () => { if(!ptAan) return; try{ document.querySelectorAll(PT_SEL).forEach(ptZet); }catch(e){ fout(e); } };
+  let ptVraag = 0;
+  const ptLater = () => { if(!ptVraag) ptVraag = requestAnimationFrame(() => { ptVraag = 0; ptAlles(); }); };
+  try{
+    const mo = new MutationObserver(ms => { for(const m of ms){ if(m.type === "attributes" || m.addedNodes.length){ ptLater(); return; } } });
+    const zet = () => { if(document.body){ mo.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:["src"]}); } else setTimeout(zet, 50); }; zet();
+    window.addEventListener("resize", ptLater);
+  }catch(e){ fout(e); }
+  const pt = {nu:ptAlles, uit:() => { ptAan = false; }, snede:src => { const m = PT.get(src); return m && m.ok ? ptSnede(m) : null; }};
+
+  return {randen, n:() => nRand, kijk, dubbel:() => n2, waarom:() => waarom, maat, pt};
+})();
+
+/* ---- module zu ---- */
+/* ================= zu (9 nov 2026): 🟣 Eeuwige Terugkeer haalt alleen terug wat echt in je graf ligt =================
+   Q: "soms de optie om fusies uit het graf te halen, terwijl ik die fusie niet gemaakt heb". Oorzaak: deel t gaf bij
+   elke soort in je graf ook een fusie-optie ("f:<element>") als je de fusie-aether van dat element had; die fusie lag
+   nooit in je graf. Een gestorven fusie laat zijn basiskaart achter, dus in het graf liggen alleen gewone kaarten.
+   Nu: geen fusie-opties meer, alleen de stapels die echt in je graf liggen. In de kern: terugOpties (zu-hooks.py). */
+(() => {
+  const T = ANI.Terug; if(!T || !T.opties) return;
+  const o0 = T.opties;
+  T.opties = function(p){ return o0.apply(this, arguments).filter(o => !o.fk); };
+})();
+
+/* ---- module zx ---- */
+/* ================= deel zx · de waterrune (9 nov 2026, Q) =================
+   Het "2x" van zh bij het Water-ritueel moet weg. In plaats daarvan: leg je een Waterplons als ritueel op een plek
+   waar al een ritueel ligt, dan zie je de oude rune wegspoelen en de waterrune ervoor in de plaats komen
+   (in de regels wordt het oude ritueel gediscard en ligt er nu Water). Heeft die Waterplons daarna geplonsd,
+   dan is het Water: het zegel krijgt de stille plaat (kaart-water-stil) en heet WATER.
+   Let op: speel je een Waterplons als WEZEN boven een ritueel, dan blijft dat ritueel wat het was (het gaat af,
+   maar wordt geen water). Dat beeld verzinnen we dus niet. */
+ANI.ZX = (() => {
+  const A = ANI;
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const effAan = () => { try{ return !FAST && A.aan(); }catch(e){ return false; } };
+  const stilKlaar = () => { try{ return !!(KAART_BEELD.water_stil && BEELD_KLAAR[KAART_BEELD.water_stil] !== "fout"); }catch(e){ return false; } };
+
+  try{ const st = document.createElement("style"); st.id = "zx-stijl";
+    st.textContent = [
+      ".slot.sp .zh2x{display:none !important}",
+      /* stil Water als ritueel: de stille plaat in de rune */
+      "html body.pc #fieldwrap .zp .zart.zxstil, .zp .zart.zxstil{background-image:url('art/kaart-water-stil.png') !important; background-size:205% auto !important;",
+      "  background-position:50% 66% !important; background-color:#06142a !important; image-rendering:pixelated; filter:saturate(.85) brightness(.95)}",
+    ].join("\n");
+    document.head.appendChild(st); }catch(e){ fout(e); }
+
+  /* het zegel van Water dat al geplonsd heeft: de stille plaat */
+  { const zh0 = zegelHTML;
+    zegelHTML = function(card){
+      const s = zh0.apply(this, arguments);
+      try{ if(typeof s === "string" && card && card.el === "water" && card.ws && !card.var && !card.lk && stilKlaar())
+        return s.replace('<div class="zart', '<div class="zart zxstil'); }catch(e){ fout(e); }
+      return s; }; }
+
+  /* de oude rune spoelt weg, de waterrune komt ervoor in de plaats */
+  const wegspoelen = async (sel, g) => { const r = A.rc(sel); if(!r){ if(g) A.geestWeg(g); return; }
+    const zp = document.querySelector(sel + " .zp"), q = zp ? A.rc(zp) : r;
+    const cx = q.cx, cy = q.y + q.h * .45, R = Math.min(q.w, q.h) * .42;
+    let u = 0, golf = 0;
+    const l = A.laag(() => { if(golf > 0){ A.ring(cx, cy, R * (.4 + golf * 1.1), "#8fd0ff", .8 * (1 - golf), 3);
+        A.ring(cx, cy, R * (.2 + golf * .8), "#ffffff", .5 * (1 - golf), 1.5); }
+      if(u > 0 && u < 1) A.gloed(cx, cy, R * 1.4, "#4aa8ff", .32 * Math.sin(u * Math.PI)); });
+    try{
+      if(g){ await A.tw(380, t => { u = t * .5; A.geestStand(g, {sx:1 - .25 * t, sy:1 - .25 * t, dy:10 * t,
+          filter:`sepia(1) hue-rotate(170deg) saturate(${1 + 3 * t}) brightness(${1 + .6 * t})`, a:1 - t}); }, A.E.in2); A.geestWeg(g); g = null; }
+      for(let i = 0; i < 18; i++){ const a = A.rnd(0, Math.PI * 2), v = A.rnd(1.5, 3.5);
+        A.deeltje({x:cx + Math.cos(a) * R * .5, y:cy + Math.sin(a) * R * .5, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 1, g:.12, life:A.rnd(.4, .7), kleur:A.kies(["#4aa8ff", "#bfe4ff", "#ffffff"]), soort:"pix", s:A.kies([2, 3])}); }
+      const k = zp ? A.kaart(sel + " .zp") : null; if(k){ k.kleur = "#4aa8ff"; }
+      await A.tw(520, t => { golf = t; u = .5 + t * .5; if(k){ k.kleurA = .9 * (1 - t); k.sx = k.sy = 1 + .12 * Math.sin(t * Math.PI); } });
+      if(k) A.los(k);
+    } finally{ if(g) A.geestWeg(g); A.weg(l); } };
+
+  { const pn0 = placeNow;
+    placeNow = async function(p, card, asSpell, col){
+      let g = null, sel = null;
+      try{ if(asSpell && card && card.el === "water" && !card.var && effAan()){
+          sel = spellSel(p, col); const oud = P(p).cols[col] && P(p).cols[col].spell;
+          const zp = oud && document.querySelector(sel + " .zp");
+          if(zp && oud.card.el !== "water") g = A.geest(zp); } }catch(e){ fout(e); g = null; }
+      const r = await pn0.apply(this, arguments);
+      if(g || sel){ try{ await A.veilig(wegspoelen(sel, g), 1100); }catch(e){ fout(e); } }
+      return r;
+    }; }
+
+  return {wegspoelen};
+})();
+
+/* ---- module ya ---- */
+/* ================= ya (9 nov 2026): 🐦 Ekster één keer per ronde · ✦ Meester en Zielenoproep: kies op de kaarten =================
+   1. De Ekster trekt één kaart per RONDE per eigenaar (S.eksterR[p] = de ronde waarin hij trok; ronde = ceil(gTurn / 2)).
+      In de kern: eksterMag / eksterNu met G.eksterR (ya-hooks.py).
+   2. Elementaal Meester: de vier kaarten die mooi neergelegd worden (ANI.L.meesterOpen) zijn zelf de keuze: wijs aan om
+      te zien, klik of tik om te kiezen. Geen tweede keuzevenster meer. Zonder effecten (of als de ander kiest) valt hij
+      terug op de kaartenkeuze van Roversbuit en Doortastend. Zielenoproep kiest ook op de kaarten uit je graf.
+      Het antwoord gaat via doAct (dezelfde weg als altijd, dus online gelijk). */
+ANI.YA = (() => {
+  const ronde = () => Math.ceil(((S && S.gTurn) || 0) / 2);
+  const mag = p => p == null || !S || !S.eksterR || S.eksterR[p] !== ronde();
+  const nu = p => { if(!S.eksterR) S.eksterR = [-1, -1]; S.eksterR[p] = ronde(); };
+
+  /* ---------- ✦ Elementaal Meester: de neergelegde kaarten zijn de keuze ---------- */
+  const VOLG = ["vuur", "water", "gras", "steen"];          // de volgorde van ANI.L.meesterOpen (VAR4)
+  let LAAG = null;
+  const vraagt = () => { try{ const u = S && S.ui; return !!(u && u.mode === "opt" && u.yaMeester && pending && iControl(u.p)); }catch(e){ return false; } };
+  function maakKiesbaar(d, p){
+    if(!d || !d.isConnected) return;
+    d.classList.add("yameester"); LAAG = d;
+    const ks = [...d.querySelectorAll(".rbk")];
+    ks.forEach((k, i) => {
+      const el = VOLG[i];
+      k.dataset.yael = el;
+      k.addEventListener("click", ev => { ev.stopPropagation();
+        if(!vraagt() || !(S.ui.opts || []).some(o => o.v === el)) return;
+        d.classList.remove("kies"); doAct({t:"f", v:el}); });
+    });
+    /* de vraag boven de kaarten */
+    try{ const h = ks[0] ? parseFloat(ks[0].style.height) || 120 : 120, c = ANI.L.bron();
+      const t = document.createElement("div"); t.className = "yavraag"; t.textContent = "Elementaal Meester: kies welke kaart dit wordt";
+      t.style.left = (c ? c.x : innerWidth / 2) + "px"; t.style.top = Math.min(innerHeight - 24, (c ? c.y : innerHeight / 2) + h * .5 + 44) + "px"; d.appendChild(t); }catch(e){}   // onder de kaarten
+  }
+  { const mo0 = ANI.L.meesterOpen;
+    ANI.L.meesterOpen = function(p){
+      const voor = new Set(document.querySelectorAll(".anirb"));
+      const r = mo0.apply(this, arguments);
+      try{ const d = [...document.querySelectorAll(".anirb")].find(x => !voor.has(x)); if(d) maakKiesbaar(d, p); }catch(e){ console.error(e); }
+      return r;
+    }; }
+  { const mk0 = ANI.L.meesterKies;
+    ANI.L.meesterKies = function(){ try{ if(LAAG){ LAAG.classList.remove("kies"); LAAG.querySelectorAll(".yavraag").forEach(x => x.remove()); } LAAG = null; }catch(e){} return mk0.apply(this, arguments); }; }
+  /* zolang die kaarten er liggen en jij kiest: geen tweede venster, de kaarten lichten op */
+  { const o0 = overlayHTML;
+    overlayHTML = function(){
+      try{ if(!M && vraagt() && LAAG && LAAG.isConnected){ LAAG.classList.add("kies"); return ""; } }catch(e){}
+      return o0.apply(this, arguments);
+    }; }
+  try{
+    const st = document.createElement("style");
+    st.textContent = `.anirb.yameester.kies .rbk{pointer-events:auto; cursor:pointer; transition:filter .12s}
+.anirb.yameester.kies .rbk:hover{filter:brightness(1.15)}
+.anirb.yameester.kies .rbk:hover > *{box-shadow:0 0 0 3px #f0c75a, 0 0 24px 4px rgba(240,199,90,.85) !important}
+.anirb.yameester .yavraag{position:absolute; transform:translateX(-50%); white-space:nowrap; font:12px/1.4 "Press Start 2P",monospace; color:#f0c75a; text-shadow:0 2px 0 #000; opacity:0; transition:opacity .2s; pointer-events:none}
+.anirb.yameester.kies .yavraag{opacity:1}
+body.tel .anirb.yameester .yavraag{font-size:8px}`;
+    document.head.appendChild(st);
+  }catch(e){}
+  return {mag, nu};
+})();
+
+/* ---- module yb ---- */
+/* ================= yb (10 nov 2026): de tikhint wordt het Zegel, en een gedeelde rondeteller ================= */
+/* 1. De tikhint van zi (de rune op het doel in de tutorial) gebruikte het oude plaatje van de elementencirkel.
+      Nu staat daar de kring van het gouden Zegel (deel zl: de vier kaartplaten, de rand met de pijltjes), zonder
+      plaat en tekst. De puls en het draaien blijven van zi; alleen het beeld wisselt.
+   2. De rondeteller: in het rechterpaneel, boven het Zegel, waar "Beurt n" stond (de beurt per speler) staat nu
+      "RONDE n" voor allebei. De ronde begint bij wie het potje begon: ronde = ceil(gTurn / 2), net als de kern.
+      Bij een nieuwe ronde licht hij kort op. Niet in draft, mulligan of buiten een potje. */
+ANI.YB = (() => {
+  const aan = () => { try{ return ANI.aan(); }catch(e){ return false; } };
+
+  /* ---------- 1. het Zegel als tikhint ---------- */
+  let URL0 = null, URLV = -1;
+  const zegelUrl = () => {
+    try{
+      const Z = ANI.ZL; if(!Z || !Z.beeld) return null;
+      if(URL0 && URLV === Z.versie) return URL0;
+      /* alleen de kring uitsnijden: het zegel is 74 van de 112 eenheden van het canvas */
+      const uit = 192, groot = Math.round(uit * Z.HALF * 2 / 74), bron = Z.beeld(groot, "kies");
+      const c = document.createElement("canvas"); c.width = c.height = uit;
+      c.getContext("2d").drawImage(bron, -(groot - uit) / 2, -(groot - uit) / 2);
+      URL0 = c.toDataURL("image/png"); URLV = Z.versie; return URL0;
+    }catch(e){ return null; }
+  };
+  const OUD = /elementcirkel\.png/;
+  const wissel = root => { const u = zegelUrl(); if(!u) return;
+    root.querySelectorAll("img").forEach(im => { if(OUD.test(im.getAttribute("src") || "") || im.classList.contains("ybz")){ if(im.src !== u) im.src = u; im.classList.add("ybz"); } }); };
+  let laagObs = null;
+  const volgLaag = () => { const l = document.getElementById("zirune"); if(!l || l.ybObs) return; l.ybObs = true;
+    wissel(l); laagObs = new MutationObserver(() => wissel(l)); laagObs.observe(l, {childList:true, subtree:true}); };
+  try{
+    new MutationObserver(volgLaag).observe(document.body, {childList:true});
+    volgLaag();
+    /* komt de art later binnen, dan het beeld nog een keer verversen */
+    let v = -1; setInterval(() => { try{ const Z = ANI.ZL; if(Z && Z.versie !== v){ v = Z.versie; const l = document.getElementById("zirune"); if(l) wissel(l); } }catch(e){} }, 700);
+    const st = document.createElement("style");
+    st.textContent = `#zirune .zir img.ybz{mix-blend-mode:normal !important; inset:auto !important; left:50% !important; top:50% !important; width:min(72%, 84px) !important; height:min(72%, 84px) !important; transform:translate(-50%,-50%); filter:drop-shadow(0 0 6px rgba(255,211,107,.55))}
+#zirune .zir.echo img.ybz{opacity:.8}`;
+    document.head.appendChild(st);
+  }catch(e){}
+
+  /* ---------- 2. de rondeteller ---------- */
+  const R = {n:0, t:-1e9};
+  const ronde = () => Math.max(1, Math.ceil(((S && S.gTurn) || 1) / 2));
+  const zicht = () => { try{ return !!(S && S.pl && !S.over && !/^(start|draft|mulligan|handoff|profiel)$/.test((S.ui && S.ui.mode) || "")); }catch(e){ return false; } };
+  function zet(){
+    const tb = document.getElementById("turnbadge"); if(!tb) return;
+    if(!/Beurt \d+/.test(tb.innerHTML)) return;
+    if(!zicht()){ tb.innerHTML = tb.innerHTML.replace(/Beurt \d+(<br>)?/, ""); return; }
+    const n = ronde(), nu = performance.now();
+    if(n !== R.n){ if(R.n && n > R.n && aan()) R.t = nu; R.n = n; }
+    const sinds = nu - R.t, licht = sinds < 1600;
+    tb.innerHTML = tb.innerHTML.replace(/Beurt \d+/, `<span class="ybronde${licht ? " ybnieuw" : ""}"${licht ? ` style="animation-delay:-${Math.round(sinds)}ms"` : ""} title="De ronde begint bij wie het potje begon. Alles wat één keer per ronde mag, telt zo.">RONDE <i>${n}</i></span>`);
+  }
+  { const r0 = render;
+    render = function(){ const v = r0.apply(this, arguments); try{ if(!FAST && !SIM) zet(); }catch(e){ console.error(e); } return v; }; }
+  try{
+    const st = document.createElement("style");
+    st.textContent = `#turnbadge .ybronde{display:inline-block; color:#d8d0c0; letter-spacing:.04em}
+#turnbadge .ybronde i{font-style:normal; color:#ffd36b}
+#turnbadge .ybronde.ybnieuw{animation:ybLicht 1.6s ease-out both}
+@keyframes ybLicht{0%{color:#fff; text-shadow:0 0 0 rgba(255,211,107,0); transform:scale(1)} 15%{color:#fff1c0; text-shadow:0 0 10px rgba(255,211,107,.95), 0 0 2px #fff; transform:scale(1.18)}
+  45%{transform:scale(1)} 100%{color:#d8d0c0; text-shadow:0 0 0 rgba(255,211,107,0)}}
+html body.pc #app #turnbadge .ybronde{font-size:11px}
+html body.pc.tel #app #turnbadge .ybronde{font-size:8px}`;
+    document.head.appendChild(st);
+  }catch(e){}
+
+  return {zegelUrl, zet, R};
+})();
+
+/* ---- module yc ---- */
+/* ================= yc (10 nov 2026): de taunt-kiezer in PvP, voorstel C uit a32 ================= */
+/* Klik je op je eigen portret, dan wordt je hand even acht taunt-kaartjes, elk met de stand van je personage als
+   plaat. Zes vaste soorten (Hoi, Kom op, Ha!, Nou, Oeps, Au) en twee eigen regels per personage, uit wat ze in het
+   verhaal al zeggen. Kies er een (tikken, klikken of de toetsen 1 tot 8): het kaartje vliegt met een lichtspoor naar
+   je portret en daarna gaat het zoals altijd: mpZeg, de ballon bij het portret, en online komt hij bij de ander aan
+   (soort "kaart" + nummer; de tekst staat aan beide kanten in deze tabel). Sluiten: ernaast klikken of Esc. */
+ANI.YC = (() => {
+  const stil = () => { try{ return !ANI.aan(); }catch(e){ return true; } };
+  const SOORT = [
+    {w:"HOI", k:"GROET", kl:"#9fd0ff"}, {w:"KOM OP", k:"UITDAGEN", kl:"#ffb347"}, {w:"HA!", k:"LACHEN", kl:"#ffe07a"},
+    {w:"NOU", k:"GOED GESPEELD", kl:"#7ddc5a"}, {w:"OEPS", k:"OEPS", kl:"#c9a8ff"}, {w:"AU", k:"VERLIES", kl:"#b8b0c4"}];
+  const EIGEN_KL = ["#f0c75a", "#ff6a5c"];
+  /* stand: "" gewoon, t taunt, w wijd, b boos, s stuk. Per personage: zes vaste [stand, zin], dan twee [woord, stand, zin]. */
+  const T = {
+    "1-1":[["", "Hoi."], ["t", "Kom op dan, zachtei."], ["b", "HA! …Ha."], ["", "Ja. Nou."], ["b", "Wacht. Wacht even. Dit ging heel anders in mijn hoofd."], ["s", "Au."],
+      ["HALT!", "b", "HALT!"], ["KEES", "", "…Kees. Kees, er komt iets aan."]],
+    "1-2":[["", "Dat ben jij dan."], ["t", "Jij tilt met je rug. Dat gaat een keer mis."], ["w", "Ik zit in de zone. Ik zit ECHT in de zone."], ["", "Ziezo. Dat was set één."],
+      ["t", "Dat was buiten het schema. Ik doe het nu alsnog, maar het telt niet."], ["b", "Nee. Nee nee nee. Ik heb hier VOOR GETRAIND."],
+      ["TELLEN", "t", "Tweehonderdveertien. Tweehonderdvijftien."], ["RUSTDAG", "t", "Geen rustdag. Nooit een rustdag. Ik heb het één keer geprobeerd en ik werd er naar van."]],
+    "1-3":[["", "Wat wordt het?"], ["t", "Ik vraag het nog één keer en dan hou ik erover op. Veertig steen tegen veertig steen. Durf je?"], ["w", "Zo. Dat was eerlijk en dat was van mij."],
+      ["", "Ook goed! Prima. Helemaal prima."], ["b", "…Nee? Nee. Nee, zegt de onverdeelde."], ["s", "…Hm."],
+      ["KIP!", "t", "TOK. TOK TOK TOK. KIP! Een kip! Vier elementen op zak en niet durven zonder!"], ["BOVEN JE", "", "Ik hang al drie dagen boven je. Je hebt me niet gezien. Niemand ziet me."]],
+    "1-4":[["", "MUHAHAHAHA…"], ["t", "Deze keer niet. DEZE KEER NIET."], ["w", "JA! Zo voelde het dus de vorige keer!"], ["", "Ik dacht dat dit beter zou voelen. Kom nog maar een keer. Ik trek hem wel weer aan."],
+      ["b", "Niet weer. Niet wéér. Ik kan dit niet nog een keer uitleggen."], ["s", "Twee keer. …Ligt het aan de cape?"],
+      ["CAPE", "t", "Ik heb een cape. Jij hebt geen cape. Denk daar maar eens over na."], ["MOOI?", "", "…Vind je hem wél mooi?"]],
+    "1-5":[["", "Magnus hoorde je aankomen. Drie keer."], ["t", "Je mag nog weg. Straks niet meer."], ["", "Sta op. Nog een keer. Magnus heeft geen haast. Magnus is van steen."],
+      ["t", "Dat was goed. Magnus zegt dat niet vaak."], ["", "…Hm. Dat had Magnus niet verwacht. Goed. Dan doen we het echt."], ["s", "…Ah."],
+      ["TIJD", "t", "Magnus heeft tijd. Dat is alles wat Magnus heeft."], ["STEEN", "t", "Steen onthoudt alles. Daarom is steen zo zwaar."]],
+    "2-1":[["t", "Ga door. Ik onderbreek je niet."], ["t", "Je hebt haast. Ik zie het aan alles."], ["w", "Ho. Ga even zitten. Ik wacht wel."], ["t", "Dat was netjes."],
+      ["t", "Dat had ik niet verwacht. Ik noteer het."], ["s", "Dank je."],
+      ["OPDRACHT", "t", "Ik heb geen hekel aan je. Ik heb een opdracht. Dat werkt rustiger."], ["LOOF", "t", "Loof staat nog steeds achter die varen. Loof denkt van niet."]],
+    "knort":[["", "Welkom, welkom. Niks aanraken."], ["t", "De eerste klap is van het huis."], ["w", "Zie je wel. Had je maar iets gekocht."], ["b", "Oké. Oké. Korting. Twintig procent. Hou op."],
+      ["b", "Niet op de koopwaar slaan!"], ["b", "Au. Dat zet ik op de rekening."],
+      ["GRATIS", "t", "Ik verkoop alles. Ook een pak slaag. Voor jou: gratis. Eenmalig."], ["KIJKEN", "t", "Ik ken jouw soort. Kijkt alleen maar. Koopt nooit wat."]],
+    "2-2":[["", "…"], ["t", "…!"], ["w", "…!!"], ["", "……"], ["", "…?!"], ["b", "…!"], ["RITSEL", "t", "…ritsel."], ["?", "", "…?"]],
+    "2-3":[["", "Thee?"], ["t", "Ga toch zitten. Je hoeft echt niks te doen."], ["w", "Sst. Zo."], ["s", "…Je bent wakker gebleven."], ["b", "…O. Je meent het écht. Wat vervelend."],
+      ["", "Het is niks. Het is altijd zo als ze weggaan."],
+      ["MOE", "t", "Je bent moe. Dat is niet erg. Iedereen is moe."], ["STIL", "t", "Hoor je dat? Nee? Precies. Zo stil is het hier."]],
+    "2-4":[["", "…Je bent er nog."], ["t", "Sta stil."], ["", "Zo. Ingepakt. Netjes."], ["s", "…Hm. Je bent niet zoals ik dacht."], ["t", "Dat werkte de vorige keer ook niet."],
+      ["b", "…Nee. Nee. Dit is precies zo begonnen."],
+      ["VIER", "t", "Ik ruik er vier. Dat hoort al heel lang niet meer."], ["DRAAD", "t", "Sst. Niet spartelen. Dat maakt de draad alleen strakker."]],
+    "2-5":[["", "Snuf. Snuf."], ["t", "Grrr."], ["t", "WRAF!"], ["", "Hrrm."], ["b", "Jank."], ["b", "WOEF."], ["HUILEN", "t", "Auuuuuu."], ["GROM", "t", "Grrrrrr…"]],
+    "2-6":[["", "Kind."], ["t", "Voel je de regen weer aankomen? Wij wel."], ["t", "Ga maar liggen. Het gras is zacht hier. Dat is met opzet."], ["t", "Je vecht goed. Dat maakt het erger."],
+      ["", "…Hm. Wij hadden dit anders verwacht."], ["", "Wij gaan de paden weer opendoen. Dat duurt even."],
+      ["OUD", "t", "Wij hebben hier bomen staan die ouder zijn dan jouw hele soort. Nou ja. Bijna."], ["NAT", "t", "Nog steeds nat?"]],
+    "3-1":[["", "O."], ["t", "MAATJE. Daar. Nee. DAAR."], ["w", "Het was je knie! Ik dacht al zoiets! Ik had op je knie gegokt."], ["", "Nou. Jij weet het altijd beter."],
+      ["", "Stúk. Hij is stuk. Hij is nog nooit stuk geweest."], ["b", "Wacht even. Maatje. Sta óp. Sta op sta op sta op."],
+      ["KNIPPER", "t", "Weet je dat je tot nu toe vierentwintig keer geknipperd hebt? Nee. Vijfentwintig."], ["HARDER", "t", "Harder. Hij voelt niks, dat is het mooie."]],
+    "3-2":[["b", "Handen uit het vuur. We beginnen bij één."], ["t", "Te licht. Alles wat je bij je hebt is te licht."], ["t", "Blijf liggen. Ik tel tot tien. Daarna sta je op."],
+      ["", "Je slaat scheef. Maar je slaat door. Dat kun je niet leren, dat heb je of niet."], ["t", "Eén. Twee. Drie. Nee, die telde niet."], ["s", "…Achtenveertig. Daar hield ik op met tellen."],
+      ["GESMEED", "t", "Dit is gesmeed. Dat van jou is gevonden. Dat merk je."], ["VONKEN", "", "En blijf daar staan. Je staat alweer in mijn vonken."]],
+    "3-3":[["", "Puf."], ["t", "Puf puf."], ["w", "Puf puf puf."], ["", "…puf."], ["", "Pf."], ["b", "…"], ["PAS", "t", "Puf puf pas."], ["ROOK", "", "……"]],
+    "3-4":[["", "Applaus voor onszelf!"], ["t", "Voor het volgende nummer hebben we een vrijwilliger nodig. Dat ben jij."], ["t", "BRAVO! Blijf liggen, dat hoort bij het nummer!"], ["", "APPLAUS!"],
+      ["t", "Spetter, jouw beurt. Nee, MIJN beurt. Het is onze beurt, jongens."], ["b", "Knetter? Knetter, waarom is het zo donker."],
+      ["TA-DAA", "t", "TA-DAAA!"], ["VUUR!", "t", "Kijk naar het vuur! Niet naar de grond! Naar het VUUR!"]],
+    "3-5":[["", "Ik ben Klinknagel. Ik verbrand."], ["t", "WAT DOE JE. VERKLAAR!"], ["t", "BIJNA. VERBRANDEN."], ["", "Dat was wel tegen jou. Sta op. De band loopt door."],
+      ["b", "DAT IS NIET DE PROCEDURE."], ["s", "De band staat stil. Er is geen procedure voor stilstaan."],
+      ["BRANDEN", "t", "VERBRANDEN. Dank je."], ["RECHTS", "t", "Naar rechts. Alles gaat naar rechts."]],
+    "3-6":[["", "Yo."], ["t", "Voel je de grond? Dat ben ik niet. Dat is gewoon hoe het hier is."], ["t", "Blijf liggen. Het is warm. Ik heb het je gegund, dat weet je toch."],
+      ["t", "Weet je wat het ergste is? Ik vind je nog steeds aardig. Dat is voor mij een beroepsfout."], ["b", "…Hm. Oké. Oké dan."], ["", "Nee. Wat er ook gebeurt. Ik laat niet los."],
+      ["GEEN ZIN", "t", "Ik sla niet hard. Dat is geen tactiek. Ik heb gewoon geen zin."], ["NAAR HUIS", "t", "Ga naar huis. Grapje. Het is te laat om dat nog te zeggen."]],
+    "4-1":[["", "Zo. Ga zitten. Voorin is beter, achterin word je nat. Waar moet u heen?"], ["t", "Rustig aan. De boot vaart, u hoeft alleen heel te blijven."],
+      ["", "Hup. Overboord. Nee, blijf liggen, ik haal u er wel uit. Dat hoort er ook bij."], ["t", "Dat was een goeie. Die had ik niet gezien."], ["t", "Niet naar de zijkant leunen."], ["", "Zo. Overkant."],
+      ["BETALEN", "", "Overzetten kost wat. Dat hoort erbij, dat is geen hebzucht."], ["BUKKEN", "t", "Hoofd naar beneden."]],
+    "4-2":[["", "Mooi!"], ["t", "Geef."], ["t", "Jij twee. Ha."], ["w", "Jij ook mooi."], ["b", "Hé! Terug!"], ["s", "Au."], ["MIJN", "t", "Mijn mijn mijn."], ["BLINKT", "t", "O! Blinkt!"]],
+    "4-3":[["", "Je loopt op mij."], ["t", "Zak erdoor."], ["", "Ja. Ja. Zo."], ["", "Ik vries weer dicht. Ik vries altijd weer dicht."], ["b", "Ik scheur. Ik scheur en het is jouw schuld."], ["s", "Ik ben open."],
+      ["ERAF", "b", "ERAF."], ["VAL", "t", "Val nou."]],
+    "4-4":[["b", "…laat maar zien."], ["t", "…kom op dan, zachtei."], ["b", "…zie je wel."], ["t", "…dat had ik ook gedaan."], ["t", "…ik zou het niet doen."], ["b", "…au."],
+      ["JIJ", "b", "…jij."], ["NAAR HUIS", "", "…ga naar huis."]],
+    "4-5":[["", "Daar ben je."], ["t", "Ik heb geen haast. Jij hebt lucht nodig."], ["w", "Blijf liggen. Het water draagt je wel."], ["t", "Nog een keer dan."],
+      ["b", "Er zit een gat in de beweging. Dat had ik niet."], ["s", "…Zo."], ["HEEN", "t", "Heen."], ["EN WEER", "t", "En weer."]],
+    "5-2":[["", "Achter de lijn blijven, graag."], ["t", "Niet aankomen."], ["t", "Ik leg je netjes neer."], ["", "O. O, kijk nou toch."], ["s", "Pas op het glas."], ["s", "Ga maar. Ik moet vegen."],
+      ["SST", "t", "Sst."], ["DRIE KEER", "t", "Die heb ik drie keer."]],
+    "5-3":[["", "Hier ben jij. Jij houdt nergens op."], ["t", "Niet verder."], ["t", "Daar hoor je."], ["t", "Jouw kant."], ["t", "…Links."], ["", "Hier houdt…"],
+      ["TOT HIER", "t", "Tot hier."], ["MIJN KANT", "t", "Mijn kant."]],
+    "5-4":[["", "Kind."], ["", "Voel je de regen? Dat ben ik."], ["", "Blijf liggen."], ["", "Dan heb ik het toch nog goed gedaan."], ["", "Kind. Wij zijn niet boos. Wij…"], ["", "Te veel stemmen."],
+      ["ALLEEN", "", "Ik ben geen wij. Ik ben alleen."], ["NEMEN", "", "Jullie namen alles. Nu neem ik dit."]],
+    "5-5":[["", "Je bent er."], ["t", "Neem je tijd."], ["", "Zo. Dan wacht ik op de volgende. Er komt altijd een volgende."], ["b", "Zo ver is niemand gekomen."],
+      ["t", "Dat heb ik ook geprobeerd. Lang geleden."], ["b", "Hm."], ["RUSTIG", "t", "Rustig."], ["OP MIJ", "t", "Je lijkt op mij. Dat is geen toeval."]]};
+
+  /* welk plaatje bij een stand hoort (met wat er bestaat) */
+  const stand = (c, s) => { const b = c.spr, ok = k => k && ptSprIs(k);
+    const r = {t:[c.taunt, b + "_taunt"], w:[b + "_wijd", c.taunt], b:[b + "_boos", b + "_stuk"], s:[b + "_stuk", b + "_boos"]}[s] || [];
+    return r.find(ok) || b; };
+  /* van wie de regels zijn: een skin praat als zijn personage, een vorm als die vorm */
+  const bron = id => { const c = mpChar(id), d = c.def || {}; if(T[c.vorm]) return c.vorm; if(T[d.van]) return d.van; if(T[c.lv]) return c.lv; if(T[id]) return id; return null; };
+  /* acht kaartjes: {w, k, kl, t, spr} */
+  const kaarten = id => { const c = mpChar(id), b = bron(id), sk = typeof skinVan === "function" ? skinVan(id) : null;
+    if(sk && sk.stil) return [];
+    if(b){ return T[b].map((r, i) => i < 6 ? Object.assign({}, SOORT[i], {t:r[1], spr:stand(c, r[0])}) : {w:r[0], k:"EIGEN", kl:EIGEN_KL[i - 6], t:r[2], spr:stand(c, r[1])}); }
+    /* iemand zonder tabel (een later personage): uit wat het al zegt */
+    const u = mpUitingen0(id), pak = (l, n) => (l || [])[n];
+    const vast = [pak(u.hoi, 0), pak(u.uit, 0), pak(u.bijna, 0), pak(u.bijna, 1) || pak(u.au, 1), pak(u.au, 1) || pak(u.uit, 3), pak(u.au, 0)];
+    const uit = vast.map((r, i) => r ? Object.assign({}, SOORT[i], {t:r.t, spr:r.spr}) : null).filter(Boolean);
+    [pak(u.uit, 1), pak(u.uit, 2)].forEach((r, i) => { if(r) uit.push({w:String(i + 7), k:"EIGEN", kl:EIGEN_KL[i], t:r.t, spr:r.spr}); });
+    return uit.slice(0, 8); };
+  const KAART = {};
+  const mpUitingen0 = mpUitingen;
+  mpUitingen = function(id){ const u = mpUitingen0.apply(this, arguments);
+    try{ if(u && !u.kaart){ u.kaart = KAART[id] || (KAART[id] = kaarten(id)); } }catch(e){ console.error(e); if(u && !u.kaart) u.kaart = []; }
+    return u; };
+  /* over het net mag de soort "kaart" mee (de ontvanger checkt MP_SOORT); het oude menu is weg, dus geen tabblad */
+  if(Array.isArray(MP_SOORT) && !MP_SOORT.some(s => s.k === "kaart")) MP_SOORT.push({k:"kaart", naam:"Taunts"});
+
+  /* ---------- stijl ---------- */
+  const CSS = `
+#ycwaaier{position:fixed; inset:0; z-index:9000; pointer-events:auto}
+#ycwaaier .ycmasker{position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%, rgba(8,6,12,.55), rgba(8,6,12,0) 60%); opacity:0; transition:opacity .25s}
+#ycwaaier.aan .ycmasker{opacity:1}
+#ycwaaier.rust .yck, #ycwaaier.rust .ycmasker, #ycwaaier.rust .ychint{transition:none !important}
+#ycwaaier .yck{position:absolute; left:0; top:0; width:var(--w); height:var(--h); transform-origin:50% 100%; cursor:pointer;
+  transform:translate(var(--x), calc(var(--y) + 60vh)) rotate(var(--r)); opacity:0;
+  transition:transform .34s cubic-bezier(.2,.9,.3,1.1) var(--d), opacity .2s var(--d), filter .15s}
+#ycwaaier.aan .yck{transform:translate(var(--x), var(--y)) rotate(var(--r)); opacity:1}
+#ycwaaier.aan .yck:hover, #ycwaaier.aan .yck.hov{transform:translate(var(--x), calc(var(--y) - var(--h) * .16)) rotate(0deg) scale(1.08); z-index:5; transition-delay:0s}
+.yck .ycbinnen{position:absolute; inset:0; background:#0b0910; border:2px solid #7d6a48; box-shadow:0 8px 18px rgba(0,0,0,.6); overflow:hidden; display:flex; flex-direction:column}
+.yck:hover .ycbinnen, .yck.hov .ycbinnen{border-color:var(--kl); box-shadow:0 0 0 1px var(--kl), 0 0 22px var(--kl), 0 10px 22px rgba(0,0,0,.7)}
+.yck .ycplaat{position:relative; flex:1; overflow:hidden; background:radial-gradient(circle at 50% 35%, #2a2130, #120e16)}
+.yck .ycplaat img, .yck .ycplaat svg{position:absolute; left:50%; top:0; height:150%; width:auto; transform:translateX(-50%); image-rendering:pixelated; max-width:none}
+.yck .ycstreep{height:2px; background:var(--kl); flex:0 0 auto}
+.yck .ycwoord{flex:0 0 auto; font-family:"Press Start 2P",ui-monospace,monospace; font-size:calc(var(--w) * .11); color:#e8e0d0; text-align:center; padding:.5em 2px .45em; white-space:nowrap; overflow:hidden; text-overflow:clip}
+#ycwaaier .yck:hover .ycwoord, #ycwaaier .yck.hov .ycwoord{color:#fff}
+#ycwaaier .ycnr{position:absolute; left:3px; top:3px; z-index:2; font-family:"Press Start 2P",ui-monospace,monospace; font-size:calc(var(--w) * .1); color:#ffe7a0; background:rgba(10,8,14,.85); padding:2px 3px; border:1px solid rgba(240,199,90,.5)}
+body.tel #ycwaaier .ycnr{display:none}
+#ycwaaier .yctip{position:absolute; left:0; top:0; max-width:min(340px, 70vw); background:rgba(14,10,8,.96); border:2px solid var(--kl, #f0c75a); padding:7px 10px 8px; pointer-events:none;
+  font-family:"VT323",ui-monospace,monospace; font-size:19px; line-height:1.1; color:#f4eedf; opacity:0; transition:opacity .15s; box-shadow:0 8px 20px rgba(0,0,0,.6)}
+#ycwaaier .yctip small{display:block; font-family:"Press Start 2P",ui-monospace,monospace; font-size:8px; color:var(--kl, #f0c75a); margin-bottom:5px; letter-spacing:.06em}
+#ycwaaier .yctip.aan{opacity:1}
+#ycwaaier .ychint{position:absolute; left:50%; transform:translateX(-50%); font-family:"Press Start 2P",ui-monospace,monospace; font-size:9px; color:#a99fb8; white-space:nowrap; opacity:0; transition:opacity .3s .25s; text-shadow:0 2px 0 #000}
+#ycwaaier.aan .ychint{opacity:1}
+body:has(#ycwaaier.aan) #pside0 .hcard{opacity:0 !important; transition:opacity .18s; pointer-events:none}
+.ycvlieg{position:fixed; left:0; top:0; z-index:9001; pointer-events:none; will-change:transform}
+.ycspoor{position:fixed; left:0; top:0; z-index:9000; pointer-events:none; width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50% !important;
+  background:radial-gradient(circle, rgba(255,255,255,.95), var(--kl) 35%, rgba(0,0,0,0) 70%); mix-blend-mode:screen}
+.ycflits{position:fixed; z-index:9001; pointer-events:none; border-radius:50% !important; background:radial-gradient(circle, rgba(255,240,200,.85), var(--kl) 30%, rgba(0,0,0,0) 68%); mix-blend-mode:screen}`;
+  const stijl = () => { if(document.getElementById("ycstijl")) return; const s = document.createElement("style"); s.id = "ycstijl"; s.textContent = CSS; document.head.appendChild(s); };
+
+  /* ---------- wanneer mag het ---------- */
+  const ik = () => (NET.on && NET.seat === 1) ? 1 : 0;
+  const sleept = () => { try{ return !!(SLEEP && SLEEP.bezig) || !!document.getElementById("sleepkaart") && document.getElementById("sleepkaart").style.display !== "none"; }catch(e){ return false; } };
+  const KEUZE = new Set(["slot", "choice", "opt", "aetherpick", "aeuitleg", "varuitleg", "pickmode", "draft", "sideboard", "profiel", "mulligan", "handoff", "banpick", "cre", "spell", "fuse", "licht"]);
+  const keuze = () => { try{ if(M) return true; const u = S && S.ui; if(!u) return true;
+      if(KEUZE.has(u.mode) || /kies|pick|keuze|discard|offer/i.test(u.mode || "")) return u.p == null || u.p === ik(); return false; }catch(e){ return true; } };
+  const mag = () => !!(S && S.char && !S.over && typeof mpBalkAan === "function" && mpBalkAan() && !(NET.on && NET.seat < 0) && !keuze() && !sleept());
+  const AFKOEL = 2200;
+  let OPEN = null, LAATST = 0;
+
+  const plaat = spr => { let p = null; try{ p = sprBeeldPad(spr); }catch(e){}
+    if(p) return `<img src="${p}" alt="" draggable="false" onerror="this.remove()">`;
+    try{ return spriteSVG(spr) || ""; }catch(e){ return ""; } };
+
+  const sluit = (snel) => { const o = OPEN; OPEN = null; document.body.classList.remove("yctaunt"); if(!o) return;
+    o.el.classList.remove("aan"); o.el.style.pointerEvents = "none"; setTimeout(() => o.el.remove(), snel || stil() ? 0 : 380); };
+
+  const open = () => {
+    if(OPEN){ sluit(); return; }
+    if(!mag()) return;
+    const me = ik(), lijst = (mpUitingen(S.char[me]) || {}).kaart || [];
+    if(!lijst.length) return;
+    stijl();
+    /* de plek van je hand: daar komen de kaartjes */
+    const hc = [...document.querySelectorAll("#pside0 .hcard")].map(e => e.getBoundingClientRect()).filter(r => r.width > 0);
+    const tel = document.body.classList.contains("tel");
+    let cw = hc.length ? Math.max(...hc.map(r => r.width)) : 92, ch = hc.length ? Math.max(...hc.map(r => r.height)) : 128;
+    cw = Math.max(54, Math.min(cw, 120)); ch = cw * 1.38;
+    const fwE = document.getElementById("fieldwrap"), fr = fwE ? fwE.getBoundingClientRect() : null, L0 = fr && fr.width > 200 ? fr.left : innerWidth * .08, R0 = fr && fr.width > 200 ? fr.right : innerWidth * .92;
+    const n = lijst.length; cw = Math.max(46, Math.min(cw, (R0 - L0 - 24) / n * .95, innerHeight * (tel ? .27 : .2))); ch = cw * 1.38;
+    const gat = Math.min(cw * 1.06, (R0 - L0 - 24) / n), cx = hc.length ? (Math.min(...hc.map(r => r.left)) + Math.max(...hc.map(r => r.right))) / 2 : innerWidth / 2;
+    const midX = Math.max(L0 + gat * n / 2, Math.min(R0 - gat * n / 2, cx));
+    const onder = innerHeight - (tel ? 12 : 26);
+    const el = document.createElement("div"); el.id = "ycwaaier";
+    el.innerHTML = `<div class="ycmasker"></div>` + lijst.map((k, i) => { const m = i - (n - 1) / 2, x = midX + m * gat - cw / 2, y = onder - ch + Math.abs(m) * Math.abs(m) * 1.4;
+        return `<div class="yck" data-i="${i}" style="--w:${cw}px;--h:${ch}px;--x:${x}px;--y:${y}px;--r:${(m * 2.4).toFixed(1)}deg;--d:${i * 22}ms;--kl:${k.kl}">`
+          + `<div class="ycbinnen"><div class="ycplaat">${plaat(k.spr)}</div><div class="ycstreep"></div><div class="ycwoord">${k.w}</div></div><span class="ycnr">${i + 1}</span></div>`; }).join("")
+      + `<div class="yctip"></div><div class="ychint" style="top:${Math.max(6, onder - ch - (tel ? 22 : 30))}px">${tel ? "tik er een aan" : "kies er een (1 tot 8) · Esc sluit"}</div>`;
+    if(stil()) el.classList.add("rust");
+    document.body.appendChild(el);
+    OPEN = {el, lijst, me};
+    document.body.classList.add("yctaunt");
+    const tip = el.querySelector(".yctip");
+    const toonTip = (kd, i) => { const k = lijst[i]; if(!k){ tip.classList.remove("aan"); return; }
+      tip.style.setProperty("--kl", k.kl); tip.innerHTML = `<small>${k.k === "EIGEN" ? k.w : k.k}</small>${k.t}`; tip.classList.add("aan");
+      const r = kd.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+      tip.style.transform = `translate(${Math.max(6, Math.min(innerWidth - w - 6, r.left + r.width / 2 - w / 2))}px, ${Math.max(6, r.top - h - 26)}px)`; };
+    el.querySelectorAll(".yck").forEach(kd => {
+      kd.addEventListener("pointerenter", e => { if(e.pointerType === "mouse") toonTip(kd, +kd.dataset.i); });
+      kd.addEventListener("pointerleave", () => tip.classList.remove("aan"));
+      kd.addEventListener("click", e => { e.stopPropagation(); kies(+kd.dataset.i); }); });
+    el.addEventListener("pointerdown", e => { if(!e.target.closest(".yck")){ e.stopPropagation(); e.preventDefault(); sluit(); } });
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("aan")));
+    try{ AU.play("draw"); }catch(e){}
+  };
+
+  /* ---------- het gekozen kaartje vliegt naar je portret ---------- */
+  const kies = async i => {
+    const o = OPEN; if(!o) return; const k = o.lijst[i]; if(!k) return;
+    if(Date.now() - LAATST < AFKOEL || !mag()){ sluit(); return; }
+    LAATST = Date.now();
+    const kd = o.el.querySelector(`.yck[data-i="${i}"]`), pt = document.querySelector("#mpvak .mppt.eigen") || document.querySelector("#mpvak .mpptvak:last-of-type .mppt");
+    let vlieg = null;
+    if(!stil() && kd && pt){
+      const a = kd.getBoundingClientRect(), b = pt.getBoundingClientRect();
+      vlieg = kd.cloneNode(true); vlieg.className = "yck ycvlieg"; vlieg.style.cssText = `--w:${a.width}px;--h:${a.height}px;--kl:${k.kl};width:${a.width}px;height:${a.height}px`;
+      vlieg.querySelector(".ycnr") && vlieg.querySelector(".ycnr").remove(); document.body.appendChild(vlieg); kd.style.visibility = "hidden";
+    }
+    sluit();
+    if(vlieg){
+      const a = vlieg.getBoundingClientRect(), b = pt.getBoundingClientRect();
+      const x0 = a.left, y0 = a.top, x1 = b.left + b.width / 2 - a.width / 2, y1 = b.top + b.height / 2 - a.height / 2, boog = Math.min(160, Math.hypot(x1 - x0, y1 - y0) * .25);
+      const t0 = performance.now(), D = 420;
+      await ANI.veilig(new Promise(res => { let laatst = 0; const f = now => { const u = Math.min(1, (now - t0) / D), e = u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+          const x = x0 + (x1 - x0) * e, y = y0 + (y1 - y0) * e - Math.sin(u * Math.PI) * boog, s = 1 - .55 * e;
+          vlieg.style.transform = `translate(${x}px,${y}px) scale(${s}) rotate(${(1 - e) * -6}deg)`; vlieg.style.opacity = 1 - e * .5;
+          if(now - laatst > 16){ laatst = now; const sp = document.createElement("div"); sp.className = "ycspoor"; sp.style.setProperty("--kl", k.kl);
+            const cx = x + a.width / 2, cy = y + a.height / 2; document.body.appendChild(sp);
+            const an = sp.animate([{transform:`translate(${cx}px,${cy}px) scale(1.4)`, opacity:.9}, {transform:`translate(${cx + (Math.random() - .5) * 14}px,${cy + 6}px) scale(.2)`, opacity:0}], {duration:420, easing:"ease-out"});
+            an.onfinish = () => sp.remove(); setTimeout(() => sp.remove(), 700); }
+          if(u < 1) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }), 900);
+      vlieg.remove();
+      const fl = document.createElement("div"); fl.className = "ycflits"; fl.style.setProperty("--kl", k.kl); const w = Math.max(b.width, b.height) * 1.3;
+      Object.assign(fl.style, {left:(b.left + b.width / 2 - w / 2) + "px", top:(b.top + b.height / 2 - w / 2) + "px", width:w + "px", height:w + "px"}); document.body.appendChild(fl);
+      const an = fl.animate([{transform:"scale(.4)", opacity:1}, {transform:"scale(1.1)", opacity:0}], {duration:380, easing:"ease-out"}); an.onfinish = () => fl.remove(); setTimeout(() => fl.remove(), 600);
+    }
+    /* en dan zoals het altijd ging: de zin bij het portret, en online bij de ander */
+    try{ MPPT.menu = false; MPPT.laatst = Date.now(); mpZeg(o.me, "kaart", i, false); }catch(e){ console.error(e); }
+  };
+
+  /* ---------- inhaken ---------- */
+  mpTauntMenu = function(){ try{ open(); }catch(e){ console.error(e); sluit(true); } };
+  window.addEventListener("keydown", e => {
+    if(!OPEN) return;
+    if(e.key === "Escape"){ e.preventDefault(); e.stopImmediatePropagation(); sluit(); return; }
+    const n = /^Digit[1-8]$/.test(e.code) ? +e.code.slice(5) : (/^Numpad[1-8]$/.test(e.code) ? +e.code.slice(6) : (/^[1-8]$/.test(e.key) ? +e.key : 0));
+    if(n && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); e.stopImmediatePropagation(); kies(n - 1); }
+  }, true);
+  /* gaat er een keuzevenster open, begin je te slepen of is het potje uit: dan dicht */
+  setInterval(() => { if(OPEN && !mag()) sluit(true); }, 200);
+
+  return {kaarten, open, sluit, kies, T, isOpen:() => !!OPEN, dbg:() => ({mag:mag(), keuze:keuze(), sleept:sleept(), aan:mpBalkAan(), open:!!OPEN, n:document.querySelectorAll('#ycwaaier').length})};
+})();
+
+/* ---- module yd ---- */
+/* ================= deel yd · MIK OP WAT? (10 nov 2026, Q koos a33 voorstel A) =================
+   Elk moment waarop jij na het spelen een doel kiest gaat door waitUI("choice", {kind:"cre"}) (chooseCre).
+   Daar haken we in: zolang jij (een mens aan deze kant) mikt, gloeien de randen op in de kleur van het
+   effect, valt "MIK OP WAT?" in beeld en staat er een strookje met de kaart, de naam en wat het doet.
+   Geldige doelen ademen in die kleur, de rest wordt donker; wijs je iets aan, dan loopt er een lijn van
+   licht van de kaart naar het doel met een voorvertoning (4 > 2). Welke doelen mogen komt uit het spel
+   zelf (ui.valid). Bot of tegenstander online: niets. Effecten uit: alleen de tekst en het strookje. */
+ANI.MIK = (() => {
+  const fout = e => { try{ console.error(e); }catch(_){} };
+  /* per soort: kleur, naam, titel en wat de voorvertoning zegt */
+  const SOORT = {
+    vuur:{k:"#ff6a2b", n:"VUUR"}, gras:{k:"#5fd35f", n:"GRAS"}, steen:{k:"#d4b07a", n:"STEEN"}, water:{k:"#4aa8ff", n:"WATER"},
+    ws:{k:"#4aa8ff", n:"WATER-RITUEEL"}, ijs:{k:"#8fd8ff", n:"IJS"}, kogel:{k:"#ffb347", n:"KOGELVIS"}, siphon:{k:"#e0405a", n:"LEVENSROOF"},
+    bloedmaan:{k:"#d0203a", n:"BLOEDMAAN"}, moeder:{k:"#ffd36b", n:"MOEDER"}, kloon:{k:"#c9a8ff", n:"KLOON", t:"WAT KOPIEER JE?"},
+    vlinder:{k:"#3fd8c8", n:"VLINDER"}, spinweb:{k:"#e2dcf0", n:"SPIN"}, basilisk:{k:"#c0dc4a", n:"BASILISK"},
+    tribute:{k:"#a070ff", n:"OFFER", t:"WAT OFFER JE?"}, terugOffer:{k:"#a070ff", n:"EEUWIGE TERUGKEER", t:"WAT OFFER JE?"}};
+  const EIGEN = {gras:"VERSTRIKT", water:"OPNIEUW", ws:"NOG EENS", spinweb:"IN HET WEB", basilisk:"WORDT STEEN", kloon:"KOPIE", tribute:"OFFER", terugOffer:"OFFER"};
+  const plat = t => { try{ return fxPlat(t); }catch(e){ return String(t || "").replace(/<[^>]+>/g, ""); } };
+  const ik = () => (typeof NET !== "undefined" && NET.on && NET.seat === 1) ? 1 : 0;
+  const telefoon = () => { try{ return matchMedia("(hover: none)").matches; }catch(e){ return false; } };
+  let nu = null;   // {ui, p, k, kleur, valid, bron, art, hover, laag, t0}
+
+  /* ---- stijl ---- */
+  try{ const st = document.createElement("style"); st.id = "yd-stijl"; st.textContent = [
+    "#ydmik{position:fixed; inset:0; pointer-events:none; z-index:78}",
+    "#ydmik .ydrand{position:absolute; inset:0; box-shadow:inset 0 0 110px 14px var(--ydk); opacity:.6}",
+    "#ydmik.anim .ydrand{animation:ydadem 1.8s ease-in-out infinite}",
+    "@keyframes ydadem{0%,100%{opacity:.45}50%{opacity:.75}}",
+    "#ydmik .ydbox{position:absolute; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px}",
+    "#ydmik .ydkop{font:22px/1 'Press Start 2P',monospace; color:#fff8e6; letter-spacing:.04em; white-space:nowrap;",
+    "  text-shadow:0 0 10px var(--ydk), 0 3px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000}",
+    "#ydmik .ydkop span{display:inline-block}",
+    "#ydmik.anim .ydkop span{animation:ydval .42s cubic-bezier(.3,1.6,.5,1) both}",
+    "@keyframes ydval{0%{opacity:0; transform:translateY(-26px)}60%{opacity:1}100%{opacity:1; transform:none}}",
+    "#ydmik .ydstrook{display:flex; align-items:center; gap:8px; background:rgba(10,8,14,.92); border:2px solid var(--ydk); padding:4px 10px 4px 4px; max-width:min(560px,92vw);",
+    "  box-shadow:0 0 14px color-mix(in srgb, var(--ydk) 45%, transparent), 0 3px 0 rgba(0,0,0,.6)}",
+    "#ydmik .ydart{flex:0 0 auto; width:34px; height:34px; background:#000 center/cover no-repeat; border:1px solid rgba(255,255,255,.25); image-rendering:pixelated}",
+    "#ydmik .ydnaam{font:10px/1.2 'Press Start 2P',monospace; color:var(--ydk)}",
+    "#ydmik .ydzin{font:8px/1.5 'Press Start 2P',monospace; color:#ece4d4; margin-top:3px}",
+    "#ydmik .ydstop{font:7px/1 'Press Start 2P',monospace; color:#a99fb8; margin-left:6px; white-space:nowrap}",
+    "body.ydmikt #fxvenster{display:none !important}",
+    "@media (max-height:500px){ #ydmik .ydkop{font-size:15px} #ydmik .ydnaam{font-size:8px} #ydmik .ydzin{font-size:7px} #ydmik .ydart{width:26px; height:26px} }",
+    "@media (prefers-reduced-motion:reduce){ #ydmik .ydrand, #ydmik .ydkop span{animation:none !important} }"].join("\n"); document.head.appendChild(st); }catch(e){ fout(e); }
+
+  /* ---- welke kaart en welke zin ---- */
+  const info = (u) => { const m = u.meta || {}, k = m.k || "", S0 = SOORT[k] || {k:"#ffe7a0", n:""}, p = u.p;
+    let naam = S0.n, art = "", zin = plat(u.prompt || ""), bron = null;
+    const fx = (typeof FXNU !== "undefined" && FXNU && FXNU.p === p) ? FXNU : null;
+    if(fx){ if(fx.kop) naam = String(fx.kop).replace(/\s*·\s*KIES\s*$/, ""); if(fx.zin) zin = fx.zin; try{ art = fxBeeldStijl(fx.beeld) || ""; }catch(e){} bron = fx.bronPlek || null; }
+    else { try{ if(EL[k]) art = fxBeeldStijl({el:k, id:-1}) || ""; }catch(e){} }
+    /* naam uit de vraag zelf ("✦ Levensroof: ...", "🦋 Vlinder: ...") als er geen venster was */
+    if(!fx){ const kop0 = zin.replace(/^[^·\u2014,]{0,30}[·\u2014,]\s*/, "").slice(0, 34), mm = kop0.match(/^\s*([A-Za-zÀ-ÿ' ]{3,24})(?: in kolom \d)?:/); if(mm) naam = mm[1].trim().toUpperCase(); }
+    zin = zin.replace(/^[^:·\u2014,]{0,30}[·\u2014,]\s*/, "").replace(/^[^A-Za-zÀ-ÿ0-9]+/, "").replace(/^\s*[A-Za-zÀ-ÿ0-9 ]{2,30}:\s*/, "").trim();
+    zin = zin ? zin.charAt(0).toUpperCase() + zin.slice(1) : "";
+    return {kleur:S0.k, titel:S0.t || "MIK OP WAT?", naam:naam || "KIES", zin, art, bron, k}; };
+  /* voorvertoning: getallen uit de vraag van het spel zelf, zodat Lawine, Oervuur en zo kloppen */
+  const voor = (n, id) => { const f = findKaart(id), zin = n.zinVol;
+    if(isPlekId(id)) return n.k === "vuur" || n.k === "gras" || n.k === "steen" ? "LEGE PLEK" : null;
+    if(!f) return null; const hp = f.cr ? f.cr.hp : null, eigen = f.p === n.p;
+    if(n.k === "vuur" || n.k === "kogel" || n.k === "bloedmaan"){ const m = zin.match(/(\d+)\s*(?:vuur)?schade/i), d = m ? +m[1] : 2; return hp != null ? hp + " > " + Math.max(0, hp - d) : "-" + d; }
+    if(n.k === "steen" || n.k === "moeder" || n.k === "vlinder"){ const m = zin.match(/\+(\d+)/), d = m ? +m[1] : 3; return hp != null ? hp + " > " + (hp + d) : "+" + d; }
+    if(n.k === "siphon") return hp != null ? "STERFT · +" + hp : "STERFT";
+    if(n.k === "ijs") return eigen ? "SMELT" : "VAN JOU";
+    if(n.k === "gras"){ const m = zin.match(/([\-−]\d)\/\+?(\d)/); return m ? m[1].replace("−", "-") + "/+" + m[2] : "VERSTRIKT"; }
+    return EIGEN[n.k] || null; };
+
+  /* ---- DOM ---- */
+  const veld = () => { const e = document.getElementById("fieldwrap") || document.getElementById("field"); return e ? e.getBoundingClientRect() : {left:0, top:0, width:innerWidth, height:innerHeight}; };
+  const toon = (n, anim) => { let d = document.getElementById("ydmik"); if(!d){ d = document.createElement("div"); d.id = "ydmik"; document.body.appendChild(d); }
+    d.className = anim ? "anim" : ""; d.style.setProperty("--ydk", n.kleur);
+    const letters = [...n.titel].map((c, i) => `<span style="animation-delay:${i * 32}ms">${c === " " ? "&nbsp;" : c}</span>`).join("");
+    const stop = n.optional ? `<span class="ydstop">${telefoon() ? "of overslaan" : "spatie of Esc: overslaan"}</span>` : "";
+    d.innerHTML = (anim ? `<div class="ydrand"></div>` : "") + `<div class="ydbox"><div class="ydkop">${letters}</div><div class="ydstrook">`
+      + (n.art ? `<div class="ydart" style="${n.art}; background-size:cover"></div>` : "")
+      + `<div><div class="ydnaam">${n.naam}</div><div class="ydzin">${n.zin}${stop}</div></div></div></div>`;
+    plaats(); document.body.classList.add("ydmikt"); };
+  const plaats = () => { const b = document.querySelector("#ydmik .ydbox"); if(!b) return; const r = veld(); b.style.left = (r.left + r.width / 2) + "px"; if(innerHeight < 500){ b.style.top = Math.max(4, innerHeight - b.offsetHeight - 6) + "px"; } else b.style.top = "16px"; };
+  const stopDom = () => { const d = document.getElementById("ydmik"); if(d) d.remove(); document.body.classList.remove("ydmikt"); };
+
+  /* ---- waar een id staat ---- */
+  const rij = p => document.getElementById(p === ik() ? "row0" : "row1");
+  const slotEl = (p, c, kind) => { const r = rij(p); if(!r) return null; const col = r.querySelectorAll(".col")[c]; return col ? col.querySelector(kind === "sp" || kind === "spell" ? ".slot.sp" : ".slot.cr") : null; };
+  const elVan = id => { if(isPlekId(id)){ const q = plekVanId(id); return slotEl(q.p, q.c, "cr"); } const f = findKaart(id); return f ? slotEl(f.p, f.c, f.kind) : null; };
+  const idVanEl = el => { const s = el && el.closest && el.closest('.slot[data-act="cre"], .slot[data-act="spell"]'); if(!s) return null; const p = +s.dataset.p, c = +s.dataset.col;
+    if(isNaN(p) || isNaN(c) || !P(p) || !P(p).cols[c]) return null; const sl = P(p).cols[c], x = s.dataset.act === "spell" ? sl.spell : sl.cre;
+    return x ? x.card.id : (s.dataset.act === "cre" ? PLEK_ID(p, c) : null); };
+
+  /* ---- het canvas: doelen, lijn en voorvertoning (alleen met effecten aan) ---- */
+  const teken = () => { const n = nu; if(!n) return false; if(!S || S.ui !== n.ui){ stop(); return false; }
+    const ctx = ANI.ctx; if(!ctx) return; const t = performance.now() / 1000, adem = .5 + .5 * Math.sin(t * 4);
+    const geldig = new Set(n.valid);
+    /* donker over wat niet mag */
+    document.querySelectorAll('#row0 .slot.cr, #row1 .slot.cr, #row0 .slot.sp, #row1 .slot.sp').forEach(s => { const id = idVanEl(s); if(id == null || isPlekId(id) || geldig.has(id)) return;
+      const r = ANI.rc(s); if(!r) return; ctx.fillStyle = "rgba(4,3,8,.5)"; ctx.fillRect(r.x, r.y, r.w, r.h); });
+    /* geldige doelen ademen in de kleur */
+    n.valid.forEach(id => { const e = elVan(id); const r = e && ANI.rc(e); if(!r) return; const hv = n.hover === id, a = hv ? 1 : .45 + .4 * adem;
+      ANI.gloed(r.cx, r.cy, Math.max(r.w, r.h) * (hv ? .8 : .62), n.kleur, (hv ? .5 : .22) * a);
+      ctx.save(); ctx.globalCompositeOperation = "lighter"; [[6, .25], [2.5, .6], [1, 1]].forEach(([lw, al], i) => { ctx.globalAlpha = a * al; ctx.strokeStyle = i === 2 ? "#fff" : n.kleur; ctx.lineWidth = lw; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); }); ctx.restore(); });
+    /* wijzen: lijn van de kaart naar het doel, en wat er gebeurt */
+    const toonVoor = id => { const e = elVan(id), r = e && ANI.rc(e); if(!r) return; const v = voor(n, id); if(!v) return;
+      ctx.save(); ctx.font = "10px 'Press Start 2P', monospace"; const w = ctx.measureText(v).width + 12, x0 = r.cx - w / 2, y0 = r.y - 22;
+      ctx.fillStyle = "rgba(10,8,14,.92)"; ctx.fillRect(x0, y0, w, 18); ctx.strokeStyle = n.kleur; ctx.lineWidth = 1.5; ctx.strokeRect(x0 + .5, y0 + .5, w - 1, 17);
+      ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(v, r.cx, y0 + 10); ctx.restore(); };
+    if(n.hover != null && geldig.has(n.hover)){ const e = elVan(n.hover), r = e && ANI.rc(e);
+      const b = n.bron ? slotEl(n.bron.p, n.bron.c, n.bron.kind) : document.querySelector("#ydmik .ydart");
+      const rb = b && ANI.rc(b);
+      if(r && rb){ ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round"; [[8, .22], [3.5, .55], [1.2, 1]].forEach(([lw, al], i) => { ctx.globalAlpha = al * (.8 + .2 * adem); ctx.strokeStyle = i === 2 ? "#fff" : n.kleur; ctx.lineWidth = lw;
+          ctx.beginPath(); ctx.moveTo(rb.cx, rb.cy); ctx.lineTo(r.cx, r.cy); ctx.stroke(); }); ctx.restore();
+        const f = (t * 1.4) % 1; ANI.gloed(ANI.lerp(rb.cx, r.cx, f), ANI.lerp(rb.cy, r.cy, f), 9, n.kleur, .9); }
+      toonVoor(n.hover); }
+    /* telefoon: er is geen wijzen, dus staat bij elk doel wat er gebeurt */
+    if(n.tel) n.valid.forEach(id => { if(!isPlekId(id)) toonVoor(id); }); };
+  const opBeweeg = ev => { if(!nu) return; const id = idVanEl(ev.target); nu.hover = id != null && nu.valid.includes(id) ? id : (id != null ? id : null); };
+
+  const start = u => { stop(); const n = Object.assign(info(u), {ui:u, p:u.p, valid:(u.valid || []).slice(), hover:null, optional:!!u.optional, zinVol:plat(u.prompt || ""), tel:telefoon()});
+    nu = n; const anim = !!ANI.aan(); toon(n, anim); document.addEventListener("mousemove", opBeweeg, true); addEventListener("resize", plaats);
+    if(anim) n.laag = ANI.laag(teken);
+    /* zolang de keuze open is: het strookje op zijn plek houden (het veld kan verschuiven) */
+    n.tik = setInterval(() => { if(!nu || !S || S.ui !== nu.ui) stop(); else plaats(); }, 250); };
+  const stop = () => { const n = nu; if(!n) return; nu = null; try{ if(n.laag) ANI.weg(n.laag); }catch(e){} clearInterval(n.tik);
+    document.removeEventListener("mousemove", opBeweeg, true); removeEventListener("resize", plaats); stopDom(); };
+  const magTonen = (mode, d) => { try{ return mode === "choice" && d && d.kind === "cre" && !FAST && !(typeof SIM !== "undefined" && SIM) && d.p != null && !isBot(d.p) && iControl(d.p) && !(typeof NET !== "undefined" && NET.on && NET.seat !== d.p) && (d.valid || []).length > 0; }catch(e){ return false; } };
+
+  /* ---- inhaken op waitUI ---- */
+  try{ const oud = waitUI;
+    waitUI = function(mode, data){ const pr = oud.apply(this, arguments);
+      try{ if(magTonen(mode, data)){ const u = S.ui; start(u); Promise.resolve(pr).then(() => { if(nu && nu.ui === u) stop(); }, () => { if(nu && nu.ui === u) stop(); }); } else if(nu) stop(); }catch(e){ fout(e); }
+      return pr; }; }catch(e){ fout(e); }
+
+  return {start, stop, get nu(){ return nu; }, SOORT};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
