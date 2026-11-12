@@ -6990,7 +6990,7 @@ function kopie(G){
     ae:[G.ae[0].slice(), G.ae[1].slice()], aeM:G.aeM.slice(), genade:G.genade.slice(), hemelT:G.hemelT && G.hemelT.slice(),
     terug:G.terug && G.terug.slice(), smeedGedaan:G.smeedGedaan && G.smeedGedaan.slice(), trok3:G.trok3,
     mulliganGedaan:G.mulliganGedaan, aeKeuzeGedaan:G.aeKeuzeGedaan, stack:G.stack.length ? structuredClone(G.stack) : [],
-    aeKeuze:G.aeKeuze, kernOp:G.kernOp && G.kernOp.slice(), dekenBeurt:Array.isArray(G.dekenBeurt) ? G.dekenBeurt.slice() : G.dekenBeurt, ziel:G.ziel.slice(), mens:G.mens, zm:G.zm,
+    aeKeuze:G.aeKeuze, kernOp:G.kernOp && G.kernOp.slice(), dekenBeurt:Array.isArray(G.dekenBeurt) ? G.dekenBeurt.slice() : G.dekenBeurt, ziel:G.ziel.slice(), mens:G.mens, zm:G.zm, plaf:G.plaf,
     roversbuit:G.roversbuit && [G.roversbuit[0].slice(), G.roversbuit[1].slice()], doorT:G.doorT, dubbelT:G.dubbelT && G.dubbelT.slice(), lenteT:G.lenteT && G.lenteT.slice(), slide:G.slide && G.slide.slice(), vier:G.vier, volle:G.volle, stTel:G.stTel && G.stTel.slice(), wraakR:G.wraakR && G.wraakR.slice(), altaarT:G.altaarT && G.altaarT.slice(), eksterR:G.eksterR && G.eksterR.slice(), st2:G.st2 && Object.assign({}, G.st2), smokeEind:G.smokeEind || 0,
     vh:G.vh && {id:G.vh.id, L:G.vh.L, st:structuredClone(G.vh.st), echt:G.vh.echt, omslag:G.vh.omslag && Object.assign({}, G.vh.omslag), beginNodig:G.vh.beginNodig}};
   if (H.vh) verhaalKlaar(H);          // de levensgrens van het verhaal er weer op
@@ -7114,6 +7114,7 @@ function kracht0(G, p, c){
 
 /* ---------- keuzes ---------- */
 function kiesWezen(G, K, p, ids, optional, meta){
+  ids = keesWeg(G, p, ids);
   if (!ids.length) return null;
   const selfId = meta && meta.selfId != null ? meta.selfId : null;
   if (!optional && ids.every(id => { if (id === selfId) return true; const w = vindWezen(G, id); return w >= 0 && wP(w) === p; })) optional = true;
@@ -7273,8 +7274,10 @@ function wsDoelen(G, p, e){
 }
 /* 🎣 Het lokaas (ronde 31): staat het bij de ander, dan gaat alles wat jij op zijn kant richt naar het lokaas. */
 function lokaasK(G, q){ const s = G.pl[q]; for (let c = 0; c < 5; c++){ const id = s.cre[c]; if (id && G.kEl[id] === LOKAAS) return id; } return 0; }
+const keesWeg = (G, p, ids) => (p === 1 && G.vh && G.vh.st.keesShook && G.vh.st.keesId != null) ? ids.filter(id => id !== G.vh.st.keesId) : ids;   // 🪨 yi
 function lokaasF(G, p, ids){
   if (p == null) return ids;
+  ids = keesWeg(G, p, ids);
   const q = 1 - p, L = lokaasK(G, q); if (!L) return ids;
   return ids.filter(id => { if (isPlekId(id)) return plekVanId(id).p !== q; const w = vindWezen(G, id); return w < 0 || wP(w) !== q || id === L; });
 }
@@ -7537,7 +7540,7 @@ function getijG(G, p, id, q, c){
   if (e === STEEN) G.kVar[id] = ROTS; else if (e === GRAS) G.kVar[id] = ROOS; else if (e === VUUR) G.kVar[id] = PLASMA;
 }
 function ziel(G, p){
-  if (G.over < 0 && heeft(G, p, 'ae_rouw')) G.pl[p].life += 1;      // 🌙 Nagloed: sterft er iets van jou, heel 1
+  if (G.over < 0 && heeft(G, p, 'ae_rouw')){ G.pl[p].life += 1; levCap(G); }      // 🌙 Nagloed: sterft er iets van jou, heel 1
   if (G.over >= 0 || !heeft(G, p, 'ae_ziel')) return;
   if (++G.ziel[p] < 4) return;   // ronde 31: bij de vierde
   G.ziel[p] = 0;
@@ -7632,7 +7635,7 @@ function losOp(G, K, it){
     case E_SLIJM: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c] && G.kEl[s.cre[c]] === SLIJM) s.hp[c] += 2; return; }   // 🟢 elk eigen slijm +2
     case E_BWOLF: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c]) s.hp[c] += 2; return; }   // 🐺 al je wezens +2
     case E_EKSTER: { const s = it.src; if (!eksterMag(G, p)){ if (s != null && G.kEl[s] === EKSTER) zetVlag(G, s, F_LEEG); return; } eksterNu(G, p); if (s != null && G.kEl[s] === EKSTER) zetVlag(G, s, F_LEEG); trek(G, K, p, 1); return; }   // 🐦 ya   // 🐦 één keer per keten
-    case E_VLEER: G.pl[p].life += 2; return;
+    case E_VLEER: G.pl[p].life += 2; levCap(G); return;
     case E_MINO: minoAanval(G, p, it.src); return;
     case E_BASI: basilisk(G, K, p, it.src, it.tid); return;
     case E_CLOWN: { const s = G.pl[p]; for (let c = 0; c < 5; c++) if (s.cre[c] && EL_VIS[G.kEl[s.cre[c]]]) s.hp[c] += 2; return; }
@@ -7776,7 +7779,7 @@ function losOp(G, K, it){
         if (!nid || !ids.includes(nid)) return;
         id = nid; zelfde = nid === it.tid;
       } else {
-        id = (it.origin === 1 && it.col != null && ids.length === 1) ? ids[0] : effDoel(G, K, it, p, ids, true, {k:'ws'});   // 💧 zr
+        id = ((!it.dec || it.tid != null) && it.origin === 1 && it.col != null && ids.length === 1) ? ids[0] : effDoel(G, K, it, p, ids, true, {k:'ws'});   // 💧 zr
         if (id === 'fizzle' || id === null) return;
       }
       const w = vindKaart(G, id); if (w < 0) return;
@@ -7820,7 +7823,7 @@ function losAanvalOp(G, K, it){
     const voor = G.pl[q].life;
     G.pl[q].life -= power2;
     const af = voor - G.pl[q].life;
-    if (af > 0 && (G.kEl[att] === BRENGER || G.kEl[att] === VLEERMUIS)) G.pl[p].life += af;   // 🦇 7 nov 2026: de vleermuis ook   // 🕯 nov 2026: de Lichtbrenger heelt wat hij direct raakt
+    if (af > 0 && (G.kEl[att] === BRENGER || G.kEl[att] === VLEERMUIS)){ G.pl[p].life += af; levCap(G); }   // 🦇 7 nov 2026: de vleermuis ook   // 🕯 nov 2026: de Lichtbrenger heelt wat hij direct raakt
     if (power2 > 0 && p === 0 && G.vh) G.vh.st.aanvalDezeBeurt = true;   // raakAanval
     if (power2 > 0) wraak(G, K, q, power2);
     if (G.pl[q].life <= 0){ eindeSpel(G, p); return; }
@@ -7977,6 +7980,8 @@ function zgWaterNu(G, K, it){
 }
 let KETEN_DIEP = 0;
 function ketenLus(G, K){ KETEN_DIEP++; try { return ketenLus0(G, K); } finally { KETEN_DIEP--; if (!KETEN_DIEP && !G.stack.length) eksterWeer(G); } }
+/* ❤ ym (12 nov 2026): levensplafond (24, of de start als die hoger is; uit het spel via nbLv.plaf) */
+function levCap(G){ for (let q = 0; q < 2; q++){ const c = G.plaf ? G.plaf[q] : 24; if (G.pl[q].life > c) G.pl[q].life = c; } }
 function eksterWeer(G){ for (let i = 0; i < G.kVlag.length; i++) if ((G.kVlag[i] & F_LEEG) && eksterMag(G, G.kOwn[i])) G.kVlag[i] &= ~F_LEEG; }   // 🐦 ya: pas weer vol als de eigenaar weer mag
 /* 🐦 ya (9 nov 2026): de Ekster trekt één kaart per ronde per eigenaar (ronde = ceil(gTurn / 2)) */
 function eksterMag(G, p){ return p == null || !G.eksterR || G.eksterR[p] !== Math.ceil(G.gTurn / 2); }
@@ -8063,7 +8068,7 @@ function kondigLichtAan(G, K, p, id, flash){
   if (isMens(G, p)){ const sl = kiesPlek(G, K, p, [{p, c:-1, kind:'licht'}], true); if (sl === 'cancel' || sl == null) return 'cancel'; }   // ✦ 7 nov 2026: zoals het spel
   const col = null;
   if (LK_KOST[k] && !stroman(G, p)){ if (G.vh) G.vh.st.naadEigen = true; s.life -= LK_KOST[k]; if (G.vh) G.vh.st.naadEigen = false; wraak(G, K, p, LK_KOST[k]); }
-  if (heeft(G, p, 'ae_zwerm')) s.life += 1;                       // ✨ Lichtzwerm (8 nov 2026): een lichtkaart spelen heelt 1
+  if (heeft(G, p, 'ae_zwerm')){ s.life += 1; levCap(G); }                       // ✨ Lichtzwerm (8 nov 2026): een lichtkaart spelen heelt 1
   if (offerId != null){
     const w = vindWezen(G, offerId);
     if (w >= 0 && wP(w) === p) vernietig(G, p, wC(w));
@@ -8082,7 +8087,7 @@ function kondigLichtAan(G, K, p, id, flash){
   if (heeft(G, p, 'ae_hemel') && (G.hemelT || [])[p] !== G.gTurn){
     if (!G.hemelT) G.hemelT = [-1, -1];
     G.hemelT[p] = G.gTurn;
-    s.life += 1;
+    s.life += 1; levCap(G);
     trek(G, K, p, 1);
   }
   const it = {t:4, ctrl:p, card:id, lk:k, col, plan};
@@ -8214,7 +8219,7 @@ function losLichtOp(G, K, it){
       return;
     }
     case L_VITAL: { const st = G.vh && G.vh.st, max = st && st.startLevens && st.startLevens[p] != null ? st.startLevens[p] : 5;
-      s.life = s.life + 3; if (G.over < 0) trek(G, K, p, 1); return; }   // 6 nov 2026: heel 3 en trek een kaart
+      s.life = s.life + 3; levCap(G); if (G.over < 0) trek(G, K, p, 1); return; }   // 6 nov 2026: heel 3 en trek een kaart
     case L_SLIDE: {                                                // 🎒 De monsterbuidel (7 nov 2026, was Magnus-slide): drie beesten, kies er één
       const uit = buidelTrek(G, p);
       let i = uit.length > 1 ? kiesOpt(G, K, p, uit.map((_, j) => j)) : 0;
@@ -8327,7 +8332,7 @@ function losLichtOp(G, K, it){
       const sq = G.pl[wP(w)];
       const weg = Math.max(0, sq.hp[wC(w)]);
       sq.hp[wC(w)] = 0;
-      s.life += weg;   // nov 2026: al zijn levens
+      s.life += weg; levCap(G);   // nov 2026: al zijn levens
       vernietig(G, wP(w), wC(w));
       return;
     }
@@ -8488,7 +8493,7 @@ function directeFusie(G, K, p, id){
   if (!slots.length) return 'cancel';
   const sl = kiesPlek(G, K, p, slots, true, {el:ELNAAM[el]});
   if (sl === 'cancel') return 'cancel';
-  if (heeft(G, p, 'ae_zwerm')) G.pl[p].life += 1;                 // ✨ Lichtzwerm: ook Directe Fusie is een lichtkaart
+  if (heeft(G, p, 'ae_zwerm')){ G.pl[p].life += 1; levCap(G); }                 // ✨ Lichtzwerm: ook Directe Fusie is een lichtkaart
   G.kEl[id] = el; G.kLk[id] = 0;
   return kondigFusieAan(G, K, p, id, null, fk, {col:sl.c});
 }
@@ -8750,7 +8755,8 @@ function kanAanvallen(G, p, c){
     if (st.stilstand) return false;
     if (st.maxWeigert && isVlag(G, id, F_MAX)) return false;
     if (st.dicht && st.dicht.includes(c)) return false;
-    if (st.sluis != null && c === st.sluis) return false; }
+    if (st.sluis != null && c === st.sluis) return false;
+    if (st.keesShook && p === 1 && st.keesId != null && G.pl[0].cre[c] === st.keesId) return false; }   // 🪨 yi: Rocky valt Kees niet aan
   return true;
 }
 /* 🏹 De jacht (7 nov 2026): een beestkaart uit je hand. Zelfde stappen als playFromHand in het spel (deel d). */
@@ -8873,6 +8879,7 @@ function vanS(S, rng, cid, lv){
   G.smokeEind = S.smokeEind ? 1 : 0;
   if (lv && lv.mens) G.mens = lv.mens.slice();
   if (lv && lv.zm) G.zm = lv.zm.slice();
+  if (lv && lv.plaf) G.plaf = lv.plaf.slice();   // ❤ ym
   if (S.roversbuit) G.roversbuit = [S.roversbuit[0].slice(), S.roversbuit[1].slice()];
   if (S.story){
     G.vh = {id:S.story.id, L:(lv && lv.L) || {}, st:JSON.parse(JSON.stringify(S.story)), echt:!!(lv && lv.fast === false)};
@@ -8949,6 +8956,7 @@ function verhaalKlaar(G){
     let leven = pl.life;
     Object.defineProperty(pl, 'life', {configurable:true, enumerable:true, get(){ return leven; }, set(v){
       const st = G.vh.st;
+      if (L.grensEerste){ if (!st.grensGedaan && v < leven && v > 0){ st.grensGedaan = true; st.grensWacht = true; } leven = v; return; }   // 🪨 yi: Rocky 1-4
       if (L.grensVol){ if (!st.grensGedaan && v <= 0){ st.grensGedaan = true; st.grensWacht = true; leven = (st.startLevens && st.startLevens[1]) || leven; return; } leven = v; return; }   // 🪨 9 nov 2026 (zb): Magnus staat op
       if (!st.grensGedaan && v <= dr && (leven > grens || (L.grensDood && leven >= grens))){ st.grensGedaan = true; st.grensWacht = true; leven = grens; return; }   // 🟣 zb: het schild ook op het laatste leven
       leven = v; }});
@@ -14508,7 +14516,7 @@ function destroyCre(p, c, cause){
    het derde gaan ze er alle drie af en trekt p meteen een kaart. Zo ook in de kern (ziel). */
 function zielDood(p, c){
   if(S && !S.over && hasAe(p, "ae_rouw")){                 // 🌙 Nagloed (ronde 29): sterft er iets van jou, heel 1
-    P(p).life += 1;
+    P(p).life += 1; levensPiek(p);   // ❤ ym: het plafond
     addLog(`🌙 <em>Nagloed</em>: ${pName(p)} heelt <b>1</b>.`, true);
     if(typeof aeFlits === "function") aeFlits(p, "ae_rouw");
     if(!FAST) ANI_AE.nagloed(p, c);   // ✨ een hartje naar je levens
@@ -17423,7 +17431,7 @@ async function resolveEffect(it){
       }
       id = nid; zelfde = nid === it.tid;
     } else {
-      id = (it.origin === "spell" && it.col != null && ids.length === 1) ? ids[0]   // als ritueel: geen keus, gaat vanzelf
+      id = ((!it.dec || it.tid != null) && it.origin === "spell" && it.col != null && ids.length === 1) ? ids[0]   /* 💧 ym: had hij bij het spelen geen doel, dan niet alsnog */   // als ritueel: geen keus, gaat vanzelf
         : await effTarget(it, p, ids, `<b>${pName(p)}</b> — ${effPrompt.ws}`, true, {k:"ws"});
       if(id === "fizzle" || id === null){ if(id === null) addLog("💧 Water: overgeslagen."); return; }
     }
@@ -50244,7 +50252,7 @@ ANI.ZH = (() => {
       let iets = false;
       const nu = performance.now();
       /* klaar: een wolkje stof als hij neerkomt */
-      document.querySelectorAll("#fieldwrap .slot.cr.zhklaar:not(.valtaan)").forEach(el => { iets = true;
+      if(!(typeof ykStil === "function" && ykStil())) document.querySelectorAll("#fieldwrap .slot.cr.zhklaar:not(.valtaan)").forEach(el => { iets = true;
         const id = el.dataset.p + ":" + el.dataset.col, c = +el.dataset.col, p = +el.dataset.p;
         const f = ((nu + c * 470 + p * 230) % PER) / PER, f0 = vorige.get(id);
         vorige.set(id, f);
@@ -50259,7 +50267,7 @@ ANI.ZH = (() => {
       const plek = [];
       for(let q = 0; q < 2; q++) for(let c = 0; c < NK(); c++){ const cr = P(q).cols[c].cre; if(cr && isPlons(cr.card)) plek.push(creSel(q, c)); }
       for(let q = 0; q < 2; q++){ if(!handVisible(q)) continue; P(q).hand.forEach(cd => { if(isPlons(cd)) plek.push(`#hand${q} .hcard[data-id="${cd.id}"]`); }); }
-      plek.forEach(sel => { const el = document.querySelector(sel); if(!el) return; const r = A.rc(el); if(!r || r.w < 10) return; iets = true;
+      plek.forEach(sel => { if(typeof ykStil === "function" && ykStil()) return; const el = document.querySelector(sel); if(!el) return; const r = A.rc(el); if(!r || r.w < 10) return; iets = true;
         const fx = el.querySelector(".card") ? A.rc(el.querySelector(".card")) || r : r;
         A.gloed(fx.cx, fx.cy + fx.h * .1, fx.w * .8, "#4aa8ff", .26 + .1 * Math.sin(nu / 260));
         if(Math.random() < .14) A.deeltje({x:fx.cx + rnd(-fx.w * .34, fx.w * .34), y:fx.y + fx.h * rnd(.55, .78), vx:rnd(-.1, .1), vy:-rnd(.35, .8), life:rnd(.5, .9),
@@ -50645,7 +50653,7 @@ ANI.ZI = (() => {
   if(typeof tutHlPaint === "function"){ const hp0 = tutHlPaint;
     tutHlPaint = function(){ const u = hp0.apply(this, arguments); try{ runeZet(); }catch(e){ console.error(e); } return u; }; }
 
-  return {toon, toonEen, gezien, AE, runeZet, RUNE};
+  return {toon, toonEen, gezien, AE, SCENE, KLEUR, runeZet, RUNE};
 })();
 
 /* ---- module zj ---- */
@@ -51052,16 +51060,16 @@ body.tel #zjTerug .zjknop{font-size:7px; padding:8px 12px}`;
 /* ================= deel zk · het ei-level, 0-0 (9-10 nov 2026, Q; vierde ronde) =================
    Het filmpje gaat over in het ei: het veld met eieren, inzoomen op dat ene ei, je borstkas met het hart dat stopt.
    Dan een donkere ruimte zonder kolommen; een stem laat je zien wat van jou is. Je sleept kaarten uit een bron van licht.
-     Per deel óf de speel-effecten óf de aanvallen. In een aanval-deel tik je op wat klaarstaat (groen zwaard, klaar-
-     beweging); het slaat recht vooruit, ook wat van jou is, en staat 10 tellen later weer klaar.
-     Steen: 5x spelen (+3 op zichzelf), 5x met je andere elementen erbij (+3 op wie je wilt), dan het aanval-deel tegen
-            de vier elementen: sloop van elk element er een.
-     Vuur:  5x, eerst vanzelf, daarna mik je zelf (MIK OP WAT?, zoals deel yd). Geen aanvallen.
-     Gras:  5x verstrikken. Geen aanvallen.
-     Water: elk element een keer optillen (verplaatsen, zijn kunstje, en dan valt het vanzelf aan: zo gevraagd), 3x Water
-            óp een wezen (zelfde), en dan het aanval-deel: raak drie keer.
+     Per deel óf de speel-effecten óf de aanvallen. In het aanval-deel tik je op wat klaarstaat (groen zwaard, klaar-
+     beweging); het slaat recht vooruit, ook wat van jou is, staat 10 tellen later weer klaar, en mist hij: weg.
+     Steen: 4x spelen (+3 op zichzelf), 3x met je andere elementen erbij (+3 op wie je wilt), dan alles van jou weg en
+            vier tegenstanders, een per element: sloop van elk element er een.
+     Vuur:  4x, eerst vanzelf, daarna mik je zelf (MIK OP WAT?, zoals deel yd).
+     Gras:  4x verstrikken, vier tegenstanders.
+     Water: 4x Water op een wezen van jou (of ernaast en dan aanwijzen): het verhuist en doet zijn kunstje nog eens.
+            Na twee keer: dat kan maar een keer, daarna is het gewoon Water.
    De kring is die van het spel (dmgOutcome, entBaar), aanval is de helft van de levens zoals atkOf.
-   Einde: "Je hebt het. Je bent klaar. Deze wereld... is van jou. RISE!", licht in het ei, muziek terug, wereldkaart.
+   Einde: "Je hebt het. Je bent klaar. Deze wereld... is van jou. NEEM HET.", licht in het ei, muziek terug, wereldkaart.
    Eigen scherm (#eilevel), geen gewone match en geen kern. Effecten uit: alles werkt, alleen stil. */
 ANI.EI = (() => {
   const A = ANI, E = A.E, lerp = A.lerp, rnd = A.rnd, kies = A.kies;
@@ -51077,14 +51085,12 @@ ANI.EI = (() => {
   const verstrikbaar = el => { try{ return entBaar({card:{el, id:-999}}, null); }catch(e){ return el !== "vuur"; } };
   /* de fasen. Steen in drie stappen, dan Vuur, Gras en Water in twee stappen. */
   const FASEN = [
-    {id:"s1", el:"steen", telt:"speel", doel:5, plus:"zelf", vecht:false, regel:"Steen geeft. Aan zichzelf."},
-    {id:"s2", el:"steen", telt:"speel", doel:5, plus:"kies", vecht:false, regel:"Geef het aan wie jij wilt."},
-    {id:"s3", el:"steen", telt:"dood", plus:"zelf", vecht:true, alleen:"steen", vijHp:{steen:4, vuur:4}, regel:"Sloop van elk element er een."},
-    {id:"v",  el:"vuur",  telt:"effect", doel:5, vecht:false, vijHp:{vuur:3}, regel:"Laat het branden."},
-    {id:"g",  el:"gras",  telt:"effect", doel:5, vecht:false, regel:"Laat het grijpen."},
-    {id:"w1", el:"water", telt:"effect", doel:3, vecht:false, regel:"Til elk element een keer op."},
-    {id:"w2", el:"water", telt:"effect", doel:3, vecht:false, regel:"Leg Water óp een wezen van jou."},
-    {id:"w3", el:"water", telt:"raak", doel:3, vecht:true, regel:"Tik op wat klaarstaat. Raak drie keer."}
+    {id:"s1", el:"steen", telt:"speel", doel:4, plus:"zelf", vecht:false, regel:"Steen geeft. Aan zichzelf."},
+    {id:"s2", el:"steen", telt:"speel", doel:3, plus:"kies", vecht:false, regel:"Geef het aan wie jij wilt."},
+    {id:"s3", el:"steen", telt:"dood", plus:"zelf", vecht:true, alleen:"steen", vijHp:{steen:9, vuur:9}, regel:"Sloop van elk element er een."},
+    {id:"v",  el:"vuur",  telt:"effect", doel:4, vecht:false, vijHp:{vuur:3}, regel:"Laat het branden."},
+    {id:"g",  el:"gras",  telt:"effect", doel:4, vecht:false, regel:"Laat het grijpen."},
+    {id:"w",  el:"water", telt:"effect", doel:4, vecht:false, regel:"Leg Water op een wezen van jou."}
   ];
   const ZELF = 2;   // na zoveel keer kies je zelf waar het effect heen gaat
   const gedaan = () => { try{ const st = SET.story || {}; return !!(st.eiKlaar || st.vrij || (st.klaar || []).length); }catch(e){ return true; } };
@@ -51167,19 +51173,15 @@ ANI.EI = (() => {
       "#eilevel.stil .eik.zhklaar > :is(.atkgem, .hpgem){animation:none}",
       "#eilevel #ydmik{position:absolute; z-index:15}",
       "#eilevel #ydmik .ydbox{left:50%; top:62px}",
-      "@media (max-height:500px){ #eilevel #ydmik .ydbox{top:4px; bottom:auto; gap:3px} #eilevel #ydmik .ydkop{font-size:12px} #eilevel #ydmik .ydstrook{padding:2px 6px 2px 2px} }",
+      "@media (max-height:500px){ #eilevel #ydmik .ydbox{top:4px; bottom:auto; gap:3px} #eilevel #ydmik .ydkop{font-size:12px} #eilevel #ydmik .ydstrook{padding:2px 6px 2px 2px; max-width:min(380px, calc(100vw - 420px))} #eilevel #ydmik .ydbox{left:calc(50% - 90px)} }",
       "#eilevel .eivoor{position:absolute; z-index:16; transform:translateX(-50%); pointer-events:none; white-space:nowrap; font:10px/1 'Press Start 2P',monospace; color:#fff;",
       "  background:rgba(10,8,14,.92); border:1.5px solid var(--ydk); padding:4px 6px}",
       "#eilevel .eirise{position:absolute; left:50%; top:42%; transform:translate(-50%, -50%); z-index:14; pointer-events:none; font:clamp(40px, 9vw, 110px)/1 'Press Start 2P',monospace; color:#fff6dc;",
       "  letter-spacing:.08em; text-shadow:0 0 30px #ffd36b, 0 0 70px #ffb347, 0 6px 0 #000}",
       "#eisluier{position:fixed; inset:0; z-index:457; pointer-events:none}",
-      "html body.pc #eilevel .eik .atkgem, html body.pc #eilevel .eik .hpgem{position:absolute; top:auto; bottom:calc(9.88% - 12px); width:24px; min-width:0; height:24px; padding:0; margin:0; border-radius:50%;",
-      "  display:flex; align-items:center; justify-content:center; z-index:7; background:none; box-shadow:none; border:0; font:11px 'Press Start 2P',ui-monospace,monospace; color:#fff;",
-      "  text-shadow:0 2px 0 rgba(0,0,0,.75), 1px 0 0 rgba(0,0,0,.5), -1px 0 0 rgba(0,0,0,.5)}",
-      "html body.pc #eilevel .eik .atkgem{left:calc(13.71% - 12px); right:auto} html body.pc #eilevel .eik .hpgem{right:calc(13.71% - 12px); left:auto}",
-      "html body.pc #eilevel .eik .hpgem.buff{color:#a8ecb5} html body.pc #eilevel .eik .hpgem.hurt{color:#ffb3a6}",
-      "html body.pc.tel #eilevel .eik :is(.atkgem, .hpgem){width:18px; height:18px; font-size:8px; bottom:calc(9.88% - 9px)}",
-      "html body.pc.tel #eilevel .eik .atkgem{left:calc(13.71% - 9px)} html body.pc.tel #eilevel .eik .hpgem{right:calc(13.71% - 9px)}"
+      /* de grote pitchkaart: de edelstenen groeien mee (de rest volgt de regels van het veld, zie leen) */
+      "html body #eilevel .eipk.eik > :is(.atkgem, .hpgem){width:calc(var(--cw) * .2) !important; height:calc(var(--cw) * .2) !important; font-size:calc(var(--cw) * .095) !important; bottom:calc(9.88% - var(--cw) * .1) !important}",
+      "html body #eilevel .eipk.eik > .atkgem{left:calc(13.71% - var(--cw) * .1) !important} html body #eilevel .eipk.eik > .hpgem{right:calc(13.71% - var(--cw) * .1) !important}",
     ].join("\n");
     (document.head || document.documentElement).appendChild(st); }catch(e){ fout(e); }
 
@@ -51191,6 +51193,7 @@ ANI.EI = (() => {
             if(nieuw.length && r.conditionText) uit.push(`@media ${r.conditionText}{${nieuw.join("\n")}}`); else uit.push(...nieuw); continue; }
           const s = r.selectorText; if(!s) continue;
           if(/\.slot\.cr/.test(s) && /zhklaar|zhvoet|zmzw/.test(s)) uit.push(r.cssText.replace(/(body\.pc )?(#fieldwrap )?\.slot\.cr/g, "#eilevel .eik"));
+          else if(/\.slot\.cr/.test(s) && /hpgem|atkgem/.test(s) && !/mik/.test(s)) uit.push(r.cssText.replace(/(#fieldwrap )?\.slot\.cr/g, "#eilevel .eik"));
           else if(s.indexOf(".lfkaart > .card") >= 0) uit.push(r.cssText.replace(/\.lfkaart > \.card/g, "#eilevel .eik > .card")); } };
       for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } pak(rs); }
       const st = document.createElement("style"); st.id = "zk-leen"; st.textContent = uit.join("\n"); document.head.appendChild(st);
@@ -51204,7 +51207,7 @@ ANI.EI = (() => {
       im.src = ICOON.zwaard; }catch(e){} };
 
   /* ---- de maat van alles ---- */
-  const maat = () => { const W = innerWidth, H = innerHeight, cw = Math.round(Math.max(54, Math.min(116, W * .1, H * .13))), ch = Math.round(cw * 1.39);
+  const maat = () => { const W = innerWidth, H = innerHeight, cw = Math.round(Math.max(54, Math.min(116, W * .1, H < 500 ? H * .2 : H * .13))), ch = Math.round(cw * 1.39);
     const boven = Math.max(H < 560 ? 84 : 112, H * .14) + ch * .5, onder = H - ch * 1.3;
     return {W, H, cw, ch, x0:cw * .75, x1:W - cw * .75, y0:boven, y1:Math.max(boven + ch, onder)}; };
 
@@ -51221,7 +51224,11 @@ ANI.EI = (() => {
   const vecht = k => !(R && R.fase && (R.fase.vecht === false || (k && R.fase.alleen && k.el !== R.fase.alleen)));
   const kanSlaan = k => k.eigen && !k.weg && k.kan && !(k.ent > 0) && vecht(k);
   /* aanvalskracht zoals in het spel: de helft van de levens, minstens 1 */
-  const atk = k => Math.max(1, Math.floor(k.hp / 2));
+  /* aanval zoals de kaart hem in een gewoon gevecht toont: met de echte atkOf, en Volle slag zoals het spel standaard speelt */
+  const atk = k => { const vol = typeof VOLLE_SLAG === "undefined" ? true : VOLLE_SLAG;
+    if(typeof S === "undefined" || !S) return vol ? k.hp : Math.max(1, Math.floor(k.hp / 2));
+    const oud = S.volle; S.volle = vol;
+    try{ return atkOf({card:{el:k.el, id:-998}, hp:k.hp, played:0, attackedT:-1, ent:0}, -1); }catch(e){ return vol ? k.hp : Math.max(1, Math.floor(k.hp / 2)); } finally{ S.volle = oud; } };
   const gems = k => `<div class="atkgem">${atk(k)}</div><div class="hpgem">${k.hp}</div>`;
   const zetPlek = k => { if(!k.dom) return; const m = maat(), p = px(k); k.dom.style.left = Math.round(p.x - m.cw / 2) + "px"; k.dom.style.top = Math.round(p.y - m.ch / 2) + "px";
     k.dom.style.width = m.cw + "px"; k.dom.style.height = m.ch + "px"; k.dom.style.setProperty("--cw", m.cw + "px"); };
@@ -51243,7 +51250,7 @@ ANI.EI = (() => {
   const tal = (k, t, kl) => { if(!R || !k) return; const m = maat(), p = px(k), d = document.createElement("div"); d.className = "eital"; d.textContent = t; d.style.color = kl || "#fff";
     d.style.left = p.x + "px"; d.style.top = (p.y - m.ch * .62) + "px"; R.el.appendChild(d); setTimeout(() => d.remove(), 1100); };
   const asje = (x, y) => A.deeltje({x, y, vx:rnd(-.3, .5), vy:rnd(-1.5, -.4), life:rnd(.6, 1.3), kleur:kies(["#fff2c0", "#ffb347", "#8a7a6a", "#4a403a"]), s:3, wr:.99});
-  const sterf = k => { if(k.weg) return; k.weg = true; geluid("ash");
+  const sterf = k => { if(k.weg) return; k.weg = true; geluid("ash"); if(R && !k.eigen){ (R.graf || (R.graf = {}))[k.el] = {u:k.u, v:k.v}; }
     if(!fx() || !k.dom){ if(k.dom) k.dom.remove(); return; }
     const r = A.rc(sel(k)), kp = A.kaart(sel(k));
     A.tw(520, t => { kp.a = 1 - t; kp.filter = `grayscale(${t}) brightness(${1 - .5 * t})`; kp.dy = -6 * t; if(r){ asje(r.x + rnd(0, r.w), r.y + rnd(r.h * .2, r.h)); asje(r.x + rnd(0, r.w), r.y + rnd(0, r.h)); } })
@@ -51331,18 +51338,17 @@ ANI.EI = (() => {
     return {x:Px, y:Py}; };
   const doekMaak = () => { const c = document.createElement("canvas"); c.className = "eiproloog"; c.width = innerWidth; c.height = innerHeight; R.el.appendChild(c); return c; };
   /* Het einde van het filmpje: je zit nog in de scène met het veld vol eieren. We zoomen in op dat ene ei dat
-     gloeit, dan zie je je borstkas met het kloppende hart. Het klopt nog een paar keer, stopt, het wordt donker en
+     gloeit (we zoomen door, zonder los ei-plaatje), dan zie je je borstkas met het kloppende hart. Het klopt nog een paar keer, stopt, het wordt donker en
      je zakt erin weg: je zit in het ei. De echte prenten uit het filmpje (eieren, ei, borst-schim). */
-  let EIEREN = null, EI1 = null;
+  let EIEREN = null;
   const eierenIm = () => EIEREN || (EIEREN = beeld("art/film/eieren.webp"));
-  const eiIm = () => EI1 || (EI1 = beeld("art/film/ei.webp"));
   const fease = v => { v = Math.max(0, Math.min(1, v)); return .5 - .5 * Math.cos(Math.PI * v); };   // dezelfde ease als het filmpje
   const coverTeken = (x, im, vak, z, fx0, fy0, a, filter) => { const b = Math.max(vak.w / im.width, vak.h / im.height), w0 = im.width * b, h0 = im.height * b;
     const Px = vak.x + (vak.w - w0) / 2 + fx0 * w0, Py = vak.y + (vak.h - h0) / 2 + fy0 * h0, w = w0 * z, h = h0 * z;
     let X = Px - fx0 * w, Y = Py - fy0 * h; X = Math.min(vak.x, Math.max(vak.x + vak.w - w, X)); Y = Math.min(vak.y, Math.max(vak.y + vak.h - h, Y));
     x.save(); x.globalAlpha = a; if(filter) x.filter = filter; x.drawImage(im, X, Y, w, h); x.restore(); return {x:X + .52 * w, y:Y + .38 * h, s:w / im.width}; };
   const proloog = async vak => { if(!R) return;
-    const [ims, im, ei] = await Promise.race([Promise.all([eierenIm(), borst(), eiIm()]), wacht(1500).then(() => [null, null, null])]); if(!R) return;
+    const [ims, im] = await Promise.race([Promise.all([eierenIm(), borst()]), wacht(1500).then(() => [null, null])]); if(!R) return;
     const c = doekMaak(), x = c.getContext("2d"), V = vak || {x:0, y:0, w:c.width, h:c.height}, mooi = fx();
     const TA = mooi ? 2.9 : .6, D = TA + (mooi ? 5.0 : 1.6);   // TA: het moment dat je de borstkas ziet
     const fx0 = .32 + .36 * fease(6.2 / 7);                    // waar het filmpje was met zijn camera
@@ -51351,15 +51357,10 @@ ANI.EI = (() => {
         x.fillStyle = "#000"; x.fillRect(0, 0, c.width, c.height);
         if(t < TA){
           /* het veld met eieren, en inzoomen op dat ene ei */
-          const u = mooi ? Math.pow(seg(t, .1, TA), 2.2) : 0, z = 1.18 * Math.pow(7, u), fxx = lerp(fx0, .52, fease(seg(t, 0, TA * .7))), fyy = lerp(.42, .38, fease(seg(t, 0, TA * .7)));
+          const u = mooi ? Math.pow(seg(t, .1, TA), 2.2) : 0, z = 1.18 * Math.pow(14, u), fxx = lerp(fx0, .52, fease(seg(t, 0, TA * .7))), fyy = lerp(.42, .38, fease(seg(t, 0, TA * .7)));
           let pos = null; if(ims) pos = coverTeken(x, ims, V, z, fxx, fyy, 1, `brightness(${1 + .4 * u})`);
           if(pos){ const g = x.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, (60 + 400 * u) * V.w / 1280); g.addColorStop(0, `rgba(255,200,130,${.35 + .4 * u})`); g.addColorStop(1, "rgba(255,190,110,0)");
             x.save(); x.globalCompositeOperation = "lighter"; x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); x.restore(); }
-          /* het ene ei, steeds groter, tot het beeld vol is */
-          const e = seg(t, TA * .55, TA);
-          if(ei && e > 0 && mooi){ const h = V.h * lerp(.5, 3.2, Math.pow(e, 1.6)), w = h * ei.width / ei.height, cx = lerp(pos ? pos.x : V.x + V.w / 2, V.x + V.w / 2, e), cy = lerp(pos ? pos.y : V.y + V.h / 2, V.y + V.h * .5, e);
-            x.save(); x.globalAlpha = Math.min(1, e * 1.6); x.filter = `brightness(${(1 + .35 * e).toFixed(2)})`; x.drawImage(ei, cx - w / 2, cy - h * .48, w, h); x.restore();
-            const g2 = x.createRadialGradient(cx, cy, 0, cx, cy, h * .4); g2.addColorStop(0, `rgba(255,190,120,${.25 * e})`); g2.addColorStop(1, 'rgba(255,190,120,0)'); x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = g2; x.fillRect(0, 0, c.width, c.height); x.restore(); }
           if(mooi && t > TA - .18){ x.fillStyle = `rgba(255,248,232,${seg(t, TA - .18, TA)})`; x.fillRect(0, 0, c.width, c.height); }
         } else {
           const tt = t - TA;
@@ -51466,7 +51467,7 @@ ANI.EI = (() => {
     if(R.bronEl && !R.bron.classList.contains("dicht") && !R.bron.classList.contains("weg")){ const b = A.rc(R.bron); if(b){ const kl = A.KL[R.bronEl] || [KLR[R.bronEl]];
       A.gloed(b.cx, m.H - 6, m.cw * 1.5, KLR[R.bronEl], .22 + .06 * Math.sin(T / 400));
       if(Math.random() < .35) A.deeltje({x:b.cx + rnd(-m.cw * .8, m.cw * .8), y:m.H - rnd(0, 10), vx:0, vy:-rnd(.5, 1.3), life:rnd(.6, 1.1), kleur:kies(kl), soort:"pix", s:kies([2, 2, 3])}); } }
-    levend().forEach(k => { if(k.ent > 0 && k.dom){ const q = A.rc(k.dom); if(q) boei(x, q, T); } }); };
+    if(!R.uit) levend().forEach(k => { if(k.ent > 0 && k.dom){ const q = A.rc(k.dom); if(q) boei(x, q, T); } }); };
 
   /* ---- de speel-effecten (zoals in het spel) ---- */
   const zwak = el => ["steen", "vuur", "gras", "water"].find(x => EL[x] && EL[x].strong === el);
@@ -51497,7 +51498,7 @@ ANI.EI = (() => {
         await A.tw(110, t => kp.dy = 10 * t, E.uit); await A.tw(150, t => { kp.dy = lerp(10, -46, E.in2(t)); kp.z = 10 * t; });
         if(r) for(let i = 0; i < 6; i++) A.deeltje({x:r.cx + rnd(-8, 8), y:r.y - 40, vx:rnd(-.3, .3), vy:-rnd(3, 6), life:.3, kleur:"#ffe7a0", soort:"streep", s:2});
         await A.tw(260, t => { kp.dy = lerp(-46, 0, t); kp.z = lerp(10, 0, t); }, E.uit); A.los(kp); } else await wacht(100);
-      tal(k, "niets", "#b9b0c8"); return {r:"mis"}; }
+      tal(k, "niets", "#b9b0c8"); if(R && R.fase && R.fase.vecht) setTimeout(() => { if(R && !k.weg) verdwijn(k); }, 350); return {r:"mis"}; }
     geluid("attack"); const kracht = atk(k);
     if(fx()) await A.veilig(A.slag(sel(k), sel(d), kracht, 0, true) || Promise.resolve(), 700); else await wacht(140);
     if(d.weg) return {r:"raak", d};
@@ -51560,12 +51561,14 @@ ANI.EI = (() => {
   /* Steen: houd van elk element er een paar in beeld */
   const bijvullen = n => { if(!R || !R.fase) return; const m = maat();
     ["steen", "vuur", "gras", "water"].forEach(el => { let c = levend().filter(q => !q.eigen && q.el === el).length;
-      while(c++ < n){ const v = vrij(rnd(m.x0, m.x1), rnd(m.y0, m.y0 + m.ch * 1.1)); vijand(el, v.u, v.v); } }); };
+      /* een gesneuvelde komt terug op (of vlak bij) zijn oude plek */
+      while(c++ < n){ const g = R.graf && R.graf[el]; if(g) delete R.graf[el];
+        const v = g ? vrij(g.u * m.W, g.v * m.H) : vrij(rnd(m.x0, m.x1), rnd(m.y0, m.y0 + m.ch * 1.1)); vijand(el, v.u, v.v); } }); };
   const verdwijn = k => { k.weg = true; if(fx() && k.dom){ const kp = A.kaart(sel(k)); A.tw(450, t => { kp.a = 1 - t; kp.sx = kp.sy = 1 - .1 * t; }).then(() => { A.los(kp); k.dom && k.dom.remove(); }); } else if(k.dom) k.dom.remove(); };
   /* niet te vol: de oudste kaart van jou verdwijnt in het donker (bij Water eerst de oude Waters, de elementen blijven) */
   const opruimen = () => { const m = maat(), max = m.H < 560 ? 4 : m.W < 700 ? 5 : 7, wtr = R.fase && R.fase.el === "water";
     const eig = eigen().sort((a, b) => wtr ? ((b.el === "water") - (a.el === "water") || a.t - b.t) : a.t - b.t); while(eig.length > max) verdwijn(eig.shift());
-    if(wtr){ for(const el of ["steen", "vuur", "gras"]) if((R.fase.id === "w1" && R.wGedaan ? !R.wGedaan.has(el) : eigen().filter(q => q.el !== "water").length < 2) && !eigen().some(q => q.el === el)){ const v = vrij(rnd(m.x0, m.x1), rnd((m.y0 + m.y1) / 2, m.y1)); nieuw(el, v.u, v.v, true, {zacht:true}); } } };
+    if(wtr){ for(const el of ["steen", "vuur", "gras"]) if(!eigen().some(q => q.el === el)){ const v = vrij(rnd(m.x0, m.x1), rnd((m.y0 + m.y1) / 2, m.y1)); nieuw(el, v.u, v.v, true, {zacht:true}); } } };
   const leeg = async () => { const al = levend(); al.forEach(k => { k.weg = true; if(fx() && k.dom){ const kp = A.kaart(sel(k)); A.tw(420, t => { kp.a = 1 - t; kp.dy = -10 * t; }).then(() => { A.los(kp); k.dom && k.dom.remove(); }); } else if(k.dom) k.dom.remove(); });
     if(al.length) await wacht(fx() ? 460 : 0); R.kaarten = []; };
   /* een nieuwe kaart: een blaadje valt eraf (of iemand weer kan slaan, beslist de klok: 10 tellen na zijn aanval) */
@@ -51587,7 +51590,7 @@ ANI.EI = (() => {
   const pitch = async f => { if(!R) return; kleurZet(f.el); bronZet(f.el, false); R.fase = null; hud();
     const m = maat(), w = Math.round(Math.min(m.cw * 2.1, innerWidth * .42, innerHeight * .3)), d = document.createElement("div"); d.className = "eipitch";
     d.innerHTML = `<div class="eipk eik lfkaart" style="width:${w}px; height:${Math.round(w * 1.39)}px; --cw:${w}px">${gezicht({el:f.el, id:"pitch"})}${gems({el:f.el, hp:HP(f.el)})}</div>
-      <h2>${NM[f.el]}</h2><p>${PITCH[f.el]}</p><em class="eisz">${sterkZwak(f.el)}</em><small>TIK OM VERDER TE GAAN</small>`;
+      <h2>${NM[f.el]}</h2><p>${PITCH[f.el]}</p><small>TIK OM VERDER TE GAAN</small>`;
     R.el.appendChild(d); geluid("light"); requestAnimationFrame(() => d.classList.add("aan"));
     const kp = d.querySelector(".eipk");
     if(fx() && kp) kp.animate([{transform:"translateY(40px) scale(.7)", opacity:0}, {transform:"translateY(-6px) scale(1.04)", opacity:1, offset:.7}, {transform:"none", opacity:1}], {duration:520, easing:"ease-out"});
@@ -51613,13 +51616,14 @@ ANI.EI = (() => {
     R.fase = f; R.n = 0; R.stap = 0; R.dood = f.telt === "dood" ? {steen:false, vuur:false, gras:false, water:false} : null; hud();
     const m = maat(), plek = (x, y) => vrij(x * m.W, y * m.H);
     if(f.id === "s2"){
+      await leeg(); if(!R) return;
       await zeg("Je bent niet alleen. Dit is ook van jou.", 1400); if(!R) return;
       ["vuur", "gras", "water"].forEach((el, i) => { const v = plek([.25, .5, .75][i], .45); nieuw(el, v.u, v.v, true, {zacht:true}); });
       await wacht(fx() ? 400 : 0); hud(); await zeg("Geef het aan wie jij wilt.", 1100);
     } else if(f.id === "s3"){
-      eigen().forEach(k => { k.kan = true; k.klaarOm = 0; tekenKaart(k); });
+      await leeg(); if(!R) return;
       await zeg("En nu de rest.", 900); if(!R) return;
-      rijen(["steen", "vuur", "gras", "water"], 2); await wacht(fx() ? 500 : 0); hud();
+      rijen(["steen", "vuur", "gras", "water"], 1); await wacht(fx() ? 500 : 0); hud();
       await zeg("Steen verplettert Water. In één klap.", 1500); if(!R) return;
       await zeg("Tegen Gras doet Steen niks. Gras breekt Steen.", 1700); if(!R) return;
       await zeg("Tik op wat klaarstaat en het slaat.", 1400); if(!R) return;
@@ -51630,37 +51634,27 @@ ANI.EI = (() => {
       await leeg(); if(!R) return; rijen(["steen", "vuur", "gras", "water"], 1); await wacht(fx() ? 420 : 0);
       await zeg("Vuur verbrandt Gras: dubbel. Water dooft het: niks.", 1800);
     } else if(f.id === "g"){
-      await leeg(); if(!R) return; rijen(["steen", "vuur", "water"], 1); await wacht(fx() ? 420 : 0);
+      await leeg(); if(!R) return; rijen(["steen", "vuur", "gras", "water"], 1); await wacht(fx() ? 420 : 0);
       await zeg("Gras breekt Steen: dubbel. Vuur laat zich niet pakken.", 1800);
-    } else if(f.id === "w1"){
+    } else if(f.id === "w"){
       await leeg(); if(!R) return;
       ["steen", "vuur", "gras"].forEach((el, i) => { const v = plek([.25, .5, .75][i], .66); nieuw(el, v.u, v.v, true, {zacht:true, kan:false}); });
-      rijen(["water", "gras", "steen", "vuur"], 1); await wacht(fx() ? 420 : 0);
-      await zeg("Water dooft Vuur. Tegen Steen doet het niks.", 1700); if(!R) return;
-      await zeg("Til ze op. Elk element een keer.", 1200);
-      R.wGedaan = new Set();
-    } else if(f.id === "w2"){
-      await zeg("Nu sneller. Leg hem er meteen op.", 1300);
-    } else if(f.id === "w3"){
-      eigen().forEach(k => { k.kan = true; k.klaarOm = 0; tekenKaart(k); }); await aanvullen(andereEl("water"), 4); if(!R) return;
-      await zeg("Nu mag je slaan. Tik op wat klaarstaat.", 1500); if(!R) return;
-      R.autoT = klokStart(f);
+      rijen(["steen", "vuur", "gras", "water"], 1); await wacht(fx() ? 420 : 0);
+      await zeg("Leg hem op een wezen van jou.", 1200);
     }
     let sloegAl = false;
     while(R && !R.volgend && (f.telt === "dood" ? !Object.values(R.dood).every(Boolean) : R.n < f.doel)){
       bronZet(f.el, true);
       const klaar = f.vecht && eigen().some(kanSlaan);
-      hint(R.stap === 0 && ["s1", "v", "g", "w1"].includes(f.id) ? "Pak hem uit het licht. Leg hem waar je wilt." : f.id === "w2" ? "Leg Water óp een wezen van jou." : (klaar && !sloegAl) ? "Tik op wat klaarstaat. Het slaat wat ervoor staat." : f.id === "s3" ? "Leg je stenen onder wat je kapot wilt." : "");
+      hint(R.stap === 0 && f.id === "w" ? "Pak hem uit het licht. Leg hem op een wezen van jou." : R.stap === 0 && ["s1", "v", "g"].includes(f.id) ? "Pak hem uit het licht. Leg hem waar je wilt." : (klaar && !sloegAl) ? "Tik op wat klaarstaat. Het slaat wat ervoor staat." : f.id === "s3" ? "Leg je stenen onder wat je kapot wilt." : "");
       const a = await wachtOp("speel"); hint(""); if(!R || !a || R.volgend) break;
       if(a.klaar) break;
       if(a.aanval){ bronZet(f.el, false); const r = await aanval(a.aanval); if(!R) return; if(r) sloegAl = true;
         if(r && r.d && !r.d.eigen){
           if(f.telt === "dood" && r.r === "immuun" && r.d.el === "gras" && R.dood && !R.dood.gras){ R.dood.gras = true; hud(); geluid("blip"); }
           if(f.telt === "raak" && r.r === "raak"){ R.n++; hud(); geluid("blip"); } }
-        if(f.id === "s3") setTimeout(() => { if(R && R.fase === f) bijvullen(2); }, 900); else await aanvullen(andereEl(f.el), 4);
+        setTimeout(() => { if(R && R.fase === f) bijvullen(1); }, 900);
         continue; }
-      /* water in w2: hij moet óp een wezen van jou */
-      if(f.id === "w2" && !(a.op && a.op.eigen)){ geluid("thud"); await zegEens("w2-op", "Óp een wezen van jou. Niet ernaast."); continue; }
       /* een nieuwe kaart */
       bronZet(f.el, false); R.stap++; nieuweBeurt();
       let spot = a.drop; if(a.op) spot = {u:a.op.u, v:a.op.v};
@@ -51674,16 +51668,14 @@ ANI.EI = (() => {
         else telt = await effect(k, k);
         if(f.id === "s1" && R.stap === 1) await zeg("Voel je het? Het luistert naar jou.", 1500);
       } else if(f.el === "water"){
-        let doel = null;
-        if(f.id === "w1"){ const mag = q => q !== k && q.eigen && q.el !== "water" && !R.wGedaan.has(q.el);
-          if(levend().some(mag)){ doel = await kiesUit(mag, "water", "Welk element til je op? Tik erop."); if(!R) return; } }
-        else { doel = a.op; }
+        /* op een wezen gelegd: dat wezen; ernaast: dan wijs je aan wie hij optilt */
+        let doel = a.op && a.op.eigen ? a.op : null;
+        if(!doel){ const mag = q => q !== k && q.eigen && q.el !== "water"; if(levend().some(mag)){ doel = await kiesUit(mag, "water", "Wie til je op? Tik erop."); if(!R) return; } }
         if(doel){ const naar = plekOnder(doel, doel.el), alWater = doel.el === "water";
-          await plons(k, doel, naar); if(!R) return;
-          if(!alWater){ doel.kan = true; await aanval(doel, {moet:true}); if(!R) return; telt = true; if(f.id === "w1") R.wGedaan.add(doel.el); }
-          else await zegEens("water-op-water", "Water op Water. Hij verhuist, verder niks."); }
+          telt = await plons(k, doel, naar); if(!R) return;
+          if(alWater) await zegEens("water-op-water", "Water op Water. Hij verhuist, verder niks."); }
         await stilWater(k); if(!R) return;
-        if(R.stap === 1 && f.id === "w1") await zegEens("plons", "Zie je? Nu is het gewoon Water.", "Dat kunstje doet hij niet nog eens.");
+        if(R.stap === 2) await zegEens("plons", "Water doet dat maar één keer: één keer iets herspelen.", "Daarna is het gewoon Water.");
       } else {
         let doel = null;
         if(R.stap > ZELF && levend().some(q => q !== k)){ doel = await kiesUit(q => q !== k, f.el, "Jij kiest. Alles mag, ook wat van jou is.") || null; if(!R) return; }
@@ -51692,27 +51684,26 @@ ANI.EI = (() => {
       }
       if(!R) return;
       if(f.telt === "speel" || (f.telt === "effect" && telt)){ R.n++; hud(); geluid("blip"); }
-      if(f.id === "v" || f.id === "g") await aanvullen(andereEl(f.el), 4);
-      if(f.id === "s3") bijvullen(2);
+      if(["s3", "v", "g", "w"].includes(f.id)) bijvullen(1);
       opruimen();
     }
     if(R && R.autoT){ clearInterval(R.autoT); R.autoT = null; }
     if(!R) return; hint("");
     if(R.volgend) return;
     await wacht(fx() ? 250 : 0);
-    if(["s1", "s2", "w1", "w2"].includes(f.id)) return;
+    if(["s1", "s2"].includes(f.id)) return;
     await band(f.el === "water" ? "ALLES VAN JOU" : `${NM[f.el]} IS VAN JOU`, f.el === "water" ? "Iedereen heeft er een beetje van. Jij bent ze." : "", "Verder"); };
 
   /* ---- begin en einde ---- */
   const loop = async () => {
     try{
       if(R.vanFilm) await proloog(R.filmVak); if(!R) return;
-      await stem(["Daar ben je.", "Voel je dat? Dat ben jij.", "Iedereen draagt de elementen in zich. Een beetje.", "Jij niet. Jij bent ze.", "Kom. Ik laat je zien wat van jou is."], "0-0 · HET BEGIN"); if(!R) return;
+      await stem(["Daar ben je.", "Voel je dat? Dat ben jij.", "Iedereen draagt de elementen in zich. Een beetje.", "Jij niet. Jij bent ze.", "Kom. Ik laat je zien wat van jou is."]); if(!R) return;
       R.volgend = false;
       let vorig = null, slaOver = null;
       for(const f of FASEN){ if(!R) return;
         if(slaOver === f.el) continue; slaOver = null;
-        if(f.el !== vorig){ R.volgend = false; if(f.el === "gras" || f.el === "water") await glitch(); if(!R) return; hartVoor(f.el); await pitch(f); vorig = f.el; if(R.volgend){ slaOver = f.el; continue; } }
+        if(f.el !== vorig){ R.volgend = false; if(f.el === "gras" || f.el === "water") await glitch(); if(!R) return; hartVoor(f.el); bronZet(f.el, false); await leeg(); if(!R) return; await pitch(f); vorig = f.el; if(R.volgend){ slaOver = f.el; continue; } }
         if(!R) return; await fase(f); if(!R) return;
         if(R.volgend){ slaOver = f.el; await leeg(); } }
       if(!R) return; R.volgend = false; await klaar();
@@ -51756,9 +51747,9 @@ ANI.EI = (() => {
     hint(""); R.bron.classList.add("weg"); R.hud.style.transition = "opacity .6s"; R.hud.style.opacity = "0"; GL.hartUit();
     { const kn = R.el.querySelector(".eiknoppen"); if(kn) kn.style.display = "none"; }
     const m = maat(), cx = m.W / 2, mooi = fx();
-    for(const k of levend()) if(k.dom){ k.dom.style.transition = "opacity .9s"; k.dom.style.opacity = "0"; }
+    R.vlak.style.transition = "opacity .9s"; R.vlak.style.opacity = "0"; R.uit = true;
     for(const [t, ms] of [["Je hebt het.", 1000], ["Je bent klaar.", 1000], ["Deze wereld... is van jou.", 1600]]){ await zeg(t, ms); if(!R) return; }
-    { const r = document.createElement("div"); r.className = "eirise"; r.textContent = "RISE!"; R.el.appendChild(r); geluid("win");
+    { const r = document.createElement("div"); r.className = "eirise"; r.textContent = "NEEM HET."; R.el.appendChild(r); geluid("win");
       if(fx()){ A.flits(.35, "#ffe7a0"); A.schud(6); r.animate([{opacity:0, transform:"translate(-50%, -50%) scale(1.6)"}, {opacity:1, transform:"translate(-50%, -50%) scale(1)", offset:.25}, {opacity:1, offset:.75}, {opacity:0, transform:"translate(-50%, -50%) scale(.96)"}], {duration:1500, fill:"forwards"}); }
       else r.animate([{opacity:0}, {opacity:1, offset:.2}, {opacity:1, offset:.8}, {opacity:0}], {duration:1400, fill:"forwards"});
       await wacht(1300); if(!R) return; }
@@ -51827,7 +51818,7 @@ ANI.EI = (() => {
       let vak = null, klaarGedaan = false;
       const verder = () => { if(klaarGedaan) return; klaarGedaan = true;
         try{ M = null; storySkin(0); render(); }catch(e){ fout(e); } start({film:true, vak}); };
-      borst(); eierenIm(); eiIm();
+      borst(); eierenIm();
       if(lijst) FILM_EDIT[OPENING_FILM] = lijst;
       try{ fs0.call(this, naam, verder); } finally{ FILM_EDIT[OPENING_FILM] = oud; }
       /* zodra het filmpje echt loopt, de tijd bijhouden en net voor het witte eind overnemen */
@@ -53359,7 +53350,7 @@ ANI.MIK = (() => {
     return x ? x.card.id : (s.dataset.act === "cre" ? PLEK_ID(p, c) : null); };
 
   /* ---- het canvas: doelen, lijn en voorvertoning (alleen met effecten aan) ---- */
-  const teken = () => { const n = nu; if(!n) return false; if(!S || S.ui !== n.ui){ stop(); return false; }
+  const teken = () => { const n = nu; if(!n) return false; if(!S || S.ui !== n.ui){ stop(); return false; } if(typeof ykStil === "function" && ykStil()) return;
     const ctx = ANI.ctx; if(!ctx) return; const t = performance.now() / 1000, adem = .5 + .5 * Math.sin(t * 4);
     const geldig = new Set(n.valid);
     /* donker over wat niet mag */
@@ -53405,6 +53396,901 @@ ANI.YF = (() => {
   const graf = card => { if(card && card.fusie && card.var === "oceaanrust") card.var = "oceaan"; return card; };
   const sleutel = card => card && card.fusie && card.var ? (Object.keys(FUSIE_VAR).find(k => FUSIE_VAR[k] === card.var) || null) : null;
   return {graf, sleutel};
+})();
+
+/* ---- module yh ---- */
+/* ================= 📖 HET VERHAAL: HANDEN, LEVENS, STERRENVAKJE (deel yh, 10 nov 2026, Q) =================
+   1. Nimbus (1-3) en Brokko (1-2) beginnen weer met een gewone hand (de nep-moeilijkheid uit deel zb gaf ze er minder;
+      Brokko had ook nog zijn oude beginHandMin). Levens van de tegenstanders blijven zoals zb ze zette.
+   2. Je levens in het verhaal, overal dezelfde som (in beeld, dus na Volle slag):
+        8  +  gekochte hartjes bij Knort (1 per hartje; codewoord "unlock": alle 3)  +  Kees in je zak (1, tot 5-2)
+      Levels met een eigen regel houden die, maar dan bovenop die som:
+        levensJij (3-6, 5-1 t/m 5-5): wat dat level er vroeger meer gaf dan 8, komt er nu bij (hartjes tellen dan ook mee).
+        startSchade (2-5 straf/hamerstraf): gaat er nog steeds af, in beeld dubbel (zoals het was).
+      De balk volgt vanzelf: zijn maximum is S.story.startLevens, en het grijze blokje van Kees staat op het laatste leven.
+   3. Het sterrenvakje rechtsonder op de verhaalkaart ("★ 5 van 20") is weg. Bij Knort en Tang staan je sterren nog. */
+ANI.YH = (() => {
+  const BASIS = 8;
+  try{
+    if(STORY["1-2"]){ STORY["1-2"].handMin = 0; STORY["1-2"].beginHandMin = 0; }
+    if(STORY["1-3"]) STORY["1-3"].handMin = 0;
+  }catch(e){ console.error(e); }
+
+  /* wat er bij je levens komt (in beeld) */
+  function levensSom(id, L){
+    const vx = S && S.volle ? LEVENS_X : 1;
+    let hart = 0; try{ const b = buitVoor(id); hart = Math.max(0, (b.hart || VERHAAL_LEVENS) - VERHAAL_LEVENS); }catch(e){}
+    const kees = kzIs("kees=kees_mee") && !storyKlaar("5-2") ? 1 : 0;
+    const bonus = L && L.levensJij ? Math.max(0, L.levensJij * vx - BASIS) : 0;
+    const straf = L && L.startSchade ? L.startSchade * vx : 0;
+    return {basis:BASIS, hart, kees, bonus, straf, totaal:Math.max(1, BASIS + hart + kees + bonus - straf)};
+  }
+  { const kz0 = kzGevechtStart;
+    kzGevechtStart = function(id, L){
+      const r = kz0.apply(this, arguments);
+      try{
+        const st = S && S.story; if(!st) return r;
+        const s = levensSom(id, L);
+        P(0).life = s.totaal; st.levensSom = s;
+        if(S.hpPiek) S.hpPiek[0] = 0;
+        levensPiek(0, s.totaal);
+        if(s.kees) st.keesLeven = P(0).life; else delete st.keesLeven;
+      }catch(e){ console.error(e); }
+      return r;
+    }; }
+
+  try{ if(typeof document !== "undefined" && !document.getElementById("yhstijl")){
+    const st = document.createElement("style"); st.id = "yhstijl";
+    st.textContent = `html body .kaartbox .kaartkop > .sterbalk{display:none !important}`;
+    document.head.appendChild(st); } }catch(e){ console.error(e); }
+
+  return {levensSom};
+})();
+
+/* ---- module yi ---- */
+/* ================= 📖 HET VERHAAL: LEVELVAK, DECKKNOP, COMPANIONS, KEES, ROCKY, TUTORIAL (deel yi, 10 nov 2026, Q) =================
+   1. Het levelvak op de wereldkaart: de aethers van de tegenstander (vak-art en naam) en hooguit een vage hint over het
+      veld. Geen regels, geen "Geen bijzondere regels".
+   2. Daarin een knop "Deck": meteen de voorbereiding van dat gevecht. Wat je kiest, staat er de volgende keer klaar.
+   3. In de deckbouwers geen aethers uit de gevangenis meer (in de library blijven ze).
+   4. Companions: Kees, Max en Maatje (deel zf maakte Max en Maatje al wezens zonder plek) staan onder een eigen kopje.
+   5. Kees: een van je Stenen is Kees (alleen het plaatje en de naam; het blijft dezelfde Steen). In 1-4 durft Rocky
+      niets tegen Kees: geen aanval in zijn kolom, geen effect op hem. Ook in de kern (yi-hooks.py).
+   6. 1-4: Rocky weer met een gewone hand. Zijn modus (Kees en de kiezels, de paarse balk) begint bij de eerste klap van
+      jou die hem niet doodt. Een klap die hem in een keer doodt, doodt hem.
+   7. De tutorial 1-1 sluit aan op het ei (0-0): wat daar al geleerd is, gaat eruit. */
+ANI.YI = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  /* ---------- 1 · de vage hints ---------- */
+  const HINT = {
+    "1-2":"Hij begint niet eerlijk.", "1-3":"Alles is steen.", "1-5":"Het plafond houdt het niet lang meer.",
+    "2-1":"Hou het een paar rondes vol!", "2-2":"Er beweegt niets. Nog niet.", "2-3":"Pas op dat je niet wegdommelt.",
+    "2-4":"Er hangt iets in het web.", "2-5":"Ze komen nooit alleen.", "2-6":"Het weer zit niet mee.",
+    "3-3":"Je ziet niet alles.", "3-4":"Ze zijn met z'n drieën.", "3-5":"Alles blijft in beweging.",
+    "3-6":"De grond is lava.", "4-1":"Hou het meerdere rondes vol!", "4-3":"Het is hier glad.",
+    "4-4":"Ze lijkt wel heel erg op jou.", "4-5":"Het water komt en gaat.", "5-1":"Een toets.",
+    "5-2":"Hij verzamelt alles wat leeft.", "5-3":"Hij is niet zomaar te raken.", "5-4":"Het plafond, weer.",
+    "5-5":"Het is niet voorbij na één keer."};
+  const lvVan = id => { const L = STORY[id]; if(!L) return null; const v = kzVariant(id);
+    return v !== undefined && L.varianten && L.varianten[v] ? Object.assign({}, L, L.varianten[v]) : L; };
+  function aethersHTML(id){
+    const L = lvVan(id); if(!L) return "";
+    const ks = [...new Set(L.aeVij || [])].filter(k => AETHERS[k]);
+    const ae = ks.map(k => { const pad = AETHER_BEELD[k];
+      return `<div class="yiae" title="${AETHERS[k].name}"><span class="yiaeb">${pad ? `<img src="${pad}" alt="" draggable="false" onerror="this.remove()">` : ""}<i>${aeIcon(k)}</i></span><b>${AETHERS[k].name}</b></div>`; }).join("");
+    return (ae ? `<div class="yiaekop">Zijn aethers</div><div class="yiaerij">${ae}</div>` : "") + (HINT[id] ? `<p class="yihint">${HINT[id]}</p>` : "");
+  }
+  const deckKan = id => { const i = STORY_ORDER.indexOf(id); return i >= STORY_ORDER.indexOf("1-4") && storyVrij(id) && !(STORY[id] && STORY[id].vrijDeck); };
+  { const ki0 = ksInfoHTML;
+    ksInfoHTML = function(id){ let h = ki0.apply(this, arguments);
+      try{ if(id === "start" || !STORY[id]) return h;
+        const a = h.indexOf('<div class="ksiregels">'), b = h.indexOf('<div class="ksiknoppen">');
+        if(a >= 0 && b > a) h = h.slice(0, a) + `<div class="ksiregels yiregels">${aethersHTML(id)}</div>\n      ` + h.slice(b);
+        if(deckKan(id)) h = h.replace('<button class="obtn ksispeel"', `<button class="obtn b-dim yideckknop" data-act="btn" data-btn="yideck" data-id="${id}">Deck</button><button class="obtn ksispeel"`);
+      }catch(e){ fout(e); }
+      return h; }; }
+  { const lu0 = lvUitlegHTML;
+    lvUitlegHTML = function(id){ let h = lu0.apply(this, arguments);
+      try{ const L = id && STORY[id]; if(!L) return h;
+        const i = h.indexOf("</p>", h.indexOf("Tegen:")) + 4, j = h.lastIndexOf("</div>");
+        if(i > 3 && j > i) h = h.slice(0, i) + `<div class="yiregels">${aethersHTML(id)}</div>` + (deckKan(id) ? `<button class="obtn b-dim yideckknop" data-act="btn" data-btn="yideck" data-id="${id}">Deck</button>` : "") + h.slice(j);
+      }catch(e){ fout(e); }
+      return h; }; }
+
+  /* ---------- 2 · alleen de voorbereiding ---------- */
+  let DECK_ALLEEN = false;
+  async function deckAlleen(id){
+    const L = lvVan(id); if(!L || DECK_ALLEEN) return;
+    DECK_ALLEEN = true;
+    const S0 = S, M0 = M;
+    try{
+      M = null; newGame(); S.nk = 5;
+      S.pl.forEach(pl => { while(pl.cols.length > S.nk) pl.cols.pop(); while(pl.cols.length < S.nk) pl.cols.push({cre:null, spell:null}); });
+      S.vsBot = true; S.set.handoff = false; S.mode = "classic";
+      S.story = {id, wereld:L.wereld, variant:kzVariant(id), schadeJij:0, mijnTijd:0, deckAlleen:true};
+      S.ae = [[], []]; S.lt = [[], []]; S.aeKeuze = [null, null]; S.terug = [null, null];
+      P(0).deck = deckUit(L.deckJij, 0); P(1).deck = [];
+      S.ui = {mode:"busy"}; storySkin(L.wereld); render();
+      await storyVoorbereiding(L, id);
+    }catch(e){ fout(e); }
+    finally{
+      DECK_ALLEEN = false;
+      try{ GEN++; pending = null; busyFlag = false; S = S0; M = M0 && M0.type === "story" ? M0 : kaartM(); storySkin(0); render(); }catch(e){ fout(e); }
+    }
+  }
+  { const ob0 = onBtn;
+    onBtn = function(btn, el){ if(btn === "yideck"){ const id = el && el.dataset && el.dataset.id; if(id) deckAlleen(id); return; } return ob0.apply(this, arguments); }; }
+
+  /* ---------- 3 · geen gevangen aethers in de deckbouwers ---------- */
+  try{ dkAeGevangenis = function(){ return ""; }; }catch(e){ fout(e); }
+
+  /* ---------- 4 · 5 · companions en Kees ---------- */
+  const keesMee = () => kzIs("kees=kees_mee") && !storyKlaar("5-2");
+  /* Max en Maatje zijn sinds deel zf al wezens in je deck (geen plek nodig); hier staan ze alleen bij elkaar met Kees */
+  const naLv = x => { try{ const i = STORY_ORDER.indexOf(S && S.story && S.story.id); return i < 0 || i > STORY_ORDER.indexOf(x); }catch(e){ return false; } };
+  const comps = () => { const uit = [];
+    try{ if(keesMee()) uit.push({k:"kees"});
+      if(naLv("2-5") && kzIs("max=max_vang")) uit.push({k:"max"});
+      if(naLv("3-1") && kzIs("maatje=maatje_kern")) uit.push({k:"maatje"}); }catch(e){ fout(e); }
+    return uit; };
+  /* in het scherm: het kopje Companions, en Kees als een van je Stenen */
+  const keesKaart = () => `<div class="gc">${cardFaceHTML({id:-951, el:"steen", owner:0, keesSkin:true})}</div>`;
+  const COMP = {kees:{t:"Kees: een van je Stenen. Hij zit in je zak.", kaart:keesKaart},
+    max:{t:"Max: een wolf in je deck. Kost geen plek.", kaart:() => `<div class="gc">${cardFaceHTML({id:-801, el:"buidelwolf", owner:0, jacht:true})}</div>`},
+    maatje:{t:"Maatje: in je deck. Kost geen plek.", kaart:() => `<div class="gc">${cardFaceHTML({id:-802, el:"balrog", owner:0, jacht:true, beest:true})}</div>`}};
+  { const vb0 = voorB2HTML;
+    voorB2HTML = function(u0){ let h = vb0.apply(this, arguments);
+      try{
+        const cs = comps();
+        if(cs.length){
+          const groep = `<div class="dkgroep yicomps"><div class="dkkop">Companions <i>kosten geen plek</i></div><div class="dkslots">${cs.map(c => `<div class="dkbplek vol yicomp" title="${COMP[c.k].t}">${COMP[c.k].kaart()}</div>`).join("")}</div></div>`;
+          const eind = h.lastIndexOf("</div>\n    </div></div>");   // onderin het rechterpaneel (daar is ruimte)
+          if(eind > 0) h = h.slice(0, eind) + groep + h.slice(eind);
+          h = h.replace(/<div class="zfrij">[\s\S]*?Geen plek nodig\.<\/span><\/div>/, "");   // die stonden onder de banen (deel zf); nu onder Companions
+          if(cs.some(c => c.k === "kees")){   // de herinnering: in de baan van Steen is er een Kees
+            const st = `<div class="dkk"><div class="gc">${cardFaceHTML({id:-960 - ORDER.indexOf("steen"), el:"steen", var:undefined, owner:0})}</div></div>`;
+            const i = h.indexOf(st); if(i >= 0) h = h.slice(0, i) + `<div class="dkk yikees" title="Kees">${keesKaart()}</div>` + h.slice(i + st.length);
+          }
+        }
+      }catch(e){ fout(e); }
+      return h; }; }
+  /* een Steen wordt Kees, voor het delen */
+  { const sd0 = storyDeel;
+    storyDeel = function(L){
+      try{ const st = S && S.story;
+        if(st && !st.deckAlleen && keesMee()){
+          const k = P(0).deck.find(c => c.el === "steen" && !c.var && !c.lk && !c.token && !c.jacht);
+          if(k){ k.keesSkin = true; st.keesId = k.id; if(st.id === "1-4") st.keesShook = true; }
+        } }catch(e){ fout(e); }
+      return sd0.apply(this, arguments); }; }
+  /* het plaatje en de naam (het blijft een gewone Steen) */
+  { const cf0 = cardFaceHTML;
+    cardFaceHTML = function(el, spell, card){
+      const c = (el && typeof el === "object") ? el : card;
+      if(c && c.keesSkin && !c.var && !spell){ try{
+        const h = cf0.call(this, Object.assign({}, c, {var:"kees"}), spell, null);
+        return h.replace(/var-kees/g, "yikeesskin").replace(/<span class="varbadge">[^<]*<\/span>/, ""); }catch(e){ fout(e); } }
+      return cf0.apply(this, arguments); }; }
+  /* 1-4: Rocky doet Kees niets */
+  const shook = () => { const st = S && S.story; return !!(st && st.keesShook && st.keesId != null); };
+  const isKees = id => shook() && id === S.story.keesId;
+  { const lf0 = lokaasFilter;
+    lokaasFilter = function(p, ids){ const r = lf0.apply(this, arguments);
+      try{ if(p === 1 && shook() && Array.isArray(r)) return r.filter(id => !isKees(id)); }catch(e){ fout(e); }
+      return r; }; }
+  { const cc0 = chooseCre;
+    chooseCre = function(p, ids){ try{ if(p === 1 && shook() && Array.isArray(ids)){ const a = Array.from(arguments); a[1] = ids.filter(id => !isKees(id)); return cc0.apply(this, a); } }catch(e){ fout(e); }
+      return cc0.apply(this, arguments); }; }
+  { const ca0 = canAttack;
+    canAttack = function(cr, p){
+      try{ if(p === 1 && shook()){ const c = P(1).cols.findIndex(x => x.cre === cr), t = c >= 0 && P(0).cols[c].cre; if(t && isKees(t.card.id)) return false; } }catch(e){ fout(e); }
+      return ca0.apply(this, arguments); }; }
+  { const pc0 = placeCre;
+    placeCre = function(p, c, card){ const r = pc0.apply(this, arguments);
+      try{ if(p === 0 && card && card.keesSkin && shook() && !S.story.keesGezien){ S.story.keesGezien = true; addLog(`🪨 Rocky ziet <em>Kees</em>. Hij verstijft.`, true); } }catch(e){ fout(e); }
+      return r; }; }
+
+  /* ---------- 6 · Rocky in 1-4 ---------- */
+  try{
+    const L = STORY["1-4"];
+    if(L){ L.handMin = 0; L.grensEerste = true; L.grensVij = 1; L.grensDood = true;
+      if(typeof VELD === "object" && VELD["1-4"]) VELD["1-4"].regels = VELD["1-4"].regels.filter(r => !/schild van Kees/.test(r)); }
+    NB.lvSleutel = null;
+  }catch(e){ fout(e); }
+  const lv = () => (S && S.story && typeof levelVan === "function" && levelVan(S.story)) || {};
+  { const gz0 = grensZet;
+    grensZet = function(pl, grens, dood){
+      const L = lv(); if(!L.grensEerste) return gz0.apply(this, arguments);
+      let leven = pl.life;
+      Object.defineProperty(pl, "life", {configurable:true, enumerable:true,
+        get(){ return leven; },
+        set(v){ const st = S && S.story;
+          if(st && !st.grensGedaan && v < leven && v > 0){ st.grensGedaan = true; st.grensWacht = true;
+            if(!FAST){ const app = document.getElementById("app"); if(app){ app.classList.remove("beefthard"); void app.offsetWidth; app.classList.add("beefthard"); setTimeout(() => app.classList.remove("beefthard"), 700); } } }
+          leven = v; }});
+    }; }
+  const paars = () => { const st = S && S.story, L = lv(); return !!(st && L.grensEerste && L.grensKees && st.grensGedaan); };
+  { const ps0 = psideHTML;
+    psideHTML = function(p){ const h = ps0.apply(this, arguments);
+      try{ if(p === 1 && paars()) return h.replace('<span class="hpb', '<span class="hpb yipaars'); }catch(e){ fout(e); }
+      return h; }; }
+  { const vb0 = vijandBalkPaint;
+    vijandBalkPaint = function(){ const r = vb0.apply(this, arguments);
+      try{ const b = document.querySelector('#vijandbalk .vbrij[data-side="1"] .hpb'); if(b) b.classList.toggle("yipaars", paars()); }catch(e){ fout(e); }
+      return r; }; }
+
+  /* ---------- 7 · de tutorial na het ei ---------- */
+  const TUT = {weg:[], kort:[]};
+  try{
+    const T = STORY["1-1"] && STORY["1-1"].tut;
+    if(Array.isArray(T)){
+      const pl = s => String(s.pop || "").replace(/<[^>]+>/g, "");
+      const isWeg = s => (s.op === "start" && s.scherm === "welkom")                          // de elementen kent het ei al
+        || (s.op === "beurt" && s.scherm === "cirkel")                                        // de kring ook
+        || (s.op === "rocky:steen" && /speel-effect/.test(pl(s)))                             // wat Steen doet
+        || (s.op === "aanval" && /recht tegenover/.test(pl(s)))                               // dat een aanval recht vooruit gaat
+        || (s.op === "doel:vuur" && /elk wezen raken/.test(pl(s)))                            // mikken met Vuur
+        || (s.op === "gespeeld:vuur" && (s.waarom || /mocht overal heen/.test(pl(s))))         // vuur op gras, mikken tegen aanval
+        || (s.op === "plek" && /duwt je Vuur weg/.test(pl(s)))                                // Water verhuist een wezen
+        || (s.op === "doel:vuur" && /opnieuw neer/.test(pl(s)))                               // en dat het dan weer afgaat
+        || (s.op === "aanval" && s.waarom === "gras-steen");                                  // de kring
+      const kort = s => {
+        if(s.op === "rocky:gras" && s.pop){ s.pop = "Verstrikt, zoals in het ei. Nieuw: <b>elke beurt van jou</b> valt er een blaadje af."; return true; }
+        if(s.op === "beurt" && s.pop && /blaadje is eraf/.test(pl(s))){ s.pop = "Het blaadje is eraf. Maar zijn 🌿 Gras staat tegenover je 🪨 Steen. Je weet wat er gebeurt als hij aanvalt."; return true; }
+        if(s.op === "aanval" && s.waarom === "water-vuur"){ s.pop = "Rocky <b>reageert</b> ook: hij zet Water voor je Vuur. Je aanval doet niets."; delete s.waarom; return true; }
+        if(s.op === "aanval" && s.bij === "cirkel" && /zelf/.test(pl(s))){ s.pop = "Vanaf hier speel je zelf. Hou je aan het eind van je beurt meer dan <b>6</b> kaarten over, dan leg je er af. Rocky heeft nog <b>{levVij}</b> {levVijWoord}: maak het af."; return true; }
+        return false; };
+      for(let i = T.length - 1; i >= 0; i--){ const s = T[i];
+        if(s && !s.kaart && !s.doel && s.aanval == null && !s.beurtAf && !s.flash && s.plek == null && isWeg(s)){ TUT.weg.push(i); T.splice(i, 1); continue; }
+        if(s && kort(s)) TUT.kort.push(i); }
+      /* het Zegel, voor de eerste keer Einde beurt */
+      const j = T.findIndex(s => s && s.beurtAf);
+      if(j > 0) T.splice(j, 0, {op:"aanval", bij:"cirkel", pop:"Klaar met je zetten? Druk op het <b>Zegel</b>. Dan is je beurt om en is Rocky aan de beurt. Een <b>ronde</b> is een beurt van jullie allebei."});
+    }
+  }catch(e){ fout(e); }
+
+  try{ if(typeof document !== "undefined" && !document.getElementById("yistijl")){
+    const st = document.createElement("style"); st.id = "yistijl";
+    st.textContent = `
+.yiaekop{font:13px/1 "Press Start 2P",monospace; color:#a9a5b8; margin:4px 0 6px; text-transform:uppercase; font-size:9px; letter-spacing:.06em}
+.yiaerij{display:flex; flex-wrap:wrap; gap:6px 10px; margin:0 0 6px}
+.yiae{display:flex; align-items:center; gap:7px; font:18px/1 "VT323",monospace; color:#ece4d4}
+.yiae b{font-weight:400}
+.yiaeb{position:relative; width:30px; height:30px; flex:0 0 auto; border:2px solid #6a4a9a; border-radius:3px; overflow:hidden; background:#16121f; box-shadow:0 0 6px rgba(150,100,230,.4)}
+.yiaeb img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; image-rendering:pixelated}
+.yiaeb i{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-style:normal; font-size:14px; z-index:0}
+.yiaeb img{z-index:1}
+.yihint{font-style:italic; color:#e6c88a !important; margin:2px 0 0 !important}
+.vtxt .yiregels{margin:4px 0}
+.yicomps .dkkop i{font-style:normal; color:#a99fb8; font-size:13px; margin-left:6px}
+.dkslot.yicomp{border:2px solid #7fd18c !important; box-shadow:0 0 8px rgba(127,209,140,.45)}
+.dkbplek.yicomp{margin-left:0; box-shadow:0 0 0 2px #7fd18c, 0 0 8px rgba(127,209,140,.45)}
+.yicomps{flex:0 0 auto; margin-top:auto; padding:8px 10px 6px; border-top:2px solid #2c2440}
+.yicomps .dkslots{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
+.dkk.yikees{box-shadow:0 0 0 2px #7fd18c; border-radius:4px}
+html body .hpb.yipaars i{background:linear-gradient(180deg,#e6d2ff 0 22%,#a46cff 22% 68%,#6a3cc0 68%) !important}
+html body.pc .pside .plife .hpb.yipaars i{background:repeating-linear-gradient(90deg, #a46cff 0 calc(var(--sw) - 4px), transparent calc(var(--sw) - 4px) var(--sw)) !important}
+html body.pc .pside .plife .hpb.yipaars{border-color:#c9a2ff !important; box-shadow:0 0 10px rgba(170,110,255,.6)}
+`;
+    document.head.appendChild(st); } }catch(e){ fout(e); }
+
+  return {HINT, aethersHTML, deckAlleen, comps, TUT, shook};
+})();
+
+/* ---- module yj ---- */
+/* ================= 📖 HET VERHAAL: LEVENS, TUTORIAL, ACHIEVEMENTS, NIMBUS, GEVANGENIS, NUMMERS (deel yj, 11 nov 2026, Q) =================
+   1. Geen extra levens meer in latere gevechten: overal 8 + hartjes + Kees (3-6 en 5-1 t/m 5-5 gaven er meer).
+      Ook de fase-resets van 5-5 gaan terug naar je eigen beginlevens (plus de 4 van "je zit", die keuze blijft).
+   2. Tutorial 1-1: het scherm "De cirkel" (de knop op het Zegel opent het nog) toont het Zegel in plaats van de oude
+      cirkel. Moet je een kaart spelen, dan krijgt alleen de kaart de gele rand (geen rune); een plek krijgt de rune.
+      Beurt eindigen: het Zegel, spatie (laptop) of dubbeltik op het veld (telefoon).
+   3. Achievements: een kleine witte knop op de verhaalkaart (in plaats van "Het eiland"), een scherm met behaald en
+      niet behaald, en een melding als je er een haalt.
+   4. Nimbus (1-3): je mag weer nee zeggen. Dan ben je een kip, speel je met een gewoon deck, en heeft alleen Nimbus Lawine.
+   5. De gevangen aethers (Hemelschoon, Zielenoffer, Tweede leven, Nagloed) zie je als speler nergens meer.
+   6. De melding "nieuw nummer": na 4-3 (de platenspeler) bij elk nieuw gewonnen level. Bij de winst van 4-3 zelf kwam
+      hij niet (en de platenspeler-melding ook niet): die twee staan er nu bij. */
+ANI.YJ = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+
+  /* ---------- 1 · levens ---------- */
+  try{
+    ["3-6", "5-1", "5-2", "5-3", "5-4", "5-5"].forEach(id => { const L = STORY[id]; if(!L) return;
+      delete L.levensJij;
+      Object.values(L.varianten || {}).forEach(v => { if(v) delete v.levensJij; });
+      (L.fases || []).forEach(F => { if(F) delete F.levensJij; });   // 5-5: de reset gaat naar je beginlevens
+    });
+    const V = typeof VELD === "object" ? VELD : {};
+    const schoon = r => r.replace(/\s*Jij begint met <b>\d+<\/b> levens, de Verzamelaar met <b>(\d+)<\/b>\./, " De Verzamelaar begint met <b>$1</b> levens.")
+      .replace(/\s*Jij begint met <b>\d+<\/b> levens\./, "")
+      .replace(/Jij hebt <b>\d+<\/b> levens voor het hele gevecht\./, "Je levens houd je het hele gevecht.")
+      .replace(/(De Eerste <b>\d+<\/b> levens), jij <b>\d+<\/b>\./, "$1.")
+      .replace(/<b>(\d+)<\/b> levens tegen jouw <b>\d+<\/b>\./, "<b>$1</b> levens.");
+    const loop = x => Array.isArray(x) ? x.map(r => typeof r === "string" ? schoon(r) : r) : (x && typeof x === "object" ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, loop(v)])) : x);
+    ["3-6", "5-1", "5-2", "5-3", "5-4", "5-5"].forEach(id => { if(V[id]) V[id] = loop(V[id]); });
+    NB.lvSleutel = null;
+  }catch(e){ fout(e); }
+
+  /* ---------- 2 · de tutorial ---------- */
+  let ZURL = null;
+  const zegelUrl = () => { try{ return (ANI.YB && ANI.YB.zegelUrl && ANI.YB.zegelUrl()) || ZURL; }catch(e){ return null; } };
+  { const ts0 = tutSchermHTML;
+    tutSchermHTML = function(k){ let h = ts0.apply(this, arguments);
+      try{ if(k === "cirkel"){ const u = zegelUrl();
+        h = h.replace(/<div class="tscirkel">[\s\S]*?<\/span><\/span><\/div>/, u ? `<div class="tscirkel"><img src="${u}" alt="Het Zegel"></div>` : "")
+             .replace("De cirkel", "De kring"); } }catch(e){ fout(e); }
+      return h; }; }
+  /* een kaart krijgt de gewone gele rand, alleen een plek krijgt de rune */
+  if(typeof tutHlPaint === "function"){ const hp0 = tutHlPaint;
+    tutHlPaint = function(){ const u = hp0.apply(this, arguments);
+      try{ const R = ANI.ZI && ANI.ZI.RUNE; if(R) [...R.entries()].forEach(([el, r]) => { if(el.matches && el.matches(".hcard")){ try{ r.d.remove(); }catch(e){} R.delete(el); } }); }catch(e){ fout(e); }
+      return u; }; }
+  try{
+    const T = STORY["1-1"] && STORY["1-1"].tut;
+    if(Array.isArray(T)){
+      const z = T.find(s => s && typeof s.pop === "string" && s.pop.includes("Druk op het <b>Zegel</b>"));
+      if(z) z.pop = "Klaar met je zetten? Beëindig je beurt: tik op het <b>Zegel</b> rechts, druk op <b>spatie</b> (laptop) of <b>dubbeltik</b> op het veld (telefoon). Dan is Rocky aan de beurt. Een <b>ronde</b> is een beurt van jullie allebei.";
+      T.forEach(s => { if(s && s.beurtAf) s.hl = "Einde beurt: het Zegel (of spatie)"; });
+    }
+  }catch(e){ fout(e); }
+
+  /* ---------- 3 · achievements ---------- */
+  const st = () => (typeof SET === "object" && SET && SET.story) || {};
+  const ACH = [
+    {id:"rocky", naam:"Hij ligt ernaast", tekst:"Je versloeg Rocky. De steen ligt er nog.", ok:() => storyKlaar("1-1")},
+    {id:"gat", naam:"Een Kees-vormig gat", tekst:"Je zette Kees terug op zijn krukje.", ok:() => kzIs("kees=kees_terug")},
+    {id:"zak", naam:"Zwaarder dan hij eruitziet", tekst:"Je nam Kees mee. Hij heeft het niet gevraagd.", ok:() => kzIs("kees=kees_mee")},
+    {id:"respect", naam:"Het respect van Nimbus", tekst:"Steen tegen steen, en jij won. Hij vond het niet eerlijk.", ok:() => !!st().nimbusRespect},
+    {id:"kip", naam:"Tok", tekst:"Je zei nee tegen een wolk met een kroontje.", ok:() => !!st().yjKip},
+    {id:"magnus", naam:"Een paar minuten niet", tekst:"Magnus wankelde. Tweehonderd jaar, en toen jij.", ok:() => storyKlaar("1-5")},
+    {id:"drie", naam:"Netjes", tekst:"Drie sterren in één level.", ok:() => STORY_ORDER.some(id => sterrenBest(id) >= 3)},
+    {id:"knort", naam:"Uitverkocht", tekst:"Je kocht alles wat Knort had. Hij doet alsof dat normaal is.", ok:() => { try{ const k = koopState(); return KOOPWAAR.ae.filter(Boolean).every(x => k.ae.includes(x)) && KOOPWAAR.lt.filter(Boolean).every(x => k.lt.includes(x)); }catch(e){ return false; } }},
+    {id:"juke", naam:"Eigen muziek", tekst:"De platenspeler is van jou.", ok:() => { try{ return ANI.X.jukeOpen(); }catch(e){ return false; } }}];
+  const behaald = () => { const s = st(); return Array.isArray(s.ach) ? s.ach : null; };
+  const nuOk = a => { try{ return !!a.ok(); }catch(e){ return false; } };
+  let WACHT = [], TOONT = false;
+  function toast(a){
+    if(FAST || typeof document === "undefined") return;
+    WACHT.push(a); if(TOONT) return;
+    const volgende = () => { const x = WACHT.shift(); if(!x){ TOONT = false; return; } TOONT = true;
+      const d = document.createElement("div"); d.className = "yjtoast"; d.innerHTML = `<small>Achievement</small><b>${x.naam}</b><span>${x.tekst}</span>`;
+      document.body.appendChild(d); try{ AU.play("win"); }catch(e){}
+      setTimeout(() => d.classList.add("weg"), 3600); setTimeout(() => { d.remove(); volgende(); }, 4100); };
+    volgende();
+  }
+  let BEZIG = false;
+  function check(stil){
+    if(BEZIG) return; BEZIG = true;
+    try{ const s = st(); if(!s || !Array.isArray(s.klaar)) return;
+      const eerst = !Array.isArray(s.ach); if(eerst) s.ach = [];
+      const nieuw = ACH.filter(a => !s.ach.includes(a.id) && nuOk(a));
+      if(!nieuw.length){ if(eerst) saveSet(); return; }
+      nieuw.forEach(a => s.ach.push(a.id)); saveSet();
+      if(!eerst && !stil) nieuw.forEach(toast);   // een oude save krijgt wat hij al had, zonder meldingen
+    }catch(e){ fout(e); } finally{ BEZIG = false; }
+  }
+  { const ss0 = saveSet;
+    saveSet = function(){ const r = ss0.apply(this, arguments); if(!BEZIG) setTimeout(() => check(false), 400); return r; }; }
+  function schermToon(){
+    check(true);
+    const s = st(), heb = behaald() || [];
+    let el = document.getElementById("yjach"); if(el) el.remove();
+    el = document.createElement("div"); el.id = "yjach";
+    const n = ACH.filter(a => heb.includes(a.id)).length;
+    el.innerHTML = `<div class="yjbox"><div class="yjkop"><h2>Achievements</h2><span>${n} van ${ACH.length}</span><button class="obtn b-dim" data-yjdicht="1">Sluiten</button></div>
+      <div class="yjlijst">${ACH.map(a => { const ok = heb.includes(a.id);
+        return `<div class="yjrij${ok ? " ok" : ""}"><i>${ok ? "★" : "·"}</i><div><b>${ok ? a.naam : "???"}</b><span>${ok ? a.tekst : "Nog niet gehaald."}</span></div></div>`; }).join("")}</div></div>`;
+    el.addEventListener("click", e => { if(e.target === el || e.target.closest("[data-yjdicht]")) el.remove(); });
+    document.body.appendChild(el);
+  }
+  const esc = e => { if(e.key === "Escape"){ const el = document.getElementById("yjach"); if(el){ el.remove(); e.stopPropagation(); } } };
+  try{ document.addEventListener("keydown", esc, true); }catch(e){}
+  { const kh0 = kaartHTML;
+    kaartHTML = function(){ let h = kh0.apply(this, arguments);
+      try{ const knop = '<button class="obtn yjachknop" data-act="btn" data-btn="kaarteiland" data-yj="ach">Achievements</button>';   // op de plek van Het eiland (zelfde plaats op het scherm)
+        const oud = /<button class="obtn b-dim" data-act="btn" data-btn="kaarteiland">[^<]*<\/button>/;
+        if(oud.test(h)) h = h.replace(oud, knop);
+        else h = h.replace('<button class="obtn b-dim" data-act="btn" data-btn="storylijst">', '<button class="obtn yjachknop" data-act="btn" data-btn="yjach">Achievements</button><button class="obtn b-dim" data-act="btn" data-btn="storylijst">'); }catch(e){ fout(e); }
+      return h; }; }
+  { const ob0 = onBtn;
+    onBtn = function(btn, el){ if(btn === "yjach" || (btn === "kaarteiland" && el && el.dataset && el.dataset.yj === "ach")){ schermToon(); return; } return ob0.apply(this, arguments); }; }
+
+  /* ---------- 4 · Nimbus: nee mag weer ---------- */
+  try{
+    const L = STORY["1-3"];
+    if(L && Array.isArray(L.intro)){
+      const r = L.intro.find(x => x && Array.isArray(x.keuze) && x.keuze.some(o => o.ga === "ja"));
+      if(r && !r.keuze.some(o => o.ga === "nee1")) r.keuze.push({label:"No way", ga:"nee1"});
+      if(L.varianten && L.varianten.b) L.varianten.b.aeVij = ["ae_stonefull"];   // wie weigert, speelt tegen Lawine zonder Lawine
+      if(L.varianten && L.varianten.b && Array.isArray(L.varianten.b.aeJij)) L.varianten.b.aeJij = [];
+    }
+    if(typeof VELD === "object" && VELD["1-3"] && VELD["1-3"].varianten && Array.isArray(VELD["1-3"].varianten.b))
+      VELD["1-3"].varianten.b = ["Jij speelt met een gewoon deck, Nimbus met veertig keer 🪨 Steen. Alleen hij heeft 🟣 Lawine.", "Nimbus begint met een 🪨 Steen-ritueel in de derde kolom."];
+  }catch(e){ fout(e); }
+  { const pk0 = praatKlaar;
+    praatKlaar = function(id, fase){ try{ if(id === "1-3" && fase === "nee2"){ st().yjKip = true; saveSet(); } }catch(e){ fout(e); } return pk0.apply(this, arguments); }; }
+
+  /* ---------- 5 · de gevangenis: nergens meer voor de speler ---------- */
+  const gevangen = () => Object.keys(AETHERS).filter(k => AETHERS[k].gevangen);
+  { const lh0 = libHTML;
+    libHTML = function(){ const gv = (typeof M === "object" && M && M.tab === "vij") ? [] : gevangen(), oud = gv.map(k => [k, AETHERS[k].uit]);   // bij de tegenstanders mogen ze blijven
+      gv.forEach(k => { AETHERS[k].gevangen = false; AETHERS[k].uit = true; });
+      try{ return lh0.apply(this, arguments); }
+      finally{ oud.forEach(([k, u]) => { AETHERS[k].gevangen = true; AETHERS[k].uit = u; }); } }; }
+  try{ dkAeGevangenis = function(){ return ""; }; }catch(e){}
+  { const bv0 = buitVoor;
+    buitVoor = function(){ const b = bv0.apply(this, arguments); try{ if(b && Array.isArray(b.ae)) b.ae = b.ae.filter(k => !(AETHERS[k] && AETHERS[k].gevangen)); }catch(e){} return b; }; }
+
+  /* ---------- 6 · de platenspeler en het nummer van 4-3 ---------- */
+  { const bm0 = beloningMaak;
+    beloningMaak = function(id, extra){ const items = bm0.apply(this, arguments);
+      try{ const NA = (ANI.X && ANI.X.JUKE_NA) || "4-3";
+        if(id === NA && !storyKlaar(id) && !(SET.story && SET.story.vrij) && !items.some(it => it.k === "juke")){
+          const erbij = [{k:"juke", ic:"♪", naam:"De platenspeler", sub:"kies je eigen muziek, op het homescreen", oud:false,
+            hoes:`<span class="nmplaat"></span><span class="nmhoes" style="background-image:url('art/kamp-achter-w4.png')"><i>♪</i></span>`}];
+          if(NUMMER_TITEL[id] && !items.some(it => it.k === "nummer")) erbij.push({k:"nummer", ic:"♪", naam:`“${NUMMER_TITEL[id]}”`, sub:"in de jukebox", oud:false, hoes:nummerHoesHTML(id)});
+          return items.concat(erbij);
+        } }catch(e){ fout(e); }
+      return items; }; }
+
+  try{ if(typeof document !== "undefined" && !document.getElementById("yjstijl")){
+    const s = document.createElement("style"); s.id = "yjstijl";
+    s.textContent = `
+body.pc .kaartbox .kaartkop > .obtn[data-btn="yjach"]{position:fixed !important; bottom:34px; right:460px; z-index:30; border-radius:20px !important}
+html body .kaartbox .kaartkop > .obtn.yjachknop, html body .obtn.yjachknop{background:#f4f1ea !important; color:#16121f !important; border-color:#f4f1ea !important; font-size:8px !important; padding:7px 10px !important; min-height:0 !important; height:auto !important; box-shadow:none !important}
+html body .obtn.yjachknop::before, html body .obtn.yjachknop::after{display:none !important}
+#yjach{position:fixed; inset:0; z-index:200; background:rgba(4,4,8,.72); display:flex; align-items:center; justify-content:center}
+#yjach .yjbox{width:min(560px, 92vw); max-height:84vh; overflow:auto; background:#0e0c16; border:2px solid #d8d2bf; border-radius:6px; padding:14px 16px}
+#yjach .yjkop{display:flex; align-items:center; gap:12px; margin-bottom:10px}
+#yjach h2{margin:0; font:14px/1 "Press Start 2P",monospace; color:#f4f1ea} #yjach .yjkop span{font:18px/1 "VT323",monospace; color:#a9a5b8; flex:1}
+#yjach .yjrij{display:flex; gap:12px; align-items:flex-start; padding:8px 4px; border-top:1px solid #2c2440; opacity:.55}
+#yjach .yjrij.ok{opacity:1}
+#yjach .yjrij i{font-style:normal; width:22px; text-align:center; font:20px/1 "VT323",monospace; color:#6d6880} #yjach .yjrij.ok i{color:#ffd447}
+#yjach .yjrij b{display:block; font:12px/1.3 "Press Start 2P",monospace; color:#ece4d4; font-weight:400; margin-bottom:3px}
+#yjach .yjrij span{font:18px/1.15 "VT323",monospace; color:#a9a5b8}
+.yjtoast{position:fixed; right:18px; top:18px; z-index:210; width:min(320px, 80vw); background:#0e0c16; border:2px solid #f4f1ea; border-radius:5px; padding:9px 12px;
+  box-shadow:0 0 18px rgba(244,241,234,.25); animation:yjin .35s ease-out both; transition:opacity .4s, transform .4s}
+.yjtoast.weg{opacity:0; transform:translateY(-8px)}
+.yjtoast small{display:block; font:9px/1 "Press Start 2P",monospace; color:#ffd447; text-transform:uppercase; margin-bottom:5px}
+.yjtoast b{display:block; font:12px/1.3 "Press Start 2P",monospace; color:#f4f1ea; font-weight:400}
+.yjtoast span{font:17px/1.15 "VT323",monospace; color:#c9c6d4}
+@keyframes yjin{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
+`;
+    document.head.appendChild(s); } }catch(e){ fout(e); }
+
+  try{ setTimeout(() => check(true), 0); }catch(e){}
+  return {ACH, check, schermToon};
+})();
+
+/* ---- module yk ---- */
+/* ================= deel yk · water dat blijft nagloeien en ballonnen achter een laag (11 nov 2026, Q) =================
+   1) "Dat water-highlight-effect blijft soms nagloeien." Het levende water van deel zh (de Waterplons in je hand en
+      op het veld: een zachte blauwe gloed en belletjes op de lichtlaag) bleef tekenen terwijl er een dialoog, menu,
+      kaartinfo of eindscherm over het veld lag; de lichtlaag ligt boven het veld, dus de gloed scheen door alles heen
+      (bijvoorbeeld midden onderin, over Rocky na het gevecht). ykStil() zegt wanneer het veld bedekt is; zh (water en
+      het stof bij het opwippen) en de mik-gloed van yd tekenen dan niets (zie yk-hooks.py). Gaat het venster dicht,
+      dan komt alles vanzelf terug bij de volgende render.
+   2) "Een deel van de uitspraken heeft de tekstballonnen gedeeltelijk achter een andere laag." De ballon bij het
+      portret (#ptbel, en .mpbel in PvP) staat in de linkerkolom, en die kolom heeft een lage laag (z-index 1 tot 45)
+      onder het veld, de hand en de rechterkolom. Waar de ballon daarover heen steekt, viel hij erachter. Zolang er een
+      ballon staat, tillen we elke laag waar hij in zit op tot 95: boven het veld, de hand en de effecten, maar onder
+      echte vensters (#overlay 100, tutorial 420+). Daarna gaat alles terug. */
+ANI.YK = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+
+  /* ================= 1) is het veld bedekt? ================= */
+  window.ykStil = () => { try{ return !!M || !!(S && S.over); }catch(e){ return false; } };
+
+  /* ================= 2) de ballonnen boven alles ================= */
+  const BEL = "#ptbel.show, #mpvak .mpbel, #praatbel.show";
+  const HOOG = "95";
+  let opgetild = new Set(), vraag = 0;
+  const til = () => { vraag = 0;
+    try{
+      const nodig = new Set();
+      document.querySelectorAll(BEL).forEach(b => { if(!b.offsetWidth && !b.offsetHeight) return;
+        for(let x = b.parentElement; x && x !== document.body && x !== document.documentElement; x = x.parentElement){
+          if(x.dataset.ykz != null){ nodig.add(x); continue; }
+          const c = getComputedStyle(x); if(c.zIndex !== "auto" && c.position !== "static" && +c.zIndex < +HOOG) nodig.add(x); } });
+      opgetild.forEach(x => { if(!nodig.has(x)){ x.style.removeProperty("z-index"); if(x.dataset.ykz) x.style.zIndex = x.dataset.ykz; delete x.dataset.ykz; } });
+      nodig.forEach(x => { if(x.dataset.ykz == null) x.dataset.ykz = x.style.zIndex || ""; x.style.setProperty("z-index", HOOG, "important"); });
+      opgetild = nodig;
+    }catch(e){ fout(e); } };
+  const later = () => { if(!vraag) vraag = requestAnimationFrame(til); };
+  try{
+    const mo = new MutationObserver(later);
+    const zet = () => { if(document.body){ mo.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:["class"]}); later(); } else setTimeout(zet, 50); }; zet();
+  }catch(e){ fout(e); }
+
+  return {til, opgetild:() => [...opgetild].map(x => x.id || x.className)};
+})();
+
+/* ---- module yl ---- */
+/* ================= yl (11 nov 2026): de aether-uitleg komt als je hem tegenkomt ================= */
+/* Q: de pop-up (het medaillon dat neerslaat, en dan de uitleg in drie stappen) hoort bij de eerste keer dat je een
+   tegenstander bevecht die die aether heeft, niet bij het krijgen ervan. Dus:
+   - het venster "speelt met kracht" vooraf (waitUI "aeuitleg") laat eerst voor elke aether die je in deze save nog
+     niet bij een tegenstander zag de pop-up zien, na elkaar (SET.story.aeVijGezien). Wat je al kende staat daarna
+     gewoon in het oude venster; blijft er niets over, dan gaat dat venster meteen door.
+   - krijg je zelf een aether, dan alleen nog de gewone melding (de haken van deel zi gaan uit).
+   - de achtergrond is de level-achtergrond van die tegenstander (art/bg-<level>.png), donker eroverheen.
+   - elke aether die een tegenstander in het verhaal heeft, krijgt drie stappen met echte kaarten. */
+ANI.YL = (() => {
+  const ZI = ANI.ZI; if(!ZI || !ZI.AE || !ZI.SCENE) return {};
+  const stil = () => { try{ return !ANI.aan(); }catch(e){ return true; } };
+  const wacht = ms => new Promise(r => setTimeout(r, stil() ? 0 : ms));
+  const ROOD = "#ff8a6a", GROEN = "#a8ecb5", GOUD = "#f0c75a", GRIJS = "#cdb894";
+
+  /* ---------- een klein toneeltaaltje bovenop het podium van zi ---------- */
+  const art = k => { const b = (typeof AETHER_BEELD === "object" && AETHER_BEELD[k]) || ((typeof AETHER_VAKKEN === "object" && AETHER_VAKKEN[k]) || [])[0]; return Array.isArray(b) ? b[0] : (b || ""); };
+  const gezicht = () => { try{ const id = S && S.story && S.story.id, L = STORY[id] || {}; return (L.sprite && (sprBeeldPad(L.sprite) || "")) || ""; }catch(e){ return ""; } };
+  const doe = {
+    land:async (P, a, van) => P.landt(P.$[a], van || "onder"),
+    val:async (P, a) => P.landt(P.$[a], "boven"),
+    "+":async (P, a, n, t) => { const k = P.$[a]; P.licht(k, GRIJS, 400); P.getal(k, t || "+" + n, GROEN); P.zetHp(k, k.hp + n, "buff"); await wacht(650); },
+    "-":async (P, a, n, t) => { const k = P.$[a]; P.getal(k, t || "-" + n, ROOD); P.zetHp(k, k.hp - n, "hurt"); await wacht(650); },
+    vuur:async (P, a, b, n) => { await P.vuurbal(P.$[a], P.$[b]); if(n) await doe["-"](P, b, n); },
+    slag:async (P, a, b, n) => { const A = P.$[a].d, B = P.$[b].d;
+      if(!stil() && A.animate){ const ra = A.getBoundingClientRect(), rb = B.getBoundingClientRect(), dx = (rb.left - ra.left) * .7, dy = (rb.top - ra.top) * .7;
+        const an = A.animate([{transform:"translate(-50%,-50%)"}, {transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`, offset:.45}, {transform:"translate(-50%,-50%)"}], {duration:420, easing:"ease-in-out"});
+        await ANI.veilig(an.finished, 900); }
+      if(n) await doe["-"](P, b, n); },
+    weg:async (P, a) => P.weg(P.$[a]),
+    ruil:async (P, a, b) => { P.weg(P.$[a]); await wacht(200); await P.landt(P.$[b]); },
+    licht:async (P, a, kl) => { await P.licht(P.$[a], kl || GOUD, 520); },
+    tekst:async (P, a, t, kl) => { P.getal(P.$[a], t, kl || GOUD); await wacht(700); },
+    gem:async (P, a, t) => { const k = P.$[a]; if(k.gem){ k.gem.textContent = t; P.licht(k, GOUD, 400); } await wacht(450); },
+    leven:async (P, a, n) => { const k = P.$[a], d = n - k.hp; P.getal(k, (d > 0 ? "+" : "") + d, d > 0 ? GROEN : ROOD); k.hp = n; if(k.gem){ k.gem.textContent = n; k.gem.className = "hpgem " + (d > 0 ? "buff" : "hurt"); } await wacht(650); },
+    wacht:async (P, ms) => wacht(ms)};
+  /* kaarten: naam -> [kaart, levens, x%, y%, verborgen]  ("@" als kaart: het gezicht van de tegenstander met zijn levens) */
+  const scene = (k, kaarten, stappen) => ({
+    opzet:P => { P.$ = {}; Object.keys(kaarten).forEach(n => { const [c, hp, x, y, verb] = kaarten[n];
+      if(c === "@" || c === "ae"){ const t = P.tegel(c === "@" ? (gezicht() || art(k)) : (art(k) || gezicht()), 0, x, y); t.hp = hp; t.gem.textContent = hp; t.gem.className = "hpgem"; if(verb) t.d.style.opacity = 0; P.$[n] = t; }
+      else P.$[n] = P.kaart(typeof c === "string" ? {el:c} : c, hp, x, y, {verborgen:!!verb}); }); },
+    stap:[0, 1, 2].map(i => async (P, A) => { await P.kop(A.stappen[i]); for(const [w, ...r] of stappen[i]){ try{ await ANI.veilig(doe[w](P, ...r), 4000); }catch(e){ console.error(e); } } await wacht(500); })});
+  const zet = (k, naam, sub, stappen, kaarten, acts, el) => { if(!AETHERS[k]) return; ZI.AE[k] = {naam, sub, el:el || "steen", stappen}; ZI.SCENE[k] = scene(k, kaarten, acts); };
+  const ONDER = 64, BOVEN = 21;
+  /* het trio: zolang de vonk brandt, gaat het effect van zijn element twee keer */
+  const trio = (k, vonk, el) => zet(k, vonk.toUpperCase(), `Zolang ${vonk} brandt: ${EL[el].name} twee keer`,
+    [`${EL[el].name}: +3 levens`, "Het effect gaat twee keer", `${vonk} uit? Dan stopt het`],
+    {t:["ae", 1, 16, 44], v:[el, EL[el].hp, 42, ONDER, 1], a:["steen", 6, 60, BOVEN], b:["water", 4, 82, BOVEN], m:["steen", 3, 66, ONDER]},
+    [[["land", "v"], ["+", "v", 3]],
+     el === "vuur" ? [["vuur", "v", "a", 2], ["vuur", "v", "b", 2]] : el === "gras" ? [["licht", "a", "#7ddc5a"], ["-", "a", 2], ["licht", "a", "#7ddc5a"], ["-", "a", 2]] : [["+", "m", 3], ["+", "m", 3]],
+     [["gem", "t", "uit"], ["licht", "t", "#6a6476"]]], el === "vuur" ? "vuur" : "steen");
+
+  /* de drie van zi blijven, alleen vanuit de tegenstander verteld */
+  if(ZI.AE.ae_stonefull) ZI.AE.ae_stonefull.stappen = ["Steen: +4", "Volgende Steen: +5", "Elke Steen: +3 levens"];
+  if(ZI.AE.ae_fire6) ZI.AE.ae_fire6.sub = "Het vuur brandt harder, ook op Water";
+
+  zet("ae_genade", "TWEEDE LEVEN", "Een wezen dat sterft laat een ei achter", ["Een wezen sterft", "Er blijft een ei liggen", "Na 3 beurten: een Spin"],
+    {a:["steen", 3, 50, ONDER], v:["vuur", 2, 50, BOVEN], e:[{el:"ei", tokens:3}, 4, 50, ONDER, 1], s:["spin", 7, 50, ONDER, 1]},
+    [[["vuur", "v", "a", 3], ["weg", "a"]], [["land", "e"]], [["licht", "e"], ["ruil", "e", "s"]]]);
+  zet("ae_kweb", "HET WEB", "Wat sterft, wordt een ei", ["Een wezen sterft", "Meteen een ei: een muur", "Na 2 beurten: een Spin van 6"],
+    {a:["gras", 2, 50, ONDER], v:["vuur", 2, 50, BOVEN], e:[{el:"ei", tokens:2}, 2, 50, ONDER, 1], s:["spin", 6, 50, ONDER, 1]},
+    [[["vuur", "v", "a", 2], ["weg", "a"]], [["land", "e"], ["slag", "v", "e"], ["tekst", "e", "MUUR"]], [["ruil", "e", "s"]]]);
+  zet("ae_grassx2", "WOEKERGROEI", "Gras verstrikt dubbel hard", ["Gras: +3 levens", "Verstrikt: Steen -4", "Ook Vuur raakt verstrikt"],
+    {g:["gras", 2, 40, ONDER, 1], s:["steen", 6, 40, BOVEN], v:["vuur", 4, 66, BOVEN]},
+    [[["land", "g"], ["+", "g", 3]], [["licht", "s", "#7ddc5a"], ["-", "s", 4]], [["licht", "v", "#7ddc5a"], ["-", "v", 2]]]);
+  zet("ae_watercycle", "GETIJDENSTROOM", "Wat Water raakt, wordt sterk", ["Water: +3 levens", "Water raakt een Steen", "Rots, met +3 levens"],
+    {w:["water", 2, 34, ONDER, 1], s:["steen", 3, 62, ONDER], r:[{el:"steen", var:"rots"}, 3, 62, ONDER, 1]},
+    [[["land", "w"], ["+", "w", 3]], [["licht", "w", "#4aa8ff"], ["licht", "s", "#4aa8ff"]], [["ruil", "s", "r"], ["+", "r", 3]]]);
+  zet("ae_lichtval", "WRAAKZUCHT", "Leven kwijt? Dan een kaart erbij", ["Er gaat leven af", "Dan trekt hij 1", "Elke keer weer"],
+    {L:["@", 10, 26, 44], v:["vuur", 2, 66, BOVEN], h1:["water", 2, 58, ONDER, 1], h2:["gras", 2, 78, ONDER, 1]},
+    [[["vuur", "v", "L"], ["leven", "L", 8]], [["land", "h1"]], [["vuur", "v", "L"], ["leven", "L", 6], ["land", "h2"]]]);
+  zet("ae_zwerm", "LICHTZWERM", "Elke lichtkaart heelt 1", ["Een lichtkaart", "Heelt 1", "Meer licht in het deck"],
+    {L:["@", 8, 26, 44], l1:[{el:"licht", lk:"vital"}, null, 58, 44, 1], l2:[{el:"licht", lk:"greed"}, null, 80, 44, 1]},
+    [[["land", "l1"]], [["leven", "L", 9]], [["land", "l2"], ["leven", "L", 10]]]);
+  zet("ae_deken", "STROMAN", "De eerste klap per beurt doet niks", ["Eerste klap: niks", "Tweede klap: wel", "Elke beurt opnieuw"],
+    {L:["@", 8, 30, 44], v:["vuur", 2, 70, BOVEN], g:["steen", 3, 70, ONDER]},
+    [[["vuur", "v", "L"], ["tekst", "L", "0", GRIJS]], [["slag", "g", "L"], ["leven", "L", 5]], [["licht", "L"]]]);
+  zet("ae_slaapthee", "SLAAPTHEE", "Geen schade? Dan zak je weg", ["Geen schade gedaan", "Je zakt een stap weg", "Op 3: in slaap, verloren"],
+    {t:["ae", "0/3", 30, 44], L:["@", 8, 70, 44]},
+    [[["tekst", "L", "zzz", "#c9a8ff"]], [["gem", "t", "1/3"], ["leven", "L", 9]], [["gem", "t", "2/3"], ["gem", "t", "3/3"], ["tekst", "t", "SLAAP", "#c9a8ff"]]]);
+  zet("ae_leven", "LEVENSKRACHT", "Al haar wezens +2", ["Een wezen komt binnen", "Met +2 levens", "Elk wezen"],
+    {a:["steen", 3, 30, 44, 1], b:["vuur", 2, 52, 44, 1], c:["gras", 2, 74, 44, 1]},
+    [[["land", "a"]], [["+", "a", 2]], [["land", "b"], ["+", "b", 2], ["land", "c"], ["+", "c", 2]]]);
+  zet("ae_roedel", "ROEDEL", "Elke beurt een gratis wolf", ["Begin van de beurt", "Een wolf, gratis", "Elke beurt weer"],
+    {L:["@", 12, 16, 44], w1:["wolf", 2, 44, 44, 1], w2:["wolf", 2, 70, 44, 1]},
+    [[["licht", "L"]], [["land", "w1"], ["+", "w1", 2]], [["land", "w2"], ["+", "w1", 2], ["+", "w2", 2]]]);
+  zet("fu_grass", "WOUDHART", "Gras wordt Woud: drie keer Gras", ["Fusie: Gras wordt Woud", "Drie keer verstrikken", "Dat kost elke beurt levens"],
+    {g:["gras", 2, 50, ONDER], w:[{el:"gras", var:"fwoud"}, 6, 50, ONDER, 1], a:["steen", 6, 26, BOVEN], b:["vuur", 4, 50, BOVEN], c:["water", 4, 74, BOVEN]},
+    [[["ruil", "g", "w"]], [["licht", "a", "#7ddc5a"], ["licht", "b", "#7ddc5a"], ["licht", "c", "#7ddc5a"]], [["-", "a", 2], ["-", "b", 1], ["-", "c", 1]]], "steen");
+  zet("ae_maatje", "MAATJE", "Een lavagolem van 30 die niet sterft", ["Maatje staat klaar", "Hij gaat hooguit naar 0", "Elke beurt +5 terug"],
+    {m:["balrog", 30, 50, ONDER, 1], v:["steen", 6, 50, BOVEN]},
+    [[["land", "m"]], [["slag", "v", "m"], ["-", "m", 30]], [["+", "m", 5]]], "vuur");
+  zet("ae_lavameer", "LAVAMEER", "Jouw grond brandt", ["Begin van jouw beurt", "Gras verbrandt", "De rest -1, Vuur en Water niet"],
+    {g:["gras", 2, 26, 44], s:["steen", 3, 50, 44], v:["vuur", 2, 74, 44]},
+    [[["licht", "g", "#ff6a2b"], ["licht", "s", "#ff6a2b"], ["licht", "v", "#ff6a2b"]], [["weg", "g"]], [["-", "s", 1], ["tekst", "v", "0", GRIJS]]], "vuur");
+  zet("ae_doorslaan", "DOORSLAAN", "Raak gemaakt? Dan nog een aanval", ["Een aanval maakt kapot", "Dan nog een keer", "Op wat er nu staat"],
+    {a:["steen", 6, 50, ONDER], v:["vuur", 2, 50, BOVEN], g:["gras", 4, 50, BOVEN, 1]},
+    [[["slag", "a", "v", 2], ["weg", "v"]], [["land", "g", "boven"], ["licht", "a"]], [["slag", "a", "g", 4], ["weg", "g"]]]);
+  zet("ae_smeed", "AAMBEELD", "Al haar kaarten zijn gesmeed", ["Steen wordt Rots", "Vuur wordt Plasma", "Gras en Water ook"],
+    {s:["steen", 3, 20, 44], v:["vuur", 2, 40, 44], g:["gras", 2, 60, 44], w:["water", 2, 80, 44],
+     s2:[{el:"steen", var:"rots"}, 3, 20, 44, 1], v2:[{el:"vuur", var:"plasma"}, 2, 40, 44, 1], g2:[{el:"gras", var:"roos"}, 2, 60, 44, 1], w2:[{el:"water", var:"ijs"}, 2, 80, 44, 1]},
+    [[["ruil", "s", "s2"]], [["ruil", "v", "v2"]], [["ruil", "g", "g2"], ["ruil", "w", "w2"]]], "vuur");
+  zet("ae_rouw", "NAGLOED", "Sterft er een wezen, dan heelt ze 1", ["Een wezen sterft", "Ze heelt 1", "Ook een token telt"],
+    {L:["@", 6, 22, 44], a:["steen", 3, 60, ONDER], b:[{el:"steen", var:"kiezel", token:true}, 1, 80, ONDER], v:["vuur", 2, 70, BOVEN]},
+    [[["vuur", "v", "a", 3], ["weg", "a"]], [["leven", "L", 7]], [["vuur", "v", "b", 1], ["weg", "b"], ["leven", "L", 8]]], "vuur");
+  zet("ae_ziel", "ZIELENOFFER", "Vier gestorven: trek 1", ["Een wezen sterft", "Een ziel op de teller", "Bij vier: trek 1"],
+    {t:["ae", "0/4", 22, 44], a:["gras", 2, 56, 44], b:["steen", 3, 78, 44], h:["water", 2, 56, 44, 1]},
+    [[["weg", "a"]], [["gem", "t", "1/4"], ["weg", "b"], ["gem", "t", "2/4"]], [["gem", "t", "4/4"], ["land", "h"], ["gem", "t", "0/4"]]], "vuur");
+  trio("ae_knetter", "Knetter", "vuur"); trio("ae_spetter", "Spetter", "gras"); trio("ae_fikkie", "Fikkie", "steen");
+  zet("ae_staal", "STAAL", "Gras en Vuur pakken zijn Steen niet", ["Zijn Steen is van staal", "Gras verstrikt hem niet", "Rots laat geen kiezel"],
+    {s:["steen", 6, 50, ONDER], g:["gras", 2, 36, BOVEN], v:["vuur", 2, 64, BOVEN]},
+    [[["licht", "s", "#c4c8cf"]], [["licht", "g", "#7ddc5a"], ["tekst", "s", "0", GRIJS], ["vuur", "v", "s"], ["tekst", "s", "0", GRIJS]], [["tekst", "s", "GEEN KIEZEL", GRIJS]]]);
+  zet("ae_graf", "EEUWIGE TERUGKEER", "Offer een wezen, haal er een terug", ["Einde van de beurt: offer", "Uit het graf terug", "Met een doodshoofd"],
+    {g:["gras", 2, 50, 44], s:["steen", 6, 50, 44, 1]},
+    [[["licht", "g", "#b77cff"], ["weg", "g"]], [["land", "s"]], [["tekst", "s", "DOODSHOOFD", "#c9a8ff"]]]);
+  zet("fu_fire", "ONWEER", "Vuur wordt Bliksem: twee schoten", ["Fusie: Vuur wordt Bliksem", "Twee plasma-schoten", "Met overslag ernaast"],
+    {v:["vuur", 2, 50, ONDER], b:[{el:"vuur", var:"bliksem"}, 6, 50, ONDER, 1], x:["steen", 6, 26, BOVEN], y:["gras", 6, 50, BOVEN], z:["steen", 6, 74, BOVEN]},
+    [[["ruil", "v", "b"]], [["vuur", "b", "y", 4], ["vuur", "b", "x", 4]], [["-", "z", 1], ["-", "y", 1]]], "vuur");
+  zet("ae_school", "SCHOOL", "Elke beurt een vis terug", ["Einde van haar beurt", "Een vis uit het graf", "Op een vrije plek"],
+    {L:["@", 10, 16, 44], f1:["vis", 3, 44, 44, 1], f2:["vis", 3, 70, 44, 1]},
+    [[["licht", "L", "#4aa8ff"]], [["land", "f1"]], [["land", "f2"]]]);
+  zet("fu_water", "SPRINGVLOED", "Water wordt Oceaan, de rest terug", ["Fusie: Water wordt Oceaan", "De rest gaat naar de hand", "De Oceaan rust een beurt"],
+    {w:["water", 2, 50, ONDER], o:[{el:"water", var:"oceaan"}, 8, 50, ONDER, 1], a:["steen", 3, 26, ONDER], b:["gras", 2, 74, ONDER]},
+    [[["ruil", "w", "o"]], [["weg", "a"], ["weg", "b"]], [["tekst", "o", "RUST", "#4aa8ff"]]]);
+  zet("ae_armen", "ACHT ARMEN", "Twee armen pakken je wezens", ["Twee armen wijzen aan", "Staat er iets aan het eind", "Ze pakt het, of 3 schade"],
+    {a:["gras", 2, 36, ONDER], b:["steen", 6, 64, ONDER]},
+    [[["licht", "a", "#b77cff"], ["licht", "b", "#b77cff"]], [["wacht", 300]], [["weg", "a"], ["-", "b", 3]]]);
+  zet("ae_veertig", "VEERTIG METER", "Onder water dooft al het vuur", ["Vuur komt binnen", "En dooft meteen", "Ook een vuur-effect fizzelt"],
+    {v:["vuur", 2, 40, ONDER, 1], s:["steen", 3, 60, BOVEN]},
+    [[["land", "v"]], [["licht", "v", "#4aa8ff"], ["weg", "v"]], [["tekst", "s", "PFFT", "#4aa8ff"]]]);
+  zet("ae_draw3", "HOORN VAN OVERVLOED", "Betaal 1, trek 2", ["Begin van de beurt", "Betaal 1 leven", "Trek er 2"],
+    {L:["@", 8, 26, 44], a:["water", 2, 60, 44, 1], b:["vuur", 2, 80, 44, 1]},
+    [[["licht", "L"]], [["leven", "L", 7]], [["land", "a"], ["land", "b"]]]);
+  zet("ae_spiegel", "WEERSPIEGELING", "Al jouw aethers heeft zij ook", ["Jij speelt met aethers", "Zij heeft ze allemaal", "Precies zoals jij ze zette"],
+    {j:["steen", 3, 50, ONDER], z:["steen", 3, 50, BOVEN, 1]},
+    [[["licht", "j"]], [["land", "z", "boven"]], [["licht", "j", "#bfefff"], ["licht", "z", "#bfefff"]]]);
+  zet("ae_hemel", "HEMELSCHOON", "Eerste licht per beurt: +1 en trek 1", ["Eerste lichtkaart", "+1 leven", "En trek 1"],
+    {L:["@", 8, 26, 44], l:[{el:"licht", lk:"vital"}, null, 56, 44, 1], h:["water", 2, 80, 44, 1]},
+    [[["land", "l"]], [["leven", "L", 9]], [["land", "h"]]]);
+  zet("ae_dubbel", "TWEEDE EXEMPLAAR", "Eerste wezen per beurt: dubbel", ["Het eerste wezen", "Komt er twee keer", "Zonder speel-effect"],
+    {a:["steen", 3, 38, 44, 1], b:["steen", 3, 62, 44, 1]},
+    [[["land", "a"]], [["land", "b"]], [["tekst", "b", "GEEN EFFECT", GRIJS]]]);
+  zet("ae_vitrine", "UIT DE VITRINE", "Elke beurt een wezen uit het graf", ["Begin van de beurt", "De grootste uit het graf", "Op een vrije plek"],
+    {L:["@", 10, 16, 44], a:[{el:"steen", var:"rots"}, 6, 46, 44, 1], b:["vuur", 2, 72, 44, 1]},
+    [[["licht", "L"]], [["land", "a"]], [["land", "b"]]]);
+  zet("ae_tothier", "TOT HIER", "Per klap hooguit 1", ["Je slaat hard", "Er gaat 1 af", "Elke klap weer 1"],
+    {L:["@", 8, 50, BOVEN + 4], s:[{el:"steen", var:"rots"}, 9, 50, ONDER + 4]},
+    [[["slag", "s", "L"]], [["leven", "L", 7]], [["slag", "s", "L"], ["leven", "L", 6]]]);
+  zet("ae_knoop", "DE KNOOP", "In de knoop: drie keer het effect", ["De knoop ligt in kolom 3", "Een wezen landt erop", "Drie keer het effect"],
+    {k:["knoop", null, 50, 44], s:["steen", 3, 74, 44, 1]},
+    [[["licht", "k"]], [["land", "s"]], [["+", "s", 3], ["+", "s", 3], ["+", "s", 3]]]);
+  zet("ae_alziend", "ALZIEND", "Ze ziet jouw hand", ["Jouw hand ligt open", "Trekt ze, dan trekt ze 2", "En legt er 1 weg"],
+    {a:["water", 2, 34, BOVEN], b:["gras", 2, 50, BOVEN], c:["vuur", 2, 66, BOVEN], x:["steen", 3, 40, ONDER, 1], y:["water", 2, 60, ONDER, 1]},
+    [[["licht", "a", "#bfefff"], ["licht", "b", "#bfefff"], ["licht", "c", "#bfefff"]], [["land", "x"], ["land", "y"]], [["weg", "y"]]]);
+
+  /* ---------- de pop-up met de achtergrond van de tegenstander ---------- */
+  const bgVan = id => new Promise(res => { if(!id){ res(null); return; } const pad = `art/bg-${id}.png`, im = new Image(); let klaar = false;
+    const f = ok => { if(klaar) return; klaar = true; res(ok ? pad : null); };
+    im.onload = () => f(true); im.onerror = () => f(false); setTimeout(() => f(im.complete && im.naturalWidth > 0), 1200); im.src = pad; });
+  const wereldBg = id => { try{ const w = (STORY[id] || {}).wereld; const eerste = STORY_ORDER.find(x => STORY[x] && STORY[x].wereld === w && x !== id); return eerste || null; }catch(e){ return null; } };
+  const toonVoorVijand = async (k, naam) => {
+    const id = S && S.story && S.story.id;
+    let bg = await bgVan(id); if(!bg) bg = await bgVan(wereldBg(id));
+    const p = ZI.toonEen(k);
+    const pop = [...document.querySelectorAll("#zipop")].pop();
+    if(pop){
+      const lab = pop.querySelector(".zilabel"); if(lab) lab.textContent = `${String(naam || "DE TEGENSTANDER").toUpperCase()} VECHT MET`;
+      /* zonder eigen prent (Slaapthee, Nagloed): het gezicht van wie hem heeft */
+      const im = pop.querySelector(".zimed img"); if(im && !art(k) && gezicht()){ im.src = gezicht(); im.style.opacity = 1; im.style.objectFit = "contain"; im.style.background = "radial-gradient(circle, #3a2a16, #120c06)"; }
+      if(bg) pop.style.background = `radial-gradient(ellipse at 50% 40%, rgba(12,9,6,.62), rgba(4,3,6,.93) 72%), url("${bg}") center / cover no-repeat, #070508`;
+    }
+    await p; };
+
+  /* ---------- haken ---------- */
+  const gezien = k => !!(SET.story && Array.isArray(SET.story.aeVijGezien) && SET.story.aeVijGezien.includes(k));
+  const zetGezien = k => { try{ if(!Array.isArray(SET.story.aeVijGezien)) SET.story.aeVijGezien = []; if(!SET.story.aeVijGezien.includes(k)){ SET.story.aeVijGezien.push(k); saveSet(); } }catch(e){} };
+  const magPop = d => !FAST && !!(S && S.story) && !(typeof NET === "object" && NET && NET.on) && d && d.p === 0 && !isBot(0) && typeof document === "object";
+  const wui0 = waitUI;
+  waitUI = function(mode, data){
+    if(mode !== "aeuitleg" || !magPop(data)) return wui0.apply(this, arguments);
+    const nieuw = (data.keys || []).filter(k => ZI.AE[k] && ZI.SCENE[k] && !gezien(k));
+    if(!nieuw.length) return wui0.apply(this, arguments);
+    const zelf = this;
+    return (async () => {
+      S.ui = {mode:"busy"}; try{ render(); }catch(e){}
+      for(const k of nieuw){ zetGezien(k); try{ await toonVoorVijand(k, data.naam || (S.story && S.story.vijandNaam)); }catch(e){ console.error(e); } }
+      const rest = Object.assign({}, data, {keys:(data.keys || []).filter(k => !nieuw.includes(k))});
+      const pr = wui0.call(zelf, mode, rest);
+      /* niets meer te laten zien: meteen door, via de gewone weg (zo staat het ook in de zettenlijst) */
+      if(!rest.keys.length && !(rest.lichten || []).length){ try{ doAct({t:"f", v:true}); }catch(e){ console.error(e); } }
+      return pr; })();
+  };
+  /* zelf een aether krijgen: alleen nog de gewone melding (de pop-up-haken van zi slaan we over) */
+  const zonderZi = (k, f) => { const st = SET && SET.story; if(!st) return f(); if(!Array.isArray(st.aePop)) st.aePop = [];
+    const had = st.aePop.includes(k); if(!had) st.aePop.push(k);
+    try{ return f(); } finally { if(!had){ const i = st.aePop.indexOf(k); if(i >= 0) st.aePop.splice(i, 1); } } };
+  if(typeof aetherMelding === "function"){ const am = aetherMelding; aetherMelding = function(k){ const a = arguments, t = this; return zonderZi(k, () => am.apply(t, a)); }; }
+  if(typeof flintPlek === "function"){ const fp = flintPlek; flintPlek = function(){ const a = arguments, t = this; return zonderZi("ae_fire6", () => fp.apply(t, a)); }; }
+
+  return {toonVoorVijand, gezien, dekking:() => Object.keys(ZI.SCENE)};
+})();
+
+/* ---- module ym ---- */
+/* ================= ym (12 nov 2026): ❤ het levensplafond =================
+   Helen mag boven je startlevens uitgaan, tot 24 (begin je hoger, zoals sommige bazen, dan is je start het plafond).
+   De balk houdt zijn startlengte; wat erboven zit vult de blokjes opnieuw van links naar rechts in een tweede laag
+   (goud), en zo nodig een derde (kristal) en een vierde (paars) bij een korte balk. Het getal ernaast telt gewoon door
+   (bijv. 15/12). De kern krijgt het plafond via nbLv (plaf) en kapt elke heal af met levCap (ym-hooks.py). */
+ANI.YM = (() => {
+  const PLAFOND = 24;
+  const base = p => {
+    const st = S && S.story;
+    if(st && st.startLevens && st.startLevens[p] != null) return st.startLevens[p];
+    if(st){ if(!st.ymStart) st.ymStart = [null, null]; if(st.ymStart[p] == null) st.ymStart[p] = P(p).life; return st.ymStart[p]; }
+    return startLevensStd();
+  };
+  const plafond = p => Math.max(PLAFOND, base(p) || 0);
+  const kap = () => { if(!S || !S.pl) return; for(const q of [0, 1]){ const pl = P(q); if(pl && pl.life > plafond(q)) pl.life = plafond(q); } };
+  /* na elke heal (die roept levensPiek(p) zonder start): afkappen. Met een start (de balk): de balk blijft zo lang. */
+  levensPiek = function(p, start){
+    if(!S || !P(p)) return start || 0;
+    if(start === undefined){ kap(); return base(p); }
+    return start;
+  };
+  { const lb0 = levensBalk;
+    levensBalk = function(n, max){
+      const h = lb0.apply(this, arguments);
+      const m = Math.max(1, max || n);
+      if(!(n > m)) return h;
+      let lagen = "";
+      for(let k = 1; k * m < n; k++){ const f = Math.min(1, (n - k * m) / m); lagen += `<u class="hpx l${Math.min(3, k)}" style="--f:${f.toFixed(4)}"></u>`; }
+      return h.replace("</i>", "</i>" + lagen);
+    }; }
+  /* de kern moet het plafond kennen */
+  { const lv0 = nbLv;
+    nbLv = function(){ const r = lv0.apply(this, arguments); try{ if(r) r.plaf = [plafond(0), plafond(1)]; }catch(e){} return r; }; }
+  try{
+    const st = document.createElement("style");
+    st.textContent = `
+.hpb u.hpx{position:absolute; text-decoration:none; pointer-events:none; --hk:#ffd84a; --hd:#c48a0c; --hg:rgba(255,214,90,.55)}
+.hpb u.hpx.l2{--hk:#a8f2ff; --hd:#3fa9d6; --hg:rgba(150,235,255,.6)}
+.hpb u.hpx.l3{--hk:#e6b4ff; --hd:#9a52d6; --hg:rgba(220,170,255,.6)}
+body.pc .pside .plife .hpb u.hpx{left:4px; top:4px; bottom:4px; z-index:2; border-radius:2px; width:calc((var(--sw) * var(--n, 6) - 4px) * var(--f));
+  background:linear-gradient(180deg, rgba(255,255,255,.55) 0 22%, transparent 22%), repeating-linear-gradient(90deg, var(--hk) 0 calc(var(--sw) - 4px), transparent calc(var(--sw) - 4px) var(--sw));
+  -webkit-mask:repeating-linear-gradient(90deg, #000 0 calc(var(--sw) - 4px), transparent calc(var(--sw) - 4px) var(--sw)); mask:repeating-linear-gradient(90deg, #000 0 calc(var(--sw) - 4px), transparent calc(var(--sw) - 4px) var(--sw));
+  filter:drop-shadow(0 0 3px var(--hg)); transition:width .45s steps(6)}
+html body.pc.tel .pside .plife .hpb u.hpx{left:2px; top:2px; bottom:2px}
+body.venster .hpb u.hpx{left:0; top:0; bottom:0; width:calc(100% * var(--f)); background:linear-gradient(180deg, #fffbe0 0 22%, var(--hk) 22% 68%, var(--hd) 68%); transition:width .45s steps(6)}
+.hpb u.hpx ~ b{z-index:3}`;
+    document.head.appendChild(st);
+  }catch(e){}
+  return {plafond, base, kap};
+})();
+
+/* ---- module yn ---- */
+/* ================= deel yn · lang drukken op de telefoon en de knop tussen de rondes (12 nov 2026, Q) =================
+   1) Lang drukken op de telefoon gaf het systeemmenuutje (kopieren, plakken, afbeelding opslaan) in plaats van slepen.
+      - Geen systeemmenu, geen tekstselectie en geen afbeelding-slepen in het spel op een aanraakscherm. Invoervelden
+        blijven gewoon werken. Op de laptop blijft rechtsklik op een kaart de uitleg geven (dat is de bestaande regel).
+      - De rijen in de deckbouwer en de voorbereiding: houd je een rij 450 ms vast zonder te bewegen, dan pakt hij op
+        (kort trillen, de rij licht op) en sleep je hem omhoog of omlaag. Dat gaat ook aan het greepje. Gewoon vegen
+        blijft scrollen. Werkt ook voor kaartjes uit de bibliotheek.
+   2) Commander tussen de rondes: alles past op de telefoon zonder scrollen, en de knop heet
+      "KLAAR VOOR DE VOLGENDE RONDE?", groot, in de letter en glans van het ELEMENTAAL-logo. */
+ANI.YN = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const aanraak = () => { try{ return document.body.classList.contains("tel") || matchMedia("(pointer:coarse)").matches; }catch(e){ return false; } };
+
+  /* ================= 1a) geen systeemmenu, geen selectie, geen afbeelding slepen ================= */
+  try{ const st = document.createElement("style"); st.id = "yn-stijl";
+    const regels = "{-webkit-touch-callout:none !important; -webkit-user-select:none !important; user-select:none !important}";
+    st.textContent = [
+      "body.tel, body.tel *" + regels,
+      "@media (pointer:coarse){ body, body * " + regels + " }",
+      "body.tel :is(input, textarea, [contenteditable]), body.tel :is(input, textarea, [contenteditable]) *{-webkit-user-select:text !important; user-select:text !important; -webkit-touch-callout:default !important}",
+      "@media (pointer:coarse){ body :is(input, textarea, [contenteditable]), body :is(input, textarea, [contenteditable]) *{-webkit-user-select:text !important; user-select:text !important; -webkit-touch-callout:default !important} }",
+      "img{-webkit-user-drag:none}",
+      /* de rij die je met lang drukken hebt opgepakt */
+      ".dkbaan.ynpak, .dklk.ynpak, .dkslot.ynpak{outline:2px solid #f0c75a; outline-offset:-2px; box-shadow:0 0 18px rgba(240,199,90,.45)}",
+      /* 2) tussen de rondes */
+      "html body #overlay .eindbox .eknoppen [data-btn].ynklaar{display:inline-flex; align-items:center; justify-content:center; padding:.9em 1.4em !important; min-height:0;",
+      "  background:linear-gradient(180deg, #1a1626, #0c0a14) !important; border:3px solid #e8c67a !important; border-radius:0 !important;",
+      "  box-shadow:0 0 0 3px #0b0d22, 0 6px 0 3px rgba(0,0,0,.55), 0 0 26px rgba(232,198,122,.35) !important; cursor:pointer; animation:ynadem 2.4s ease-in-out infinite}",
+      "html body #overlay .eindbox .eknoppen [data-btn].ynklaar:hover{border-color:#fff3c4 !important; box-shadow:0 0 0 3px #0b0d22, 0 6px 0 3px rgba(0,0,0,.55), 0 0 38px rgba(232,198,122,.6) !important}",
+      "html body #overlay .eindbox .eknoppen [data-btn].ynklaar:active{transform:translateY(3px)}",
+      ".ynklaar .ynlogo{font-family:'Press Start 2P',ui-monospace,monospace; font-size:clamp(13px, 1.25vw + .9vh, 24px); letter-spacing:.08em; line-height:1.15; white-space:nowrap;",
+      "  background:linear-gradient(180deg,#ffffff 0 46%,#e8c67a 54% 100%); -webkit-background-clip:text; background-clip:text; color:transparent;",
+      "  filter:drop-shadow(3px 3px 0 #0b0d22) drop-shadow(0 0 12px rgba(232,198,122,.35))}",
+      ".ynklaar .toets{display:none}",
+      "@keyframes ynadem{0%,100%{box-shadow:0 0 0 3px #0b0d22, 0 6px 0 3px rgba(0,0,0,.55), 0 0 18px rgba(232,198,122,.25)} 50%{box-shadow:0 0 0 3px #0b0d22, 0 6px 0 3px rgba(0,0,0,.55), 0 0 34px rgba(232,198,122,.55)}}",
+      "@media (prefers-reduced-motion:reduce){ .ynklaar{animation:none !important} }",
+      /* met een bot is er maar een knop: de klaar-chips zeggen dan niets extra */
+      ".eindbox.yntussen.ynbot .readyrow{display:none !important}",
+      ".eindbox.yntussen .eknoppen{margin-top:clamp(10px, 2.4vh, 22px) !important}",
+      /* telefoon: alles past zonder scrollen */
+      "body.tel .eindbox.yntussen{overflow:hidden !important}",
+      "body.tel .eindbox.yntussen .eindkop{margin-top:4px !important; margin-bottom:6px !important}",
+      "body.tel .eindbox.yntussen .eregel{margin:0 auto 8px !important; line-height:1.15}",
+      "body.tel .eindbox.yntussen .estats{margin-top:0 !important; margin-bottom:6px !important}",
+      "body.tel .eindbox.yntussen .tussenuitleg{margin-top:4px !important; margin-bottom:4px !important; font-size:15px !important}",
+      "body.tel .eindbox.yntussen .readyrow{margin-top:2px !important}",
+      "body.tel .eindbox.yntussen .ereden{margin-top:2px !important}",
+      "body.tel .eindbox.yntussen .eknoppen{margin-top:8px !important}",
+      "body.tel .ynklaar .ynlogo{font-size:clamp(12px, 2vw, 16px)}",
+      "html body.tel #overlay .eindbox .eknoppen [data-btn].ynklaar{padding:.75em 1.1em !important}",
+    ].join("\n");
+    document.head.appendChild(st); }catch(e){ fout(e); }
+  /* afbeeldingen: niet slepen (lang drukken op een plaatje gaf "afbeelding opslaan") */
+  const plaatjes = () => { try{ document.querySelectorAll("img:not([draggable])").forEach(i => i.setAttribute("draggable", "false")); }catch(e){} };
+  /* het systeemmenu bij lang drukken: weg, behalve in een invoerveld. Op de laptop (muis) blijft alles zoals het was. */
+  let laatsteTik = 0;
+  try{
+    window.addEventListener("pointerdown", e => { if(e.pointerType === "touch") laatsteTik = performance.now(); }, true);
+    window.addEventListener("touchstart", () => { laatsteTik = performance.now(); }, {capture:true, passive:true});
+    document.addEventListener("contextmenu", e => {
+      const viaTik = e.pointerType === "touch" || performance.now() - laatsteTik < 1500;
+      if(!viaTik) return;
+      if(e.target && e.target.closest && e.target.closest("input, textarea, [contenteditable]")) return;
+      e.preventDefault();
+    }, true);
+    document.addEventListener("selectstart", e => { if(aanraak() && !(e.target.closest && e.target.closest("input, textarea, [contenteditable]"))) e.preventDefault(); }, true);
+    document.addEventListener("dragstart", e => { if(e.target && e.target.tagName === "IMG") e.preventDefault(); }, true);
+  }catch(e){ fout(e); }
+
+  /* ================= 1b) lang drukken en slepen in de deckbouwer ================= */
+  const LANG = 450;
+  let lang = null;   // {id, x, y, t, timer, pak:false, rs, ds, el}
+  const pakbaar = t => t && t.closest && t.closest('.dkbox .dkbaan[data-act="rang"], .dkbox .dklk[data-act], .dkbox .dkslot.vol[data-act]');
+  try{
+    window.addEventListener("pointerdown", e => {
+      if(e.pointerType !== "touch") return;
+      if(lang){ clearTimeout(lang.timer); lang = null; }
+      const el = pakbaar(e.target); if(!el) return;
+      const o = {id:e.pointerId, x:e.clientX, y:e.clientY, pak:false, el};
+      o.timer = setTimeout(() => { if(lang !== o) return;
+        try{ o.rs = typeof RANG_SLEEP !== "undefined" ? RANG_SLEEP : null; o.ds = typeof DK_SLEEP !== "undefined" ? DK_SLEEP : null; }catch(x){}
+        if(!o.rs && !o.ds) return;
+        o.pak = true; el.classList.add("ynpak");
+        document.addEventListener("touchmove", houd, {capture:true, passive:false});
+        if(o.t0) ["touchmove", "touchend", "touchcancel"].forEach(k => o.t0.addEventListener(k, o.door, {passive:false}));
+        try{ navigator.vibrate && navigator.vibrate(15); }catch(x){} }, LANG);
+      lang = o; }, true);
+    window.addEventListener("pointermove", e => { const o = lang; if(!o || e.pointerId !== o.id) return;
+      if(!o.pak){ if(Math.hypot(e.clientX - o.x, e.clientY - o.y) > 8){ clearTimeout(o.timer); lang = null; } return; }
+      /* opgepakt: een veeg is nu slepen. Een ander deel kan het slepen bij een verticale veeg loslaten; zet het terug. */
+      try{ if(o.rs && !RANG_SLEEP) RANG_SLEEP = o.rs; if(o.ds && !DK_SLEEP) DK_SLEEP = o.ds; }catch(x){} }, true);
+    /* zolang hij vastzit, scrollt de pagina niet mee */
+    const houd = e => { if(lang && lang.pak && e.cancelable) e.preventDefault(); };
+    const los = e => { const o = lang; if(!o || (e.pointerId != null && e.pointerId !== o.id)) return; if(o.t0 && !o.t0.isConnected) return;
+      klaarLos(o); };
+    const klaarLos = o => { clearTimeout(o.timer); try{ o.el.classList.remove("ynpak"); }catch(x){}
+      document.removeEventListener("touchmove", houd, {capture:true});
+      if(o.t0 && o.door) ["touchmove", "touchend", "touchcancel"].forEach(k => o.t0.removeEventListener(k, o.door));
+      if(lang === o) lang = null; };
+    window.addEventListener("pointerup", los, true);
+    window.addEventListener("pointercancel", los, true);
+    /* tijdens het slepen tekent het spel de rijen opnieuw; dan hangt je vinger aan een rij die er niet meer is en
+       komen loslaten en bewegen niet meer bij het spel aan. Die sturen we zelf door. */
+    window.addEventListener("touchstart", e => { const t = e.target; const o = lang; if(!t || !o || !pakbaar(t)) return;
+      o.t0 = t;
+      o.door = ev => { if(t.isConnected) return; const tp = ev.changedTouches && ev.changedTouches[0];
+        if(ev.type === "touchmove"){ if(!tp) return; if(ev.cancelable) ev.preventDefault();
+          try{ document.dispatchEvent(new PointerEvent("pointermove", {bubbles:true, cancelable:true, pointerId:o.id, pointerType:"touch", isPrimary:true, clientX:tp.clientX, clientY:tp.clientY})); }catch(x){} return; }
+        klaarLos(o); try{ dkSleepKlaar(ev.type === "touchend"); }catch(x){ fout(x); } };
+      }, {capture:true, passive:true});
+  }catch(e){ fout(e); }
+
+  /* ================= 2) tussen de rondes ================= */
+  const tussen = () => { try{
+    const box = document.querySelector("#overlay .eindbox"); if(!box) return;
+    if(!(S && S.over && !S.over.matchDone && typeof matchVan === "function" && matchVan() && S.match && S.match.bo !== 1)){ box.classList.remove("yntussen", "ynbot"); return; }
+    box.classList.add("yntussen");
+    const knoppen = [...box.querySelectorAll('.eknoppen [data-btn="ready"], .eknoppen [data-btn="ready0"], .eknoppen [data-btn="ready1"]')];
+    const een = knoppen.length === 1;
+    box.classList.toggle("ynbot", een);
+    if(een && !knoppen[0].classList.contains("ynklaar")){
+      const k = knoppen[0]; k.classList.add("ynklaar"); k.innerHTML = `<span class="ynlogo">KLAAR VOOR DE VOLGENDE RONDE?</span>`; }
+  }catch(e){ fout(e); } };
+
+  let vraag = 0;
+  const later = () => { if(!vraag) vraag = requestAnimationFrame(() => { vraag = 0; plaatjes(); tussen(); }); };
+  try{ const mo = new MutationObserver(later);
+    const zet = () => { if(document.body){ mo.observe(document.body, {childList:true, subtree:true}); later(); } else setTimeout(zet, 50); }; zet(); }catch(e){ fout(e); }
+
+  return {tussen, lang:() => lang && {pak:lang.pak}};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
