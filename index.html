@@ -51673,7 +51673,7 @@ ANI.EI = (() => {
       if(f.el === "steen"){
         if(f.plus === "kies"){ const d = await kiesUit(q => q.eigen, "steen", "Wie verdient +3? Tik erop."); if(!R) return; telt = await effect(k, d || k); }
         else telt = await effect(k, k);
-        if(f.id === "s1" && R.stap === 1) await zeg("Voel je dat? Het doet wat jij wilt.", 1500);
+        if(f.id === "s1" && R.stap === 1) await zeg("Zie je? Het doet wat jij wilt.", 1500);
       } else if(f.el === "water"){
         /* op een wezen gelegd: dat wezen; ernaast: dan wijs je aan wie hij optilt */
         let doel = a.op && a.op.eigen ? a.op : null;
@@ -51690,6 +51690,10 @@ ANI.EI = (() => {
         if(R.stap === ZELF) await zegEens("zelf-" + f.el, "Tot nu toe deed ik het voor je.", "Nu wijs jij aan.");
       }
       if(!R) return;
+      if(f.vecht && f.el === "steen" && !R.yuEerst && kanSlaan(k) && vooruit(k, true)){ R.yuEerst = true; await wacht(fx() ? 260 : 0); if(!R) return;
+        const r = await aanval(k); if(!R) return;
+        if(r && r.d && !r.d.eigen && f.telt === "dood" && r.r === "immuun" && r.d.el === "gras" && R.dood && !R.dood.gras){ R.dood.gras = true; hud(); geluid("blip"); }
+        setTimeout(() => { if(R && R.fase === f) bijvullen(1); }, 900); }
       if(f.telt === "speel" || (f.telt === "effect" && telt)){ R.n++; hud(); geluid("blip"); }
       if(["s3", "v", "g", "w"].includes(f.id)) bijvullen(1);
       opruimen();
@@ -51705,7 +51709,7 @@ ANI.EI = (() => {
   const loop = async () => {
     try{
       if(R.vanFilm) await proloog(R.filmVak); if(!R) return;
-      await stem(["Daar ben je.", "Rustig. Je hart moet nog leren kloppen.", "Je bent van een oud soort. Sterk. Gevreesd.", "Ze dachten dat er niemand meer over was.", "Kom. Ik laat je zien wat je kunt."]); if(!R) return;
+      if(ANI.YU && ANI.YU.opening) await ANI.YU.opening({R:() => R, stem, wacht, GL, pols, fx, geluid}); if(!R) return;
       R.volgend = false;
       let vorig = null, slaOver = null;
       for(const f of FASEN){ if(!R) return;
@@ -55062,12 +55066,12 @@ const YS_SIM = (o) => {
   const rnd = o.rnd || Math.random;
   const C = Object.assign({
     KERN:{x:500, y:290, r:42}, RING:{rx:330, ry:225, ix:118, iy:88, ymax:525},
-    KERN_HP:25, MAX_EIGEN:9, CW:80, CH:111,
-    ATK_CD:2.7, ATK_R:70, EFF_CD:6.0, EFF_R:290, BLOK_R:62,
+    KERN_HP:8, MAX_EIGEN:10, SCHAAL:1, CW:80, CH:111,
+    ATK_CD:2.4, ATK_R:70, EFF_CD:6.0, EFF_R:290, BLOK_R:62,
     VIJ:{
       schaduw:{hp:3, atk:1, v:34, kern:1, cd:2.4, r:22},
-      groot:{hp:40, atk:4, v:15, kern:5, cd:3.0, r:46},
-      el:{atk:2, v:30, kern:2, cd:2.5, r:26, extra:1}
+      groot:{hp:40, atk:4, v:15, kern:3, cd:3.0, r:46},
+      el:{atk:2, v:30, kern:1, cd:2.5, r:26, extra:1}
     },
     GOLVEN:null,
     W:{e1:24, s1:4, d1:1.3, s2:36, d2:.9, s3:30, d3:.85, e3:18, de3:1.3, g3t:6, dg3:9}
@@ -55079,7 +55083,7 @@ const YS_SIM = (o) => {
   /* golf 1: vooral elementen, elke richting zijn eigen element (40%), op het eind een grote Puf.
      golf 2: alleen kleine Pufs. golf 3: alles door elkaar, plus drie grote Pufs, uit elke richting een. */
   const ELS4 = ["steen", "vuur", "gras", "water"], los = () => ELS4[Math.floor(rnd() * 4)];
-  const maakGolf = n => { const r = [], W = C.W;
+  const maakGolf = n => { const r = [], W0 = C.W, f = C.SCHAAL || 1, W = Object.assign({}, W0, {e1:Math.round(W0.e1 * f), s1:Math.round(W0.s1 * f), s2:Math.round(W0.s2 * f), s3:Math.round(W0.s3 * f), e3:Math.round(W0.e3 * f)});
     if(n === 1){ const vast = ELS4.slice().sort(() => rnd() - .5); G.vast1 = {links:vast[0], boven:vast[1], rechts:vast[2]};
       for(let i = 0; i < W.e1; i++){ const k = kanten[i % 3]; r.push([1 + i * W.d1, k, rnd() < .4 ? G.vast1[k] : los()]); }
       for(let i = 0; i < W.s1; i++) r.push([3 + i * W.d1 * 2.2, kanten[(i + 1) % 3], "schaduw"]);
@@ -55168,7 +55172,12 @@ const YS_SIM = (o) => {
   const geluid = n => { try{ AU.play(n); }catch(e){} };
   const KLR = {steen:"#cdb894", vuur:"#ff8a2b", gras:"#7ddc5a", water:"#4aa8ff"};
   const ELS = ["steen", "vuur", "gras", "water"];
-  const ID = "3-3", BRON_CD = 3, STAPEL_T = 6, STER2 = 12, STER3 = 22;
+  const ID = "3-3", BRON_CD = 3, STAPEL_T = 6;
+  /* de kern heeft jouw levens: dezelfde som als in elk verhaalgevecht (deel yh: 8 + hartjes + Kees). Heel wordt hij niet,
+     dus het plafond van ym raakt hem niet. Sterren: 2 vanaf 45% van je start over, 3 vanaf 90% (bij 8 levens: 4 en 8). */
+  const kernStart = () => { try{ const s = ANI.YH && ANI.YH.levensSom ? ANI.YH.levensSom(ID, (typeof STORY === "object" && STORY[ID]) || null) : null;
+      return {n:Math.max(1, Math.round((s && s.totaal) || 8)), kees:!!(s && s.kees)}; }catch(e){ return {n:8, kees:false}; } };
+  const STER2 = () => Math.ceil(((V && V.G.kern.max) || 8) * .45 - 1e-9), STER3 = () => Math.ceil(((V && V.G.kern.max) || 8) * .9 - 1e-9);
   const wacht = ms => new Promise(r => setTimeout(r, ms));
   const hpVan = el => (typeof EL === "object" && EL[el] && EL[el].hp) || 2;
   /* aanval zoals de kaart hem in een gewoon gevecht toont (echte atkOf, Volle slag zoals het spel standaard speelt) */
@@ -55203,7 +55212,9 @@ const YS_SIM = (o) => {
     "#ysveld .yskern.raak{animation:yskraak .35s}",
     "@keyframes yskraak{0%{filter:none} 30%{filter:brightness(.6) sepia(1) hue-rotate(-40deg) saturate(4)} 100%{filter:none}}",
     "#ysveld .yskernhp{position:absolute; z-index:7; transform:translate(-50%, 0); text-align:center; pointer-events:none; font:clamp(10px, 1.4vw, 15px) 'Press Start 2P',monospace; color:#fff3d6; text-shadow:0 2px 0 #000}",
-    "#ysveld .yskernhp i{display:block; margin:5px auto 0; width:clamp(90px, 14vw, 180px); height:8px; background:#2a1a12; border:1px solid #000; box-shadow:0 0 0 1px rgba(255,220,160,.35)}",
+    "#ysveld .yskernhp .yskt{display:block; margin-bottom:4px; font:clamp(9px, 1.1vw, 12px) 'Press Start 2P',monospace; color:#fff3d6; letter-spacing:.1em}",
+    "#ysveld .ysvk{--pt:320px; display:flex; justify-content:center} #ysveld .ysvk .plife{display:flex; align-items:center; gap:10px}",
+    "#ysveld .yskernhp > i{display:block; margin:5px auto 0; width:clamp(90px, 14vw, 180px); height:8px; background:#2a1a12; border:1px solid #000; box-shadow:0 0 0 1px rgba(255,220,160,.35)}",
     "#ysveld .yskernhp i b{display:block; height:100%; background:linear-gradient(#ffe08a, #e0902a); transition:width .3s}",
     "#ysveld .ysk{position:absolute; z-index:7}", "#ysveld .ysvlak > .ysk, #ysveld .ysvlak > .ysch{left:0; top:0; will-change:translate}",
     "#ysveld .ysk.vij > .card{filter:saturate(.8) brightness(.9)}",
@@ -55253,6 +55264,7 @@ const YS_SIM = (o) => {
           const s = r.selectorText; if(!s) continue;
           if(/\.slot\.cr/.test(s) && /zhklaar|zhvoet|zmzw/.test(s)) uit.push(r.cssText.replace(/(body\.pc )?(#fieldwrap )?\.slot\.cr/g, "#ysveld .ysk"));
           else if(/\.slot\.cr/.test(s) && /hpgem|atkgem/.test(s) && !/mik/.test(s)) uit.push(r.cssText.replace(/(#fieldwrap )?\.slot\.cr/g, "#ysveld .ysk"));
+          else if(/\.pside \.plife/.test(s) && !/data-side|pinfo/.test(s)) uit.push(r.cssText.replace(/\.pside \.plife/g, "#ysveld .ysvk .plife"));
           else if(s.indexOf(".lfkaart > .card") >= 0) uit.push(r.cssText.replace(/\.lfkaart > \.card/g, "#ysveld .ysk > .card")); } };
       for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } pak(rs); }
       const st = document.createElement("style"); st.id = "ys-leen"; st.textContent = uit.join("\n"); document.head.appendChild(st);
@@ -55432,7 +55444,8 @@ const YS_SIM = (o) => {
       if(fx() && !d._weg){ d._weg = true; const r = d.getBoundingClientRect(); const nd = V.G.vij.length > 25 ? 3 : V.G.vij.length > 12 ? 5 : 9; for(let i = 0; i < nd; i++) A.deeltje({x:r.x + Math.random() * r.width, y:r.y + Math.random() * r.height, vx:A.rnd(-.4, .4), vy:-A.rnd(.4, 1.4), life:A.rnd(.5, 1), kleur:A.kies(["#8a8e98", "#c0c4cc", "#4a4e58", "#fff2c0"]), s:3});
         d.animate([{opacity:1}, {opacity:0, transform:"translateY(-8px) scale(.9)", filter:"grayscale(1)"}], {duration:420, fill:"forwards"}).finished.then(() => d.remove()).catch(() => d.remove()); }
       else d.remove(); });
-    const hpk = G.kern.hp; V.kernHp.innerHTML = `KERN ${hpk}<small style="opacity:.6">/${G.kern.max}</small><i><b style="width:${(hpk / G.kern.max * 100).toFixed(1)}%"></b></i>`;
+    const hpk = G.kern.hp, ksl = hpk + "/" + G.kern.max; if(V.kernSl !== ksl){ V.kernSl = ksl; let balk = ""; try{ balk = levensBalk(hpk, G.kern.max, 0, V.kees && hpk >= 1); }catch(e){ balk = `<span class="lnum">${hpk}<small>/${G.kern.max}</small></span>`; }
+      V.kernHp.innerHTML = `<b class="yskt">KERN</b><div class="ysvk"><div class="plife hpbalk">${balk}</div></div>`; }
     V.hud.innerHTML = `<b>GOLF ${Math.max(1, G.golf)} / 3</b><span>${V.versie === "stapel" ? "De stapel geeft wat hij geeft." : "Kies uit de vier bronnen."}</span>`; };
   /* ---- wat er gebeurt, met beeld erbij (alleen met effecten aan) ---- */
   const verwerk = evs => { evs.forEach(e => { try{
@@ -55502,18 +55515,18 @@ const YS_SIM = (o) => {
     const tekst = {1:["Puf.", "Uit de rook komt kleur."], 2:["Puf blaast.", "Nu alleen Puf. Heel veel Puf."], 3:["PUF.", "Alles tegelijk."]}[n];
     for(const t of tekst){ await zeg(t, 1200); if(!V) return; }
     await golfTitel(n); if(!V) return;
-    V.G.golfStart(n); V.wisselt = false; V.fase = "spel"; if(V.versie === "stapel" && !V.top) volgendeTop(); };
+    V.G.C.MAX_EIGEN = V.versie === "stapel" ? 11 : 10; V.G.golfStart(n); V.wisselt = false; V.fase = "spel"; if(V.versie === "stapel" && !V.top) volgendeTop(); };
   const golfKlaar = async () => { if(!V) return; const n = V.G.golf; V.fase = "pauze";
     if(n >= 3){ await gewonnen(); return; }
     await zeg(n === 1 ? "De rook trekt terug. Even." : "Puf zegt niets. Puf haalt adem.", 1500); if(!V) return; await golf(n + 1); };
 
   /* ---- einde ---- */
-  const sterren = over => over >= STER3 ? 3 : over >= STER2 ? 2 : 1;
+  const sterren = over => over >= STER3() ? 3 : over >= STER2() ? 2 : 1;
   const gewonnen = async () => { if(!V) return; const over = V.G.kern.hp, n = sterren(over);
     await zeg("De mist trekt op.", 1500); if(!V) return; await zeg("Puf is vooral lucht nu.", 1400); if(!V) return;
     dicht();
     try{ if(typeof S !== "undefined" && S){ S.story = Object.assign({}, S.story && S.story.id === ID ? S.story : {}, {id:ID, wereld:3, variant:V0.variant, schadeJij:((V && V.G && V.G.kern.max) || 30) - over, mijnTijd:0,
-        sterrenNu:{n, lijst:[["de kern gehouden", true], [`${STER2} of meer levens over`, over >= STER2], [`${STER3} of meer levens over`, over >= STER3]], geenSchade:over >= ((V && V.G && V.G.kern.max) || 30), snel:false, tijd:0}}); } }catch(e){ fout(e); }
+        sterrenNu:{n, lijst:[["de kern gehouden", true], [`${STER2()} of meer levens over`, over >= STER2()], [`${STER3()} of meer levens over`, over >= STER3()]], geenSchade:over >= ((V && V.G && V.G.kern.max) || 30), snel:false, tijd:0}}); } }catch(e){ fout(e); }
     try{ praatStart(ID, "win"); }catch(e){ fout(e); naarKaart(); } };
   let V0 = {};
   const verloren = async () => { if(!V) return; await zeg("De rook neemt alles.", 1500); if(!V) return;
@@ -55546,7 +55559,8 @@ const YS_SIM = (o) => {
     let art = {}; try{ art = {schaduw:(typeof sprBeeldPad === "function" && sprBeeldPad("rookman")) || "art/rookman.png", groot:(typeof sprBeeldPad === "function" && sprBeeldPad("rookman_boos")) || "art/rookman-boos.png"}; }catch(e){}
     V = {el, vlak:el.querySelector(".ysvlak"), hud:el.querySelector(".yshud"), kern:el.querySelector(".yskern"), kernHp:el.querySelector(".yskernhp"), ring:el.querySelector(".ysring"), ring2:el.querySelector(".ysring2b"),
       bronEl:el.querySelector(".ysbron"), zeg:el.querySelector(".yszeg"), golfEl:el.querySelector(".ysgolf"), dom:new Map(), art, fase:"keus", bron:{steen:0, vuur:0, gras:0, water:0}, bronSl:"", vis:new Map(), aanv:[],
-      G:YS_SIM({hp:hpVan, atk:atkVan, uit:uitkomst, verstrikbaar})};
+      G:null};
+    { const ks = kernStart(); V.kees = ks.kees; V.G = YS_SIM({hp:hpVan, atk:atkVan, uit:uitkomst, verstrikbaar, C:{KERN_HP:ks.n, SCHAAL:Math.max(.8, 1 + (ks.n - 8) * .025)}}); }
     V.cvV = doek("ysv"); V.cvD = doek("ysdonker"); V.cvE = doek("ysaanv"); el.insertBefore(V.cvV, V.vlak); el.insertBefore(V.cvD, V.vlak); el.insertBefore(V.cvE, V.vlak.nextSibling);
     plaats(); zetMist(1);
     el.addEventListener("pointerdown", pd); addEventListener("pointermove", beweeg); addEventListener("pointerup", pu); addEventListener("pointercancel", pu); addEventListener("resize", plaats);
@@ -55602,6 +55616,161 @@ ANI.YT = {pad:ytPad, rond:ytRond};
     return true; }catch(e){ return false; } };
   window.ykStil = () => { try{ if(oud && oud()) return true; }catch(e){} return !gevecht(); };
   ANI.YT.gevecht = gevecht;
+})();
+
+/* ---- module yu ---- */
+/* ================= deel yu · een nieuwe opening voor het ei-level, 0-0 (15 nov 2026, Q) =================
+   Voor de eerste les: een hartslag op het scherm (bonk bonk, bonk bonk), de stem vraagt wat je bent, en je kiest.
+     "Voel je dat?" / "Dat ben jij." / "Maar... wat ben jij eigenlijk?"
+     1 Een meisje?  2 Een jongen?  3 ERFGENAAM VAN EEN OEROUD SOORT DAT BESTEMD IS TE OVERHEERSEN?!
+     Meisje of jongen: "Fout. Jij overstijgt zulke simpele grenzen. Jij bent bestemd voor meer." en die keuze vervaagt.
+     De derde: "Inderdaad. Ze dachten dat wij er niet meer waren." / "Maar jouw hart klopt. We zijn terug..."
+     Dan de elementen, "Kom. Ik laat je zien wat je kunt." en door naar de lessen.
+   Het ei-level (zk) roept dit aan via yu-hooks.py, en geeft zijn eigen stem, wachten, hart en scherm mee.
+   Effecten uit: dezelfde tekst en keuze, alleen zonder schermpuls. */
+ANI.YU = (() => {
+  const KEUZES = [
+    {t:"Een meisje?", goed:false},
+    {t:"Een jongen?", goed:false},
+    {t:"ERFGENAAM VAN EEN OEROUD SOORT DAT BESTEMD IS TE OVERHEERSEN?!", goed:true}];
+  const FOUT = "Fout. Jij overstijgt zulke simpele grenzen. Jij bent bestemd voor meer.";
+  try{ const st = document.createElement("style"); st.id = "yu-stijl"; st.textContent = [
+    /* de schermpuls: een donkerrode rand die op elke slag aanzwelt */
+    "#eilevel .yupuls{position:absolute; inset:0; z-index:12; pointer-events:none; opacity:0;",
+    "  background:radial-gradient(ellipse 75% 70% at 50% 50%, transparent 45%, rgba(120,10,20,.38) 78%, rgba(60,0,8,.75) 100%)}",
+    "#eilevel .yukeus{position:absolute; inset:0; z-index:13; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:18px; text-align:center;",
+    "  background:rgba(4,3,8,.55); opacity:0; transition:opacity .3s}",
+    "#eilevel .yukeus.aan{opacity:1}",
+    "#eilevel .yukeus .yuvraag{margin:0; font:italic clamp(22px, 3vw, 34px)/1.25 'VT323',monospace; color:#efe8ff; text-shadow:0 0 16px rgba(190,170,255,.45), 0 2px 0 #000; max-width:min(92vw, 760px); min-height:1.3em}",
+    "#eilevel .yukeus .yurij{display:flex; flex-direction:column; gap:10px; align-items:stretch; width:min(92vw, 640px)}",
+    "#eilevel .yukeus button{display:flex; align-items:center; gap:12px; text-align:left; cursor:pointer; padding:12px 14px; background:rgba(20,16,32,.88); border:2px solid #5a4e78; color:#efe8ff;",
+    "  font:clamp(18px, 2.3vw, 26px)/1.15 'VT323',monospace; transition:opacity .5s, filter .5s, border-color .2s, transform .12s}",
+    "#eilevel .yukeus button:hover, #eilevel .yukeus button:focus-visible{border-color:#cfc0ff; outline:none; transform:translateX(3px)}",
+    "#eilevel .yukeus button kbd{flex:0 0 auto; font:10px 'Press Start 2P',monospace; color:#ffe7a0; background:#000; border:2px solid #f0c75a; padding:3px 6px}",
+    "#eilevel .yukeus button.groot{font:clamp(10px, 1.35vw, 14px)/1.5 'Press Start 2P',monospace; color:#ffd8a0; border-color:#a0702a; letter-spacing:.02em}",
+    "#eilevel .yukeus button.fout{opacity:.18; filter:grayscale(1) blur(1px); pointer-events:none}",
+    "#eilevel.stil .yukeus, #eilevel.stil .yukeus button{transition:none}",
+    "@media (max-height:500px){ #eilevel .yukeus{gap:8px; padding:8px} #eilevel .yukeus button{padding:7px 10px} #eilevel .yukeus .yurij{gap:6px} }"
+  ].join("\n"); document.head.appendChild(st); }catch(e){ console.error(e); }
+
+  /* de opening. h = {R, stem, wacht, GL, pols, fx, geluid} uit het ei-level */
+  const opening = async h => {
+    const R = h.R; if(!R()) return;
+    const el = R().el, puls = document.createElement("div"); puls.className = "yupuls"; el.appendChild(puls);
+    /* bonk bonk, bonk bonk: het geluid (twee tikken per slag zit al in klop) en de schermpuls op hetzelfde ritme */
+    const slag = () => { try{ h.pols(.55); if(h.fx()) puls.animate([{opacity:0}, {opacity:.95, offset:.1}, {opacity:.3, offset:.24}, {opacity:.8, offset:.34}, {opacity:0}], {duration:950, easing:"ease-out"}); }catch(e){} };
+    h.GL.hartAan(1150, .6, slag);
+    try{
+      await h.stem(["Voel je dat?", "Dat ben jij."]); if(!R() || R().volgend) return;
+      /* de keuze: klikken, tikken of 1 tot 3 */
+      const d = document.createElement("div"); d.className = "yukeus";
+      d.innerHTML = `<p class="yuvraag">Maar... wat ben jij eigenlijk?</p><div class="yurij">${KEUZES.map((k, i) => `<button type="button" data-i="${i}" class="${k.goed ? "groot" : ""}"><kbd>${i + 1}</kbd><span>${k.t}</span></button>`).join("")}</div>`;
+      el.appendChild(d); requestAnimationFrame(() => d.classList.add("aan"));
+      d.addEventListener("pointerdown", ev => ev.stopPropagation());
+      const vraag = d.querySelector(".yuvraag");
+      await new Promise(klaar => {
+        let bezig = false;
+        const kies = async i => { if(bezig || !R()) return; const b = d.querySelector(`[data-i="${i}"]`); if(!b || b.classList.contains("fout")) return; bezig = true; h.geluid("click");
+          if(KEUZES[i].goed){ klaar(); return; }
+          b.classList.add("fout"); h.geluid("thud"); vraag.textContent = FOUT; try{ if(h.fx()) vraag.animate([{transform:"translateX(-6px)"}, {transform:"translateX(6px)"}, {transform:"none"}], {duration:220}); }catch(e){}
+          bezig = false; };
+        d.addEventListener("click", ev => { const b = ev.target.closest("button"); if(b){ ev.stopPropagation(); kies(+b.dataset.i); } });
+        const toets = ev => { if(!R() || !d.isConnected){ removeEventListener("keydown", toets, true); return; } const i = "123".indexOf(ev.key); if(i >= 0){ ev.preventDefault(); ev.stopPropagation(); kies(i); } };
+        addEventListener("keydown", toets, true);
+        const kijk = setInterval(() => { if(!R() || R().volgend){ clearInterval(kijk); klaar(); } }, 200);
+        d._los = () => { clearInterval(kijk); removeEventListener("keydown", toets, true); };
+        d._klaar = klaar; });
+      if(d._los) d._los(); d.classList.remove("aan"); await h.wacht(h.fx() ? 300 : 0); d.remove();
+      if(!R() || R().volgend) return;
+      await h.stem(["Inderdaad. Ze dachten dat wij er niet meer waren.", "Maar jouw hart klopt. We zijn terug...",
+        "In elk wezen zitten vier elementen. Maar niet zoals in jou.", "Die van jou zijn sterker...", "Kom. Ik laat je zien wat je kunt."]);
+    } finally { h.GL.hartUit(); puls.remove(); }
+  };
+  return {opening, KEUZES, FOUT};
+})();
+
+/* ---- module yv ---- */
+/* ================= deel yv · de deckbouwer bijgeschaafd (15 nov 2026, Q) =================
+   Bovenop deel yr (het zegel), zonder yr zelf te veranderen:
+   1. Companions staan in de bovenbalk (in het verhaal), niet meer rechtsonder bij het zegel.
+   2. De element-rijen: elke kaart is in elke rij even breed en even ver zichtbaar. De overlap komt van de langste rij en geldt voor alle rijen.
+   3. Erboven hangen (muis) toont alleen de naam. Het volledige effect pas bij een tweede klik kort na de eerste (of lang drukken / rechtsklik, zoals het was).
+      De tekst in het infovak is groter.
+   4. Het plaatje in het infovak is altijd vierkant (ook bij lichtkaarten en companions).
+   5. De missie-aether en -lichtkaart hebben geen gele omlijning meer, alleen de ster. */
+ANI.YV = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;"})[c]);
+  /* ---------- de html van yr bijwerken ---------- */
+  /* een div met alles erin vanaf een startpositie (telt geneste divs) */
+  const pakDiv = (h, i) => { let d = 0, j = i; const re = /<\/?div\b/g; re.lastIndex = i; let m; while((m = re.exec(h))){ if(m[0] === "<div") d++; else { d--; if(d === 0){ j = h.indexOf(">", m.index) + 1; return [i, j]; } } } return null; };
+  const bewerk = h => { try{
+      /* 5 · geen gele rand om de missie, alleen de ster */
+      h = h.replace(/(<(?:path|circle) class="yrhalo"[^>]*?)stroke="#ffd84a"/g, '$1stroke="none"');
+      /* 1 · companions naar de bovenbalk */
+      const a = h.indexOf('<div class="yrcpgroep">');
+      if(a >= 0){ const r = pakDiv(h, a); if(r){ const groep = h.slice(r[0], r[1]).replace('class="yrcpgroep"', 'class="yrcpgroep yvtop"'); h = h.slice(0, r[0]) + h.slice(r[1]);
+          const k = h.indexOf('<div class="dkknoppen">'); if(k >= 0) h = h.slice(0, k) + groep + h.slice(k); } }
+    }catch(e){ fout(e); } return h; };
+  try{ const vb0 = voorB2HTML; voorB2HTML = function(){ return bewerk(vb0.apply(this, arguments)); }; }catch(e){ fout(e); }
+  try{ const db0 = deckbouwHTML; deckbouwHTML = function(){ return bewerk(db0.apply(this, arguments)); }; }catch(e){ fout(e); }
+  /* ---------- 2 · de rijen: één kaartbreedte en één overlap voor alle rijen ---------- */
+  const maat = () => { try{ const bn = document.querySelector(".yrbox .yrlinks > .dkbanen"); if(!bn) return; const rijen = [...bn.querySelectorAll(".dkbaan")]; if(!rijen.length) return;
+      const kaart = bn.querySelector(".dkk .gc"); if(!kaart) return; const kw = kaart.getBoundingClientRect().width; if(!kw) return;
+      let beschikbaar = 1e9, n = 1;
+      for(const r of rijen){ const kk = r.querySelector(".dkkaarten"); if(!kk) continue; n = Math.max(n, kk.querySelectorAll(":scope > .dkk").length);
+        let rest = document.body.classList.contains("tel") ? 44 : 110; for(const c of r.children){ if(c !== kk && !c.classList.contains("dktekst")) rest += c.getBoundingClientRect().width; } const st = getComputedStyle(r), gap = parseFloat(st.columnGap || st.gap) || 0;
+        beschikbaar = Math.min(beschikbaar, r.clientWidth - rest - gap * (r.children.length - 1) - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight) - 4); }
+      const tel = document.body.classList.contains("tel"), ruimte = Math.max(kw, beschikbaar), stap = n > 1 ? Math.min(kw + (tel ? 0 : 4), (ruimte - kw) / (n - 1)) : kw, ov = Math.max(0, kw - stap);
+      bn.style.setProperty("--yvov", ov.toFixed(1) + "px"); bn.style.setProperty("--yvgap", (stap > kw ? stap - kw : 0).toFixed(1) + "px"); bn.style.setProperty("--yvaw", Math.floor(kw + stap * (n - 1)) + "px");
+    }catch(e){ fout(e); } };
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); try{ const bx = document.querySelector(".yrbox"); if(bx){ maat(); if(bx.dataset.opdr) bx.dataset.opdr = bx.dataset.opdr.replace(/Wat met de gouden rand staat, hoort erbij\.?/g, "Wat een ster heeft, hoort erbij."); } else naam(null); }catch(e){ fout(e); } return v; }; }catch(e){ fout(e); }
+  addEventListener("resize", () => setTimeout(maat, 60));
+  /* ---------- 3 · erboven hangen: alleen de naam; tweede klik: het infovak ---------- */
+  let LABEL = null;
+  const naamVan = el => { const v = el.dataset.yri || "", i = v.indexOf(":"), s0 = v.slice(0, i), k = v.slice(i + 1);
+    if(s0 === "cp"){ const t = el.getAttribute("title") || el.textContent || ""; return t.trim(); }
+    const D = s0 === "lt" ? (typeof LIGHTS !== "undefined" && LIGHTS[k]) : (typeof AETHERS !== "undefined" && AETHERS[k]); return D ? D.name : ""; };
+  const naam = (el, px, py) => { if(!LABEL){ LABEL = document.createElement("div"); LABEL.id = "yvnaam"; document.body.appendChild(LABEL); }
+    if(!el){ LABEL.className = ""; return; } const t = naamVan(el); if(!t){ LABEL.className = ""; return; } LABEL.textContent = t; LABEL.className = "aan"; LABEL.style.left = px + 14 + "px"; LABEL.style.top = py + 16 + "px"; };
+  const item = t => t && t.closest && t.closest(".yrbox [data-yri]");
+  addEventListener("pointerover", e => { if(e.pointerType !== "mouse") return; const it = item(e.target); if(it){ e.stopPropagation(); naam(it, e.clientX, e.clientY); } else naam(null); }, true);
+  addEventListener("pointermove", e => { if(e.pointerType !== "mouse" || !LABEL || LABEL.className !== "aan") return; if(!item(e.target)){ naam(null); return; } LABEL.style.left = e.clientX + 14 + "px"; LABEL.style.top = e.clientY + 16 + "px"; }, true);
+  let VORIG = null;
+  addEventListener("click", e => { const it = item(e.target); if(!it){ VORIG = null; return; } const key = it.dataset.yri, nu = performance.now();
+    if(VORIG && VORIG.k === key && nu - VORIG.t < 650){ VORIG = null; e.stopPropagation(); e.preventDefault(); naam(null);
+      const i = key.indexOf(":"), s0 = key.slice(0, i); try{ ANI.YR.toonInfo(key.slice(i + 1), s0 === "lt" ? true : s0 === "cp" ? "cp" : false, true); }catch(x){ fout(x); } return; }
+    VORIG = {k:key, t:nu}; }, true);
+  /* ---------- stijl ---------- */
+  try{ const st = document.createElement("style"); st.id = "yv-stijl"; st.textContent = `
+html body .yrbox .yrhalo{animation:none; filter:none}
+/* de kaarten: vaste breedte, een overlap voor alle rijen */
+html body .yrbox .yrlinks .dkkaarten{flex:0 0 var(--yvaw, auto) !important; width:var(--yvaw, auto); gap:0 !important; overflow:visible}
+html body .yrbox .yrlinks .dkkaarten > .dkk{flex:0 0 auto !important; margin-right:0 !important}
+html body .yrbox .yrlinks .dkkaarten > .dkk:not(:last-child){margin-right:calc(var(--yvgap, 0px) - var(--yvov, 0px)) !important}
+html body:not(.tel) .yrbox .yrlinks .dktekst{flex:1 1 0 !important; min-width:0 !important}
+html body .yrbox .yrlinks .dkk .gc{width:var(--kw) !important; height:calc(var(--kw) * 1.39) !important}
+/* companions in de bovenbalk: klein en op een rij */
+html body .yrbox .dktop .yrcpgroep.yvtop{flex-direction:row; align-items:center; gap:6px; padding:3px 8px; margin-left:auto; background:rgba(12,9,6,.55)}
+html body .yrbox .dktop .yrcpgroep.yvtop .yrcprij{gap:6px}
+html body .yrbox .dktop .yrcpgroep.yvtop .yrcp{width:auto; flex-direction:row; gap:4px}
+html body .yrbox .dktop .yrcpgroep.yvtop .yrcpbeeld{width:28px; height:28px}
+html body .yrbox .dktop .yrcpgroep.yvtop .yrcpnaam{font-size:11px; max-width:52px}
+html body .yrbox .dktop .yrcpgroep.yvtop .yrcp.leeg .yrcpnaam{display:none}
+body.tel .yrbox .dktop .yrcpgroep.yvtop{padding:1px 5px; gap:3px} body.tel .yrbox .dktop .yrcpgroep.yvtop .yrcpkop{display:none}
+body.tel .yrbox .dktop .yrcpgroep.yvtop .yrcpbeeld{width:20px; height:20px} body.tel .yrbox .dktop .yrcpgroep.yvtop .yrcpnaam{display:none}
+html body .yrbox .yrcomps:empty{display:none}
+/* de naam bij erboven hangen */
+#yvnaam{position:fixed; z-index:9001; pointer-events:none; display:none; background:rgba(14,11,8,.94); border:1px solid #f0c75a; border-radius:4px; padding:5px 8px 4px; font:10px/1.2 'Press Start 2P',monospace; color:#ffe7a0; white-space:nowrap; box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#yvnaam.aan{display:block}
+/* het infovak: grotere tekst en een vierkant plaatje */
+#yrinfo .yribeeld, #yrinfo .yribeeld.licht{aspect-ratio:1 / 1 !important; flex:0 0 34% !important; height:auto !important; align-self:flex-start !important}
+#yrinfo .yribeeld.licht{border-radius:8px}
+#yrinfo .yribeeld img{width:100% !important; height:100% !important; object-fit:cover; object-position:50% 35%}
+#yrinfo .yrinaam{font-size:17px !important} #yrinfo .yrizin{font-size:23px !important; line-height:1.15 !important} #yrinfo .yriplek{font-size:18px !important} #yrinfo .yriopdr{font-size:19px !important} #yrinfo .yristat{font-size:10px !important}
+body.tel #yrinfo .yrinaam{font-size:12px !important} body.tel #yrinfo .yrizin{font-size:17px !important} body.tel #yrinfo .yribeeld, body.tel #yrinfo .yribeeld.licht{flex-basis:28% !important}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {maat};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
