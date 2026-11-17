@@ -56304,15 +56304,19 @@ ANI.YW = (() => {
   const RACE = (() => {
     const BEATS = {3:1, 1:2, 2:0, 0:3};   // a wint van BEATS[a]: Water > Vuur > Gras > Steen > Water
     const EL = [{n:"Steen", k:"S", c:"#9a5f2a", l:"#d8a066"}, {n:"Vuur", k:"V", c:"#ff3a14", l:"#ffb070"}, {n:"Gras", k:"G", c:"#33b23f", l:"#9ef08a"}, {n:"Water", k:"W", c:"#2a7fff", l:"#9cccff"}];
-    const CD = .6, FAR = 60, LIVES = 3, MAXLIVES = 5, RAINBOW_T = 4, GOAL = 4500, ADEM_START = 30, ADEM_MAX = 50, ADEM_EXTRA = .77, HEAT_FULL = 6, DIE_T = 1.2;
+    const CD = .6, LIVES = 3, MAXLIVES = 5, RAINBOW_T = 4, GOAL = 4500, ADEM_START = 30, ADEM_MAX = 50, ADEM_EXTRA = .77, HEAT_FULL = 6, DIE_T = 1.2;
     let W = 480; const H = 300, HOR = 70, LW = 480;   /* W groeit mee met de breedte van het scherm (het beeld vult alles); de banen houden hun maat (LW) */ const F = n => n + "px 'Press Start 2P',monospace";
     let V = null, toldStorm = false, SIMR = null;
+    /* hoe ver je vooruit kijkt groeit mee met de snelheid (BAL.zicht seconden), en het beeld wordt zo samengeperst dat de verte op dezelfde plek blijft:
+       bij hoge snelheid zie je de muren dus even lang aankomen als bij lage */
+    let FAR = 60, KZ = .09; const zetZicht = base => { FAR = Math.max(60, base * BAL.zicht); KZ = .09 * 60 / FAR; };
     /* balans (17 nov 2026, Q: te makkelijk): sneller, De Adem komt harder, minder vaartverlies bij botsen */
-    const BAL = {b0:11, b1:20, b1m:52, b2:20, b2v:1100, b2m:190, boost:1.45, crashSlow:.45, crashF:.55, neutSlow:.5, neutF:.6, adem:1, ademF:.4, ademR:1200, vrijZ:24};
+    /* 17 nov 2026 (Q): geen maximumsnelheid meer, de band versnelt het hele level door (afstand), en een reeks maakt je nog sneller */
+    const BAL = {b0:18, b1m:40, combo:.012, zicht:1.6, boost:1.45, crashSlow:.45, crashF:.55, neutSlow:.5, neutF:.6, adem:1, ademF:.38, ademR:1200, vrijZ:24};
     const bg = (() => { let im = null; return () => { if(im) return im; im = new Image(); im.src = "art/bg-3-5-binnen.png"; im.onerror = () => { if(!im.dataset.b){ im.dataset.b = 1; im.src = "art/bg-3-5.png"; } }; return im; }; })();
     const outcome = (p, w) => BEATS[p] === w ? "win" : BEATS[w] === p ? "lose" : "neutral";
     const rnd = n => Math.floor(Math.random() * n), shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-    const reset = () => { V.Q = {run:false, lane:1, laneX:1, el:3, cd:0, speed:9, base:9, slow:0, slowF:.3, boost:0, dist:0, score:0, combo:0, best:0, lives:LIVES, inv:0,
+    const reset = () => { zetZicht(BAL.b0); V.Q = {run:false, lane:1, laneX:1, el:3, cd:0, speed:BAL.b0, base:BAL.b0, slow:0, slowF:.3, boost:0, dist:0, score:0, combo:0, best:0, lives:LIVES, inv:0,
       shield:false, x2:0, storm:0, heat:0, dying:0, goalDone:false, goalT:0, flash:0, tipT:0, adem:ADEM_START, minAdem:ADEM_START, objs:[], fx:[], nextZ:20, t:0, shake:0, msg:"", msgT:0, msgC:"#ffd84a", broken:0, crashes:0, neutrals:0, band:0,
       deco:[], decoZ:6, brk:[], amb:Array.from({length:26}, (_, i) => ({x:Math.random() * W, y:Math.random() * H * .8, v:6 + Math.random() * 14, p:Math.random() * 7, k:i % 3 ? '#ffb050' : '#ff6a20'}))}; };
     const Q = () => V.Q;
@@ -56335,7 +56339,7 @@ ANI.YW = (() => {
       else { const l = rnd(3); add("wall", l, z, {el:rnd(4)}); if(Math.random() < .5) add("pick", l, z + 3, {k:pickKind()}); if(Math.random() < .5) add("aether", (l + 1 + rnd(2)) % 3, z); }
       if(Math.random() < .05) add("pick", rnd(3), z + 5, {k:pickKind()});
       q.nextZ = z + Math.max(q.speed * .75, 16 - d * 6); };
-    const proj = (lp, z) => { const s = 1 / (1 + z * .09); return {x:W / 2 + (lp - 1) * LW * .30 * s, y:HOR + (H - HOR) * s, s}; };
+    const proj = (lp, z) => { const s = 1 / (1 + z * KZ); return {x:W / 2 + (lp - 1) * LW * .30 * s, y:HOR + (H - HOR) * s, s}; };
     const burst = (x, y, col, n) => { for(let i = 0; i < n; i++) Q().fx.push({x, y, vx:(Math.random() - .5) * 260, vy:-Math.random() * 220, l:.6 + Math.random() * .4, c:col}); };
     const say = (m, c) => { const q = Q(); q.msg = m; q.msgT = .9; q.msgC = c || "#ffd84a"; };
     const crash = what => { const q = Q(); if(q.storm > 0) return false; if(q.inv > 0) return true; q.shake = .35;
@@ -56351,23 +56355,23 @@ ANI.YW = (() => {
         for(const f of q.fx){ f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 500 * dt; f.l -= dt; } q.fx = q.fx.filter(f => f.l > 0); if(q.dying <= 0) einde(false, "ADEM"); return; }
       q.t += dt; q.cd = Math.max(0, q.cd - dt); q.inv = Math.max(0, q.inv - dt); q.shake = Math.max(0, q.shake - dt); q.msgT = Math.max(0, q.msgT - dt); q.tipT = Math.max(0, q.tipT - dt); q.x2 = Math.max(0, q.x2 - dt);
       if(q.storm > 0){ q.storm = Math.max(0, q.storm - dt); if(q.storm <= 0){ q.inv = 1.5; say("STORM VOORBIJ", "#ccc"); } }
-      q.base = BAL.b0 + Math.min(BAL.b1, q.dist / BAL.b1m) + Math.min(BAL.b2, Math.max(0, q.dist - BAL.b2v) / BAL.b2m); q.flash = Math.max(0, q.flash - dt);
+      q.base = BAL.b0 + q.dist / BAL.b1m; zetZicht(q.base); q.flash = Math.max(0, q.flash - dt);
       /* staat er even geen muur voor je (niets, of alleen zwarte aetherblokken), dan verlies je geen vaart: de boost zakt niet weg en De Adem wint niets */
       const vrij = !q.objs.some(o => o.t === "wall" && !o.hit && o.z > -.5 && o.z < BAL.vrijZ);
       if(!q.goalDone && (q.dist >= GOAL || (window.YW_TEST && window.YW_TEST.eind))){ q.goalDone = true; q.goalT = 1.6; q.flash = .5; q.msg = "DOEL GEHAALD!"; q.msgT = 2.2; q.msgC = "#7f7";
         for(let i = 0; i < 70; i++) q.fx.push({x:Math.random() * W, y:HOR - 10 + Math.random() * 30, vx:(Math.random() - .5) * 200, vy:-80 - Math.random() * 200, l:1 + Math.random() * .8, c:["#ffd84a", "#ff5a1f", "#3cb043", "#2a7fff", "#fff"][i % 5]}); }
       if(q.goalDone){ q.goalT -= dt; q.inv = Math.max(q.inv, .2); if(q.goalT <= 0){ einde(true); return; } }
       q.slow = Math.max(0, q.slow - dt); if(!vrij || q.slow > 0) q.boost = Math.max(0, q.boost - dt);
-      let target = q.base; if(q.storm > 0) target *= 1.5; else if(q.slow > 0) target *= q.slowF; else if(q.boost > 0) target *= BAL.boost;
+      let target = q.base * (1 + BAL.combo * q.combo); if(q.storm > 0) target *= 1.5; else if(q.slow > 0) target *= q.slowF; else if(q.boost > 0) target *= BAL.boost;
       q.speed += (target - q.speed) * Math.min(1, dt * (q.slow > 0 ? 8 : 3)); const dz = q.speed * dt; q.dist += dz; q.band = (q.band + dz) % 4;
       q.score += dz * .2 * mult() * (q.x2 > 0 ? 2 : 1);
       if(!q.goalDone){ let dA = (q.speed - (q.base * (1 + BAL.ademF * Math.min(1, .25 + q.dist / BAL.ademR)) + BAL.adem)) * dt; if(vrij && q.slow <= 0 && dA < 0) dA = 0; q.adem = Math.min(ADEM_MAX, q.adem + dA); q.minAdem = Math.min(q.minAdem, q.adem);
         if(q.adem <= 0){ q.adem = 0; q.dying = DIE_T; q.tipT = 0; q.msgT = 0; q.shake = .4; return; } }
       q.laneX += (q.lane - q.laneX) * Math.min(1, dt * 14);
       for(const o of q.objs) o.z -= dz; q.nextZ -= dz; if(!q.goalDone) while(q.nextZ < FAR) spawnRow();
-      for(const d of q.deco) d.z -= dz; q.decoZ -= dz; while(q.decoZ < FAR){ q.deco.push({z:q.decoZ, kant:Math.random() < .5 ? -1 : 1, f:Math.random() * 3}); q.decoZ += 9 + Math.random() * 10; } q.deco = q.deco.filter(d => d.z > -2);
+      for(const d of q.deco) d.z -= dz; q.decoZ -= dz; while(q.decoZ < FAR){ q.deco.push({z:q.decoZ, kant:Math.random() < .5 ? -1 : 1, f:Math.random() * 3}); q.decoZ += (9 + Math.random() * 10) * FAR / 60; } q.deco = q.deco.filter(d => d.z > -2);
       for(const k of q.brk){ k.z -= dz * .4; k.u += dt * 2.6; } q.brk = q.brk.filter(k => k.u < 1);
-      for(const o of q.objs){ if(o.hit || o.z > .6) continue; if(o.z < -.5){ o.hit = true; continue; } if(Math.abs(q.laneX - o.lane) > .5) continue;
+      for(const o of q.objs){ if(o.hit || o.z > .6) continue; if(o.z + dz < -.5){ o.hit = true; continue; } if(Math.abs(q.laneX - o.lane) > .5) continue;
         o.hit = true; o.gone = true; const p = proj(o.lane, .5);
         if(o.t === "pick"){ burst(p.x, p.y - 20, "#fff", 12);
           if(o.k === "heart"){ q.lives = Math.min(MAXLIVES, q.lives + 1); say("+1 LEVEN", "#ff7a9a"); } else if(o.k === "shield"){ q.shield = true; say("SCHILD", "#8cc4ff"); }
@@ -56457,19 +56461,19 @@ function draw(){ ctx=V.ctx; S=V.Q; BG=bg(); const sbtn=V.sbtn, btns=V.btns;
   const a=proj(-.62,FAR),b=proj(2.62,FAR),c=proj(2.62,0),d=proj(-.62,0);
   ctx.fillStyle='rgba(0,0,0,.55)'; ctx.beginPath(); ctx.moveTo(a.x-3,a.y); ctx.lineTo(b.x+3,b.y); ctx.lineTo(c.x+70,H); ctx.lineTo(d.x-70,H); ctx.fill();
   const bandG=ctx.createLinearGradient(0,HOR,0,H); bandG.addColorStop(0,'#2a2b31'); bandG.addColorStop(1,'#3e4048'); ctx.fillStyle=bandG; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.lineTo(c.x+40,H); ctx.lineTo(d.x-40,H); ctx.fill();
-  const band=S.dist%2;
-  for(let z=-band;z<FAR;z+=2){ const p1=proj(-.62,z),p2=proj(2.62,z),p3=proj(-.62,z+.5),p4=proj(2.62,z+.5); if(p1.y<HOR+1) continue;
+  const st=2*FAR/60, band=S.dist%st;
+  for(let z=-band;z<FAR;z+=st){ const p1=proj(-.62,z),p2=proj(2.62,z),p3=proj(-.62,z+.5),p4=proj(2.62,z+.5); if(p1.y<HOR+1) continue;
     ctx.fillStyle='rgba(16,16,20,'+(.35+p1.s*.4)+')'; ctx.beginPath(); ctx.moveTo(p1.x-40*p1.s,p1.y); ctx.lineTo(p2.x+40*p1.s,p2.y); ctx.lineTo(p4.x+40*p3.s,p4.y); ctx.lineTo(p3.x-40*p3.s,p3.y); ctx.fill();
     ctx.fillStyle='rgba(255,255,255,'+(.05*p1.s)+')'; ctx.fillRect(p1.x-40*p1.s,p1.y-.6,p2.x-p1.x+80*p1.s,.6); }
   /* banen: dunne gloeiende geleiders */
   for(const lp of [.5,1.5]){ const p1=proj(lp,0),p2=proj(lp,FAR); ctx.strokeStyle='rgba(255,180,80,.18)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke(); }
   /* stalen randen met geel-zwarte waarschuwingsstrepen */
   for(const kant of [-1,1]){ const lp=kant<0?-.62:2.62;
-    for(let z=-(S.dist%3);z<FAR;z+=1.5){ const p1=proj(lp,z),p2=proj(lp,z+1.5); if(p2.y<HOR) continue; const w1=16*p1.s,w2=16*p2.s, o1=kant*40*p1.s, o2=kant*40*p2.s;
-      ctx.fillStyle=Math.floor((z+S.dist)/1.5)%2?'#e0b020':'#1c1c20'; ctx.beginPath(); ctx.moveTo(p1.x+o1,p1.y); ctx.lineTo(p1.x+o1+kant*w1,p1.y); ctx.lineTo(p2.x+o2+kant*w2,p2.y); ctx.lineTo(p2.x+o2,p2.y); ctx.fill(); }
+    const sr=1.5*FAR/60; for(let z=-(S.dist%(2*sr));z<FAR;z+=sr){ const p1=proj(lp,z),p2=proj(lp,z+sr); if(p2.y<HOR) continue; const w1=16*p1.s,w2=16*p2.s, o1=kant*40*p1.s, o2=kant*40*p2.s;
+      ctx.fillStyle=Math.floor((z+S.dist)/sr)%2?'#e0b020':'#1c1c20'; ctx.beginPath(); ctx.moveTo(p1.x+o1,p1.y); ctx.lineTo(p1.x+o1+kant*w1,p1.y); ctx.lineTo(p2.x+o2+kant*w2,p2.y); ctx.lineTo(p2.x+o2,p2.y); ctx.fill(); }
     const n1=proj(lp,0),n2=proj(lp,FAR); ctx.strokeStyle='rgba(200,206,219,.55)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(n1.x+kant*40,n1.y); ctx.lineTo(n2.x+kant*40*n2.s,n2.y); ctx.stroke(); }
   /* finishlijn */
-  { const gz=GOAL-S.dist; if(!S.goalDone&&gz>0&&gz<FAR){ for(let i=0;i<10;i++){ const l0=-.62+i*3.24/10,n0=proj(l0,gz),n1=proj(l0+3.24/10,gz+.8); ctx.fillStyle=i%2?'#fff':'#111'; ctx.fillRect(n0.x,n1.y,n1.x-n0.x,Math.max(1.5,n0.y-n1.y)); } } }
+  { const gz=GOAL-S.dist; if(!S.goalDone&&gz>0&&gz<FAR){ for(let i=0;i<10;i++){ const l0=-.62+i*3.24/10,n0=proj(l0,gz),n1=proj(l0+3.24/10,gz+.8*FAR/60); ctx.fillStyle=i%2?'#fff':'#111'; ctx.fillRect(n0.x,n1.y,n1.x-n0.x,Math.max(1.5,n0.y-n1.y)); } } }
   /* decor (zaagbladen) en blokken, van ver naar dichtbij */
   const lijst=[]; for(const z of S.deco) lijst.push({z:z.z,d:z}); for(const o of S.objs) lijst.push({z:o.z,o}); for(const k of S.brk) lijst.push({z:k.z,k});
   lijst.sort((x,y)=>y.z-x.z);
@@ -56478,7 +56482,7 @@ function draw(){ ctx=V.ctx; S=V.Q; BG=bg(); const sbtn=V.sbtn, btns=V.btns;
       /* half in een sleuf in de vloer: alleen de bovenkant steekt uit */ ctx.fillStyle='rgba(0,0,0,.7)'; rr(p.x-r*1.05,p.y-r*.1,r*2.1,r*.22,r*.08); ctx.fill(); ctx.save(); ctx.beginPath(); ctx.rect(p.x-r*1.2,p.y-r*1.2,r*2.4,r*1.2); ctx.clip(); zaag(p.x,p.y,r,S.t+z.f); ctx.restore(); gloed(p.x,p.y,r*.9,'rgba(255,150,50,.6)',.35);
       if(z.z<30&&Math.random()<.45*p.s+.05){ for(let i=0;i<3;i++) S.fx.push({x:p.x-z.kant*r*.75,y:p.y-r*.15,vx:-z.kant*(60+Math.random()*120),vy:-40-Math.random()*90,l:.35+Math.random()*.3,c:Math.random()<.5?'#ffd480':'#ff8a2a',s:1.2}); } continue; }
     if(it.k){ const k=it.k,p=proj(k.lane,Math.max(0,k.z)),bw=LW*.28*p.s,bh=bw*.8; if(k.t==='aether') aetherBlok(p.x,p.y,bw,bh,S.t,k.u); else tegel(k.el,p.x,p.y,bw,bh,S.t,k.u); continue; }
-    const o=it.o; if(o.z>FAR||o.z<-.4) continue; const p=proj(o.lane,Math.max(0,o.z)); const near=Math.min(1,Math.max(0,(FAR-o.z)/12));
+    const o=it.o; if(o.z>FAR||o.z<-.4) continue; const p=proj(o.lane,Math.max(0,o.z)); const near=Math.min(1,Math.max(0,(FAR-o.z)/(12*FAR/60)));
     ctx.globalAlpha=near;
     if(o.t==='pick'){ drawPick(o,p); ctx.globalAlpha=1; continue; }
     const bw=LW*.28*p.s,bh=bw*.8;
@@ -57292,7 +57296,7 @@ svg .yzwijs, g.yzwijs{outline:none !important; filter:drop-shadow(0 0 6px #f0c75
   /* het logo (voorstel A van a42, in mint): ARCADE in neonbuizen. Op het medaillon in een boog over de rand, die af
      en toe hapert; in het infovak en de pop-up recht. YZ_ARCADE_LOGO (een plaatje) gaat voor. */
   const arcadeLogo = boog => window.YZ_ARCADE_LOGO ? `<img class="yzlogo${boog ? " yzlogoboog" : ""}" src="${window.YZ_ARCADE_LOGO}" alt="Arcade" draggable="false">`
-    : boog ? `<div class="yzarc" aria-label="Arcade">${[..."ARCADE"].map((c, n) => `<s style="--a:${((n - 2.5) * 15).toFixed(1)}deg"${n === 3 ? ' class="yzhap"' : ""}>${c}</s>`).join("")}</div>`
+    : boog ? `<div class="yzarc" aria-label="Arcade">${[..."ARCADE"].map((c, n) => `<s style="--a:${((n - 2.5) * 19).toFixed(1)}deg"${n === 3 ? ' class="yzhap"' : ""}>${c}</s>`).join("")}</div>`
     : `<span class="yzlogo yzneon">ARCADE</span>`;
   /* wat je in een arcade challenge doet (het infovak) */
   const ARC_UITLEG = {
@@ -57332,6 +57336,11 @@ svg .yzwijs, g.yzwijs{outline:none !important; filter:drop-shadow(0 0 6px #f0c75
   const flintOk = () => storyKlaar("3-1") && (storyKlaar("3-4") || storyKlaar("3-5"));
   try{ const sv1 = storyVrij; storyVrij = function(id){ if(id === "3-6" && !(SET.story && SET.story.vrij) && !storyKlaar("3-6") && !flintOk()) return false; return sv1.apply(this, arguments); }; }catch(e){ fout(e); }
   try{ const br0 = bordRandOpen; bordRandOpen = function(r){ if(r && r[0] === "3-1" && r[1] === "3-6" && !(SET.story && SET.story.vrij) && !flintOk()) return false; return br0.apply(this, arguments); }; }catch(e){ fout(e); }
+  /* de nummers in wereld 3 volgen de kaart: Tang 3-1, fabriek 3-2, circus 3-3, Zuster As 3-4, Flint 3-5 (interne id's blijven) */
+  const W3NR = {"3-2":"3-1", "3-5":"3-2", "3-4":"3-3", "3-1":"3-4", "3-6":"3-5"};
+  try{ if(typeof yyN === "function"){ const yy0 = yyN; yyN = function(id){ return W3NR[id] || yy0.apply(this, arguments); }; } }catch(e){ fout(e); }
+  try{ const bb1 = bordBordjes; bordBordjes = function(){ let h = bb1.apply(this, arguments);
+      try{ h = h.replace(/(<div class="bbord[^"]*" data-id="(3-\d)"[\s\S]*?<b>)3-\d(<\/b>)/g, (m, a, id, b) => W3NR[id] ? a + W3NR[id] + b : m); }catch(e){ fout(e); } return h; }; }catch(e){ fout(e); }
   /* het vraagteken: een plek die vrij blijft voor een level dat later komt (zichtbaar zodra Tang verslagen is) */
   const MYST = {x:88.5, y:45.5};
   const mystOpen = () => { try{ return !!SET.story.vrij || storyKlaar("3-2"); }catch(e){ return false; } };
@@ -57348,12 +57357,16 @@ svg .yzwijs, g.yzwijs{outline:none !important; filter:drop-shadow(0 0 6px #f0c75
         h = h.replace(/<div class="bbord([^"]*)" data-id="([^"]+)"/g, (m, kl, id) => {
           let extra = "";
           if(arcadeVanId(id)) extra += " yzarcade";
-          if(id === "3-2" && typeof smidOpen === "function" && smidOpen()) extra += " yzshop";
+          if(id === "3-2" && storyKlaar("3-2")) extra += " yzshop";   // de smidse pas als Tang verslagen is
+          if(id === "knort" && SET.story && (SET.story.knortGezien || SET.story.vrij)) extra += " yzshop";
           return `<div class="bbord${kl}${extra}" data-id="${id}"`; });
         /* het logo en het SHOP-labeltje in het bordje */
-        h = h.replace(/(<div class="bbord[^"]*yzarcade[^"]*"[^>]*>\s*<div class="bbmed[^"]*">)/g, `$1${arcadeLogo(true)}`);
-        h = h.replace(/(<div class="bbord[^"]*yzshop[^"]*"[^>]*>)/g, `$1<span class="yzshoptag">SHOP</span>`);
-        if(mystOpen()) h += `<div class="bbord zonder med yzmyst" data-id="m3" style="left:${MYST.x}%;top:${MYST.y}%" title="Hier komt later nog iets">
+        h = h.replace(/(<div class="bbord[^"]*yzarcade[^"]*"[^>]*>(?:(?!<div class="bbord)[\s\S])*?<div class="bbmed[^"]*">)/g, `$1${arcadeLogo(true)}`);
+        h = h.replace(/(<div class="bbord[^"]*yzshop[^"]*"[^>]*>(?:(?!<div class="bbord)[\s\S])*?<div class="bbmed[^"]*">)/g, `$1<em class="yzshoptag">SHOP</em>`);
+        /* Knort: het SHOP-label staat nu bij zijn medaillon; het bordje gewoon het nummer */
+        h = h.replace(/(<div class="bbord[^"]*" data-id="knort"[\s\S]*?<b>)2-2 SHOP(<\/b>)/, "$12-2$2");
+        /* 17 nov: Q wil het vraagteken naast Tang niet meer op de kaart */
+        if(false && mystOpen()) h += `<div class="bbord zonder med yzmyst" data-id="m3" style="left:${MYST.x}%;top:${MYST.y}%" title="Hier komt later nog iets">
           <div class="bbmed"><i style="background-image:url('art/bg-3-3.png')"></i><span><b class="yzvraag">?</b></span></div><div class="bbin"><b>?</b></div><i class="bbpijl"></i></div>`;
       }catch(e){ fout(e); }
       return h; }; }catch(e){ fout(e); }
@@ -57510,8 +57523,8 @@ body.tel .kaartbox .yzknoppen .yzwk{width:30px; height:30px}
 /* de boog van neonletters boven het medaillon */
 .yzarc{position:absolute; left:0; bottom:0; width:100%; aspect-ratio:1; container-type:inline-size; z-index:5; pointer-events:none; animation:yzhapert 6.5s steps(1) infinite}
 .bbmed .yzarc{border-radius:0 !important; overflow:visible !important; height:auto !important; background:none !important}
-.yzarc s{text-decoration:none; position:absolute; left:50%; top:-30%; height:80%; width:0; transform-origin:50% 100%; transform:rotate(var(--a)); font:normal 22cqw/1 'Press Start 2P',monospace;
-  display:flex; justify-content:center; color:#f0fff9; -webkit-text-stroke:.08em #04201c; paint-order:stroke fill; text-shadow:0 0 .15em #7dffd0, 0 0 .4em #7dffd0, 0 0 .8em rgba(47,224,200,.85); white-space:nowrap}
+.yzarc s{text-decoration:none; position:absolute; left:50%; top:-26%; height:76%; width:0; transform-origin:50% 100%; transform:rotate(var(--a)); font:normal 18cqw/1 'Press Start 2P',monospace;
+  display:flex; justify-content:center; color:#f0fff9; -webkit-text-stroke:.12em #04201c; paint-order:stroke fill; text-shadow:0 0 .15em #7dffd0, 0 0 .4em #7dffd0, 0 0 .8em rgba(47,224,200,.85); white-space:nowrap}
 .yzarc s.yzhap{animation:yzhapert2 4.3s steps(1) infinite}
 @keyframes yzhapert{0%,88%,90%,93%,100%{opacity:1} 89%,92%{opacity:.35}}
 @keyframes yzhapert2{0%,70%,73%,100%{opacity:1} 71%{opacity:.15} 72%{opacity:.6}}
@@ -57521,15 +57534,18 @@ body.tel .kaartbox .yzknoppen .yzwk{width:30px; height:30px}
   animation:yzhapert 6.5s steps(1) infinite; white-space:nowrap}
 .bordvlak .bbord.yzlicht .bbmed{animation:yzlicht 1.1s ease-in-out infinite}
 @keyframes yzlicht{0%,100%{filter:drop-shadow(0 0 .25cqw rgba(47,224,200,.75))} 50%{filter:drop-shadow(0 0 .7cqw #7dffd0) brightness(1.2)}}
-.ksinfo.yzarcinfo{border-color:#5ff0d8 !important; box-shadow:0 0 0 2px #04201c, 0 0 26px rgba(47,224,200,.45) !important}
+/* het infovak van een arcade-level: dezelfde witte rand als elk infovak */
 .yzarckop{display:flex; align-items:center; gap:10px; margin:4px 0 0}
 .yzarckop b{font:9px/1.2 'Press Start 2P',monospace; color:#7dffd0; letter-spacing:.08em}
 .yzarckop img.yzlogo{height:18px; width:auto}
 #tutpop2.yzarcpop{border-color:#5ff0d8; box-shadow:0 0 0 3px #04201c, 0 0 26px rgba(47,224,200,.55)}
 #tutpop2.yzarcpop .yzpopkop{display:flex; align-items:center; gap:10px; color:#7dffd0}
 /* Tang: shop */
-.bordvlak .bbord .yzshoptag{position:absolute; right:-6px; top:0; transform:translate(30%, -30%) rotate(8deg); z-index:6; font:.62cqw/1 'Press Start 2P',monospace; color:#16121f; background:#ffd84a;
-  padding:.25cqw .4cqw .18cqw; border:.08cqw solid #16121f; box-shadow:0 2px 0 rgba(0,0,0,.6); pointer-events:none; white-space:nowrap}
+/* SHOP: dezelfde familie als ARCADE (pixelletter, donkere rand, gloed), in goud, tegen de bovenkant van het medaillon */
+.bordvlak .bbord .bbmed .yzshoptag{position:absolute; left:42%; top:20%; transform:translate(-50%, -62%) rotate(-4deg); z-index:6; pointer-events:none; white-space:nowrap;
+  font:normal .66cqw/1 'Press Start 2P',monospace; letter-spacing:.08em; color:#fff4c8; padding:.3cqw .4cqw .22cqw; background:rgba(22,14,4,.88);
+  border:.1cqw solid #ffd84a; box-shadow:0 0 0 .08cqw #1a0f02, 0 0 .5cqw rgba(255,216,74,.55); text-shadow:0 0 .25cqw #ffd84a, .06cqw .06cqw 0 #1a0f02}
+.bordvlak .bbord.hier .bbmed .yzshoptag{font-size:.8cqw}
 /* het vraagteken */
 .bordvlak .bbord.yzmyst{cursor:default; pointer-events:none; filter:saturate(.2) brightness(.6)}
 .bordvlak .bbord.yzmyst .bbmed i{filter:blur(1.5px)}
@@ -57537,6 +57553,15 @@ body.tel .kaartbox .yzknoppen .yzwk{width:30px; height:30px}
 /* de trap */
 .bordvlak .bbord .bbmed.yzhemel i{background-size:cover; background-position:50% 30%}
 `; document.head.appendChild(st); }catch(e){ fout(e); }
+
+  /* ---------- de startpanelen van de arcade-minigames: geen "Terug naar de kaart" (stoppen kan in het spel, verliezen geeft hem weer) ---------- */
+  try{ const st = document.createElement("style"); st.id = "yz-arcstart"; st.textContent = '.ywpaneel .rij:has(button[data-k="go"]) button[data-k="kaart"]{display:none !important}'; document.head.appendChild(st); }catch(e){ fout(e); }
+  const ifStijl = f => { try{ const d = f.contentDocument; if(!d || !d.head || d.getElementById("yzgeenterug")) return;
+      const st = d.createElement("style"); st.id = "yzgeenterug"; st.textContent = "button.yzbeginterug{display:none !important}"; d.head.appendChild(st);
+      const kijk = () => { try{ d.querySelectorAll("button.terug").forEach(b => { const v = b.previousElementSibling; b.classList.toggle("yzbeginterug", !!(v && /^\s*begin\s*$/i.test(v.textContent || ""))); }); }catch(e){} };
+      kijk(); new MutationObserver(kijk).observe(d.body || d.documentElement, {childList:true, subtree:true}); }catch(e){} };
+  try{ new MutationObserver(ms => { for(const m of ms) for(const n of m.addedNodes) if(n.tagName === "IFRAME" && /^(xenaad|xginvasie)$/.test(n.id)){ n.addEventListener("load", () => ifStijl(n)); setTimeout(() => ifStijl(n), 600); } })
+      .observe(document.documentElement, {childList:true, subtree:true}); }catch(e){ fout(e); }
 
   return {pop, gezienAe, onthoud, opgeslagen};
 })();
