@@ -18040,7 +18040,7 @@ async function startTurnSequence(){
                regenBij(); getijBij(); rotsMerkBij(); inktMerkBij(); naadOog(); balrogHeelt(); hitteBij(); sluisBij(); wolkBij();
                ogenNoemen(); }
   if(!S.over && S.story && S.story.vrees) await serafVrees();
-  if(S.story && S.story.zeg && S.tp === 1) zegNu("beurt");
+  const xtZeg = !!(S.story && S.story.zeg && S.tp === 1);   // xt: de beurtzin pas na de wissel
   if(!S.story && S.char && isBot(S.tp) && S.gTurn > 1 && rndVrij() < .35) mpZegAuto(S.tp, "beurt");
   if(S.gTurn === 1) await mulliganFase();
   if(S.gTurn === 1) await aetherKeuzes();
@@ -18049,7 +18049,8 @@ async function startTurnSequence(){
   S.phase = "upkeep"; render();
   turnCry(S.tp);
   if(!FAST) ANI_AE.potjeBegin();   // ✨ Aambeeld, Lichtzwerm
-  await sleep(FAST ? 0 : 800);   // ronde 32: was 1250
+  await sleep(FAST ? 0 : (typeof xtWacht === "function" ? xtWacht(800) : 800));   // xt: wacht tot de beurtband weg is (was 800)
+  if(xtZeg && !S.over) zegNu("beurt");
   await upkeepEntangle(S.tp);
   if(S.over) return;
   /* 🌹 Roos groeit niet meer: hij geeft alleen Volle slag. */
@@ -45531,7 +45532,8 @@ ANI.V = (() => {
       const per = spans.length > 70 ? 3 : 2;   // nov 2026: sneller typen
       for(let i = 0; i < spans.length; i++){ if(B.gen !== gen) return; const s = spans[i]; s.classList.add("vzie", "vwit"); setTimeout(() => s.classList.remove("vwit"), 70);
         s.after(cur); if(hard && s.textContent.trim() && i % 2 === 0) schud(2); if(hard && i % 6 === 0) hitstop(25);
-        if(i % per === per - 1 || i === spans.length - 1) await new Promise(r => setTimeout(r, hard ? 40 : 26)); }
+        if(i % per === per - 1 || i === spans.length - 1) await new Promise(r => setTimeout(r, hard ? 40 : 26));
+        while(typeof xtPauze === "function" && xtPauze() && B.gen === gen) await new Promise(r => setTimeout(r, 60)); }   // xt: stil onder de beurtband
       doel.classList.remove("vtril");
       await new Promise(r => setTimeout(r, 1300)); if(B.gen === gen) cur.remove();
     })().catch(fout); };
@@ -47426,7 +47428,8 @@ const dkKaartje = (k, licht, badge) => licht ? lkHTML(k, true, {badge:badge || "
 const dkSlotKaart = (k, licht, attr, badge) => `<div class="dkslot vol" ${attr} title="${dkTip(k, licht)} (klik: weghalen)">${dkKaartje(k, licht, badge)}</div>`;
 const dkSlotLeeg = (t, kl, attr) => `<div class="dkslot ${kl || ""}" ${attr || ""}><em>${t}</em></div>`;
 /* 🔒 de gevangenis: achteraan, op slot, niet te kiezen */
-const dkGevangenis = () => Object.keys(LIGHTS).filter(ltGevangen).map(k => `<div class="dklk dicht" title="${LIGHTS[k].name}: in de gevangenis, niet te kiezen">${lkHTML(k, true, {kl:"op", op:true})}</div>`).join("");
+const dkGevangenis = () => "";   // xr: de gevangenis is onzichtbaar
+const dkGevangenisOud = () => Object.keys(LIGHTS).filter(ltGevangen).map(k => `<div class="dklk dicht" title="${LIGHTS[k].name}: in de gevangenis, niet te kiezen">${lkHTML(k, true, {kl:"op", op:true})}</div>`).join("");
 /* 🏹 de beesten voor De jacht: klik er een (of sleep hem naar je deck) en hij komt op de gekozen baan, anders op de eerste lege */
 function dkBeestLib(ctx, beest){
   return BEEST_LIJST.map(k => { const n = ORDER.filter(el => beest[el] === k).length;
@@ -59778,7 +59781,7 @@ ANI.XQ = (() => {
   /* 4 · het kleinere levelvak */
   try{ const st = document.createElement("style"); st.id = "xq-stijl"; st.textContent = `
 body.xqeind #voorwerpmelding{display:none !important}
-body.xqlaadt #bordvlak{opacity:0 !important}
+body.xqlaadt #overlay #bordvlak{opacity:0 !important}
 html body .kaartbox .ksinfo .yideckknop{display:none !important}
 html body .kaartbox .ksinfo .yzchal{background:#b8322a !important; color:#fff !important; border:0 !important; box-shadow:0 3px 0 #6e1a14 !important}
 html body .kaartbox .ksinfo .yzchal:hover{filter:brightness(1.12)}
@@ -59799,6 +59802,458 @@ html body .kaartbox .ksinfo .ksiknoppen{gap:6px !important; padding-top:4px !imp
 html body .kaartbox .ksinfo .ksiknoppen .obtn{font-size:9px !important; padding:8px 10px !important}
 `; document.head.appendChild(st); }catch(e){ fout(e); }
   return {rij:() => RIJ.slice()};
+})();
+
+/* ---- module xr ---- */
+/* ================= deel xr (24 nov 2026, Q) =================
+   1. Het levelvak zoals in het artefact "Na het level": zachte hoeken, gouden titelletters, de Start-knop goud,
+      Challenge rood, alleen het levelnummer bovenin. Terug is weg (klik ernaast sluit hem).
+   2. Deck en Library vanaf de kaart zijn een pop-up: de kaart blijft gedimd staan achter het venster.
+      Terug op de kaart: de oude kaart blijft staan tot de nieuwe helemaal geladen is (geen zwart ertussen).
+   3. In de deckbouwer vanaf de kaart: "Klaar" en een kruisje rechtsboven (en Escape) brengen je terug.
+   4. De mist rond de fabriek (3-5) alleen als dat level open is: dicht zag je losse grijze bollen in het donker. */
+ANI.XR = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  /* ---------- 1 · het vak ---------- */
+  try{ const bi0 = bordInfoToon;
+    bordInfoToon = function(){ const v = bi0.apply(this, arguments);
+      try{ const s = document.querySelector(".kaartbox .ksinfo .ksitekst > small"); if(s && /·/.test(s.textContent)) s.textContent = s.textContent.split("·")[0].trim(); }catch(e){ fout(e); }
+      return v; }; }catch(e){ fout(e); }
+
+  /* ---------- 2 · pop-ups boven de kaart ---------- */
+  const POP = new Set(["yideck", "kaartlib"]);
+  let ACHTER = null, OPEN = false, WEG = null;
+  const kaartNu = () => document.querySelector("#overlay .ovbox.kaartbox");
+  const achterZet = () => { const kb = kaartNu(); if(!kb || !kb.querySelector("#bordvlak")) return;
+    if(ACHTER) ACHTER.remove();
+    ACHTER = document.createElement("div"); ACHTER.id = "xrachter"; ACHTER.setAttribute("aria-hidden", "true");
+    const ov = document.getElementById("overlay"); if(ov && ov.parentNode) ov.parentNode.insertBefore(ACHTER, ov.nextSibling); else document.body.appendChild(ACHTER); ACHTER.appendChild(kb); OPEN = true; document.body.classList.add("xrpop"); };
+  const achterWeg = (zacht) => { OPEN = false; clearTimeout(WEG); const a = ACHTER; ACHTER = null; document.body.classList.remove("xrpop");
+    if(!a) return; if(!zacht){ a.remove(); return; } a.classList.add("weg"); setTimeout(() => a.remove(), 260); };
+  try{ const ob0 = onBtn;
+    onBtn = function(btn){ try{ if(POP.has(btn) && M && M.type === "story" && !M.lijst && !OPEN) achterZet(); }catch(e){ fout(e); }
+      return ob0.apply(this, arguments); }; }catch(e){ fout(e); }
+  const naRender = () => { if(!OPEN) return;
+    try{ if(M && M.type === "story" && !M.lijst){
+        /* terug naar de kaart: wachten tot hij echt staat */
+        if(WEG) return; const t0 = Date.now();
+        const kijk = () => { if(!OPEN) return; const klaar = document.querySelector("#overlay #bordvlak") && !document.body.classList.contains("xqlaadt") && !document.querySelector("#bordbak.laadt");
+          if(klaar || Date.now() - t0 > 3500){ WEG = null; achterWeg(true); } else WEG = setTimeout(kijk, 60); };
+        WEG = setTimeout(kijk, 60); return; }
+      const ov = document.querySelector("#overlay.show .ovbox");
+      if(ov && (ov.classList.contains("dkbox") || ov.classList.contains("libbox"))) return;
+      if(ov){ achterWeg(false); return; }
+      /* even niets (tussen de deckbouwer en de kaart): niet meteen weghalen */
+      setTimeout(() => { try{ if(!OPEN || WEG) return; if(M && M.type === "story") return; const o2 = document.querySelector("#overlay.show .ovbox");
+        if(!o2 || !(o2.classList.contains("dkbox") || o2.classList.contains("libbox"))) achterWeg(false); }catch(e){ achterWeg(false); } }, 700);
+    }catch(e){ fout(e); achterWeg(false); } };
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); naRender(); deckKnoppen(); return v; }; }catch(e){ fout(e); }
+
+  /* ---------- 3 · terug uit de deckbouwer ---------- */
+  const alleen = () => { try{ return !!(S && S.story && S.story.deckAlleen); }catch(e){ return false; } };
+  const deckKnoppen = () => { try{ if(!alleen()) return; const b = document.querySelector("#overlay .xmbox"); if(!b) return;
+      const k = b.querySelector('.dkknoppen [data-btn="banconfirm"]'); if(k && !k.dataset.xr){ k.dataset.xr = 1; k.innerHTML = "Klaar"; }
+      const top = b.querySelector(".xmtop"); if(top && !top.querySelector(".xrsluit")) top.insertAdjacentHTML("beforeend", `<button class="xrsluit" data-act="btn" data-btn="banconfirm" aria-label="Terug naar de kaart" title="Terug naar de kaart">✕</button>`);
+    }catch(e){ fout(e); } };
+  addEventListener("keydown", e => { if(e.key !== "Escape" || !alleen()) return; const k = document.querySelector('#overlay .xmbox .dkknoppen [data-btn="banconfirm"]'); if(k){ e.preventDefault(); e.stopPropagation(); k.click(); } }, true);
+
+  /* ---------- 5 · de gevangenis: niet meer in de library (in de deckbouwers: xr-hooks) ---------- */
+  try{ libMetGevangenis = function(keys){ return keys.filter(k => !ltGevangen(k)); }; }catch(e){ fout(e); }
+
+  /* ---------- 4 · de fabrieksmist ---------- */
+  const FAB = () => { try{ return Object.keys(STORY).find(k => STORY[k] && (STORY[k].vijand === "Klinknagel" || STORY[k].muziek === "w3_fabriek")) || null; }catch(e){ return null; } };
+  setInterval(() => { try{ if(typeof LVAAN === "undefined") return; const f = FAB(); LVAAN.mist = !!(f && storyVrij(f)); }catch(e){} }, 400);
+  try{ if(typeof LVAAN !== "undefined"){ const f = FAB(); LVAAN.mist = !!(f && storyVrij(f)); } }catch(e){}
+
+  /* ---------- stijl ---------- */
+  try{ const st = document.createElement("style"); st.id = "xr-stijl"; st.textContent = `
+#xrachter{position:fixed; inset:0; z-index:99; display:flex; align-items:center; justify-content:center; pointer-events:none; filter:brightness(.45) saturate(.8); transition:opacity .25s}
+#xrachter.weg{opacity:0}
+#xrachter .ksinfo, #xrachter .xndock, #xrachter .bordhud, #xrachter .buitmelding{display:none !important}
+body.xrpop #anidoek{visibility:hidden !important}
+body.xrpop #overlay{background:rgba(0,0,0,.25) !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important}
+#overlay .xmtop{position:relative}
+#overlay .xmbox .xrsluit{margin-left:10px; width:34px; height:34px; flex:none; display:grid; place-items:center; background:#000; color:#fff; border:2px solid #fff; border-radius:6px; font:14px/1 'Press Start 2P', monospace; cursor:pointer}
+#overlay .xmbox .xrsluit:hover{color:#e8c25a; border-color:#e8c25a}
+html body .kaartbox .ksinfo{width:min(300px, calc(100vw - 24px)) !important; background:#000 !important; border:3px solid #fff !important; border-radius:10px !important; overflow:hidden !important; box-shadow:0 10px 30px rgba(0,0,0,.55) !important}
+html body .kaartbox .ksinfo .ksitekst{padding:10px 12px 12px !important; gap:5px !important}
+html body .kaartbox .ksinfo .ksitekst > small{font:9px/1.2 'Press Start 2P', monospace !important; color:#e8c25a !important; opacity:1 !important; letter-spacing:.08em}
+html body .kaartbox .ksinfo .ksitekst h3{font:15px/1.2 'Press Start 2P', monospace !important; letter-spacing:.06em !important; margin:2px 0 0 !important;
+  background:linear-gradient(180deg, #fff 0 48%, #e8c67a 52% 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; color:transparent !important; -webkit-text-fill-color:transparent !important; filter:drop-shadow(3px 3px 0 #1a1206)}
+html body .kaartbox .ksinfo .ksister svg{width:54px; height:16px}
+html body .kaartbox .ksinfo .ksitegen{font:19px/1 'VT323', monospace !important; color:#cfd3dc !important}
+html body .kaartbox .ksinfo .yihint{color:#e8c25a !important; font-size:17px !important; line-height:1 !important}
+html body .kaartbox .ksinfo .ksiknoppen{gap:6px !important; padding-top:4px !important; justify-content:stretch !important}
+html body .kaartbox .ksinfo .ksiknoppen [data-btn="kaartvelweg"]{display:none !important}
+body.tel .kaartbox .ksinfo .ksiknoppen [data-btn="kaartvelweg"]{display:block !important}
+html body .kaartbox .ksinfo .ksiknoppen .obtn{white-space:nowrap !important; font:9px/1.1 'Press Start 2P', monospace !important; padding:9px 10px !important; border-radius:5px !important}
+html body .kaartbox .ksinfo .ksiknoppen .obtn.b-dim:not(.yzchal){background:#000 !important; color:#fff !important; border:2px solid #fff !important; box-shadow:none !important}
+html body .kaartbox .ksinfo .ksiknoppen .yzchal{background:#b8322a !important; color:#fff !important; border:0 !important; box-shadow:0 3px 0 #6e1a14 !important}
+html body .kaartbox .ksinfo .ksiknoppen .ksispeel{flex:1; background:#e8c25a !important; color:#1a1205 !important; border:0 !important; box-shadow:0 3px 0 #9c7a2a !important}
+html body .kaartbox .ksinfo .ksiknoppen .ksispeel:hover, html body .kaartbox .ksinfo .ksiknoppen .yzchal:hover{filter:brightness(1.1); color:inherit}
+html body .kaartbox .ksinfo .ksiknoppen .ksispeel:hover{color:#1a1205 !important}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {open:() => OPEN};
+})();
+
+/* ---- module xs ---- */
+/* ================= deel xs · de library als album (24 nov 2026, Q koos voorstel 1 "Het album") =================
+   1. De library (bekijken, niet het kiezen in de draft) is een album: een pop-up met tabjes en een teller per soort
+      (Aethers, Licht, Beesten, Tegenstanders), een raster met alleen de plaatjes, en een klik legt de kaart groot over
+      het album met alle tekst. Bladeren met ‹ › of de pijltoetsen, Escape is terug naar het album.
+      Wat je niet kent is een donker silhouet zonder naam; wat je in PvP al mag gebruiken blijft in kleur (zoals het was).
+      De gevangenis staat er niet in.
+   2. Beesten: de beesten van De jacht, en Kees vooraan. Wie een companion kan zijn (Kees, Max de wolf, Maatje) krijgt
+      een companion-sticker op zijn kaart.
+   3. De kaartteksten: LIGHTS[k].txt en AETHERS[k].txt opnieuw uit LICHT_TEKST en AETHER_TEKST, nadat alle delen ze
+      hebben aangepast (deel XB veranderde de teksten maar niet .txt). */
+ANI.XS = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+
+  /* ---------- 3 · de teksten van nu ---------- */
+  const vulTekst = () => {
+    try{ Object.entries(LICHT_TEKST).forEach(([k, t]) => { if(LIGHTS[k] && t) LIGHTS[k].txt = LIGHTS[k].kort = kwHTML(t); }); }catch(e){ fout(e); }
+    try{ Object.entries(AETHER_TEKST).forEach(([k, t]) => { if(AETHERS[k] && t) AETHERS[k].txt = AETHERS[k].kort = kwHTML(t); }); }catch(e){ fout(e); } };
+  vulTekst(); setTimeout(vulTekst, 0);
+
+  /* ---------- de inhoud van het album ---------- */
+  const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const srcAe = (k, licht) => { try{ const m = (aeBeeldHTML(k, licht) || "").match(/src="([^"]+)"/); return m ? m[1] : ""; }catch(e){ return ""; } };
+  const srcKaart = kaart => { try{ const h = cardFaceHTML(kaart); return (h.match(/class="kaartbeeld" src="([^"]+)"/) || h.match(/src="([^"]+)"/) || [])[1] || ""; }catch(e){ return ""; } };
+  const tekstKaart = el => { try{ const t = kaartTekst(el); return [t.speel, t.veld].concat(t.eig || []).filter(Boolean).join(" "); }catch(e){ return ""; } };
+  const kz = s => { try{ return kzIs(s); }catch(e){ return false; } };
+  const klaar = id => { try{ return storyKlaar(id); }catch(e){ return false; } };
+  const SOORT = [["ae", "AETHERS"], ["lt", "LICHT"], ["bst", "BEESTEN"], ["vij", "TEGENSTANDERS"]];
+  const VORM = {ae:"1/1", lt:"2/3", bst:"2/3", vij:"1/1"};
+  const tagsVan = (k, licht) => { try{ const t = toegang(k, licht); return [["Verhaal", t.verhaal], ["Commander", t.cmd], ["Basis", t.bas]]; }catch(e){ return []; } };
+
+  function lijst(tab){
+    const bz = libBezit(), alles = !!(SET.story && SET.story.vrij);
+    if(tab === "ae"){
+      const keys = Object.keys(AETHERS).filter(k => !AETHERS[k].uit && !AETHERS[k].gevangen && ((!AETHERS[k].verhaal && !AETHERS[k].pvp && !AETHERS[k].vijand) || bz.ae.has(k) || inPvp(k, false) || (typeof BOT_AE !== "undefined" && BOT_AE.includes(k))));
+      return libSorteer(keys, false).map(k => { const A = AETHERS[k];
+        return {k, f:alles || bz.ae.has(k) || inPvp(k, false) || ladderAeVrij().includes(k), n:A.name, src:srcAe(k, false), t:A.txt || "",
+          s:A.kind === "fusie" ? "aether · fusie" : "aether", tags:tagsVan(k, false), verhaalNog:!alles && !bz.ae.has(k)}; });
+    }
+    if(tab === "lt"){
+      const keys = Object.keys(LIGHTS).filter(k => !LIGHTS[k].weg && !ltGevangen(k) && (!LIGHTS[k].verhaal || bz.lt.has(k) || LIGHTS[k].pvp));
+      return libSorteer(keys, true).map(k => { const L = LIGHTS[k];
+        return {k, f:alles || bz.lt.has(k) || inPvp(k, true), n:L.name, src:srcAe(k, true), t:L.txt || "", s:"lichtkaart", tags:tagsVan(k, true), verhaalNog:!alles && !bz.lt.has(k)}; });
+    }
+    if(tab === "bst"){
+      const jacht = alles || bz.ae.has("ae_jacht") || inPvp("ae_jacht", false);
+      const kees = {k:"kees", f:alles || klaar("1-4") || kz("kees=kees_mee"), n:"Kees", src:srcKaart({id:-951, el:"steen", owner:0, keesSkin:true}),
+        t:tekstKaart("steen"), s:"steen · de kiezelwachter", comp:"Kees"};
+      return [kees].concat(BEEST_LIJST.map((k, i) => ({k, f:jacht || (k === "buidelwolf" && kz("max=max_vang")) || (k === "balrog" && kz("maatje=maatje_kern")),
+        n:beestNaam(k), src:srcKaart({id:-990 - i, el:k, owner:0, jacht:true}), t:tekstKaart(k), s:"beest · De jacht",
+        comp:k === "buidelwolf" ? "Max" : k === "balrog" ? "Maatje" : null})));
+    }
+    /* tegenstanders */
+    return libSorteer(Object.keys(AETHERS).filter(k => AETHERS[k].vijand && !AETHERS[k].uit && !AETHERS[k].gevangen), false, true).map(k => {
+      const wie = vijAeBij(k), f = alles || wie.some(w => storyOntmoetAl(w.id) || (SET.story.klaar || []).indexOf(w.id) >= 0);
+      return {k, f, n:AETHERS[k].name, src:srcAe(k, false), t:AETHERS[k].txt || "", s:"aether van een tegenstander", wie}; });
+  }
+
+  /* ---------- het album ---------- */
+  const tabNu = () => { const t = M && M.tab; return SOORT.some(s => s[0] === t) ? t : "ae"; };
+  const sticker = x => x.comp && x.f ? `<span class="xssticker">COMPANION</span>` : "";
+  const art = (x, kl) => `<span class="xsart${x.f ? "" : " stil"}${kl ? " " + kl : ""}">${x.src ? `<img src="${esc(x.src)}" alt="" draggable="false" decoding="async">` : ""}</span>`;
+  function detailHTML(tab, L, i){
+    const x = L[i]; if(!x) return "";
+    const tekst = x.f ? x.t : `<span class="xsdim">${tab === "vij" ? "Kom deze tegenstander in het verhaal tegen om te zien wat zijn aether doet." : "Deze kaart heb je nog niet gevonden."}</span>`;
+    let onder = "";
+    if(x.f && tab === "vij") onder = x.wie && x.wie.length ? `<div class="xswie">Bij ${x.wie.map(w => `${esc(w.naam)} <i>${esc(w.id)}</i>`).join(", ")}</div>` : "";
+    else if(x.f && x.tags) onder = `<div class="xstags">${x.tags.map(([n, ja]) => `<span class="${ja ? "" : "nee"}">${n === "Verhaal" && ja && x.verhaalNog ? "VERHAAL: NOG NIET" : n.toUpperCase()}</span>`).join("")}</div>`;
+    const comp = x.f && x.comp ? `<div class="xscomp">Companion${x.comp !== x.n ? ` (${esc(x.comp)})` : ""}: zit altijd in je starthand, ook na een mulligan.</div>` : "";
+    const vonk = x.f ? `<i class="xslicht"></i>` + Array.from({length:7}, (_, j) => `<i class="xsvk" style="left:${12 + j * 12 + (j * 37 % 9)}%;--d:${2.4 + (j * 0.53 % 1.6)}s;--w:${(j * 0.61) % 2.6}s;--x:${(j % 2 ? 1 : -1) * (6 + j * 3)}px"></i>`).join("") : "";
+    return `<div class="xslinks"><div class="xsgroot" style="--ta:${VORM[tab]}">${vonk}${art(x)}${sticker(x)}</div></div>
+      <div class="xsrechts"><div class="xsnaam${x.f ? "" : " leeg"}">${x.f ? esc(x.n).toUpperCase() : "???"}</div>
+        <div class="xssoort">${x.f ? x.s : (tab === "vij" ? "nog niet tegengekomen" : "nog niet gevonden")}</div>
+        <div class="xstxt">${tekst}${comp}</div>${onder}
+        <div class="xsnav"><button class="xsknop" data-xs="terug" type="button">‹ ALBUM</button><button class="xsknop uit" data-xs="vorige" type="button" aria-label="Vorige">‹</button><button class="xsknop uit" data-xs="volgende" type="button" aria-label="Volgende">›</button><span class="xsteller">${i + 1} / ${L.length}</span></div></div>`;
+  }
+  let LAATST = {tab:null, L:[]};
+  function albumHTML(){
+    const tab = tabNu(), L = lijst(tab); LAATST = {tab, L};
+    const tel = t => { const l = t === tab ? L : lijst(t); return `${l.filter(x => x.f).length}/${l.length}`; };
+    const terug = M && M.terug ? "infoterug" : "closemodal";
+    const open = M && M.xsOpen != null && L[M.xsOpen] ? M.xsOpen : null;
+    return `<div class="ovbox libbox xsalbum">
+      <button class="xsx" data-act="btn" data-btn="${terug}" type="button" aria-label="Sluiten" title="Sluiten">✕</button>
+      <div class="xskop"><span class="xstitel">LIBRARY</span><div class="xstabs">${SOORT.map(([t, n]) => `<button class="xstab${t === tab ? " aan" : ""}" data-xs="tab" data-t="${t}" type="button">${n}<em>${tel(t)}</em></button>`).join("")}</div></div>
+      <div class="xsraster" data-xsscroll="${tab}" style="--ta:${VORM[tab]}">${L.map((x, i) => `<button class="xstegel${x.f ? "" : " stil"}" data-xs="kaart" data-i="${i}" type="button" title="${x.f ? esc(x.n) : "???"}">${art(x)}${sticker(x)}<span class="xsn">${x.f ? esc(x.n) : "&nbsp;"}</span></button>`).join("")}</div>
+      <div class="xsdet${open != null ? " open" : ""}">${open != null ? detailHTML(tab, L, open) : ""}</div>
+    </div>`;
+  }
+
+  const SCROL = {};
+  const box = () => document.querySelector("#overlay .ovbox.xsalbum");
+  const toon = (i, anim) => { const b = box(); if(!b) return; const L = LAATST.L, n = L.length; if(!n) return;
+    i = ((i % n) + n) % n; M.xsOpen = i; const d = b.querySelector(".xsdet"); d.innerHTML = detailHTML(LAATST.tab, L, i);
+    if(anim){ d.classList.remove("open"); void d.offsetWidth; } d.classList.add("open"); try{ AU.play("click"); }catch(e){} };
+  const dicht = () => { const b = box(); if(!b) return; M.xsOpen = null; b.querySelector(".xsdet").classList.remove("open"); };
+
+  try{ const lh0 = libHTML;
+    libHTML = function(){
+      try{ const kies = M && M.modus === "kies" && S && S.ui && S.ui.mode === "banpick";
+        if(!kies) return albumHTML(); }catch(e){ fout(e); }
+      return lh0.apply(this, arguments); }; }catch(e){ fout(e); }
+
+  /* klikken in het album (eigen afhandeling, voor de rest van het spel) */
+  document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-xs]"); if(!t || !t.closest(".xsalbum")) return;
+    e.preventDefault(); e.stopPropagation();
+    try{ const w = t.dataset.xs;
+      if(w === "tab"){ if(t.dataset.t !== tabNu()){ M.tab = t.dataset.t; M.xsOpen = null; M.libSel = null; try{ AU.play("click"); }catch(x){} render(); } }
+      else if(w === "kaart") toon(+t.dataset.i, true);
+      else if(w === "terug") dicht();
+      else if(w === "vorige") toon(M.xsOpen - 1, false);
+      else if(w === "volgende") toon(M.xsOpen + 1, false);
+    }catch(x){ fout(x); } }, true);
+  addEventListener("keydown", e => { try{ const b = box(); if(!b || M.xsOpen == null) return;
+      if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); dicht(); }
+      else if(e.key === "ArrowLeft"){ e.preventDefault(); toon(M.xsOpen - 1, false); }
+      else if(e.key === "ArrowRight"){ e.preventDefault(); toon(M.xsOpen + 1, false); } }catch(x){ fout(x); } }, true);
+  /* de scrollplek per tab bewaren */
+  document.addEventListener("scroll", e => { const t = e.target; if(t && t.dataset && t.dataset.xsscroll) SCROL[t.dataset.xsscroll] = t.scrollTop; }, true);
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments);
+      try{ const g = document.querySelector("#overlay .xsalbum .xsraster"); if(g && SCROL[g.dataset.xsscroll]) g.scrollTop = SCROL[g.dataset.xsscroll]; }catch(e){}
+      return v; }; }catch(e){ fout(e); }
+
+  /* ---------- stijl ---------- */
+  try{ const st = document.createElement("style"); st.id = "xs-stijl"; st.textContent = `
+#overlay .ovbox.libbox.xsalbum{position:relative; width:min(880px, calc(100vw - 32px)) !important; max-width:none !important; height:min(600px, calc(100dvh - 32px)) !important; max-height:none !important;
+  padding:0 !important; margin:0; display:flex !important; flex-direction:column; overflow:hidden !important; text-align:left; background:#000 !important; border:3px solid #fff !important; border-radius:10px !important; box-shadow:0 18px 60px rgba(0,0,0,.7) !important; font:22px/1.1 'VT323', monospace; color:#e9e6dc}
+.xsalbum .xsx{position:absolute; right:10px; top:10px; width:32px; height:32px; z-index:6; display:grid; place-items:center; background:#000; color:#fff; border:2px solid #fff; border-radius:6px; font:11px/1 'Press Start 2P', monospace; cursor:pointer; padding:0}
+.xsalbum .xsx:hover{color:#e8c25a; border-color:#e8c25a}
+.xsalbum .xskop{flex:none; display:flex; align-items:center; gap:24px; height:58px; padding:16px 56px 0 22px; min-width:0}
+.xsalbum .xstitel{font:11px 'Press Start 2P', monospace; color:#e8c25a; letter-spacing:.06em; flex:none}
+.xsalbum .xstabs{display:flex; gap:20px; min-width:0; overflow-x:auto; scrollbar-width:none}
+.xsalbum .xstabs::-webkit-scrollbar{display:none}
+.xsalbum .xstab{flex:none; background:none; border:0; border-bottom:3px solid transparent; padding:6px 0 9px; font:9px 'Press Start 2P', monospace; color:#6f7585; cursor:pointer; letter-spacing:.04em; border-radius:0; box-shadow:none}
+.xsalbum .xstab em{font-style:normal; color:#4b5161; margin-left:6px}
+.xsalbum .xstab:hover{color:#cfd3dc}
+.xsalbum .xstab.aan{color:#fff; border-bottom-color:#e8c25a}
+.xsalbum .xstab.aan em{color:#e8c25a}
+.xsalbum .xsraster{flex:1; min-height:0; overflow-y:auto; padding:18px 22px 22px; display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:16px 14px; align-content:start; scrollbar-width:thin; scrollbar-color:#3a4150 transparent}
+.xsalbum .xsraster[style*="2/3"]{grid-template-columns:repeat(auto-fill, minmax(84px, 1fr))}
+.xsalbum .xstegel{position:relative; background:none; border:0; padding:0; margin:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; color:inherit; font:inherit; box-shadow:none; min-width:0}
+.xsalbum .xsart{position:relative; display:block; overflow:hidden; border-radius:6px; background:#12151c}
+.xsalbum .xsart img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 30%; pointer-events:none}
+.xsalbum .xsart.stil{background:#171b24}
+.xsalbum .xsart.stil img{filter:grayscale(1) brightness(.24) contrast(1.25) blur(.6px)}
+.xsalbum .xstegel .xsart{width:100%; aspect-ratio:var(--ta); border:2px solid #262c38; transition:transform .15s, border-color .15s, box-shadow .15s}
+.xsalbum .xstegel:hover .xsart, .xsalbum .xstegel:focus-visible .xsart{transform:translateY(-3px); border-color:#fff; box-shadow:0 0 18px rgba(232,194,90,.35)}
+.xsalbum .xstegel.stil .xsart{border-color:#1d212b; box-shadow:none; transform:none}
+.xsalbum .xstegel .xsn{font-size:17px; color:#b9bdc7; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.xsalbum .xssticker{position:absolute; left:-4px; top:6px; z-index:2; font:6px/1 'Press Start 2P', monospace; letter-spacing:.04em; color:#1a1205; background:#e8c25a; border:2px solid #fff; border-radius:4px; padding:4px 4px 3px; transform:rotate(-8deg); box-shadow:0 2px 0 #9c7a2a, 0 3px 8px rgba(0,0,0,.6); pointer-events:none}
+.xsalbum .xsdet{position:absolute; inset:58px 0 0 0; z-index:4; background:#000; border-radius:0 0 8px 8px; display:grid; grid-template-columns:330px minmax(0, 1fr); gap:30px; padding:16px 30px 22px 34px;
+  opacity:0; pointer-events:none; transform:scale(.97); transition:opacity .22s, transform .22s cubic-bezier(.2,.8,.2,1)}
+.xsalbum .xsdet.open{opacity:1; pointer-events:auto; transform:none}
+.xsalbum .xslinks{position:relative; display:grid; place-items:center; min-height:0}
+.xsalbum .xsgroot{position:relative; width:min(100%, 300px); max-height:100%}
+.xsalbum .xsgroot[style*="2/3"]{width:min(100%, 270px)}
+.xsalbum .xsgroot .xsart{position:relative; z-index:1; width:100%; aspect-ratio:var(--ta); border:3px solid #fff; border-radius:8px}
+.xsalbum .xsgroot .xssticker{font-size:8px; padding:6px 6px 5px; left:-10px; top:14px}
+.xsalbum .xslicht{position:absolute; inset:-28%; border-radius:50%; background:radial-gradient(circle, rgba(232,194,90,.42) 0, rgba(232,194,90,.12) 42%, transparent 68%); animation:xspuls 3.2s ease-in-out infinite; pointer-events:none; z-index:0}
+@keyframes xspuls{0%,100%{opacity:.7; transform:scale(.96)} 50%{opacity:1; transform:scale(1.04)}}
+.xsalbum .xsvk{position:absolute; bottom:8%; width:4px; height:4px; background:#fff6d8; box-shadow:0 0 6px #e8c25a, 0 0 2px #fff; opacity:0; animation:xsstijg var(--d, 3s) linear var(--w, 0s) infinite; pointer-events:none; z-index:3}
+@keyframes xsstijg{0%{opacity:0; transform:translate(0,0)} 15%{opacity:1} 100%{opacity:0; transform:translate(var(--x, 0), -180px)}}
+.xsalbum .xsrechts{display:flex; flex-direction:column; gap:12px; min-height:0; min-width:0; padding-top:20px}
+.xsalbum .xsnaam{font:17px/1.25 'Press Start 2P', monospace; letter-spacing:.05em; background:linear-gradient(180deg, #fff 0 48%, #e8c67a 52% 100%); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; filter:drop-shadow(2px 2px 0 #1a1206); overflow-wrap:anywhere}
+.xsalbum .xsnaam.leeg{background:none; color:#4b5161; -webkit-text-fill-color:#4b5161; filter:none}
+.xsalbum .xssoort{color:#8d93a1; font-size:19px}
+.xsalbum .xstxt{flex:1; min-height:0; overflow-y:auto; font-size:23px; line-height:1.15; color:#e6e3da; padding-right:8px; scrollbar-width:thin; scrollbar-color:#3a4150 transparent}
+.xsalbum .xstxt b{color:#fff; font-weight:400}
+.xsalbum .xsdim{color:#8d93a1}
+.xsalbum .xscomp{margin-top:10px; color:#e8c25a}
+.xsalbum .xstags{display:flex; gap:10px; flex-wrap:wrap; font:8px/1.6 'Press Start 2P', monospace; color:#cfd3dc}
+.xsalbum .xstags span.nee{color:#4b5161; text-decoration:line-through}
+.xsalbum .xswie{color:#8d93a1; font-size:20px}
+.xsalbum .xswie i{font-style:normal; color:#e8c25a}
+.xsalbum .xsnav{display:flex; gap:10px; align-items:center}
+.xsalbum .xsknop{font:9px 'Press Start 2P', monospace; background:#e8c25a; color:#1a1205; border:0; border-radius:6px; padding:9px 11px; box-shadow:0 3px 0 #9c7a2a; cursor:pointer}
+.xsalbum .xsknop.uit{background:#000; color:#cfd3dc; border:2px solid #3a4150; box-shadow:none; padding:7px 9px}
+.xsalbum .xsknop:hover{filter:brightness(1.1)}
+.xsalbum .xsteller{margin-left:auto; color:#4b5161; font-size:18px}
+/* de gloed-laag van de kaart (#anibloei) lag boven de pop-up: wazige letters en ringen over het album */
+body.xrpop #anibloei, body:has(#overlay .xsalbum) #anibloei{visibility:hidden !important}
+@media (max-height:520px){
+  body:has(#overlay .xsalbum) #xfvol{visibility:hidden !important}
+  #overlay .ovbox.libbox.xsalbum{height:calc(100dvh - 24px) !important; width:min(880px, calc(100vw - 24px)) !important}
+  .xsalbum .xskop{height:42px; padding:10px 50px 0 16px; gap:16px}
+  .xsalbum .xstitel{display:none}
+  .xsalbum .xstabs{gap:14px}
+  .xsalbum .xstab{font-size:8px}
+  .xsalbum .xsx{width:28px; height:28px; right:8px; top:8px}
+  .xsalbum .xsraster{padding:10px 16px 14px; gap:8px 10px; grid-template-columns:repeat(auto-fill, minmax(62px, 1fr))}
+  .xsalbum .xsraster[style*="2/3"]{grid-template-columns:repeat(auto-fill, minmax(54px, 1fr))}
+  .xsalbum .xstegel .xsn{font-size:15px}
+  .xsalbum .xssticker{font-size:5px; padding:3px 3px 2px}
+  .xsalbum .xsdet{inset:42px 0 0 0; grid-template-columns:minmax(0, 220px) minmax(0, 1fr); gap:18px; padding:8px 18px 12px 20px}
+  .xsalbum .xsgroot{width:min(100%, 200px)}
+  .xsalbum .xsgroot[style*="2/3"]{width:min(100%, 170px)}
+  .xsalbum .xsgroot .xssticker{font-size:6px; padding:4px; left:-6px; top:8px}
+  .xsalbum .xsrechts{padding-top:4px; gap:7px}
+  .xsalbum .xsnaam{font-size:12px}
+  .xsalbum .xstxt{font-size:19px}
+  .xsalbum .xsknop{font-size:8px; padding:7px 9px}
+}
+@media (max-width:640px) and (min-height:521px){
+  .xsalbum .xsdet{grid-template-columns:1fr; grid-template-rows:auto minmax(0, 1fr); gap:12px; padding:12px 16px 16px}
+  .xsalbum .xsgroot{width:150px} .xsalbum .xsgroot[style*="2/3"]{width:120px}
+  .xsalbum .xskop{padding-left:14px} .xsalbum .xstitel{display:none}
+}
+@media (prefers-reduced-motion: reduce){.xsalbum .xslicht, .xsalbum .xsvk{animation:none} .xsalbum .xsvk{display:none}}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {lijst, vulTekst};
+})();
+
+/* ---- module xt ---- */
+/* ================= deel xt (24 nov 2026, Q koos voorstel 1 uit het artefact "Beurtwissel") =================
+   De beurtband van vroeger, maar vóór alles:
+   1. De band loopt van rand tot rand over het hele scherm, ook over de linker- en rechterbalk en over de spreekballon
+      (laag 99: boven de balken en de ballon (95), onder echte vensters (#overlay 100) en de tutorial).
+   2. Jij goud, de tegenstander paars (zoals het Zegel). Onder de titel de ronde ("aan zet · ronde n"), niet "beurt 0".
+   3. Een korte pauze: het spel wacht tot de wissel klaar is (1,35 s) en pas dan begint de upkeep (xt-hooks: de sleep
+      vóór upkeepEntangle vraagt xtWacht()). Zijn beurtzin (zegNu("beurt")) komt ook pas na de wissel.
+   4. Een ballon die al stond zakt onder het donker en het typen staat zolang stil (xtPauze), daarna typt hij verder.
+   FAST/SIM (bots, tests) en effecten uit: de oude weg, zonder wachten. */
+ANI.XT = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const DUUR = 1350;
+  let EIND = 0;
+  const actief = () => (typeof performance !== "undefined" ? performance.now() : Date.now()) < EIND;
+  /* hoe lang de beurtstart nog moet wachten: de rest van de wissel, of de oude 800 ms als er geen band is */
+  window.xtWacht = function(oud){ try{ if(typeof FAST !== "undefined" && FAST) return 0; if(EIND){ const r = EIND - performance.now(); return r > 0 ? Math.ceil(r) : 0; } }catch(e){ fout(e); } return oud; };
+  window.xtPauze = function(){ try{ return actief(); }catch(e){ return false; } };
+
+  try{ const s = document.createElement("style"); s.id = "xtstijl";
+    s.textContent = `
+#turncry.xt{z-index:99; inset:0; left:0 !important; right:0 !important; animation:none !important; background:none !important; overflow:hidden; pointer-events:none}
+#turncry.xt .xtdim{position:absolute; inset:0; background:#04060e; opacity:0; animation:xtdim ${DUUR}ms linear forwards}
+@keyframes xtdim{0%{opacity:0}15%{opacity:.6}78%{opacity:.52}100%{opacity:0}}
+#turncry.xt .xtband{position:absolute; left:0; right:0; top:50%; height:clamp(84px, 20vh, 176px); transform:translate(-110%,-50%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden;
+  border-top:3px solid var(--bc); border-bottom:3px solid var(--bc); background:linear-gradient(180deg,var(--b1),var(--b2)); box-shadow:0 0 40px var(--bg3);
+  animation:xtband ${DUUR}ms linear forwards}
+#turncry.xt.theirs .xtband{animation-name:xtbandR}
+@keyframes xtband{0%{transform:translate(-110%,-50%); animation-timing-function:cubic-bezier(.2,.75,.25,1)}18%{transform:translate(0,-50%)}76%{transform:translate(0,-50%); animation-timing-function:cubic-bezier(.6,0,.8,.3)}100%{transform:translate(110%,-50%)}}
+@keyframes xtbandR{0%{transform:translate(110%,-50%); animation-timing-function:cubic-bezier(.2,.75,.25,1)}18%{transform:translate(0,-50%)}76%{transform:translate(0,-50%); animation-timing-function:cubic-bezier(.6,0,.8,.3)}100%{transform:translate(-110%,-50%)}}
+#turncry.xt.mine{--bc:#e3c684; --b1:rgba(70,54,20,.95); --b2:rgba(30,24,10,.95); --bg3:rgba(227,198,132,.45); --tc:#fff1c8; --ts:rgba(240,200,110,.9); --td:#3a2a08}
+#turncry.xt.theirs{--bc:#b77cff; --b1:rgba(52,28,84,.95); --b2:rgba(20,10,34,.95); --bg3:rgba(183,124,255,.45); --tc:#f0e4ff; --ts:rgba(183,124,255,.95); --td:#1a0a2c}
+#turncry.xt .xtglans{position:absolute; top:0; bottom:0; width:22%; left:-25%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  animation:xtglans ${DUUR}ms ease-in-out forwards}
+@keyframes xtglans{0%,20%{left:-25%}62%,100%{left:110%}}
+#turncry.xt .xtkop{position:relative; font-family:"Press Start 2P",ui-monospace,monospace; white-space:nowrap; letter-spacing:.16em; line-height:1.2;
+  font-size:clamp(1.25rem, 3.6vw, 2.9rem); color:var(--tc); text-shadow:0 0 24px var(--ts), 0 4px 0 var(--td)}
+#turncry.xt .xtsub{position:relative; display:block; font-family:"VT323",ui-monospace,monospace; white-space:nowrap; letter-spacing:.3em;
+  font-size:clamp(.95rem, 1.7vw, 1.4rem); color:var(--tc); opacity:.85; margin-top:clamp(4px, 1.2vh, 12px)}
+#turncry.xt canvas{position:absolute; inset:0; width:100%; height:100%}`;
+    document.head.appendChild(s); }catch(e){ fout(e); }
+
+  /* vonkjes van de randen van de band, op een eigen canvas in de melding */
+  const vonken = (d, rgb) => { try{
+    const cv = document.createElement("canvas"), W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); d.appendChild(cv);
+    const x = cv.getContext("2d"); x.scale(dpr, dpr);
+    const band = d.querySelector(".xtband"), bh = band ? band.getBoundingClientRect().height : 176, y0 = H / 2 - bh / 2, y1 = H / 2 + bh / 2, k = Math.min(1, H / 900 + .25);
+    const P = []; let t0 = 0, last = 0;
+    const r = (a, b) => a + Math.random() * (b - a);
+    const start = () => { for(let i = 0; i < 110; i++){ const boven = Math.random() < .5, w = Math.random();
+      P.push({x:r(0, W), y:boven ? y0 : y1, vx:r(-40, 40) * k, vy:(boven ? -1 : 1) * r(40, 200) * k, l:r(.5, 1.1), m:0, s:Math.max(2, Math.round(r(2, 4.5) * k)), c:w < .3 ? "255,248,225" : rgb, wit:w < .2}); }
+      P.forEach(p => p.m = p.l); };
+    const stap = t => { if(!d.isConnected) return; if(!t0){ t0 = t; last = t; } const dt = Math.min(.05, (t - last) / 1000); last = t;
+      if(t - t0 > 240 && !P.started){ P.started = true; start(); }
+      x.clearRect(0, 0, W, H); x.globalCompositeOperation = "lighter";
+      for(const p of P){ if((p.l -= dt) <= 0) continue; p.vx *= 1 - 1.3 * dt; p.vy *= 1 - 1.3 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        const a = Math.min(1, p.l / p.m * 1.6), s = p.s;
+        x.fillStyle = `rgba(${p.c},${a * .22})`; x.fillRect(p.x - s * 1.8, p.y - s * 1.8, s * 3.6, s * 3.6);
+        x.fillStyle = `rgba(${p.c},${a})`; x.fillRect(Math.round(p.x - s / 2), Math.round(p.y - s / 2), s, s);
+        if(p.wit){ x.fillStyle = `rgba(255,255,240,${a * .9})`; x.fillRect(Math.round(p.x - s / 4), Math.round(p.y - s / 4), Math.max(1, s / 2), Math.max(1, s / 2)); } }
+      if(t - t0 < DUUR + 200) requestAnimationFrame(stap); };
+    requestAnimationFrame(stap);
+  }catch(e){ fout(e); } };
+
+  try{ const tc0 = turnCry;
+    turnCry = function(p){
+      try{ if((typeof FAST !== "undefined" && FAST) || (typeof SET === "object" && SET && SET.fx === "uit")){ EIND = 0; return tc0.apply(this, arguments); }
+        const solo = NET.on || S.vsBot, mine = NET.on ? p === NET.seat : p === 0;
+        AU.play("turn", {mine});
+        const old = document.getElementById("turncry"); if(old) old.remove();
+        const n = Math.max(1, Math.ceil((S.gTurn || 1) / 2));
+        const kop = solo ? (mine ? "JOUW BEURT" : "TEGENSTANDER") : `SPELER ${p + 1}`;
+        const sub = solo && !mine ? `${pName(p)} is aan zet · ronde ${n}` : `aan zet · ronde ${n}`;
+        const d = document.createElement("div"); d.id = "turncry"; d.className = "xt " + (mine ? "mine" : "theirs");
+        d.setAttribute("aria-live", "polite");
+        d.innerHTML = `<div class="xtdim"></div><div class="xtband"><i class="xtglans"></i><div class="xtkop">${kop}</div><span class="xtsub">${sub}</span></div>`;
+        document.body.appendChild(d);
+        EIND = performance.now() + DUUR;
+        vonken(d, mine ? "240,199,90" : "183,124,255");
+        setTimeout(() => { if(d.isConnected) d.remove(); }, DUUR + 250);
+        return;
+      }catch(e){ fout(e); }
+      EIND = 0; return tc0.apply(this, arguments); };
+  }catch(e){ fout(e); }
+  return {actief, DUUR};
+})();
+
+/* ---- module xu ---- */
+/* ================= deel xu (24 nov 2026, Q) =================
+   1. De shop op de kaart: het nummerbordje zegt SHOP (voorstel S1), het gele SHOP-labeltje erboven is weg.
+      Zolang je Knort nog niet gezien hebt weet je niet dat het de shop is: dan staat er gewoon 2-2 (en tellen de
+      levels erna mee zoals nu). Heb je hem gezien, dan tellen de levels van wereld 2 zonder de shop: 2-2 is weer 2-2.
+   2. Wurgranken bestaat voor de speler niet meer: het is gewoon Woekergroei (wie hem won, heeft Woekergroei).
+   3. Kern van Maatje is uit het spel (library, beloningen, deckbouwer).
+   4. De aethers in de deckbouwer: eerst de vier element-upgrades (water, steen, vuur, gras), daaronder in dezelfde
+      kolommen de fusies van die elementen, daarna de rest (zelfde volgorde als de library). */
+ANI.XU = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const zag = () => { try{ return !!(SET.story && (SET.story.knortGezien || SET.story.vrij)); }catch(e){ return false; } };
+
+  /* ---------- 1 · SHOP in het bordje ---------- */
+  try{ const yn0 = yyN;
+    yyN = function(id){ if(zag()){ if(id === "knort") return "SHOP"; if(/^2-\d$/.test(id)) return id; } return yn0.apply(this, arguments); }; }catch(e){ fout(e); }
+  try{ const bb0 = bordBordjes;
+    bordBordjes = function(){ let h = bb0.apply(this, arguments);
+      try{ if(zag()) h = h.replace(/(<div class="bbord[^"]*" data-id="knort"[\s\S]*?<div class="bbin"><b>)[^<]*(<\/b>)/, "$1SHOP$2"); }catch(e){ fout(e); }
+      return h; }; }catch(e){ fout(e); }
+
+  /* ---------- 2 · 3 · wat de speler heeft ---------- */
+  const WEG = new Set(["ae_kern", "ae_wurgrank"]);
+  const schoon = l => { if(!Array.isArray(l)) return l; const r = [];
+    l.forEach(k => { const n = k === "ae_wurgrank" ? "ae_grassx2" : k; if(n === "ae_kern") return; if(!r.includes(n)) r.push(n); }); return r; };
+  try{ const bv0 = buitVoor;
+    buitVoor = function(){ const b = bv0.apply(this, arguments); try{ if(b && Array.isArray(b.ae)) b.ae = schoon(b.ae); }catch(e){ fout(e); } return b; }; }catch(e){ fout(e); }
+  try{ if(AETHERS.ae_kern){ AETHERS.ae_kern.weg = true; AETHERS.ae_kern.verhaal = false; AETHERS.ae_kern.vijand = false; } }catch(e){ fout(e); }
+  /* de library: Wurgranken en Kern van Maatje niet tonen (Kaelid zelf houdt haar versie in het gevecht) */
+  try{ const ls0 = libSorteer;
+    libSorteer = function(keys, licht){ const r = ls0.apply(this, arguments); return licht ? r : volgorde(r.filter(k => !WEG.has(k))); }; }catch(e){ fout(e); }
+
+  /* ---------- 4 · de volgorde ---------- */
+  const UP = ["ae_watercycle", "ae_stonefull", "ae_fire6", "ae_grassx2"], FU = ["fu_water", "fu_stone", "fu_fire", "fu_grass"];
+  function volgorde(keys){ const rest = keys.filter(k => !UP.includes(k) && !FU.includes(k));
+    return UP.filter(k => keys.includes(k)).concat(FU.filter(k => keys.includes(k)), rest); }
+  try{ const ds0 = dkScherm;
+    dkScherm = function(){ try{ const m = ANI.YR && ANI.YR.model; if(m && Array.isArray(m.aePool)){
+        const pool = schoon(m.aePool.filter(k => k !== "ae_kern")); m.aePool = volgorde(pool);
+        if(Array.isArray(m.aeIn)) m.aeIn = m.aeIn.filter(k => !WEG.has(k)); } }catch(e){ fout(e); }
+      return ds0.apply(this, arguments); }; }catch(e){ fout(e); }
+  /* in het raster: upgrades op rij 1, fusies eronder in dezelfde kolom, de rest daarna */
+  const zetRaster = () => { try{ const g = document.querySelector("#overlay .xmbox .xmgrid:not(.bst)"); if(!g || g.dataset.xu) return;
+      const tegels = [...g.querySelectorAll(":scope > .xmtegel[data-xmv^='ae:']")]; if(!tegels.length) return; g.dataset.xu = 1;
+      let zet = false;
+      tegels.forEach(t => { const k = t.dataset.xmv.slice(3), u = UP.indexOf(k), f = FU.indexOf(k);
+        if(u >= 0){ t.style.gridRow = "1"; t.style.gridColumn = String(u + 1); zet = true; }
+        else if(f >= 0){ t.style.gridRow = "2"; t.style.gridColumn = String(f + 1); zet = true; } });
+      if(zet){ const sp = document.createElement("i"); sp.className = "xuscheid"; const eerste = tegels.find(t => !t.style.gridRow); if(eerste) g.insertBefore(sp, eerste); else g.appendChild(sp); }
+    }catch(e){ fout(e); } };
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); zetRaster(); return v; }; }catch(e){ fout(e); }
+
+  try{ const st = document.createElement("style"); st.id = "xu-stijl"; st.textContent = `
+.bordvlak .yzshoptag{display:none !important}
+#overlay .xmbox .xmgrid .xuscheid{grid-column:1 / -1; height:0; display:block}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {volgorde};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
