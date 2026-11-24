@@ -7610,7 +7610,7 @@ function getijG(G, p, id, q, c){
   G.pl[q].hp[c] += 3;
   if (G.kVar[id] || isVlag(G, id, F_TOKEN) || isVlag(G, id, F_FUSIE)) return;
   const e = G.kEl[id];
-  if (e === STEEN) G.kVar[id] = ROTS; else if (e === GRAS) G.kVar[id] = ROOS; else if (e === VUUR) G.kVar[id] = PLASMA;
+  if (e === STEEN) G.kVar[id] = ROTS; else if (e === GRAS) G.kVar[id] = ROOS; else if (e === VUUR) G.kVar[id] = PLASMA; else if (e === WATER) G.kVar[id] = IJS;   // 🧊 xo: Water wordt IJs
 }
 function ziel(G, p, id, c){
   if (G.over < 0 && heeft(G, p, 'ae_rouw')){ G.pl[p].life += 1; levCap(G); }      // 🌙 Nagloed: sterft er iets van jou, heel 1
@@ -8060,8 +8060,8 @@ function zielOpLijst(G, p){
   g.forEach((x, i) => {
     if (G.kLk[x] || G.kEl[x] === LICHT) return;
     if (isVlag(G, x, F_FUSIE)){ const k = 'f:' + G.kVar[x]; if (!soorten.has(k)) soorten.set(k, {v:i, m:'fusie'}); return; }
-    if (!IS_ELEMENT(G.kEl[x]) || isVlag(G, x, F_TOKEN)) return;
-    const k = 'e:' + G.kEl[x], al = soorten.get(k), vr = G.kVar[x], sterk = !!(vr && NIETSTERK.indexOf(VARNAAM[vr]) < 0);
+    if (G.kEl[x] < 0 || G.kEl[x] === LICHT || EL_ALLEENSPELL[G.kEl[x]]) return;   // xo: ook tokens mogen terug
+    const k = (isVlag(G, x, F_TOKEN) ? 't:' + G.kEl[x] + ':' + G.kVar[x] : 'e:' + G.kEl[x]), al = soorten.get(k), vr = G.kVar[x], sterk = !!(vr && NIETSTERK.indexOf(VARNAAM[vr]) < 0);
     if (!al || (sterk && !al.sterk)) soorten.set(k, {v:i, m:'summon', sterk});
   });
   return [...soorten.values()];
@@ -46110,7 +46110,9 @@ ANI.S = (() => {
     const hoofd = laag(() => { if(!geldig()) return false; zPas(); sterDom(n); });
     try{
       /* wachten tot de kaart echt in beeld is: geen overgang meer, niet meer aan het laden */
-      const t0 = nu(); while(geldig() && (IRIS_BEZIG || document.querySelector("#bordbak.laadt") || document.querySelector(".anis-blok")) && nu() - t0 < 6000) await slaap(50);
+      /* xq (24 nov): ook wachten tot de tekeningen op de kaart (medaillons, portretten) echt binnen zijn */
+      const plaatjesKlaar = () => { const v = document.getElementById("bordvlak"); if(!v) return true; return [...v.querySelectorAll("img")].every(i => i.complete); };
+      const t0 = nu(); while(geldig() && (IRIS_BEZIG || document.querySelector("#bordbak.laadt") || document.querySelector(".anis-blok") || !plaatjesKlaar()) && nu() - t0 < 6000) await slaap(50);
       if(!geldig()) return;
       await slaap(280);
       /* 1 · de sterren van het level dat je net haalde */
@@ -46157,7 +46159,7 @@ ANI.S = (() => {
      Elke melding schuift met een veertje van rechts binnen, een lichtpunt loopt één keer langs de
      rand, het plaatje springt erin en er glijdt een glans overheen. Ze blijven langer staan dan
      vroeger en schuiven daarna een voor een weer weg. */
-  const BLIJF = 5400;
+  const BLIJF = 4000;   // xq (24 nov, Q): 4 tellen
   const randLoop = (cv, t, kl) => { const c = cv.getContext("2d"), dpr = cv._dpr || 1, w = cv.width / dpr, h = cv.height / dpr;
     c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h); if(t <= 0 || t >= 1) return;
     const x0 = 17, y0 = 17, bw = w - 34, bh = h - 34, L = 2 * (bw + bh);
@@ -50521,6 +50523,7 @@ ANI.ZH = (() => {
       for(let q = 0; q < 2; q++) for(let c = 0; c < NK(); c++){ const cr = P(q).cols[c].cre; if(cr && isPlons(cr.card)) plek.push(creSel(q, c)); }
       for(let q = 0; q < 2; q++){ if(!handVisible(q)) continue; P(q).hand.forEach(cd => { if(isPlons(cd)) plek.push(`#hand${q} .hcard[data-id="${cd.id}"]`); }); }
       plek.forEach(sel => { if(typeof ykStil === "function" && ykStil()) return; const el = document.querySelector(sel); if(!el) return; const r = A.rc(el); if(!r || r.w < 10) return; iets = true;
+        if(!zhZicht(el, r)) return;   /* xp (24 nov): niet bij een verborgen kaart (mulligan) en niet door een laag eroverheen */
         const fx = el.querySelector(".card") ? A.rc(el.querySelector(".card")) || r : r;
         A.gloed(fx.cx, fx.cy + fx.h * .1, fx.w * .8, "#4aa8ff", .26 + .1 * Math.sin(nu / 260));
         if(Math.random() < .14) A.deeltje({x:fx.cx + rnd(-fx.w * .34, fx.w * .34), y:fx.y + fx.h * rnd(.55, .78), vx:rnd(-.1, .1), vy:-rnd(.35, .8), life:rnd(.5, .9),
@@ -50529,6 +50532,20 @@ ANI.ZH = (() => {
     }catch(e){ fout(e); stop(); }
   }
   function stop(){ if(laag) A.weg(laag); laag = null; vorige.clear(); }
+  /* xp (24 nov 2026, Q): de gloed hoort bij de kaart. Is de kaart (of een ouder) onzichtbaar, zoals tijdens de mulligan
+     waar een kopie vliegt, of ligt er een dichte laag overheen (een keuzescherm, een kaartenwaaier), dan geen gloed.
+     Het overdekt-zijn kijken we om de 8 beelden na; tussendoor geldt het laatste antwoord. */
+  const ZICHT = new WeakMap(); let zTel = 0;
+  const peStijl = (() => { const st = document.createElement("style"); st.textContent = "body.zhpe *{pointer-events:auto !important}"; document.head.appendChild(st); return st; })();
+  function verborgen(el){ for(let e = el, i = 0; e && e.nodeType === 1 && i < 9; e = e.parentElement, i++){ const c = getComputedStyle(e); if(c.visibility === "hidden" || c.display === "none" || +c.opacity < .3) return true; } return false; }
+  function dicht(e){ if(e.tagName === "IMG" || e.tagName === "VIDEO" || e.tagName === "svg") return true; const c = getComputedStyle(e); if(+c.opacity < .2 || c.visibility === "hidden") return false;
+    if(/url\(/.test(c.backgroundImage || "")) return true; const m = /rgba?\(([^)]+)\)/.exec(c.backgroundColor || ""); if(!m) return false; const v = m[1].split(",").map(Number); return v.length < 4 || v[3] > .3; }
+  function overdekt(el, r){ document.body.classList.add("zhpe");
+    try{ const els = document.elementsFromPoint(r.cx, r.cy);
+      for(const e of els){ if(e === el || el.contains(e)) return false; if(e.tagName === "CANVAS" || e.contains(el)) continue; if(dicht(e)) return true; }
+      return false; } finally { document.body.classList.remove("zhpe"); } }
+  function zhZicht(el, r){ if(verborgen(el)) return false;
+    let z = ZICHT.get(el); if(!z || ++zTel % 8 === 0){ z = {v:!overdekt(el, r)}; ZICHT.set(el, z); } return z.v; }
 
   /* ================= de plons en het ritueel ================= */
   const selVan = f => f.kind === "spell" ? spellSel(f.p, f.c) : creSel(f.p, f.c);
@@ -52580,7 +52597,7 @@ ANI.ZO = (() => {
 ANI.ZP = (() => {
   const fout = e => { try{ console.error(e); }catch(x){} };
   const fx = () => { try{ return !FAST && ANI.aan(); }catch(e){ return false; } };
-  const RUST = 900;        // zo lang moet alles stil zijn voordat het portret gaat lopen
+  const RUST = 400;        // zo lang moet alles stil zijn voordat het portret gaat lopen
   const VANGNET = 60000;   // daarna geven we het op
   let zelf = false;
 
@@ -52588,7 +52605,9 @@ ANI.ZP = (() => {
   const doelVan = n => {
     const lv = [...((n && n.plekken) || [])].filter(id => /^\d/.test(id) && STORY[id] && !storyKlaar(id));
     lv.sort((a, b) => volgorde(a) - volgorde(b));
-    return lv[0] || null;
+    if(lv[0]) return lv[0];
+    /* xq (24 nov, Q): is het enige nieuwe een shop (Knort, de smidse) of iets zonder nummer, dan dat */
+    return [...((n && n.plekken) || [])].find(id => id !== "start" && id !== "hemel") || null;
   };
 
   /* is alles op de kaart klaar? */
@@ -52598,7 +52617,7 @@ ANI.ZP = (() => {
     if(n.anis && !n.anis.klaar) return false;
     if(document.getElementById("eisluier") || document.getElementById("eilevel")) return false;
     if(fx()){
-      if(document.querySelector(".buitmelding:not(.handmelding)")) return false;
+      /* xq: niet meer wachten op de beloningsmeldingen rechtsboven; die staan los van de kaart */
       if(document.body.classList.contains("anis-nwacht")) return false;
     }
     return true;
@@ -52617,7 +52636,7 @@ ANI.ZP = (() => {
       zelf = true; try{ bordLoop(z.doel); } finally { zelf = false; }
       /* de tekst van het level hoort erbij, ook op de telefoon (daar haalt bordLoop het venster anders weg) */
       z.klaar = true;
-      setTimeout(() => { try{ if(!z.user && M && M.type === "story" && M.bordNieuw === n && bordPionPlek() === z.doel && !document.querySelector(".kaartbox.ks-bord .ksinfo")){ M.infoDicht = false; bordInfoToon(z.doel); } }catch(e){ fout(e); } }, fx() ? 900 : 0);   // eerst zie je het medaillon gekozen worden
+      setTimeout(() => { try{ if(!z.user && M && M.type === "story" && M.bordNieuw === n && bordPionPlek() === z.doel && !document.querySelector(".kaartbox.ks-bord .ksinfo")){ M.infoDicht = false; bordInfoToon(z.doel); } }catch(e){ fout(e); } }, fx() ? 250 : 0);   // xq: het vak komt meteen
     }catch(e){ clearInterval(iv); fout(e); } }, 120);
   };
 
@@ -57998,8 +58017,8 @@ ANI.XB = (() => {
     P(p).grave.forEach((cd, i) => {
       if(!cd || cd.lk || cd.el === "licht") return;
       if(cd.fusie && cd.var){ const k = "f:" + cd.var; if(!soorten.has(k)) soorten.set(k, {v:i, m:"fusie"}); return; }
-      if(!ORDER.includes(cd.el) || cd.token) return;
-      const k = "e:" + cd.el, al = soorten.get(k), sterk = !!(cd.var && !NIETSTERK.includes(cd.var));
+      if(!EL[cd.el] || EL[cd.el].light || EL[cd.el].alleenSpell) return;   // xo (24 nov, Q): ook tokens mogen terug
+      const k = (cd.token ? "t:" + cd.el + ":" + (cd.var || "") : "e:" + cd.el), al = soorten.get(k), sterk = !!(cd.var && !NIETSTERK.includes(cd.var));
       if(!al || (sterk && !al.sterk)) soorten.set(k, {v:i, m:"summon", sterk}); });
     return [...soorten.values()]; };
   { const lp0 = lightPlayable;
@@ -58301,11 +58320,10 @@ ANI.XB = (() => {
         const cr = P(p).cols[c] && P(p).cols[c].cre; if(!cr) return s;
         const kd = cr.card;
         let tok = "";
-        if(kd.zielOp){ const img = (LICHT_BEELD && LICHT_BEELD.reborn) || ""; tok += `<span class="tok xbziel" title="Teruggeroepen met Zielenoproep: sterft hij, dan is hij verbannen">${img ? `<img src="${img}" alt="">` : pixIcoon("hart", "#bfe6ff")}</span>`; }
+        /* xo (24 nov, Q): geen plaatje van de Zielenoproep-kaart als token; het gewone 💀 doodshoofd zegt het al */
         const anders = kd.token || kd.kopie || kd.el === "balrog" || kd.el === "ziel";
         if(anders) tok += `<span class="tok xbmerk" title="${kd.el === "balrog" ? "Maatje: een bijzonder wezen" : kd.el === "ziel" ? "Verloren ziel: een token" : kd.kopie ? "Een kopie (token)" : "Een token"}">${pixIcoon("ster", "#d8c8ff")}</span>`;
         if(!tok) return s;
-        if(kd.zielOp) s = s.replace(/<span class="tok[^"]*schedel[^"]*"[^>]*>[\s\S]*?<\/span>/, "");
         if(s.includes('<div class="stat">')) s = s.replace('<div class="stat">', '<div class="stat">' + tok);
         else if(s.includes('<div class="atkgem')) s = s.replace('<div class="atkgem', `<div class="stat">${tok}</div><div class="atkgem`);
       }catch(e){ console.error(e); }
@@ -59245,7 +59263,7 @@ ANI.XM = (() => {
   const plat = s => String(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").replace(/ ([.,:;])/g, "$1").trim();
   const src = (k, licht) => { try{ const m = (aeBeeldHTML(k, licht) || "").match(/src="([^"]+)"/); return m ? m[1] : ""; }catch(e){ return ""; } };
   const plekVan = k => { try{ return aePlek(k); }catch(e){ return 1; } };
-  const ST = {tab:"ae", vb:null};   // het open tabblad en wat er in het uitlegvak staat
+  const ST = {tab:"ae", vb:null, toon:false, vol:null};   // toon: het uitlegvak is zichtbaar (alleen als je iets aanwijst)   // het open tabblad en wat er in het uitlegvak staat
 
   /* ================= 2 · companions ================= */
   const naLv = x => { try{ const i = STORY_ORDER.indexOf(S && S.story && S.story.id); return i < 0 || i > STORY_ORDER.indexOf(x); }catch(e){ return false; } };
@@ -59307,27 +59325,34 @@ ANI.XM = (() => {
   const kaartFace = (el, v) => { const u = faceSrc({id:-970 - ORDER.indexOf(el) - (v ? 10 : 0), el, var:v || undefined, owner:0}); return u ? `<img src="${u}" alt="" draggable="false">` : ""; };
   /* het uitlegvak */
   const vbHTML = (m, v) => {
-    if(!v){ if(m && m.opdr) return `<div class="xmvb"><div class="xmvbt"><div class="xmvbn">MISSIE</div><div class="xmvbtx">${esc(m.opdr)}</div></div></div>`;
-      return `<div class="xmvb leeg"><div class="xmvbtx">Wijs iets aan of sleep een element-rij: hier staat wat het doet.</div></div>`; }
-    if(v.t === "el"){ const el = v.k, up = elUp(el), rang = (() => { try{ const d = rangDoel(m.ctx); return d ? rangSchoon(d.rang) : null; }catch(e){ return null; } })();
+    if(!v || !ST.toon) { if(v && !ST.toon){ ST.toon = true; const h = vbHTML(m, v); ST.toon = false; return h.replace('class="xmvb', 'class="xmvb weg'); }
+      return `<div class="xmvb leeg weg"></div>`; }
+    if(v.t === "el"){ const el = v.k, dd = (() => { try{ return rangDoel(m.ctx); }catch(e){ return null; } })(), rang = dd ? rangSchoon(dd.rang) : null;
+      const open = !(dd && Array.isArray(dd.rangOpen)) || dd.rangOpen.includes(el), up = open ? elUp(el) : null;
+      if(!up){ const i = v.plek != null ? v.plek : (rang ? rang.indexOf(el) : -1), x = i >= 0 && typeof RANG_EXTRA !== "undefined" ? RANG_EXTRA[i] : 0, en = EL[el] ? EL[el].name : el;
+        return `<div class="xmvb el${ST.toon ? "" : " weg"}" style="--c:${KL(el)}"><div class="xmvbbeeld kaart">${kaartFace(el, null)}</div><div class="xmvbt"><div class="xmvbn">${esc(en.toUpperCase())}</div>
+          <div class="xmvbtx">${esc(elTekst(el))}</div>${i >= 0 ? `<span class="xmvbplek">PLEK ${i + 1}: ${3 + x} KAARTEN</span>` : ""}</div></div>`; }
       const i = v.plek != null ? v.plek : (rang ? rang.indexOf(el) : -1), x = i >= 0 && typeof RANG_EXTRA !== "undefined" ? RANG_EXTRA[i] : null;
       const vn = up && VAR[up] ? VAR[up].name : "", en = EL[el] ? EL[el].name : el;
-      return `<div class="xmvb el" style="--c:${KL(el)}"><div class="xmvbbeeld kaart">${kaartFace(el, up)}</div><div class="xmvbt"><div class="xmvbn">${esc(vn.toUpperCase())}</div>
+      return `<div class="xmvb el${ST.toon ? "" : " weg"}" style="--c:${KL(el)}"><div class="xmvbbeeld kaart">${kaartFace(el, up)}</div><div class="xmvbt"><div class="xmvbn">${esc(vn.toUpperCase())}</div>
         <div class="xmvbsub">opgewaardeerde ${esc(en)} · gewone ${esc(en)}: ${esc(elTekst(el))}</div><div class="xmvbtx">${esc(elTekst(el, up))}</div>
         ${x != null ? `<span class="xmvbplek">PLEK ${i + 1}: ${x ? `${x} ${esc(vn.toUpperCase())} ERBIJ` : `GEEN ${esc(vn.toUpperCase())}`}</span>` : ""}</div></div>`; }
     if(v.t === "cp"){ const c = COMPS[v.k]; if(!c) return "";
-      return `<div class="xmvb"><div class="xmvbbeeld kaart"><img src="${compSrc(v.k)}" alt="" draggable="false"></div><div class="xmvbt"><div class="xmvbn">${esc(c.n.toUpperCase())}</div><div class="xmvbsub">companion · zit altijd in je starthand, ook na een mulligan</div><div class="xmvbtx">${esc(c.t)}</div></div></div>`; }
+      return `<div class="xmvb${ST.toon ? "" : " weg"}"><div class="xmvbbeeld kaart"><img src="${compSrc(v.k)}" alt="" draggable="false"></div><div class="xmvbt"><div class="xmvbn">${esc(c.n.toUpperCase())}</div><div class="xmvbsub">companion · zit altijd in je starthand, ook na een mulligan</div><div class="xmvbtx">${esc(c.t)}</div></div></div>`; }
     const licht = v.t === "lt", D = licht ? LIGHTS[v.k] : AETHERS[v.k]; if(!D) return "";
     const sub = licht ? `lichtkaart · max ${m ? m.per : 3} in je deck` : `aether${D.el && EL[D.el] ? " · " + EL[D.el].name : ""}${plekVan(v.k) > 1 ? ` · neemt ${plekVan(v.k)} plekken` : ""}`;
     const ster = m && m.ster && (licht ? m.ster.lt : m.ster.ae) === v.k && m.opdr ? `<div class="xmvbmissie">★ ${esc(m.opdr)}</div>` : "";
-    return `<div class="xmvb"><div class="xmvbbeeld${licht ? " licht" : ""}">${src(v.k, licht) ? `<img src="${src(v.k, licht)}" alt="">` : ""}</div><div class="xmvbt"><div class="xmvbn">${esc(D.name.toUpperCase())}</div><div class="xmvbsub">${sub}</div><div class="xmvbtx">${esc(plat(D.txt || D.kort || ""))}</div>${ster}</div></div>`; };
-  const zetVb = v => { ST.vb = v; const o = document.querySelector(".xmbox .xmvb"), m = ANI.YR && ANI.YR.model; if(!o) return; const box = o.closest(".xmbox");
+    return `<div class="xmvb${ST.toon ? "" : " weg"}"><div class="xmvbbeeld${licht ? " licht" : ""}">${src(v.k, licht) ? `<img src="${src(v.k, licht)}" alt="">` : ""}</div><div class="xmvbt"><div class="xmvbn">${esc(D.name.toUpperCase())}</div><div class="xmvbsub">${sub}</div><div class="xmvbtx">${esc(plat(D.txt || D.kort || ""))}</div>${ster}</div></div>`; };
+  let VBT = 0;
+  const verberg = () => { clearTimeout(VBT); VBT = setTimeout(() => { ST.toon = false; document.querySelectorAll(".xmbox .xmvb").forEach(o => o.classList.add("weg")); }, 1400); };
+  const zetVb = v => { clearTimeout(VBT); ST.toon = true; ST.vb = v; const o = document.querySelector(".xmbox .xmvb"), m = ANI.YR && ANI.YR.model; if(!o) return; const box = o.closest(".xmbox");
     o.outerHTML = vbHTML(box && box.__m || m, v); };
 
   /* de tegels links */
   const tegel = (k, licht, m) => { const dicht = (licht ? m.ltLock : m.aeLock).has(k), n = licht ? (m.ltN[k] || 0) : (m.aeIn.includes(k) ? 1 : 0);
     const ster = m.ster && (licht ? m.ster.lt : m.ster.ae) === k;
-    const act = dicht ? "" : (licht ? m.actLt(k, 1) : m.actAe(k)); const D = licht ? LIGHTS[k] : AETHERS[k];
+    const vol = licht && !dicht && (n >= (m.per || 3) || m.ltOp >= m.ltMax);   // xo: vol = niets doen (niet terug naar 0)
+    const act = dicht ? "" : vol ? `data-xm="vol" data-k="${esc(k)}"` : (licht ? m.actLt(k, 1) : m.actAe(k)); const D = licht ? LIGHTS[k] : AETHERS[k];
     return `<div class="xmtegel${n ? " in" : ""}${dicht ? " dicht" : ""}" ${act} data-xmv="${licht ? "lt" : "ae"}:${esc(k)}">${n ? `<span class="xmvink">${licht ? n + "×" : "✓"}</span>` : ""}${ster ? `<span class="xmster">★</span>` : ""}
       <span class="xmtb">${src(k, licht) ? `<img src="${src(k, licht)}" alt="" draggable="false">` : ""}</span><span class="xmtn">${esc(D ? D.name : k)}</span>${dicht ? `<span class="xmslot">nog niet gevonden</span>` : ""}</div>`; };
   const regel = (attr, beeld, naam, rechts, xmv) => `<div class="xmregel" ${attr} ${xmv ? `data-xmv="${xmv}"` : ""}>${beeld ? `<img src="${beeld}" alt="" draggable="false">` : ""}<span class="n">${esc(naam)}</span>${rechts || ""}<span class="min">−</span></div>`;
@@ -59388,17 +59413,22 @@ ANI.XM = (() => {
   addEventListener("click", e => { const t = e.target.closest && e.target.closest(".xmbox [data-xm]"); if(!t) return;
     e.stopPropagation(); e.preventDefault();
     const w = t.dataset.xm;
+    if(w === "vol"){ const m = LAATSTE_M, k = t.dataset.k, n = m && m.ltN[k] || 0, D = LIGHTS[k];
+      t.classList.remove("xmschud"); void t.offsetWidth; t.classList.add("xmschud");
+      const tel = document.querySelector(".xmbox .xmlijst .xmsec:last-child .xmlab"); if(tel && !(n >= ((m && m.per) || 3))){ tel.classList.remove("xmschud"); void tel.offsetWidth; tel.classList.add("xmschud"); }
+      zetVb({t:"lt", k}); const o = document.querySelector(".xmbox .xmvb .xmvbsub"); if(o) o.innerHTML = `<b style="color:#ff8a7a;font-weight:400">${n >= ((m && m.per) || 3) ? `Van ${D ? D.name : k} heb je er al ${n}: meer mag niet.` : "Je lichtplekken zijn vol. Haal er rechts eerst een weg."}</b>`;
+      try{ AU.play("click"); }catch(x){} return; }
     if(w === "tab"){ ST.tab = t.dataset.k; }
     else if(w === "tabcp"){ ST.tab = "cp"; }
     else if(w === "comp"){ const k = t.dataset.k; if(SET.story){ SET.story.xmComp = compKeus() === k ? "geen" : k; try{ saveSet(); }catch(x){} } ST.vb = {t:"cp", k}; }
     try{ AU.play("click"); }catch(x){}
     render(); }, true);
   /* uitleg bij aanwijzen */
-  addEventListener("pointerover", e => { if(SLEEP) return; const t = e.target.closest && e.target.closest(".xmbox [data-xmv], .xmbox .dkbaan[data-el]"); if(!t) return;
+  addEventListener("pointerover", e => { if(SLEEP) return; const t = e.target.closest && e.target.closest(".xmbox [data-xmv], .xmbox .dkbaan[data-el]"); if(!t){ if(ST.toon && !(e.target.closest && e.target.closest(".xmbox .xmvb"))) verberg(); return; }
     let v; if(t.dataset.xmv){ const s = t.dataset.xmv, i = s.indexOf(":"); v = {t:s.slice(0, i), k:s.slice(i + 1)}; } else v = {t:"el", k:t.dataset.el};
-    if(!ST.vb || ST.vb.t !== v.t || ST.vb.k !== v.k || ST.vb.plek != null) zetVb(v); }, true);
+    if(!ST.toon || !ST.vb || ST.vb.t !== v.t || ST.vb.k !== v.k || ST.vb.plek != null) zetVb(v); else clearTimeout(VBT); }, true);
   /* na een klik op een tegel: dat ding blijft in het uitlegvak staan */
-  addEventListener("pointerdown", e => { const t = e.target.closest && e.target.closest(".xmbox [data-xmv]"); if(t){ const s = t.dataset.xmv, i = s.indexOf(":"); ST.vb = {t:s.slice(0, i), k:s.slice(i + 1)}; } }, true);
+  addEventListener("pointerdown", e => { const t = e.target.closest && e.target.closest(".xmbox [data-xmv]"); if(t){ const s = t.dataset.xmv, i = s.indexOf(":"); ST.vb = {t:s.slice(0, i), k:s.slice(i + 1)}; ST.toon = true; clearTimeout(VBT); } }, true);
 
   /* soepel slepen van de element-rijen (vóór deel r: die sleept niet meer in de Deklijst) */
   let SLEEP = null, EET = false;
@@ -59508,7 +59538,9 @@ body.xmland #overlay .tthuis > .tlogo{animation:xmfade .5s ease .1s both} @keyfr
 .xmbox .xmster{position:absolute; top:3px; right:5px; z-index:2; color:#ffd84a; font:14px monospace; text-shadow:0 0 6px #ffd84a}
 .xmbox .xmleegt{grid-column:1/-1; font:20px 'VT323',monospace; color:#8d93a1}
 .xmbox .xmvb{flex:0 0 auto; display:flex; gap:14px; border:2px solid #fff; border-radius:10px; padding:10px; background:#000; min-height:128px; max-height:168px}
-.xmbox .xmvb.leeg{align-items:center; justify-content:center; border-color:#2b313d}
+.xmbox .xmvb{transition:opacity .45s ease} .xmbox .xmvb.weg{opacity:0; pointer-events:none}
+.xmbox .xmvb.leeg{border-color:transparent; background:none}
+.xmbox .xmschud{animation:xmschud .35s} @keyframes xmschud{0%,100%{transform:none}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 .xmbox .xmvb.el{border-color:var(--c)}
 .xmbox .xmvbbeeld{flex:0 0 108px; height:108px; border-radius:8px; overflow:hidden; background:#000}
 .xmbox .xmvbbeeld img{width:100%; height:100%; object-fit:cover; image-rendering:pixelated}
@@ -59568,6 +59600,205 @@ body.tel .xmbox .xmregel{font-size:16px} body.tel .xmbox .xmlab{font-size:8px} b
     document.body.classList.remove("xmland"); void document.body.offsetWidth; document.body.classList.add("xmland");
     clearTimeout(THT); THT = setTimeout(() => document.body.classList.remove("xmland"), 1600); };
   return {landen, thuisIn, compKeus, compsVrij, get tab(){ return ST.tab; }};
+})();
+
+/* ---- module xn ---- */
+/* ================= deel xn · kaartknoppen als symbolen, en één vaste geluidsknop (23 nov 2026, Q) =================
+   1. Rechtsonder op de kaart: geen rij tekstknoppen en plaatjes van Knort meer, maar een rustig dock van vierkante
+      symbolen in de huisstijl: Deck, Shop, Library, Achievements, Lijst. De naam verschijnt als je erboven hangt.
+      Eén shopknop: heb je zowel Knort als de smidse van Tang, dan klapt er een keuzetje open.
+   2. De geluidsknop (deel xf) springt niet meer heen en weer: hij staat altijd rechtsboven.
+      In een gevecht is hij weg, want daar zit het geluid al in het paneel (dan stond het er dubbel). */
+ANI.XN = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  /* pixel-symbolen, net als PIXIC: elke # is een pixel */
+  const IC = {
+    deck:["...#######..", "...#.....#..", "#######..#..", "#.....#..#..", "#.###.#..#..", "#.#.#.#..#..", "#.###.#..#..", "#.....#..#..", "#.....####..", "#.....#.....", "#######....."],
+    shop:["############", "#..##..##..#", "#..##..##..#", "############", ".#.##..##.#.", "............", ".#........#.", ".#.###.##.#.", ".#.#.#.##.#.", ".#.#.#....#.", ".##########."],
+    trofee:["############", "##.######.##", "#..######..#", "#..######..#", ".#.######.#.", "..########..", "....####....", ".....##.....", ".....##.....", "....####....", "...######..."],
+    lijst:["##.#########", "##.#########", "............", "##.#########", "##.#########", "............", "##.#########", "##.#########", "............", "##.#########", "##.#########"],
+    boek:["############", "#....##....#", "#.##.##.##.#", "#....##....#", "#.##.##.##.#", "#....##....#", "#.##.##.##.#", "#....##....#", "#....##....#", "############", ".....##....."]};
+  const svg = n => { const g = IC[n], w = Math.max(...g.map(r => r.length)); let r = "";
+    g.forEach((rij, y) => { let x = 0; while(x < rij.length){ if(rij[x] !== "#"){ x++; continue; } let k = 1; while(rij[x + k] === "#") k++; r += `<rect x="${x}" y="${y}" width="${k}" height="1"/>`; x += k; } });
+    return `<svg viewBox="0 0 ${w} ${g.length}" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true">${r}</svg>`; };
+  const knop = (ic, naam, attr) => `<button class="xnk" ${attr} aria-label="${naam}"><span class="xnic">${svg(ic)}</span><span class="xntip">${naam}</span></button>`;
+  let OPEN = false;
+  const dock = h => {
+    const a = h.indexOf('<div class="yzknoppen">'); if(a < 0) return h;
+    let d = 0, i = a, b = -1; const re = /<\/?div\b/g; re.lastIndex = a; let m;
+    while((m = re.exec(h))){ if(m[0] === "<div") d++; else { d--; if(d === 0){ b = h.indexOf(">", m.index) + 1; break; } } }
+    if(b < 0) return h;
+    const binnen = h.slice(a, b), heeft = btn => binnen.includes(`data-btn="${btn}"`);
+    const deckId = (binnen.match(/data-btn="yideck" data-id="([^"]+)"/) || [])[1];
+    const winkels = [heeft("winkel") ? ["winkel", "Knort"] : null, heeft("smid") ? ["smid", "Smidse van Tang"] : null].filter(Boolean);
+    const ach = (binnen.match(/<button class="obtn[^"]*yjachknop[^"]*"([^>]*)>/) || [])[1] || ' data-act="btn" data-btn="kaarteiland" data-yj="ach"';
+    let shop = "";
+    if(winkels.length === 1) shop = knop("shop", winkels[0][1] === "Knort" ? "Shop" : "Smidse", `data-act="btn" data-btn="${winkels[0][0]}"`);
+    else if(winkels.length > 1) shop = `<span class="xnshop${OPEN ? " open" : ""}">${knop("shop", "Shops", 'data-xn="shop"')}<span class="xnkeus">${winkels.map(([btn, n]) => `<button class="xnkk" data-act="btn" data-btn="${btn}">${n.toUpperCase()}</button>`).join("")}</span></span>`;
+    const nieuw = `<div class="yzknoppen xndock">${deckId ? knop("deck", "Deck", `data-act="btn" data-btn="yideck" data-id="${deckId}"`) : ""}${shop}${heeft("kaartlib") ? knop("boek", "Library", 'data-act="btn" data-btn="kaartlib"') : ""}${knop("trofee", "Achievements", ach.trim())}${heeft("storylijst") ? knop("lijst", "Lijst", 'data-act="btn" data-btn="storylijst"') : ""}</div>`;
+    return h.slice(0, a) + nieuw + h.slice(b); };
+  try{ const kh0 = kaartHTML; kaartHTML = function(){ const h = kh0.apply(this, arguments); try{ return dock(h); }catch(e){ fout(e); return h; } }; }catch(e){ fout(e); }
+  /* het keuzetje voor de twee shops */
+  addEventListener("click", e => { const t = e.target.closest && e.target.closest('[data-xn="shop"]');
+    if(t){ e.stopPropagation(); e.preventDefault(); OPEN = !OPEN; const s = t.closest(".xnshop"); if(s) s.classList.toggle("open", OPEN); try{ AU.play("click"); }catch(x){} return; }
+    if(OPEN && !(e.target.closest && e.target.closest(".xnshop"))){ OPEN = false; document.querySelectorAll(".xnshop.open").forEach(s => s.classList.remove("open")); } }, true);
+  addEventListener("keydown", e => { if(e.key === "Escape" && OPEN){ OPEN = false; document.querySelectorAll(".xnshop.open").forEach(s => s.classList.remove("open")); } }, true);
+
+  /* 2 · de geluidsknop: in een gevecht weg (daar zit hij in het paneel) */
+  const gevecht = () => { try{ const r = document.getElementById("rtmute"); if(!(r && r.offsetWidth)) return false;
+      return !M && !!(S && S.pl && S.ui && S.ui.mode && S.ui.mode !== "start") && !document.querySelector("#overlay.show .ovbox"); }catch(e){ return false; } };
+  const kijk = () => { try{ document.body.classList.toggle("xngevecht", gevecht()); }catch(e){} };
+  setInterval(kijk, 400);
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); kijk(); return v; }; }catch(e){ fout(e); }
+
+  try{ const st = document.createElement("style"); st.id = "xn-stijl"; st.textContent = `
+#xfvol#xfvol{left:auto !important; right:16px !important; top:16px !important; bottom:auto !important}
+body.xngevecht #xfvol#xfvol{display:none !important}
+@media (max-height:500px), (max-width:900px){ #xfvol#xfvol{right:10px !important; top:10px !important} }
+.kaartbox .yzknoppen.xndock{gap:8px; align-items:flex-end; flex-direction:row}
+.kaartbox .xndock .xnk{position:relative; width:46px; height:46px; padding:0; display:grid; place-items:center; background:#000; color:#fff; border:3px solid #fff; border-radius:8px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.6); transition:transform .12s, color .12s, border-color .12s}
+.kaartbox .xndock .xnk:hover, .kaartbox .xndock .xnk:focus-visible, .kaartbox .xnshop.open > .xnk{color:#e8c25a; border-color:#e8c25a; transform:translateY(-2px); outline:none}
+.kaartbox .xndock .xnic, .kaartbox .xndock .xnic svg{width:22px; height:21px; display:block}
+.kaartbox .xndock .xntip{position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .12s;
+  font:9px 'Press Start 2P', monospace; color:#fff; background:#000; border:2px solid #fff; border-radius:5px; padding:6px 7px}
+.kaartbox .xndock .xnk:hover .xntip, .kaartbox .xndock .xnk:focus-visible .xntip{opacity:1}
+.kaartbox .xnshop.open .xntip{opacity:0 !important}
+.kaartbox .xnshop{position:relative; display:block}
+.kaartbox .xnkeus{position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); display:none; flex-direction:column; gap:6px; padding:8px; background:#000; border:3px solid #fff; border-radius:8px; z-index:3}
+.kaartbox .xnshop.open .xnkeus{display:flex}
+.kaartbox .xnkk{font:9px 'Press Start 2P', monospace; white-space:nowrap; color:#1a1205; background:#e8c25a; border:0; border-radius:5px; padding:9px 10px; box-shadow:0 3px 0 #8f6d1f; cursor:pointer}
+.kaartbox .xnkk:hover{filter:brightness(1.1)}
+body.tel .kaartbox .yzknoppen.xndock{flex-direction:column; gap:6px}
+body.tel .kaartbox .xndock .xnk{width:38px; height:38px; border-width:2px} body.tel .kaartbox .xndock .xnic, body.tel .kaartbox .xndock .xnic svg{width:18px; height:17px}
+body.tel .kaartbox .xndock .xntip{bottom:auto; top:50%; left:auto; right:calc(100% + 8px); transform:translateY(-50%)}
+body.tel .kaartbox .xnkeus{bottom:auto; top:50%; left:auto; right:calc(100% + 8px); transform:translateY(-50%)}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {dock};
+})();
+
+/* ---- module xo ---- */
+/* ================= deel xo (24 nov 2026, Q) =================
+   1. Getijdenstroom: wat Water raakt wordt sterk, en Water zelf wordt dus 🧊 IJs (kern: xo-hooks.py).
+   2. De element-aethers (Getijdenstroom, Lawine, Vuurzee, Woekergroei) geven hun element +3 levens bij binnenkomst:
+      dat zie je nu ook al op de kaarten in je hand.
+   (Zielenoproep: tokens mogen terug, en geen kaartplaatje als token; dat staat in xb.js en xo-hooks.py.) */
+ANI.XO = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  try{ GETIJ_UP.water = "ijs"; }catch(e){ fout(e); }
+  try{ const hs0 = handStatHTML;
+    handStatHTML = function(p, cd){
+      try{ if(cd && !cd.lk && cd.el !== "licht" && !cd.token && typeof elAeBonus === "function"){ const b = elAeBonus(p, cd.el);
+          if(b){ const s = hs0.call(this, p, Object.assign({}, cd, {getij:(cd.getij || 0) + b})); return s.replace('class="hst hp', 'class="hst xobonus hp'); } } }catch(e){ fout(e); }
+      return hs0.apply(this, arguments); }; }catch(e){ fout(e); }
+  try{ const st = document.createElement("style"); st.textContent = `.hst.xobonus{color:#7ddc5a !important; text-shadow:0 0 6px rgba(125,220,90,.6)}`; document.head.appendChild(st); }catch(e){}
+  return {};
+})();
+
+/* ---- module xp ---- */
+/* ================= deel xp (24 nov 2026, Q) =================
+   1. Het eindscherm (gewonnen/verloren) past op de telefoon helemaal in beeld, zonder scrollen:
+      het portret links, de tekst rechts, alles wat compacter.
+   (2. De water-gloed volgt de kaart en schijnt niet door lagen heen: dat staat in zh.js.)
+   3. Van home naar Challenges en terug: dezelfde overgang als van home naar het verhaal (irisOvergang, in deel s de tegels). */
+(() => {
+  try{ const ob0 = onBtn;
+    onBtn = function(btn, el, fromAction){
+      try{ const naarChal = btn === "mpmodus" && el && el.dataset && el.dataset.m === "chal" && !(M && M.type === "chal");
+        const terug = btn === "closemodal" && M && M.type === "chal";
+        if((naarChal || terug) && !IRIS_IN && !IRIS_BEZIG && typeof irisOvergang === "function" && irisMag()){
+          const a = arguments, dit = this;
+          irisOvergang(() => { IRIS_IN = true; try{ ob0.apply(dit, a); } finally{ IRIS_IN = false; } });
+          return true; } }catch(e){ console.error(e); }
+      return ob0.apply(this, arguments); }; }catch(e){ console.error(e); }
+  try{ const st = document.createElement("style"); st.id = "xp-stijl"; st.textContent = `
+@media (max-height:520px){
+  html body #overlay .ovbox.eindbox{grid-template-columns:auto minmax(0, 1fr) !important; gap:14px 20px !important; padding:10px 16px !important; max-height:calc(100dvh - 16px) !important; overflow:hidden !important; text-align:left !important; align-items:center !important}
+  html body #overlay .ovbox.eindbox.zonder{grid-template-columns:minmax(0, 1fr) !important; text-align:center !important}
+  html body #overlay .eindbox .eport{width:min(150px, 40dvh) !important; align-self:center}
+  html body #overlay .eindbox .etekst{text-align:left !important; display:flex; flex-direction:column; gap:4px}
+  html body #overlay .eindbox.zonder .etekst{text-align:center !important; align-items:center}
+  html body #overlay .eindbox .eboven{margin:0 !important; font-size:9px !important}
+  html body #overlay .eindbox h1.eindkop{margin:2px 0 4px !important; font-size:clamp(1.2rem, 5.6dvh, 2rem) !important; justify-content:flex-start !important}
+  html body #overlay .eindbox.zonder h1.eindkop{justify-content:center !important}
+  html body #overlay .eindbox .eregel{margin:0 0 4px !important; font-size:15px !important; line-height:1.1 !important; max-width:46ch !important; margin-left:0 !important}
+  html body #overlay .eindbox .estats{margin:0 0 2px !important; gap:6px !important; justify-content:flex-start !important}
+  html body #overlay .eindbox .estats > *{padding:2px 8px !important; min-height:0 !important}
+  html body #overlay .eindbox .estats b, html body #overlay .eindbox .estats strong{font-size:13px !important}
+  html body #overlay .eindbox .estats span, html body #overlay .eindbox .estats small{font-size:11px !important}
+  html body #overlay .eindbox .sterrij{margin:2px 0 !important; gap:8px !important; justify-content:flex-start !important; transform:scale(.8); transform-origin:0 50%}
+  html body #overlay .eindbox .sub.sternieuw{font-size:12px !important; margin:0 !important}
+  html body #overlay .eindbox .ereden{display:none !important}
+  html body #overlay .eindbox .eknoppen{margin-top:4px !important; justify-content:flex-start !important; gap:8px !important}
+  html body #overlay .eindbox .eknoppen .obtn{padding:6px 10px !important; font-size:10px !important}
+}`; document.head.appendChild(st); }catch(e){ console.error(e); }
+})();
+
+/* ---- module xq ---- */
+/* ================= deel xq · na het level (24 nov 2026, Q koos het filmpje in "Na het level") =================
+   De volgorde: gewonnen-scherm, praatje, kaart (met sterren), beloningen als één stapel (4 tellen), pad en het nieuwe
+   medaillon dat opengaat (deel s), en meteen daarna kiest het spel het nieuwe level en gaat het kleine vak open (deel zp).
+   Hier:
+   1. Beloningsmeldingen die tijdens het gewonnen-scherm of het praatje komen, wachten tot de kaart echt in beeld is;
+      daar komen ze allemaal tegelijk en na 4 tellen gaan ze weg (ook als iets anders ze ophoudt).
+   2. Geen losse "Nieuwe aether"-melding meer over het gewonnen-scherm (die komt in de stapel op de kaart).
+   3. Een verse kaart begint niet met een camera die nog van het vorige bezoek wegglijdt (dat gaf een oud beeld ertussen).
+   4. Het levelvak is kleiner (zelfde titelletters).
+   (In deel zp: niet meer wachten op meldingen, shops ook kiezen, vak meteen. In deel s: wachten tot alle plaatjes binnen zijn.) */
+ANI.XQ = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const opKaart = () => { try{ return !!(M && M.type === "story" && document.getElementById("bordvlak") && !document.querySelector("#bordbak.laadt") && !(typeof IRIS_BEZIG !== "undefined" && IRIS_BEZIG)); }catch(e){ return false; } };
+  const naGevecht = () => { try{ return !!(S && S.story && (S.over || (M && M.type === "praat"))); }catch(e){ return false; } };
+  /* 1 · de stapel */
+  let RIJ = [], T0 = 0;
+  const opruimen = n => { /* na 4 tellen (plus het binnenkomen) weg, wat er ook gebeurt */
+    setTimeout(() => { document.querySelectorAll(".buitmelding.anis-bm").forEach(d => { d.style.transition = "transform .3s ease-in, opacity .3s"; d.style.transform = "translateX(130%)"; d.style.opacity = "0"; setTimeout(() => d.remove(), 350); }); }, 4000 + n * 360 + 1300); };
+  try{ const bm0 = buitMelding;
+    buitMelding = function(lijst){
+      try{ if(!FAST && Array.isArray(lijst) && lijst.length && naGevecht() && !opKaart()){ RIJ = RIJ.concat(lijst); if(!T0) T0 = Date.now(); return; } }catch(e){ fout(e); }
+      const r = bm0.apply(this, arguments); try{ if(Array.isArray(lijst) && lijst.length) opruimen(lijst.length); }catch(e){} return r; };
+    setInterval(() => { try{ if(!RIJ.length) return;
+      if(opKaart() || Date.now() - T0 > 45000){ const l = RIJ; RIJ = []; T0 = 0; setTimeout(() => { try{ buitMelding(l); }catch(e){ fout(e); } }, 500); }
+    }catch(e){ fout(e); } }, 200);
+  }catch(e){ fout(e); }
+  /* 2 · geen losse melding over het eindscherm */
+  const zet = () => { try{ document.body.classList.toggle("xqeind", !!(S && S.story && S.over && !opKaart())); }catch(e){} };
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); zet(); return v; }; }catch(e){ fout(e); }
+  setInterval(zet, 250);
+  /* 3 · een verse kaart: de camera begint gewoon op zijn plek */
+  try{ const km0 = kaartM; kaartM = function(){ try{ if(!document.getElementById("bordvlak") && typeof BORD !== "undefined" && BORD){ BORD.cam = null; BORD.camNaar = null; BORD.pan = null; } }catch(e){} return km0.apply(this, arguments); }; }catch(e){ fout(e); }
+  /* 5 · de kaart pas laten zien als alles op zijn plek staat: geen medaillons die verspringen terwijl ze nog laden */
+  const KLAAR = new WeakSet();
+  const kijkKaart = () => { try{ const v = document.getElementById("bordvlak"); if(!v || KLAAR.has(v)) return;
+      KLAAR.add(v); document.body.classList.add("xqlaadt"); const t0 = Date.now();
+      const test = () => { try{ const af = !document.querySelector("#bordbak.laadt") && [...v.querySelectorAll("img")].every(i => i.complete) && (!document.fonts || document.fonts.status === "loaded");
+          if((af && Date.now() - t0 > 120) || Date.now() - t0 > 3000 || !v.isConnected){ requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("xqlaadt"))); return; }
+          setTimeout(test, 60); }catch(e){ document.body.classList.remove("xqlaadt"); } };
+      test(); }catch(e){ fout(e); document.body.classList.remove("xqlaadt"); } };
+  try{ const r1 = render; render = function(){ const v = r1.apply(this, arguments); kijkKaart(); return v; }; }catch(e){ fout(e); }
+  /* 4 · het kleinere levelvak */
+  try{ const st = document.createElement("style"); st.id = "xq-stijl"; st.textContent = `
+body.xqeind #voorwerpmelding{display:none !important}
+body.xqlaadt #bordvlak{opacity:0 !important}
+html body .kaartbox .ksinfo .yideckknop{display:none !important}
+html body .kaartbox .ksinfo .yzchal{background:#b8322a !important; color:#fff !important; border:0 !important; box-shadow:0 3px 0 #6e1a14 !important}
+html body .kaartbox .ksinfo .yzchal:hover{filter:brightness(1.12)}
+html body .kaartbox .ksinfo{width:min(340px, calc(100vw - 24px)) !important; grid-template-columns:minmax(0, 1fr) !important; max-height:none !important}
+html body .kaartbox .ksinfo .ksiport{display:none !important}
+html body .kaartbox .ksinfo .ksitekst{padding:10px 12px 12px !important; gap:4px !important}
+html body .kaartbox .ksinfo .ksitekst > small{font-size:8px !important; opacity:.8; margin:0 !important}
+html body .kaartbox .ksinfo .ksitekst h3{font-size:15px !important; margin:2px 0 2px !important; line-height:1.25 !important}
+html body .kaartbox .ksinfo .ksitegen{font-size:18px !important}
+html body .kaartbox .ksinfo .ksiregels{margin:0 !important}
+html body .kaartbox .ksinfo .ksiregels p{font-size:16px !important; margin:0 !important; line-height:1.05 !important}
+html body .kaartbox .ksinfo .yiaekop{display:none !important}
+html body .kaartbox .ksinfo .yiaerij{display:flex !important; flex-wrap:wrap; gap:4px 10px !important; margin:2px 0 !important}
+html body .kaartbox .ksinfo .yiae{display:flex !important; align-items:center; gap:5px !important; font-size:15px !important}
+html body .kaartbox .ksinfo .yiae .yiaeb, html body .kaartbox .ksinfo .yiae .yiaeb img{width:20px !important; height:20px !important}
+html body .kaartbox .ksinfo .yiae b{font:15px 'VT323', monospace !important}
+html body .kaartbox .ksinfo .ksiknoppen{gap:6px !important; padding-top:4px !important}
+html body .kaartbox .ksinfo .ksiknoppen .obtn{font-size:9px !important; padding:8px 10px !important}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {rij:() => RIJ.slice()};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
