@@ -21657,7 +21657,7 @@ function actionsHTML(){
     if(!iControl(u.p)) return `<div style="color:var(--dim);font-size:.8rem">⏳ ${pName(u.p)} bekijkt de starthand…</div>`;
     /* De echte knoppen staan in het mulligan-paneel; hier blijft alleen de terugval voor
        als dat paneel om wat voor reden dan ook niet staat. */
-    return `<div style="color:var(--dim);font-size:.8rem">🔄 kies hierboven: houden of opnieuw</div>`;
+    return `<div style="color:var(--dim);font-size:.8rem">🔄 houden of opnieuw?</div>`;
   }
   if(u.mode==="slot" && u.cancellable) return `${u.fuseKnop ? `<button class="abtn primary" data-act="btn" data-btn="slotfuse" style="background:#6b45a0;color:#f2e6ff">🟣 ${u.fuseNaam || "Fusie"}</button>` : ""}<button class="abtn ghost" data-act="btn" data-btn="cancel">✕ Annuleer</button>`;
   if(u.mode==="choice" && u.optional && !isBot(u.p)) return `<button class="abtn ghost" data-act="btn" data-btn="skip">${u.meta && u.meta.eigenEffect ? "Effect niet doen" : "Overslaan"}</button>`;
@@ -38796,7 +38796,7 @@ function decksHTML(){
   const decks = basDecks();
   const vr = (btn, lab, sub, extra, data) => `<button class="vr${extra || ""}" data-act="btn" data-btn="${btn}"${data || ""}><span>${lab}${sub ? `<small>${sub}</small>` : ""}</span></button>`;
   return `<div class="ovbox mpbox"><h2>JE DECKS · ${decks.length}/${BAS.DECKS}</h2>
-    <div class="sub mpnote">Voor Basis. 24 elementkaarten, ${BAS.AE} aethers en ${BAS.LT} lichtkaarten (✨ Lichtzwerm en 💚 Levenskracht veranderen dat), plus een klein sideboard.</div>
+    <div class="sub mpnote">Voor Basis. 24 elementkaarten, ${BAS.AE} aethers en ${BAS.LT} lichtkaarten (✨ Lichtzwerm verandert dat), plus een klein sideboard.</div>
     <div class="vlijst mplijst">${decks.map((d, i) => vr("deckbewerk", d.naam, basKort(d), i === 0 ? " aan" : "", ` data-i="${i}"`)).join("")}
       ${decks.length < BAS.DECKS ? vr("decknieuw", "+ Nieuw deck", "", decks.length ? "" : " aan") : ""}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="closemodal">Terug</button></div></div>`;
@@ -47805,7 +47805,7 @@ decksHTML = function(){
   const decks = basDecks();
   const vr = (btn, lab, sub, extra, data) => `<button class="vr${extra || ""}" data-act="btn" data-btn="${btn}"${data || ""}><span>${lab}${sub ? `<small>${sub}</small>` : ""}</span></button>`;
   return `<div class="ovbox mpbox"><h2>JE DECKS · ${decks.length}/${BAS.DECKS}</h2>
-    <div class="sub mpnote">Voor Basis. Van elk element ${BAS.EL}, en je zet ze op volgorde: plek 1 krijgt er ${RANG_EXTRA[0]} opgewaardeerde bij, plek 2 ${RANG_EXTRA[1]}, plek 3 ${RANG_EXTRA[2]} (samen ${BAS.EL * 4 + RANG_EXTRA.reduce((a, x) => a + x, 0)}). ${BAS.AE} aethers en ${BAS.LT} lichtkaarten (✨ Lichtzwerm en 💚 Levenskracht veranderen dat), plus een klein sideboard.</div>
+    <div class="sub mpnote">Voor Basis. Van elk element ${BAS.EL}, en je zet ze op volgorde: plek 1 krijgt er ${RANG_EXTRA[0]} opgewaardeerde bij, plek 2 ${RANG_EXTRA[1]}, plek 3 ${RANG_EXTRA[2]} (samen ${BAS.EL * 4 + RANG_EXTRA.reduce((a, x) => a + x, 0)}). ${BAS.AE} aethers en ${BAS.LT} lichtkaarten (✨ Lichtzwerm verandert dat), plus een klein sideboard.</div>
     <div class="vlijst mplijst">${decks.map((d, i) => vr("deckbewerk", d.naam, basKort(d), i === 0 ? " aan" : "", ` data-i="${i}"`)).join("")}
       ${decks.length < BAS.DECKS ? vr("decknieuw", "+ Nieuw deck", "", decks.length ? "" : " aan") : ""}</div>
     <div class="mponder"><button class="obtn" data-act="btn" data-btn="closemodal">Terug</button></div></div>`;
@@ -53909,7 +53909,7 @@ ANI.MIK = (() => {
       ctx.save(); ctx.globalCompositeOperation = "lighter"; [[6, .25], [2.5, .6], [1, 1]].forEach(([lw, al], i) => { ctx.globalAlpha = a * al; ctx.strokeStyle = i === 2 ? "#fff" : n.kleur; ctx.lineWidth = lw; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); }); ctx.restore(); });
     /* wijzen: wat er gebeurt (geen lijn meer, 10 nov) */
     const toonVoor = id => { const e = elVan(id), r = e && ANI.rc(e); if(!r) return; const C = n.cache || (n.cache = new Map()); if(!C.has(id)) C.set(id, voor(n, id)); const v = C.get(id); if(!v) return;
-      ctx.save(); ctx.font = "10px 'Press Start 2P', monospace"; const w = ctx.measureText(v).width + 12, x0 = r.cx - w / 2, y0 = r.y - 40;
+      ctx.save(); ctx.font = "10px 'Press Start 2P', monospace"; const w = ctx.measureText(v).width + 12, x0 = r.cx - w / 2, y0 = (e.closest && e.closest("#row1")) ? r.y + 8 : Math.max(4, r.y - 40);   /* wv */
       ctx.fillStyle = "rgba(10,8,14,.92)"; ctx.fillRect(x0, y0, w, 18); ctx.strokeStyle = n.kleur; ctx.lineWidth = 1.5; ctx.strokeRect(x0 + .5, y0 + .5, w - 1, 17);
       ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(v, r.cx, y0 + 10); ctx.restore(); };
     if(n.hover != null && geldig.has(n.hover)) toonVoor(n.hover);
@@ -62323,6 +62323,265 @@ ANI.WU = (() => {
       setTimeout(() => clearInterval(mist), 300); A.geestWeg(g);
     }catch(e){ fout(e); try{ A.geestWeg(g); }catch(x){} } }
   return {schot, zakNu};
+})();
+
+/* ---- module wv ---- */
+/* ================= deel wv (26 nov 2026, Q: "doe een run, kleine ontwerpfoutjes eruit") =================
+   1. Het mik-label bij een doel van de tegenstander staat bovenin over de kaart (niet meer onder de kaartwaaier): wv-hooks.py.
+   2. Commander, het overzicht na de draft ("De draft · potje n"): op een telefoon schoof de Start-knop onder de pakketjes.
+      Nu passen de rijen op het scherm en blijft de knop er altijd onder staan.
+   3. Wurgranken bestaat niet (Q, 24 nov): ook in de commander-draft en de Basis-decks heet het Woekergroei.
+   4. "Hand te vol" stond rechtsboven over het bord (op een telefoon over twee kolommen van de tegenstander): nu klein,
+      midden onderin, net boven je hand.
+   5. Telefoon: de volumeknop zat over "Beginnen"/"Klaar" en het kruisje van de deckbouwer: die balk schuift ervoor opzij.
+   6. Het achievementsvenster gaat dicht zodra je van de kaart weggaat (het bleef over de voorbereiding en het gevecht hangen).
+   7. Telefoon: Je decks (Basis) liep onder het scherm uit (Terug onzichtbaar); achievement-meldingen kleiner.
+   8. Mulligan (Q): geen uitlegvenster over je kaarten, alleen twee knoppen net boven je hand: Houden en Opnieuw (met de prijs). */
+ANI.WV = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const schoon = l => { const r = []; (l || []).forEach(k => { const n = k === "ae_wurgrank" ? "ae_grassx2" : k; if(n === "ae_kern") return; if(!r.includes(n)) r.push(n); }); return r; };
+  try{ const p0 = pvpAePool; pvpAePool = function(){ return schoon(p0.apply(this, arguments)); }; }catch(e){ fout(e); }
+  try{ if(typeof basAePool === "function"){ const b0 = basAePool; basAePool = function(){ return schoon(b0.apply(this, arguments)); }; } }catch(e){ fout(e); }
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments);
+      try{ const a = document.getElementById("yjach"); if(a && !(M && M.type === "story" && !M.lijst)) a.remove(); }catch(e){} return v; }; }catch(e){ fout(e); }
+  /* mulligan: de knoppen net boven de bovenkant van je hand */
+  const mullPlek = () => { try{ const el = document.getElementById("mullpaneel"); if(!el || !S || !S.ui || S.ui.mode !== "mulligan") return;
+      const h = document.getElementById("hand" + S.ui.p); let top = innerHeight * .72;
+      if(h){ const ks = [...h.querySelectorAll(".hcard")].map(k => k.getBoundingClientRect().top).filter(t => t > 40); if(ks.length) top = Math.min(...ks); }
+      el.style.paddingBottom = Math.max(8, Math.round(innerHeight - top + 10)) + "px"; }catch(e){} };
+  try{ const mp0 = mulliganPaneel; mulliganPaneel = function(){ const v = mp0.apply(this, arguments); mullPlek(); setTimeout(mullPlek, 350); setTimeout(mullPlek, 900); return v; }; }catch(e){ fout(e); }
+  addEventListener("resize", mullPlek);
+  try{ const st = document.createElement("style"); st.id = "wv-stijl"; st.textContent = `
+html body #mullpaneel{align-items:flex-end !important; padding-top:0 !important}
+html body #mullpaneel .mullbox, html body.pc #mullpaneel .mullbox{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; max-width:none !important}
+html body #mullpaneel :is(.mullkop, .mullsub, .mullprijs, .mulltel){display:none !important}
+html body #mullpaneel .mulllaatste{font:9px/1.2 'Press Start 2P', monospace; color:#ff9a7a; text-shadow:0 2px 0 #000; margin:0 0 6px}
+html body #mullpaneel .mullknop{display:flex; flex-direction:row !important; gap:12px; margin:0 !important; justify-content:center}
+html body #mullpaneel .mullknop .abtn, html body.pc #mullpaneel .mullknop .abtn{width:auto !important; min-width:0; white-space:nowrap; padding:10px 16px !important; font:10px/1.2 'Press Start 2P', monospace !important;
+  background:#050507 !important; color:#ffd84a !important; border:0 !important; border-radius:4px; box-shadow:0 0 0 2px #ececec, 0 0 0 4px #000, 0 6px 14px rgba(0,0,0,.6) !important}
+html body #mullpaneel .mullknop .abtn + .abtn{color:#ececec !important}
+@media (max-height:520px){ html body .tpvp{padding-top:12px !important} html body .tpvp .tpvptitel{font-size:22px !important} }
+@media (max-height:520px){ html body #mullpaneel .mullknop .abtn{padding:8px 12px !important; font-size:8px !important} html body #mullpaneel .mullknop .toets{display:none} }
+html body #overlay .ovbox.dovbox{gap:clamp(6px,1.4vh,14px)}
+#overlay .ovbox.dovbox .dovrij{flex:1 1 auto; min-height:0; overflow:auto; scrollbar-width:none}
+#overlay .ovbox.dovbox .dovrij::-webkit-scrollbar{display:none}
+#overlay .ovbox.dovbox .dovknop{flex:none; position:relative; z-index:2}
+/* draft: de vraag en de uitleg boven de kaarten (op een telefoon schoof het linker pakketje over de tekst) */
+#overlay .drveld .drvraag, #overlay .drveld .drsub{position:relative; z-index:6}
+html body .buitmelding.handmelding{top:auto !important; right:auto !important; left:50%; bottom:min(230px, 27vh); translate:none !important; transform:translate(-50%, 16px); opacity:0;
+  transition:transform .35s cubic-bezier(.2,.8,.25,1), opacity .3s !important; padding:6px 12px 6px 6px; min-width:0; max-width:min(420px, 80vw)}
+html body .buitmelding.handmelding.aan{transform:translate(-50%, 0); opacity:1}
+body.ydmikt .buitmelding.handmelding{display:none !important}   /* niet over de mik-vraag heen */
+html body .buitmelding.handmelding .vmic{width:34px; height:34px}
+@media (max-height:520px){
+  html body .buitmelding.handmelding{bottom:64px; gap:8px}
+  html body .buitmelding.handmelding .vmic{width:26px; height:26px} html body .buitmelding.handmelding .vmic span{font-size:1.1rem}
+  html body .buitmelding.handmelding small{font-size:.5rem} html body .buitmelding.handmelding b{font-size:.62rem; line-height:1.2}
+  #overlay .xmbox .xmtop{padding-right:46px !important}
+  /* Je decks (Basis): de lijst schuift binnen het venster, Terug blijft zichtbaar */
+  #overlay .ovbox.mpbox{max-height:94vh; display:flex; flex-direction:column}
+  #overlay .ovbox.mpbox .mplijst{flex:1 1 auto; min-height:0; overflow:auto; scrollbar-width:thin}
+  #overlay .ovbox.mpbox .mponder{flex:none}
+  #overlay .ovbox.mpbox .mpnote{font-size:13px; line-height:1.15}
+  /* achievement-meldingen kleiner, zodat ze niet half het scherm bedekken */
+  html body .yjtoast{max-width:250px !important; padding:6px 10px !important}
+  html body .yjtoast *{font-size:clamp(7px, 2.2vh, 11px) !important; line-height:1.25 !important}
+}
+@media (max-height:520px){
+  html body #overlay .ovbox.dovbox{padding:10px 14px !important; max-height:96vh !important}
+  #overlay .ovbox.dovbox h2{font-size:10px}
+  #overlay .ovbox.dovbox .dovkop{--kw:40px; padding-bottom:3px; gap:8px}
+  #overlay .ovbox.dovbox .dovkop .med, #overlay .ovbox.dovbox .dovkop > :first-child{width:40px !important; height:40px !important; flex:none}
+  #overlay .ovbox.dovbox .dovkol{gap:4px}
+  #overlay .ovbox.dovbox .dovr{padding:2px 6px; gap:8px}
+  #overlay .ovbox.dovbox .dovb{width:52px; height:40px}
+  #overlay .ovbox.dovbox .dovb .aei{width:40px !important; height:40px !important}
+  #overlay .ovbox.dovbox .dovpak .gc{width:26px; height:37px; left:calc(50% + (var(--j) - 1) * 11px)}
+  #overlay .ovbox.dovbox .dovt b{font-size:8px}
+  #overlay .ovbox.dovbox .dovknop{padding:9px 20px; font-size:10px}
+}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {schoon};
+})();
+
+/* ---- module ww ---- */
+/* ================= deel ww (26 nov 2026, Q koos A uit het artefact "Terug naar de kaart") =================
+   Na het nagesprek terug naar de kaart: zacht doorvloeien. Het gesprek zakt een stukje en vervaagt, het beeld is heel even
+   donker en de kaart komt rustig op, een fractie te groot die op zijn plek valt. */
+ANI.WW = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const RM = (() => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } })();
+  let VORIG = null, BEZIG = false, LAATST = null;
+  const kloonVan = ps => { const k = ps.cloneNode(true); k.removeAttribute("id"); k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id")); k.querySelectorAll("[data-act]").forEach(e => e.removeAttribute("data-act")); return k; };
+  const kaartKlaar = () => !!document.querySelector("#overlay #bordvlak") && !document.body.classList.contains("xqlaadt") && !document.querySelector("#bordbak.laadt");
+  async function vloei(kloon){
+    BEZIG = true;
+    const laag = document.createElement("div"); laag.id = "wwlaag";
+    laag.style.cssText = "position:fixed; inset:0; z-index:9000; pointer-events:none";
+    const zwart = document.createElement("div"); zwart.style.cssText = "position:absolute; inset:0; background:#000";
+    laag.appendChild(zwart);
+    if(kloon){ kloon.style.position = "absolute"; kloon.style.inset = "0"; laag.appendChild(kloon); }
+    document.body.appendChild(laag);
+    try{
+      if(kloon) await kloon.animate([{opacity:1, transform:"none"}, {opacity:0, transform:"translateY(14px)"}], {duration:320, easing:"ease-in", fill:"forwards"}).finished;
+      const t0 = Date.now(); while(!kaartKlaar() && Date.now() - t0 < 1800) await new Promise(r => setTimeout(r, 40));
+      await new Promise(r => setTimeout(r, 80));
+      const kb = document.querySelector("#overlay .ovbox.kaartbox");
+      const a1 = zwart.animate([{opacity:1}, {opacity:0}], {duration:420, easing:"ease-out", fill:"forwards"}).finished;
+      const a2 = kb ? kb.animate([{transform:"scale(1.035)"}, {transform:"scale(1)"}], {duration:560, easing:"cubic-bezier(.2,.8,.25,1)"}).finished : Promise.resolve();
+      await Promise.all([a1, a2]);
+    }catch(e){ fout(e); }
+    laag.remove(); BEZIG = false;
+  }
+  try{ const r0 = render;
+    render = function(){ const nu = M && M.type, was = VORIG; let kloon = null;
+      try{ if(was === "praat" && nu === "story" && !M.lijst && !BEZIG && !RM && !(typeof FAST !== "undefined" && FAST)){
+          const ps = document.querySelector("#overlay .praatscherm"); kloon = ps && !ps.classList.contains("leeg") ? kloonVan(ps) : LAATST; } }catch(e){ fout(e); }
+      const v = r0.apply(this, arguments); VORIG = nu;
+      /* het laatste gesprek met tekst onthouden: bij het sluiten is het scherm al leeg */
+      try{ if(nu === "praat"){ const ps = document.querySelector("#overlay .praatscherm"); if(ps && !ps.classList.contains("leeg")) LAATST = kloonVan(ps); } else if(nu !== "story") LAATST = null; }catch(e){}
+      if(kloon){ LAATST = null; vloei(kloon); }
+      return v; }; }catch(e){ fout(e); }
+  return {vloei};
+})();
+
+/* ---- module wx ---- */
+/* ================= deel wx (26 nov 2026, Q: testrun 2) =================
+   1. Telefoon: "Overslaan" in een gesprek zat onder de volumeknop: schuift ernaast.
+   2. Telefoon: "X speelt met kracht" (de aethers van de tegenstander voor het gevecht) liep van het scherm; de derde aether
+      en "Begrepen" waren onzichtbaar. Nu drie naast elkaar, kleiner, en de knop altijd in beeld.
+   3. De volumeknop ook in de platenspeler (Q: één knop, overal op dezelfde plek).
+   4. Telefoon, draft: de uitleg onder een kaart viel onder het scherm uit: nu boven de kaart. De bovenste balk (deck van
+      de tegenstander) schuift opzij voor de volumeknop.
+   5. Telefoon, mulligan: "Opnieuw · −1" paste niet in zijn knop. */
+ANI.WX = (() => {
+  /* 6. Tijdens een gesprek (ook bij een fase-overgang) geen zetmelding ("X speelt ...") van het gevecht erboven */
+  try{ const r0 = render; render = function(){ const v = r0.apply(this, arguments); try{ document.body.classList.toggle("wxpraat", !!(M && M.type === "praat")); }catch(e){} return v; }; }catch(e){ console.error(e); }
+  try{ const st = document.createElement("style"); st.id = "wx-stijl"; st.textContent = `
+body.wxpraat #zetmelding{opacity:0 !important; visibility:hidden !important}
+html body.xgopen #xfvol.aan, html body.xeopen #xfvol.aan{display:block !important}
+@media (max-height:520px){
+  html body .praatskip{right:calc(var(--sr, 0px) + 54px) !important}
+  #overlay .drveld .druitleg{top:auto !important; bottom:calc(100% + 4px) !important}
+  #overlay .drveld .drpakw .druitleg{top:auto !important; bottom:calc(100% + 4px) !important}
+  #overlay .drveld > .drbalk:first-child{padding-right:46px !important}
+  html body #mullpaneel .mullknop .abtn{width:auto !important; min-width:max-content !important; overflow:visible !important}
+  #overlay .ovbox:has(> .aerow){max-height:94vh !important; display:flex !important; flex-direction:column; padding:10px 14px !important; gap:4px}
+  #overlay .ovbox:has(> .aerow) > h2{font-size:11px !important; margin:0 !important}
+  #overlay .ovbox:has(> .aerow) > .sub{font-size:13px !important; margin:0 !important}
+  #overlay .ovbox:has(> .aerow) > .aerow{flex:1 1 auto; min-height:0; overflow:auto; display:grid !important; grid-template-columns:repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow:column; gap:8px; margin:4px 0 !important}
+  #overlay .ovbox:has(> .aerow) .aecard{width:auto !important; min-width:0; max-width:none !important; margin:0 !important}
+  #overlay .ovbox:has(> .aerow) .aecard .aei{height:64px !important; min-height:0 !important}
+  #overlay .ovbox:has(> .aerow) .aecard .aet{font-size:8px !important; padding:4px !important}
+  #overlay .ovbox:has(> .aerow) .aecard .aex{font-size:12px !important; line-height:1.15 !important; padding:4px 6px !important}
+  #overlay .ovbox:has(> .aerow) > .obtn{flex:none; margin-top:4px !important; padding:8px 16px !important}
+}
+`; document.head.appendChild(st); }catch(e){ console.error(e); }
+  return {};
+})();
+
+/* ---- module wy ---- */
+/* ================= deel wy (26 nov 2026, Q: "alles moet makkelijk uitlegbaar zijn, geen edge cases in de uitleg") =================
+   De teksten van aethers, lichtkaarten, upgrades en wezens korter en simpeler: wat het doet, met de juiste getallen.
+   Uitzonderingen en randgevallen staan er niet meer in (het spel doet ze nog steeds). */
+ANI.WY = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const K = t => { try{ return kwHTML(t); }catch(e){ return t; } };
+  const AE = {
+    ae_watercycle:"Je 💧 <b>Water</b> komt binnen met <b>+3</b> levens. Herspeel je een wezen met 💧 Water, dan wordt het sterk en krijgt het <b>+3</b> levens.",
+    ae_fire6:"Je 🔥 <b>Vuur</b> komt binnen met <b>+3</b> levens. Je 🔥 Vuur doet <b>4</b> schade, en <b>1</b> aan de wezens ernaast. Het raakt ook 💧 Water.",
+    ae_stonefull:"Je 🪨 <b>Steen</b> komt binnen met <b>+3</b> levens. Je 🪨 Steen geeft eerst <b>+4</b>, en elke keer dat hij afgaat <b>1</b> meer.",
+    ae_grassx2:"Je 🌿 <b>Gras</b> komt binnen met <b>+3</b> levens. Je 🌿 Gras verstrikt dubbel (<b>−2</b>, op 🪨 Steen <b>−4</b>) en verstrikt ook 🔥 Vuur.",
+    ae_meester:"Telt als Getijdenstroom, Lawine, Vuurzee en Woekergroei samen. Neemt <b>3</b> aether-plekken in.",
+    fu_water:"Fusie 💧 Water wordt 🌊 Oceaan: al je andere wezens gaan terug naar je hand. Daarna rust de Oceaan tot je volgende beurt.",
+    fu_fire:"Fusie 🔥 Vuur wordt ⚡ Bliksem: twee keer <b>2</b> schade op een wezen naar keuze, en <b>2</b> op de wezens ernaast. Niet op 💧 Water.",
+    fu_stone:"Fusie 🪨 Steen wordt 🏔️ Bergketen: er komt een Steen bij met evenveel levens, en die doet zijn speel-effect.",
+    fu_grass:"Fusie 🌿 Gras wordt 🌳 Woud: verstrik drie keer.",
+    fu_portaal:"Telt als alle vier de fusies. Neemt <b>2</b> aether-plekken in.",
+    ae_graf:"Einde van je beurt: je mag een eigen wezen offeren en een wezen uit je graf terugspelen. Sterft dat nog eens, dan is het weg.",
+    ae_lichtval:"Elke keer dat je levens verliest, trek je <b>1</b>.",
+    ae_deken:"De eerste keer per beurt dat je levens zou verliezen, verlies je niets.",
+    ae_altaar:"Het eerste ritueel dat je per ronde speelt, wordt daar ook een wezen: een kopie, als token.",
+    ae_ziel:"Elke derde keer dat een wezen van jou sterft, krijg je een 👻 Verloren ziel: <b>0</b>/<b>1</b>, valt niet aan.",
+    ae_pijn:"Begin van je beurt: je mag een kaart uit je hand wegleggen. Dan trek je er <b>2</b>.",
+    ae_alziend:"Je ziet de hand van je tegenstander. Trek je een kaart, trek er dan <b>1</b> bij en leg er <b>1</b> weg.",
+    ae_genade:"Eén keer per ronde: sterft een wezen van jou, dan blijft er een 🥚 ei. Na <b>3</b> beurten komt er een 🕷 Spin uit.",
+    ae_zwerm:"Speel je een ✦ lichtkaart, heel <b>1</b>. Je deck heeft <b>4</b> lichtkaarten meer en van elk element <b>1</b> kaart minder.",
+    ae_jacht:"Er komen beesten in je deck: per element één, in plaats van een gewone kaart. Een beest speel je als wezen.",
+    ae_draw3:"Begin van je beurt: betaal <b>1</b> en trek <b>2</b> in plaats van <b>1</b>.",
+    ae_offer:"Je 🔥 Vuur doet <b>1</b> meer. Je mag er ook een eigen wezen mee offeren: dan trek je <b>1</b>.",
+    ae_nabeeld:"De eerste upgrade, fusie, beest of companion die je elke ronde speelt, krijgt een kopie met <b>1</b> leven.",
+    /* van tegenstanders */
+    ae_arsenaal:"Onder zijn kolom 2, 3 en 4 liggen 🗡 Swipe (<b>2</b> schade aan al jouw wezens), 🔪 Stab (<b>8</b> recht tegenover) en 🛡 Schild (een schildje van <b>0</b>/<b>1</b>). Ze gaan af bij elk wezen dat hij daar speelt.",
+    ae_kweb:"Sterft er een wezen van haar, dan wordt het een 🥚 ei (<b>0</b>/<b>2</b>). Na twee beurten komt er een 🕷 spin van <b>6</b> uit.",
+    ae_doorslaan:"Vernietigt een wezen van haar met een aanval iets, dan valt het nog een keer aan. Eén keer per beurt.",
+    ae_maatje:"Maatje, haar vlammengeest: <b>30</b> levens, Volle slag. Gaat niet dood en krijgt elke beurt <b>5</b> levens terug.",
+    ae_lavameer:"Jouw grond is lava. Begin van jouw beurt: je 🌿 Gras verbrandt, je 🪨 Steen en kleurloze wezens krijgen <b>1</b> schade, 🔥 Vuur en 💧 Water niets.",
+    ae_knetter:"Zolang Knetter brandt, komt hun 🔥 Vuur binnen met <b>+3</b> levens en gaat het Vuur-effect twee keer.",
+    ae_spetter:"Zolang Spetter brandt, komt hun 🌿 Gras binnen met <b>+3</b> levens en gaat het Gras-effect twee keer.",
+    ae_fikkie:"Zolang Fikkie brandt, komt hun 🪨 Steen binnen met <b>+3</b> levens en gaat het Steen-effect twee keer.",
+    ae_armen:"Begin van jouw beurt wijzen twee armen een plek aan jouw kant aan. Staat daar aan het eind van je beurt een wezen, dan pakt ze het, of knijpt ze: <b>3</b> schade.",
+    ae_veertig:"Onder water doet 🔥 Vuur niets, van niemand.",
+    ae_staal:"Zijn 🪨 Steen en ⛰️ Rots zijn van staal: 🌿 Gras en 🔥 Vuur kunnen er niets mee.",
+    ae_knoop:"In zijn derde kolom ligt ⛓ de knoop. Een wezen dat hij daar speelt, doet zijn speel-effect drie keer.",
+    ae_slaapthee:"💤 Het wiegelied. Doe je haar in je beurt geen schade, dan zak je verder weg. Bij <b>3</b>/<b>3</b> slaap je en verlies je.",
+    ae_dubbel:"Van het eerste wezen dat hij elke beurt neerzet, komt meteen een tweede exemplaar bij, zonder speel-effect.",
+    ae_vitrine:"Begin van zijn beurt: het grootste wezen uit zijn graf komt terug op een vrije plek."
+  };
+  const LT = {
+    darkhole:"{Betaal} <b>3</b>. Vernietig al je eigen wezens en trek <b>1</b>. Waren het er <b>3</b> of meer, trek dan <b>2</b>.",
+    reborn:"Offer een eigen wezen en haal twee wezens uit je graf terug op het veld. Sterven ze, dan zijn ze weg.",
+    negate:"{Betaal} <b>3</b>. Maak de kaart die je tegenstander net speelde ongedaan, ook een ✦ lichtkaart.",
+    brenger:"Zet een 🕯 Lichtbrenger neer: <b>6</b> levens, Volle slag, Onaantastbaar. Raakt hij je tegenstander, dan heel je evenveel.",
+    kloon:"Kopieer een kaart op het veld, van wie ook, naar jouw kant: als wezen of als ritueel. Het speel-effect gaat af.",
+    struik:"Leg 🗡 Swipe, 🔪 Stab of 🛡 Schild als ritueel in een kolom. Elk kan één keer per potje.",
+    slide:"Gaat meteen af. {Betaal} <b>3</b>. Kies één van drie beesten uit de buidel: het komt op een vrije plek en doet zijn speel-effect.",
+    hamer:"Kies een eigen wezen: het wordt sterk, zijn speel-effect gaat nog een keer, en je trekt <b>1</b>.",
+    opstand:"Op elke eigen plek met een ritueel maar zonder wezen komt dat ritueel als wezen (token). Elk kost <b>1</b> leven."
+  };
+  const VR = {
+    rots:"▶ Het Steen-effect, en de eerste keer ook een 🪨 Kiezel (<b>1</b> leven) op een vrije plek.",
+    plasma:"Doet het schade, dan krijgen de wezens ernaast <b>2</b> schade.",
+    roos:"▶ Verstrik twee keer.",
+    ijs:"▶ Neem het vijandelijke wezen in deze kolom over en doe zijn speel-effect (als ritueel: het ritueel). Het zit eerst vast in het ijs. Of laat het smelten: dan is het gewoon 💧 Water.",
+    bliksem:"▶ Twee keer <b>2</b> schade op een wezen naar keuze, en <b>2</b> op de wezens ernaast. Niet op 💧 Water.",
+    bergketen:"▶ Er komt een Steen bij met evenveel levens, en die doet zijn speel-effect.",
+    oceaan:"▶ Al je andere wezens gaan terug naar je hand. Daarna rust de Oceaan tot je volgende beurt.",
+    fwoud:"▶ Verstrik drie keer.",
+    lokaasbeest:"Valt nooit aan. Zolang hij staat, gaat alles wat je tegenstander op jouw wezens richt naar hem. Kan niet als ritueel.",
+    keescomp:"▶ Zet een 🪨 Kiezel (<b>1</b> leven) op een vrije plek, elke keer weer."
+  };
+  const ELT = {
+    water:["{Plons}: {herspeel} een eigen wezen.", "▶ {Plons}: {herspeel} een eigen wezen. Als ritueel: het wezen in die kolom doet zijn speel-effect nog een keer."],
+    ekster:["Trek <b>1</b>. Eén keer per ronde.", "▶ Trek <b>1</b>. Eén keer per ronde."],
+    slijm:["Elk 🟢 Slijm van jou krijgt <b>+2</b> levens, ook dit.", "▶ Elk 🟢 Slijm van jou krijgt <b>+2</b> levens, ook dit. Einde van je beurt komt er een kopie bij."],
+    basilisk:["Kies een kolom: wat daar staat wordt een 🪨 Steen van <b>3</b>/<b>3</b>.", "▶ Kies een kolom, bij jou of je tegenstander: wat daar staat wordt een 🪨 Steen van <b>3</b>/<b>3</b>."],
+    ei:["Na <b>2</b> beurten komt er een 🕷 Spin uit.", "◆ Na <b>2</b> beurten komt er een 🕷 Spin uit."],
+    reus:["Slaat altijd <b>3</b>.", "Slaat altijd <b>3</b>. 🌿 houdt hem niet tegen."],
+    dodenbewaarder:["<b>6</b> {kleurloze|kleurloos} schade op een wezen naar keuze. Sterft het, dan is het verbannen.", "▶ <b>6</b> {kleurloze|kleurloos} schade op een wezen naar keuze. Sterft het, dan is het verbannen. Als ritueel: hetzelfde, bij elk wezen dat jij hier speelt."],
+    spin:["Spin een vijandelijk wezen in: zijn eerste aanval doet niets.", "▶ Spin een vijandelijk wezen in: zijn eerste aanval doet niets."]
+  };
+  const BG = {
+    onaantastbaar:"Effecten van de tegenstander doen er niets mee. Een gewone aanval raakt hem wel.",
+    herspeel:"Pak een eigen wezen op en zet het opnieuw neer. De levens blijven, de 🌿 vallen af en het speel-effect gaat nog een keer.",
+    spiegel:"Een Waterplons die al geplonsd heeft. Als wezen doet hij niets meer. Als ritueel doet het wezen in zijn kolom zijn speel-effect nog een keer.",
+    plons:"Het speel-effect van een Waterplons: herspeel een eigen wezen. Daarna heet de kaart gewoon 💧 Water.",
+    fusie:"Offer een eigen wezen: deze kaart wordt het fusiewezen van je aether, met de levens van het offer erbij.",
+    verstrik:"Leg een 🌿 op een wezen: het verliest 1 leven (Steen 2), jouw Gras krijgt er 1 bij, en het kan niet aanvallen. Elke beurt valt er één 🌿 af. 🔥 Vuur kan niet verstrikt worden.",
+    spell:"Een kaart op de ritueelplek van een kolom. Hij doet zijn speel-effect bij het neerleggen, en opnieuw bij elk wezen dat jij in die kolom speelt."
+  };
+  try{ Object.assign(effPrompt, {gras:"🌿 Gras: kies wie je verstrikt", dodenbewaarder:"💀 Dodenbewaarder: kies een wezen (6 schade)",
+    basilisk:"🦎 Basilisk: kies een kolom. Wat daar staat, wordt een 🪨 Steen van 3/3"}); }catch(e){ fout(e); }
+  try{ if(typeof BEGRIPPEN === "object") Object.entries(BG).forEach(([k, t]) => { if(BEGRIPPEN[k]) BEGRIPPEN[k].uitleg = t; }); }catch(e){ fout(e); }
+  try{ Object.entries(AE).forEach(([k, t]) => { if(!AETHERS[k]) return; try{ AETHER_TEKST[k] = t; }catch(e){} AETHERS[k].txt = AETHERS[k].kort = K(t); }); }catch(e){ fout(e); }
+  try{ Object.entries(LT).forEach(([k, t]) => { if(!LIGHTS[k]) return; try{ if(typeof LICHT_TEKST === "object") LICHT_TEKST[k] = t; }catch(e){} LIGHTS[k].txt = K(t); }); }catch(e){ fout(e); }
+  /* ook de opgedeelde tekst (.tekst: speel / eig / spell), want kaart-uitleg en hover lezen die */
+  const zonder = t => t.replace(/^[▶◆]\s*/, "");
+  try{ Object.entries(VR).forEach(([k, t]) => { const V = VAR[k]; if(!V) return; V.uitleg = V.kort = K(t);
+      if(V.tekst) V.tekst = Object.assign({}, V.tekst, {speel:/^▶/.test(t) ? K(zonder(t)) : "", eig:/^▶/.test(t) ? "" : K(t), spell:""}); }); }catch(e){ fout(e); }
+  try{ Object.entries(ELT).forEach(([k, [kort, cre]]) => { const E = EL[k]; if(!E) return; E.kort = K(kort); E.cre = K(cre);
+      if(E.tekst && E.tekst.speel) E.tekst = Object.assign({}, E.tekst, {speel:K(zonder(cre).split(/ Als ritueel: /)[0])}); }); }catch(e){ fout(e); }
+  return {AE, LT, VR, ELT};
 })();
 
 /* @@IMPL@@ hier komen de nieuwe animatiemodules (ANI.V, ANI.G, ANI.S, ANI.D, ANI.N) */
