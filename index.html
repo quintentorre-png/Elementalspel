@@ -6854,7 +6854,7 @@ body.tel #laadscherm .ldslot{min-height:120px} body.tel #laadscherm .ldkeuze{pad
 <div class="ldraam" id="ldraam">
   <div class="ldlogo"><span class="lds">ELEMENTAAL</span><span class="ldt">ELEMENTAAL</span></div>
   <div class="ldtag">EEN DUEL IN VIER ELEMENTEN</div>
-  <div class="ldvakken"><div class="ldvak" data-el="water" style="--c:#4f9bd8"><img src="art/kaart-water.png" alt="" draggable="false"></div><div class="ldvak" data-el="steen" style="--c:#b08a5a"><img src="art/kaart-steen.png" alt="" draggable="false"></div><div class="ldvak" data-el="vuur" style="--c:#e0603d"><img src="art/kaart-vuur.png" alt="" draggable="false"></div><div class="ldvak" data-el="gras" style="--c:#58b065"><img src="art/kaart-gras.png" alt="" draggable="false"></div></div>
+  <div class="ldvakken"><div class="ldvak" data-el="steen" style="--c:#b08a5a"><img src="art/kaart-steen.png" alt="" draggable="false"></div><div class="ldvak" data-el="gras" style="--c:#58b065"><img src="art/kaart-gras.png" alt="" draggable="false"></div><div class="ldvak" data-el="vuur" style="--c:#e0603d"><img src="art/kaart-vuur.png" alt="" draggable="false"></div><div class="ldvak" data-el="water" style="--c:#4f9bd8"><img src="art/kaart-water.png" alt="" draggable="false"></div></div>
   <div class="ldbalkw"><span class="ldruiter" id="ldruiter">0%</span><div class="ldbalk"><i id="ldvul"></i><b></b></div></div>
   <div class="ldrij"><span class="ldtekst" id="ldtekst">de kaart wordt getekend</span><span class="ldpct" id="ldpct">0%</span></div>
   <div class="ldsub" id="ldsub"></div>
@@ -6952,7 +6952,7 @@ const ELNAAM = ["water", "steen", "vuur", "gras", "licht", "wolk", "brenger", "b
 const IS_ELEMENT = e => e >= 0 && e <= 3;
 //                water steen vuur gras licht wolk brenger | balrog golem kapitein reus troon skelet wolf vis clown kogel ei spin swipe stab schild knoop schildje lokaas | buidelwolf ekster vleermuis vlinder minotaurus slijm basilisk
 const EL_HP =        [2, 3, 2, 2, 2, 1, 6, 30, 20, 5, 12, 6, 1, 3, 3, 1, 3, 2, 7, 2, 2, 2, 2, 3, 10, 4, 1, 2, 1, 8, 1, 6, 1, 5, 10, 4, 5];
-const EL_FLASH =     [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+const EL_FLASH =     [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1];
 const EL_TOKEN =     [0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];   // EL-niveau token
 const EL_OVERHEEN =  [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];   // er mag iets bovenop
 const EL_STIL =      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];   // valt nooit aan
@@ -7480,6 +7480,7 @@ function kondigAan0(G, K, p, id, asSpell, col){
       /* 🧊 IJs mikt op wat er tegenover ligt en gaat op de keten: de ander mag reageren (en met 💧 ontwijken). */
       const vij = 1 - p, doel = asSpell ? G.pl[vij].spell[col] : G.pl[vij].cre[col];
       pushPlay(G, p, id, asSpell, col, [{el:E_IJS, tid:doel, tp:vij, tc:col, spell:asSpell, src:id}]);
+      wmNabeeld(G, K, p, id);   // 🟣 wm: IJs telt ook
       return true;
     }
     G.kVar[id] = 0; zetVlag(G, id, F_WASIJS);
@@ -7995,7 +7996,7 @@ function vraagReactie(G, K, p, keten){
     }
     const ijs = G.kVar[r] === IJS;
     const canCre = EL_FLASH[el] === 1 && openKol(G, p).length > 0;
-    const canSp = EL_FLASH[el] === 1 && vrijeRituelen(G, p).length > 0 && !isVlag(G, r, F_FUSIE);   // 🟣 yg
+    const canSp = EL_FLASH[el] === 1 && vrijeRituelen(G, p).length > 0 && !isVlag(G, r, F_FUSIE) && G.kVar[r] !== LOKAASB;   // 🎣 wj   // 🟣 yg
     const canFuse = fuseOk(G, p, el) && !isVlag(G, r, F_FUSIE);
     const n = (canCre ? 1 : 0) + (canSp ? 1 : 0) + (canFuse ? 1 : 0);
     if (!n){ if (!isMens(G, p)) return 'pass'; continue; }
@@ -8145,14 +8146,15 @@ function meesterSpeel(G, K, p, id){
 /* 🟣 Altaar nieuw en Nabeeld, na het neerleggen */
 function xbNaZet(G, K, p, id, asSpell, col){
   const r = Math.ceil(G.gTurn / 2), s = G.pl[p];
-  if (asSpell && G.over < 0 && heeft(G, p, 'ae_altaar') && IS_ELEMENT(G.kEl[id]) && !isVlag(G, id, F_JACHT) && !isVlag(G, id, F_TOKEN) && s.spell[col] === id && !s.cre[col] && !(dichtVan(G) && dichtVan(G).includes(col))){
+  if (asSpell && G.over < 0 && heeft(G, p, 'ae_altaar') && G.kEl[id] >= 0 && G.kEl[id] !== LICHT && !G.kLk[id] && !isVlag(G, id, F_TOKEN) && !isVlag(G, id, F_KOPIE) && s.spell[col] === id && !s.cre[col] && !(dichtVan(G) && dichtVan(G).includes(col))){
     G.altaarR = G.altaarR ? G.altaarR.slice() : [-1, -1];
-    if (G.altaarR[p] !== r){ G.altaarR[p] = r; const ak = nieuweKaart(G, G.kEl[id], p, G.kVar[id] === IJS ? 0 : G.kVar[id], F_TOKEN | F_KOPIE); plaatsWezen(G, p, col, ak);
+    if (G.altaarR[p] !== r){ G.altaarR[p] = r; const ak = nieuweKaart(G, G.kEl[id], p, G.kVar[id] === IJS ? 0 : G.kVar[id], F_TOKEN | F_KOPIE | (G.kVlag[id] & (F_JACHT | F_COMP | F_FUSIE))); plaatsWezen(G, p, col, ak);
       const top = G.stack[G.stack.length - 1], pa = legPlan(G, K, p, ak, false, col, {});   // 16 nov (Q): speel-effect en ritueel gaan af, onder de zet van het ritueel
       if (pa !== 'cancel' && pa.length && G.over < 0){ pushPlay(G, p, ak, false, col, pa); if (top && top.t === 1 && top.card === id && G.stack[G.stack.length - 2] === top){ const it = G.stack.pop(); G.stack.splice(G.stack.length - 1, 0, it); } } }
   }
   const vr = G.kVar[id];
-  if (G.over < 0 && heeft(G, p, 'ae_nabeeld') && !isVlag(G, id, F_TOKEN) && !isVlag(G, id, F_KOPIE) && !isVlag(G, id, F_FUSIE) && ((vr === ROTS || vr === PLASMA || vr === ROOS || vr === IJS) || isVlag(G, id, F_WASROTS) || isVlag(G, id, F_JACHT)) && G.kEl[id] !== VLINDER){
+  wmNabeeld(G, K, p, id);   // 🟣 wm: het nieuwe Nabeeld (het oude hieronder staat uit)
+  if (false && G.over < 0 && heeft(G, p, 'ae_nabeeld') && !isVlag(G, id, F_TOKEN) && !isVlag(G, id, F_KOPIE) && !isVlag(G, id, F_FUSIE) && ((vr === ROTS || vr === PLASMA || vr === ROOS || vr === IJS) || isVlag(G, id, F_WASROTS) || isVlag(G, id, F_JACHT))){   // 🦋 wl
     G.nabeeldR = G.nabeeldR ? G.nabeeldR.slice() : [-1, -1];
     const vrij = legeKol(G, p);
     if (G.nabeeldR[p] !== r && vrij.length){
@@ -8202,6 +8204,28 @@ function wfKameleon(G, K, p, it){
     const it2 = effItem(p, Object.assign({}, e, {origin:0, src:actor || null}), actor || null); it2.dec = false;
     losOp(G, K, it2);
   }
+}
+/* ---------- 🟣 wm (25 nov 2026): Nabeeld ---------- */
+function wmNabeeldOk(G, id){
+  const e = G.kEl[id];
+  if (e < 0 || e === LICHT || G.kLk[id] || isVlag(G, id, F_TOKEN) || isVlag(G, id, F_KOPIE)) return false;
+  if (!IS_ELEMENT(e)) return true;   // beesten, companions en andere wezens
+  return !!(G.kVar[id] || isVlag(G, id, F_FUSIE) || isVlag(G, id, F_COMP) || isVlag(G, id, F_WASROTS) || isVlag(G, id, F_WASIJS));
+}
+function wmNabeeld(G, K, p, id){
+  if (G.over >= 0 || !heeft(G, p, 'ae_nabeeld') || !wmNabeeldOk(G, id)) return;
+  G.nabeeldR = G.nabeeldR ? G.nabeeldR.slice() : [-1, -1];
+  const vrij = legeKol(G, p);
+  const ronde = Math.ceil(G.gTurn / 2);   // 🟣 wo: één keer per ronde
+  if (G.nabeeldR[p] === ronde || !vrij.length) return;
+  G.nabeeldR[p] = ronde;
+  const sl = vrij.length === 1 ? {c:vrij[0]} : kiesPlek(G, K, p, vrij.map(c => ({p, c, kind:'cre'})), false, {el:ELNAAM[G.kEl[id]]});
+  const c2 = sl && sl !== 'cancel' && vrij.includes(sl.c) ? sl.c : vrij[0];
+  const vr = G.kVar[id];
+  const kp = nieuweKaart(G, G.kEl[id], p, vr === IJS ? 0 : vr, F_TOKEN | F_KOPIE | (G.kVlag[id] & (F_JACHT | F_COMP | F_FUSIE)));
+  plaatsWezen(G, p, c2, kp); G.pl[p].hp[c2] = 1;
+  const pl2 = legPlan(G, K, p, kp, false, c2, {});
+  if (pl2 !== 'cancel' && pl2.length) pushPlay(G, p, kp, false, c2, pl2);
 }
 function eksterWeer(G){ for (let i = 0; i < G.kVlag.length; i++) if ((G.kVlag[i] & F_LEEG) && eksterMag(G, G.kOwn[i])) G.kVlag[i] &= ~F_LEEG; }   // 🐦 ya: pas weer vol als de eigenaar weer mag
 /* 🐦 ya (9 nov 2026): de Ekster trekt één kaart per ronde per eigenaar (ronde = ceil(gTurn / 2)) */
@@ -8641,7 +8665,7 @@ function buidelZak(zak, r){
 function eigenEi(G, p, c, n){ const s = G.pl[p], ei = nieuweKaart(G, EI, p, 0, F_TOKEN | F_EIGENEI); plaatsWezen(G, p, c, ei); s.hp[c] = 2; s.eiB[c] = G.turnNo[p] + n; s.pld[c] = G.gTurn; }
 function buidelZet(G, K, p, k){
   const s = G.pl[p];
-  if (k === 'vlinder'){                                            // 🦋 lost op op een eigen wezen: +3 en onaantastbaar deze beurt
+  if (false && k === 'vlinder'){   // 🦋 wl: niet meer; hij komt gewoon op het bord   // 🦋 lost op op een eigen wezen: +3 en onaantastbaar deze beurt
     const ids = alleWezens(G, (id, pp) => pp === p);
     if (!ids.length) return;
     const id = ids.length === 1 ? ids[0] : kiesWezen(G, K, p, ids, false, {k:'vlinder'});
@@ -8749,6 +8773,7 @@ function kondigFusieAan(G, K, p, id, tributeId, fuseKey, o){
   /* nov 2026: alles mikt op een plek; een fusie neemt geen doelwitten mee */
   const plan = legPlan(G, K, p, id, false, col, {});
   pushPlay(G, p, id, false, col, plan === 'cancel' ? [] : plan, {asFuse:true, fuseKey, offerTerug});
+  wmNabeeld(G, K, p, id);   // 🟣 wm: een fusie telt ook
   return true;
 }
 function mikOver(G, oud, nieuw, np, nc){
@@ -9099,11 +9124,12 @@ function speel0(G, K, id){
     if (sl === 'cancel' || !sl || !vrij.includes(sl.c)) return;
     neemUitHand(G, p, id); kondigFusieAan(G, K, p, id, null, fuseKeyK(G.kVar[id]), {col:sl.c}); ketenLus(G, K); return;
   }
-  const creOk = (G.kVar[id] === IJS && isMens(G, p) ? creSlotsMens(G, p, id).length : openKol(G, p).length) > 0, spOk = vrijeRituelen(G, p).length > 0, fuOk = fuseOk(G, p, G.kEl[id]);
+  const creOk = (G.kVar[id] === IJS && isMens(G, p) ? creSlotsMens(G, p, id).length : openKol(G, p).length) > 0, spOk = vrijeRituelen(G, p).length > 0 && G.kVar[id] !== LOKAASB, fuOk = fuseOk(G, p, G.kEl[id]);   // 🎣 wj: Het Lokaas niet als ritueel
   if (!creOk && !spOk && !fuOk) return;
   let plek = null, mode;
   if (isMens(G, p)){ plek = kiesPlekMens(G, K, p, id, {creOk, spOk, fuseOk:fuOk}); if (plek === 'cancel') return; mode = plek.mode; }
   else mode = K('pickmode', {p, cardId:id, creOk, spOk, fuseOk:fuOk});
+  if (mode === 'spell' && !spOk && creOk) mode = 'cre';   // 🎣 wj
   if (mode === 'cancel') return;
   if (mode === 'fuse'){
     const fk = aeFuseKey(G, p, G.kEl[id]);
@@ -9860,7 +9886,7 @@ function nieuwPotje(seed, o){
 const STRAK = {E_IJS, VARIANT, nieuwPotje, LKI, WATER, STEEN, VUUR, GRAS, LICHT, WOLK, BRENGER, ELNAAM, VARNAAM, LK, STERK, E_WATER, E_STEEN, E_VUUR, E_GRAS, E_WS,
   leegSpel, kopie, vanS, projectie, beurtBegin:(G, K) => bewaakt(G, K, K2 => beurtBegin(G, K2)), speel, valAan, fase, kanAanvallen, openKol, legeKol, alleWezens, vindWezen, vindKaart,
   lichtSpeelbaar, fuseOk, offerIds, kracht, magSpelen, ritBeest, vrijeRituelen, F_COMP,
-  verhaalOmslag:(G, K) => { let r = null; bewaakt(G, K, K2 => { r = verhaalOmslag(G, K2); }); return r; }, smeedToepas, rnd, schud, nieuweKaart, heeft, Fout, F_WS, F_TOKEN, BUIDEL, buidelTrek};   // BUIDEL, buidelTrek: om te testen
+  verhaalOmslag:(G, K) => { let r = null; bewaakt(G, K, K2 => { r = verhaalOmslag(G, K2); }); return r; }, smeedToepas, rnd, schud, nieuweKaart, heeft, Fout, F_WS, F_TOKEN, BUIDEL, buidelTrek, buidelZet};   // wl: buidelZet om te testen   // BUIDEL, buidelTrek: om te testen
 if (typeof module !== 'undefined') module.exports = STRAK; else globalThis.STRAK = STRAK;
 
 
@@ -9950,7 +9976,7 @@ function maakBeleid(rand, o){
         /* een ritueel klaarleggen: zeker als de hand bijna vol is (anders gooi je hem toch weg) */
         if (o.ritueel > 0 && (s.hand.length >= o.ritueelHand || rand(1000) < o.ritueel * 1000)){
           const tel = [0, 0, 0, 0]; let best = -1;
-          for (const id of s.hand){ const e = el(G, id); if (e >= 0 && e <= 3){ tel[e]++; if (best < 0 || tel[e] > tel[el(G, best)]) best = id; } }
+          for (const id of s.hand){ const e = el(G, id); if (e >= 0 && e <= 3 && G.kVar[id] !== T.VARNAAM.indexOf('lokaasbeest')){ tel[e]++; if (best < 0 || tel[e] > tel[el(G, best)]) best = id; } }
           const vrij = []; for (let c = 0; c < 5; c++) if (!s.spell[c]) vrij.push(c);
           if (best >= 0 && vrij.length){ plan[p] = {col:vrij[rand(vrij.length)], mode:'spell'}; return {k:'play', id:best}; }
         }
@@ -9974,7 +10000,7 @@ function maakBeleid(rand, o){
       if (m === 'pickmode'){
         const pl = plan[p];
         if (d.fuseOk && rand(4) === 0) return 'fuse';
-        if (pl && pl.mode) return d.creOk ? pl.mode : 'spell';
+        if (pl && pl.mode) return d.creOk ? (pl.mode === 'spell' && !d.spOk ? 'cre' : pl.mode) : 'spell';   // 🎣 wj
         return d.creOk ? 'cre' : 'spell';
       }
       if (m === 'slot'){
@@ -9999,7 +10025,7 @@ function maakBeleid(rand, o){
           if (dmg >= 2 || s.life <= o.blokLeven || rand(3) === 0 || xcTrioKol(G, p, top.col)){
             const ae = el(G, ac);
             let best = null, bs = -1e9;
-            for (const id of s.hand){ const e = el(G, id); if (e > 3 && !(e !== LICHT && (G.kVlag[id] & 2048) && T.ELNAAM[e] !== 'vlinder')) continue;   // 🐂 9 nov 2026: een beest uit De jacht blokt ook
+            for (const id of s.hand){ const e = el(G, id); if (e > 3 && !(e !== LICHT && (G.kVlag[id] & 2048))) continue;   // 🦋 wl   // 🐂 9 nov 2026: een beest uit De jacht blokt ook
               const sc = (sterkTegen(ae, e) ? -5 : 0) + (sterkTegen(e, ae) ? 3 : 0) + (sterkTegen(ae, e) ? 0 : 1) + rand(10) / 10; if (sc > bs){ bs = sc; best = id; } }
             if (best != null && bs > -2){ plan[p] = {col:top.col, mode:'cre'}; return best; }
           }
@@ -10095,7 +10121,7 @@ function opties(G, m, d, ctx, o){
       if (!wijze || (e > 3 && !T.ritBeest(G, id))){ uit.push({k:'play', id}); continue; }
       if (e > 3){ if (open) uit.push({k:'play', id, m:'cre'}); if (T.vrijeRituelen(G, p).length) uit.push({k:'play', id, m:'spell'}); continue; }   // 🐂 wc: een beest ook als ritueel
       if (open) uit.push({k:'play', id, m:'cre'});
-      uit.push({k:'play', id, m:'spell'});
+      if (G.kVar[id] !== T.VARNAAM.indexOf('lokaasbeest')) uit.push({k:'play', id, m:'spell'});   // 🎣 wj
       if (T.fuseOk(G, p, e)) uit.push({k:'play', id, m:'fuse'});
     }
     for (let c = 0; c < 5; c++) if (T.kanAanvallen(G, p, c)) uit.push({k:'atk', c});
@@ -15602,7 +15628,7 @@ async function askPriority(p, keten){
     }
     /* Alles mag altijd: als wezen, als ritueel of als fusie — ook in de beurt van de ander. */
     const canCre = EL[card.el].flash && (card.var === "ijs" ? ijsCreCols(p).length > 0 : openCols(p).length > 0);
-    const canSp = EL[card.el].flash && (card.var === "ijs" ? ijsSpellCols(p).length > 0 : freeSpellCols(p).length > 0) && !card.fusie;   // 🟣 yg
+    const canSp = EL[card.el].flash && (card.var === "ijs" ? ijsSpellCols(p).length > 0 : freeSpellCols(p).length > 0) && !card.fusie && card.var !== "lokaasbeest";   // 🟣 yg   // 🎣 wj
     const canFuse = fuseOk(p, card.el, "flash") && !card.fusie;
     const opties = [canCre, canSp, canFuse].filter(Boolean).length;
     if(!opties){ if(isBot(p)) return "pass"; continue; }
@@ -15926,6 +15952,7 @@ async function announcePlay0(p, card, asSpell, col, flash, opts){
       pushPlay(p, card, asSpell, col, flash, plan);
       if(!FAST){ fxSplash(asSpell ? `.pside[data-side="${vij}"] .col:nth-child(${col+1}) .slot.sp` : creSel(vij, col)); AU.play("water"); }
       await toonZet(p, cardFaceHTML(card, false), `🧊 IJs mikt op <b>${kNaam(doel.card)}</b>`, plan);
+      await ANI.WM.nabeeld(p, card);   // 🟣 wm: IJs telt ook
       return true;
     }
     /* Smelten tot water: vanaf hier is het gewoon een 💧 Waterplons. */
@@ -16744,6 +16771,7 @@ async function announceFusion0(p, card, tributeId, fuseKey, opts){
   const plan = await declarePlan(p, card, false, col, {onField:true});
   pushPlay(p, card, false, col, false, plan === "cancel" ? [] : plan, {asFuse:true, fuseKey});
   await toonZet(p, cardFaceHTML(card), `<b>${VAR[card.var].name}</b>`, plan === "cancel" ? [] : plan);
+  await ANI.WM.nabeeld(p, card);   // 🟣 wm: een fusie telt ook
   return true;
 }
 /* ============ ✦ LICHTKAARTEN ============
@@ -18762,7 +18790,7 @@ async function playFromHand(cardId){
       return;
     }
     const creOk = card.var === "ijs" ? ijsCreCols(p).length > 0 : canPlayCreature(p);
-    const spOk = card.var === "ijs" ? ijsSpellCols(p).length > 0 : freeSpellCols(p).length > 0;
+    const spOk = (card.var === "ijs" ? ijsSpellCols(p).length > 0 : freeSpellCols(p).length > 0) && card.var !== "lokaasbeest";   // 🎣 wj
     const fuOk = fuseOk(p, card.el);
     if(!creOk && !spOk && !fuOk) return;
     /* Een mens kiest meteen een plek; de bot houdt zijn eigen tweestaps-route. */
@@ -18774,6 +18802,7 @@ async function playFromHand(cardId){
     } else {
       mode = await waitUI("pickmode", {p, cardId, creOk, spOk, fuseOk:fuOk});
     }
+    if(mode === "spell" && !spOk && creOk) mode = "cre";   // 🎣 wj (zoals de kern)
     if(mode === "cancel"){ backToPhase(); return; }
     if(p === 0 && !tutMag("mode", mode)){ backToPhase(); return; }
     if(mode === "fuse"){
@@ -43797,7 +43826,7 @@ const ANI = (() => {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); bloei(true); donkerLaag(0); return false; };
   /* gloed zoals de bloom in het lab: een kopie van de tekenlaag, wazig en 'screen' eroverheen (alleen bij effecten op vol) */
   let BL = null, BLX = null;
-  const bloei = leeg => { if(leeg || !vol() || RM){ if(BL && BL.isConnected){ BLX.clearRect(0, 0, BL.width, BL.height); BL.style.display = "none"; } return; }
+  const bloei = leeg => { if(leeg || !vol() || RM || (document.body && document.body.classList.contains("tel"))){ if(BL && BL.isConnected){ BLX.clearRect(0, 0, BL.width, BL.height); BL.style.display = "none"; } return; }
     if(!BL || !BL.isConnected){ BL = document.createElement("canvas"); BL.id = "anibloei"; BL.setAttribute("aria-hidden", "true");
       BL.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:79;mix-blend-mode:screen;filter:blur(7px) brightness(1.35)"; cv.after(BL); BLX = BL.getContext("2d"); }
     const bw = Math.max(1, Math.round(W / 4)), bh = Math.max(1, Math.round(H / 4)); if(BL.width !== bw || BL.height !== bh){ BL.width = bw; BL.height = bh; }
@@ -46123,9 +46152,9 @@ ANI.S = (() => {
         if(k && k.btn === "storylevel" && duikMag(k.el)){ let p = punt;
           if(!p && k.el && k.el.getBoundingClientRect){ const r = k.el.getBoundingClientRect(); if(r.width) p = {x:r.left + r.width / 2, y:r.top + r.height / 2}; }
           duik(fn, p, storyKlaar(k.el.dataset.id)); return; }
-        if(k && ["winkel", "smid", "jukebox"].includes(k.btn)){ deuren(fn); return; }
-        /* terug uit de winkel of de jukebox: dezelfde deuren */
-        if((typeof JUKE !== "undefined" && fn === JUKE.sluit) || (M && M.type === "winkel" && M.dag)){ deuren(fn); return; }
+        /* wn (25 nov, Q): naar de winkel en terug dezelfde tegels als van het verhaal naar de kaart; alleen de jukebox houdt de deuren */
+        if(k && ["jukebox"].includes(k.btn)){ deuren(fn); return; }
+        if(typeof JUKE !== "undefined" && fn === JUKE.sluit){ deuren(fn); return; }
         /* al het andere: de tegels van licht */
         tegels(fn, punt, wacht0); return;
       }
@@ -47294,7 +47323,7 @@ body.drzij #lkolom, body.drzij #left > *, body.drzij #right, body.drzij .pside .
   try{
     AETHERS[JACHT] = {el:null, name:"De jacht", kind:"passief", ic:"🏹"};
     AETHER_TEKST[JACHT] = "Pak je hem in de draft, dan gaat er van elk element één gewone kaart uit je deck en kies je vier keer uit drie beesten. "
-      + "Die vier beestkaarten blijven de hele match in je deck. Je speelt ze als wezen op een vrije plek (de 🦋 vlinder op een eigen wezen); hun speel-effect gaat af en als ze sterven gaan ze naar je graf.";
+      + "Die vier beestkaarten blijven de hele match in je deck. Je speelt ze als wezen op een vrije plek ; hun speel-effect gaat af en als ze sterven gaan ze naar je graf.";
     AETHERS[JACHT].txt = AETHERS[JACHT].kort = kwHTML(AETHER_TEKST[JACHT]);
     AETHER_VAKKEN[JACHT] = ["art/vak-dejacht.png", "art/vak-terugkeer.png"]; AETHER_BEELD[JACHT] = AETHER_VAKKEN[JACHT][0];
     if(typeof AE_KRACHT === "object" && AE_KRACHT) AE_KRACHT[JACHT] = 50;
@@ -48253,7 +48282,7 @@ voorAeEffect = function(u){
     if(AETHERS.ae_jacht){
       AETHER_TEKST.ae_jacht = "In commander: pak je hem in de draft, dan gaat er van elk element één gewone kaart uit je deck en kies je vier keer uit twee beesten. "
         + "In Basis en het verhaal kies je in de deckbuilder per element een beest: dat neemt de plek in van één gewone kaart. "
-        + "Je speelt een beest als wezen op een vrije plek (de 🦋 vlinder op een eigen wezen); zijn speel-effect gaat af en als hij sterft gaat hij naar je graf. Niet in je sideboard.";
+        + "Je speelt een beest als wezen op een vrije plek; zijn speel-effect gaat af en als hij sterft gaat hij naar je graf. Niet in je sideboard.";
       AETHERS.ae_jacht.txt = AETHERS.ae_jacht.kort = kwHTML(AETHER_TEKST.ae_jacht);
     }
     /* best of 3: De jacht blijft in je deck (je beesten veranderen tussen potjes niet) */
@@ -48547,7 +48576,7 @@ ANI.B = (() => {
   const UITLEG = {buidelwolf:"4 levens · al je wezens +2", draak:"199 levens · 🔥 2 schade", leviathan:"260 levens · 💧 herspeel een eigen wezen",
     kolos:"333 levens · 🪨 +3 levens", woud:"150 levens · 🌿 verstrik", ekster:"1 leven · trek 1 per ronde", vleermuis:"2 levens · heel 2, slaat direct 2",
     brenger:"6 levens · onaantastbaar", ei:"2 eieren van 0/2 · na 2 beurten elk een 🕷 spin", balrog:"10 levens · heelt zichzelf 5",
-    vlinder:"+3 en onaantastbaar deze beurt op een eigen wezen", minotaurus:"8 levens · valt meteen aan", slijm:"1/1 · elk slijm +2, deelt zich elke beurt (kopie 1/1, haar speel-effect gaat ook af)", basilisk:"6 levens · maakt een wezen steen", spin:"7 levens · spint een vijand in het web"};
+    vlinder:"1/1 · speel: een eigen wezen (ook hijzelf) +3 en onaantastbaar deze beurt", minotaurus:"8 levens · valt meteen aan", slijm:"1/1 · elk slijm +2, deelt zich elke beurt (kopie 1/1, haar speel-effect gaat ook af)", basilisk:"6 levens · maakt een wezen steen", spin:"7 levens · spint een vijand in het web"};
   const kaartVan = (k, p) => MON[k] ? {id:0, el:MON[k], var:k, owner:p, jacht:true} : Object.assign({id:0, el:k, owner:p, jacht:true}, k === "balrog" ? {beest:true} : {});   // 8 nov 2026: echte beestkaarten, geen tokens   // 🌋 8 nov 2026: Maatje als beest (10 levens, deel w)
   const naamVan = k => MON[k] ? `${VAR[k].icon} ${VAR[k].name}` : `${EL[k].icon} ${k === "ei" ? "Spinnenei" : EL[k].name}`;
   /* de oude bot (zonder de nieuwe bot): een vuistregel */
@@ -48589,7 +48618,7 @@ ANI.B = (() => {
   async function zet(p, k, geest){
     let g = geest;
     try{
-      if(k === "vlinder"){
+      if(false && k === "vlinder"){   /* 🦋 wl: niet meer; hij komt gewoon op het bord */
         const ids = allCreIds((cr, pp) => pp === p);
         if(!ids.length){ addLog(`🦋 De vlinder vindt geen eigen wezen en fladdert weg.`, true); return; }
         const id = ids.length === 1 ? ids[0] : await chooseCre(p, ids, `<b>${pName(p)}</b> · 🦋 Vlinder: op welk eigen wezen landt hij? (+3 en onaantastbaar deze beurt)`, false, {k:"vlinder"});
@@ -49685,7 +49714,7 @@ ANI.ZA = (() => {
           const att = P(opp(p)).cols[top.col].cre, kr = att ? atkOf(att, opp(p)) : 0;
           if(kr >= 3 || kr >= P(p).life){
             let best = null, bs = -1e9;
-            for(const cd of P(p).hand){ if(!cd.jacht || cd.el === "vlinder" || !jachtFlashOk(p, cd)) continue;
+            for(const cd of P(p).hand){ if(!cd.jacht || !jachtFlashOk(p, cd)) continue;   // 🦋 wl
               const hp = (EL[cd.el] && EL[cd.el].hp) || 2, sc = (hp > kr ? 3 : 0) + hp * 0.2; if(sc > bs){ bs = sc; best = cd; } }
             if(best) return {cardId:best.id, col:top.col};
           }
@@ -50150,7 +50179,7 @@ ANI.ZC = (() => {
         const h = cf0.apply(this, arguments);
         try{
           /* de beesten van De jacht hebben id -890, -891, -892 (d.js) */
-          if(card && typeof card === "object" && card.id <= -890 && card.id > -900 && EL[card.el] && !card.lk && card.el !== "vlinder")   // de vlinder komt nooit op het bord
+          if(card && typeof card === "object" && card.id <= -890 && card.id > -900 && EL[card.el] && !card.lk)   // 🦋 wl: de vlinder komt ook op het bord
             return h + handStatHTML(card.owner != null ? card.owner : 0, Object.assign({}, card, {jacht:true}));   // jacht: Maatje als beest (10 levens)
         }catch(e){ fout(e); }
         return h;
@@ -50695,8 +50724,12 @@ ANI.ZH = (() => {
   let laag = null, leeg = 0;
   const vorige = new Map();   // per kaart: de fase van het vorige beeld (om het neerkomen te vangen)
   function wek(){ if(laag) return; leeg = 0; laag = A.laag(teken); }
+  /* ws (26 nov): plekken van kaarten maar om de 6 beelden lezen (per sleutel), niet elk beeldje */
+  let wsF = 0; const WSRC = new Map();
+  const rcK = (k, el) => { if(!el) return null; const c = WSRC.get(k); if(c && c.el === el && wsF - c.t < 6) return c.r; const r = A.rc(el); WSRC.set(k, {el, t:wsF, r}); return r; };
   function teken(){
     try{
+      wsF++; if(WSRC.size > 60) WSRC.clear();
       if(!effAan()){ stop(); return; }
       let iets = false;
       const nu = performance.now();
@@ -50705,7 +50738,7 @@ ANI.ZH = (() => {
         const id = el.dataset.p + ":" + el.dataset.col, c = +el.dataset.col, p = +el.dataset.p;
         const f = ((nu + c * 470 + p * 230) % PER) / PER, f0 = vorige.get(id);
         vorige.set(id, f);
-        const r = A.rc(el); if(!r) return;
+        const r = rcK("k" + id, el); if(!r) return;
         const kl = (el.style.getPropertyValue("--zhk") || "#ffe08a").trim();
         if(f0 == null || !(f0 < LAND && f >= LAND)) return;
         for(let i = 0; i < 2; i++){ const kant = i ? 1 : -1;
@@ -50716,9 +50749,9 @@ ANI.ZH = (() => {
       const plek = [];
       for(let q = 0; q < 2; q++) for(let c = 0; c < NK(); c++){ const cr = P(q).cols[c].cre; if(cr && isPlons(cr.card)) plek.push(creSel(q, c)); }
       for(let q = 0; q < 2; q++){ if(!handVisible(q)) continue; P(q).hand.forEach(cd => { if(isPlons(cd)) plek.push(`#hand${q} .hcard[data-id="${cd.id}"]`); }); }
-      plek.forEach(sel => { if(typeof ykStil === "function" && ykStil()) return; const el = document.querySelector(sel); if(!el) return; const r = A.rc(el); if(!r || r.w < 10) return; iets = true;
-        if(!zhZicht(el, r)) return;   /* xp (24 nov): niet bij een verborgen kaart (mulligan) en niet door een laag eroverheen */
-        const fx = el.querySelector(".card") ? A.rc(el.querySelector(".card")) || r : r;
+      plek.forEach(sel => { if(typeof ykStil === "function" && ykStil()) return; const el = document.querySelector(sel); if(!el) return; const r = rcK(sel, el); if(!r || r.w < 10) return; iets = true;
+        if(!zhZicht(el, r, sel)) return;   /* xp (24 nov): niet bij een verborgen kaart (mulligan) en niet door een laag eroverheen */
+        const fx = el.querySelector(".card") ? rcK(sel + " .card", el.querySelector(".card")) || r : r;
         A.gloed(fx.cx, fx.cy + fx.h * .1, fx.w * .8, "#4aa8ff", .26 + .1 * Math.sin(nu / 260));
         if(Math.random() < .14) A.deeltje({x:fx.cx + rnd(-fx.w * .34, fx.w * .34), y:fx.y + fx.h * rnd(.55, .78), vx:rnd(-.1, .1), vy:-rnd(.35, .8), life:rnd(.5, .9),
           kleur:kies(["#bfe4ff", "#ffffff", "#8fd0ff"]), soort:"pix", s:kies([2, 2, 3]), wr:.99}); });
@@ -50734,12 +50767,17 @@ ANI.ZH = (() => {
   function verborgen(el){ for(let e = el, i = 0; e && e.nodeType === 1 && i < 9; e = e.parentElement, i++){ const c = getComputedStyle(e); if(c.visibility === "hidden" || c.display === "none" || +c.opacity < .3) return true; } return false; }
   function dicht(e){ if(e.tagName === "IMG" || e.tagName === "VIDEO" || e.tagName === "svg") return true; const c = getComputedStyle(e); if(+c.opacity < .2 || c.visibility === "hidden") return false;
     if(/url\(/.test(c.backgroundImage || "")) return true; const m = /rgba?\(([^)]+)\)/.exec(c.backgroundColor || ""); if(!m) return false; const v = m[1].split(",").map(Number); return v.length < 4 || v[3] > .3; }
-  function overdekt(el, r){ document.body.classList.add("zhpe");
+  function overdekt(el, r){ /* ws: geen zhpe-klasse meer */
     try{ const els = document.elementsFromPoint(r.cx, r.cy);
       for(const e of els){ if(e === el || el.contains(e)) return false; if(e.tagName === "CANVAS" || e.contains(el)) continue; if(dicht(e)) return true; }
-      return false; } finally { document.body.classList.remove("zhpe"); } }
-  function zhZicht(el, r){ if(verborgen(el)) return false;
-    let z = ZICHT.get(el); if(!z || ++zTel % 8 === 0){ z = {v:!overdekt(el, r)}; ZICHT.set(el, z); } return z.v; }
+      return false; } finally { } }
+  /* ws (26 nov): per kaart (sleutel) onthouden; verborgen om de 10 beelden, overdekt om de 45 (dat zette een klasse op <body>) */
+  const WSZ = new Map();
+  function zhZicht(el, r, k){ zTel++; k = k || el; let z = WSZ.get(k);
+    if(!z || z.el !== el || zTel - z.tv >= 10){ const v = verborgen(el); z = Object.assign(z && z.el === el ? z : {el, to:-999, o:false}, {tv:zTel, v}); WSZ.set(k, z); }
+    if(z.v) return false;
+    if(zTel - z.to >= 45){ z.o = overdekt(el, r); z.to = zTel; }
+    if(WSZ.size > 60) WSZ.clear(); return !z.o; }
 
   /* ================= de plons en het ritueel ================= */
   const selVan = f => f.kind === "spell" ? spellSel(f.p, f.c) : creSel(f.p, f.c);
@@ -52475,6 +52513,10 @@ ANI.ZL = (() => {
   /* ---------- toestand ---------- */
   const ST = {mode:null, label:"", h:0, golf0:0, glans:-1, flits:0, flitsK:"#fff1c0", klik:0, druk:0, ringF:null, ringK:"#ffd36b", over:null, rond:null, t:0};
   let vuil = true, raf = 0;
+  /* ws (26 nov): de maat van het canvas zonder elk beeldje de layout te lezen */
+  const WSM = new WeakMap(); let wsRO = null;
+  const wsMaat = cv => { let m = WSM.get(cv); if(m) return m; m = {width:cv.getBoundingClientRect().width}; WSM.set(cv, m);
+    try{ if(!wsRO) wsRO = new ResizeObserver(es => es.forEach(e => { const q = WSM.get(e.target); if(q) q.width = e.contentRect.width; vuil = true; })); wsRO.observe(cv); }catch(e){} return m; };
   const knop = () => { try{ const e = document.querySelector("#actions .zl"); return e && e.isConnected ? e : null; }catch(e){ return null; } };
 
   function frame(nu){
@@ -52501,7 +52543,7 @@ ANI.ZL = (() => {
     if(ST.flits > 0) ST.flits = animeer ? Math.max(0, ST.flits - dt / 420) : 0;
 
     const cv = el.querySelector("canvas.zlc"); if(!cv){ return; }
-    const r = cv.getBoundingClientRect(), dpr = Math.min(3, window.devicePixelRatio || 1), px = Math.max(32, Math.round(r.width * dpr));
+    const r = wsMaat(cv), dpr = Math.min(3, window.devicePixelRatio || 1), px = Math.max(32, Math.round(r.width * dpr));
     if(!r.width){ raf = requestAnimationFrame(frame); return; }
     if(cv.width !== px){ cv.width = cv.height = px; vuil = true; }
     const golf = mode === "kies" && animeer;
@@ -58329,12 +58371,13 @@ ANI.XB = (() => {
   async function naZet(p, card, asSpell, col){
     if(S.over || !card) return;
     const r = ronde(), k = P(p).cols[col];
-    if(asSpell && hasAe(p, "ae_altaar") && ORDER.includes(card.el) && !card.jacht && !card.token && k.spell && k.spell.card === card && !k.cre && !kolDicht(col)){
+    if(asSpell && hasAe(p, "ae_altaar") && card.el !== "licht" && !card.lk && !card.token && !card.kopie && k.spell && k.spell.card === card && !k.cre && !kolDicht(col)){
       if(!S.altaarR) S.altaarR = [-1, -1];
       if(S.altaarR[p] !== r){
         S.altaarR[p] = r;
         const kp = {id:++cid, el:card.el, owner:p, token:true, kopie:true};
         if(card.var && card.var !== "ijs") kp.var = card.var;
+        ["fusie", "jacht", "beest", "comp"].forEach(x => { if(card[x]) kp[x] = true; });   // 🟣 wq
         placeCre(p, col, kp);
         addLog(`🟣 <em>Altaar</em>: het ritueel ${kIcon(card)} ${kNaam(card)} in kolom ${col + 1} wordt daar ook een wezen.`, true);
         if(!FAST){ render(); try{ if(ANI.aan()) await ANI_AE.altaar(p, col); }catch(e){} pop(creSel(p, col), "ALTAAR", "heal"); }
@@ -58350,7 +58393,8 @@ ANI.XB = (() => {
       }
     }
     const sterk = (card.var && ["rots", "plasma", "roos", "ijs"].includes(card.var)) || card.wasRots;
-    if(hasAe(p, "ae_nabeeld") && !card.token && !card.kopie && !card.fusie && (sterk || card.jacht) && card.el !== "vlinder"){
+    await ANI.WM.nabeeld(p, card);   // 🟣 wm: het nieuwe Nabeeld
+    if(false && hasAe(p, "ae_nabeeld") && !card.token && !card.kopie && !card.fusie && (sterk || card.jacht)){   // 🦋 wl
       if(!S.nabeeldR) S.nabeeldR = [-1, -1];
       const vrij = emptyCols(p);
       if(S.nabeeldR[p] !== r && vrij.length){
@@ -59100,9 +59144,13 @@ ANI.XF = (() => {
   const kijk = () => { try{ if(!document.body.classList.contains("geladen") && !document.getElementById("jukebox")){ /* nog aan het laden */ }
       if(!VK || !VK.classList.contains("open")){ plaats(); zetKnop(); } }catch(e){ fout(e); } };
   /* xj (17 nov): zoeken is duur (elementsFromPoint + stijlregel over alles): alleen als het scherm veranderd is, de tik erna nog een keer, en verder om de 9 s */
-  setTimeout(() => { kijk(); let sig0 = "", n = 0; setInterval(() => { if(document.hidden) return; const s2 = (ANI.XJ && ANI.XJ.sigGroot) ? ANI.XJ.sigGroot() : String(Math.random()); n++;
-      if(s2 !== sig0){ sig0 = s2; n = 4; kijk(); } else if(n >= 10){ n = 0; kijk(); } }, 900); }, 400);
-  addEventListener("resize", () => { PLEK = null; kijk(); });
+  /* wp (26 nov): de knop staat vast rechtsboven (CSS van deel xn). Geen zoektocht naar een vrije plek meer:
+     die zette elke 0,9 s een stijlregel over de hele pagina en kostte in een gevecht ~40% van het stijlwerk. */
+  const wpVast = () => { try{ const v = maakKnop(); v.classList.add("aan"); v.style.display = ""; v.style.visibility = ""; if(v.classList.contains("open")) plaatsPan(); }catch(e){ fout(e); } };
+  let wpSig = "";
+  const wpIcoon = () => { try{ if(!VK || document.hidden) return; const g = String(stil()) + "|" + SET.music + "|" + SET.sfx; if(g !== wpSig){ wpSig = g; zetKnop(); } }catch(e){} };
+  setTimeout(() => { wpVast(); wpIcoon(); setInterval(wpIcoon, 1000); }, 400);
+  addEventListener("resize", wpVast);
 
   return {teken, ververs, plaats, V, _hoes:(k, s) => hoesDoek(k, s || 120, 1)};
 })();
@@ -59889,7 +59937,7 @@ ANI.XN = (() => {
   addEventListener("keydown", e => { if(e.key === "Escape" && OPEN){ OPEN = false; document.querySelectorAll(".xnshop.open").forEach(s => s.classList.remove("open")); } }, true);
 
   /* 2 · de geluidsknop: in een gevecht weg (daar zit hij in het paneel) */
-  const gevecht = () => { try{ const r = document.getElementById("rtmute"); if(!(r && r.offsetWidth)) return false;
+  const gevecht = () => { try{ return false; const r = document.getElementById("rtmute"); if(!(r && r.offsetWidth)) return false;
       return !M && !!(S && S.pl && S.ui && S.ui.mode && S.ui.mode !== "start") && !document.querySelector("#overlay.show .ovbox"); }catch(e){ return false; } };
   const kijk = () => { try{ document.body.classList.toggle("xngevecht", gevecht()); }catch(e){} };
   setInterval(kijk, 400);
@@ -61203,6 +61251,10 @@ ANI.WB = (() => {
     ["Het eerste wezen: Steen", "Een kopie erbij: 3", "Zonder effect"],
     {a:["steen", 3, 38, M, 1], b:["steen", 3, 62, M, 1]},
     [[["land", "a"], ["+", "a", 3]], [["land", "b"]], [["tekst", "b", "GEEN EFFECT", GRIJS]]], "steen");
+  zet("ae_nabeeld", "NABEELD", "De eerste upgrade, fusie, beest of companion die je elke ronde speelt, krijgt een kopie met 1 leven.",
+    ["Een upgrade: Rots", "Een kopie erbij: 1 leven", "Ook de kopie doet zijn effect"],
+    {a:[{el:"steen", var:"rots"}, 6, 38, M, 1], b:[{el:"steen", var:"rots", token:true, kopie:true}, 1, 62, M, 1]},
+    [[["land", "a"]], [["land", "b"], ["tekst", "b", "KOPIE · 1", PAARS]], [["+", "a", 3]]], "steen");   // 🟣 wm
   zet("ae_vitrine", "UIT DE VITRINE", "Begin van elke beurt komt er een wezen uit haar graf terug, het grootste eerst.",
     ["Begin van haar beurt", "Het grootste uit het graf", "Op een vrije plek"],
     {L:["@", 10, 16, M], a:[{el:"steen", var:"rots"}, 3, 46, M, 1], b:["vuur", 2, 72, M, 1]},
@@ -61933,10 +61985,10 @@ html body.tel #overlay .xmbox .whcp > .xmlab{display:none}
 .xmbox .whcpk{position:relative; flex:none; --kw:40px; width:40px; height:56px; --whks:.3636}
 body.tel .xmbox .whcpk{--kw:22px; width:22px; height:31px; --whks:.2}
 .xmbox .whcpk > .card{position:absolute !important; left:0 !important; top:0 !important; width:110px !important; height:153px !important; margin:0 !important; transform:scale(var(--whks)) !important; transform-origin:0 0 !important}
-.xmbox :is(.whel, .whcpk) .whst{position:absolute; inset:0; pointer-events:none; z-index:3}
-.xmbox :is(.whel, .whcpk) .whst .hst{position:absolute; bottom:calc(9.88% - var(--kw) * .12); width:calc(var(--kw) * .26); height:calc(var(--kw) * .26); display:flex; align-items:center; justify-content:center; margin:0; padding:0; background:none; border:0; box-shadow:none;
-  font:max(6px, calc(var(--kw) * .17)) "Press Start 2P",ui-monospace,monospace; color:#fff; text-shadow:0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000}
-.xmbox :is(.whel, .whcpk) .whst .hst.at{left:calc(13.71% - var(--kw) * .13)} .xmbox :is(.whel, .whcpk) .whst .hst.hp{right:calc(13.71% - var(--kw) * .13)}
+.xmbox :is(.whel, .whcpk) .whst{position:absolute; left:0; top:0; width:var(--kw); height:calc(var(--kw) * 153 / 110); pointer-events:none; z-index:3}
+.xmbox :is(.whel, .whcpk) .whst .hst{position:absolute; bottom:calc(12.3% - var(--kw) * .1); width:calc(var(--kw) * .2); height:calc(var(--kw) * .2); display:flex; align-items:center; justify-content:center; margin:0; padding:0; background:none; border:0; box-shadow:none;
+  font:max(4px, calc(var(--kw) * .1))/1 "Press Start 2P",ui-monospace,monospace; letter-spacing:0; color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.8), 1px 0 0 rgba(0,0,0,.5), -1px 0 0 rgba(0,0,0,.5); padding-top:calc(var(--kw) * .012); box-sizing:border-box}
+.xmbox :is(.whel, .whcpk) .whst .hst.at{left:calc(16% - var(--kw) * .1)} .xmbox :is(.whel, .whcpk) .whst .hst.hp{right:calc(15.6% - var(--kw) * .1)}
 .xmbox .xmlijst .whel .xmbanen .dkbplek{width:var(--kw); height:calc(var(--kw) * 1.39); min-height:0; margin:0; flex:none; overflow:hidden; font-size:max(5px, calc(var(--kw) * .13)) !important; display:flex; align-items:center; justify-content:center}
 .xmbox .xmlijst .whel .xmbanen .dkbplek em{font-size:inherit !important}
 .xmbox .xmlijst .whel .xmbanen .dktekst{flex:0 0 64px !important}
@@ -61982,6 +62034,232 @@ html body.tel #overlay .xmbox .xmsec{gap:2px}
    De andere vaste aanvallen (ei, lokaas, schildje, ziel, reus) blijven zoals ze zijn. */
 ANI.WI = (() => {
   try{ delete EL.spin.vastAtk; EL.spin.volAtk = true; }catch(e){ console.error(e); }
+  return {};
+})();
+
+/* ---- module wj ---- */
+/* ================= deel wj (24 nov 2026, Q) =================
+   1. 🎣 Het Lokaas (companion) kan niet als ritueel (regels: wj-hooks.py).
+   2. ❄️ Rijp legt 4 echte 🧊 IJs-tokens (dezelfde als bij IJs dat een wezen steelt: kan niet aanvallen, 1 eraf per beurt).
+   4. 🪨 De companion-Kees toont overal 3/3 (hand, deckbouwer, library, uitleg); Rocky's Kees uit 1-4 blijft zoals hij was. */
+ANI.WJ = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const kwT = t => ({kw:t.kw || [], speel:kwHTML(t.speel || ""), veld:kwHTML(t.veld || ""), eig:kwHTML(t.eig || ""), spell:kwHTML(t.spell || "")});
+  /* ---------- 4 · twee Kezen: Rocky's (var kees) en de companion (getoond als keescomp) ---------- */
+  const KEES_ROCKY = {eig:"<b>5</b> levens. Een steen met een gezichtje."};
+  const KEES_COMP = {kw:["volleslag"], speel:"Zet een 🪨 Kiezel (<b>1</b> leven) op een vrije eigen plek. Kees blijft Kees, dus dat doet hij elke keer.", spell:"Als ritueel: bij elke trigger een 🪨 Kiezel."};
+  const LOKAAS = {kw:[], eig:"<b>0</b> aanval, valt nooit aan. Zolang hij staat, gaat alles wat je tegenstander aan negatieve effecten op jouw wezens richt naar het lokaas. Eén keer per potje: verlaat hij het veld, dan is hij weg. Kan niet als ritueel."};
+  try{
+    VAR.keescomp = Object.assign({}, VAR.kees, {name:"Kees", hp:3, comp:true, monster:true});
+    KAART_BEELD.keescomp = KAART_BEELD.kees;
+    VAR_TEKST.kees = KEES_ROCKY; VAR.kees.tekst = kwT(KEES_ROCKY); VAR.kees.kort = VAR.kees.uitleg = VAR.kees.tekst.eig;
+    VAR_TEKST.keescomp = KEES_COMP; { const o = kwT(KEES_COMP); VAR.keescomp.tekst = o; VAR.keescomp.kort = VAR.keescomp.uitleg = "▶ " + o.speel + " " + o.spell; }
+    VAR_TEKST.lokaasbeest = LOKAAS; { const o = kwT(LOKAAS); VAR.lokaasbeest.tekst = o; VAR.lokaasbeest.kort = VAR.lokaasbeest.uitleg = o.eig; }
+  }catch(e){ fout(e); }
+  try{ const tv0 = toonVarKey; toonVarKey = function(cd){ if(cd && !cd.lk && cd.var === "kees" && cd.comp) return "keescomp"; return tv0.apply(this, arguments); }; }catch(e){ fout(e); }
+  try{ const kt0 = kaartTekst;
+    kaartTekst = function(el, varKey){
+      if(varKey === "keescomp"){ const o = kwT(KEES_COMP); return {kw:o.kw, speel:o.speel, veld:"", eig:[], spell:o.spell, alleenSpell:false}; }
+      if(varKey === "kees"){ const o = kwT(KEES_ROCKY); return {kw:[], speel:"", veld:"", eig:[o.eig, "Alleen het element telt: geen effecten."], spell:"", alleenSpell:false}; }
+      if(varKey === "lokaasbeest"){ const o = kwT(LOKAAS); return {kw:o.kw, speel:"", veld:"", eig:[o.eig], spell:"", alleenSpell:false}; }
+      return kt0.apply(this, arguments); }; }catch(e){ fout(e); }
+  /* de uitleg van Het Lokaas: geen regel "Als ritueel" */
+  try{ const ef0 = effectHTML; effectHTML = function(el, varKey, opt){ if(varKey === "lokaasbeest") return ef0.call(this, el, varKey, Object.assign({}, opt || {}, {geenSpell:true})); return ef0.apply(this, arguments); }; }catch(e){ fout(e); }
+  /* in je hand: de levens van de companion-Kees (3) */
+  try{ const hs0 = handStatHTML;
+    handStatHTML = function(p, cd){ if(cd && cd.var === "kees" && cd.comp) return hs0.call(this, p, Object.assign({}, cd, {var:"keescomp"})); return hs0.apply(this, arguments); }; }catch(e){ fout(e); }
+
+  /* ---------- 2 · Rijp: de bevriezing zijn IJs-tokens ---------- */
+  try{ const re0 = resolveEffect;
+    resolveEffect = async function(it){
+      if(!(it && it.el === "rijp")) return await re0.apply(this, arguments);
+      const voor = new Map(); eachCre(cr => voor.set(cr, cr.ent || 0));
+      const r = await re0.apply(this, arguments);
+      eachCre((cr, p, c) => { const d = (cr.ent || 0) - (voor.has(cr) ? voor.get(cr) : 0); if(d > 0){ cr.ijsT = (cr.ijsT || 0) + d; delete cr.rijp; } });
+      render(); return r; }; }catch(e){ fout(e); }
+  return {};
+})();
+
+/* ---- module wk ---- */
+/* ================= deel wk (25 nov 2026, Q) =================
+   Alle companions mag je als reactie in de keten spelen (als wezen, en als ritueel waar dat mag; Het Lokaas niet als ritueel).
+   De neutrale companions (Max, Kameleon, Dodenbewaarder, Rijp) waren nog niet "flash": nu wel. Kern: wk-hooks.py. */
+ANI.WK = (() => {
+  try{ ["max", "kameleon", "dodenbewaarder", "rijp"].forEach(k => { if(EL[k]) EL[k].flash = true; }); }catch(e){ console.error(e); }
+  return {};
+})();
+
+/* ---- module wl ---- */
+/* ================= deel wl (25 nov 2026, Q) =================
+   🦋 De Vlinder is overal een gewoon beest (1/1): uit de monsterbuidel, uit De jacht en uit de hand komt hij op een plek,
+   zijn speel-effect beschermt een eigen wezen (ook hemzelf): +3 en Onaantastbaar tot het eind van de beurt. Als reactie en
+   als ritueel zoals de andere beesten. De oude weg "landt meteen op een wezen" (vlinderLand) bestaat niet meer. */
+ANI.WL = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  /* mocht er nog ergens een reactie {vlinder:true} langskomen: gewoon als wezen spelen */
+  try{ vlinderLand = async function(p, card){
+      const vrij = creSlotsFor(p, card.el, card); if(!vrij.length) return false;
+      const s = vrij.length === 1 ? vrij[0] : await waitUI("slot", {p, valid:vrij, cancellable:false, prompt:`Kies een plek voor ${kIcon(card)} ${kNaam(card)}`});
+      const c = s && s.c != null ? s.c : vrij[0].c;
+      await announcePlay(p, card, false, c, true); return true; }; }catch(e){ fout(e); }
+  return {};
+})();
+
+/* ---- module wm ---- */
+/* ================= deel wm (25 nov 2026, Q): 🟣 Nabeeld =================
+   Elke beurt: de eerste kaart die je speelt die geen gewone element-kaart en geen lichtkaart is (dus een upgrade zoals
+   Rots, Plasma, Roos of IJs, een fusie, een beest of een companion) krijgt een kopie met 1 leven op een vrije plek.
+   De kopie is een token en doet zijn speel-effect ook (zoals het oude Nabeeld). Regels ook in de kern (wm-hooks.py).
+   Art: art/vak-nabeeld.png (stond op het plaatje van Tweede exemplaar, vak-tweede.png). */
+ANI.WM = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const TEKST = "De eerste upgrade, fusie, beest of companion die je elke ronde speelt, krijgt een kopie met 1 leven.";
+  try{
+    AETHER_TEKST.ae_nabeeld = TEKST;
+    if(AETHERS.ae_nabeeld) AETHERS.ae_nabeeld.txt = AETHERS.ae_nabeeld.kort = kwHTML(TEKST);
+    AETHER_VAKKEN.ae_nabeeld = ["art/vak-nabeeld.png"]; AETHER_BEELD.ae_nabeeld = "art/vak-nabeeld.png";
+  }catch(e){ fout(e); }
+  const telt = card => { if(!card || card.lk || card.el === "licht" || card.token || card.kopie || !EL[card.el]) return false;
+    if(!ORDER.includes(card.el)) return true;
+    return !!(card.var || card.fusie || card.comp || card.wasRots || card.wasIjs); };
+  async function nabeeld(p, card){
+    try{
+      if(S.over || !hasAe(p, "ae_nabeeld") || !telt(card)) return;
+      if(!S.nabeeldR) S.nabeeldR = [-1, -1];
+      const vrij = emptyCols(p);
+      if(S.nabeeldR[p] === S.gTurn || !vrij.length) return;
+      S.nabeeldR[p] = S.gTurn;
+      const sl = vrij.length === 1 ? {c:vrij[0]} : await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `🟣 Nabeeld: waar komt de kopie van ${kIcon(card)} ${kNaam(card)} (1 leven)?`, false, {el:card.el});
+      const c2 = sl && sl !== "cancel" && vrij.includes(sl.c) ? sl.c : vrij[0];
+      const kp = {id:++cid, el:card.el, owner:p, token:true, kopie:true};
+      if(card.var && card.var !== "ijs") kp.var = card.var;
+      ["fusie", "jacht", "beest", "comp"].forEach(k => { if(card[k]) kp[k] = true; });
+      placeCre(p, c2, kp);
+      const cr = P(p).cols[c2].cre; if(cr && cr.card === kp) cr.hp = 1;
+      addLog(`🟣 <em>Nabeeld</em>: ${pName(p)} krijgt een kopie van ${kIcon(card)} ${kNaam(card)} in kolom ${c2 + 1}, met 1 leven.`, true);
+      if(!FAST){ render(); pop(creSel(p, c2), "×2", "heal"); await sleep(260); }
+      const plan = await declarePlan(p, kp, false, c2, {onField:true});
+      if(plan !== "cancel" && plan.length) pushPlay(p, kp, false, c2, false, plan);
+      render();
+    }catch(e){ fout(e); }
+  }
+  return {nabeeld, telt};
+})();
+
+/* ---- module wn ---- */
+/* ================= deel wn (25 nov 2026, Q) =================
+   1. Arcade-medaillons: een oranje rand in plaats van mint. SHOP-letters gewoon geel.
+   2. In een gevecht: met de muis op een aether-ruit (onder het portret) zie je de aether met zijn effect. */
+ANI.WN = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  let BOX = null, NU = null;
+  const weg = () => { NU = null; if(BOX) BOX.classList.remove("aan"); };
+  const toon = el => { try{ const k = el.dataset.pvae, A = AETHERS[k]; if(!A) return;
+      if(!BOX){ BOX = document.createElement("div"); BOX.id = "wnaebox"; BOX.setAttribute("aria-hidden", "true"); document.body.appendChild(BOX); }
+      const img = (typeof AETHER_BEELD === "object" && AETHER_BEELD[k]) ? `<img src="${AETHER_BEELD[k]}" alt="">` : "";
+      BOX.innerHTML = `${img}<div><b>${A.name}</b><p>${A.txt || A.kort || ""}</p></div>`;
+      BOX.classList.add("aan"); NU = el;
+      const r = el.getBoundingClientRect(), bw = BOX.offsetWidth, bh = BOX.offsetHeight;
+      let x = r.right + 10, y = r.top + r.height / 2 - bh / 2;
+      if(x + bw > innerWidth - 8) x = Math.max(8, r.left - bw - 10);
+      y = Math.max(8, Math.min(innerHeight - bh - 8, y));
+      BOX.style.left = x + "px"; BOX.style.top = y + "px"; }catch(e){ fout(e); } };
+  addEventListener("pointerover", e => { const t = e.target.closest && e.target.closest("#app [data-pvae]"); if(t){ if(t !== NU) toon(t); } else if(NU) weg(); }, true);
+  addEventListener("pointerdown", () => { if(NU) weg(); }, true);
+  addEventListener("scroll", weg, true);
+  try{ const st = document.createElement("style"); st.id = "wn-stijl"; st.textContent = `
+html body .bordvlak .bbord.yzarcade .bbmed > i{box-shadow:0 0 0 .22cqw #ff9a3c, 0 0 0 .44cqw #2a1204 !important}
+html body .bordvlak .bbord.yzarcade .bbmed{filter:drop-shadow(0 0 .35cqw rgba(255,150,60,.7)) !important}
+html body .bordvlak .bbord.yzarcade.yzlicht .bbmed{filter:drop-shadow(0 0 .7cqw #ff9a3c) brightness(1.15) !important}
+html body .bordvlak .bbord.yzshop[data-id="knort"] .bbin b, html body .bordvlak .bbord[data-id="knort"] .bbin b{color:#ffd84a !important}
+#wnaebox{position:fixed; z-index:2147480000; display:none; gap:10px; align-items:flex-start; max-width:320px; padding:10px 12px; background:#000; border:3px solid #fff; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.6); pointer-events:none}
+#wnaebox.aan{display:flex}
+#wnaebox img{width:56px; height:56px; object-fit:cover; image-rendering:pixelated; border-radius:4px; flex:none}
+#wnaebox > div > b{display:block; font:10px/1.3 'Press Start 2P', monospace; color:#e8c25a; margin:2px 0 6px}
+#wnaebox p b{font:inherit; color:#ffd84a; display:inline; margin:0} #wnaebox p{margin:0; font:18px/1.05 'VT323', monospace; color:#e9e6dc}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
+  return {};
+})();
+
+/* ---- module wo ---- */
+/* ================= deel wo (25 nov 2026, Q): 🟣 Nabeeld één keer per ronde =================
+   Zoals deel wm, maar de teller is de ronde (ceil(gTurn/2), RONDE n links), niet de beurt. De eerste kwalificerende
+   kaart in een ronde (eigen beurt of als reactie in de beurt van de ander) krijgt de kopie met 1 leven. Kern: wo-hooks.py. */
+ANI.WO = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const TEKST = "De eerste upgrade, fusie, beest of companion die je elke ronde speelt, krijgt een kopie met 1 leven.";
+  try{ AETHER_TEKST.ae_nabeeld = TEKST; if(AETHERS.ae_nabeeld) AETHERS.ae_nabeeld.txt = AETHERS.ae_nabeeld.kort = kwHTML(TEKST); }catch(e){ fout(e); }
+  async function nabeeld(p, card){
+    try{
+      if(S.over || !hasAe(p, "ae_nabeeld") || !ANI.WM.telt(card)) return;
+      if(!S.nabeeldR) S.nabeeldR = [-1, -1];
+      const ronde = Math.ceil(S.gTurn / 2), vrij = emptyCols(p);
+      if(S.nabeeldR[p] === ronde || !vrij.length) return;
+      S.nabeeldR[p] = ronde;
+      const sl = vrij.length === 1 ? {c:vrij[0]} : await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `🟣 Nabeeld: waar komt de kopie van ${kIcon(card)} ${kNaam(card)} (1 leven)?`, false, {el:card.el});
+      const c2 = sl && sl !== "cancel" && vrij.includes(sl.c) ? sl.c : vrij[0];
+      const kp = {id:++cid, el:card.el, owner:p, token:true, kopie:true};
+      if(card.var && card.var !== "ijs") kp.var = card.var;
+      ["fusie", "jacht", "beest", "comp"].forEach(k => { if(card[k]) kp[k] = true; });
+      placeCre(p, c2, kp);
+      const cr = P(p).cols[c2].cre; if(cr && cr.card === kp) cr.hp = 1;
+      addLog(`🟣 <em>Nabeeld</em>: ${pName(p)} krijgt een kopie van ${kIcon(card)} ${kNaam(card)} in kolom ${c2 + 1}, met 1 leven.`, true);
+      if(!FAST){ render(); pop(creSel(p, c2), "×2", "heal"); await sleep(260); }
+      const plan = await declarePlan(p, kp, false, c2, {onField:true});
+      if(plan !== "cancel" && plan.length) pushPlay(p, kp, false, c2, false, plan);
+      render();
+    }catch(e){ fout(e); }
+  }
+  try{ ANI.WM.nabeeld = nabeeld; }catch(e){ fout(e); }
+  return {nabeeld};
+})();
+
+/* ---- module wp ---- */
+/* ================= deel wp (26 nov 2026, Q) =================
+   Eén volumeknop, altijd op dezelfde plek (rechtsboven), ook in een gevecht.
+   De GELUID-knop in het paneel rechts in een gevecht is weg: het is overal dezelfde knop. */
+ANI.WP = (() => {
+  try{ const st = document.createElement("style"); st.id = "wp-stijl"; st.textContent = `
+body.xngevecht #xfvol#xfvol.aan{display:block !important}
+html body #rtools .tbtn#rtmute, html body.pc #rtools .tbtn#rtmute, html body.pc #app #right #rtools #rtmute{display:none !important}
+`; document.head.appendChild(st); }catch(e){}
+  return {};
+})();
+
+/* ---- module wq ---- */
+/* ================= deel wq (26 nov 2026, Q): 🟣 Altaar met elke kaart =================
+   Het eerste ritueel per ronde wordt ook een wezen, wat het ook is: element, fusie, beest of companion. Kern: wq-hooks.py. */
+ANI.WQ = (() => {
+  const TEKST = "Het eerste ritueel dat je per ronde speelt, wordt daar meteen ook een wezen: een kopie, als token. Dat geldt voor elke kaart, ook een beest of een companion.";
+  try{ AETHER_TEKST.ae_altaar = TEKST; if(AETHERS.ae_altaar) AETHERS.ae_altaar.txt = AETHERS.ae_altaar.kort = kwHTML(TEKST); }catch(e){ try{ console.error(e); }catch(x){} }
+  return {TEKST};
+})();
+
+/* ---- module wr ---- */
+/* ================= deel wr (26 nov 2026, Q) =================
+   De rondjes op de kaartrand (rood aanval, groen levens) staan nooit meer leeg. Het cijfer zit nu in de kaart zelf
+   (cardFaceHTML), dus elke vliegende kaart, de kaart in de zetmelding, het graf, de mulligan en de rituelen hebben het.
+   Het cijfer is alleen zichtbaar waar er geen ander cijfer naast staat: vliegende kaarten, de zetmelding, het graf en rituelen op het veld (geen :has, dat is duur). */
+ANI.WR = (() => {
+  const fout = e => { try{ console.error(e); }catch(x){} };
+  const getal = (p, c) => { try{ const h = handStatHTML(p, c); if(!h) return null;
+      const at = (h.match(/class="hst(?: [^"]*)? at(?: [^"]*)?">([^<]*)</) || [])[1], hp = (h.match(/class="hst(?: [^"]*)? hp(?: [^"]*)?">([^<]*)</) || [])[1];
+      return at == null || hp == null ? null : [at, hp]; }catch(e){ return null; } };
+  const svg = (at, hp) => { const t = (x, v) => `<text x="${x}" y="126.4" font-size="${String(v).length > 1 ? 8 : 10}">${v}</text>`;
+    return `<svg class="wrst" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${t(13.71, at)}${t(86.29, hp)}</svg>`; };
+  try{ const cf0 = cardFaceHTML;
+    cardFaceHTML = function(el, spell, card){ const h = cf0.apply(this, arguments);
+      try{ const c = (el && typeof el === "object") ? el : card;
+        if(!c || c.lk || c.el === "licht" || typeof h !== "string" || h.includes('class="wrst"') || !/^\s*<div [^>]*class="card /.test(h)) return h;
+        const g = getal(c.owner == null ? 0 : c.owner, c); if(!g) return h;
+        return h.replace(/<\/div>\s*$/, svg(g[0], g[1]) + "</div>"); }catch(e){ fout(e); return h; } }; }catch(e){ fout(e); }
+  try{ const st = document.createElement("style"); st.id = "wr-stijl"; st.textContent = `
+.card > svg.wrst{position:absolute; inset:0; width:100%; height:100%; z-index:6; pointer-events:none; overflow:visible}
+.card > svg.wrst text{font-family:"Press Start 2P", ui-monospace, monospace; fill:#fff; text-anchor:middle; dominant-baseline:central; stroke:rgba(0,0,0,.8); stroke-width:1.6px; paint-order:stroke; letter-spacing:-.5px}
+.card > svg.wrst{display:none}
+:is(#anig, #zetmelding, .gtop, .slot.sp, .anigeest) .card > svg.wrst{display:block}
+#anig :is(.hcard, .slot.cr) > .card > svg.wrst, .anigeest .slot.cr > .card > svg.wrst, .anigeest.slot.cr > .card > svg.wrst{display:none}
+`; document.head.appendChild(st); }catch(e){ fout(e); }
   return {};
 })();
 
