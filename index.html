@@ -7908,11 +7908,11 @@ function losOp(G, K, it){
       const effs = effsVan(G, id, isSpell ? 1 : 0);
       if (G.kVar[id] === ROTS) rotsKiezel(G, K, p, id, wC(w));
       const selfId = isSpell ? null : id;
-      if (zelfde && Array.isArray(it.sub)){
-        for (let i = it.sub.length - 1; i >= 0; i--) G.stack.push(effItem(p, Object.assign({}, it.sub[i], {keten}), selfId));
-        return;
-      }
-      for (let i = effs.length - 1; i >= 0; i--){ const x = effItem(p, Object.assign({}, effs[i], {keten}), selfId); x.dec = false; G.stack.push(x); }
+      const wzOp = lijst => { const L = lijst.map(x => Object.assign({}, x, {keten}));   // 💧 wz
+        if (WZ_LINK){ if (L.length) pushPlay(G, p, id, isSpell, wC(w), L); return; }
+        for (let i = L.length - 1; i >= 0; i--) G.stack.push(effItem(p, L[i], selfId)); };
+      if (zelfde && Array.isArray(it.sub)){ wzOp(it.sub); return; }
+      { const sub2 = wsSubPlan(G, K, p, id, keten); if (Array.isArray(sub2)) wzOp(sub2); }   // 💧 wz: meteen opnieuw mikken
       return;
     }
   }
@@ -8095,13 +8095,14 @@ function zgSlotNodig(G, it){
   if (!a || a !== it.creId || s.ent[it.col] > 0 || s.web[it.col]) return false;
   return !!it.zgDef && zgDefNu(G, it) !== it.zgDef;
 }
+let WZ_LINK = false;   // 💧 wz: het herhaalde speel-effect als eigen link
 function zgWaterNu(G, K, it){
   if (!Array.isArray(it.plan)) return false;
-  const nu = it.plan.filter(e => e.el === E_WATER || e.el === E_BERG);   // 🏔 xb: de Steen van de Bergketen komt ook meteen
+  const nu = it.plan.filter(e => e.el === E_WATER || e.el === E_BERG || (e.el === E_WS && e.origin === 1));   // 💧 wz: het water-ritueel ook meteen   // 🏔 xb: de Steen van de Bergketen komt ook meteen
   if (!nu.length) return false;
   it.plan = it.plan.filter(e => nu.indexOf(e) < 0);
   const selfId = it.asSpell ? null : it.card;
-  for (const e of nu){ if (G.over >= 0) break; losOp(G, K, effItem(it.ctrl, e, selfId)); }
+  for (const e of nu){ if (G.over >= 0) break; WZ_LINK = e.el === E_WS; try { losOp(G, K, effItem(it.ctrl, e, selfId)); } finally { WZ_LINK = false; } }
   if (!it.plan.length && G.kEl[it.card] === WATER){ const i = G.stack.indexOf(it); if (i >= 0) G.stack.splice(i, 1); }
   return true;
 }
@@ -14910,7 +14911,7 @@ function applyDamage(id, srcEl, base, o){
     const baas = (o && o.ctrl != null) ? o.ctrl : S.actor;
     if(f.p !== baas){
       pop(creSel(f.p, f.c), "🌧", "imm");
-      addLog(`🌧 De regen dooft het vuur: ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} van ${pName(f.p)} blijft heel.`);
+      addLog(`🌧 De regen dooft het vuur: ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} van ${pName(f.p)} blijft heel.`);
       return {destroyed:false};
     }
   }
@@ -14944,7 +14945,7 @@ function applyDamage(id, srcEl, base, o){
   }
   if(out === "immuun"){
     pop(sel, "IMMUUN", "imm");
-    addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} is <em>immuun</em> voor ${icon(srcEl)} ${EL[srcEl].name}.`);
+    addLog(`${kIcon(f.cr.card)} ${kNaam(f.cr.card)} is <em>immuun</em> voor ${icon(srcEl)} ${EL[srcEl].name}.`);
     return {destroyed:false};
   }
   if(o && o.protect){
@@ -14964,7 +14965,7 @@ function applyDamage(id, srcEl, base, o){
   f.cr.hp -= out;
   if(EL[f.cr.card.el].onsterfelijk && f.cr.hp < 0) f.cr.hp = 0;
   pop(sel, "-" + out, "dmg");
-  addLog(`${icon(srcEl)} doet ${out} schade aan ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} (kolom ${f.c+1}, ${pName(f.p)})${dubbel ? ": sterk tegen, dus dubbel" : ""}.`);
+  addLog(`${icon(srcEl)} doet ${out} schade aan ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} (kolom ${f.c+1}, ${pName(f.p)})${dubbel ? ": sterk tegen, dus dubbel" : ""}.`);
   const weg = f.cr.hp <= 0 && !EL[f.cr.card.el].onsterfelijk;
   if(weg) destroyCre(f.p, f.c, "schade");
   return weg ? {destroyed:true, wasP:f.p, raak:true} : {destroyed:false, raak:true};
@@ -14996,9 +14997,9 @@ function bounceToHand(id){
   const f = findCre(id); if(!f) return;
   P(f.p).cols[f.c].cre = null;
   ANI.YF.graf(f.cr.card);   // 🟣 yg: een fusie blijft een fusie
-  if(f.cr.card.token){ addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} van ${pName(f.p)} is een token en verdwijnt.`); return; }
+  if(f.cr.card.token){ addLog(`${kIcon(f.cr.card)} ${kNaam(f.cr.card)} van ${pName(f.p)} is een token en verdwijnt.`); return; }
   P(f.cr.card.owner).hand.push(f.cr.card);   // 💀 8 nov 2026: een doodshoofd blijft
-  addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} van ${pName(f.p)} keert terug naar de hand.`);
+  addLog(`${kIcon(f.cr.card)} ${kNaam(f.cr.card)} van ${pName(f.p)} keert terug naar de hand.`);
 }
 function moveCre(p, from, to){
   P(p).cols[to].cre = P(p).cols[from].cre;
@@ -15849,7 +15850,7 @@ function statVan(){
   return S.stat;
 }
 function pushPlay(p, card, asSpell, col, flash, plan, extra){
-  if(!SIM){ const st = statVan(); st.gespeeld[p]++; const nm = card && card.lk ? (LIGHTS[card.lk] || {}).name : kNaam(card); if(nm) st.soort[p][nm] = (st.soort[p][nm] || 0) + 1; }
+  if(!SIM && !window.__wzWs){ const st = statVan(); st.gespeeld[p]++; const nm = card && card.lk ? (LIGHTS[card.lk] || {}).name : kNaam(card); if(nm) st.soort[p][nm] = (st.soort[p][nm] || 0) + 1; }
   S.stack.push(Object.assign({type:"play", ctrl:p, card, asSpell, col, flash, plan:plan || []}, extra || {}));
   if(p === 1 && S.story && S.story.wolfScript && card.el === "wolf") S.story.maxPlays = (S.story.maxPlays || 0) + 1;
   const tg = planPlat(plan || []).filter(e => e.tid != null).map(e => {
@@ -15857,6 +15858,7 @@ function pushPlay(p, card, asSpell, col, flash, plan, extra){
     const f = findKaart(e.tid);
     return f ? `${kIcon(f.card)} ${pName(f.p)} kol ${f.c+1}${f.kind === "spell" ? " (spell)" : ""}` : "?";
   });
+  if(window.__wzWs){ addLog(`💧 ${kIcon(card)} <em>${kNaam(card)}</em> gaat nog een keer${tg.length ? ` · target: ${tg.join(" + ")}` : ""}.`, true); return; }   // 💧 wz
   addLog(`${pName(p)} speelt ${kIcon(card)} <em>${kNaam(card)}</em> als ${asSpell?"ritueel":"wezen"}${flash?" (reactie)":""} → kolom ${col+1}${tg.length?` · target: ${tg.join(" + ")}`:""}.`, true);
 }
 /* Kaart direct neerleggen, doelwitten kiezen, en dan als link op de chain. */
@@ -16759,7 +16761,7 @@ async function announceFusion0(p, card, tributeId, fuseKey, opts){
   /* Een gesmeed element verliest zijn upgrade: het wordt het fusiewezen. */
   delete card.ws;
   card.var = FUSIE_VAR[fuseKey]; card.fusie = true;
-  placeCre(p, col, card);
+  window.__wzStil = 1; try{ placeCre(p, col, card); } finally { window.__wzStil = 0; }   // wz: één melding
   const me = P(p).cols[col].cre;
   if(!me) return false;
   me.hp += offerHp;
@@ -16851,7 +16853,7 @@ async function announceLight0(p, card, flash){
   if(offerId != null){
     const f = findCre(offerId);
     if(f && f.p === p){
-      addLog(`${pName(p)} offert ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} in kolom ${f.c+1} voor ✦ ${LIGHTS[k].name}.`, true);
+      addLog(`${pName(p)} offert ${kIcon(f.cr.card)} ${kNaam(f.cr.card)} in kolom ${f.c+1} voor ✦ ${LIGHTS[k].name}.`, true);
       destroyCre(f.p, f.c, `✦ ${LIGHTS[k].name}`);
       render(); await sleep(FAST ? 0 : 220);
     } else {
@@ -17355,7 +17357,7 @@ async function resolveLight(it){
     const id = await effTarget(t, p, ids, `<b>${pName(p)}</b> — ✦ Levensroof: kies een wezen`, true, {k:"siphon"});
     if(id === "fizzle" || id == null){ if(id == null) addLog("✦ Levensroof overgeslagen."); return; }
     const f = findCre(id); if(!f) return;
-    const voor = Math.max(0, f.cr.hp), naam = `${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}`;
+    const voor = Math.max(0, f.cr.hp), naam = `${kIcon(f.cr.card)} ${kNaam(f.cr.card)}`;
     if(FAST || !ANI.aan()) fxLight(creSel(f.p, f.c)); else await ANI.L.zuiger(p, f.p, f.c, it.card);   // ✨ Zuiger
     AU.play("light");
     /* nov 2026 (weer zoals vroeger): wat er op die plek staat sterft, en jij krijgt al zijn levens. */
@@ -17429,7 +17431,7 @@ function placeCre(p, col, card){
   const hp = ((vv && vv.hp) || EL[card.el].hp || 2) + bonus;
   P(p).cols[col].cre = {card, hp, played:S.gTurn, attackedT:-1, ent:0};
   if(hasAe(p, "ae_bloei")) P(p).cols[col].cre.bloesem = 1;             // 🌸 Volle bloei
-  addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? (trioKracht(p, card.el) ? " (🎪 vonk)" : oerkrachtOp(p, card.el) ? " (🟣 Oerkracht)" : (getijLabel || (card.el === "water" && hasAe(p, "ae_watercycle"))) ? " (🟣 Getijdenstroom)" : "") : ""}.`);
+  if(!window.__wzStil) addLog(`${icon(card.el)} ${kNaam(card)} verschijnt in kolom ${col+1} van ${pName(p)}${hp > 2 ? ` met ${hp} levens` : ""}${bonus ? (trioKracht(p, card.el) ? " (🎪 vonk)" : oerkrachtOp(p, card.el) ? " (🟣 Oerkracht)" : (getijLabel || (card.el === "water" && hasAe(p, "ae_watercycle"))) ? " (🟣 Getijdenstroom)" : "") : ""}.`);
 }
 /* ✦ Bloedmaan: je eigen wezens die nog een speel-effect te doen hebben. */
 const bloedWezens = (p, gedaan) => allCreIds((cr, pp) => pp === p && gedaan.indexOf(cr.card.id) < 0 && effsOf(cr.card.el, "creature", cr.card).length > 0);
@@ -17582,7 +17584,7 @@ async function resolveEffect(it){
     const sl = await chooseSlot(p, vrij.map(c => ({p, c, kind:"cre"})), `🏔 Bergketen: kies een plek voor de Steen`, false, {el:"steen"});
     const c2 = sl && sl !== "cancel" ? sl.c : vrij[0];
     const steen = {id:++cid, el:"steen", owner:p};
-    placeCre(p, c2, steen);
+    window.__wzStil = 1; try{ placeCre(p, c2, steen); } finally { window.__wzStil = 0; }   // wz: één melding
     const k2 = P(p).cols[c2].cre;
     if(k2){ k2.hp = Math.max(1, Math.ceil(hp * BERGKETEN_DEEL)); k2.played = S.gTurn; }
     addLog(`🏔 <em>Bergketen</em>: er rijst een Steen op in kolom ${c2+1}${k2 ? ` met ${k2.hp} levens` : ""}.`, true);
@@ -17733,7 +17735,7 @@ async function resolveEffect(it){
     if(it.protect === id){
       applyDamage(id, "vuur", dmg, {protect:true, ignoreImmune:nat, heet, plasma:plasmaV, blik:blikV, expl:big, srcSel:fSrc, ctrl:p});
     } else if(vuurOffert(p, f)){
-      addLog(`🟣 <em>Brandoffer</em> — 🔥 offert de eigen ${icon(f.cr.card.el)} ${EL[f.cr.card.el].name}: <em>instakill</em>!`, true);
+      addLog(`🟣 <em>Brandoffer</em> — 🔥 offert de eigen ${kIcon(f.cr.card)} ${kNaam(f.cr.card)}: <em>instakill</em>!`, true);
       fxFire(fSrc, creSel(f.p, f.c));
       destroyCre(f.p, f.c, "🔥 offer");
       offer = true;
@@ -17771,7 +17773,7 @@ async function resolveEffect(it){
     fxThorns(creSel(f.p, f.c), gSrcSel, mul > 1);
     f.cr.ent += n;
     pop(creSel(f.p, f.c), `🌿 +${n}`, "imm");
-    addLog(`${icon(f.cr.card.el)} ${EL[f.cr.card.el].name} (kolom ${f.c+1}, ${pName(f.p)}) wordt verstrikt: +${n} 🌿${mul>1?" (🟣 Woekergroei: dubbele drain)":""}, nu ${f.cr.ent}.`, true);
+    addLog(`${kIcon(f.cr.card)} ${kNaam(f.cr.card)} (kolom ${f.c+1}, ${pName(f.p)}) wordt verstrikt: +${n} 🌿${mul>1?" (🟣 Woekergroei: dubbele drain)":""}, nu ${f.cr.ent}.`, true);
     entangleDrain(id, src ? it.srcId : null, p, n, mul);
     render(); return;
   }
@@ -17826,14 +17828,12 @@ async function resolveEffect(it){
     if(f.card.var === "rots") await rotsKiezel(p, f.card, f.c);
     const selfId = f.kind === "cre" ? f.card.id : null;
     /* Al bij het aankondigen gekozen: die doelwitten staan vast (en fizzelen als ze weg zijn). */
-    if(zelfde && Array.isArray(it.sub)){
-      for(let i = it.sub.length - 1; i >= 0; i--) S.stack.push(effItem(p, Object.assign({}, it.sub[i], {keten}), selfId));
-      return;
-    }
-    for(let i = effs.length - 1; i >= 0; i--){
-      const e = Object.assign({}, effs[i], {keten});
-      S.stack.push(Object.assign(effItem(p, e, selfId), {dec:false}));
-    }
+    const wzOp = lijst => { const L = lijst.map(x => Object.assign({}, x, {keten}));   // 💧 wz
+      if(window.__wzLink){ if(L.length){ window.__wzWs = 1; try{ pushPlay(p, f.card, f.kind === "spell", f.c, false, L); } finally { window.__wzWs = 0; } } return; }
+      for(let i = L.length - 1; i >= 0; i--) S.stack.push(effItem(p, L[i], selfId)); };
+    if(zelfde && Array.isArray(it.sub)){ wzOp(it.sub); return; }
+    { const sub2 = await wsSubPlan(p, id, keten, it.srcCard);   // 💧 wz: meteen opnieuw mikken
+      if(Array.isArray(sub2)) wzOp(sub2); }
     return;
   }
 
@@ -50405,12 +50405,12 @@ const ZG = (() => {
   /* 💧 Een plons gaat altijd meteen, ook als hij uit Zielenoproep, Kloon of Water op Water komt. */
   async function waterNu(it){
     if(!Array.isArray(it.plan)) return false;
-    const nu = it.plan.filter(e => e && (e.el === "water" || e.el === "bergketen"));   // 🏔 xb: de Steen van de Bergketen komt ook meteen
+    const nu = it.plan.filter(e => e && (e.el === "water" || e.el === "bergketen" || (e.el === "ws" && e.origin === "spell")));   // 💧 wz: het water-ritueel ook meteen   // 🏔 xb: de Steen van de Bergketen komt ook meteen
     if(!nu.length) return false;
     it.plan = it.plan.filter(e => nu.indexOf(e) < 0);
     const selfId = it.asSpell ? null : (it.card ? it.card.id : null);
-    addLog(nu.some(e => e.el === "bergketen") ? `🏔 De Steen van de Bergketen komt meteen.` : `💧 Water gaat meteen af.`);
-    for(const e of nu){ if(S.over) break; await resolveEffect(effItem(it.ctrl, e, selfId)); render(); }
+    addLog(nu.some(e => e.el === "bergketen") ? `🏔 De Steen van de Bergketen komt meteen.` : nu.every(e => e.el === "ws") ? `💧 Het water-ritueel gaat meteen af.` : `💧 Water gaat meteen af.`);
+    for(const e of nu){ if(S.over) break; window.__wzLink = e.el === "ws"; try{ await resolveEffect(effItem(it.ctrl, e, selfId)); } finally { window.__wzLink = 0; } render(); }
     if(!it.plan.length && it.card && it.card.el === "water" && S.stack.indexOf(it) >= 0) S.stack.splice(S.stack.indexOf(it), 1);
     return true;
   }
@@ -50866,7 +50866,7 @@ ANI.ZI = (() => {
   /* ---------- de aethers die deze pop-up krijgen ---------- */
   const AE = {
     ae_stonefull:{naam:"LAWINE", sub:"Elke Steen geeft er een meer", el:"steen", stappen:["Steen: +4", "Volgende Steen: +5", "Je Stenen: +3 levens"]},
-    fu_stone:{naam:"TWEELINGTOP", sub:"Een Bergketen laat een Steen achter", el:"steen", stappen:["Speel een Bergketen", "De ander reageert eerst", "Een Steen met zijn levens"]},
+    fu_stone:{naam:"TWEELINGTOP", sub:"Een Bergketen laat een Steen achter", el:"steen", stappen:["Speel een Bergketen", "De Steen komt meteen", "Met evenveel levens"]},
     ae_fire6:{naam:"VUURZEE", sub:"Je vuur brandt harder, ook op Water", el:"vuur", stappen:["Vuur: 4 schade", "Ernaast: 1 schade", "Water brandt ook"]}};
   const KLEUR = {steen:{licht:"#f0c75a", diep:"#cdb894", brok:["#6b5a45", "#9c8665", "#cdb894", "#433628"]},
                  vuur:{licht:"#ffb347", diep:"#ff6a2b", brok:["#ff6a2b", "#ffb347", "#ffd36b", "#c8281a"]}};
@@ -55056,7 +55056,7 @@ ANI.YQ = (() => {
   let zaad = 1, afL = null, ketenWas = false;
   const G = {waarde:0, van:0, naar:0, t0:0, duur:1, eind:0, span:0, spanT0:-1};
   let cv = null, ctx = null, raf = 0, uitlegTot = 0;
-  function schakel(it){ let L = MOD.get(it); if(!L){ L = {it, wie:it.ctrl === ikVan() ? "jij" : "zij", el:elVan(it), a:1, s:1, dy:0, gl:0, zaad:(zaad = zaad * 7 + 13) % 997, i:MOD.size, t0:-1}; MOD.set(it, L); } return L; }
+  function schakel(it){ let L = MOD.get(it); if(!L){ L = {it, wie:it.ctrl === ikVan() ? "jij" : "zij", el:elVan(it), a:1, s:1, dy:0, gl:0, zaad:(zaad = (zaad * 7 + 13) % 997), i:MOD.size, t0:-1}; MOD.set(it, L); } return L; }
 
   /* ---------- het element in de capsule ---------- */
   function rr(x, X, Y, w, h, r){ r = Math.max(0, Math.min(r, h / 2, w / 2)); x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
@@ -57037,7 +57037,7 @@ function draw(){ ctx=V.ctx; S=V.Q; BG=bg(); const sbtn=V.sbtn, btns=V.btns;
    data-arcade="defense" en de klasse yxarcade (en yxrookt zolang het nog niet gehaald is). */
 ANI.YX = (() => {
   const fout = e => { try{ console.error(e); }catch(x){} };
-  const actief = () => { try{ return !!(SET.story && storyKlaar("2-6")); }catch(e){ return false; } };
+  const actief = () => { try{ return !!(SET.story && (storyKlaar("2-6") || SET.story.vrij)); }catch(e){ return false; } };   // wz: ook met "unlock"
   const gehaald = () => { try{ return !!(SET.story && SET.story.pufArcade && SET.story.pufArcade.klaar); }catch(e){ return false; } };
   const rookt = () => actief() && !gehaald();
   const stil = () => { try{ return FAST || !(ANI.aan && ANI.aan()); }catch(e){ return true; } };
